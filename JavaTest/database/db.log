@@ -1,0 +1,293 @@
+/*C2*/SET SCHEMA PUBLIC
+CREATE TABLE IF NOT EXISTS AL_CONFIGURATION ( PROPERTY_NAME VARCHAR(255) NOT NULL UNIQUE , PROPERTY_VALUE LONGVARCHAR ) 
+CREATE TABLE IF NOT EXISTS AL_GROUPS ( GROUP_NAME VARCHAR(255) NOT NULL PRIMARY KEY , DESCRIPTION LONGVARCHAR ) 
+CREATE TABLE IF NOT EXISTS AL_TABLES ( TABLE_NAME VARCHAR(255) NOT NULL PRIMARY KEY , GROUP_NAME VARCHAR(255) , DESCRIPTION LONGVARCHAR ) 
+CREATE TABLE IF NOT EXISTS AL_CUSTOM_TYPE ( TABLE_NAME VARCHAR(255) , COLUMN_NAME VARCHAR(255) , TYPE VARCHAR(255) , NAME VARCHAR(255) ) 
+CREATE TABLE IF NOT EXISTS AL_VIEWS ( VIEW_NAME VARCHAR(255) NOT NULL UNIQUE , VIEW_DEFINITION LONGVARCHAR , IS_VALID BOOLEAN ) 
+CREATE TABLE IF NOT EXISTS AL_SELECTED_LOG_OBJECTS ( NAME VARCHAR(255) NOT NULL UNIQUE , TYPE VARCHAR(255) ) 
+CREATE TABLE IF NOT EXISTS AL_DB_OBJECTS ( NAME VARCHAR(255) NOT NULL UNIQUE , TYPE VARCHAR(255) , USAGE VARCHAR(255) ) 
+/*C3*/SET SCHEMA PUBLIC
+DROP VIEW trace_log IF EXISTS CASCADE
+DROP VIEW histograms_log IF EXISTS CASCADE
+DROP VIEW datasets_log IF EXISTS CASCADE
+DROP VIEW statistics_log IF EXISTS CASCADE
+DROP VIEW agent_type_statechart_stats_log IF EXISTS CASCADE
+DROP VIEW agent_statechart_stats_log IF EXISTS CASCADE
+DROP VIEW agent_statechart_states_log IF EXISTS CASCADE
+DROP VIEW statechart_transitions_log IF EXISTS CASCADE
+DROP VIEW fluid_utilization_log IF EXISTS CASCADE
+DROP VIEW fluid_rates_log IF EXISTS CASCADE
+DROP VIEW fluid_storages_log IF EXISTS CASCADE
+DROP VIEW fluid_units_log IF EXISTS CASCADE
+DROP VIEW resource_unit_utilization_log IF EXISTS CASCADE
+DROP VIEW resource_pool_utilization_log IF EXISTS CASCADE
+DROP VIEW resource_pool_task_stats_log IF EXISTS CASCADE
+DROP VIEW resource_unit_task_stats_log IF EXISTS CASCADE
+DROP VIEW resource_unit_states_log IF EXISTS CASCADE
+DROP VIEW flowchart_stats_time_in_state_log IF EXISTS CASCADE
+DROP VIEW flowchart_process_states_log IF EXISTS CASCADE
+DROP VIEW flowchart_entries_log IF EXISTS CASCADE
+DROP VIEW events_log IF EXISTS CASCADE
+DROP VIEW agent_messages_log IF EXISTS CASCADE
+DROP VIEW agent_movement_stats_log IF EXISTS CASCADE
+DROP VIEW agent_movement_log IF EXISTS CASCADE
+DROP VIEW library_block_parameters_log IF EXISTS CASCADE
+DROP VIEW agent_parameters_log IF EXISTS CASCADE
+DROP VIEW library_blocks_log IF EXISTS CASCADE
+DROP VIEW agents_log IF EXISTS CASCADE
+DROP TABLE fluid_utilization_raw_log IF EXISTS CASCADE
+DROP TABLE fluid_rates_raw_log IF EXISTS CASCADE
+DROP TABLE fluid_storages_raw_log IF EXISTS CASCADE
+DROP TABLE fluid_units_raw_log IF EXISTS CASCADE
+DROP TABLE resource_unit_utilization_raw_log IF EXISTS CASCADE
+DROP TABLE resource_pool_utilization_raw_log IF EXISTS CASCADE
+DROP TABLE resource_unit_states_raw_log IF EXISTS CASCADE
+DROP TABLE histograms_raw_log IF EXISTS CASCADE
+DROP TABLE datasets_raw_log IF EXISTS CASCADE
+DROP TABLE statistics_raw_log IF EXISTS CASCADE
+DROP TABLE flowchart_process_states_raw_log IF EXISTS CASCADE
+DROP TABLE flowchart_entries_raw_log IF EXISTS CASCADE
+DROP TABLE agent_messages_raw_log IF EXISTS CASCADE
+DROP TABLE agent_movement_raw_log IF EXISTS CASCADE
+DROP TABLE events_raw_log IF EXISTS CASCADE
+DROP TABLE statechart_transitions_raw_log IF EXISTS CASCADE
+DROP TABLE statechart_states_raw_log IF EXISTS CASCADE
+DROP TABLE trace_raw_log IF EXISTS CASCADE
+DROP TABLE agent_elements_raw_log IF EXISTS CASCADE
+DROP TABLE agent_type_statecharts_raw_log IF EXISTS CASCADE
+DROP TABLE agent_type_elements_raw_log IF EXISTS CASCADE
+DROP TABLE agent_parameters_raw_log IF EXISTS CASCADE
+DROP TABLE destroyed_agents_raw_log IF EXISTS CASCADE
+DROP TABLE agents_raw_log IF EXISTS CASCADE
+DROP TABLE agent_types_raw_log IF EXISTS CASCADE
+DROP FUNCTION al_format_agent_name_log IF EXISTS CASCADE
+DROP FUNCTION al_format_agent_type_name_log IF EXISTS CASCADE
+DELETE FROM AL_DB_OBJECTS WHERE NAME='al_format_agent_type_name_log' AND TYPE='FUNCTION' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='al_format_agent_name_log' AND TYPE='FUNCTION' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_types_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agents_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='destroyed_agents_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_parameters_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_type_elements_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_type_statecharts_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_elements_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='trace_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='statechart_states_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='statechart_transitions_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='events_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_movement_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_messages_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='flowchart_entries_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='flowchart_process_states_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='statistics_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='datasets_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='histograms_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='resource_unit_states_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='resource_pool_utilization_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='resource_unit_utilization_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='fluid_units_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='fluid_storages_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='fluid_rates_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='fluid_utilization_raw_log' AND TYPE='TABLE' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agents_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='library_blocks_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_parameters_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='library_block_parameters_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_movement_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_movement_stats_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_messages_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='events_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='flowchart_entries_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='flowchart_process_states_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='flowchart_stats_time_in_state_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='resource_unit_states_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='resource_unit_task_stats_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='resource_pool_task_stats_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='resource_pool_utilization_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='resource_unit_utilization_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='fluid_units_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='fluid_storages_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='fluid_rates_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='fluid_utilization_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='statechart_transitions_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_statechart_states_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_statechart_stats_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='agent_type_statechart_stats_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='statistics_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='datasets_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='histograms_log' AND TYPE='VIEW' AND USAGE='LOG'
+DELETE FROM AL_DB_OBJECTS WHERE NAME='trace_log' AND TYPE='VIEW' AND USAGE='LOG'
+COMMIT
+CREATE FUNCTION al_format_agent_type_name_log (agentType LONGVARCHAR) RETURNS LONGVARCHAR\u000aBEGIN ATOMIC\u000a\u0009DECLARE dotIndex INT;\u000a\u0009SET dotIndex = LOCATE ('.', REVERSE (agentType));\u000a\u0009IF dotIndex = 0 THEN\u000a\u0009\u0009RETURN agentType;\u000a\u0009END IF;\u000a\u0009RETURN REVERSE (SUBSTRING (REVERSE (agentType), 0, dotIndex));\u000aEND
+INSERT INTO AL_DB_OBJECTS VALUES('al_format_agent_type_name_log','FUNCTION','LOG')
+COMMIT
+CREATE FUNCTION al_format_agent_name_log (name LONGVARCHAR, id INT) RETURNS LONGVARCHAR\u000aBEGIN ATOMIC\u000a\u0009DECLARE index INT;\u000a\u0009DECLARE result LONGVARCHAR;\u000a\u0009SET result = name;\u000a\u0009SET index = LOCATE ('root.', name);\u000a\u0009IF index = 1 THEN\u000a\u0009\u0009SET result = SUBSTRING (result, LENGTH('root.') + 1, LENGTH(result));\u000a\u0009END IF;\u000a\u0009SET index = LOCATE('[', result);\u0009IF index > 0 THEN\u000a\u0009\u0009SET result = CONCAT (result, ' : ', id);\u000a\u0009END IF;\u000a\u0009RETURN result;\u000aEND
+INSERT INTO AL_DB_OBJECTS VALUES('al_format_agent_name_log','FUNCTION','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS agent_types_raw_log (ID INT PRIMARY KEY, NAME VARCHAR(255))
+INSERT INTO AL_DB_OBJECTS VALUES('agent_types_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS agents_raw_log (ID INT PRIMARY KEY, AGENT_TYPE_ID INT, NAME VARCHAR(255), DATE TIMESTAMP, CONSTRAINT AGENT_TYPE_REF FOREIGN KEY (AGENT_TYPE_ID) REFERENCES agent_types_raw_log(Id))
+INSERT INTO AL_DB_OBJECTS VALUES('agents_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS destroyed_agents_raw_log (AGENT_ID INT, DATE TIMESTAMP, CONSTRAINT DESTROYED_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(Id))
+INSERT INTO AL_DB_OBJECTS VALUES('destroyed_agents_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS agent_parameters_raw_log (AGENT_ID INT, PARAMETER_NAME VARCHAR(255), PARAMETER_VALUE LONGVARCHAR, CONSTRAINT AGENT_PARAMETERS_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(Id))
+INSERT INTO AL_DB_OBJECTS VALUES('agent_parameters_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS agent_type_elements_raw_log (ID INT PRIMARY KEY, AGENT_TYPE_ID INT, NAME VARCHAR(255), CONSTRAINT ELEMENT_TO_AGENT_TYPE_REF FOREIGN KEY (AGENT_TYPE_ID) REFERENCES agent_types_raw_log(Id))
+INSERT INTO AL_DB_OBJECTS VALUES('agent_type_elements_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS agent_type_statecharts_raw_log (STATECHART_ID INT, ELEMENT_ID INT, CONSTRAINT STATECHARTS_STATECHART_TO_ELEMENT_REF FOREIGN KEY (STATECHART_ID) REFERENCES agent_type_elements_raw_log(Id),CONSTRAINT STATECHARTS_ELEMENT_TO_ELEMENT_REF FOREIGN KEY (ELEMENT_ID) REFERENCES agent_type_elements_raw_log(Id))
+INSERT INTO AL_DB_OBJECTS VALUES('agent_type_statecharts_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS agent_elements_raw_log (ID INT PRIMARY KEY, AGENT_ID INT, NAME VARCHAR(255), CONSTRAINT ELEMENT_TO_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(Id))
+INSERT INTO AL_DB_OBJECTS VALUES('agent_elements_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS trace_raw_log (COUNTER INT GENERATED BY DEFAULT AS IDENTITY, AGENT_ID INT, DATE TIMESTAMP, MESSAGE_TEXT LONGVARCHAR, CONSTRAINT TRACE_LOG_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(Id))
+INSERT INTO AL_DB_OBJECTS VALUES('trace_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS statechart_states_raw_log (AGENT_ID INT, STATE_ID INT, ENTRY_DATE TIMESTAMP, EXIT_DATE TIMESTAMP, CONSTRAINT STATECHART_STATES_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(ID),CONSTRAINT STATECHART_STATES_STATE_REF FOREIGN KEY (STATE_ID) REFERENCES agent_type_elements_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('statechart_states_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS statechart_transitions_raw_log (AGENT_ID INT, TRANSITION_ID INT, FROM_STATE_ID INT, DATE TIMESTAMP, CONSTRAINT STATECHART_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(ID),CONSTRAINT TRANSITION_REF FOREIGN KEY (TRANSITION_ID) REFERENCES agent_type_elements_raw_log(ID),CONSTRAINT FROM_STATE_REF FOREIGN KEY (FROM_STATE_ID) REFERENCES agent_type_elements_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('statechart_transitions_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS events_raw_log (EVENT_ID INT, DATE TIMESTAMP, CONSTRAINT EVENT_REF FOREIGN KEY (EVENT_ID) REFERENCES agent_type_elements_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('events_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS agent_movement_raw_log (AGENT_ID INT, SPEED FLOAT, START_DATE TIMESTAMP, STOP_DATE TIMESTAMP, CONSTRAINT MOVEMENT_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('agent_movement_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS agent_messages_raw_log (AGENT_ID INT, SENDER_ID INT, MESSAGE LONGVARCHAR, DATE TIMESTAMP, COUNTER INT GENERATED BY DEFAULT AS IDENTITY, CONSTRAINT MESSAGES_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(ID),CONSTRAINT MESSAGES_SENDER_AGENT_REF FOREIGN KEY (SENDER_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('agent_messages_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS flowchart_entries_raw_log (COUNTER INT GENERATED BY DEFAULT AS IDENTITY, AGENT_ID INT, BLOCK_ID INT, ENTRY_DATE TIMESTAMP, CONSTRAINT FLOWCHART_ENTRIES_ENTITY_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(ID),CONSTRAINT FLOWCHART_ENTRIES_BLOCK_AGENT_REF FOREIGN KEY (BLOCK_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('flowchart_entries_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS flowchart_process_states_raw_log (AGENT_ID INT, BLOCK_ID INT, ACTIVITY_TYPE VARCHAR(20), START_DATE TIMESTAMP, STOP_DATE TIMESTAMP, CONSTRAINT FLOWCHART_PROCESS_STATES_ENTITY_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(ID),CONSTRAINT FLOWCHART_PROCESS_STATES_BLOCK_AGENT_REF FOREIGN KEY (BLOCK_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('flowchart_process_states_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS statistics_raw_log (AGENT_ID INT, NAME VARCHAR(255), MEAN FLOAT, DEVIATION FLOAT, MINIMUM FLOAT, MAXIMUM FLOAT, MEAN_CONFIDENCE FLOAT, NUMBER INT, CONSTRAINT STATISTICS_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('statistics_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS datasets_raw_log (ELEMENT_ID INT, INDEX INT, X FLOAT, Y FLOAT, CONSTRAINT DATASETS_ELEMENT_REF FOREIGN KEY (ELEMENT_ID) REFERENCES agent_elements_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('datasets_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS histograms_raw_log (ELEMENT_ID INT, START FLOAT, END FLOAT, PDF FLOAT, CDF FLOAT, CONSTRAINT HISTOGRAMS_ELEMENT_REF FOREIGN KEY (ELEMENT_ID) REFERENCES agent_elements_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('histograms_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS resource_unit_states_raw_log (UNIT_ID INT, POOL_ID INT, USAGE_STATE VARCHAR(20), TASK_TYPE VARCHAR(20), AGENT_ID INT, TASK_ID INT, START_DATE TIMESTAMP, STOP_DATE TIMESTAMP, CONSTRAINT RESOURCE_UNIT_STATES_UNIT_AGENT_REF FOREIGN KEY (UNIT_ID) REFERENCES agents_raw_log(ID),CONSTRAINT RESOURCE_UNIT_STATES_POOL_AGENT_REF FOREIGN KEY (POOL_ID) REFERENCES agents_raw_log(ID),CONSTRAINT RESOURCE_UNIT_STATES_AGENT_AGENT_REF FOREIGN KEY (AGENT_ID) REFERENCES agents_raw_log(ID),CONSTRAINT RESOURCE_UNIT_STATES_TASK_AGENT_REF FOREIGN KEY (TASK_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('resource_unit_states_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS resource_pool_utilization_raw_log (POOL_ID INT, UTILIZATION FLOAT, SIZE INT, CONSTRAINT RESOURCE_POOL_UTILIZATION_POOL_AGENT_REF FOREIGN KEY (POOL_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('resource_pool_utilization_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS resource_unit_utilization_raw_log (UNIT_ID INT, POOL_ID INT, UTILIZATION FLOAT, CONSTRAINT RESOURCE_UNIT_UTILIZATION_UNIT_AGENT_REF FOREIGN KEY (UNIT_ID) REFERENCES agents_raw_log(ID),CONSTRAINT RESOURCE_UNIT_UTILIZATION_POOL_AGENT_REF FOREIGN KEY (POOL_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('resource_unit_utilization_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS fluid_units_raw_log (BLOCK_ID INT, AMOUNT_UNITS VARCHAR(20), RATE_UNITS VARCHAR(20), CONSTRAINT FLUID_UNITS_BLOCK_AGENT_REF FOREIGN KEY (BLOCK_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('fluid_units_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS fluid_storages_raw_log (BLOCK_ID INT, MINIMUM FLOAT, MAXIMUM FLOAT, AVERAGE FLOAT, CONSTRAINT FLUID_STORAGES_BLOCK_AGENT_REF FOREIGN KEY (BLOCK_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('fluid_storages_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS fluid_rates_raw_log (BLOCK_ID INT, PORT VARCHAR(20), TOTAL FLOAT, MINIMUM FLOAT, MAXIMUM FLOAT, AVERAGE FLOAT, CONSTRAINT FLUID_RATES_BLOCK_AGENT_REF FOREIGN KEY (BLOCK_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('fluid_rates_raw_log','TABLE','LOG')
+COMMIT
+CREATE CACHED TABLE IF NOT EXISTS fluid_utilization_raw_log (BLOCK_ID INT, UTILIZATION FLOAT, CONSTRAINT FLUID_UTILIZATION_BLOCK_AGENT_REF FOREIGN KEY (BLOCK_ID) REFERENCES agents_raw_log(ID))
+INSERT INTO AL_DB_OBJECTS VALUES('fluid_utilization_raw_log','TABLE','LOG')
+COMMIT
+CREATE VIEW agents_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) type, al_format_agent_name_log(agents.NAME, agents.ID) name, agents.DATE BirthDate, destroyed_agents.DATE DeathDate FROM agent_types_raw_log agent_types INNER JOIN agents_raw_log agents ON agent_types.ID = agents.AGENT_TYPE_ID LEFT JOIN destroyed_agents_raw_log destroyed_agents ON agents.ID = destroyed_agents.AGENT_ID WHERE agent_types.NAME NOT LIKE 'com.anylogic.libraries.%' ORDER BY type, name
+INSERT INTO AL_DB_OBJECTS VALUES('agents_log','VIEW','LOG')
+COMMIT
+CREATE VIEW library_blocks_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) type, al_format_agent_name_log(agents.NAME, agents.ID) name, agents.DATE BirthDate, destroyed_agents.DATE DeathDate FROM agent_types_raw_log agent_types INNER JOIN agents_raw_log agents ON agent_types.ID = agents.AGENT_TYPE_ID LEFT JOIN destroyed_agents_raw_log destroyed_agents ON agents.ID = destroyed_agents.AGENT_ID WHERE agent_types.NAME LIKE 'com.anylogic.libraries.%' ORDER BY type, name
+INSERT INTO AL_DB_OBJECTS VALUES('library_blocks_log','VIEW','LOG')
+COMMIT
+CREATE VIEW agent_parameters_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, parameters.PARAMETER_NAME parameter_name, parameters.PARAMETER_VALUE parameter_value FROM agent_parameters_raw_log parameters INNER JOIN agents_raw_log agents ON parameters.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID WHERE agent_types.NAME NOT LIKE 'com.anylogic.libraries.%' ORDER BY agent_type, agent
+INSERT INTO AL_DB_OBJECTS VALUES('agent_parameters_log','VIEW','LOG')
+COMMIT
+CREATE VIEW library_block_parameters_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) block_type, al_format_agent_name_log(agents.NAME, agents.ID) block, parameters.PARAMETER_NAME parameter_name, parameters.PARAMETER_VALUE parameter_value FROM agent_parameters_raw_log parameters INNER JOIN agents_raw_log agents ON parameters.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID WHERE agent_types.NAME LIKE 'com.anylogic.libraries.%' ORDER BY block_type, block
+INSERT INTO AL_DB_OBJECTS VALUES('library_block_parameters_log','VIEW','LOG')
+COMMIT
+CREATE VIEW agent_movement_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) type, al_format_agent_name_log(agents.NAME, agents.ID) agent, agent_movement.SPEED speed, agent_movement.START_DATE start_date, agent_movement.STOP_DATE stop_date FROM agent_movement_raw_log agent_movement INNER JOIN agents_raw_log agents ON agent_movement.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID ORDER BY start_date
+INSERT INTO AL_DB_OBJECTS VALUES('agent_movement_log','VIEW','LOG')
+COMMIT
+CREATE VIEW agent_movement_stats_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) type, al_format_agent_name_log(agents.NAME, agents.ID) agent, agent_movement.total_meters total_meters, agent_movement.total_seconds total_seconds, agent_movement.avg_speed_mps avg_speed_mps FROM (   SELECT     AGENT_ID,     SUM(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE ) * SPEED) / 1000 total_meters,     SUM(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE )) / 1000 total_seconds,     SUM(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE ) * SPEED)       / SUM(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE )) avg_speed_mps   FROM agent_movement_raw_log   GROUP BY AGENT_ID) agent_movement INNER JOIN agents_raw_log agents ON agent_movement.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID ORDER BY type, agent
+INSERT INTO AL_DB_OBJECTS VALUES('agent_movement_stats_log','VIEW','LOG')
+COMMIT
+CREATE VIEW agent_messages_log AS SELECT am.MESSAGE message, al_format_agent_name_log(a1.NAME, a1.ID) recipient, al_format_agent_type_name_log(at1.NAME) recipient_type, al_format_agent_name_log(a2.NAME, a2.ID) sender, al_format_agent_type_name_log(at2.NAME) sender_type, am.DATE date, am.COUNTER counter FROM agent_messages_raw_log am INNER JOIN agents_raw_log a1 ON am.AGENT_ID = a1.ID INNER JOIN agent_types_raw_log at1 ON a1.AGENT_TYPE_ID = at1.ID LEFT JOIN agents_raw_log a2 ON am.SENDER_ID = a2.ID LEFT JOIN agent_types_raw_log at2 ON a2.AGENT_TYPE_ID = at2.ID ORDER BY am.COUNTER
+INSERT INTO AL_DB_OBJECTS VALUES('agent_messages_log','VIEW','LOG')
+COMMIT
+CREATE VIEW events_log AS SELECT agent_type_elements.NAME event_name, events.DATE date, al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent FROM events_raw_log events INNER JOIN agent_type_elements_raw_log agent_type_elements ON events.EVENT_ID = agent_type_elements.ID INNER JOIN agents_raw_log agents ON agent_type_elements.AGENT_TYPE_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agent_type_elements.AGENT_TYPE_ID = agent_types.ID ORDER BY events.DATE
+INSERT INTO AL_DB_OBJECTS VALUES('events_log','VIEW','LOG')
+COMMIT
+CREATE VIEW flowchart_entries_log AS SELECT \u0009flowchart_entries.COUNTER counter, \u0009al_format_agent_type_name_log(agent_types.NAME) agent_type, \u0009al_format_agent_name_log(agents.NAME, agents.ID) agent, \u0009al_format_agent_type_name_log(block_types.NAME) block_type, \u0009al_format_agent_name_log(blocks.NAME, blocks.ID) block, \u0009flowchart_entries.ENTRY_DATE entry_date FROM flowchart_entries_raw_log flowchart_entries INNER JOIN agents_raw_log agents ON flowchart_entries.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID LEFT JOIN agents_raw_log blocks ON flowchart_entries.BLOCK_ID = blocks.ID LEFT JOIN agent_types_raw_log block_types ON blocks.AGENT_TYPE_ID = block_types.ID ORDER BY flowchart_entries.ENTRY_DATE
+INSERT INTO AL_DB_OBJECTS VALUES('flowchart_entries_log','VIEW','LOG')
+COMMIT
+CREATE VIEW flowchart_process_states_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, al_format_agent_type_name_log(block_types.NAME) block_type, al_format_agent_name_log(blocks.NAME, blocks.ID) block, flowchart_process_states.ACTIVITY_TYPE activity_type, flowchart_process_states.START_DATE start_date, flowchart_process_states.STOP_DATE stop_date FROM flowchart_process_states_raw_log flowchart_process_states INNER JOIN agents_raw_log agents ON flowchart_process_states.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID INNER JOIN agents_raw_log blocks ON flowchart_process_states.BLOCK_ID = blocks.ID INNER JOIN agent_types_raw_log block_types ON blocks.AGENT_TYPE_ID = block_types.ID ORDER BY flowchart_process_states.START_DATE
+INSERT INTO AL_DB_OBJECTS VALUES('flowchart_process_states_log','VIEW','LOG')
+COMMIT
+CREATE VIEW flowchart_stats_time_in_state_log AS SELECT al_format_agent_type_name_log(block_types.NAME) block_type, al_format_agent_name_log(blocks.NAME, blocks.ID) block, flowchart_process_states.activity_type activity_type, flowchart_process_states.mean_seconds mean_seconds, flowchart_process_states.total_seconds total_seconds, flowchart_process_states.min_seconds min_seconds, flowchart_process_states.max_seconds max_seconds, flowchart_process_states.n_agents n_agents FROM (   SELECT     BLOCK_ID block_id,     ACTIVITY_TYPE activity_type,     AVG(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE )) / 1000 mean_seconds,     SUM(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE )) / 1000 total_seconds,     MIN(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE )) / 1000 min_seconds,     MAX(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE )) / 1000 max_seconds,     COUNT( DISTINCT AGENT_ID ) n_agents   FROM flowchart_process_states_raw_log flowchart_process_states   GROUP BY BLOCK_ID, ACTIVITY_TYPE) flowchart_process_states INNER JOIN agents_raw_log blocks ON flowchart_process_states.BLOCK_ID = blocks.ID INNER JOIN agent_types_raw_log block_types ON blocks.AGENT_TYPE_ID = block_types.ID ORDER BY block_type, block, activity_type
+INSERT INTO AL_DB_OBJECTS VALUES('flowchart_stats_time_in_state_log','VIEW','LOG')
+COMMIT
+CREATE VIEW resource_unit_states_log AS SELECT al_format_agent_type_name_log(unit_types.NAME) unit_type, al_format_agent_name_log(units.NAME, units.ID) unit, al_format_agent_name_log(pools.NAME, pools.ID) resource_pool, resource_unit_states.USAGE_STATE usage_state, CASE WHEN resource_unit_states.TASK_TYPE = 'TASK_CUSTOM' THEN al_format_agent_name_log(tasks.NAME, tasks.ID) ELSE resource_unit_states.TASK_TYPE END task, al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, resource_unit_states.START_DATE start_date, resource_unit_states.STOP_DATE stop_date FROM resource_unit_states_raw_log resource_unit_states INNER JOIN agents_raw_log units ON resource_unit_states.UNIT_ID = units.ID INNER JOIN agent_types_raw_log unit_types ON units.AGENT_TYPE_ID = unit_types.ID INNER JOIN agents_raw_log pools ON resource_unit_states.POOL_ID = pools.ID LEFT JOIN agents_raw_log agents ON resource_unit_states.AGENT_ID = agents.ID LEFT JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID LEFT JOIN agents_raw_log tasks ON resource_unit_states.TASK_ID = tasks.ID ORDER BY resource_unit_states.START_DATE
+INSERT INTO AL_DB_OBJECTS VALUES('resource_unit_states_log','VIEW','LOG')
+COMMIT
+CREATE VIEW resource_unit_task_stats_log AS SELECT al_format_agent_type_name_log(unit_types.NAME) unit_type, al_format_agent_name_log(pools.NAME, pools.ID) resource_pool, al_format_agent_name_log(units.NAME, units.ID) unit, CASE WHEN resource_unit_states.TASK_TYPE = 'TASK_CUSTOM' THEN al_format_agent_name_log(tasks.NAME, tasks.ID) ELSE resource_unit_states.TASK_TYPE END task, resource_unit_states.mean_seconds mean_seconds, resource_unit_states.total_seconds total_seconds, resource_unit_states.n_tasks n_tasks FROM (   SELECT     UNIT_ID unit_id,     POOL_ID pool_id,     TASK_TYPE task_type,     TASK_ID task_id,     AVG(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE )) / 1000 mean_seconds,     SUM(CAST( DATEDIFF('millisecond', START_DATE, STOP_DATE) AS DOUBLE )) / 1000 total_seconds,     COUNT(START_DATE) n_tasks   FROM resource_unit_states_raw_log   GROUP BY UNIT_ID, POOL_ID, TASK_TYPE, TASK_ID ) resource_unit_states INNER JOIN agents_raw_log units ON resource_unit_states.UNIT_ID = units.ID INNER JOIN agent_types_raw_log unit_types ON units.AGENT_TYPE_ID = unit_types.ID INNER JOIN agents_raw_log pools ON resource_unit_states.POOL_ID = pools.ID LEFT JOIN agents_raw_log tasks ON resource_unit_states.TASK_ID = tasks.ID ORDER BY unit_type, resource_pool, unit, resource_unit_states.TASK_TYPE, tasks.NAME
+INSERT INTO AL_DB_OBJECTS VALUES('resource_unit_task_stats_log','VIEW','LOG')
+COMMIT
+CREATE VIEW resource_pool_task_stats_log AS SELECT al_format_agent_type_name_log(unit_types.NAME) unit_type, al_format_agent_name_log(pools.NAME, pools.ID) resource_pool, CASE WHEN resource_unit_states.TASK_TYPE = 'TASK_CUSTOM' THEN tasks.NAME ELSE resource_unit_states.TASK_TYPE END task, resource_unit_states.mean_seconds mean_seconds, resource_unit_states.total_seconds total_seconds, resource_unit_states.n_tasks n_tasks FROM (   SELECT     u.AGENT_TYPE_ID unit_type_id,     s.POOL_ID pool_id,     s.TASK_TYPE task_type,     s.TASK_ID task_id,     AVG(CAST( DATEDIFF('millisecond', s.START_DATE, s.STOP_DATE) AS DOUBLE )) / 1000 mean_seconds,     SUM(CAST( DATEDIFF('millisecond', s.START_DATE, s.STOP_DATE) AS DOUBLE )) / 1000 total_seconds,     COUNT(s.START_DATE) n_tasks   FROM resource_unit_states_raw_log s   INNER JOIN agents_raw_log u ON s.UNIT_ID = u.ID   GROUP BY u.AGENT_TYPE_ID, s.POOL_ID, s.TASK_TYPE, s.TASK_ID ) resource_unit_states INNER JOIN agent_types_raw_log unit_types ON resource_unit_states.unit_type_id = unit_types.ID INNER JOIN agents_raw_log pools ON resource_unit_states.POOL_ID = pools.ID LEFT JOIN agents_raw_log tasks ON resource_unit_states.TASK_ID = tasks.ID ORDER BY unit_type, resource_pool, resource_unit_states.TASK_TYPE, tasks.NAME
+INSERT INTO AL_DB_OBJECTS VALUES('resource_pool_task_stats_log','VIEW','LOG')
+COMMIT
+CREATE VIEW resource_pool_utilization_log AS SELECT al_format_agent_name_log(pools.NAME, pools.ID) resource_pool, resource_pool_utilization.UTILIZATION utilization, resource_pool_utilization.SIZE size FROM resource_pool_utilization_raw_log resource_pool_utilization INNER JOIN agents_raw_log pools ON resource_pool_utilization.POOL_ID = pools.ID ORDER BY resource_pool
+INSERT INTO AL_DB_OBJECTS VALUES('resource_pool_utilization_log','VIEW','LOG')
+COMMIT
+CREATE VIEW resource_unit_utilization_log AS SELECT al_format_agent_type_name_log(unit_types.NAME) unit_type, al_format_agent_name_log(pools.NAME, pools.ID) resource_pool, al_format_agent_name_log(units.NAME, units.ID) unit, resource_unit_utilization.UTILIZATION utilization FROM resource_unit_utilization_raw_log resource_unit_utilization INNER JOIN agents_raw_log units ON resource_unit_utilization.UNIT_ID = units.ID INNER JOIN agent_types_raw_log unit_types ON units.AGENT_TYPE_ID = unit_types.ID INNER JOIN agents_raw_log pools ON resource_unit_utilization.POOL_ID = pools.ID ORDER BY unit_type, resource_pool
+INSERT INTO AL_DB_OBJECTS VALUES('resource_unit_utilization_log','VIEW','LOG')
+COMMIT
+CREATE VIEW fluid_units_log AS SELECT al_format_agent_type_name_log(block_types.NAME) block_type, al_format_agent_name_log(blocks.NAME, blocks.ID) block, units.AMOUNT_UNITS amount_units, units.RATE_UNITS rate_units FROM fluid_units_raw_log units INNER JOIN agents_raw_log blocks ON units.BLOCK_ID = blocks.ID INNER JOIN agent_types_raw_log block_types ON blocks.AGENT_TYPE_ID = block_types.ID ORDER BY block_type, block
+INSERT INTO AL_DB_OBJECTS VALUES('fluid_units_log','VIEW','LOG')
+COMMIT
+CREATE VIEW fluid_storages_log AS SELECT al_format_agent_type_name_log(block_types.NAME) block_type, al_format_agent_name_log(blocks.NAME, blocks.ID) block, storages.MINIMUM minimum, storages.MAXIMUM maximum, storages.AVERAGE average FROM fluid_storages_raw_log storages INNER JOIN agents_raw_log blocks ON storages.BLOCK_ID = blocks.ID INNER JOIN agent_types_raw_log block_types ON blocks.AGENT_TYPE_ID = block_types.ID ORDER BY block_type, block
+INSERT INTO AL_DB_OBJECTS VALUES('fluid_storages_log','VIEW','LOG')
+COMMIT
+CREATE VIEW fluid_rates_log AS SELECT al_format_agent_type_name_log(block_types.NAME) block_type, al_format_agent_name_log(blocks.NAME, blocks.ID) block, rates.PORT port, rates.TOTAL total_amount,rates.MINIMUM minimum_rate, rates.MAXIMUM maximum_rate, rates.AVERAGE average_rate FROM fluid_rates_raw_log rates INNER JOIN agents_raw_log blocks ON rates.BLOCK_ID = blocks.ID INNER JOIN agent_types_raw_log block_types ON blocks.AGENT_TYPE_ID = block_types.ID ORDER BY block_type, block
+INSERT INTO AL_DB_OBJECTS VALUES('fluid_rates_log','VIEW','LOG')
+COMMIT
+CREATE VIEW fluid_utilization_log AS SELECT al_format_agent_type_name_log(block_types.NAME) block_type, al_format_agent_name_log(blocks.NAME, blocks.ID) block, utilization.UTILIZATION utilization FROM fluid_utilization_raw_log utilization INNER JOIN agents_raw_log blocks ON utilization.BLOCK_ID = blocks.ID INNER JOIN agent_types_raw_log block_types ON blocks.AGENT_TYPE_ID = block_types.ID ORDER BY block_type, block
+INSERT INTO AL_DB_OBJECTS VALUES('fluid_utilization_log','VIEW','LOG')
+COMMIT
+CREATE VIEW statechart_transitions_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, transitions.NAME transition, states.NAME from_state, statechart_transitions.DATE date FROM statechart_transitions_raw_log statechart_transitions INNER JOIN agents_raw_log agents ON statechart_transitions.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID LEFT JOIN agent_type_elements_raw_log transitions ON statechart_transitions.TRANSITION_ID = transitions.ID INNER JOIN agent_type_elements_raw_log states ON statechart_transitions.FROM_STATE_ID = states.ID ORDER BY statechart_transitions.DATE
+INSERT INTO AL_DB_OBJECTS VALUES('statechart_transitions_log','VIEW','LOG')
+COMMIT
+CREATE VIEW agent_statechart_states_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, elements_statecharts.NAME statechart, elements_states.NAME state, statechart_states.ENTRY_DATE entry_date, statechart_states.EXIT_DATE exit_date FROM statechart_states_raw_log statechart_states INNER JOIN agents_raw_log agents ON statechart_states.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID INNER JOIN agent_type_statecharts_raw_log agent_type_statecharts ON agent_type_statecharts.ELEMENT_ID = statechart_states.STATE_ID INNER JOIN agent_type_elements_raw_log elements_statecharts ON agent_type_statecharts.STATECHART_ID = elements_statecharts.ID INNER JOIN agent_type_elements_raw_log elements_states ON statechart_states.STATE_ID = elements_states.ID ORDER BY agent_type, agent, statechart, statechart_states.ENTRY_DATE
+INSERT INTO AL_DB_OBJECTS VALUES('agent_statechart_states_log','VIEW','LOG')
+COMMIT
+CREATE VIEW agent_statechart_stats_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, elements_statecharts.NAME statechart, elements_states.NAME state, statechart_states.mean_seconds mean_seconds, statechart_states.total_seconds total_seconds, statechart_states.n_entries n_entries FROM (   SELECT     AGENT_ID agent_id,     STATE_ID state_id,     AVG(CAST( DATEDIFF('millisecond', ENTRY_DATE, EXIT_DATE) AS DOUBLE )) / 1000 mean_seconds,     SUM(CAST( DATEDIFF('millisecond', ENTRY_DATE, EXIT_DATE) AS DOUBLE )) / 1000 total_seconds,     COUNT(ENTRY_DATE) n_entries   FROM statechart_states_raw_log   GROUP BY AGENT_ID, STATE_ID ) statechart_states INNER JOIN agents_raw_log agents ON statechart_states.AGENT_ID = agents.ID INNER JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID INNER JOIN agent_type_statecharts_raw_log agent_type_statecharts ON agent_type_statecharts.ELEMENT_ID = statechart_states.STATE_ID INNER JOIN agent_type_elements_raw_log elements_statecharts ON agent_type_statecharts.STATECHART_ID = elements_statecharts.ID INNER JOIN agent_type_elements_raw_log elements_states ON statechart_states.STATE_ID = elements_states.ID ORDER BY agent_type, agent, statechart, state
+INSERT INTO AL_DB_OBJECTS VALUES('agent_statechart_stats_log','VIEW','LOG')
+COMMIT
+CREATE VIEW agent_type_statechart_stats_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, elements_statecharts.NAME statechart, elements_states.NAME state, statechart_states.mean_seconds mean_seconds, statechart_states.total_seconds total_seconds, statechart_states.min_seconds min_seconds, statechart_states.max_seconds max_seconds, statechart_states.n_entries n_entries FROM (   SELECT     a.AGENT_TYPE_ID agent_type_id,     s.STATE_ID state_id,     AVG(CAST( DATEDIFF('millisecond', s.ENTRY_DATE, s.EXIT_DATE) AS DOUBLE )) / 1000 mean_seconds,     SUM(CAST( DATEDIFF('millisecond', s.ENTRY_DATE, s.EXIT_DATE) AS DOUBLE )) / 1000 total_seconds,     MIN(CAST( DATEDIFF('millisecond', s.ENTRY_DATE, s.EXIT_DATE) AS DOUBLE )) / 1000 min_seconds,     MAX(CAST( DATEDIFF('millisecond', s.ENTRY_DATE, s.EXIT_DATE) AS DOUBLE )) / 1000 max_seconds,     COUNT(s.ENTRY_DATE) n_entries   FROM statechart_states_raw_log s   INNER JOIN agents_raw_log a ON s.AGENT_ID = a.ID   GROUP BY a.AGENT_TYPE_ID, s.STATE_ID ) statechart_states INNER JOIN agent_types_raw_log agent_types ON statechart_states.agent_type_id = agent_types.ID INNER JOIN agent_type_statecharts_raw_log agent_type_statecharts ON agent_type_statecharts.ELEMENT_ID = statechart_states.STATE_ID INNER JOIN agent_type_elements_raw_log elements_statecharts ON agent_type_statecharts.STATECHART_ID = elements_statecharts.ID INNER JOIN agent_type_elements_raw_log elements_states ON statechart_states.STATE_ID = elements_states.ID ORDER BY agent_type, statechart, state
+INSERT INTO AL_DB_OBJECTS VALUES('agent_type_statechart_stats_log','VIEW','LOG')
+COMMIT
+CREATE VIEW statistics_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, statistics.NAME name, statistics.MEAN mean, statistics.DEVIATION deviation, statistics.MINIMUM minimum, statistics.MAXIMUM maximum, statistics.MEAN_CONFIDENCE mean_confidence, statistics.NUMBER number FROM statistics_raw_log statistics LEFT JOIN agents_raw_log agents ON statistics.AGENT_ID = agents.ID LEFT JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID ORDER BY agent_type, agent, statistics.NAME
+INSERT INTO AL_DB_OBJECTS VALUES('statistics_log','VIEW','LOG')
+COMMIT
+CREATE VIEW datasets_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, agent_elements.NAME name, datasets.INDEX index, datasets.X x, datasets.Y y FROM datasets_raw_log datasets LEFT JOIN agent_elements_raw_log agent_elements ON datasets.ELEMENT_ID = agent_elements.ID LEFT JOIN agents_raw_log agents ON agent_elements.AGENT_ID = agents.ID LEFT JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID ORDER BY agent_type, agent, agent_elements.NAME, datasets.INDEX
+INSERT INTO AL_DB_OBJECTS VALUES('datasets_log','VIEW','LOG')
+COMMIT
+CREATE VIEW histograms_log AS SELECT al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent, agent_elements.NAME name, histograms.START start, histograms.END end, histograms.PDF pdf, histograms.CDF cdf FROM histograms_raw_log histograms LEFT JOIN agent_elements_raw_log agent_elements ON histograms.ELEMENT_ID = agent_elements.ID LEFT JOIN agents_raw_log agents ON agent_elements.AGENT_ID = agents.ID LEFT JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID ORDER BY agent_type, agent, agent_elements.NAME, histograms.START
+INSERT INTO AL_DB_OBJECTS VALUES('histograms_log','VIEW','LOG')
+COMMIT
+CREATE VIEW trace_log AS SELECT trace.MESSAGE_TEXT message_text, trace.DATE date, trace.COUNTER counter, al_format_agent_type_name_log(agent_types.NAME) agent_type, al_format_agent_name_log(agents.NAME, agents.ID) agent FROM trace_raw_log trace LEFT JOIN agents_raw_log agents ON trace.AGENT_ID = agents.ID LEFT JOIN agent_types_raw_log agent_types ON agents.AGENT_TYPE_ID = agent_types.ID ORDER BY trace.COUNTER
+INSERT INTO AL_DB_OBJECTS VALUES('trace_log','VIEW','LOG')
+COMMIT
+INSERT INTO AGENT_TYPES_RAW_LOG VALUES(0,'javatest.Main')
+COMMIT
+INSERT INTO AGENTS_RAW_LOG VALUES(0,0,'root','2016-07-14 00:00:00.000000')
+COMMIT
+DELETE FROM AGENTS_RAW_LOG WHERE ID=0
+INSERT INTO AGENTS_RAW_LOG VALUES(0,0,'root','2016-07-14 00:00:00.000000')
+COMMIT
+DISCONNECT
