@@ -12,6 +12,8 @@ If Starting of the msb client leads to this error:
 
 	java.lang.NoSuchMethodError: org.joda.time.format.DateTimeFormatter.withZoneUTC()Lorg/joda/time/format/DateTimeFormatter;
 
+get the joda-time version, used in vfk client and manally download it: http://central.maven.org/maven2/joda-time/joda-time/2.8.2/ 
+
 do this:
 
 	cd bin/anylogic/plugins/com.anylogic.third_party_libraries_7.3.4.201605201443/lib/database/querydsl/
