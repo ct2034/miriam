@@ -1,7 +1,9 @@
 # cloudsim
 
 ## Requirements
-Tested with Anylogic 7.3.2
+Tested with Anylogic ...
+* 7.3.2
+* 7.3.4
 
 http://www.anylogic.com/downloads
 
