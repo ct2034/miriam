@@ -4,7 +4,7 @@
 	         AnyLogic Project File 
 *************************************************	         
 -->
-<AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="7.3.2.201604211919" AlpVersion="7.3.3">
+<AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="7.3.4.201605201443" AlpVersion="7.3.3">
 <Model>
 	<Id>1468521131728</Id>
 	<Name><![CDATA[JavaTest]]></Name>
@@ -24,38 +24,62 @@ import de.fhg.ipa.vfk.broker.interfaces.websocket.client.ClientWebSocketHandlerF
 import de.fhg.ipa.vfk.smartobjectmgmt.client.api.Application;
 import de.fhg.ipa.vfk.smartobjectmgmt.client.api.Configuration;
 import de.fhg.ipa.vfk.smartobjectmgmt.client.api.ParameterValue;
-import java.io.Console;]]></Import>
+import java.io.Console;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormat;]]></Import>
 			<StartupCode><![CDATA[System.out.println("Hello Anylogic!");
 String version = System.getProperty("java.version");
 System.out.println("Java version: " + version);
 
-final ClientWebSocketHandlerFactory factory = ClientWebSocketHandlerFactory.getInstance("./CERTS.trs");
-Thread thread = new Thread(new Runnable() {
+System.out.println("DateTimeFormatter version: ");
+org.joda.time.format.DateTimeFormatter dtf = org.joda.time.format.DateTimeFormat.forPattern("MMMM, yyyy");
+System.out.println(dtf.getClass().getPackage().getSpecificationVersion());
+System.out.println(dtf.getClass().getPackage().getImplementationVersion());
 
-	@Override
-	public void run() {
+Object waitLock = new Object();
 
-		try (ClientHandler handler = factory.getClientHandler("ws://demo.virtualfortknox.de/msb2")) {
-			Application smartObject = new Application();
-			smartObject.setUuid("");
-			smartObject.setName("");
-			smartObject.setDescription("Test client");
-			smartObject.setToken("");
-			Map<String, ParameterValue> parameters = new HashMap<>();
-			parameters.put("test", new ParameterValue("testValue"));
-			Configuration configuration = new Configuration();
-			configuration.setParameters(parameters);
-			smartObject.setConfiguration(configuration);
-			handler.register(smartObject, "javatest");
+try {
 
-//			handler.addConfigurationListener(configurationListener);
-//			wait4TerminateSignal();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
+	final ClientWebSocketHandlerFactory factory = ClientWebSocketHandlerFactory.getInstance("./CERTS.trs");
+	Thread thread = new Thread(new Runnable() {
+	
+		@Override
+		public void run() {
+	
+			try (ClientHandler handler = factory.getClientHandler("ws://demo.virtualfortknox.de/msb2")) {
+				Application smartObject = new Application();
+				smartObject.setUuid("anylogic");
+				smartObject.setName("anylogic");
+				smartObject.setDescription("A AnyLogic Simulation");
+				smartObject.setToken("anylogic");
+				Map<String, ParameterValue> parameters = new HashMap<>();
+				parameters.put("test", new ParameterValue("testValue"));
+				Configuration configuration = new Configuration();
+				configuration.setParameters(parameters);
+				smartObject.setConfiguration(configuration);
+				handler.register(smartObject, "javatest");
+	
+	//			handler.addConfigurationListener(configurationListener);
+
+				synchronized (waitLock) {
+					try {
+						waitLock.wait();
+					} catch (InterruptedException e) {
+						System.out.println("WAITLOCK INTERRUPT");
+					}
+				}
+				
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
 		}
-	}
-});
-thread.start();]]></StartupCode>
+	});
+	thread.start();
+} catch (Exception e) {
+	System.out.println("catching ...");
+	System.out.println(e.getMessage());
+}
+				]]></StartupCode>
 			<Generic>false</Generic>
 			<GenericParameter>
 				<Id>1468521131732</Id>
@@ -193,6 +217,10 @@ thread.start();]]></StartupCode>
 				<CloseConfirmation>false</CloseConfirmation>
 			</Frame>
 			<CommandLineArguments><![CDATA[]]></CommandLineArguments>
+			<InitialSetupCode><![CDATA[
+if ( getState() == IDLE & autorun)
+	run();
+getPresentation().setPresentable( getEngine().getRoot() );]]></InitialSetupCode>
 			<MaximumMemory>256</MaximumMemory>
 			<RandomNumberGenerationType>fixedSeed</RandomNumberGenerationType>
 			<CustomGeneratorCode>new Random()</CustomGeneratorCode>
@@ -201,6 +229,23 @@ thread.start();]]></StartupCode>
 			<VmArgs><![CDATA[]]></VmArgs>
 			<LoadRootFromSnapshot>false</LoadRootFromSnapshot>
 			<SnapshotFile></SnapshotFile>
+			<Variables>
+				<Variable Class="PlainVariable">
+					<Id>1469167486694</Id>
+					<Name><![CDATA[autorun]]></Name>
+					<X>40</X><Y>-30</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[boolean]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA[true]]></Code>
+						</InitialValue>
+					</Properties>
+				</Variable>
+			</Variables>
 
 			<Shapes>
 				<Text>
@@ -239,8 +284,8 @@ thread.start();]]></StartupCode>
 					<BasicProperties Width="100" Height="30" 
 				AsObject="true">
                         <EmbeddedIcon>false</EmbeddedIcon>				
-						<FillColor/>
-						<TextColor/>
+						<FillColor>-16744448</FillColor>
+						<TextColor>-1</TextColor>
 						<Enabled>true</Enabled>
 						<ActionCode><![CDATA[if ( getState() == IDLE )
 	run();
@@ -298,6 +343,11 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 	</Experiments>
 	<ClassPathEntry>
 		<Location><![CDATA[vfk.msb.client.library.websocket.java-1.3.0-SNAPSHOT.jar]]></Location>
+		<Imported>true</Imported>
+		<Folder>false</Folder>
+	</ClassPathEntry>
+	<ClassPathEntry>
+		<Location><![CDATA[joda-time-2.8.2.jar]]></Location>
 		<Imported>true</Imported>
 		<Folder>false</Folder>
 	</ClassPathEntry>
