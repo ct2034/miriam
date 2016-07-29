@@ -4,7 +4,7 @@
 	         AnyLogic Project File 
 *************************************************	         
 -->
-<AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="7.3.4.201605201237" AlpVersion="7.3.3">
+<AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="7.3.4.201605201443" AlpVersion="7.3.3">
 <Model>
 	<Id>1468521131728</Id>
 	<Name><![CDATA[JavaTest]]></Name>
@@ -16,7 +16,8 @@
 		<ActiveObjectClass>
 			<Id>1468521131733</Id>
 			<Name><![CDATA[Main]]></Name>
-			<AdditionalClassCode><![CDATA[ClientHandler handler;]]></AdditionalClassCode>
+			<AdditionalClassCode><![CDATA[ClientHandler handler;
+boolean connected = false;]]></AdditionalClassCode>
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
 			<IconTopGroupPersistent>true</IconTopGroupPersistent>
@@ -39,8 +40,7 @@ Thread thread = new Thread(new Runnable() {
 	public void run() {
 
 		try{
-			handler = factory.getClientHandler("ws://localhost:8085",9999);
-			System.out.println("02");
+			handler = factory.getClientHandler("ws://10.3.6.140:8085",9999);
 			Application smartObject = new Application();		
 			smartObject.setUuid("AL_TC");
 			smartObject.setName("AnyLogic-TestClient");
@@ -54,10 +54,12 @@ Thread thread = new Thread(new Runnable() {
 			smartObject.setConfiguration(configuration);
 			//handler.register(smartObject, "javatest");
 			
-			Class<?> dataType = String.class;
+			Class<?> dataType = int.class;
 			handler.addEvent(smartObject, "NUMBER", "number", "A number", dataType);
 
 			handler.register(smartObject);
+			connected = true;
+			System.out.println("CONNECTED TO MSB ...");
 
 			synchronized (waitLock) {
 				try {
@@ -548,10 +550,11 @@ Thread thread2 = new Thread(new Runnable() {
 
 	int x = rand.nextInt() ;
 	System.out.println("PRINT - x: "+x);
-	handler.publish("NUMBER", x);
+	if(connected) handler.publish("NUMBER", x);
 
 } catch (Exception e) {
 	System.out.println("Exception: "+ e.toString());
+	e.printStackTrace();
 }
 
 ]]></Code>
