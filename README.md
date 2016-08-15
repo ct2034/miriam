@@ -1,5 +1,9 @@
 # cloudsim
 
+## General
+What can a Simulation do in the cloud?
+![General][cloud_sim_general]
+
 ## Requirements
 Tested with Anylogic ...
 * 7.3.2
@@ -19,3 +23,11 @@ do this:
 	cd bin/anylogic/plugins/com.anylogic.third_party_libraries_7.3.4.201605201443/lib/database/querydsl/
 	mv joda-time-1.6.jar joda-time-1.6.jar_ORIG
 	cp ~/src/cloudsim/JavaTest/joda-time-2.8.2.jar joda-time-1.6.jar
+
+
+
+## Logger-Config-file / Debuggen with Eclipse
+http://www.cs.usask.ca/faculty/ndo885/Classes/MIT15879/LectureSlides/Lecture%2023%20--%20Debugging%20in%20AnyLogic.pdf
+
+## Concept anylogic
+![Concept][anylogic]
