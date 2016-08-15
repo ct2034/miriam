@@ -116,6 +116,37 @@ class Car(object):
 
 if __name__ == '__main__':
     s = SimpleSimulation()
+
+    try:
+        mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
+
+        f = Function("num",
+                     # there can not be capital letters in name
+                     DataFormat("start", "Integer").toCol(),
+                     "number",
+                     "A number")
+        s = Application(
+            "testclient_uuid2",
+            "testclient_name2",
+            "testclient_desc2",
+            [],
+            [f.toOrderedDict()],
+            "token2")
+
+        mwc.register(s)
+
+        # wait a bit
+        time.sleep(2)
+
+        # mwc.emitEvent(s, e.toOrderedDict(), 3, 2)
+
+        while True:
+            time.sleep(2)
+
+    except KeyboardInterrupt:
+        print("EXIT ..")
+        mwc.disconnect()
+
     s.start(100, 100, 2)
 
     print("start sim")
