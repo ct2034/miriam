@@ -2,59 +2,121 @@ from numpy import *
 import time
 import threading
 import random
+from graphics import *
 
+from vfk_msb_py.msb_ws4py_client import MsbWsClient
+from vfk_msb_py.msb_classes import *
 
-def loop():
-    SimpleSimulation.running = True
-    while SimpleSimulation.running:
+def iterate():
+    SimpSim.running = True
+    while SimpSim.running:
         try:
-            print(".")
-            for j in SimpleSimulation.routes:
+            work_queue()
+            # print(".")
+            for j in SimpSim.activeRoutes:
                 if not j.finished:
-                    j.new_step(SimpleSimulation.driveSpeed)
-            time.sleep(SimpleSimulation.simTime)
+                    j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
+            time.sleep(SimpSim.simTime)
         except Exception as e:
-            print(str(e))
+            print("ERROR:", str(e))
+            raise e
 
 
-class SimpleSimulation(object):
+def pointFromPose(pose):
+    poseVis = pose * Vis.scale
+    return Point(poseVis[0], poseVis[1])
+
+class Vis(object):
+    """Visualisation of the AGVs and environment"""
+
+    scale = 5
+    carCircles = {}
+    routeLines = {}
+    queueText = False
+    dimensions = array([0, 0])
+
+    def open(self, x, y, cars):
+        Vis.dimensions[0] = x * Vis.scale
+        Vis.dimensions[1] = y * Vis.scale
+        Vis.win = GraphWin(
+            'cloudnav',
+            width = Vis.dimensions[0],
+            height = Vis.dimensions[1]
+        )
+        for car in cars:
+            Vis.carCircles[car.id] = Circle(pointFromPose(car.pose), Vis.scale)
+            Vis.carCircles[car.id].draw(Vis.win)
+            Vis.carCircles[car.id].setFill('green')
+
+    def updateCar(self, car):
+        if car:
+            poseVis = car.pose * Vis.scale
+            dx = poseVis[0] - Vis.carCircles[car.id].getCenter().x
+            dy = poseVis[1] - Vis.carCircles[car.id].getCenter().y
+            Vis.carCircles[car.id].move(dx=dx, dy=dy)
+
+    def updateRoute(self, route):
+        if route:
+            if route.id not in Vis.routeLines.keys():
+                Vis.routeLines[route.id] = Line(pointFromPose(route.start), pointFromPose(route.goal))
+                Vis.routeLines[route.id].setFill('red')
+                Vis.routeLines[route.id].setArrow('last')
+                Vis.routeLines[route.id].draw(Vis.win)
+            if route.onRoute:
+                Vis.routeLines[route.id].setFill('blue')
+            if route.finished:
+                Vis.routeLines[route.id].undraw()
+
+    def updateQueue(self, queue):
+        if not Vis.queueText:
+            Vis.queueText = Text(
+                Point(Vis.scale * 10, Vis.dimensions[1] / 2 + Vis.scale),
+                ""
+            )
+            Vis.queueText.draw(Vis.win)
+            Vis.queueText.setSize(8)
+        Vis.queueText.setText("\n".join(
+            [r.to_string() for r in queue]
+        ))
+
+
+def work_queue():
+    for c in SimpSim.cars:
+        if not c.route and len(SimpSim.queue) > 0:
+            routeTodo = SimpSim.queue.pop()
+            routeTodo.assign_car(c)
+            SimpSim.activeRoutes.append(routeTodo)
+    SimpSim.v.updateQueue(SimpSim.queue)
+
+class SimpSim(object):
     """simulation of multiple AGVs"""
 
-    routes = []
-    driveSpeed = 5
-    simTime = 1
+    queue = []
+    activeRoutes = []
+    cars = []
+    driveSpeed = 50
+    simTime = .01
     running = False
+    v = Vis()
 
     def __init__(self):
         print("init Simulation")
 
         self.area = zeros([1])
         self.number_agvs = 1
-        self.cars = []
 
     def start(self, width, height, number_agvs):
         self.area = zeros([width, height])
         self.number_agvs = number_agvs
         for i in range(self.number_agvs):
-            self.cars.append(Car(self))
-        t = threading.Thread(target=loop)
-        t.start()
+            SimpSim.cars.append(Car(self))
+        SimpSim.v.open(width, height, SimpSim.cars)
 
     def stop(self):
-        SimpleSimulation.running = False
+        SimpSim.running = False
 
     def new_job(self, a, b):
-        car = False
-        for c in self.cars:
-            if not c.route:
-                car = c
-        if not car:
-            print("No free Car, waiting")
-            time.sleep(SimpleSimulation.simTime)
-            self.new_job(a, b)
-        else:
-            new_job = Route(a, b, car)
-            SimpleSimulation.routes.append(new_job)
+        SimpSim.queue.append(Route(a, b, False, self))
 
 
 def get_distance(a, b):
@@ -62,41 +124,83 @@ def get_distance(a, b):
     assert b.size is 2, "B point needs to have two coordinates"
     return linalg.norm(a - b)
 
+def get_distance(vec):
+    return linal
 
 class Route(object):
     """a route to be simulated"""
 
     nextId = 0
 
-    def __init__(self, start, goal, car):
+    def __init__(self, start, goal, car, s):
+        self.sim = s
+
+        self.id = Route.nextId
+        Route.nextId += 1
+
         assert start.__class__ is ndarray, 'Start needs to be a numpy.ndarray'
         self.start = start
         assert goal.__class__ is ndarray, 'Goal needs to be a numpy.ndarray'
         self.goal = goal
 
-        assert car.route == False
-        car.route = self
-        self.car = car
-        self.car.pose = start
+        self.assign_car(car)
 
-        self.distance = get_distance(start, goal)
+        self.onRoute = False
+
+        self.vector = goal - start
+        self.distance = linalg.norm(self.vector)
         self.remaining = self.distance
+
         self.finished = False
 
-        self.id = Route.nextId
-        Route.nextId += 1
 
         print("Created route with id", str(self.id), "distance:", self.distance)
 
-    def new_step(self, speed):
-        self.remaining = self.remaining - speed
-        if self.remaining <= 0:
-            self.car.pose = self.goal
-            self.car.route = False
-            self.remaining = 0
-            self.finished = True
-            print("Route", self.id, "reached Goal", self.goal)
+    def assign_car(self, car):
+        self.car = car
+        if car:  # if we are setting a car
+            assert car.route == False, "car is not on a route"
+            car.route = self
 
+            self.preVector = self.start - car.pose
+            self.preDistance = linalg.norm(self.preVector)
+            self.preRemaining = self.preDistance
+
+    def new_step(self, stepSize):
+        if not self.onRoute: # on way to start
+            self.car.setPose(
+                stepSize * self.preVector /
+                self.preDistance +
+                self.car.pose
+            )
+
+            self.preRemaining -= stepSize
+
+            if self.preRemaining <= 0:
+                self.onRoute = True
+                self.car.setPose(self.start)
+                self.preRemaining = 0
+                print(self.to_string(), "reached Start")
+        else: # on route
+            self.car.setPose(
+                stepSize * self.vector /
+                self.distance +
+                self.car.pose
+            )
+
+            self.remaining -= stepSize
+
+            if self.remaining <= 0:
+                self.car.route = False
+                self.car.setPose(self.goal)
+                self.remaining = 0
+                self.finished = True
+                print(self.to_string(), "reached Goal")
+
+        SimpSim.v.updateRoute(self)
+
+    def to_string(self):
+        return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))
 
 class Car(object):
     """an AGV to be simulated"""
@@ -104,8 +208,13 @@ class Car(object):
     nextId = 0
 
     def __init__(self, s):
-        assert s.__class__ is SimpleSimulation, "Pass the simulation object to the new car"
-        self.pose = random.random() * array(s.area.shape)
+        self.sim = s
+
+        assert s.__class__ is SimpSim, "Pass the simulation object to the new car"
+        self.pose = array([
+            random.random() * s.area.shape[0],
+            random.random() * s.area.shape[1]
+        ])
 
         self.route = False
 
@@ -114,49 +223,58 @@ class Car(object):
 
         print("New car:", str(self.id), "at", str(self.pose))
 
-if __name__ == '__main__':
-    s = SimpleSimulation()
+    def setPose(self, pose):
+        self.pose = pose
+        SimpSim.v.updateCar(self)
 
-    try:
-        mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
 
-        f = Function("num",
-                     # there can not be capital letters in name
-                     DataFormat("start", "Integer").toCol(),
-                     "number",
-                     "A number")
-        s = Application(
-            "testclient_uuid2",
-            "testclient_name2",
-            "testclient_desc2",
-            [],
-            [f.toOrderedDict()],
-            "token2")
-
-        mwc.register(s)
-
-        # wait a bit
-        time.sleep(2)
-
-        # mwc.emitEvent(s, e.toOrderedDict(), 3, 2)
-
-        while True:
-            time.sleep(2)
-
-    except KeyboardInterrupt:
-        print("EXIT ..")
-        mwc.disconnect()
-
-    s.start(100, 100, 2)
-
+def test_jobs():
     print("start sim")
     time.sleep(1)
 
-    s.new_job(array([10, 10]), array([20, 20]))
-    s.new_job(array([10, 10]), array([30, 50]))
-    s.new_job(array([70, 10]), array([20, 80]))
+    for i in range(5):
+        s.new_job(array([random.randint(1,100), random.randint(1,100)]), array([random.randint(1,100), random.randint(1,100)]))
+        time.sleep(random.randint(0,2))
 
-    time.sleep(15)
+    time.sleep(5)
 
     print("sim finished")
     s.stop()
+    # mwc.disconnect()
+
+if __name__ == '__main__':
+    s = SimpSim()
+
+    # try:
+    #     mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', print)
+    #
+    #     f = Function("num",
+    #                  # there can not be capital letters in name
+    #                  DataFormat("start", "Integer").toCol(),
+    #                  "number",
+    #                  "A number")
+    #     app = Application(
+    #         "testclient_uuid2",
+    #         "testclient_name2",
+    #         "testclient_desc2",
+    #         [],
+    #         [f.toOrderedDict()],
+    #         "token2")
+    #
+    #     mwc.register(app)
+    #
+    #     # wait a bit
+    #     time.sleep(2)
+    #
+    #     # mwc.emitEvent(s, e.toOrderedDict(), 3, 2)
+    #
+    # except KeyboardInterrupt:
+    #     print("EXIT ..")
+    #     mwc.disconnect()
+
+    s.start(100, 100, 2)
+
+    t = threading.Thread(target=test_jobs)
+    t.start()
+
+    iterate()
