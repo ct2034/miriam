@@ -2,7 +2,7 @@
 
 ## General
 What can a Simulation do in the cloud?
-![General](cloud_sim_general.jpg?raw=true)
+![General](doc/cloud_sim_general.jpg?raw=true)
 
 ## Requirements
 Tested with Anylogic ...
@@ -30,4 +30,8 @@ do this:
 http://www.cs.usask.ca/faculty/ndo885/Classes/MIT15879/LectureSlides/Lecture%2023%20--%20Debugging%20in%20AnyLogic.pdf
 
 ## Concept anylogic
-![Concept](anylogic.jpg?raw=true)
+![Concept](doc/anylogic.jpg?raw=true)
+
+![Concept](doc/160818_architecture_01.png?raw=true)
+
+![Concept](doc/160818_architecture_02.png?raw=true)
