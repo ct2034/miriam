@@ -1,17 +1,30 @@
 # cloudsim
 
 ## General
+
+### Cloudsim
 What can a Simulation do in the cloud?
 ![General](doc/cloud_sim_general.jpg?raw=true)
 
-## Requirements
+### Architecture
+<!-- ![Concept](doc/anylogic.jpg?raw=true) -->
+
+The following image illustartes the general concept of simulation in Anylogic and AGV sim:
+![Concept](doc/160818_architecture_01.png?raw=true)
+
+This shows the interconnection between both simulations
+![Concept](doc/160818_architecture_02.png?raw=true)
+
+## Anylogic
+
+### Requirements
 Tested with Anylogic ...
 * 7.3.2
 * 7.3.4
 
 http://www.anylogic.com/downloads
 
-## joda-time Workaround
+### joda-time Workaround
 If Starting of the msb client leads to this error:
 
 	java.lang.NoSuchMethodError: org.joda.time.format.DateTimeFormatter.withZoneUTC()Lorg/joda/time/format/DateTimeFormatter;
@@ -26,12 +39,5 @@ do this:
 
 
 
-## Logger-Config-file / Debuggen with Eclipse
+### Logger-Config-file / Debuggen with Eclipse
 http://www.cs.usask.ca/faculty/ndo885/Classes/MIT15879/LectureSlides/Lecture%2023%20--%20Debugging%20in%20AnyLogic.pdf
-
-## Concept anylogic
-![Concept](doc/anylogic.jpg?raw=true)
-
-![Concept](doc/160818_architecture_01.png?raw=true)
-
-![Concept](doc/160818_architecture_02.png?raw=true)
