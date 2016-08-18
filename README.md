@@ -9,7 +9,7 @@ What can a Simulation do in the cloud?
 ### Architecture
 <!-- ![Concept](doc/anylogic.jpg?raw=true) -->
 
-The following image illustartes the general concept of simulation in Anylogic and AGV sim:
+The following image illustrates the general concept of simulation in Anylogic and AGV sim:
 ![Concept](doc/160818_architecture_01.png?raw=true)
 
 This shows the interconnection between both simulations
@@ -25,7 +25,7 @@ Tested with Anylogic ...
 http://www.anylogic.com/downloads
 
 ### joda-time Workaround
-If Starting of the msb client leads to this error:
+If starting of the msb client leads to this error:
 
 	java.lang.NoSuchMethodError: org.joda.time.format.DateTimeFormatter.withZoneUTC()Lorg/joda/time/format/DateTimeFormatter;
 
