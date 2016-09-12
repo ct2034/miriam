@@ -7,6 +7,8 @@ from graphics import *
 from vfk_msb_py.msb_ws4py_client import MsbWsClient
 from vfk_msb_py.msb_classes import *
 
+import smartleitstand
+
 def iterate():
     SimpSim.running = True
     while SimpSim.running:
@@ -26,67 +28,71 @@ def pointFromPose(pose):
     poseVis = pose * Vis.scale
     return Point(poseVis[0], poseVis[1])
 
-class Vis(object):
-    """Visualisation of the AGVs and environment"""
-
-    scale = 5
-    carCircles = {}
-    routeLines = {}
-    queueText = False
-    dimensions = array([0, 0])
-
-    def open(self, x, y, cars):
-        Vis.dimensions[0] = x * Vis.scale
-        Vis.dimensions[1] = y * Vis.scale
-        Vis.win = GraphWin(
-            'cloudnav',
-            width = Vis.dimensions[0],
-            height = Vis.dimensions[1]
-        )
-        for car in cars:
-            Vis.carCircles[car.id] = Circle(pointFromPose(car.pose), Vis.scale)
-            Vis.carCircles[car.id].draw(Vis.win)
-            Vis.carCircles[car.id].setFill('green')
-
-    def updateCar(self, car):
-        if car:
-            poseVis = car.pose * Vis.scale
-            dx = poseVis[0] - Vis.carCircles[car.id].getCenter().x
-            dy = poseVis[1] - Vis.carCircles[car.id].getCenter().y
-            Vis.carCircles[car.id].move(dx=dx, dy=dy)
-
-    def updateRoute(self, route):
-        if route:
-            if route.id not in Vis.routeLines.keys():
-                Vis.routeLines[route.id] = Line(pointFromPose(route.start), pointFromPose(route.goal))
-                Vis.routeLines[route.id].setFill('red')
-                Vis.routeLines[route.id].setArrow('last')
-                Vis.routeLines[route.id].draw(Vis.win)
-            if route.onRoute:
-                Vis.routeLines[route.id].setFill('blue')
-            if route.finished:
-                Vis.routeLines[route.id].undraw()
-
-    def updateQueue(self, queue):
-        if not Vis.queueText:
-            Vis.queueText = Text(
-                Point(Vis.scale * 10, Vis.dimensions[1] / 2 + Vis.scale),
-                ""
-            )
-            Vis.queueText.draw(Vis.win)
-            Vis.queueText.setSize(8)
-        Vis.queueText.setText("\n".join(
-            [r.to_string() for r in queue]
-        ))
+# class Vis(object):
+#     """Visualisation of the AGVs and environment"""
+#
+#     scale = 5
+#     carCircles = {}
+#     routeLines = {}
+#     queueText = False
+#     dimensions = array([0, 0])
+#
+#     def open(self, x, y, cars):
+#         Vis.dimensions[0] = x * Vis.scale
+#         Vis.dimensions[1] = y * Vis.scale
+#         Vis.win = GraphWin(
+#             'cloudnav',
+#             width = Vis.dimensions[0],
+#             height = Vis.dimensions[1]
+#         )
+#         for car in cars:
+#             Vis.carCircles[car.id] = Circle(pointFromPose(car.pose), Vis.scale)
+#             Vis.carCircles[car.id].draw(Vis.win)
+#             Vis.carCircles[car.id].setFill('green')
+#
+#     def updateCar(self, car):
+#         if car:
+#             poseVis = car.pose * Vis.scale
+#             dx = poseVis[0] - Vis.carCircles[car.id].getCenter().x
+#             dy = poseVis[1] - Vis.carCircles[car.id].getCenter().y
+#             Vis.carCircles[car.id].move(dx=dx, dy=dy)
+#
+#     def updateRoute(self, route):
+#         if route:
+#             if route.id not in Vis.routeLines.keys():
+#                 Vis.routeLines[route.id] = Line(pointFromPose(route.start), pointFromPose(route.goal))
+#                 Vis.routeLines[route.id].setFill('red')
+#                 Vis.routeLines[route.id].setArrow('last')
+#                 Vis.routeLines[route.id].draw(Vis.win)
+#             if route.onRoute:
+#                 Vis.routeLines[route.id].setFill('blue')
+#             if route.finished:
+#                 Vis.routeLines[route.id].undraw()
+#
+#     def updateQueue(self, queue):
+#         if not Vis.queueText:
+#             Vis.queueText = Text(
+#                 Point(Vis.scale * 10, Vis.dimensions[1] / 2 + Vis.scale),
+#                 ""
+#             )
+#             Vis.queueText.draw(Vis.win)
+#             Vis.queueText.setSize(8)
+#         Vis.queueText.setText("\n".join(
+#             [r.to_string() for r in queue]
+#         ))
 
 
 def work_queue():
+    freeCars = []
+    routeTodo = False
     for c in SimpSim.cars:
         if not c.route and len(SimpSim.queue) > 0:
+            freeCars.append(c)
             routeTodo = SimpSim.queue.pop()
-            routeTodo.assign_car(c)
-            SimpSim.activeRoutes.append(routeTodo)
-    SimpSim.v.updateQueue(SimpSim.queue)
+    if routeTodo:
+        routeTodo.assign_car(smartleitstand.which_car(freeCars, routeTodo, []))
+        SimpSim.activeRoutes.append(routeTodo)
+        # SimpSim.v.updateQueue(SimpSim.queue)
 
 class SimpSim(object):
     """simulation of multiple AGVs"""
@@ -97,7 +103,7 @@ class SimpSim(object):
     driveSpeed = 50
     simTime = .01
     running = False
-    v = Vis()
+    # v = Vis()
 
     def __init__(self):
         print("init Simulation")
@@ -110,7 +116,8 @@ class SimpSim(object):
         self.number_agvs = number_agvs
         for i in range(self.number_agvs):
             SimpSim.cars.append(Car(self))
-        SimpSim.v.open(width, height, SimpSim.cars)
+        # SimpSim.v.open(width, height, SimpSim.cars)
+        threading.Thread(target=iterate).start()
 
     def stop(self):
         SimpSim.running = False
@@ -123,9 +130,6 @@ def get_distance(a, b):
     assert a.size is 2, "A point needs to have two coordinates"
     assert b.size is 2, "B point needs to have two coordinates"
     return linalg.norm(a - b)
-
-def get_distance(vec):
-    return linal
 
 class Route(object):
     """a route to be simulated"""
@@ -197,7 +201,7 @@ class Route(object):
                 self.finished = True
                 print(self.to_string(), "reached Goal")
 
-        SimpSim.v.updateRoute(self)
+        # SimpSim.v.updateRoute(self)
 
     def to_string(self):
         return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))
@@ -212,8 +216,8 @@ class Car(object):
 
         assert s.__class__ is SimpSim, "Pass the simulation object to the new car"
         self.pose = array([
-            random.random() * s.area.shape[0],
-            random.random() * s.area.shape[1]
+            random.randint(0, s.area.shape[0]),
+            random.randint(0, s.area.shape[1])
         ])
 
         self.route = False
@@ -225,56 +229,4 @@ class Car(object):
 
     def setPose(self, pose):
         self.pose = pose
-        SimpSim.v.updateCar(self)
-
-
-def test_jobs():
-    print("start sim")
-    time.sleep(1)
-
-    for i in range(5):
-        s.new_job(array([random.randint(1,100), random.randint(1,100)]), array([random.randint(1,100), random.randint(1,100)]))
-        time.sleep(random.randint(0,2))
-
-    time.sleep(5)
-
-    print("sim finished")
-    s.stop()
-    # mwc.disconnect()
-
-if __name__ == '__main__':
-    s = SimpSim()
-
-    # try:
-    #     mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', print)
-    #
-    #     f = Function("num",
-    #                  # there can not be capital letters in name
-    #                  DataFormat("start", "Integer").toCol(),
-    #                  "number",
-    #                  "A number")
-    #     app = Application(
-    #         "testclient_uuid2",
-    #         "testclient_name2",
-    #         "testclient_desc2",
-    #         [],
-    #         [f.toOrderedDict()],
-    #         "token2")
-    #
-    #     mwc.register(app)
-    #
-    #     # wait a bit
-    #     time.sleep(2)
-    #
-    #     # mwc.emitEvent(s, e.toOrderedDict(), 3, 2)
-    #
-    # except KeyboardInterrupt:
-    #     print("EXIT ..")
-    #     mwc.disconnect()
-
-    s.start(100, 100, 2)
-
-    t = threading.Thread(target=test_jobs)
-    t.start()
-
-    iterate()
+        # SimpSim.v.updateCar(self)
