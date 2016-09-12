@@ -2,84 +2,11 @@ from numpy import *
 import time
 import threading
 import random
-from graphics import *
-
-from vfk_msb_py.msb_ws4py_client import MsbWsClient
-from vfk_msb_py.msb_classes import *
+from PyQt4 import QtGui, QtCore
 
 import smartleitstand
+import msb
 
-def iterate():
-    SimpSim.running = True
-    while SimpSim.running:
-        try:
-            work_queue()
-            # print(".")
-            for j in SimpSim.activeRoutes:
-                if not j.finished:
-                    j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
-            time.sleep(SimpSim.simTime)
-        except Exception as e:
-            print("ERROR:", str(e))
-            raise e
-
-
-def pointFromPose(pose):
-    poseVis = pose * Vis.scale
-    return Point(poseVis[0], poseVis[1])
-
-# class Vis(object):
-#     """Visualisation of the AGVs and environment"""
-#
-#     scale = 5
-#     carCircles = {}
-#     routeLines = {}
-#     queueText = False
-#     dimensions = array([0, 0])
-#
-#     def open(self, x, y, cars):
-#         Vis.dimensions[0] = x * Vis.scale
-#         Vis.dimensions[1] = y * Vis.scale
-#         Vis.win = GraphWin(
-#             'cloudnav',
-#             width = Vis.dimensions[0],
-#             height = Vis.dimensions[1]
-#         )
-#         for car in cars:
-#             Vis.carCircles[car.id] = Circle(pointFromPose(car.pose), Vis.scale)
-#             Vis.carCircles[car.id].draw(Vis.win)
-#             Vis.carCircles[car.id].setFill('green')
-#
-#     def updateCar(self, car):
-#         if car:
-#             poseVis = car.pose * Vis.scale
-#             dx = poseVis[0] - Vis.carCircles[car.id].getCenter().x
-#             dy = poseVis[1] - Vis.carCircles[car.id].getCenter().y
-#             Vis.carCircles[car.id].move(dx=dx, dy=dy)
-#
-#     def updateRoute(self, route):
-#         if route:
-#             if route.id not in Vis.routeLines.keys():
-#                 Vis.routeLines[route.id] = Line(pointFromPose(route.start), pointFromPose(route.goal))
-#                 Vis.routeLines[route.id].setFill('red')
-#                 Vis.routeLines[route.id].setArrow('last')
-#                 Vis.routeLines[route.id].draw(Vis.win)
-#             if route.onRoute:
-#                 Vis.routeLines[route.id].setFill('blue')
-#             if route.finished:
-#                 Vis.routeLines[route.id].undraw()
-#
-#     def updateQueue(self, queue):
-#         if not Vis.queueText:
-#             Vis.queueText = Text(
-#                 Point(Vis.scale * 10, Vis.dimensions[1] / 2 + Vis.scale),
-#                 ""
-#             )
-#             Vis.queueText.draw(Vis.win)
-#             Vis.queueText.setSize(8)
-#         Vis.queueText.setText("\n".join(
-#             [r.to_string() for r in queue]
-#         ))
 
 
 def work_queue():
@@ -92,32 +19,37 @@ def work_queue():
     if routeTodo:
         routeTodo.assign_car(smartleitstand.which_car(freeCars, routeTodo, []))
         SimpSim.activeRoutes.append(routeTodo)
-        # SimpSim.v.updateQueue(SimpSim.queue)
+        # SimpSim.v.update_queue(SimpSim.queue)
 
-class SimpSim(object):
+
+class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
 
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = 50
+    driveSpeed = 10
     simTime = .01
     running = False
-    # v = Vis()
 
-    def __init__(self):
+    def __init__(self, parent=None):
+        QtCore.QThread.__init__(self, parent)
         print("init Simulation")
+
+        msb.Msb(self)
 
         self.area = zeros([1])
         self.number_agvs = 1
 
-    def start(self, width, height, number_agvs):
+    def run(self):
+        self.iterate()
+
+    def start_sim(self, width, height, number_agvs):
         self.area = zeros([width, height])
         self.number_agvs = number_agvs
         for i in range(self.number_agvs):
             SimpSim.cars.append(Car(self))
-        # SimpSim.v.open(width, height, SimpSim.cars)
-        threading.Thread(target=iterate).start()
+        self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width, height, SimpSim.cars)
 
     def stop(self):
         SimpSim.running = False
@@ -125,11 +57,26 @@ class SimpSim(object):
     def new_job(self, a, b):
         SimpSim.queue.append(Route(a, b, False, self))
 
+    def iterate(self):
+        SimpSim.running = True
+        while SimpSim.running:
+            try:
+                work_queue()
+                # print(".")
+                for j in SimpSim.activeRoutes:
+                    if not j.finished:
+                        j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
+                self.sleep(SimpSim.simTime)
+            except Exception as e:
+                print("ERROR:", str(e))
+                raise e
+
 
 def get_distance(a, b):
     assert a.size is 2, "A point needs to have two coordinates"
     assert b.size is 2, "B point needs to have two coordinates"
     return linalg.norm(a - b)
+
 
 class Route(object):
     """a route to be simulated"""
@@ -157,7 +104,6 @@ class Route(object):
 
         self.finished = False
 
-
         print("Created route with id", str(self.id), "distance:", self.distance)
 
     def assign_car(self, car):
@@ -171,7 +117,7 @@ class Route(object):
             self.preRemaining = self.preDistance
 
     def new_step(self, stepSize):
-        if not self.onRoute: # on way to start
+        if not self.onRoute:  # on way to start
             self.car.setPose(
                 stepSize * self.preVector /
                 self.preDistance +
@@ -185,7 +131,7 @@ class Route(object):
                 self.car.setPose(self.start)
                 self.preRemaining = 0
                 print(self.to_string(), "reached Start")
-        else: # on route
+        else:  # on route
             self.car.setPose(
                 stepSize * self.vector /
                 self.distance +
@@ -201,10 +147,11 @@ class Route(object):
                 self.finished = True
                 print(self.to_string(), "reached Goal")
 
-        # SimpSim.v.updateRoute(self)
+                # SimpSim.v.update_route(self)
 
     def to_string(self):
         return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))
+
 
 class Car(object):
     """an AGV to be simulated"""
@@ -229,4 +176,4 @@ class Car(object):
 
     def setPose(self, pose):
         self.pose = pose
-        # SimpSim.v.updateCar(self)
+        self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
