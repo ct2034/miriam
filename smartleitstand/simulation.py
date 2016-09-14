@@ -27,8 +27,8 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = .5
-    simTime = .01
+    driveSpeed = .2
+    simTime = .1
     running = False
 
     def __init__(self, msb_select: bool, parent=None):
@@ -147,7 +147,7 @@ class Route(object):
                 self.finished = True
                 print(self.to_string(), "reached Goal")
 
-                # SimpSim.v.update_route(self)
+        self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
 
     def to_string(self):
         return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))
