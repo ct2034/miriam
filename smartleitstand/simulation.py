@@ -8,7 +8,6 @@ import smartleitstand
 import msb
 
 
-
 def work_queue():
     freeCars = []
     routeTodo = False
@@ -28,15 +27,16 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = 10
+    driveSpeed = .5
     simTime = .01
     running = False
 
-    def __init__(self, parent=None):
+    def __init__(self, msb_select: bool, parent=None):
         QtCore.QThread.__init__(self, parent)
         print("init Simulation")
 
-        msb.Msb(self)
+        if msb_select:
+            msb.Msb(self)
 
         self.area = zeros([1])
         self.number_agvs = 1

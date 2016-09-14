@@ -1,14 +1,15 @@
 from numpy import *
-import time
-import threading
-import random
-import sys
+import simulation
 from PyQt4 import QtGui, QtCore
 
+green = QtGui.QColor(10, 200, 10, 127)
+blue = QtGui.QColor(10, 10, 200, 127)
+red = QtGui.QColor(200, 10, 10, 127)
+dark_grey = color = QtGui.QColor(10, 10, 10, 127)
 
 def pointFromPose(pose):
     poseVis = pose * Vis.scale
-    print(str(poseVis))
+    # print(str(poseVis))
     return QtCore.QPoint(poseVis[0], poseVis[1])
 
 
@@ -31,8 +32,17 @@ class Vis(QtGui.QWidget):
         self.connect(Vis.simThread, QtCore.SIGNAL("update_car(PyQt_PyObject)"), self.update_car)
         print("connected")
 
+    def brush_for_car(self, car):
+        if not car.route:
+            brush = QtGui.QBrush(green)
+        elif not car.route.onRoute:
+            brush = QtGui.QBrush(blue)
+        elif car.route.onRoute:
+            brush = QtGui.QBrush(red)
+        return brush
+
     def open(self, x, y, cars):
-        print ("open")
+        print("open")
         margin = 20
         width = x * Vis.scale
         height = y * Vis.scale
@@ -41,8 +51,7 @@ class Vis(QtGui.QWidget):
         scene = QtGui.QGraphicsScene()
 
         field = QtGui.QGraphicsRectItem(0, 0, width, height)
-        color = QtGui.QColor(10, 10, 10, 127) #dark grey
-        brush = QtGui.QBrush(color)
+        brush = QtGui.QBrush(dark_grey)
         field.setBrush(brush)
         scene.addItem(field)
 
@@ -50,8 +59,8 @@ class Vis(QtGui.QWidget):
             Vis.carCircles[car.id] = QtGui.QGraphicsEllipseItem(0, 0, Vis.scale, Vis.scale)
             Vis.carCircles[car.id].setPos(pointFromPose(car.pose))
             scene.addItem(Vis.carCircles[car.id])
-            color = QtGui.QColor(10, 200, 10, 127) #green
-            brush = QtGui.QBrush(color)
+            brush = self.brush_for_car(car)
+
             Vis.carCircles[car.id].setBrush(brush)
 
         view.setScene(scene)
@@ -62,9 +71,8 @@ class Vis(QtGui.QWidget):
     def update_car(self, car):
         if car:
             Vis.carCircles[car.id].setPos(pointFromPose(car.pose))
-            print(Vis.carCircles[car.id].pos().x())
-            color = QtGui.QColor(200, 10, 10, 127) #red
-            brush = QtGui.QBrush(color)
+            # print(Vis.carCircles[car.id].pos().x())
+            brush = self.brush_for_car(car)
             Vis.carCircles[car.id].setBrush(brush)
 
     def update_route(self, route):
