@@ -88,6 +88,17 @@ def distance(a, b):
     return linalg.norm(array(a) - array(b))
 
 
+def path_length(path):
+    """Path length calculation (for eval only)"""
+    previous = False
+    l = 0
+    for p in path:
+        if previous:
+            l += distance(p, previous)
+        previous = p
+    return l
+
+
 def min_f_open(open, f_score):
     current_min_val = Inf
     current_min_index = 0

@@ -1,12 +1,12 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from astar import astar
+from astar import astar, path_length
 
 if __name__ == "__main__":
     print("main ...")
 
-    map = abs(np.random.rand(8, 8)*100)
+    map = abs(np.random.rand(8, 8)*.5)
     map[2,4] = -1
     map[3,4] = -1
     map[4,4] = -1
@@ -23,6 +23,7 @@ if __name__ == "__main__":
     #  0      7
 
     path = astar((1, 1), (6, 6), map)
+    print("length: ", path_length(path))  # 8.24 optimal for example (1,1) -> (6,6) with wall
 
     fig, ax = plt.subplots()
 
