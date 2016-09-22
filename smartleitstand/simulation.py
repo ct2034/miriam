@@ -35,6 +35,7 @@ class SimpSim(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         print("init Simulation")
 
+        self.msb_select = msb_select
         if msb_select:
             msb.Msb(self)
 
@@ -104,7 +105,12 @@ class Route(object):
 
         self.finished = False
 
-        print("Created route with id", str(self.id), "distance:", self.distance)
+        print(
+            "Created route with id",
+            str(self.id),
+            "distance:",
+            self.distance
+        )
 
     def assign_car(self, car):
         self.car = car
@@ -115,6 +121,10 @@ class Route(object):
             self.preVector = self.start - car.pose
             self.preDistance = linalg.norm(self.preVector)
             self.preRemaining = self.preDistance
+
+            if self.sim.msb_select:
+                data = {"agvId": self.car.id, "jobId": self.id}
+                msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eAGVAssignment, data=data)
 
     def new_step(self, stepSize):
         if not self.onRoute:  # on way to start
@@ -146,8 +156,13 @@ class Route(object):
                 self.remaining = 0
                 self.finished = True
                 print(self.to_string(), "reached Goal")
+                if self.sim.msb_select:
+                    msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
 
         self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
+        if self.sim.msb_select:
+            data = {"id": self.car.id, "x": self.car.pose[0], "y": self.car.pose[1]}
+            msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.ePose, data=data)
 
     def to_string(self):
         return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))
