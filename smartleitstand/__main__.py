@@ -32,7 +32,7 @@ if __name__ == '__main__':
     vis = False
 
     # sim
-    # msb = True
+    msb = True
     simThread = SimpSim(msb)
     simThread.start()
 

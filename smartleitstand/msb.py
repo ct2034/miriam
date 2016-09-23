@@ -6,14 +6,18 @@ from vfk_msb_py.msb_ws4py_client import MsbWsClient
 from vfk_msb_py.msb_classes import *
 # from vfk_msb_py.msb_communicate import *
 
+
 def callback(m):
-    print(m)
+    if "NIO" in str(m):
+        print(m)
+
 
 def callback_start(message_dict):
     print("start sim")
     args = message_dict['functionParameters'][0]['value']
     wait_for_sim()
     Msb.s.start_sim(args['x'], args['y'], args['n_agvs'])
+
 
 def callback_job(message_dict):
     args = message_dict['functionParameters'][0]['value']
@@ -24,14 +28,17 @@ def callback_job(message_dict):
         array([args['goal_x'], args['goal_y']])
     )
 
+
 def callback_stop(message_dict):
     print("stop sim")
     wait_for_sim()
     Msb.s.stop()
 
+
 def wait_for_sim():
     while not Msb.s:
         time.sleep(.1)
+
 
 class Msb():
     s = False
@@ -40,16 +47,16 @@ class Msb():
         Msb.s = s
         print("s: " + str(s))
 
-        mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
+        Msb.mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
         time.sleep(.1)
 
-        #testing
+        # testing
         # s.new_job(
         #     array([1, 1]),
         #     array([20, 3])
         # )
 
-        ePose = Event(
+        Msb.ePose = Event(
             eventId="Pose",
             name='Pose',
             description='The Pose of an AGV',
@@ -61,13 +68,24 @@ class Msb():
                 ]
             )
         )
-        eReached = Event(
+        Msb.eReached = Event(
             eventId="Reached",
             name="Reached",
             description="An AGV has reached a goal",
             dataFormat=DataFormat(doc_type="Integer")
         )
-        fStart = Function(
+        Msb.eAGVAssignment = Event(
+            eventId="AGVAssignment",
+            name="AGVAssignment",
+            description="A Job was assigned to an AGV",
+            dataFormat=ComplexDataFormat(
+                properties=[
+                    DataFormat("agvId", "Integer"),
+                    DataFormat("jobId", "Integer")
+                ]
+            )
+        )
+        Msb.fStart = Function(
             functionId="Start",
             name="Start",
             description="Start the Simulation",
@@ -80,7 +98,7 @@ class Msb():
             ),
             callback=callback_start
         )
-        fJob = Function(
+        Msb.fJob = Function(
             functionId="Job",
             name="Job",
             description="Job to Simulate",
@@ -95,19 +113,19 @@ class Msb():
             ),
             callback=callback_job
         )
-        fStop = Function(
+        Msb.fStop = Function(
             functionId="Stop",
             name="Stop",
             description="Stop the Simulation",
             callback=callback_stop
         )
-        application = Application(
+        Msb.application = Application(
             uuid="3785b920-3777-43ad-9199-b5362d9ef4b5",
             token="b5362d9ef4b5",
             name="AGV sim",
             description="Simulation of AGVs",
-            events=[ePose, eReached],
-            functions=[fStart, fJob, fStop]
+            events=[Msb.ePose, Msb.eReached, Msb.eAGVAssignment],
+            functions=[Msb.fStart, Msb.fJob, Msb.fStop]
         )
 
-        mwc.register(application)
+        Msb.mwc.register(Msb.application)
