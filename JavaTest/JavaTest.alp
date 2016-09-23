@@ -4,7 +4,7 @@
 	         AnyLogic Project File 
 *************************************************	         
 -->
-<AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="7.3.4.201605201237" AlpVersion="7.3.3">
+<AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="7.3.4.201605201443" AlpVersion="7.3.3">
 <Model>
 	<Id>1468521131728</Id>
 	<Name><![CDATA[JavaTest]]></Name>
@@ -18,14 +18,6 @@
 			<Name><![CDATA[Main]]></Name>
 			<AdditionalClassCode><![CDATA[ClientHandler handler;
 boolean connected = false;
-
-/*
-public class FunctionContainer{
-	public void logThis(@FunctionParam(name = "to_log")String in) {
-		System.out.println(">> logging: '" + in + "'");
-	}
-}
-*/
 ]]></AdditionalClassCode>
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
@@ -69,7 +61,7 @@ Thread thread = new Thread(new Runnable() {
 			
 			Class<?> dataType = QueueConf.class;
 			
-			//handler.addEvent(smartObject, "NUMBER", "number", "A number", dataType);
+			handler.addEvent(smartObject, "NUMBER", "number", "A number", dataType);
 			handler.addEvent(smartObject, "CONFIG", "config", "A Configuration", dataType);
 
 			FunctionContainer fc = new FunctionContainer(getEmbeddedObjects());
@@ -92,10 +84,7 @@ Thread thread = new Thread(new Runnable() {
 			System.out.println(e.getMessage());
 		}		
 	}	
-	
-//	public void logThis(@FunctionParam(name = "to_log")String in) {
-//	System.out.println(">> logging: '" + in + "'");
-//	}
+
 });
 thread.start();
 
@@ -103,40 +92,40 @@ thread.start();
 
 //System.out.println("Config Test!");
 
-Thread thread2 = new Thread(new Runnable() {
+//Thread thread2 = new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-				try{
-					handler = factory.getClientHandler("ws://localhost:8085");
+//			@Override
+//			public void run() {
+//				try{
+//					handler = factory.getClientHandler("ws://localhost:8085");
 					//Random rand = new Random();
 					
-					while (true) {
+//					while (true) {
 					
-						Thread.sleep(3000);
-						try {		
+//						Thread.sleep(3000);
+//						try {		
 										
-							List<Object> list = getEmbeddedObjects();
-							QueueConf qc = new QueueConf(queue.getName(),21,true,true);
+//							List<Object> list = getEmbeddedObjects();
+//							QueueConf qc = new QueueConf(queue.getName(),21,true,true);
 							
-							if(connected) handler.publish("CONFIG", qc);
+//							if(connected) handler.publish("CONFIG", qc);
 							
 						//	for(int i =0; i< list.size();i++){
 						//		System.out.println("Obj. "+list.get(i).toString());
 						//	}					
 
-						} catch (Exception e) {
-							System.out.println("Exception: "+ e.toString());
-							e.printStackTrace();
-						}
-					}
-				} catch (Exception e) {
-					System.out.println("Exception: "+ e.toString());
-				}
-			}
-		});
+//						} catch (Exception e) {
+//							System.out.println("Exception: "+ e.toString());
+//							e.printStackTrace();
+//						}
+//					}
+//				} catch (Exception e) {
+//					System.out.println("Exception: "+ e.toString());
+//				}
+//			}
+//		});
 
-		thread2.start();	
+//		thread2.start();	
 	]]></StartupCode>
 			<Generic>false</Generic>
 			<GenericParameter>
@@ -314,72 +303,6 @@ Thread thread2 = new Thread(new Runnable() {
 					<Points>
 						<Point><X>320</X><Y>170</Y></Point>
 						<Point><X>280</X><Y>170</Y></Point>
-					</Points>
-				</Connector>
-				<Connector>
-					<Id>1471255361244</Id>
-					<Name><![CDATA[connector3]]></Name>
-					<X>120</X><Y>360</Y>
-					<Label><X>10</X><Y>0</Y></Label>
-					<PublicFlag>false</PublicFlag>
-					<PresentationFlag>true</PresentationFlag>
-					<ShowLabel>false</ShowLabel>
-					<SourceEmbeddedObjectReference>
-						<PackageName><![CDATA[javatest]]></PackageName>
-						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[pedSource]]></ItemName>
-					</SourceEmbeddedObjectReference>
-					<SourceConnectableItemReference>
-						<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-						<ClassName><![CDATA[PedSource]]></ClassName>
-						<ItemName><![CDATA[out]]></ItemName>
-					</SourceConnectableItemReference>
-					<TargetEmbeddedObjectReference>
-						<PackageName><![CDATA[javatest]]></PackageName>
-						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[pedChangeGround]]></ItemName>
-					</TargetEmbeddedObjectReference>
-					<TargetConnectableItemReference>
-						<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-						<ClassName><![CDATA[PedChangeGround]]></ClassName>
-						<ItemName><![CDATA[in]]></ItemName>
-					</TargetConnectableItemReference>
-					<Points>
-						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>110</X><Y>-10</Y></Point>
-					</Points>
-				</Connector>
-				<Connector>
-					<Id>1471255378106</Id>
-					<Name><![CDATA[connector4]]></Name>
-					<X>370</X><Y>370</Y>
-					<Label><X>10</X><Y>0</Y></Label>
-					<PublicFlag>false</PublicFlag>
-					<PresentationFlag>true</PresentationFlag>
-					<ShowLabel>false</ShowLabel>
-					<SourceEmbeddedObjectReference>
-						<PackageName><![CDATA[javatest]]></PackageName>
-						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[pedGoTo]]></ItemName>
-					</SourceEmbeddedObjectReference>
-					<SourceConnectableItemReference>
-						<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-						<ClassName><![CDATA[PedGoTo]]></ClassName>
-						<ItemName><![CDATA[in]]></ItemName>
-					</SourceConnectableItemReference>
-					<TargetEmbeddedObjectReference>
-						<PackageName><![CDATA[javatest]]></PackageName>
-						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[pedChangeGround]]></ItemName>
-					</TargetEmbeddedObjectReference>
-					<TargetConnectableItemReference>
-						<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-						<ClassName><![CDATA[PedChangeGround]]></ClassName>
-						<ItemName><![CDATA[out]]></ItemName>
-					</TargetConnectableItemReference>
-					<Points>
-						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>-100</X><Y>-20</Y></Point>
 					</Points>
 				</Connector>
 			</Connectors>
@@ -713,9 +636,9 @@ Thread thread2 = new Thread(new Runnable() {
 	Random rand = new Random();
 
 	int x = rand.nextInt() ;
-/*	System.out.println("PRINT - x: "+x);
+	System.out.println("EMIT - x: "+x);
 	if(connected) handler.publish("NUMBER", x);
-*/
+
 } catch (Exception e) {
 	System.out.println("Exception: "+ e.toString());
 	e.printStackTrace();
@@ -912,354 +835,6 @@ Thread thread2 = new Thread(new Runnable() {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[destroyEntity]]></Name>
-						</Parameter>
-					</Parameters>
-					<ReplicationFlag>false</ReplicationFlag>
-					<Replication Class="CodeValue">
-						<Code><![CDATA[100]]></Code>
-					</Replication>
-					<CollectionType>ARRAY_LIST_BASED</CollectionType>
-					<InitialSpeedCode Class="CodeUnitValue">
-						<Code><![CDATA[10]]></Code>
-						<Unit Class="SpeedUnits"><![CDATA[MPS]]></Unit>
-					</InitialSpeedCode>
-					<InitialLocationType>AT_ANIMATION_POSITION</InitialLocationType>
-					<XCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</XCode>
-					<YCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</YCode>
-					<ZCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</ZCode>
-					<ColumnCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</ColumnCode>
-					<RowCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</RowCode>
-					<LatitudeCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</LatitudeCode>
-					<LongitudeCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</LongitudeCode>
-					<LocationNameCode Class="CodeValue">
-						<Code><![CDATA[""]]></Code>
-					</LocationNameCode>
-					<InitializationType>SPECIFIED_NUMBER</InitializationType>
-					<InitializationDatabaseTableQuery>
-						<TableReference>
-						</TableReference>
-					</InitializationDatabaseTableQuery>
-					<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
-					<QuantityColumn>
-					</QuantityColumn>
-				</EmbeddedObject>
-				<EmbeddedObject>
-					<Id>1471255346950</Id>
-					<Name><![CDATA[pedChangeGround]]></Name>
-					<X>230</X><Y>340</Y>
-					<Label><X>-50</X><Y>-25</Y></Label>
-					<PublicFlag>false</PublicFlag>
-					<PresentationFlag>true</PresentationFlag>
-					<ShowLabel>true</ShowLabel>
-					<ActiveObjectClass>
-						<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-						<ClassName><![CDATA[PedChangeGround]]></ClassName>
-					</ActiveObjectClass>
-					<GenericParameterSubstitute>
-						<GenericParameterSubstituteReference>
-							<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-							<ClassName><![CDATA[PedChangeGround]]></ClassName>
-							<ItemName><![CDATA[1412464601134]]></ItemName>
-						</GenericParameterSubstituteReference>
-					</GenericParameterSubstitute>
-					<Parameters>
-						<Parameter>
-							<Name><![CDATA[exitLine]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[entryLine]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[reachTolerance]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onEnter]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onExitGround]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onEnterGround]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onCancel]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onRemove]]></Name>
-						</Parameter>
-					</Parameters>
-					<ReplicationFlag>false</ReplicationFlag>
-					<Replication Class="CodeValue">
-						<Code><![CDATA[100]]></Code>
-					</Replication>
-					<CollectionType>ARRAY_LIST_BASED</CollectionType>
-					<InitialSpeedCode Class="CodeUnitValue">
-						<Code><![CDATA[10]]></Code>
-						<Unit Class="SpeedUnits"><![CDATA[MPS]]></Unit>
-					</InitialSpeedCode>
-					<InitialLocationType>AT_ANIMATION_POSITION</InitialLocationType>
-					<XCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</XCode>
-					<YCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</YCode>
-					<ZCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</ZCode>
-					<ColumnCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</ColumnCode>
-					<RowCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</RowCode>
-					<LatitudeCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</LatitudeCode>
-					<LongitudeCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</LongitudeCode>
-					<LocationNameCode Class="CodeValue">
-						<Code><![CDATA[""]]></Code>
-					</LocationNameCode>
-					<InitializationType>SPECIFIED_NUMBER</InitializationType>
-					<InitializationDatabaseTableQuery>
-						<TableReference>
-						</TableReference>
-					</InitializationDatabaseTableQuery>
-					<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
-					<QuantityColumn>
-					</QuantityColumn>
-				</EmbeddedObject>
-				<EmbeddedObject>
-					<Id>1471255351384</Id>
-					<Name><![CDATA[pedSource]]></Name>
-					<X>90</X><Y>360</Y>
-					<Label><X>-20</X><Y>-35</Y></Label>
-					<PublicFlag>false</PublicFlag>
-					<PresentationFlag>true</PresentationFlag>
-					<ShowLabel>true</ShowLabel>
-					<ActiveObjectClass>
-						<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-						<ClassName><![CDATA[PedSource]]></ClassName>
-					</ActiveObjectClass>
-					<GenericParameterSubstitute>
-						<GenericParameterSubstituteReference>
-							<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-							<ClassName><![CDATA[PedSource]]></ClassName>
-							<ItemName><![CDATA[1412464601074]]></ItemName>
-						</GenericParameterSubstituteReference>
-					</GenericParameterSubstitute>
-					<Parameters>
-						<Parameter>
-							<Name><![CDATA[locationType]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationLine]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[ground]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationX]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationY]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationArea]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[arrivalType]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[rate]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[interarrivalTime]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[rateSchedule]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[modifyRate]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[rateExpression]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[arrivalSchedule]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[limitArrivals]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[maxArrivals]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[newPed]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[comfortableSpeed]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[initialSpeed]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[diameter]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[createGroups]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[groupSize]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[groupMemberInterarrivalTime]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[groupFormation]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[serviceGroupBehavior]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[solidCancelling]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[addToCustomPopulation]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[population]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onExit]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onBeginGrouping]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onEndGrouping]]></Name>
-						</Parameter>
-					</Parameters>
-					<ReplicationFlag>false</ReplicationFlag>
-					<Replication Class="CodeValue">
-						<Code><![CDATA[100]]></Code>
-					</Replication>
-					<CollectionType>ARRAY_LIST_BASED</CollectionType>
-					<InitialSpeedCode Class="CodeUnitValue">
-						<Code><![CDATA[10]]></Code>
-						<Unit Class="SpeedUnits"><![CDATA[MPS]]></Unit>
-					</InitialSpeedCode>
-					<InitialLocationType>AT_ANIMATION_POSITION</InitialLocationType>
-					<XCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</XCode>
-					<YCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</YCode>
-					<ZCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</ZCode>
-					<ColumnCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</ColumnCode>
-					<RowCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</RowCode>
-					<LatitudeCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</LatitudeCode>
-					<LongitudeCode Class="CodeValue">
-						<Code><![CDATA[0]]></Code>
-					</LongitudeCode>
-					<LocationNameCode Class="CodeValue">
-						<Code><![CDATA[""]]></Code>
-					</LocationNameCode>
-					<InitializationType>SPECIFIED_NUMBER</InitializationType>
-					<InitializationDatabaseTableQuery>
-						<TableReference>
-						</TableReference>
-					</InitializationDatabaseTableQuery>
-					<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
-					<QuantityColumn>
-					</QuantityColumn>
-				</EmbeddedObject>
-				<EmbeddedObject>
-					<Id>1471255375158</Id>
-					<Name><![CDATA[pedGoTo]]></Name>
-					<X>370</X><Y>360</Y>
-					<Label><X>-15</X><Y>-25</Y></Label>
-					<PublicFlag>false</PublicFlag>
-					<PresentationFlag>true</PresentationFlag>
-					<ShowLabel>true</ShowLabel>
-					<ActiveObjectClass>
-						<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-						<ClassName><![CDATA[PedGoTo]]></ClassName>
-					</ActiveObjectClass>
-					<GenericParameterSubstitute>
-						<GenericParameterSubstituteReference>
-							<PackageName><![CDATA[com.anylogic.libraries.pedestrian]]></PackageName>
-							<ClassName><![CDATA[PedGoTo]]></ClassName>
-							<ItemName><![CDATA[1412464601103]]></ItemName>
-						</GenericParameterSubstituteReference>
-					</GenericParameterSubstitute>
-					<Parameters>
-						<Parameter>
-							<Name><![CDATA[mode]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationType]]></Name>
-							<Value Class="CodeValue">
-								<Code><![CDATA[self.LOCATION_POINT]]></Code>
-							</Value>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationLine]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationX]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationY]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[locationArea]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[route]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[walkInReverseDirection]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[reachTolerance]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onEnter]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onExit]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onCancel]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[onRemove]]></Name>
 						</Parameter>
 					</Parameters>
 					<ReplicationFlag>false</ReplicationFlag>
@@ -1728,7 +1303,7 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 			<Name><![CDATA[FunctionContainer]]></Name>
 			<Text><![CDATA[/**
  * FunctionContainer
- */	
+ */
 
 import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionParam;
 import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionHandler;
@@ -1739,19 +1314,13 @@ public class FunctionContainer implements Serializable {
 
 	static FunctionContainer fc;
 	List<Object> list;
-    /**
-     * Default constructor
-     */
+
     public FunctionContainer(List<Object> l) {
 		System.out.println("new FunctionContainer");
 		fc = this;
 		list = l;
     }
     
-	/**
-	 * This number is here for model snapshot storing purpose<br>
-	 * It needs to be changed when this class gets changed
-	 */ 
 	private static final long serialVersionUID = 1L;
 
 	public void logThis(@FunctionParam(name = "to_log")String in) {
@@ -1763,7 +1332,7 @@ public class FunctionContainer implements Serializable {
 		}
 	}
 	
-	public void configThis(@FunctionParam(name = "to_config")QueueConf in) {
+	/*public void configThis(@FunctionParam(name = "to_config")QueueConf in) {
 		try {
 			System.out.println("Queue Name: " + in.name);
 			System.out.println("Queue capacity: " + in.capacity);
@@ -1792,7 +1361,7 @@ public class FunctionContainer implements Serializable {
 		}catch (Exception e) {
 			System.out.println("FunctionContainer.configThis: " + e.getMessage() + " fc==null->" + (fc==null) + " in==null->" + (in==null));
 		}
-	}
+	}*/
 
 }]]></Text>
 		</JavaClass>
