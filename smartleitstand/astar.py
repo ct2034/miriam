@@ -1,10 +1,8 @@
 from numpy import *
 
 
-# source: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
-
-
 def astar(start, goal, map):
+    """based on: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode"""
     # The set of nodes already evaluated.
     closed = []
     # The set of currently discovered nodes still to be evaluated.
@@ -63,13 +61,14 @@ def reconstruct_path(came_from, current):
 
 def get_children(current, grid):
     __children = []
+    # for d in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
     for d in [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]:
         checking = array(current) + array(d)
         if (
-                            (checking[0] < grid.shape[0]) &  # bounds ->
-                            (checking[1] < grid.shape[1]) &  # bounds ->|
-                        (checking[0] >= 0) &  # bounds  <-
-                    (checking[1] >= 0)  # bounds |<-
+            (checking[0] < grid.shape[0]) &  # bounds ->
+            (checking[1] < grid.shape[1]) &  # bounds ->|
+            (checking[0] >= 0) &  # bounds  <-
+            (checking[1] >= 0)  # bounds |<-
         ):
             if grid[tuple(checking)] >= 0:  # free
                 __children.append(tuple(checking))
@@ -85,7 +84,7 @@ def cost(a, b, grid):
 
 
 def distance(a, b):
-    return linalg.norm(array(a) - array(b))
+    return linalg.norm(array(a, dtype=float) - array(b, dtype=float))
 
 
 def path_length(path):

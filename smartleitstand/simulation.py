@@ -27,7 +27,7 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = .2
+    driveSpeed = .02
     simTime = .1
     running = False
 
