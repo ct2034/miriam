@@ -17,7 +17,8 @@
 			<Id>1473765357186</Id>
 			<Name><![CDATA[Main]]></Name>
 			<AdditionalClassCode><![CDATA[ClientHandler handler;
-boolean connected = false;]]></AdditionalClassCode>
+boolean connected = false;
+//static Logger LOG = LoggerFactory.getLogger(Main.class);]]></AdditionalClassCode>
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
 			<IconTopGroupPersistent>true</IconTopGroupPersistent>
@@ -28,7 +29,9 @@ import de.fhg.ipa.vfk.smartobjectmgmt.client.api.Configuration;
 import de.fhg.ipa.vfk.smartobjectmgmt.client.api.ParameterValue;
 import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionParam;
 import java.io.Console;
-import productionorders.FunctionContainer;]]></Import>
+import productionorders.FunctionContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;]]></Import>
 			<StartupCode><![CDATA[System.out.println("Hello Anylogic!");
 String version = System.getProperty("java.version");
 System.out.println("Java version: " + version);
@@ -54,11 +57,56 @@ Thread thread = new Thread(new Runnable() {
 			
 			handler.addEvent(smartObject, "START", "Start", "Start the Simulation", StartData.class);
 			handler.addEvent(smartObject, "JOB", "Job", "A new job", Job.class);
+			handler.addEvent(smartObject, "STOP", "Stop", "Stop the Simulation", int.class);
 
 			FunctionContainer fc = new FunctionContainer(getEmbeddedObjects());
-			fc.setMain(main);
-			handler.addFunction(smartObject, "/FunctionContainer/logThis", "to_log", "Log This", new String[0], fc, FunctionContainer.class.getMethod("logThis", String.class));
-		
+			
+			System.out.println("1"+fc);
+			
+			//fc.setMain(main);
+			System.out.println("2"+fc);
+			
+			
+			handler.addFunction(
+				smartObject, 
+				"/FunctionContainer/logThis", 
+				"to_log", 
+				"Log This", 
+				new String[0], 
+				fc, 
+				FunctionContainer.class.getMethod("logThis", String.class));
+			
+			// agvAssignment ---------------------------------------------------------
+			handler.addFunction(
+				smartObject, 
+				"/FunctionContainer/agvAssignment", 
+				"agvAssignment", "agvAssignment", 
+				new String[0], 
+				fc, 
+				FunctionContainer.class.getMethod("agvAssignment", Integer.class, Integer.class)
+			);
+			
+			// pose ---------------------------------------------------------
+			handler.addFunction(
+				smartObject, 
+				"/FunctionContainer/pose", 
+				"pose", "pose", 
+				new String[0], 
+				fc, 
+				FunctionContainer.class.getMethod("pose", Integer.class, Double.class, Double.class)
+			);
+			
+			// reached ---------------------------------------------------------
+			handler.addFunction(
+				smartObject, 
+				"/FunctionContainer/reached", 
+				"reached", "reached", 
+				new String[0], 
+				fc, 
+				FunctionContainer.class.getMethod("reached", Integer.class)
+			);
+			
+			// register ...
 			handler.register(smartObject);
 			
 			connected = true;
@@ -66,10 +114,13 @@ Thread thread = new Thread(new Runnable() {
 			
 			synchronized (waitLock) {
 				try {
+					System.out.println("."+fc);
 					waitLock.wait();
+					System.out.println(".."+fc);
 				} catch (InterruptedException e) {
+					System.out.println("e"+fc);
+				}
 			}
-		}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}		
@@ -81,7 +132,7 @@ thread.start();
 // START EVENT EMISSION
 try {				
 	while(!connected) { 
-		System.out.println("waiting for msb ...");
+		LOG.info("waiting for msb ...");
 		try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -94,6 +145,13 @@ try {
 	System.out.println("Exception: " + e.toString());
 	e.printStackTrace();
 }]]></StartupCode>
+			<DestroyCode><![CDATA[try {	
+	System.out.println("EMIT - STOP");			
+	if(connected) handler.publish("STOP", 0);
+} catch (Exception e) {
+	System.out.println("Exception: " + e.toString());
+	e.printStackTrace();
+}]]></DestroyCode>
 			<Generic>false</Generic>
 			<GenericParameter>
 				<Id>1473765357185</Id>
@@ -177,7 +235,7 @@ try {
 				<Variable Class="Parameter">
 					<Id>1474629344462</Id>
 					<Name><![CDATA[width]]></Name>
-					<X>20</X><Y>-350</Y>
+					<X>20</X><Y>-340</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -202,7 +260,7 @@ try {
 				<Variable Class="Parameter">
 					<Id>1474629356118</Id>
 					<Name><![CDATA[height]]></Name>
-					<X>20</X><Y>-320</Y>
+					<X>20</X><Y>-310</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -227,7 +285,7 @@ try {
 				<Variable Class="Parameter">
 					<Id>1474629707820</Id>
 					<Name><![CDATA[nAgvs]]></Name>
-					<X>20</X><Y>-290</Y>
+					<X>20</X><Y>-280</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -456,6 +514,10 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[rate]]></Name>
+							<Value Class="CodeUnitValue">
+								<Code><![CDATA[10]]></Code>
+								<Unit Class="RateUnits"><![CDATA[PER_MINUTE]]></Unit>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[interarrivalTime]]></Name>
@@ -489,9 +551,15 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[limitArrivals]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[true]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[maxArrivals]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[10]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[newEntity]]></Name>
@@ -1054,7 +1122,7 @@ try {
 					<Width>1</Width>
 					<Height>1</Height>
 					<Rotation>0.0</Rotation>
-					<FillColor>-8355712</FillColor>
+					<FillColor>2139127936</FillColor>
 					<FillMaterial>null</FillMaterial>
 				</Rectangle>
 				<Rectangle>
@@ -1065,6 +1133,7 @@ try {
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>false</ShowLabel>
+					<Lock>true</Lock>
 					<DrawMode>SHAPE_DRAW_2D3D</DrawMode>
 					<AsObject>true</AsObject>
 					<EmbeddedIcon>false</EmbeddedIcon>
@@ -1073,11 +1142,11 @@ try {
 					<LineWidth>1</LineWidth>
 					<LineColor>-16777216</LineColor>
 					<LineMaterial>null</LineMaterial>
-					<LineStyle>SOLID</LineStyle>
-					<Width>300</Width>
+					<LineStyle>DOTTED</LineStyle>
+					<Width>200</Width>
 					<Height>150</Height>
 					<Rotation>0.0</Rotation>
-					<FillColor>-1</FillColor>
+					<FillColor>1811928832</FillColor>
 					<FillMaterial>null</FillMaterial>
 				</Rectangle>
 				<Text>
@@ -1088,6 +1157,7 @@ try {
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>false</ShowLabel>
+					<Lock>true</Lock>
 					<DrawMode>SHAPE_DRAW_2D</DrawMode>
 					<AsObject>true</AsObject>
 					<EmbeddedIcon>false</EmbeddedIcon>
@@ -1096,8 +1166,8 @@ try {
 					<Color>-16777216</Color>
 					<Text><![CDATA[experiment Parameters]]></Text>
 					<Font>
-						<Name>SansSerif</Name>
-						<Size>10</Size>
+						<Name>Droid Sans</Name>
+						<Size>14</Size>
 						<Style>0</Style>
 					</Font>
 					<Alignment>LEFT</Alignment>
@@ -1253,6 +1323,32 @@ try {
 				<InheritedFromParentAgentType>true</InheritedFromParentAgentType>
 			</ScaleRuler>
 			<ConnectionsId>1473765382619</ConnectionsId>
+			<Variables>
+				<Variable Class="PlainVariable">
+					<Id>1474965187123</Id>
+					<Name><![CDATA[x]]></Name>
+					<X>50</X><Y>40</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[double]]></Type>        
+					</Properties>
+				</Variable>
+				<Variable Class="PlainVariable">
+					<Id>1474965199028</Id>
+					<Name><![CDATA[y]]></Name>
+					<X>50</X><Y>80</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[double]]></Type>        
+					</Properties>
+				</Variable>
+			</Variables>
 			<AgentLinks>
 				<AgentLink>
 					<Id>1473765382619</Id>
@@ -1933,6 +2029,9 @@ try {
 					<ShowLabel>true</ShowLabel>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[Car]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA[null]]></Code>
+						</InitialValue>
 					</Properties>
 				</Variable>
 			</Variables>
@@ -2009,7 +2108,7 @@ try {
 				<Maximized>false</Maximized>
 				<CloseConfirmation>false</CloseConfirmation>
 			</Frame>
-			<CommandLineArguments><![CDATA[]]></CommandLineArguments>
+			<CommandLineArguments><![CDATA[-Dlogback.configurationFile=/tmp/config.xml]]></CommandLineArguments>
 			<InitialSetupCode><![CDATA[if ( getState() == IDLE )
 	run();
 getPresentation().setPresentable( getEngine().getRoot() );]]></InitialSetupCode>
@@ -2165,22 +2264,32 @@ class FunctionContainer implements Serializable {
 		}
 	}
 	
-	public void agvAssignment(@FunctionParam(name="agvID")int agvID, @FunctionParam(name="jobId")int jobID) {
+	public void agvAssignment(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="jobId")Integer jobId) {
+		System.out.println("agvAssignment");
 		for(int i = 0; i<main.orders.size(); i++){
-			if(main.orders[i].jobId == jobID) {
-				main.ordeforforrforforforforforforfors[i].agv = main.cars[agvID]; 
-				break;fofoforforforrfoforforforrfoforforforrfoforforforrforforforr
-			}for
+			if(main.orders.get(i).jobId == jobId) {
+				main.orders.get(i).agv = main.cars.get(agvId); 
+			}
 		}
 	}
 	
-	public void reach
+	public void pose(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="x")Double x, @FunctionParam(name="y")Double y) {
+		System.out.println("pose");
+		Car agv = main.orders.get(agvId).agv; 
+		agv.x = x;
+		agv.y = y;
+		agv.moveTo(x, y);
+	}
 	
-	public void reach
-	
-	public void reached(@FunctionParam(name="jobId")int jobID) {
-			
-		main.jobDelay.stopDelay()
+	public void reached(@FunctionParam(name="jobId")Integer jobId) {
+		System.out.println("reached");
+		for(int i = 0; i<main.orders.size(); i++){
+			if(main.orders.get(i).jobId == jobId) {
+				Car agv = main.orders.get(i).agv; 
+				main.jobDelay.stopDelay(agv);
+				main.orders.get(i).agv = null;
+			}
+		}	
 	}
 
 }
@@ -2275,7 +2384,113 @@ class Job{
     public void setGoal_y(int goal_y) {
         this.goal_y = goal_y;
     }
-}]]></Text>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Text>
 		</JavaClass>
 	</JavaClasses>
     <RequiredLibraryReference>

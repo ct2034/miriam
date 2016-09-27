@@ -16,7 +16,7 @@ def pointFromPose(pose):
 class Vis(QtGui.QWidget):
     """Visualisation of the AGVs and environment"""
 
-    scale = 5
+    scale = False
     carCircles = {}
     routeLines = {}
     queueText = False
@@ -44,6 +44,15 @@ class Vis(QtGui.QWidget):
         return brush
 
     def open(self, x, y, cars):
+        desktop = QtGui.QDesktopWidget()
+        Vis.scale = int(min(
+            desktop.geometry().width() / x,
+            desktop.geometry().height() / y
+        )/1.5)
+        if Vis.scale < 1:
+            Vis.scale = 1
+        print("Vis.scale " + str(Vis.scale))
+
         print("open")
         margin = 20
         width = x * Vis.scale

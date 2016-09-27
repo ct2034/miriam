@@ -27,8 +27,8 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = .02
-    simTime = .1
+    driveSpeed = 2
+    simTime = 10
     running = False
 
     def __init__(self, msb_select: bool, parent=None):
@@ -54,6 +54,10 @@ class SimpSim(QtCore.QThread):
 
     def stop(self):
         SimpSim.running = False
+        self.area = False
+        SimpSim.queue = []
+        SimpSim.activeRoutes = []
+        SimpSim.cars = []
 
     def new_job(self, a, b):
         SimpSim.queue.append(Route(a, b, False, self))
@@ -161,7 +165,8 @@ class Route(object):
 
         self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
         if self.sim.msb_select:
-            data = {"id": self.car.id, "x": self.car.pose[0], "y": self.car.pose[1]}
+            data = {"id": self.car.id, "x": float(self.car.pose[0]), "y": float(self.car.pose[1])}
+            print(data)
             msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.ePose, data=data)
 
     def to_string(self):

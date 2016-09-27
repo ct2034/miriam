@@ -42,7 +42,7 @@ if __name__ == '__main__':
         threading.Thread(target=testing, args=(simThread,)).start()
 
     # vis
-    vis = True
+    # vis = True
     if vis:
         app = QtGui.QApplication(sys.argv)
         window = Vis(simThread=simThread)

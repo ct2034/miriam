@@ -64,8 +64,8 @@ class Msb():
             dataFormat=ComplexDataFormat(
                 properties=[
                     DataFormat("id", "Integer"),
-                    DataFormat("x", "Integer"),
-                    DataFormat("y", "Integer")
+                    DataFormat("x", "Float"),
+                    DataFormat("y", "Float")
                 ]
             )
         )
