@@ -47,7 +47,8 @@ class Msb():
         Msb.s = s
         print("s: " + str(s))
 
-        Msb.mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
+        # Msb.mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
+        Msb.mwc = MsbWsClient('ws://ipa.virtualfortknox.de/msb', callback)
         time.sleep(.1)
 
         # testing

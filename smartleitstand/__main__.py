@@ -37,7 +37,7 @@ if __name__ == '__main__':
     simThread.start()
 
     # test
-    test = True
+    # test = True
     if test:
         threading.Thread(target=testing, args=(simThread,)).start()
 

@@ -2167,16 +2167,10 @@ class FunctionContainer implements Serializable {
 	
 	public void agvAssignment(@FunctionParam(name="agvID")int agvID, @FunctionParam(name="jobId")int jobID) {
 		for(int i = 0; i<main.orders.size(); i++){
-			if(main.orders[i].jobId == jobID) {
-				main.ordeforforrforforforforforforfors[i].agv = main.cars[agvID]; 
-				break;fofoforforforrfoforforforrfoforforforrfoforforforrforforforr
-			}for
+			if(main.orders[i].jobId == jobID) 
+				main.orders[i].agv = main.cars[agvID]; 
 		}
 	}
-	
-	public void reach
-	
-	public void reach
 	
 	public void reached(@FunctionParam(name="jobId")int jobID) {
 			

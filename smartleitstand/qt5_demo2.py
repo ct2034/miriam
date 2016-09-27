@@ -8,6 +8,9 @@ class Window(QWidget):
 
         QWidget.__init__(self, parent)
 
+        desktop = QDesktopWidget()
+        print(desktop.geometry().width())
+
         self.thread = Worker()
 
         label = QLabel(self.tr("Number of stars:"))
