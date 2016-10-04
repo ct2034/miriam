@@ -17,8 +17,7 @@
 			<Id>1473765357186</Id>
 			<Name><![CDATA[Main]]></Name>
 			<AdditionalClassCode><![CDATA[ClientHandler handler;
-boolean connected = false;
-//static Logger LOG = LoggerFactory.getLogger(Main.class);]]></AdditionalClassCode>
+boolean connected = false;]]></AdditionalClassCode>
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
 			<IconTopGroupPersistent>true</IconTopGroupPersistent>
@@ -37,7 +36,7 @@ String version = System.getProperty("java.version");
 System.out.println("Java version: " + version);
 
 Object waitLock = new Object();
-Main main = this;
+final Main main = this;
 
 final ClientWebSocketHandlerFactory factory = ClientWebSocketHandlerFactory.getInstance("./CERTS.trs");
 Thread thread = new Thread(new Runnable() {
@@ -47,19 +46,20 @@ Thread thread = new Thread(new Runnable() {
 
 		try{
 			//handler = factory.getClientHandler("ws://localhost:8085",9999);
-			//handler = factory.getClientHandler("ws://atm.virtualfortknox.de/msb",9999);
-			handler = factory.getClientHandler("ws://ipa.virtualfortknox.de/msb",9999);
+			handler = factory.getClientHandler("ws://atm.virtualfortknox.de/msb",9999);
+			//handler = factory.getClientHandler("ws://ipa.virtualfortknox.de/msb",9999);
 			Application smartObject = new Application();		
-			smartObject.setUuid("AL_TC2");
+			smartObject.setUuid("AL_TC3");
 			smartObject.setName("AnyLogic-TestClient");
 			smartObject.setDescription("Test client");
-			smartObject.setToken("altc2");	
+			smartObject.setToken("secret");	
 			
 			handler.addEvent(smartObject, "START", "Start", "Start the Simulation", StartData.class);
 			handler.addEvent(smartObject, "JOB", "Job", "A new job", Job.class);
 			handler.addEvent(smartObject, "STOP", "Stop", "Stop the Simulation", int.class);
 
 			FunctionContainer fc = new FunctionContainer(getEmbeddedObjects());
+			fc.setMain(main);
 			
 			System.out.println("1"+fc);
 			
@@ -132,7 +132,6 @@ thread.start();
 // START EVENT EMISSION
 try {				
 	while(!connected) { 
-		LOG.info("waiting for msb ...");
 		try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -1349,6 +1348,22 @@ try {
 					</Properties>
 				</Variable>
 			</Variables>
+			<Functions>
+				<Function AccessType="public" StaticFunction="false">
+					<ReturnModificator>RETURNS_VALUE</ReturnModificator>
+					<ReturnType><![CDATA[String]]></ReturnType>
+					<Id>1475587059542</Id>
+					<Name><![CDATA[toString]]></Name>
+					<X>-100</X><Y>50</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Body><![CDATA[return
+	"x = " + x + ", " +
+	"y = " + y;]]></Body>
+				</Function>
+			</Functions>
 			<AgentLinks>
 				<AgentLink>
 					<Id>1473765382619</Id>
@@ -2237,7 +2252,7 @@ import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionPara
 import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionHandler;
 import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionCallback;
 
-class FunctionContainer implements Serializable {
+public class FunctionContainer implements Serializable {
 
 	static FunctionContainer fc;
 	List<Object> list;
@@ -2265,31 +2280,58 @@ class FunctionContainer implements Serializable {
 	}
 	
 	public void agvAssignment(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="jobId")Integer jobId) {
-		System.out.println("agvAssignment");
-		for(int i = 0; i<main.orders.size(); i++){
-			if(main.orders.get(i).jobId == jobId) {
-				main.orders.get(i).agv = main.cars.get(agvId); 
+		try {
+			System.out.println("agvAssignment");
+			for(int i = 0; i<main.orders.size(); i++){
+				if(main.orders.get(i).jobId == jobId) {
+					System.out.println("agvAssignment, car:" + main.cars.get(agvId));
+					System.out.println("agvAssignment, order:" + main.cars.get(agvId));
+					main.orders.get(i).agv = main.cars.get(agvId); 
+				}
 			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
 	public void pose(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="x")Double x, @FunctionParam(name="y")Double y) {
-		System.out.println("pose");
-		Car agv = main.orders.get(agvId).agv; 
-		agv.x = x;
-		agv.y = y;
-		agv.moveTo(x, y);
+		try {
+			System.out.println("pose, y:" + y);
+			//System.out.println("pose, agvId:" + agvId);
+			//System.out.println("pose, main.cars.size():" + main.cars.size());
+			Car agv = main.cars.get(agvId);
+			System.out.println("pose, agv:" + agv);
+			if(agv.x == 0 & agv.y==0) { // new
+				agv.jumpTo(x, y);
+			}
+			else {
+				agv.moveTo(x, y);
+			}
+			
+			agv.x = x;
+			agv.y = y;
+			//System.out.println("pose, main.cars.get(agvId).x:" + main.cars.get(agvId).x);
+			
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void reached(@FunctionParam(name="jobId")Integer jobId) {
-		System.out.println("reached");
-		for(int i = 0; i<main.orders.size(); i++){
-			if(main.orders.get(i).jobId == jobId) {
-				Car agv = main.orders.get(i).agv; 
-				main.jobDelay.stopDelay(agv);
-				main.orders.get(i).agv = null;
+		try {
+			System.out.println("reached");
+			for(int i = 0; i<main.orders.size(); i++){
+				if(main.orders.get(i).jobId == jobId) {
+					main.jobDelay.stopDelay(main.orders.get(i).agv);
+					main.orders.get(i).agv = null;
+				}
 			}
-		}	
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -28,7 +28,7 @@ class SimpSim(QtCore.QThread):
     activeRoutes = []
     cars = []
     driveSpeed = 2
-    simTime = 10
+    simTime = 1
     running = False
 
     def __init__(self, msb_select: bool, parent=None):

@@ -16,7 +16,12 @@ def callback_start(message_dict):
     print("start sim")
     args = message_dict['functionParameters'][0]['value']
     wait_for_sim()
-    Msb.s.start_sim(args['x'], args['y'], args['n_agvs'])
+    try:
+        Msb.s.start_sim(args['x'], args['y'], args['n_agvs'])
+    except KeyError as e:
+        print("error using: ")
+        print(args)
+
 
 
 def callback_job(message_dict):
@@ -47,8 +52,8 @@ class Msb():
         Msb.s = s
         print("s: " + str(s))
 
-        # Msb.mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
-        Msb.mwc = MsbWsClient('ws://ipa.virtualfortknox.de/msb', callback)
+        Msb.mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
+        # Msb.mwc = MsbWsClient('ws://ipa.virtualfortknox.de/msb', callback)
         time.sleep(.1)
 
         # testing
@@ -121,8 +126,8 @@ class Msb():
             callback=callback_stop
         )
         Msb.application = Application(
-            uuid="3785b920-3777-43ad-9199-b5362d9ef4b5",
-            token="b5362d9ef4b5",
+            uuid="3785b920-3777-43ad-9199-b5362d9ef4b6",
+            token="b5362d9ef4b6",
             name="AGV sim",
             description="Simulation of AGVs",
             events=[Msb.ePose, Msb.eReached, Msb.eAGVAssignment],
