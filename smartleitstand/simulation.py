@@ -20,6 +20,10 @@ def work_queue():
         SimpSim.activeRoutes.append(routeTodo)
         # SimpSim.v.update_queue(SimpSim.queue)
 
+def emit_car(msb, car):
+    data = {"id": car.id, "x": float(car.pose[0]), "y": float(car.pose[1])}
+    print(data)
+    msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.ePose, data=data)
 
 class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
@@ -49,7 +53,12 @@ class SimpSim(QtCore.QThread):
         self.area = zeros([width, height])
         self.number_agvs = number_agvs
         for i in range(self.number_agvs):
-            SimpSim.cars.append(Car(self))
+            c = Car(self)
+            SimpSim.cars.append(c)
+            if self.msb_select:
+                emit_car(msb, c)
+
+        SimpSim.running = True
         self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width, height, SimpSim.cars)
 
     def stop(self):
@@ -58,20 +67,21 @@ class SimpSim(QtCore.QThread):
         SimpSim.queue = []
         SimpSim.activeRoutes = []
         SimpSim.cars = []
+        Car.nextId = 0
 
-    def new_job(self, a, b):
-        SimpSim.queue.append(Route(a, b, False, self))
+    def new_job(self, a, b, id):
+        SimpSim.queue.append(Route(a, b, False, id, self))
 
     def iterate(self):
-        SimpSim.running = True
-        while SimpSim.running:
+        while True:
             try:
-                work_queue()
-                # print(".")
-                for j in SimpSim.activeRoutes:
-                    if not j.finished:
-                        j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
-                self.sleep(SimpSim.simTime)
+                if SimpSim.running:
+                    work_queue()
+                    print(".")
+                    for j in SimpSim.activeRoutes:
+                        if not j.finished:
+                            j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
+                    self.sleep(SimpSim.simTime)
             except Exception as e:
                 print("ERROR:", str(e))
                 raise e
@@ -86,13 +96,10 @@ def get_distance(a, b):
 class Route(object):
     """a route to be simulated"""
 
-    nextId = 0
-
-    def __init__(self, start, goal, car, s):
+    def __init__(self, start, goal, car, id, s):
         self.sim = s
 
-        self.id = Route.nextId
-        Route.nextId += 1
+        self.id = id
 
         assert start.__class__ is ndarray, 'Start needs to be a numpy.ndarray'
         self.start = start
@@ -165,9 +172,8 @@ class Route(object):
 
         self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
         if self.sim.msb_select:
-            data = {"id": self.car.id, "x": float(self.car.pose[0]), "y": float(self.car.pose[1])}
-            print(data)
-            msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.ePose, data=data)
+            emit_car(msb, self.car)
+
 
     def to_string(self):
         return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))

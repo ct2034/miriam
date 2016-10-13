@@ -30,7 +30,8 @@ def callback_job(message_dict):
     wait_for_sim()
     Msb.s.new_job(
         array([args['start_x'], args['start_y']]),
-        array([args['goal_x'], args['goal_y']])
+        array([args['goal_x'], args['goal_y']]),
+        args['id']
     )
 
 
@@ -52,8 +53,10 @@ class Msb():
         Msb.s = s
         print("s: " + str(s))
 
-        Msb.mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
+        # Msb.mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
         # Msb.mwc = MsbWsClient('ws://ipa.virtualfortknox.de/msb', callback)
+        Msb.mwc = MsbWsClient('ws://localhost:8085', callback)
+
         time.sleep(.1)
 
         # testing
@@ -127,7 +130,7 @@ class Msb():
         )
         Msb.application = Application(
             uuid="3785b920-3777-43ad-9199-b5362d9ef4b6",
-            token="b5362d9ef4b6",
+                token="b5362d9ef4b6",
             name="AGV sim",
             description="Simulation of AGVs",
             events=[Msb.ePose, Msb.eReached, Msb.eAGVAssignment],

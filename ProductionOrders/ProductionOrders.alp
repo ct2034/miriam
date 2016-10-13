@@ -45,8 +45,8 @@ Thread thread = new Thread(new Runnable() {
 	public void run() {
 
 		try{
-			//handler = factory.getClientHandler("ws://localhost:8085",9999);
-			handler = factory.getClientHandler("ws://atm.virtualfortknox.de/msb",9999);
+			handler = factory.getClientHandler("ws://localhost:8085",9999);
+			//handler = factory.getClientHandler("ws://atm.virtualfortknox.de/msb",9999);
 			//handler = factory.getClientHandler("ws://ipa.virtualfortknox.de/msb",9999);
 			Application smartObject = new Application();		
 			smartObject.setUuid("AL_TC3");
@@ -2281,12 +2281,14 @@ public class FunctionContainer implements Serializable {
 	
 	public void agvAssignment(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="jobId")Integer jobId) {
 		try {
-			System.out.println("agvAssignment");
+			//System.out.println("agvAssignment, agvId: " + agvId + " jobId: " + jobId);
 			for(int i = 0; i<main.orders.size(); i++){
-				if(main.orders.get(i).jobId == jobId) {
-					System.out.println("agvAssignment, car:" + main.cars.get(agvId));
-					System.out.println("agvAssignment, order:" + main.cars.get(agvId));
-					main.orders.get(i).agv = main.cars.get(agvId); 
+				Order o = main.orders.get(i);
+				//System.out.println("agvAssignment, order:" + o);
+				if(o.jobId == jobId) {
+					//System.out.println("agvAssignment, Assign! car:" + main.cars.get(agvId));
+					//System.out.println("agvAssignment, to order:" + o);
+					o.agv = main.cars.get(agvId); 
 				}
 			}
 		}
@@ -2323,9 +2325,10 @@ public class FunctionContainer implements Serializable {
 		try {
 			System.out.println("reached");
 			for(int i = 0; i<main.orders.size(); i++){
-				if(main.orders.get(i).jobId == jobId) {
+				Order o = main.orders.get(i);
+				if(o.jobId == jobId) {
 					main.jobDelay.stopDelay(main.orders.get(i).agv);
-					main.orders.get(i).agv = null;
+					o.agv = null;
 				}
 			}
 		}
