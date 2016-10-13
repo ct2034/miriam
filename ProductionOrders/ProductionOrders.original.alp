@@ -17,7 +17,8 @@
 			<Id>1473765357186</Id>
 			<Name><![CDATA[Main]]></Name>
 			<AdditionalClassCode><![CDATA[ClientHandler handler;
-boolean connected = false;]]></AdditionalClassCode>
+boolean connected = false;
+Random random = new Random();]]></AdditionalClassCode>
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
 			<IconTopGroupPersistent>true</IconTopGroupPersistent>
@@ -28,13 +29,15 @@ import de.fhg.ipa.vfk.smartobjectmgmt.client.api.Configuration;
 import de.fhg.ipa.vfk.smartobjectmgmt.client.api.ParameterValue;
 import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionParam;
 import java.io.Console;
-import productionorders.FunctionContainer;]]></Import>
+import productionorders.FunctionContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;]]></Import>
 			<StartupCode><![CDATA[System.out.println("Hello Anylogic!");
 String version = System.getProperty("java.version");
 System.out.println("Java version: " + version);
 
 Object waitLock = new Object();
-Main main = this;
+final Main main = this;
 
 final ClientWebSocketHandlerFactory factory = ClientWebSocketHandlerFactory.getInstance("./CERTS.trs");
 Thread thread = new Thread(new Runnable() {
@@ -43,22 +46,68 @@ Thread thread = new Thread(new Runnable() {
 	public void run() {
 
 		try{
-			//handler = factory.getClientHandler("ws://localhost:8085",9999);
+			handler = factory.getClientHandler("ws://localhost:8085",9999);
 			//handler = factory.getClientHandler("ws://atm.virtualfortknox.de/msb",9999);
-			handler = factory.getClientHandler("ws://ipa.virtualfortknox.de/msb",9999);
+			//handler = factory.getClientHandler("ws://ipa.virtualfortknox.de/msb",9999);
 			Application smartObject = new Application();		
-			smartObject.setUuid("AL_TC2");
+			smartObject.setUuid("AL_TC3");
 			smartObject.setName("AnyLogic-TestClient");
 			smartObject.setDescription("Test client");
-			smartObject.setToken("altc2");	
+			smartObject.setToken("secret");	
 			
 			handler.addEvent(smartObject, "START", "Start", "Start the Simulation", StartData.class);
 			handler.addEvent(smartObject, "JOB", "Job", "A new job", Job.class);
+			handler.addEvent(smartObject, "STOP", "Stop", "Stop the Simulation", int.class);
 
 			FunctionContainer fc = new FunctionContainer(getEmbeddedObjects());
 			fc.setMain(main);
-			handler.addFunction(smartObject, "/FunctionContainer/logThis", "to_log", "Log This", new String[0], fc, FunctionContainer.class.getMethod("logThis", String.class));
-		
+			
+			System.out.println("1"+fc);
+			
+			//fc.setMain(main);
+			System.out.println("2"+fc);
+			
+			
+			handler.addFunction(
+				smartObject, 
+				"/FunctionContainer/logThis", 
+				"to_log", 
+				"Log This", 
+				new String[0], 
+				fc, 
+				FunctionContainer.class.getMethod("logThis", String.class));
+			
+			// agvAssignment ---------------------------------------------------------
+			handler.addFunction(
+				smartObject, 
+				"/FunctionContainer/agvAssignment", 
+				"agvAssignment", "agvAssignment", 
+				new String[0], 
+				fc, 
+				FunctionContainer.class.getMethod("agvAssignment", Integer.class, Integer.class)
+			);
+			
+			// pose ---------------------------------------------------------
+			handler.addFunction(
+				smartObject, 
+				"/FunctionContainer/pose", 
+				"pose", "pose", 
+				new String[0], 
+				fc, 
+				FunctionContainer.class.getMethod("pose", Integer.class, Double.class, Double.class)
+			);
+			
+			// reached ---------------------------------------------------------
+			handler.addFunction(
+				smartObject, 
+				"/FunctionContainer/reached", 
+				"reached", "reached", 
+				new String[0], 
+				fc, 
+				FunctionContainer.class.getMethod("reached", Integer.class)
+			);
+			
+			// register ...
 			handler.register(smartObject);
 			
 			connected = true;
@@ -66,10 +115,13 @@ Thread thread = new Thread(new Runnable() {
 			
 			synchronized (waitLock) {
 				try {
+					System.out.println("."+fc);
 					waitLock.wait();
+					System.out.println(".."+fc);
 				} catch (InterruptedException e) {
+					System.out.println("e"+fc);
+				}
 			}
-		}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}		
@@ -81,7 +133,6 @@ thread.start();
 // START EVENT EMISSION
 try {				
 	while(!connected) { 
-		System.out.println("waiting for msb ...");
 		try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -94,6 +145,13 @@ try {
 	System.out.println("Exception: " + e.toString());
 	e.printStackTrace();
 }]]></StartupCode>
+			<DestroyCode><![CDATA[try {	
+	System.out.println("EMIT - STOP");			
+	if(connected) handler.publish("STOP", 0);
+} catch (Exception e) {
+	System.out.println("Exception: " + e.toString());
+	e.printStackTrace();
+}]]></DestroyCode>
 			<Generic>false</Generic>
 			<GenericParameter>
 				<Id>1473765357185</Id>
@@ -177,7 +235,7 @@ try {
 				<Variable Class="Parameter">
 					<Id>1474629344462</Id>
 					<Name><![CDATA[width]]></Name>
-					<X>20</X><Y>-350</Y>
+					<X>20</X><Y>-340</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -188,7 +246,7 @@ try {
 						<NumericType><![CDATA[double]]></NumericType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[900]]></Code>
+							<Code><![CDATA[600]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1474629344460</Id>
@@ -202,7 +260,7 @@ try {
 				<Variable Class="Parameter">
 					<Id>1474629356118</Id>
 					<Name><![CDATA[height]]></Name>
-					<X>20</X><Y>-320</Y>
+					<X>20</X><Y>-310</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -213,7 +271,7 @@ try {
 						<NumericType><![CDATA[double]]></NumericType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[400]]></Code>
+							<Code><![CDATA[300]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1474629356116</Id>
@@ -227,7 +285,7 @@ try {
 				<Variable Class="Parameter">
 					<Id>1474629707820</Id>
 					<Name><![CDATA[nAgvs]]></Name>
-					<X>20</X><Y>-290</Y>
+					<X>20</X><Y>-280</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -254,7 +312,7 @@ try {
 				<Connector>
 					<Id>1474029881071</Id>
 					<Name><![CDATA[connector]]></Name>
-					<X>200</X><Y>670</Y>
+					<X>130</X><Y>670</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -262,7 +320,7 @@ try {
 					<SourceEmbeddedObjectReference>
 						<PackageName><![CDATA[productionorders]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[jobDelay]]></ItemName>
+						<ItemName><![CDATA[transportDelay]]></ItemName>
 					</SourceEmbeddedObjectReference>
 					<SourceConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -281,13 +339,13 @@ try {
 					</TargetConnectableItemReference>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>-120</X><Y>0</Y></Point>
+						<Point><X>-50</X><Y>0</Y></Point>
 					</Points>
 				</Connector>
 				<Connector>
-					<Id>1474029916126</Id>
+					<Id>1476365127263</Id>
 					<Name><![CDATA[connector1]]></Name>
-					<X>370</X><Y>670</Y>
+					<X>440</X><Y>670</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -305,7 +363,73 @@ try {
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[productionorders]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[jobDelay]]></ItemName>
+						<ItemName><![CDATA[selectOutput]]></ItemName>
+					</TargetEmbeddedObjectReference>
+					<TargetConnectableItemReference>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[SelectOutput]]></ClassName>
+						<ItemName><![CDATA[outT]]></ItemName>
+					</TargetConnectableItemReference>
+					<Points>
+						<Point><X>0</X><Y>0</Y></Point>
+						<Point><X>-80</X><Y>0</Y></Point>
+					</Points>
+				</Connector>
+				<Connector>
+					<Id>1476365311388</Id>
+					<Name><![CDATA[connector2]]></Name>
+					<X>0</X><Y>0</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>false</ShowLabel>
+					<SourceEmbeddedObjectReference>
+						<PackageName><![CDATA[productionorders]]></PackageName>
+						<ClassName><![CDATA[Main]]></ClassName>
+						<ItemName><![CDATA[selectOutput]]></ItemName>
+					</SourceEmbeddedObjectReference>
+					<SourceConnectableItemReference>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[SelectOutput]]></ClassName>
+						<ItemName><![CDATA[in]]></ItemName>
+					</SourceConnectableItemReference>
+					<TargetEmbeddedObjectReference>
+						<PackageName><![CDATA[productionorders]]></PackageName>
+						<ClassName><![CDATA[Main]]></ClassName>
+						<ItemName><![CDATA[processDelay]]></ItemName>
+					</TargetEmbeddedObjectReference>
+					<TargetConnectableItemReference>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[Delay]]></ClassName>
+						<ItemName><![CDATA[out]]></ItemName>
+					</TargetConnectableItemReference>
+					<Points>
+						<Point><X>340</X><Y>670</Y></Point>
+						<Point><X>270</X><Y>670</Y></Point>
+					</Points>
+				</Connector>
+				<Connector>
+					<Id>1476365311389</Id>
+					<Name><![CDATA[connector3]]></Name>
+					<X>230</X><Y>670</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>false</ShowLabel>
+					<SourceEmbeddedObjectReference>
+						<PackageName><![CDATA[productionorders]]></PackageName>
+						<ClassName><![CDATA[Main]]></ClassName>
+						<ItemName><![CDATA[processDelay]]></ItemName>
+					</SourceEmbeddedObjectReference>
+					<SourceConnectableItemReference>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[Delay]]></ClassName>
+						<ItemName><![CDATA[in]]></ItemName>
+					</SourceConnectableItemReference>
+					<TargetEmbeddedObjectReference>
+						<PackageName><![CDATA[productionorders]]></PackageName>
+						<ClassName><![CDATA[Main]]></ClassName>
+						<ItemName><![CDATA[transportDelay]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -314,7 +438,7 @@ try {
 					</TargetConnectableItemReference>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>-130</X><Y>0</Y></Point>
+						<Point><X>-60</X><Y>0</Y></Point>
 					</Points>
 				</Connector>
 			</Connectors>
@@ -456,6 +580,10 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[rate]]></Name>
+							<Value Class="CodeUnitValue">
+								<Code><![CDATA[10]]></Code>
+								<Unit Class="RateUnits"><![CDATA[PER_MINUTE]]></Unit>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[interarrivalTime]]></Name>
@@ -489,9 +617,15 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[limitArrivals]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[true]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[maxArrivals]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[10]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[newEntity]]></Name>
@@ -673,8 +807,8 @@ try {
 				</EmbeddedObject>
 				<EmbeddedObject>
 					<Id>1474029876961</Id>
-					<Name><![CDATA[jobDelay]]></Name>
-					<X>200</X><Y>650</Y>
+					<Name><![CDATA[transportDelay]]></Name>
+					<X>130</X><Y>650</Y>
 					<Label><X>0</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -793,7 +927,7 @@ try {
 				<EmbeddedObject>
 					<Id>1474029913906</Id>
 					<Name><![CDATA[sink]]></Name>
-					<X>370</X><Y>660</Y>
+					<X>440</X><Y>660</Y>
 					<Label><X>-10</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -992,6 +1126,219 @@ try {
 					<QuantityColumn>
 					</QuantityColumn>
 				</EmbeddedObject>
+				<EmbeddedObject>
+					<Id>1476365125158</Id>
+					<Name><![CDATA[selectOutput]]></Name>
+					<X>330</X><Y>660</Y>
+					<Label><X>-25</X><Y>-20</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<ActiveObjectClass>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[SelectOutput]]></ClassName>
+					</ActiveObjectClass>
+					<GenericParameterSubstitute>
+						<GenericParameterSubstituteReference>
+							<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+							<ClassName><![CDATA[SelectOutput]]></ClassName>
+							<ItemName><![CDATA[1412336242931]]></ItemName>
+						</GenericParameterSubstituteReference>
+					</GenericParameterSubstitute>
+					<Parameters>
+						<Parameter>
+							<Name><![CDATA[conditionIsProbabilistic]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[false]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[condition]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[order.state <= 5]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[probability]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onAtEnter]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onEnter]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onExitTrue]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[order.state++]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onExitFalse]]></Name>
+						</Parameter>
+					</Parameters>
+					<ReplicationFlag>false</ReplicationFlag>
+					<Replication Class="CodeValue">
+						<Code><![CDATA[100]]></Code>
+					</Replication>
+					<CollectionType>ARRAY_LIST_BASED</CollectionType>
+					<InitialSpeedCode Class="CodeUnitValue">
+						<Code><![CDATA[10]]></Code>
+						<Unit Class="SpeedUnits"><![CDATA[MPS]]></Unit>
+					</InitialSpeedCode>
+					<InitialLocationType>AT_ANIMATION_POSITION</InitialLocationType>
+					<XCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</XCode>
+					<YCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</YCode>
+					<ZCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</ZCode>
+					<ColumnCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</ColumnCode>
+					<RowCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</RowCode>
+					<LatitudeCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</LatitudeCode>
+					<LongitudeCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</LongitudeCode>
+					<LocationNameCode Class="CodeValue">
+						<Code><![CDATA[""]]></Code>
+					</LocationNameCode>
+					<InitializationType>SPECIFIED_NUMBER</InitializationType>
+					<InitializationDatabaseTableQuery>
+						<TableReference>
+						</TableReference>
+					</InitializationDatabaseTableQuery>
+					<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
+					<QuantityColumn>
+					</QuantityColumn>
+				</EmbeddedObject>
+				<EmbeddedObject>
+					<Id>1476365307980</Id>
+					<Name><![CDATA[processDelay]]></Name>
+					<X>230</X><Y>650</Y>
+					<Label><X>0</X><Y>-10</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<ActiveObjectClass>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[Delay]]></ClassName>
+					</ActiveObjectClass>
+					<GenericParameterSubstitute>
+						<GenericParameterSubstituteReference>
+							<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+							<ClassName><![CDATA[Delay]]></ClassName>
+							<ItemName><![CDATA[1412336242930]]></ItemName>
+						</GenericParameterSubstituteReference>
+					</GenericParameterSubstitute>
+					<Parameters>
+						<Parameter>
+							<Name><![CDATA[type]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[self.MANUAL]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[delayTime]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacity]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maximumCapacity]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[true]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[entityLocation]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[pushProtocol]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[restoreEntityLocationOnExit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[forceStatisticsCollection]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onEnter]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[try {					
+	System.out.println("EMIT - JOB");
+	Random rand = new Random();
+	int jobId = rand.nextInt();
+	if(connected) handler.publish("JOB", new Job(jobId, 20, 20, 80, 80));
+	agent.jobId = jobId;
+} catch (Exception e) {
+	System.out.println("Exception: " + e.toString());
+	e.printStackTrace();
+}
+]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onAtExit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onExit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onRemove]]></Name>
+						</Parameter>
+					</Parameters>
+					<ReplicationFlag>false</ReplicationFlag>
+					<Replication Class="CodeValue">
+						<Code><![CDATA[100]]></Code>
+					</Replication>
+					<CollectionType>ARRAY_LIST_BASED</CollectionType>
+					<InitialSpeedCode Class="CodeUnitValue">
+						<Code><![CDATA[10]]></Code>
+						<Unit Class="SpeedUnits"><![CDATA[MPS]]></Unit>
+					</InitialSpeedCode>
+					<InitialLocationType>AT_ANIMATION_POSITION</InitialLocationType>
+					<XCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</XCode>
+					<YCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</YCode>
+					<ZCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</ZCode>
+					<ColumnCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</ColumnCode>
+					<RowCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</RowCode>
+					<LatitudeCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</LatitudeCode>
+					<LongitudeCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</LongitudeCode>
+					<LocationNameCode Class="CodeValue">
+						<Code><![CDATA[""]]></Code>
+					</LocationNameCode>
+					<InitializationType>SPECIFIED_NUMBER</InitializationType>
+					<InitializationDatabaseTableQuery>
+						<TableReference>
+						</TableReference>
+					</InitializationDatabaseTableQuery>
+					<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
+					<QuantityColumn>
+					</QuantityColumn>
+				</EmbeddedObject>
 			</EmbeddedObjects>
 
 			<Shapes>
@@ -1054,7 +1401,7 @@ try {
 					<Width>1</Width>
 					<Height>1</Height>
 					<Rotation>0.0</Rotation>
-					<FillColor>-8355712</FillColor>
+					<FillColor>2139127936</FillColor>
 					<FillMaterial>null</FillMaterial>
 				</Rectangle>
 				<Rectangle>
@@ -1065,6 +1412,7 @@ try {
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>false</ShowLabel>
+					<Lock>true</Lock>
 					<DrawMode>SHAPE_DRAW_2D3D</DrawMode>
 					<AsObject>true</AsObject>
 					<EmbeddedIcon>false</EmbeddedIcon>
@@ -1073,11 +1421,11 @@ try {
 					<LineWidth>1</LineWidth>
 					<LineColor>-16777216</LineColor>
 					<LineMaterial>null</LineMaterial>
-					<LineStyle>SOLID</LineStyle>
-					<Width>300</Width>
+					<LineStyle>DOTTED</LineStyle>
+					<Width>200</Width>
 					<Height>150</Height>
 					<Rotation>0.0</Rotation>
-					<FillColor>-1</FillColor>
+					<FillColor>1811928832</FillColor>
 					<FillMaterial>null</FillMaterial>
 				</Rectangle>
 				<Text>
@@ -1088,6 +1436,7 @@ try {
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>false</ShowLabel>
+					<Lock>true</Lock>
 					<DrawMode>SHAPE_DRAW_2D</DrawMode>
 					<AsObject>true</AsObject>
 					<EmbeddedIcon>false</EmbeddedIcon>
@@ -1096,8 +1445,8 @@ try {
 					<Color>-16777216</Color>
 					<Text><![CDATA[experiment Parameters]]></Text>
 					<Font>
-						<Name>SansSerif</Name>
-						<Size>10</Size>
+						<Name>Droid Sans</Name>
+						<Size>14</Size>
 						<Style>0</Style>
 					</Font>
 					<Alignment>LEFT</Alignment>
@@ -1175,6 +1524,13 @@ try {
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
 			<IconTopGroupPersistent>true</IconTopGroupPersistent>
+			<Import><![CDATA[import java.util.Random;]]></Import>
+			<StartupCode><![CDATA[this.carCol = new Color(
+	main.random.nextInt(200)+55, 
+	main.random.nextInt(200)+55, 
+	main.random.nextInt(200)+55
+);
+System.out.println(main.random.nextInt(100));]]></StartupCode>
 			<Generic>false</Generic>
 			<GenericParameter>
 				<Id>1473765382622</Id>
@@ -1253,6 +1609,63 @@ try {
 				<InheritedFromParentAgentType>true</InheritedFromParentAgentType>
 			</ScaleRuler>
 			<ConnectionsId>1473765382619</ConnectionsId>
+			<Variables>
+				<Variable Class="PlainVariable">
+					<Id>1474965187123</Id>
+					<Name><![CDATA[x]]></Name>
+					<X>50</X><Y>40</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[double]]></Type>        
+					</Properties>
+				</Variable>
+				<Variable Class="PlainVariable">
+					<Id>1474965199028</Id>
+					<Name><![CDATA[y]]></Name>
+					<X>50</X><Y>80</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[double]]></Type>        
+					</Properties>
+				</Variable>
+				<Variable Class="PlainVariable">
+					<Id>1476362404460</Id>
+					<Name><![CDATA[carCol]]></Name>
+					<X>160</X><Y>40</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[Color]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA[new Color(0,0,0)]]></Code>
+						</InitialValue>
+					</Properties>
+				</Variable>
+			</Variables>
+			<Functions>
+				<Function AccessType="public" StaticFunction="false">
+					<ReturnModificator>RETURNS_VALUE</ReturnModificator>
+					<ReturnType><![CDATA[String]]></ReturnType>
+					<Id>1475587059542</Id>
+					<Name><![CDATA[toString]]></Name>
+					<X>-100</X><Y>50</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Body><![CDATA[return
+	"x = " + x + ", " +
+	"y = " + y;]]></Body>
+				</Function>
+			</Functions>
 			<AgentLinks>
 				<AgentLink>
 					<Id>1473765382619</Id>
@@ -1412,8 +1825,8 @@ try {
 					<EmbeddedIcon>false</EmbeddedIcon>
 					<Z>0</Z>
 					<ZHeight>10</ZHeight>
-					<LineWidth>1</LineWidth>
-					<LineColor>-7112944</LineColor>
+					<LineWidth>0.2</LineWidth>
+					<LineColor>-16777216</LineColor>
 					<LineMaterial>null</LineMaterial>
 					<LineStyle>SOLID</LineStyle>
 					<BeginArrowSize>1</BeginArrowSize>
@@ -1421,6 +1834,7 @@ try {
 					<EndArrowSize>1</EndArrowSize>
 					<EndArrowStyle>0</EndArrowStyle>
 					<FillColor>-10496</FillColor>
+					<FillColorCode><![CDATA[carCol]]></FillColorCode>
 					<FillMaterial>null</FillMaterial>
 					<Points>
 					   <Point><X>0</X><Y>0</Y><Z>0</Z></Point>
@@ -1798,14 +2212,14 @@ try {
 					<Z>0</Z>
 					<ZHeight>10</ZHeight>
 					<LineWidth>1</LineWidth>
-					<LineColor>-16777216</LineColor>
+					<LineColor>-16711936</LineColor>
 					<LineMaterial>null</LineMaterial>
 					<LineStyle>SOLID</LineStyle>
 					<Width>20</Width>
 					<Height>20</Height>
 					<Rotation>0.0</Rotation>
-					<FillColor>-1</FillColor>
-					<FillMaterial>concrete</FillMaterial>
+					<FillColor>-16777216</FillColor>
+					<FillMaterial>null</FillMaterial>
 				</Rectangle>
 			</Shapes>
 
@@ -1933,6 +2347,9 @@ try {
 					<ShowLabel>true</ShowLabel>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[Car]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA[null]]></Code>
+						</InitialValue>
 					</Properties>
 				</Variable>
 			</Variables>
@@ -1974,6 +2391,31 @@ try {
 				</ContainerLink>
 			</ContainerLinks>
 
+			<Shapes>
+				<Rectangle>
+					<Id>1476365836902</Id>
+					<Name><![CDATA[rectangle]]></Name>
+					<X>-5</X><Y>-5</Y>
+					<Label><X>10</X><Y>10</Y></Label>
+					<PublicFlag>true</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>false</ShowLabel>
+					<DrawMode>SHAPE_DRAW_2D3D</DrawMode>
+					<AsObject>true</AsObject>
+					<EmbeddedIcon>false</EmbeddedIcon>
+					<Z>0</Z>
+					<ZHeight>10</ZHeight>
+					<LineWidth>1</LineWidth>
+					<LineColor>-16777216</LineColor>
+					<LineMaterial>null</LineMaterial>
+					<LineStyle>SOLID</LineStyle>
+					<Width>10</Width>
+					<Height>10</Height>
+					<Rotation>0.0</Rotation>
+					<FillColor>-10496</FillColor>
+					<FillMaterial>null</FillMaterial>
+				</Rectangle>
+			</Shapes>
 
 		</ActiveObjectClass>
 	</ActiveObjectClasses>	
@@ -2009,7 +2451,7 @@ try {
 				<Maximized>false</Maximized>
 				<CloseConfirmation>false</CloseConfirmation>
 			</Frame>
-			<CommandLineArguments><![CDATA[]]></CommandLineArguments>
+			<CommandLineArguments><![CDATA[-Dlogback.configurationFile=/tmp/config.xml]]></CommandLineArguments>
 			<InitialSetupCode><![CDATA[if ( getState() == IDLE )
 	run();
 getPresentation().setPresentable( getEngine().getRoot() );]]></InitialSetupCode>
@@ -2138,7 +2580,7 @@ import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionPara
 import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionHandler;
 import de.fhg.ipa.vfk.broker.interfaces.websocket.client.annotation.FunctionCallback;
 
-class FunctionContainer implements Serializable {
+public class FunctionContainer implements Serializable {
 
 	static FunctionContainer fc;
 	List<Object> list;
@@ -2165,16 +2607,62 @@ class FunctionContainer implements Serializable {
 		}
 	}
 	
-	public void agvAssignment(@FunctionParam(name="agvID")int agvID, @FunctionParam(name="jobId")int jobID) {
-		for(int i = 0; i<main.orders.size(); i++){
-			if(main.orders[i].jobId == jobID) 
-				main.orders[i].agv = main.cars[agvID]; 
+	public void agvAssignment(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="jobId")Integer jobId) {
+		try {
+			//System.out.println("agvAssignment, agvId: " + agvId + " jobId: " + jobId);
+			for(int i = 0; i<main.orders.size(); i++){
+				Order o = main.orders.get(i);
+				//System.out.println("agvAssignment, order:" + o);
+				if(o.jobId == jobId) {
+					//System.out.println("agvAssignment, Assign! car:" + main.cars.get(agvId));
+					//System.out.println("agvAssignment, to order:" + o);
+					o.agv = main.cars.get(agvId); 
+				}
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
-	public void reached(@FunctionParam(name="jobId")int jobID) {
+	public void pose(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="x")Double x, @FunctionParam(name="y")Double y) {
+		try {
+			System.out.println("pose, y:" + y);
+			//System.out.println("pose, agvId:" + agvId);
+			//System.out.println("pose, main.cars.size():" + main.cars.size());
+			Car agv = main.cars.get(agvId);
+			System.out.println("pose, agv:" + agv);
+			if(agv.x == 0 & agv.y==0) { // new
+				agv.jumpTo(x, y);
+			}
+			else {
+				agv.moveTo(x, y);
+			}
 			
-		main.jobDelay.stopDelay()
+			agv.x = x;
+			agv.y = y;
+			//System.out.println("pose, main.cars.get(agvId).x:" + main.cars.get(agvId).x);
+			
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void reached(@FunctionParam(name="jobId")Integer jobId) {
+		try {
+			System.out.println("reached");
+			for(int i = 0; i<main.orders.size(); i++){
+				Order o = main.orders.get(i);
+				if(o.jobId == jobId) {
+					main.transportDelay.stopDelay(main.orders.get(i).agv);
+					o.agv = null;
+				}
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
@@ -2269,7 +2757,113 @@ class Job{
     public void setGoal_y(int goal_y) {
         this.goal_y = goal_y;
     }
-}]]></Text>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></Text>
 		</JavaClass>
 	</JavaClasses>
     <RequiredLibraryReference>
