@@ -62,10 +62,10 @@ Thread thread = new Thread(new Runnable() {
 			FunctionContainer fc = new FunctionContainer(getEmbeddedObjects());
 			fc.setMain(main);
 			
-			System.out.println("1"+fc);
+			//System.out.println("1"+fc);
 			
 			//fc.setMain(main);
-			System.out.println("2"+fc);
+			//System.out.println("2"+fc);
 			
 			
 			handler.addFunction(
@@ -617,7 +617,7 @@ try {
 						<Parameter>
 							<Name><![CDATA[rate]]></Name>
 							<Value Class="CodeUnitValue">
-								<Code><![CDATA[10]]></Code>
+								<Code><![CDATA[2]]></Code>
 								<Unit Class="RateUnits"><![CDATA[PER_MINUTE]]></Unit>
 							</Value>
 						</Parameter>
@@ -909,20 +909,14 @@ try {
 								<Code><![CDATA[try {					
 	System.out.println("EMIT - JOB");
 	Random rand = new Random();
-	int jobId = rand.nextInt();
-	int toStation = (int) selectFrom(process_list)
-		.where(process_list.id.eq(agent.state))
-		.firstResult(process_list.station);
+	int jobId = rand.nextInt(1000);
+	int[] goal = agent.getGoal();
 	if(connected) handler.publish("JOB", new Job(
 		jobId, 
 		(int) Math.round(agent.getX()), 
 		(int) Math.round(agent.getY()), 
-		(int) Math.round(selectFrom(station_positions)
-			.where(station_positions.id.eq(toStation))
-			.firstResult(station_positions.x)), 
-		(int) Math.round(selectFrom(station_positions)
-			.where(station_positions.id.eq(toStation))
-			.firstResult(station_positions.y))
+		goal[0], 
+		goal[1]
 	));
 	agent.jobId = jobId;
 } catch (Exception e) {
@@ -1580,8 +1574,7 @@ try {
 	main.random.nextInt(200)+55, 
 	main.random.nextInt(200)+55, 
 	main.random.nextInt(200)+55
-);
-System.out.println(main.random.nextInt(100));]]></StartupCode>
+);]]></StartupCode>
 			<Generic>false</Generic>
 			<GenericParameter>
 				<Id>1473765382622</Id>
@@ -2404,6 +2397,33 @@ System.out.println(main.random.nextInt(100));]]></StartupCode>
 					</Properties>
 				</Variable>
 			</Variables>
+			<Functions>
+				<Function AccessType="default" StaticFunction="false">
+					<ReturnModificator>RETURNS_VALUE</ReturnModificator>
+					<ReturnType><![CDATA[int[]]]></ReturnType>
+					<Id>1476444563915</Id>
+					<Name><![CDATA[getGoal]]></Name>
+					<X>50</X><Y>170</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Body><![CDATA[int toStation = (int) selectFrom(process_list)
+	.where(process_list.id.eq(state))
+	.firstResult(process_list.station);
+
+int[] res = new int[2];
+	
+res[0] = (int) Math.round(selectFrom(station_positions)
+		.where(station_positions.id.eq(toStation))
+		.firstResult(station_positions.x));
+res[1] = (int) Math.round(selectFrom(station_positions)
+		.where(station_positions.id.eq(toStation))
+		.firstResult(station_positions.y));
+		
+return res;]]></Body>
+				</Function>
+			</Functions>
 			<AgentLinks>
 				<AgentLink>
 					<Id>1473767308921</Id>
@@ -2706,7 +2726,8 @@ public class FunctionContainer implements Serializable {
 			for(int i = 0; i<main.orders.size(); i++){
 				Order o = main.orders.get(i);
 				if(o.jobId == jobId) {
-					o.jumpTo(o.agv.getX(), o.agv.getY());
+					int[] goal = o.getGoal();
+					o.jumpTo(goal[0], goal[1]);
 					main.transportDelay.stopDelay(o);
 					o.agv = null;
 				}

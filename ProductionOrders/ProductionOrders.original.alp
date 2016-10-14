@@ -312,7 +312,7 @@ try {
 				<Connector>
 					<Id>1474029881071</Id>
 					<Name><![CDATA[connector]]></Name>
-					<X>130</X><Y>670</Y>
+					<X>180</X><Y>700</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -339,13 +339,13 @@ try {
 					</TargetConnectableItemReference>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>-50</X><Y>0</Y></Point>
+						<Point><X>-70</X><Y>0</Y></Point>
 					</Points>
 				</Connector>
 				<Connector>
 					<Id>1476365127263</Id>
 					<Name><![CDATA[connector1]]></Name>
-					<X>440</X><Y>670</Y>
+					<X>490</X><Y>700</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -378,7 +378,7 @@ try {
 				<Connector>
 					<Id>1476365311388</Id>
 					<Name><![CDATA[connector2]]></Name>
-					<X>0</X><Y>0</Y>
+					<X>390</X><Y>700</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -404,14 +404,14 @@ try {
 						<ItemName><![CDATA[out]]></ItemName>
 					</TargetConnectableItemReference>
 					<Points>
-						<Point><X>340</X><Y>670</Y></Point>
-						<Point><X>270</X><Y>670</Y></Point>
+						<Point><X>0</X><Y>0</Y></Point>
+						<Point><X>-70</X><Y>0</Y></Point>
 					</Points>
 				</Connector>
 				<Connector>
 					<Id>1476365311389</Id>
 					<Name><![CDATA[connector3]]></Name>
-					<X>230</X><Y>670</Y>
+					<X>280</X><Y>700</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -439,6 +439,42 @@ try {
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
 						<Point><X>-60</X><Y>0</Y></Point>
+					</Points>
+				</Connector>
+				<Connector>
+					<Id>1476366602989</Id>
+					<Name><![CDATA[connector4]]></Name>
+					<X>400</X><Y>710</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>false</ShowLabel>
+					<SourceEmbeddedObjectReference>
+						<PackageName><![CDATA[productionorders]]></PackageName>
+						<ClassName><![CDATA[Main]]></ClassName>
+						<ItemName><![CDATA[selectOutput]]></ItemName>
+					</SourceEmbeddedObjectReference>
+					<SourceConnectableItemReference>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[SelectOutput]]></ClassName>
+						<ItemName><![CDATA[outF]]></ItemName>
+					</SourceConnectableItemReference>
+					<TargetEmbeddedObjectReference>
+						<PackageName><![CDATA[productionorders]]></PackageName>
+						<ClassName><![CDATA[Main]]></ClassName>
+						<ItemName><![CDATA[transportDelay]]></ItemName>
+					</TargetEmbeddedObjectReference>
+					<TargetConnectableItemReference>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[Delay]]></ClassName>
+						<ItemName><![CDATA[in]]></ItemName>
+					</TargetConnectableItemReference>
+					<Points>
+						<Point><X>0</X><Y>0</Y></Point>
+						<Point><X>0</X><Y>40</Y></Point>
+						<Point><X>-230</X><Y>40</Y></Point>
+						<Point><X>-230</X><Y>0</Y></Point>
+						<Point><X>-220</X><Y>-10</Y></Point>
 					</Points>
 				</Connector>
 			</Connectors>
@@ -558,7 +594,7 @@ try {
 				<EmbeddedObject>
 					<Id>1474029837149</Id>
 					<Name><![CDATA[source]]></Name>
-					<X>50</X><Y>660</Y>
+					<X>80</X><Y>690</Y>
 					<Label><X>-5</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -624,7 +660,7 @@ try {
 						<Parameter>
 							<Name><![CDATA[maxArrivals]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[10]]></Code>
+								<Code><![CDATA[3]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -691,15 +727,27 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[locationType]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[self.LOCATION_XYZ]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[locationX]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[10]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[locationY]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[10]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[locationZ]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[0]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[locationLatitude]]></Name>
@@ -808,7 +856,7 @@ try {
 				<EmbeddedObject>
 					<Id>1474029876961</Id>
 					<Name><![CDATA[transportDelay]]></Name>
-					<X>130</X><Y>650</Y>
+					<X>180</X><Y>680</Y>
 					<Label><X>0</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -862,7 +910,20 @@ try {
 	System.out.println("EMIT - JOB");
 	Random rand = new Random();
 	int jobId = rand.nextInt();
-	if(connected) handler.publish("JOB", new Job(jobId, 20, 20, 80, 80));
+	int toStation = (int) selectFrom(process_list)
+		.where(process_list.id.eq(agent.state))
+		.firstResult(process_list.station);
+	if(connected) handler.publish("JOB", new Job(
+		jobId, 
+		(int) Math.round(agent.getX()), 
+		(int) Math.round(agent.getY()), 
+		(int) Math.round(selectFrom(station_positions)
+			.where(station_positions.id.eq(toStation))
+			.firstResult(station_positions.x)), 
+		(int) Math.round(selectFrom(station_positions)
+			.where(station_positions.id.eq(toStation))
+			.firstResult(station_positions.y))
+	));
 	agent.jobId = jobId;
 } catch (Exception e) {
 	System.out.println("Exception: " + e.toString());
@@ -927,7 +988,7 @@ try {
 				<EmbeddedObject>
 					<Id>1474029913906</Id>
 					<Name><![CDATA[sink]]></Name>
-					<X>440</X><Y>660</Y>
+					<X>490</X><Y>690</Y>
 					<Label><X>-10</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -1129,7 +1190,7 @@ try {
 				<EmbeddedObject>
 					<Id>1476365125158</Id>
 					<Name><![CDATA[selectOutput]]></Name>
-					<X>330</X><Y>660</Y>
+					<X>380</X><Y>690</Y>
 					<Label><X>-25</X><Y>-20</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -1155,7 +1216,7 @@ try {
 						<Parameter>
 							<Name><![CDATA[condition]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[order.state <= 5]]></Code>
+								<Code><![CDATA[agent.state >= 5]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -1169,12 +1230,12 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[onExitTrue]]></Name>
-							<Value Class="CodeValue">
-								<Code><![CDATA[order.state++]]></Code>
-							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[onExitFalse]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[agent.state++]]></Code>
+							</Value>
 						</Parameter>
 					</Parameters>
 					<ReplicationFlag>false</ReplicationFlag>
@@ -1223,7 +1284,7 @@ try {
 				<EmbeddedObject>
 					<Id>1476365307980</Id>
 					<Name><![CDATA[processDelay]]></Name>
-					<X>230</X><Y>650</Y>
+					<X>280</X><Y>680</Y>
 					<Label><X>0</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -1242,12 +1303,15 @@ try {
 					<Parameters>
 						<Parameter>
 							<Name><![CDATA[type]]></Name>
-							<Value Class="CodeValue">
-								<Code><![CDATA[self.MANUAL]]></Code>
-							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[delayTime]]></Name>
+							<Value Class="CodeUnitValue">
+								<Code><![CDATA[(double) selectFrom(process_list)
+	.where(process_list.id.eq(agent.state))
+	.firstResult(process_list.duration)]]></Code>
+								<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[capacity]]></Name>
@@ -1272,19 +1336,6 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[onEnter]]></Name>
-							<Value Class="CodeValue">
-								<Code><![CDATA[try {					
-	System.out.println("EMIT - JOB");
-	Random rand = new Random();
-	int jobId = rand.nextInt();
-	if(connected) handler.publish("JOB", new Job(jobId, 20, 20, 80, 80));
-	agent.jobId = jobId;
-} catch (Exception e) {
-	System.out.println("Exception: " + e.toString());
-	e.printStackTrace();
-}
-]]></Code>
-							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[onAtExit]]></Name>
@@ -2321,7 +2372,7 @@ System.out.println(main.random.nextInt(100));]]></StartupCode>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[int]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[0]]></Code>
+							<Code><![CDATA[1]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -2627,11 +2678,11 @@ public class FunctionContainer implements Serializable {
 	
 	public void pose(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="x")Double x, @FunctionParam(name="y")Double y) {
 		try {
-			System.out.println("pose, y:" + y);
+			//System.out.println("pose, y:" + y);
 			//System.out.println("pose, agvId:" + agvId);
 			//System.out.println("pose, main.cars.size():" + main.cars.size());
 			Car agv = main.cars.get(agvId);
-			System.out.println("pose, agv:" + agv);
+			//System.out.println("pose, agv:" + agv);
 			if(agv.x == 0 & agv.y==0) { // new
 				agv.jumpTo(x, y);
 			}
@@ -2655,7 +2706,8 @@ public class FunctionContainer implements Serializable {
 			for(int i = 0; i<main.orders.size(); i++){
 				Order o = main.orders.get(i);
 				if(o.jobId == jobId) {
-					main.transportDelay.stopDelay(main.orders.get(i).agv);
+					o.jumpTo(o.agv.getX(), o.agv.getY());
+					main.transportDelay.stopDelay(o);
 					o.agv = null;
 				}
 			}
