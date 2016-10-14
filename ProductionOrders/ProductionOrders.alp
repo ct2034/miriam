@@ -660,7 +660,7 @@ try {
 						<Parameter>
 							<Name><![CDATA[maxArrivals]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[10]]></Code>
+								<Code><![CDATA[3]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -910,7 +910,20 @@ try {
 	System.out.println("EMIT - JOB");
 	Random rand = new Random();
 	int jobId = rand.nextInt();
-	if(connected) handler.publish("JOB", new Job(jobId, 20, 20, 80, 80));
+	int toStation = (int) selectFrom(process_list)
+		.where(process_list.id.eq(agent.state))
+		.firstResult(process_list.station);
+	if(connected) handler.publish("JOB", new Job(
+		jobId, 
+		(int) Math.round(agent.getX()), 
+		(int) Math.round(agent.getY()), 
+		(int) Math.round(selectFrom(station_positions)
+			.where(station_positions.id.eq(toStation))
+			.firstResult(station_positions.x)), 
+		(int) Math.round(selectFrom(station_positions)
+			.where(station_positions.id.eq(toStation))
+			.firstResult(station_positions.y))
+	));
 	agent.jobId = jobId;
 } catch (Exception e) {
 	System.out.println("Exception: " + e.toString());
@@ -1203,7 +1216,7 @@ try {
 						<Parameter>
 							<Name><![CDATA[condition]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[agent.state <= 5]]></Code>
+								<Code><![CDATA[agent.state >= 5]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -1217,12 +1230,12 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[onExitTrue]]></Name>
-							<Value Class="CodeValue">
-								<Code><![CDATA[agent.state++]]></Code>
-							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[onExitFalse]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[agent.state++]]></Code>
+							</Value>
 						</Parameter>
 					</Parameters>
 					<ReplicationFlag>false</ReplicationFlag>
@@ -1293,6 +1306,12 @@ try {
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[delayTime]]></Name>
+							<Value Class="CodeUnitValue">
+								<Code><![CDATA[(double) selectFrom(process_list)
+	.where(process_list.id.eq(agent.state))
+	.firstResult(process_list.duration)]]></Code>
+								<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[capacity]]></Name>
@@ -2353,7 +2372,7 @@ System.out.println(main.random.nextInt(100));]]></StartupCode>
 					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
 						<Type><![CDATA[int]]></Type>        
 						<InitialValue Class="CodeValue">
-							<Code><![CDATA[0]]></Code>
+							<Code><![CDATA[1]]></Code>
 						</InitialValue>
 					</Properties>
 				</Variable>
@@ -2659,11 +2678,11 @@ public class FunctionContainer implements Serializable {
 	
 	public void pose(@FunctionParam(name="agvId")Integer agvId, @FunctionParam(name="x")Double x, @FunctionParam(name="y")Double y) {
 		try {
-			System.out.println("pose, y:" + y);
+			//System.out.println("pose, y:" + y);
 			//System.out.println("pose, agvId:" + agvId);
 			//System.out.println("pose, main.cars.size():" + main.cars.size());
 			Car agv = main.cars.get(agvId);
-			System.out.println("pose, agv:" + agv);
+			//System.out.println("pose, agv:" + agv);
 			if(agv.x == 0 & agv.y==0) { // new
 				agv.jumpTo(x, y);
 			}
@@ -2687,7 +2706,8 @@ public class FunctionContainer implements Serializable {
 			for(int i = 0; i<main.orders.size(); i++){
 				Order o = main.orders.get(i);
 				if(o.jobId == jobId) {
-					main.transportDelay.stopDelay(main.orders.get(i).agv);
+					o.jumpTo(o.agv.getX(), o.agv.getY());
+					main.transportDelay.stopDelay(o);
 					o.agv = null;
 				}
 			}

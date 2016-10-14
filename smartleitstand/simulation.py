@@ -31,7 +31,7 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = 2
+    driveSpeed = 10
     simTime = 1
     running = False
 
@@ -189,8 +189,9 @@ class Car(object):
 
         assert s.__class__ is SimpSim, "Pass the simulation object to the new car"
         self.pose = array([
-            random.randint(0, s.area.shape[0]),
-            random.randint(0, s.area.shape[1])
+            50, 10
+            # random.randint(0, s.area.shape[0]),
+            # random.randint(0, s.area.shape[1])
         ])
 
         self.route = False
