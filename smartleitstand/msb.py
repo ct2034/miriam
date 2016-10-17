@@ -83,6 +83,17 @@ class Msb():
             description="An AGV has reached a goal",
             dataFormat=DataFormat(doc_type="Integer")
         )
+        Msb.eReachedStart = Event(
+            eventId="ReachedStart",
+            name="ReachedStart",
+            description="An AGV has reached a start",
+            dataFormat=ComplexDataFormat(
+                properties=[
+                    DataFormat("agvId", "Integer"),
+                    DataFormat("jobId", "Integer")
+                ]
+            )
+        )
         Msb.eAGVAssignment = Event(
             eventId="AGVAssignment",
             name="AGVAssignment",
@@ -133,7 +144,7 @@ class Msb():
                 token="b5362d9ef4b6",
             name="AGV sim",
             description="Simulation of AGVs",
-            events=[Msb.ePose, Msb.eReached, Msb.eAGVAssignment],
+            events=[Msb.ePose, Msb.eReached, Msb.eAGVAssignment, Msb.eReachedStart],
             functions=[Msb.fStart, Msb.fJob, Msb.fStop]
         )
 
