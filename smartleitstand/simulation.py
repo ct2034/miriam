@@ -15,6 +15,7 @@ def work_queue():
         if not c.route and len(SimpSim.queue) > 0:
             freeCars.append(c)
             routeTodo = SimpSim.queue.pop()
+            break
     if routeTodo:
         routeTodo.assign_car(smartleitstand.which_car(freeCars, routeTodo, []))
         SimpSim.activeRoutes.append(routeTodo)
@@ -31,7 +32,7 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = 10
+    driveSpeed = 50
     simTime = 1
     running = False
 
@@ -152,6 +153,9 @@ class Route(object):
                 self.car.setPose(self.start)
                 self.preRemaining = 0
                 print(self.to_string(), "reached Start")
+                if self.sim.msb_select:
+                    data = {"agvId": self.car.id, "jobId": self.id}
+                    msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReachedStart, data=data)
         else:  # on route
             self.car.setPose(
                 stepSize * self.vector /
