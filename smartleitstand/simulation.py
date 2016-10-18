@@ -1,3 +1,5 @@
+from random import randint
+
 from numpy import *
 import time
 import threading
@@ -21,10 +23,12 @@ def work_queue():
         SimpSim.activeRoutes.append(routeTodo)
         # SimpSim.v.update_queue(SimpSim.queue)
 
+
 def emit_car(msb, car):
     data = {"id": car.id, "x": float(car.pose[0]), "y": float(car.pose[1])}
     print(data)
     msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.ePose, data=data)
+
 
 class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
@@ -32,8 +36,8 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = 50
-    simTime = 1
+    driveSpeed = 10
+    simTime = .1
     running = False
 
     def __init__(self, msb_select: bool, parent=None):
@@ -70,10 +74,12 @@ class SimpSim(QtCore.QThread):
         SimpSim.cars = []
         Car.nextId = 0
 
-    def new_job(self, a, b, id):
-        SimpSim.queue.append(Route(a, b, False, id, self))
+    def new_job(self, a, b, job_id):
+        SimpSim.queue.append(Route(a, b, False, job_id, self))
 
     def iterate(self):
+        i = 0
+        startTime = time.time()
         while True:
             try:
                 if SimpSim.running:
@@ -82,10 +88,16 @@ class SimpSim(QtCore.QThread):
                     for j in SimpSim.activeRoutes:
                         if not j.finished:
                             j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
-                    self.sleep(SimpSim.simTime)
+                    self.msleep(SimpSim.simTime * 1000)
+                    i += 1
             except Exception as e:
                 print("ERROR:", str(e))
                 raise e
+            if (not SimpSim.running) & (i > 2):
+                print('end-start= ', time.time() - startTime)
+                print('i*SimTime= ', i * SimpSim.simTime)
+                print('missing: ', time.time() - startTime - i * SimpSim.simTime, 's')
+                break
 
 
 def get_distance(a, b):
@@ -177,7 +189,6 @@ class Route(object):
         self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
         if self.sim.msb_select:
             emit_car(msb, self.car)
-
 
     def to_string(self):
         return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))

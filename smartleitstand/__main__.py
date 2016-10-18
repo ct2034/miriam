@@ -17,11 +17,13 @@ def testing(thread: SimpSim):
     for i in range(10):
         thread.new_job(
             array([random.randint(0, width), random.randint(0, height)]),
-            array([random.randint(0, width), random.randint(0, height)])
+            array([random.randint(0, width), random.randint(0, height)]),
+            random.randint(0, 1000)
         )
         time.sleep(.5)
 
     time.sleep(10)
+    thread.stop()
 
 if __name__ == '__main__':
     print("__main__.py ...")
@@ -32,17 +34,17 @@ if __name__ == '__main__':
     vis = False
 
     # sim
-    msb = True
+    # msb = True
     simThread = SimpSim(msb)
     simThread.start()
 
     # test
-    # test = True
+    test = True
     if test:
         threading.Thread(target=testing, args=(simThread,)).start()
 
     # vis
-    # vis = True
+    vis = True
     if vis:
         app = QtGui.QApplication(sys.argv)
         window = Vis(simThread=simThread)
