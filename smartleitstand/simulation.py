@@ -5,6 +5,7 @@ import time
 import threading
 import random
 from PyQt4 import QtGui, QtCore
+from apscheduler.schedulers.background import BackgroundScheduler
 
 import smartleitstand
 import msb
@@ -30,6 +31,20 @@ def emit_car(msb, car):
     msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.ePose, data=data)
 
 
+def iterate():
+    try:
+        if SimpSim.running:
+            # print(".")
+            work_queue()
+            for j in SimpSim.activeRoutes:
+                if not j.finished:
+                    j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
+            SimpSim.i += 1
+    except Exception as e:
+        print("ERROR:", str(e))
+        raise e
+
+
 class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
 
@@ -37,8 +52,11 @@ class SimpSim(QtCore.QThread):
     activeRoutes = []
     cars = []
     driveSpeed = 10
-    simTime = .1
+    simTime = .01
     running = False
+    scheduler = BackgroundScheduler()
+    i = 0
+    startTime = time.time()
 
     def __init__(self, msb_select: bool, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -51,8 +69,17 @@ class SimpSim(QtCore.QThread):
         self.area = zeros([1])
         self.number_agvs = 1
 
+        SimpSim.scheduler.add_job(
+            func=iterate,
+            trigger='interval',
+            id="sim_iterate",
+            seconds=SimpSim.simTime,
+            max_instances=1,
+            replace_existing=True  # for restarting
+        )
+
     def run(self):
-        self.iterate()
+        SimpSim.running = True
 
     def start_sim(self, width, height, number_agvs):
         self.area = zeros([width, height])
@@ -64,7 +91,11 @@ class SimpSim(QtCore.QThread):
                 emit_car(msb, c)
 
         SimpSim.running = True
+        SimpSim.scheduler.start()
         self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width, height, SimpSim.cars)
+
+        SimpSim.i = 0
+        self.startTime = time.time()
 
     def stop(self):
         SimpSim.running = False
@@ -74,30 +105,15 @@ class SimpSim(QtCore.QThread):
         SimpSim.cars = []
         Car.nextId = 0
 
+        SimpSim.scheduler.shutdown()
+
+        print('end-start= ', time.time() - self.startTime)
+        print('i= ', SimpSim.i)
+        print('i*SimTime= ', SimpSim.i * SimpSim.simTime)
+        print('missing: ', time.time() - self.startTime - SimpSim.i * SimpSim.simTime, 's')
+
     def new_job(self, a, b, job_id):
         SimpSim.queue.append(Route(a, b, False, job_id, self))
-
-    def iterate(self):
-        i = 0
-        startTime = time.time()
-        while True:
-            try:
-                if SimpSim.running:
-                    work_queue()
-                    print(".")
-                    for j in SimpSim.activeRoutes:
-                        if not j.finished:
-                            j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
-                    self.msleep(SimpSim.simTime * 1000)
-                    i += 1
-            except Exception as e:
-                print("ERROR:", str(e))
-                raise e
-            if (not SimpSim.running) & (i > 2):
-                print('end-start= ', time.time() - startTime)
-                print('i*SimTime= ', i * SimpSim.simTime)
-                print('missing: ', time.time() - startTime - i * SimpSim.simTime, 's')
-                break
 
 
 def get_distance(a, b):

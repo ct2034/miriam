@@ -10,17 +10,34 @@ def testing(thread: SimpSim):
     height = 100
 
     time.sleep(.5)
-    thread.start_sim(width, height, 5)
+    thread.start_sim(width, height, 3)
 
-    time.sleep(2)
+    time.sleep(.5)
 
-    for i in range(10):
+    for i in range(4):
         thread.new_job(
             array([random.randint(0, width), random.randint(0, height)]),
             array([random.randint(0, width), random.randint(0, height)]),
             random.randint(0, 1000)
         )
-        time.sleep(.5)
+        time.sleep(1)
+
+    time.sleep(10)
+    thread.stop()
+
+    time.sleep(1)
+
+    thread.start_sim(width, height, 3)
+
+    time.sleep(.5)
+
+    for i in range(4):
+        thread.new_job(
+            array([random.randint(0, width), random.randint(0, height)]),
+            array([random.randint(0, width), random.randint(0, height)]),
+            random.randint(0, 1000)
+        )
+        time.sleep(1)
 
     time.sleep(10)
     thread.stop()
