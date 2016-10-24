@@ -38,7 +38,11 @@ def iterate():
             work_queue()
             for j in SimpSim.activeRoutes:
                 if not j.finished:
-                    j.new_step(SimpSim.driveSpeed * SimpSim.simTime)
+                    j.new_step(
+                        SimpSim.driveSpeed *
+                        SimpSim.speedMultiplier *
+                        SimpSim.simTime
+                    )
             SimpSim.i += 1
     except Exception as e:
         print("ERROR:", str(e))
@@ -52,7 +56,8 @@ class SimpSim(QtCore.QThread):
     activeRoutes = []
     cars = []
     driveSpeed = 10
-    simTime = .01
+    speedMultiplier = 1
+    simTime = .1
     running = False
     scheduler = BackgroundScheduler()
     i = 0
