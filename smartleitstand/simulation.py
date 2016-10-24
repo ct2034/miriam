@@ -120,6 +120,8 @@ class SimpSim(QtCore.QThread):
     def new_job(self, a, b, job_id):
         SimpSim.queue.append(Route(a, b, False, job_id, self))
 
+    def set_speed_multiplier(self, multiplier):
+        SimpSim.speedMultiplier = multiplier
 
 def get_distance(a, b):
     assert a.size is 2, "A point needs to have two coordinates"

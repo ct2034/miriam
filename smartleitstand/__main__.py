@@ -20,9 +20,9 @@ def testing(thread: SimpSim):
             array([random.randint(0, width), random.randint(0, height)]),
             random.randint(0, 1000)
         )
-        time.sleep(1)
+        time.sleep(.1)
 
-    time.sleep(10)
+    time.sleep(1)
     thread.stop()
 
     time.sleep(1)
@@ -37,9 +37,9 @@ def testing(thread: SimpSim):
             array([random.randint(0, width), random.randint(0, height)]),
             random.randint(0, 1000)
         )
-        time.sleep(1)
+        time.sleep(.1)
 
-    time.sleep(10)
+    time.sleep(1)
     thread.stop()
 
 if __name__ == '__main__':
@@ -51,17 +51,17 @@ if __name__ == '__main__':
     vis = False
 
     # sim
-    # msb = True
+    msb = True
     simThread = SimpSim(msb)
     simThread.start()
 
     # test
-    test = True
+    # test = True
     if test:
         threading.Thread(target=testing, args=(simThread,)).start()
 
     # vis
-    vis = True
+    # vis = True
     if vis:
         app = QtGui.QApplication(sys.argv)
         window = Vis(simThread=simThread)

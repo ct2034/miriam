@@ -6,6 +6,8 @@ from vfk_msb_py.msb_ws4py_client import MsbWsClient
 from vfk_msb_py.msb_classes import *
 # from vfk_msb_py.msb_communicate import *
 
+from simulation import SimpSim
+
 
 def callback(m):
     if "NIO" in str(m):
@@ -23,8 +25,19 @@ def callback_start(message_dict):
         print(args)
 
 
-
 def callback_job(message_dict):
+    args = message_dict['functionParameters'][0]['value']
+    print(args)
+    Msb.s.set_speed_multiplier(args['dataObject'])
+
+
+def callback_stop(message_dict):
+    print("stop sim")
+    wait_for_sim()
+    Msb.s.stop()
+
+
+def callback_timing(message_dict):
     args = message_dict['functionParameters'][0]['value']
     print(args)
     wait_for_sim()
@@ -34,13 +47,6 @@ def callback_job(message_dict):
         args['id']
     )
 
-
-def callback_stop(message_dict):
-    print("stop sim")
-    wait_for_sim()
-    Msb.s.stop()
-
-
 def wait_for_sim():
     while not Msb.s:
         time.sleep(.1)
@@ -49,7 +55,7 @@ def wait_for_sim():
 class Msb():
     s = False
 
-    def __init__(self, s):
+    def __init__(self, s: SimpSim):
         Msb.s = s
         print("s: " + str(s))
 
@@ -139,13 +145,20 @@ class Msb():
             description="Stop the Simulation",
             callback=callback_stop
         )
+        Msb.fTiming = Function(
+            functionId="Timing",
+            name="Timing",
+            description="Change the Timing of the Simulation",
+            callback=callback_timing,
+            dataFormat=DataFormat(doc_type="Float")
+        )
         Msb.application = Application(
             uuid="3785b920-3777-43ad-9199-b5362d9ef4b6",
                 token="b5362d9ef4b6",
             name="AGV sim",
             description="Simulation of AGVs",
             events=[Msb.ePose, Msb.eReached, Msb.eAGVAssignment, Msb.eReachedStart],
-            functions=[Msb.fStart, Msb.fJob, Msb.fStop]
+            functions=[Msb.fStart, Msb.fJob, Msb.fStop, Msb.fTiming]
         )
 
         Msb.mwc.register(Msb.application)

@@ -18,7 +18,18 @@
 			<Name><![CDATA[Main]]></Name>
 			<AdditionalClassCode><![CDATA[ClientHandler handler;
 boolean connected = false;
-Random random = new Random();]]></AdditionalClassCode>
+Random random = new Random();
+
+static {
+	StatusBar.addMouseListener(new MouseAdapter() {
+	    @Override
+	    public void mouseClicked(MouseEvent e) {
+	        System.out.println(
+				"click"
+			);
+	    }
+	});
+}]]></AdditionalClassCode>
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
 			<IconTopGroupPersistent>true</IconTopGroupPersistent>
@@ -33,10 +44,18 @@ import productionorders.FunctionContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.anylogic.engine.analysis.Chart.InterpolationType;
-import com.anylogic.engine.analysis.Chart.PointStyle;]]></Import>
+import com.anylogic.engine.analysis.Chart.PointStyle;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;]]></Import>
 			<StartupCode><![CDATA[System.out.println("Hello Anylogic!");
 String version = System.getProperty("java.version");
 System.out.println("Java version: " + version);
+
+System.out.println(
+	"RealTimeScale(): " + 
+	this.getEngine().getRealTimeScale()
+);
 
 Object waitLock = new Object();
 final Main main = this;
@@ -1479,7 +1498,11 @@ checktofree();]]></Code>
 						<Parameter>
 							<Name><![CDATA[onEnter]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[checktofree();]]></Code>
+								<Code><![CDATA[checktofree();
+System.out.println(
+	"RealTimeScale(): " + 
+	this.getEngine().getRealTimeScale()
+);]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
