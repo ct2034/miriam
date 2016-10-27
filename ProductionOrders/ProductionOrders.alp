@@ -18,18 +18,7 @@
 			<Name><![CDATA[Main]]></Name>
 			<AdditionalClassCode><![CDATA[ClientHandler handler;
 boolean connected = false;
-Random random = new Random();
-
-static {
-	StatusBar.addMouseListener(new MouseAdapter() {
-	    @Override
-	    public void mouseClicked(MouseEvent e) {
-	        System.out.println(
-				"click"
-			);
-	    }
-	});
-}]]></AdditionalClassCode>
+Random random = new Random();]]></AdditionalClassCode>
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
 			<IconTopGroupPersistent>true</IconTopGroupPersistent>
@@ -52,10 +41,7 @@ import java.awt.event.MouseAdapter;]]></Import>
 String version = System.getProperty("java.version");
 System.out.println("Java version: " + version);
 
-System.out.println(
-	"RealTimeScale(): " + 
-	this.getEngine().getRealTimeScale()
-);
+this.getEngine().setRealTimeScale(timeScale);
 
 Object waitLock = new Object();
 final Main main = this;
@@ -79,6 +65,7 @@ Thread thread = new Thread(new Runnable() {
 			handler.addEvent(smartObject, "START", "Start", "Start the Simulation", StartData.class);
 			handler.addEvent(smartObject, "JOB", "Job", "A new job", Job.class);
 			handler.addEvent(smartObject, "STOP", "Stop", "Stop the Simulation", int.class);
+			handler.addEvent(smartObject, "TIMING", "Timing", "Time multiplier of the Simulation", double.class);
 
 			FunctionContainer fc = new FunctionContainer(getEmbeddedObjects());
 			fc.setMain(main);
@@ -172,6 +159,10 @@ try {
 	}
 	System.out.println("EMIT - START");
 	handler.publish("START", new StartData(width, height, nAgvs));
+	if (timeScale != 1.0) {
+		System.out.println("EMIT - TIMING: " + timeScale);
+		handler.publish("TIMING", timeScale);
+	}
 } catch (Exception e) {
 	System.out.println("Exception: " + e.toString());
 	e.printStackTrace();
@@ -331,6 +322,31 @@ try {
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1474629707818</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1477328361034</Id>
+					<Name><![CDATA[timeScale]]></Name>
+					<X>20</X><Y>-250</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[double]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<NumericType><![CDATA[double]]></NumericType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[10]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1477328361032</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
 							<MinSliderValue><![CDATA[0]]></MinSliderValue>
 							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
@@ -1753,12 +1769,11 @@ System.out.println(
 				<Rectangle>
 					<Id>1474901764472</Id>
 					<Name><![CDATA[rectangle1]]></Name>
-					<X>0</X><Y>-400</Y>
+					<X>0</X><Y>-399.752</Y>
 					<Label><X>10</X><Y>10</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>false</ShowLabel>
-					<Lock>true</Lock>
 					<DrawMode>SHAPE_DRAW_2D3D</DrawMode>
 					<AsObject>true</AsObject>
 					<EmbeddedIcon>false</EmbeddedIcon>
@@ -1769,7 +1784,7 @@ System.out.println(
 					<LineMaterial>null</LineMaterial>
 					<LineStyle>DOTTED</LineStyle>
 					<Width>200</Width>
-					<Height>150</Height>
+					<Height>169.752</Height>
 					<Rotation>0.0</Rotation>
 					<FillColor>1811928832</FillColor>
 					<FillMaterial>null</FillMaterial>
@@ -1777,12 +1792,11 @@ System.out.println(
 				<Text>
 					<Id>1474901778895</Id>
 					<Name><![CDATA[das]]></Name>
-					<X>10</X><Y>-390</Y>
+					<X>10</X><Y>-387.268</Y>
 					<Label><X>0</X><Y>-10</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>false</ShowLabel>
-					<Lock>true</Lock>
 					<DrawMode>SHAPE_DRAW_2D</DrawMode>
 					<AsObject>true</AsObject>
 					<EmbeddedIcon>false</EmbeddedIcon>
@@ -1865,8 +1879,8 @@ System.out.println(
 						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
 					</RecurrenceCode>
 					<EmbeddedIcon>false</EmbeddedIcon>
-					<Width>1000</Width>
-					<Height>600</Height>
+					<Width>970</Width>
+					<Height>630</Height>
 					<BackgroundColor/>
 					<BorderColor/>
 					<ChartArea>
@@ -1879,7 +1893,7 @@ System.out.println(
 						<GridColor>-12566464</GridColor>
 					</ChartArea>
 					<Legend>
-						<Place>WEST</Place>
+						<Place>SOUTH</Place>
 						<TextColor>-16777216</TextColor>
 						<Size>30</Size>
 					</Legend>
@@ -2930,7 +2944,7 @@ traveledDist = sqrt(
 	pow(lastX-getX(), 2) +
 	pow(lastY-getY(), 2)
 	);
-dataSet.add(traveledDist);
+dataSet.add(time(), traveledDist);
 lastX = getX();
 lastY = getY();]]></Body>
 				</Function>
@@ -2955,7 +2969,7 @@ lastY = getY();]]></Body>
 						<Code><![CDATA[1]]></Code>
 						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
 					</RecurrenceCode>
-					<FreezeXAxis>true</FreezeXAxis>
+					<FreezeXAxis>false</FreezeXAxis>
 					<SamplesToKeep>100</SamplesToKeep>
 				</DataSet>
 			</AnalysisData>
@@ -3133,6 +3147,9 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[nAgvs]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[timeScale]]></ParameterName>
 				</Parameter>
 			</Parameters>			
 			<PresentationProperties 

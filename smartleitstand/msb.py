@@ -6,8 +6,7 @@ from vfk_msb_py.msb_ws4py_client import MsbWsClient
 from vfk_msb_py.msb_classes import *
 # from vfk_msb_py.msb_communicate import *
 
-from simulation import SimpSim
-
+import simulation
 
 def callback(m):
     if "NIO" in str(m):
@@ -28,8 +27,12 @@ def callback_start(message_dict):
 def callback_job(message_dict):
     args = message_dict['functionParameters'][0]['value']
     print(args)
-    Msb.s.set_speed_multiplier(args['dataObject'])
-
+    wait_for_sim()
+    Msb.s.new_job(
+        array([args['start_x'], args['start_y']]),
+        array([args['goal_x'], args['goal_y']]),
+        args['id']
+    )
 
 def callback_stop(message_dict):
     print("stop sim")
@@ -40,12 +43,8 @@ def callback_stop(message_dict):
 def callback_timing(message_dict):
     args = message_dict['functionParameters'][0]['value']
     print(args)
-    wait_for_sim()
-    Msb.s.new_job(
-        array([args['start_x'], args['start_y']]),
-        array([args['goal_x'], args['goal_y']]),
-        args['id']
-    )
+    Msb.s.set_speed_multiplier(args)
+
 
 def wait_for_sim():
     while not Msb.s:
@@ -55,7 +54,7 @@ def wait_for_sim():
 class Msb():
     s = False
 
-    def __init__(self, s: SimpSim):
+    def __init__(self, s):
         Msb.s = s
         print("s: " + str(s))
 
