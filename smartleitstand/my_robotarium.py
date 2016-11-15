@@ -1,11 +1,6 @@
 from numpy import *
-import simulation
-from PyQt4 import QtGui, QtCore
-
-green = QtGui.QColor(10, 200, 10, 127)
-blue = QtGui.QColor(10, 10, 200, 127)
-red = QtGui.QColor(200, 10, 10, 127)
-dark_grey = color = QtGui.QColor(10, 10, 10, 127)
+from robotarium import Robotarium, transformations, graph
+import json
 
 def pointFromPose(pose):
     poseVis = pose * Vis.scale
@@ -13,7 +8,7 @@ def pointFromPose(pose):
     return QtCore.QPoint(poseVis[0], poseVis[1])
 
 
-class Vis(QtGui.QWidget):
+class MyRob:
     """Visualisation of the AGVs and environment"""
 
     scale = False
@@ -25,27 +20,18 @@ class Vis(QtGui.QWidget):
     scene = False
 
     def __init__(self, simThread, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        print("init vis")
         print("simThread: " + str(simThread))
         Vis.simThread = simThread
-        self.connect(Vis.simThread, QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), self.open)
-        self.connect(Vis.simThread, QtCore.SIGNAL("update_car(PyQt_PyObject)"), self.update_car)
-        self.connect(Vis.simThread, QtCore.SIGNAL("update_route(PyQt_PyObject)"), self.update_route)
-        print("connected")
+        self.r = Robotarium()
 
-    def brush_for_car(self, car):
-        if not car.route:
-            brush = QtGui.QBrush(green)
-        elif not car.route.onRoute:
-            brush = QtGui.QBrush(blue)
-        elif car.route.onRoute:
-            brush = QtGui.QBrush(red)
-        return brush
+    def open(self, cars):
+        x = 1
+        y = 1
+        assert cars > self.r.get_available_agents(), "not that many agents available"
 
-    def open(self, x, y, cars):
-        desktop = QtGui.QDesktopWidget()
-        Vis.scale = int(min(
+        self.r.initialize(cars)
+
+        Vis.scale = float(min(
             desktop.geometry().width() / x,
             desktop.geometry().height() / y
         )/1.5)

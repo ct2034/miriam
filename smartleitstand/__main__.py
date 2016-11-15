@@ -49,6 +49,7 @@ if __name__ == '__main__':
     msb = False
     test = False
     vis = False
+    robotarium = False
 
     # sim
     msb = True
@@ -67,3 +68,7 @@ if __name__ == '__main__':
         window = Vis(simThread=simThread)
         window.show()
         sys.exit(app.exec_())
+
+    # robotarium
+    robotarium = True
+    if robotarium:
