@@ -5,13 +5,12 @@ import matplotlib.pyplot as plt
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-assert "mongodb" in sys.argv[-1], "please pass mongodb connection string"
+assert "mongodb:" in sys.argv[-1], "please pass mongodb connection string"
 
 client = MongoClient(str(sys.argv[-1]))
 db = client["robotarium-results"]
 collection = db.test_collection
 doc = collection.find_one({"_id": ObjectId("582c1a4afd94ce24372e7725")})
-# print(entry)
 
 keys = doc.keys()
 keylist = list(keys)
@@ -26,6 +25,9 @@ floatlist.sort()
 
 y = np.array(floatlist)
 
+fig = plt.figure()
+p = 1
+
 
 def get_array(entry):
     xlist = []
@@ -35,20 +37,23 @@ def get_array(entry):
 
 
 def plot_line(entry):
-    plt.figure()
+    fig.add_subplot(2, 2, p)
     plt.plot(y, get_array(entry))
     plt.title(entry)
     plt.legend(["x", "y", "ph"])
 
 
 plot_line("x")
+p += 1
 plot_line("x_goal")
+p += 1
 plot_line("dx")
+p += 1
 
 
 def plot_xy(entry):
+    fig.add_subplot(2, 2, p)
     x = get_array(entry)
-    plt.figure()
     plt.plot(x[:, 1], x[:, 0])
     plt.gca().set_aspect('equal')
     plt.title("X-Y " + entry)
