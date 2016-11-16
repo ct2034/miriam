@@ -1,4 +1,5 @@
 import pymongo
+import datetime
 
 client = pymongo.MongoClient(
     "mongodb://experiment:2VP8ewY2qn" +
@@ -6,6 +7,10 @@ client = pymongo.MongoClient(
     "robotarium-results"
 )
 db = client["robotarium-results"]
+
 collection = db.test_collection
-id = collection.insert_one({"test": 1}).inserted_id
+data = {"test": datetime.datetime.now()}
+print(data)
+
+id = collection.insert_one(data).inserted_id
 print(id)

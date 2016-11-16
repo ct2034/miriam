@@ -1,4 +1,4 @@
-import time
+import datetime
 import pymongo
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,7 +12,7 @@ r = Robotarium()
 n = r.get_available_agents()
 
 # Number of iterations.
-iterations = 200
+iterations = 1500
 
 # Initialize the Robotarium object with the desired number of agents.
 r.initialize(n)
@@ -21,9 +21,16 @@ r.initialize(n)
 # vector containing the linear and angular velocity, respectively.
 dx = np.zeros((2, n))
 
-x_goal = (np.random.rand(2, n) * .8 - .4) 
+x_goal = (np.random.rand(2, n) * .8 - .4)
 
-nearest_neighbors = np.zeros((n, iterations))
+start_time = datetime.datetime.now()
+
+data = {}
+data["experiment"] = {
+    "n": n,
+    "iterations": iterations,
+    "start": start_time
+}
 
 # iterate for the previously specified number of iterations.
 for it in range(iterations):
@@ -32,12 +39,9 @@ for it in range(iterations):
     x = r.get_poses()
     x_temp = x[0:2, :]
 
-    for agent in range(n):
-        nearest_neighbors[agent-1, it] = np.count_nonzero(r.get_d_disk_neighbors(agent, 0.2))
-
     # New goal?
-    if np.linalg.norm(x_goal-x_temp, ord=1) < 0.08:
-        x_goal = np.random.rand(2, n)-.5
+    if np.linalg.norm(x_goal - x_temp, ord=1) < 0.08:
+        x_goal = np.random.rand(2, n) - .5
         print("New goal")
 
     dx = controllers.position_int(x, x_goal, 0.9)
@@ -55,7 +59,22 @@ for it in range(iterations):
     # diffeomorphism, which can be found in the utilities.
     dx = transformations.int_to_uni2(dx, x, 0.75, np.pi)
 
-    # Set velocities of agents 1,...,n
+    # SAVE SOME METRICS ...
+    if it % 10 is 0:
+        now = datetime.datetime.now()
+        now_str = str(
+            (now - start_time).total_seconds()
+        ).replace('.', '_')
+        data[now_str] = {}
+        data[now_str]["t"] = now
+        for agent in range(n):
+            data[now_str][str(agent)] = {
+                "x": x[:, agent].tolist(),
+                "x_goal": x_goal[:, agent].tolist(),
+                "dx": dx[:, agent].tolist()
+            }
+
+        # Set velocities of agents 1,...,n
     r.set_velocities(range(0, n), dx)
 
     perc = (it / iterations * 100)
@@ -70,13 +89,25 @@ legend = []
 for agent in range(n):
     legend.append(str(agent))
 
-plt.figure()
-plt.plot(np.transpose(nearest_neighbors))
-plt.legend(legen)d
-plt.savefig(str(
-    time.ctime())
-    .replace(' ','')
-    .replace(':','')
-    +".png")
+# plt.figure()
+# plt.plot(np.transpose(nearest_neighbors))
+# plt.legend(legend)
+# plt.savefig(str(
+#     time.ctime())
+#     .replace(' ', '')
+#     .replace(':', '')
+#     + ".png")
 
-client = pymongo.MongoClient("mongodb://experiment:2VP8ewY2qn@ds050539.mlab.com:50539/robotarium-results")
+data["experiment"].update({"end": datetime.datetime.now()})
+
+client = pymongo.MongoClient(
+    "mongodb://experiment:2VP8ewY2qn" +
+    "@ds050539.mlab.com:50539/" +
+    "robotarium-results"
+)
+db = client["robotarium-results"]
+collection = db.test_collection
+print(data)
+
+id = collection.insert_one(data).inserted_id
+print("Saved reults with id: ", id)
