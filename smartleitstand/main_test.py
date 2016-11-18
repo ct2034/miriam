@@ -22,7 +22,7 @@ def test_write_mongodb():
     }
     print(data)
 
-    # id = collection.insert_one(data).inserted_id
-    # print(id)
+    id = collection.insert_one(data).inserted_id
+    print(id)
 
 test_write_mongodb()
