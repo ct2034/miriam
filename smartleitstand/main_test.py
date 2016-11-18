@@ -11,14 +11,14 @@ db = client["robotarium-results"]
 
 collection = db.test_collection
 
+def run_command(bashCommand):
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    return process.communicate()[0].decode()
 
 def test_write_mongodb():
-    bashCommand = "hostname"
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    hostname = process.communicate()[0]
     data = {
         "time": datetime.datetime.now(),
-        "host": hostname.decode()
+        "host": run_command("hostname")
     }
     print(data)
 
