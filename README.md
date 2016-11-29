@@ -1,8 +1,8 @@
-# cloudsim
+# smartleitstand
 
 [![Build Status](https://travis-ci.com/ct2034/smartleitstand.svg?token=h8cyxU2xaFZFLypWpbG5&branch=master)](https://travis-ci.com/ct2034/smartleitstand)
 
-## General
+## Simulation
 
 ### Cloudsim
 What can a Simulation do in the cloud?
