@@ -1,27 +1,30 @@
 import numpy as np
-from datetime import datetime
+# from datetime import datetime
 
 import estimator as e
 
 
-def generate_data():
+def generate_data(
+        trips_todo: int = 10000,
+        timestep: float = .1,
+        nr_agents: int = 5,
+        nr_landmarks: int = 8
+        ) -> list:
     """
     generating example data that simulates a number of
     agvs
     """
-    nr_agents = 5
-    duration_landmarks_mean = np.arange(4, 12)
+    duration_landmarks_mean = np.arange(4, 4+nr_landmarks)
     duration_landmarks_std = 4
-    nr_landmarks = len(duration_landmarks_mean)
-    duration_travel = 15
-    trips_todo = 10000
-    timestep = .5
+    assert nr_landmarks == len(duration_landmarks_mean)
+    duration_travel_mean = 15
+    duration_travel_std = 2
 
     location = np.zeros(nr_agents)
     timeout = np.zeros(nr_agents)
-    history = []
+    _history = []
     t = 0
-    while len(history) < trips_todo:
+    while len(_history) < trips_todo:
 
         at_timeout = timeout <= 0
         at_landmark = location % 1 == 0
@@ -32,9 +35,12 @@ def generate_data():
             next_landmark = (current_landmark + 1) % nr_landmarks
 
             location[agent] = current_landmark + 0.5
-            timeout[agent] = duration_travel
+            timeout[agent] = np.random.normal(
+                loc=duration_travel_mean,
+                scale=duration_travel_std
+            )
 
-            history.append([t, current_landmark, next_landmark])
+            _history.append([t, current_landmark, next_landmark])
 
         # update agents arriving at stations
         for agent in np.arange(nr_agents)[np.invert(at_landmark) & at_timeout]:
@@ -49,7 +55,7 @@ def generate_data():
         t += timestep
         timeout -= timestep
 
-    return history
+    return _history
 
 
 def base_test():
@@ -59,9 +65,19 @@ def base_test():
     assert e.estimation(s, 4, 5) == (1, 0), "with only one update we expect a clear result"
 
 
+def list_test():
+    n = 8  # number of landmarks
+    s = e.init(4)
+    l = generate_data(1000, .1, 4, n)
+    s = e.update_list(s, l)
+    e.info(s)
+
+
 if __name__ == "__main__":
-    start = datetime.now()
-    history = generate_data()
-    print("Generated", len(history), "samples")
-    print(history[-5:])
-    print("Computation took", str((datetime.now()-start).total_seconds()), "s")
+    print("main")
+    # start = datetime.now()
+    # history = generate_data()
+    # print("Generated", len(history), "samples")
+    # print(history[-5:])
+    # print("Computation took", str((datetime.now()-start).total_seconds()), "s")
+    list_test()
