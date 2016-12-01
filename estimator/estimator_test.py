@@ -15,10 +15,10 @@ def generate_data(
     agvs
     """
     duration_landmarks_mean = np.arange(4, 4+nr_landmarks)
-    duration_landmarks_std = 4
+    duration_landmarks_std = 1
     assert nr_landmarks == len(duration_landmarks_mean)
     duration_travel_mean = 15
-    duration_travel_std = 2
+    duration_travel_std = 1
 
     location = np.zeros(nr_agents)
     timeout = np.zeros(nr_agents)
@@ -67,8 +67,8 @@ def base_test():
 
 def list_test():
     n = 8  # number of landmarks
-    s = e.init(4)
-    l = generate_data(1000, .1, 4, n)
+    s = e.init(n)
+    l = generate_data(1000, .1, nr_agents=4, nr_landmarks=n)
     s = e.update_list(s, l)
     e.info(s)
 

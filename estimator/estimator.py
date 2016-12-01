@@ -1,51 +1,76 @@
+import itertools
+
 import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use('bmh')
 
 
 class state:
-    t_mean = False
-    t_std = False
-    n = 0
+    last = {}
+    nr_landmarks = 0
     iterations = 0
-    last = 0
-    stat = []
+
+    testing = []
+    legend = []
 
 
-def update(s, t, start, goal):
+def update(_s: state, t: float, start: int, goal: int):
     """
     Update for new job
-    :param s: the state
+    :param _s: the state
     :param t: time the job occurred
     :param start: start landmark
     :param goal: goal landmark
     """
-    s.iterations += 1
-    s.t_mean[start][goal] = t
-    s.last = t
+    _s.iterations += 1
+
+    # TODO: this is only a test for one pair: now from 2, when last to all?
+    l = []
+    legend = []
+    legend_set = False
+
+    def from_to(_pair, l):
+        if (_pair in _s.last.keys()):
+            l.append(t - _s.last[_pair])
+            if not legend_set:
+                legend.append(str(_pair))
+        return l
+
+    if start == 2:  # TODO: assuming current testcase
+        for pair in filter(lambda x: True, itertools.product(range(_s.nr_landmarks), repeat=2)):
+            l = from_to(pair, l)
+
+    if len(l) == _s.nr_landmarks:
+        _s.testing.append(l)
+        _s.legend = legend
+        legend_set = True
+
+    key = (int(start), int(goal))
+    _s.last.update({key: t})
+
+    return _s
 
 
-def update_list(s, l):
+def update_list(_s: state, l: list):
     """
     Update for s list of jobs
-    :param s: the state
+    :param _s: the state
     :param l: list of jobs
     """
-    window_size = s.n * 20
-    for i, job in enumerate(l):
-        iback = i
-        seen = nb.zeros(s.n)
-        while iback > 0 & nb.all(seen):
-            if j[1] == 0:  # previous to 0
-                print("to be implemented")
+    for j in l:
+        _s = update(_s, j[0], j[1], j[2])
 
-            iback -= 1
+    return _s
 
 
-def info(s):
+def info(_s):
     """
     Print info about current state
-    :param s: the state
+    :param _s: the state
     """
-    print("to be implemented")
+    plt.plot(np.array(_s.testing))
+    plt.legend(_s.legend)
+    plt.show()
 
 
 def init(n):
@@ -53,15 +78,9 @@ def init(n):
     Initialize the state
     :param n: number of landmarks
     """
-    s = state
-    s.n = n
-    s.t_mean = np.array(
-        [[1 / n for i in range(n)] for i in range(n)]
-    )
-    s.t_std = np.array(
-        [[999 for i in range(n)] for i in range(n)]
-    )
-    return state
+    _s = state
+    _s.nr_landmarks = n
+    return _s
 
 
 def estimation(s, start, goal):
@@ -71,7 +90,7 @@ def estimation(s, start, goal):
     :param start: the start landmark to check
     :param goal: the goal
     """
-    return s.t_mean[start][goal], s.t_std[start][goal]
+    raise NotImplementedError()
 
 
 if __name__ == "__main__":
