@@ -100,10 +100,11 @@ def info(_s: state):
     #smooth
     smooth = np.array(_s.testing)
     for i in range(_s.nr_landmarks):
-        smooth[:, i] = savitzky_golay(np.array(_s.testing)[:, i], 19, 5)
+        smooth[:, i] = savitzky_golay(np.array(_s.testing)[:, i], 23, 3)
 
     plt.plot(smooth)
     plt.legend(_s.legend)
+
     plt.show()
 
 
