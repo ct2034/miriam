@@ -2,6 +2,7 @@ import itertools
 
 import numpy as np
 import matplotlib.pyplot as plt
+
 plt.style.use('bmh')
 
 import pymc3 as pm
@@ -19,6 +20,7 @@ class state:
     mean_sd = np.array([])
     std_mu = np.array([])
     std_sd = np.array([])
+    trace = False
 
 
 def update(_s: state, t: float, start: int, goal: int):
@@ -37,10 +39,10 @@ def update(_s: state, t: float, start: int, goal: int):
 
     # Save job in list
     for index_i in itertools.product(tuple(range(_s.nr_landmarks)),
-                                     repeat=2): #  for all last starts and goals
+                                     repeat=2):  # for all last starts and goals
         current_duration = t - _s.last_timestamp[index_i]
         if ((current_duration > 0) &
-            (_s.last_timestamp[index_i] != -1)):
+                (_s.last_timestamp[index_i] != -1)):
             index_save = (index_i[1], index[0])  # last goal + this start
             _s.durations_values[index_save] += 1
             _s.durations[:, index_save[0], index_save[1]] = np.roll(_s.durations[:, index_save[0], index_save[1]], 1)
@@ -48,10 +50,41 @@ def update(_s: state, t: float, start: int, goal: int):
 
     # Build model
     if ((_s.iterations > _s.durations.shape[0]) &
-        (np.min(_s.durations_values[_s.durations_values>0]) > _s.durations.shape[0])):
-        with pm.Model() as model:
+            (np.max(_s.durations_values) > 0)):
+        if np.min(_s.durations_values[_s.durations_values > 0]) > _s.durations.shape[0]:
+            n = _s.nr_landmarks
+            with pm.Model() as model:
+                timing(True)
+                mean = pm.Normal('mean', mu=_s.mean_mu, sd=_s.mean_sd, shape=(n, n))
 
+                std = pm.Normal('std', mu=_s.std_mu, sd=_s.std_sd, shape=(n, n))
 
+                Y = pm.Normal('Y', mu=mean, sd=std, observed=_s.durations)
+
+                start = pm.find_MAP()
+                print("found start")
+                timing()
+
+                step = pm.NUTS()
+
+                _s.trace = pm.sample(500, step, start=start, progressbar=True)
+                print("sample finished")
+                timing()
+
+                info(_s)
+    # Evaluate results
+                #TODO: before saving results, check for correct correlation
+                mean_trace = _s.trace.get_values('mean')
+                std_trace = _s.trace.get_values('std')
+
+                burnin = int(.3 * len(alpha_trace))
+
+                _s.mean_mu = np.mean(mean_trace[burnin:,:,:], axis = 0)
+                _s.mean_sd = np.std(mean_trace[burnin:,:,:], axis = 0)
+                assert np.shape(alpha_mean) == (n, n), "Wrong Dimensions"
+
+                _s.std_mu = np.mean(std_trace[burnin:,:,:], axis = 0)
+                _s.std_sd = np.std(std_trace[burnin:,:,:], axis = 0)
 
     return _s
 
@@ -79,13 +112,15 @@ def info(_s: state):
     print("min durations", np.min(_s.durations))
     print("min durations[0]", np.min(_s.durations[0]))
     print("max durations", np.max(_s.durations))
-    print("max durations[0,:,:]", np.max(_s.durations[0,:,:]))
+    print("max durations[0,:,:]", np.max(_s.durations[0, :, :]))
     print("min durations_values", np.min(_s.durations_values))
     print("min durations_values[0]", np.min(_s.durations_values[0]))
     print("max durations_values", np.max(_s.durations_values))
     print("-----")
 
-
+    _ = pm.traceplot(_s.trace,
+                     varnames=['mean',
+                               'std'])
 
 def init(n):
     """
@@ -100,7 +135,10 @@ def init(n):
     _s.last_timestamp = np.zeros([n, n], dtype=float) - 1
 
     # model
-    
+    _s.mean_mu = np.ones([n, n]) * 2
+    _s.mean_sd = np.ones([n, n])
+    _s.std_mu = np.ones([n, n]) * .1
+    _s.std_sd = np.ones([n, n])
 
     return _s
 
@@ -113,6 +151,23 @@ def estimation(s, start, goal):
     :param goal: the goal
     """
     raise NotImplementedError()
+
+
+last = False
+
+
+def timing(reset=False):
+    from datetime import datetime
+    global last
+    global startt
+    if reset or not last:
+        last = datetime.now()
+        startt = datetime.now()
+    else:
+        duration = datetime.now() - last
+        print('last:', duration.total_seconds(), 's')
+        print('total:', (datetime.now() - startt).total_seconds(), 's')
+        last = datetime.now()
 
 
 if __name__ == "__main__":
