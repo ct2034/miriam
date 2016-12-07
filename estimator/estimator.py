@@ -4,14 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('bmh')
 
+import pymc3 as pm
+
 
 class state:
-    last = {}
     nr_landmarks = 0
     iterations = 0
 
-    testing = []
-    legend = []
+    durations = np.array([])
+    durations_values = np.array([])
+    last_timestamp = np.array([])
+
+    mean_mu = np.array([])
+    mean_sd = np.array([])
+    std_mu = np.array([])
+    std_sd = np.array([])
 
 
 def update(_s: state, t: float, start: int, goal: int):
@@ -23,30 +30,28 @@ def update(_s: state, t: float, start: int, goal: int):
     :param goal: goal landmark
     """
     _s.iterations += 1
+    index = (int(start), int(goal))
 
-    # TODO: this is only a test for one pair: now from 2, when last to all?
-    l = []
-    legend = []
-    legend_set = False
+    # Saving this timestamp
+    _s.last_timestamp[index] = t
 
-    def from_to(_pair, l):
-        if (_pair in _s.last.keys()):
-            l.append(t - _s.last[_pair])
-            if not legend_set:
-                legend.append(str(_pair))
-        return l
+    # Save job in list
+    for index_i in itertools.product(tuple(range(_s.nr_landmarks)),
+                                     repeat=2): #  for all last starts and goals
+        current_duration = t - _s.last_timestamp[index_i]
+        if ((current_duration > 0) &
+            (_s.last_timestamp[index_i] != -1)):
+            index_save = (index_i[1], index[0])  # last goal + this start
+            _s.durations_values[index_save] += 1
+            _s.durations[:, index_save[0], index_save[1]] = np.roll(_s.durations[:, index_save[0], index_save[1]], 1)
+            _s.durations[0, index_save[0], index_save[1]] = current_duration
 
-    if start == 2:  # TODO: assuming current testcase
-        for pair in filter(lambda x: True, itertools.product(range(_s.nr_landmarks), repeat=2)):
-            l = from_to(pair, l)
+    # Build model
+    if ((_s.iterations > _s.durations.shape[0]) &
+        (np.min(_s.durations_values[_s.durations_values>0]) > _s.durations.shape[0])):
+        with pm.Model() as model:
 
-    if len(l) == _s.nr_landmarks:
-        _s.testing.append(l)
-        _s.legend = legend
-        legend_set = True
 
-    key = (int(start), int(goal))
-    _s.last.update({key: t})
 
     return _s
 
@@ -63,49 +68,23 @@ def update_list(_s: state, l: list):
     return _s
 
 
-def savitzky_golay(y, window_size, order, deriv=0, rate=1):
-    """
-    src: https://stackoverflow.com/questions/22988882/how-to-smooth-a-curve-in-python
-    """
-    import numpy as np
-    from math import factorial
-
-    try:
-        window_size = np.abs(np.int(window_size))
-        order = np.abs(np.int(order))
-    except ValueError as msg:
-        raise ValueError("window_size and order have to be of type int")
-    if window_size % 2 != 1 or window_size < 1:
-        raise TypeError("window_size size must be a positive odd number")
-    if window_size < order + 2:
-        raise TypeError("window_size is too small for the polynomials order")
-    order_range = range(order+1)
-    half_window = (window_size -1) // 2
-    # precompute coefficients
-    b = np.mat([[k**i for i in order_range] for k in range(-half_window, half_window+1)])
-    m = np.linalg.pinv(b).A[deriv] * rate**deriv * factorial(deriv)
-    # pad the signal at the extremes with
-    # values taken from the signal itself
-    firstvals = y[0] - np.abs( y[1:half_window+1][::-1] - y[0] )
-    lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
-    y = np.concatenate((firstvals, y, lastvals))
-    return np.convolve( m[::-1], y, mode='valid')
-
-
 def info(_s: state):
     """
     Print info about current state
     :param _s: the state
     """
-    #smooth
-    smooth = np.array(_s.testing)
-    for i in range(_s.nr_landmarks):
-        smooth[:, i] = savitzky_golay(np.array(_s.testing)[:, i], 23, 3)
+    print("=====")
+    print("Iterations:", _s.iterations)
+    print("-----")
+    print("min durations", np.min(_s.durations))
+    print("min durations[0]", np.min(_s.durations[0]))
+    print("max durations", np.max(_s.durations))
+    print("max durations[0,:,:]", np.max(_s.durations[0,:,:]))
+    print("min durations_values", np.min(_s.durations_values))
+    print("min durations_values[0]", np.min(_s.durations_values[0]))
+    print("max durations_values", np.max(_s.durations_values))
+    print("-----")
 
-    plt.plot(smooth)
-    plt.legend(_s.legend)
-
-    plt.show()
 
 
 def init(n):
@@ -113,8 +92,16 @@ def init(n):
     Initialize the state
     :param n: number of landmarks
     """
+    window_length = 100
     _s = state
     _s.nr_landmarks = n
+    _s.durations = np.zeros([window_length, n, n], dtype=float)
+    _s.durations_values = np.zeros([n, n], dtype=int)
+    _s.last_timestamp = np.zeros([n, n], dtype=float) - 1
+
+    # model
+    
+
     return _s
 
 
