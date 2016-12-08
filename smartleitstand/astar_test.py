@@ -1,3 +1,4 @@
+import datetime
 import numpy as np
 
 from smartleitstand import astar
@@ -26,6 +27,12 @@ def test_astar():
     map[2, 4:8] = -1
     map[2:, 8] = -1
 
+    start = datetime.datetime.now()
     path = astar.astar((1, 1), (9, 9), map)
+    duration = (datetime.datetime.now() - start).total_seconds()
 
     assert astar.path_length(path) < 33.8994949367
+
+    print(duration, "s")
+
+    assert duration < .05
