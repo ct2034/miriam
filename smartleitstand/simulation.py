@@ -1,14 +1,11 @@
-from random import randint
-
-from numpy import *
 import time
-import threading
-import random
-from PyQt4 import QtGui, QtCore
-from apscheduler.schedulers.background import BackgroundScheduler
 
-import smartleitstand
 import msb
+from PyQt4 import QtCore
+from apscheduler.schedulers.background import BackgroundScheduler
+from numpy import *
+
+import astar
 
 
 def work_queue():
@@ -20,7 +17,7 @@ def work_queue():
             routeTodo = SimpSim.queue.pop()
             break
     if routeTodo:
-        routeTodo.assign_car(smartleitstand.which_car(freeCars, routeTodo, []))
+        routeTodo.assign_car(astar.which_car(freeCars, routeTodo, []))
         SimpSim.activeRoutes.append(routeTodo)
         # SimpSim.v.update_queue(SimpSim.queue)
 
