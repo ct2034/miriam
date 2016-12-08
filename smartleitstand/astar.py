@@ -1,4 +1,4 @@
-from numpy import *
+import numpy as np
 
 
 def astar(start, goal, map):
@@ -14,12 +14,12 @@ def astar(start, goal, map):
     cameFrom = {}
 
     # For each node, the cost of getting from the start node to that node.
-    g_score = ones(map.shape) + Inf
+    g_score = np.full(map.shape, np.Inf)
     # The cost of going from start to start is zero.
     g_score[start] = 0
     # For each node, the total cost of getting from the start node to the goal
     # by passing by that node. That value is partly known, partly heuristic.
-    f_score = zeros(map.shape) + Inf
+    f_score = np.full(map.shape, np.Inf)
     # For the first node, that value is completely heuristic.
     f_score[start] = heuristic(start, goal, map)
 
@@ -63,7 +63,7 @@ def get_children(current, grid):
     __children = []
     # for d in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
     for d in [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]:
-        checking = array(current) + array(d)
+        checking = np.array(current) + np.array(d)
         if (
             (checking[0] < grid.shape[0]) &  # bounds ->
             (checking[1] < grid.shape[1]) &  # bounds ->|
@@ -76,15 +76,18 @@ def get_children(current, grid):
 
 
 def heuristic(a, b, grid):
-    return mean(abs(grid)) * distance(a, b)
+    return np.mean(abs(grid)) * distance(a, b)
 
 
 def cost(a, b, grid):
-    return grid[a] * distance(a, b)
+    if np.max(grid) > 0:
+        return grid[a] * distance(a, b)
+    else:
+        return distance(a, b)
 
 
 def distance(a, b):
-    return linalg.norm(array(a, dtype=float) - array(b, dtype=float))
+    return np.linalg.norm(np.array(a, dtype=float) - np.array(b, dtype=float))
 
 
 def path_length(path):
@@ -99,7 +102,7 @@ def path_length(path):
 
 
 def min_f_open(open, f_score):
-    current_min_val = Inf
+    current_min_val = np.Inf
     current_min_index = 0
     for o in open:
         if f_score[o] < current_min_val:
