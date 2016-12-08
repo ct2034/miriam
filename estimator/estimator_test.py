@@ -48,7 +48,7 @@ def generate_data(
 
             location[agent] = arriving_landmark
             timeout[agent] = np.random.normal(
-                loc=duration_landmarks_mean[agent],
+                loc=duration_landmarks_mean[arriving_landmark],
                 scale=duration_landmarks_std
             )
 
@@ -65,12 +65,20 @@ def base_test():
     assert e.estimation(s, 4, 5) == (1, 0), "with only one update we expect a clear result"
 
 
+def fix_neg_values_test():
+    a = np.linspace(-1, 1, 100)
+    assert np.min(e.fix_neg_values(a)) == 0, "failed to fix negative values"
+
+
 def list_test():
-    n = 8  # number of landmarks
+    np.random.seed(42)
+    n = 3  # number of landmarks
     s = e.init(n)
-    l = generate_data(1000, .1, nr_agents=4, nr_landmarks=n)
+    l = generate_data(92, .1, nr_agents=4, nr_landmarks=n) 
+    #  with this setup window is full at iteration 88
     s = e.update_list(s, l)
-    e.info(s)
+    e.info(s, plot=True)
+
 
 
 if __name__ == "__main__":

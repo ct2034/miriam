@@ -1,5 +1,7 @@
 import itertools
+import collections
 
+import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -23,13 +25,15 @@ class state:
     trace = False
 
 
-def update(_s: state, t: float, start: int, goal: int):
+def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, std_delta: float = 1):
     """
     Update for new job
     :param _s: the state
     :param t: time the job occurred
     :param start: start landmark
     :param goal: goal landmark
+    :param std_spread: how to increase model params stds after each model update
+    :param std_delta: how to increase model params stds after each model update
     """
     _s.iterations += 1
     index = (int(start), int(goal))
@@ -48,11 +52,25 @@ def update(_s: state, t: float, start: int, goal: int):
             _s.durations[:, index_save[0], index_save[1]] = np.roll(_s.durations[:, index_save[0], index_save[1]], 1)
             _s.durations[0, index_save[0], index_save[1]] = current_duration
 
-    # Build model
     if ((_s.iterations > _s.durations.shape[0]) &
             (np.max(_s.durations_values) > 0)):
         if np.min(_s.durations_values[_s.durations_values > 0]) > _s.durations.shape[0]:
             n = _s.nr_landmarks
+
+            # Removing zero values from durations
+            durations_mean = np.mean(_s.durations[_s.durations > 0])
+            durations_std = np.std(_s.durations[_s.durations > 0])
+
+            zeros = 0 == np.min(_s.durations, axis=0)
+            for zero in itertools.product(tuple(range(_s.nr_landmarks)), repeat=2):
+                if zeros[zero]:
+                    _s.durations[:,
+                                 zero[0],
+                                 zero[1]] = np.random.normal(loc=durations_mean,
+                                                             scale=durations_std,
+                                                             size=_s.durations.shape[0])
+
+            # Build model
             with pm.Model() as model:
                 timing(True)
                 mean = pm.Normal('mean', mu=_s.mean_mu, sd=_s.mean_sd, shape=(n, n))
@@ -61,7 +79,7 @@ def update(_s: state, t: float, start: int, goal: int):
 
                 Y = pm.Normal('Y', mu=mean, sd=std, observed=_s.durations)
 
-                start = pm.find_MAP()
+                start = pm.find_MAP(fmin=scipy.optimize.fmin_powell)
                 print("found start")
                 timing()
 
@@ -72,21 +90,27 @@ def update(_s: state, t: float, start: int, goal: int):
                 timing()
 
                 info(_s)
-    # Evaluate results
-                #TODO: before saving results, check for correct correlation
+                # Evaluate results
+                # TODO: before saving results, check for correct correlation
                 mean_trace = _s.trace.get_values('mean')
                 std_trace = _s.trace.get_values('std')
 
-                burnin = int(.3 * len(alpha_trace))
+                burnin = int(.3 * len(mean_trace))
 
-                _s.mean_mu = np.mean(mean_trace[burnin:,:,:], axis = 0)
-                _s.mean_sd = np.std(mean_trace[burnin:,:,:], axis = 0)
-                assert np.shape(alpha_mean) == (n, n), "Wrong Dimensions"
+                _s.mean_mu = fix_neg_values(np.mean(mean_trace[burnin:, :, :], axis=0))
+                _s.mean_sd = (fix_neg_values(np.std(mean_trace[burnin:, :, :], axis=0))
+                              + std_delta ) * std_spread
+                assert np.shape(_s.mean_mu) == (n, n), "Wrong Dimensions"
 
-                _s.std_mu = np.mean(std_trace[burnin:,:,:], axis = 0)
-                _s.std_sd = np.std(std_trace[burnin:,:,:], axis = 0)
-
+                _s.std_mu = fix_neg_values(np.mean(std_trace[burnin:, :, :], axis=0))
+                _s.std_sd = (fix_neg_values(np.std(std_trace[burnin:, :, :], axis=0))
+                             + std_delta ) * std_spread
     return _s
+
+
+def fix_neg_values(_array):
+    _array[_array < 0] = 0
+    return _array
 
 
 def update_list(_s: state, l: list):
@@ -101,10 +125,11 @@ def update_list(_s: state, l: list):
     return _s
 
 
-def info(_s: state):
+def info(_s: state, plot: bool = False):
     """
     Print info about current state
     :param _s: the state
+    :param plot: whether to plot something
     """
     print("=====")
     print("Iterations:", _s.iterations)
@@ -118,16 +143,22 @@ def info(_s: state):
     print("max durations_values", np.max(_s.durations_values))
     print("-----")
 
-    _ = pm.traceplot(_s.trace,
-                     varnames=['mean',
-                               'std'])
+    pm_params = {'trace':_s.trace,
+                 'varnames':['mean', 'std']}
+
+    pm.summary(**pm_params)
+
+    if plot:
+        pm.traceplot(**pm_params)
+        pm.autocorrplot(**pm_params)
+
 
 def init(n):
     """
     Initialize the state
     :param n: number of landmarks
     """
-    window_length = 100
+    window_length = 8 * n
     _s = state
     _s.nr_landmarks = n
     _s.durations = np.zeros([window_length, n, n], dtype=float)
@@ -135,10 +166,10 @@ def init(n):
     _s.last_timestamp = np.zeros([n, n], dtype=float) - 1
 
     # model
-    _s.mean_mu = np.ones([n, n]) * 2
-    _s.mean_sd = np.ones([n, n])
-    _s.std_mu = np.ones([n, n]) * .1
-    _s.std_sd = np.ones([n, n])
+    _s.mean_mu = np.ones([n, n]) * 30
+    _s.mean_sd = np.ones([n, n]) * 5
+    _s.std_mu = np.ones([n, n]) * 4
+    _s.std_sd = np.ones([n, n]) * 2
 
     return _s
 
@@ -159,14 +190,14 @@ last = False
 def timing(reset=False):
     from datetime import datetime
     global last
-    global startt
+    global start
     if reset or not last:
         last = datetime.now()
-        startt = datetime.now()
+        start = datetime.now()
     else:
         duration = datetime.now() - last
         print('last:', duration.total_seconds(), 's')
-        print('total:', (datetime.now() - startt).total_seconds(), 's')
+        print('total:', (datetime.now() - start).total_seconds(), 's')
         last = datetime.now()
 
 
