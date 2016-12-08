@@ -1,4 +1,6 @@
-import datetime
+
+import timeit
+
 import numpy as np
 
 from smartleitstand import astar
@@ -27,12 +29,18 @@ def test_astar():
     map[2, 4:8] = -1
     map[2:, 8] = -1
 
-    start = datetime.datetime.now()
-    path = astar.astar((1, 1), (9, 9), map)
-    duration = (datetime.datetime.now() - start).total_seconds()
+    # timing ..
+    measurements = 10
+    duration = np.zeros(measurements)
 
-    assert astar.path_length(path) < 33.8994949367
+    t = timeit.Timer()
 
-    print(duration, "s")
+    for i in range(measurements):
+        t.timeit()
+        path = astar.astar((1, 1), (9, 9), map)
 
-    assert duration < .05
+        assert astar.path_length(path) < 33.8994949367
+
+    print("duration mean:", np.mean(t.repeat()), "s, std:", np.std(t.repeat()))
+
+    assert np.mean(t.repeat()) < .05

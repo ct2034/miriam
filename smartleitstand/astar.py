@@ -60,19 +60,17 @@ def reconstruct_path(came_from, current):
 
 
 def get_children(current, grid):
-    __children = []
-    # for d in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-    for d in [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]:
-        checking = np.array(current) + np.array(d)
-        if (
-                            (checking[0] < grid.shape[0]) &  # bounds ->
-                            (checking[1] < grid.shape[1]) &  # bounds ->|
-                        (checking[0] >= 0) &  # bounds  <-
-                    (checking[1] >= 0)  # bounds |<-
-        ):
-            if grid[tuple(checking)] >= 0:  # free
-                __children.append(tuple(checking))
-    return __children
+    _children = []
+    for d in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:  # ugly but faster
+        checking = (d[0]+current[0], d[1]+current[1])  # ugly but faster
+        try:
+            if np.min(checking) >= 0:  # no negative coord to not wrap
+                grid_checking = grid[checking]
+                if grid_checking >= 0:  # no obstacle
+                    _children.append(checking)
+        except IndexError:
+            pass
+    return _children
 
 
 def heuristic(a, b, grid):
