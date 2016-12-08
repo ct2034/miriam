@@ -18,6 +18,9 @@ class state:
     durations_values = np.array([])
     last_timestamp = np.array([])
 
+    """Where in the durations have been zeros?"""
+    zeros = np.array([])
+
     mean_mu = np.array([])
     mean_sd = np.array([])
     std_mu = np.array([])
@@ -61,9 +64,9 @@ def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, st
             durations_mean = np.mean(_s.durations[_s.durations > 0])
             durations_std = np.std(_s.durations[_s.durations > 0])
 
-            zeros = 0 == np.min(_s.durations, axis=0)
+            _s.zeros = 0 == np.min(_s.durations, axis=0)
             for zero in itertools.product(tuple(range(_s.nr_landmarks)), repeat=2):
-                if zeros[zero]:
+                if _s.zeros[zero]:
                     _s.durations[:,
                                  zero[0],
                                  zero[1]] = np.random.normal(loc=durations_mean,
@@ -79,7 +82,7 @@ def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, st
 
                 Y = pm.Normal('Y', mu=mean, sd=std, observed=_s.durations)
 
-                start = pm.find_MAP(fmin=scipy.optimize.fmin_powell)
+                start = pm.find_MAP()
                 print("found start")
                 timing()
 
@@ -89,7 +92,7 @@ def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, st
                 print("sample finished")
                 timing()
 
-                info(_s)
+                info(_s, True)
                 # Evaluate results
                 # TODO: before saving results, check for correct correlation
                 mean_trace = _s.trace.get_values('mean')
@@ -151,6 +154,8 @@ def info(_s: state, plot: bool = False):
     if plot:
         pm.traceplot(**pm_params)
         pm.autocorrplot(**pm_params)
+
+    print("=====\n\n")
 
 
 def init(n):
