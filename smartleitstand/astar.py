@@ -65,10 +65,10 @@ def get_children(current, grid):
     for d in [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]:
         checking = np.array(current) + np.array(d)
         if (
-            (checking[0] < grid.shape[0]) &  # bounds ->
-            (checking[1] < grid.shape[1]) &  # bounds ->|
-            (checking[0] >= 0) &  # bounds  <-
-            (checking[1] >= 0)  # bounds |<-
+                            (checking[0] < grid.shape[0]) &  # bounds ->
+                            (checking[1] < grid.shape[1]) &  # bounds ->|
+                        (checking[0] >= 0) &  # bounds  <-
+                    (checking[1] >= 0)  # bounds |<-
         ):
             if grid[tuple(checking)] >= 0:  # free
                 __children.append(tuple(checking))

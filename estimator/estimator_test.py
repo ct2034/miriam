@@ -1,6 +1,6 @@
-import numpy as np
-# from datetime import datetime
 import unittest
+
+import numpy as np
 
 import estimator as e
 
@@ -10,12 +10,12 @@ def generate_data(
         timestep: float = .1,
         nr_agents: int = 5,
         nr_landmarks: int = 8
-        ) -> list:
+) -> list:
     """
     generating example data that simulates a number of
     agvs
     """
-    duration_landmarks_mean = np.arange(4, 4+nr_landmarks)
+    duration_landmarks_mean = np.arange(4, 4 + nr_landmarks)
     duration_landmarks_std = 1
     assert nr_landmarks == len(duration_landmarks_mean)
     duration_travel_mean = 15
@@ -63,7 +63,6 @@ def generate_data(
 def base_test():
     s = e.init(8)
     e.update(s, 0, 4, 5)
-
     assert e.estimation(s, 4, 5) == (1, 0), "with only one update we expect a clear result"
 
 
@@ -78,11 +77,10 @@ def list_test():
     np.random.seed(42)
     n = 3  # number of landmarks
     s = e.init(n)
-    l = generate_data(92, .1, nr_agents=4, nr_landmarks=n) 
+    l = generate_data(92, .1, nr_agents=4, nr_landmarks=n)
     #  with this setup window is full at iteration 88
     s = e.update_list(s, l)
     e.info(s, plot=True)
-
 
 
 if __name__ == "__main__":

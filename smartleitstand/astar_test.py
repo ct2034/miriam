@@ -1,5 +1,6 @@
-from smartleitstand import astar
 import numpy as np
+
+from smartleitstand import astar
 
 grid = np.zeros([4, 4])
 
@@ -20,10 +21,10 @@ def test_get_children_middle():
 
 def test_astar():
     map = np.zeros([10, 10])
-    map[:8,2] = -1
-    map[8,2:6] = -1
-    map[2,4:8] = -1
-    map[2:,8] = -1
+    map[:8, 2] = -1
+    map[8, 2:6] = -1
+    map[2, 4:8] = -1
+    map[2:, 8] = -1
 
     path = astar.astar((1, 1), (9, 9), map)
 
