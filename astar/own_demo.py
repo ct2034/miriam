@@ -1,32 +1,53 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import timeit
 
-from astar import astar_grid8con
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 
-map = np.zeros([100, 100])
-map[:80, 20] = -1
-map[80, 20:60] = -1
-map[20, 40:80] = -1
-map[20:, 80] = -1
+from astar import astar_grid48con
+
+"""scale"""
+s = 1
+
+map = np.zeros([s * 10, s * 10, 50])
+map[:s * 8, s * 2, :] = -1
+map[s * 8, s * 2:s * 6, :] = -1
+map[s * 2, s * 4:s * 8, :] = -1
+map[s * 2:, s * 8, :] = -1
 
 t = timeit.Timer()
 t.timeit()
 
-path = astar_grid8con.astar_grid8con((10, 10), (90, 90), map)
+path = astar_grid48con.astar_grid8con((s * 1, s * 1, 0), (s * 9, s * 9, 49), map)
 
-print("computation time:", t.repeat(), "s")
+print("computation time:", t.repeat(repeat=0), "s")
 
-print("length: ", astar_grid8con.path_length(path))
+print("length: ", astar_grid48con.path_length(path))
 
-fig, ax = plt.subplots()
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 
-ax.imshow(map.T, cmap='Greys', interpolation='nearest')
-ax.set_title('astar path')
-ax.axis([0, map.shape[0], 0, map.shape[1]])
+# ax.imshow(map[:,:,0].T, cmap='Greys', interpolation='nearest')
+
+X = np.arange(10)
+Y = np.arange(10)
+XY = np.meshgrid(X, Y)
+Z = np.zeros(shape=XY[0].shape)
+
+ax.plot_surface(X,
+                Y,
+                Z,
+                rstride=1,
+                cstride=1,
+                facecolors=plt.cm.BrBG(map[:, :, 0]),
+                shade=False)
+# plt.title('astar path')
+# plt.axis([0, map.shape[0], 0, map.shape[1]])
+patharray = np.array(path)
 ax.plot(
-    np.array(np.matrix(path)[:, 0]).flatten(),
-    np.array(np.matrix(path)[:, 1]).flatten(),
+    xs=patharray[:, 0],
+    ys=patharray[:, 1],
+    zs=patharray[:, 2],
     c='b',
     lw=2
 )

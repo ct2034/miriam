@@ -1,8 +1,13 @@
 import numpy as np
 
-
+"""My A* Planner
+based on: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode"""
 def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost):
-    """based on: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode"""
+    # config
+    # """Time Dimension Size"""
+    # time_len = heuristic(start, goal, map) * 20
+    # ------
+
     # The set of nodes already evaluated.
     closed = []
     # The set of currently discovered nodes still to be evaluated.
@@ -47,7 +52,7 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
             g_score[neighbor] = tentative_g_score
             f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, goal, map)
 
-    return -1  # failure
+    raise RuntimeError("Can not find a path")
 
 
 def min_f_open(open, f_score):

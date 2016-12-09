@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-from astar import astar_grid8con
+from astar import astar_grid48con
 
 eight_con = False
 n = 10
@@ -21,7 +21,7 @@ goal = (n * .9, n * .9)
 
 def cost(a, b):
     if map[a] >= 0 and map[b] >= 0:  # no obstacle
-        return astar_grid8con.cost(a, b, map)
+        return astar_grid48con.cost(a, b, map)
     else:
         return np.Inf
 
@@ -50,7 +50,7 @@ path = nx.astar_path(G, start, goal, cost)
 
 print("computation time:", t.repeat(), "s")
 
-print("length: ", astar_grid8con.path_length(path))
+print("length: ", astar_grid48con.path_length(path))
 
 fig, ax = plt.subplots()
 

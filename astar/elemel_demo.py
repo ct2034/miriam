@@ -4,7 +4,7 @@ elemel_astar = __import__("elemel_python-astar.src.astar")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from astar import astar_grid8con
+from astar import astar_grid48con
 
 grid = np.zeros([100, 100])
 grid[:80, 20] = -1
@@ -18,18 +18,18 @@ goal = (90, 90)
 t = timeit.Timer()
 t.timeit()
 path = elemel_astar.src.astar.astar(start_pos=start,
-                                    neighbors=lambda pos: astar_grid8con.get_children(pos, grid),
+                                    neighbors=lambda pos: astar_grid48con.get_children(pos, grid),
                                     goal=lambda pos: pos == goal,
                                     start_g=0,
-                                    cost=lambda a, b: astar_grid8con.cost(a, b, grid),
-                                    heuristic=lambda pos: astar_grid8con.heuristic(pos, goal, grid)
+                                    cost=lambda a, b: astar_grid48con.cost(a, b, grid),
+                                    heuristic=lambda pos: astar_grid48con.heuristic(pos, goal, grid)
                                     )
 print("computation time:", t.repeat(), "s")
 
 # make comparable:
 path.insert(0, start)
 
-print("length: ", astar_grid8con.path_length(path))
+print("length: ", astar_grid48con.path_length(path))
 
 fig, ax = plt.subplots()
 

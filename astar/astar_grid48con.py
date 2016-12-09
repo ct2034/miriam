@@ -13,9 +13,20 @@ def reconstruct_path(came_from, current):
 
 
 def get_children(current, grid):
+    # config
+    """Should we have a 0-connected graph (else 4)"""
+    eight_con = False
+    # ------
+
+    if eight_con:
+        ds = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+        raise NotImplementedError("8-connected not in spacetime")
+    else:
+        ds = [(-1, 0, 1), (0, -1, 1), (0, 1, 1), (1, 0, 1), (0, 0, 1)]  # ugly but faster
+
     _children = []
-    for d in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:  # ugly but faster
-        checking = (d[0] + current[0], d[1] + current[1])  # ugly but faster
+    for d in ds:
+        checking = tuple(np.add(current, d))
         try:
             if np.min(checking) >= 0:  # no negative coord to not wrap
                 grid_checking = grid[checking]
@@ -27,11 +38,12 @@ def get_children(current, grid):
 
 
 def heuristic(a, b, grid):
-    return np.mean(abs(grid)) * distance(a, b)
+    # optimistic heuristic takes only distance in space
+    return np.mean(abs(grid)) * distance(a[0:2], b[0:2])
 
 
 def cost(a, b, grid):
-    if np.max(grid) > 0:
+    if np.max(grid) > 0:  # costmap values
         return grid[a] * distance(a, b)
     else:
         return distance(a, b)
