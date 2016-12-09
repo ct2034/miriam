@@ -6,16 +6,18 @@ import numpy as np
 
 from astar import astar_grid8con
 
-n = 100
+eight_con = False
+n = 10
 G = nx.grid_graph([n, n])
-map = np.zeros([100, 100])
-map[:80, 20] = -1
-map[80, 20:60] = -1
-map[20, 40:80] = -1
-map[20:, 80] = -1
+map = np.zeros([n, n])
+map[:n * .8, n * .2] = -1
+map[n * .8, n * .2:n * .6] = -1
+map[n * .2, n * .4:n * .8] = -1
+map[n * .2:, n * .8] = -1
 
-start = (10, 10)
-goal = (90, 90)
+start = (n * .1, n * .1)
+goal = (n * .9, n * .9)
+
 
 def cost(a, b):
     if map[a] >= 0 and map[b] >= 0:  # no obstacle
@@ -31,13 +33,15 @@ for n in G.nodes_iter():
 
 G.remove_nodes_from(obstacle)
 
-for n in G.nodes_iter():
-    for d in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
-        checking = (d[0] + n[0], d[1] + n[1])
-        if G.has_node(checking):
-            if not G.has_edge(n, checking):
-                G.add_edge(n, checking)
-            G[n][checking]['weight'] = cost(n, checking)
+if eight_con:
+    # add 8-connectedness
+    for n in G.nodes_iter():
+        for d in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
+            checking = (d[0] + n[0], d[1] + n[1])
+            if G.has_node(checking):
+                if not G.has_edge(n, checking):
+                    G.add_edge(n, checking)
+                G[n][checking]['weight'] = cost(n, checking)
 
 t = timeit.Timer()
 t.timeit()
@@ -59,5 +63,11 @@ ax.plot(
     c='b',
     lw=2
 )
+
+n = G.number_of_nodes()
+if n < 500:
+    plt.figure()
+    pos = nx.spring_layout(G, iterations=1000, k=.1 / np.sqrt(n))
+    nx.draw(G, pos)
 
 plt.show()
