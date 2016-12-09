@@ -1342,7 +1342,7 @@ public class FunctionContainer implements Serializable {
 				for(int i =0; i< list.size();i++){
 					try{
 						Queue q = (Queue)list.get(i);
-						if(q.getName().equals("queue")){ //TODO "queue" zu in.name
+						if(q.getName().equals("queue")){
 							System.out.println("Vorher:\n"+q.toString());
 							if(in.maximum){
 								q.set_maximumCapacity(true);
