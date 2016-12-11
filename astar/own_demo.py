@@ -6,7 +6,7 @@ from astar import astar_grid48con
 """Scale of map (min: 1)"""
 s = 2
 """Do you want to see something?"""
-plot = True
+plot = False
 
 map = np.zeros([s * 10, s * 10, s * 50])
 map[:s * 8, s * 2, :] = -1

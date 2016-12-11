@@ -28,14 +28,20 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
     # For the first node, that value is completely heuristic.
     f_score[start] = heuristic(start, goal, map)
 
+    f_score_open = np.array([])
+    f_score_open = np.append(f_score_open, f_score[start])
+
     while len(open) > 0:
-        current = min_f_open(open, f_score)  # the node in openSet having the lowest fScore[] value
+        current = argmin_f_open(open, f_score_open)  # the node in openSet having the lowest fScore[] value
 
         if current[0:2] == goal[0:2]:  # waiting at the goal for free
             # TODO: Write test to check if it is not waiting around somewhere else
             return reconstruct_path(cameFrom, current)
 
+        i_rm = open.index(current)
         open.remove(current)
+        f_score_open = np.delete(f_score_open, i_rm)
+
         closed.append(current)
         children = get_children(current, map)
         for neighbor in children:
@@ -52,12 +58,12 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
             cameFrom[neighbor] = current
             g_score[neighbor] = tentative_g_score
             f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, goal, map)
+            f_score_open = np.append(f_score_open, f_score[neighbor])
 
     raise RuntimeError("Can not find a path")
 
 
 def min_f_open(open, f_score):
-    # TODO: Make this more efficient (with numpy.argmin!)
     current_min_val = np.Inf
     current_min_index = 0
     for o in open:
@@ -65,3 +71,8 @@ def min_f_open(open, f_score):
             current_min_val = f_score[o]
             current_min_index = o
     return current_min_index
+
+
+def argmin_f_open(open, f_score_open):
+    assert len(open) == len(f_score_open), "Lenghts must be equal"
+    return open[np.argmin(f_score_open)]
