@@ -52,7 +52,7 @@ def cost(a, b, grid=False):
 
 
 def distance(a, b):
-    space_dist = np.linalg.norm(np.array(a[0:2], dtype=float) - np.array(b[0:2], dtype=float))
+    space_dist = np.abs(a[0] - b[0]) + np.abs(a[1] - b[1])  # Manhattan Distance
     if space_dist == 0:
         return 1.9  # waiting is a bit cheaper then driving twice
     else:

@@ -52,16 +52,22 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
                 continue  # Ignore the neighbor which is already evaluated.
             # The distance from start to a neighbor
             tentative_g_score = g_score[current] + cost(current, neighbor, map if have_map else False)
+
+            append = True
             if neighbor not in open:  # Discover a new node
                 open.append(neighbor)
             elif tentative_g_score >= g_score[neighbor]:
                 continue  # This is not a better path.
+            else:
+                append = False
 
             # This path is the best until now. Record it!
             cameFrom[neighbor] = current
             g_score[neighbor] = tentative_g_score
             f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, goal, map if have_map else False)
-            f_score_open = np.append(f_score_open, f_score[neighbor])
+
+            if append:
+                f_score_open = np.append(f_score_open, f_score[neighbor])
 
     raise RuntimeError("Can not find a path")
 
