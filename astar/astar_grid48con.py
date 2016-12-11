@@ -38,8 +38,10 @@ def get_children(current, grid):
 
 
 def heuristic(a, b, grid):
-    # optimistic heuristic takes only distance in space
-    return np.mean(abs(grid)) * distance(a[0:2], b[0:2])
+    if np.max(grid) > 0:  # costmap values
+        return np.mean(grid[grid >= 0]) * distance(a, b)
+    else:
+        return distance(a, b)
 
 
 def cost(a, b, grid):
@@ -50,7 +52,11 @@ def cost(a, b, grid):
 
 
 def distance(a, b):
-    return np.linalg.norm(np.array(a, dtype=float) - np.array(b, dtype=float))
+    space_dist = np.linalg.norm(np.array(a[0:2], dtype=float) - np.array(b[0:2], dtype=float))
+    if space_dist == 0:
+        return 1.9  # waiting is a bit cheaper then driving twice
+    else:
+        return space_dist
 
 
 def path_length(path):

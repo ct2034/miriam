@@ -57,6 +57,7 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
 
 
 def min_f_open(open, f_score):
+    # TODO: Make this more efficient (with numpy.argmin!)
     current_min_val = np.Inf
     current_min_index = 0
     for o in open:
