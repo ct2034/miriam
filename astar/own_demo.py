@@ -8,9 +8,8 @@ def rand_coords(x, y):
     return (np.random.randint(0, x),
             np.random.randint(0, y))
 
-
 """Deterministic test?"""
-det = True
+det = False
 
 if det:
     """Scale of map (min: 1)"""

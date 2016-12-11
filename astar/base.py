@@ -71,16 +71,6 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
     raise RuntimeError("Can not find a path")
 
 
-def min_f_open(open, f_score):
-    current_min_val = np.Inf
-    current_min_index = 0
-    for o in open:
-        if f_score[o] < current_min_val:
-            current_min_val = f_score[o]
-            current_min_index = o
-    return current_min_index
-
-
 def argmin_f_open(open, f_score_open):
     assert len(open) == len(f_score_open), "Lenghts must be equal"
     return open[np.argmin(f_score_open)]
