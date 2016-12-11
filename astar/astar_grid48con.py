@@ -13,10 +13,8 @@ def reconstruct_path(came_from, current):
 
 
 def get_children(current, grid):
-    # config
     """Should we have a 0-connected graph (else 4)"""
     eight_con = False
-    # ------
 
     if eight_con:
         ds = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -26,9 +24,9 @@ def get_children(current, grid):
 
     _children = []
     for d in ds:
-        checking = tuple(np.add(current, d))
+        checking = (current[0] + d[0], current[1] + d[1], current[2] + d[2])
         try:
-            if np.min(checking) >= 0:  # no negative coord to not wrap
+            if np.min(checking[0:2]) >= 0:  # no negative coord to not wrap
                 grid_checking = grid[checking]
                 if grid_checking >= 0:  # no obstacle
                     _children.append(checking)
@@ -39,16 +37,18 @@ def get_children(current, grid):
 
 def heuristic(a, b, grid):
     if np.max(grid) > 0:  # costmap values
-        return np.mean(grid[grid >= 0]) * distance(a, b)
+        h = np.mean(grid[grid >= 0]) * distance(a, b)
     else:
-        return distance(a, b)
+        h = distance(a, b)
+    assert h >= 0, "Negative Heuristic"
+    return h
 
 
-def cost(a, b, grid):
-    if np.max(grid) > 0:  # costmap values
-        return grid[a] * distance(a, b)
+def cost(a, b, grid=False):
+    if grid:  # costmap values
+        return grid[a] * distance_grid(a, b)
     else:
-        return distance(a, b)
+        return distance_grid(a, b)
 
 
 def distance(a, b):
@@ -57,6 +57,21 @@ def distance(a, b):
         return 1.9  # waiting is a bit cheaper then driving twice
     else:
         return space_dist
+
+
+def distance_grid(a, b):
+    dist_tuple = (a[0] - b[0], a[1] - b[1])
+    if ((dist_tuple == (1, 0)) |
+            (dist_tuple == (-1, 0)) |
+            (dist_tuple == (0, 1)) |
+            (dist_tuple == (0, -1))
+        ):
+        return 1
+    elif dist_tuple == (0, 0):
+        return 1.9  # waiting is a bit cheaper then driving twice
+    else:
+        raise ArithmeticError("Unknown Distance")
+
 
 
 def path_length(path):

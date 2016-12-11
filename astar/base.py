@@ -2,6 +2,8 @@ import numpy as np
 
 """My A* Planner
 based on: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode"""
+
+
 def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost):
     # config
     # """Time Dimension Size"""
@@ -31,6 +33,8 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
     f_score_open = np.array([])
     f_score_open = np.append(f_score_open, f_score[start])
 
+    have_map = np.max(map) > 0  # having a costmap
+
     while len(open) > 0:
         current = argmin_f_open(open, f_score_open)  # the node in openSet having the lowest fScore[] value
 
@@ -48,7 +52,7 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
             if neighbor in closed:
                 continue  # Ignore the neighbor which is already evaluated.
             # The distance from start to a neighbor
-            tentative_g_score = g_score[current] + cost(current, neighbor, map)
+            tentative_g_score = g_score[current] + cost(current, neighbor, map if have_map else False)
             if neighbor not in open:  # Discover a new node
                 open.append(neighbor)
             elif tentative_g_score >= g_score[neighbor]:
