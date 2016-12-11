@@ -10,6 +10,7 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
     # time_len = heuristic(start, goal, map) * 20
     # ------
 
+    have_map = np.max(map) > 0  # having a costmap
     # The set of nodes already evaluated.
     closed = []
     # The set of currently discovered nodes still to be evaluated.
@@ -28,12 +29,10 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
     # by passing by that node. That value is partly known, partly heuristic.
     f_score = np.full(map.shape, np.Inf)
     # For the first node, that value is completely heuristic.
-    f_score[start] = heuristic(start, goal, map)
+    f_score[start] = heuristic(start, goal, map if have_map else False)
 
     f_score_open = np.array([])
     f_score_open = np.append(f_score_open, f_score[start])
-
-    have_map = np.max(map) > 0  # having a costmap
 
     while len(open) > 0:
         current = argmin_f_open(open, f_score_open)  # the node in openSet having the lowest fScore[] value
@@ -61,7 +60,7 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
             # This path is the best until now. Record it!
             cameFrom[neighbor] = current
             g_score[neighbor] = tentative_g_score
-            f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, goal, map)
+            f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, goal, map if have_map else False)
             f_score_open = np.append(f_score_open, f_score[neighbor])
 
     raise RuntimeError("Can not find a path")

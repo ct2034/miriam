@@ -35,8 +35,8 @@ def get_children(current, grid):
     return _children
 
 
-def heuristic(a, b, grid):
-    if np.max(grid) > 0:  # costmap values
+def heuristic(a, b, grid: np.array = False):
+    if grid:  # costmap values
         h = np.mean(grid[grid >= 0]) * distance(a, b)
     else:
         h = distance(a, b)
