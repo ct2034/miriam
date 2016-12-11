@@ -38,7 +38,6 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
         current = argmin_f_open(open, f_score_open)  # the node in openSet having the lowest fScore[] value
 
         if current[0:2] == goal[0:2]:  # waiting at the goal for free
-            # TODO: Write test to check if it is not waiting around somewhere else
             return reconstruct_path(cameFrom, current)
 
         i_rm = open.index(current)

@@ -51,7 +51,7 @@ def cost(a, b, grid=False):
         return distance_grid(a, b)
 
 
-def distance(a, b):
+def distance(a: tuple, b: tuple) -> float:
     space_dist = np.abs(a[0] - b[0]) + np.abs(a[1] - b[1])  # Manhattan Distance
     if space_dist == 0:
         return 1.9  # waiting is a bit cheaper then driving twice
@@ -73,15 +73,12 @@ def distance_grid(a, b):
         raise ArithmeticError("Unknown Distance")
 
 
-
 def path_length(path):
     """Path length calculation (for eval only)"""
-    previous = False
     l = 0
-    for p in path:
-        if previous:
-            l += distance(p, previous)
-        previous = p
+    for i in range(len(path)):
+        if i != 0:
+            l += distance_grid(path[i - 1], path[i])
     return l
 
 
