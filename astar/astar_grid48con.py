@@ -84,3 +84,29 @@ def path_length(path):
 
 def astar_grid8con(start, goal, map):
     return base.astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost)
+
+
+def plot(path, map):
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    zz = map[:, :, 0].T
+    xx, yy = np.meshgrid(np.arange(len(zz)),
+                         np.arange(len(zz)))
+    ax.contourf(xx, yy, zz, cmap='Greys', zdir='z', alpha=.2)
+
+    patharray = np.array(path)
+    ax.plot(
+        xs=patharray[:, 0],
+        ys=patharray[:, 1],
+        zs=patharray[:, 2],
+        c='b'
+    )
+
+    plt.title('Astar path')
+    ax.axis([0, map.shape[0], 0, map.shape[1]])
+
+    plt.show()
