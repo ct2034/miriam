@@ -43,7 +43,7 @@ def astar_wait():
     startt = datetime.datetime.now()
 
     try:
-        path = astar_grid48con.astar_grid8con(start, goal, _grid)
+        path = astar_grid48con.astar_grid4con(start, goal, _grid)
     except RuntimeError as e:
         print("Could not find path")
         return 0, (datetime.datetime.now() - startt).total_seconds()

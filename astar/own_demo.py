@@ -39,7 +39,7 @@ else:
 
 startt = datetime.datetime.now()
 
-path = astar_grid48con.astar_grid8con(start, goal, _grid)
+path = astar_grid48con.astar_grid4con(start, goal, _grid)
 
 print("computation time:", (datetime.datetime.now() - startt).total_seconds(), "s")
 
