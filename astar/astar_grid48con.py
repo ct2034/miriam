@@ -73,7 +73,7 @@ def distance_grid(a, b):
         raise ArithmeticError("Unknown Distance")
 
 
-def path_length(path):
+def path_length(path: list) -> int:
     """Path length calculation (for eval only)"""
     l = 0
     for i in range(len(path)):
@@ -82,7 +82,7 @@ def path_length(path):
     return l
 
 
-def astar_grid8con(start, goal, map):
+def astar_grid4con(start, goal, map):
     return base.astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost)
 
 
@@ -110,3 +110,4 @@ def plot(path, map):
     ax.axis([0, map.shape[0], 0, map.shape[1]])
 
     plt.show()
+
