@@ -39,32 +39,52 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
                       dx=(j[1][0] - j[0][0]),
                       dy=(j[1][1] - j[0][1]),
                       head_width=0.3, head_length=1,
-                      fc='r')
+                      ec='r',
+                      fill=False)
         igs = []
-        for ig in idle_goals:
-            igs.append(ig[0])
+        for ai in idle_goals:
+            igs.append(ai[0])
         igsa = np.array(igs)
         plt.scatter(igsa[:, 0],
                     igsa[:, 1],
                     s=np.full(igsa.shape[0], 100),
-                    color='green',
+                    color='g',
                     alpha=.9)
         plt.legend(["Agents", "Idle Goals"])
-        plt.title("Problem Configuration")
-        plt.show()
+        plt.title("Problem Configuration and Solution")
     agent_job = ()
     agent_idle = ()
     blocked = ()
 
-    astar_base(start=comp2state(agent_job, agent_idle, blocked),
-               condition=comp2condition(agent_pos, jobs, idle_goals, grid),
-               goal_test=goal_test,
-               get_children=get_children,
-               heuristic=heuristic,
-               cost=cost)
+    (agent_job, agent_idle, blocked
+     ) = astar_base(start=comp2state(agent_job, agent_idle, blocked),
+                    condition=comp2condition(agent_pos, jobs, idle_goals, grid),
+                    goal_test=goal_test,
+                    get_children=get_children,
+                    heuristic=heuristic,
+                    cost=cost)
 
-    return agent_job, agent_idle
+    if plot:
+        for aj in agent_job:
+            plt.arrow(x=agent_pos[aj[0]][0],
+                      y=agent_pos[aj[0]][1],
+                      dx=(jobs[aj[1]][0][0] - agent_pos[aj[0]][0]),
+                      dy=(jobs[aj[1]][0][1] - agent_pos[aj[0]][1]),
+                      ec='r',
+                      fill=False,
+                      linestyle='dotted')
+        for ai in agent_idle:
+            plt.arrow(x=agent_pos[ai[0]][0],
+                      y=agent_pos[ai[0]][1],
+                      dx=(idle_goals[ai[1]][0][0] - agent_pos[ai[0]][0]),
+                      dy=(idle_goals[ai[1]][0][1] - agent_pos[ai[0]][1]),
+                      ec='g',
+                      fill=False,
+                      linestyle='dotted')
+        plt.show()
 
+    # TODO: also give out paths!
+    return agent_job, agent_idle, blocked
 
 def heuristic(_condition, _state):
     """
@@ -113,7 +133,7 @@ def get_children(_condition, _state):
     jobs = list(jobs)
     idle_goals = list(idle_goals)
     if len(left_jobs) > 0:  # still jobs to assign - try with all left agents
-        # TODO: what if there are to many jobs?
+        # TODO: what if there are too many jobs?
         for a in left_agent_pos:
             l = list(agent_job).copy()
             l.append((agent_pos.index(a),
@@ -134,7 +154,6 @@ def get_children(_condition, _state):
     else:  # all assigned
         return []
 
-
 def clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs):
     """
     Clear condition sets of agents, jobs and idle goals already taken care or
@@ -149,9 +168,8 @@ def clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs):
     for ai in agent_idle:
         cp_agent_pos.remove(agent_pos[ai[0]])
         cp_idle_goals.remove(idle_goals[ai[1]])
-    # TODO: sort by lengths
+    # TODO: sort by lengths, i.e. metric of assignment order
     return cp_agent_pos, cp_idle_goals, cp_jobs
-
 
 def cost(_condition, _state1, _state2):
     (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
@@ -174,7 +192,6 @@ def cost(_condition, _state1, _state2):
             _cost += (p * path_len)
     return _cost
 
-
 def path(start: tuple, goal: tuple, _map: np.array, calc=True) -> list:
     index = [start, goal]
     index.sort()
@@ -190,13 +207,11 @@ def path(start: tuple, goal: tuple, _map: np.array, calc=True) -> list:
     if reverse: _path.reverse()
     return _path
 
-
 def condition2comp(_condition: dict):
     return (_condition["agent_pos"],
             _condition["jobs"],
             _condition["idle_goals"],
             _condition["grid"])
-
 
 def comp2condition(agent_pos: list,
                    jobs: list,
@@ -209,18 +224,15 @@ def comp2condition(agent_pos: list,
         "grid": grid
     }
 
-
 def state2comp(_state: tuple) -> tuple:
     return (_state[0],
             _state[1],
             _state[2])
 
-
 def comp2state(agent_job: tuple,
                agent_idle: tuple,
                blocked: tuple) -> tuple:
     return (agent_job, agent_idle, blocked)
-
 
 def goal_test(_condition, current):
     (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
