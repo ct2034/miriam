@@ -8,24 +8,22 @@ from planner.base import astar_base
 save = {}
 
 
-# condition = {
-#     "agent_pos": [],
-#     "jobs": [],
-#     "idle_goals": [],
-#     "grid": np.array([])
-# }
-#
-# state = {
-#     "agent_job": (),
-#     "agent_idle": (),
-#     "blocked": ()
-# }
-
-
 def plan(agent_pos, jobs, idle_goals, grid, plot=False):
-    n_agents = len(agent_pos)
-
     if plot:
+        plt.style.use('bmh')
+        fig, ax = plt.subplots()
+        ax.set_aspect('equal')
+        major_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 2)
+        minor_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 1) + .5
+
+        ax.set_xticks(major_ticks)
+        ax.set_xticks(minor_ticks, minor=True)
+        ax.set_yticks(major_ticks)
+        ax.set_yticks(minor_ticks, minor=True)
+
+        ax.grid(which='minor', alpha=0.5)
+        ax.grid(which='major', alpha=0.2)
+
         plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
         agents = np.array(agent_pos)
         plt.scatter(agents[:, 0],
@@ -38,7 +36,8 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
                       y=j[0][1],
                       dx=(j[1][0] - j[0][0]),
                       dy=(j[1][1] - j[0][1]),
-                      head_width=0.3, head_length=1,
+                      head_width=.3, head_length=.7,
+                      length_includes_head=True,
                       ec='r',
                       fill=False)
         igs = []
@@ -86,6 +85,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
     # TODO: also give out paths!
     return agent_job, agent_idle, blocked
 
+
 def heuristic(_condition, _state):
     """
     Estimation from this state to the goal
@@ -119,6 +119,7 @@ def heuristic(_condition, _state):
             # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
 
     return _cost
+
 
 def get_children(_condition, _state):
     """
@@ -154,6 +155,7 @@ def get_children(_condition, _state):
     else:  # all assigned
         return []
 
+
 def clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs):
     """
     Clear condition sets of agents, jobs and idle goals already taken care or
@@ -170,6 +172,7 @@ def clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs):
         cp_idle_goals.remove(idle_goals[ai[1]])
     # TODO: sort by lengths, i.e. metric of assignment order
     return cp_agent_pos, cp_idle_goals, cp_jobs
+
 
 def cost(_condition, _state1, _state2):
     (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
@@ -192,6 +195,7 @@ def cost(_condition, _state1, _state2):
             _cost += (p * path_len)
     return _cost
 
+
 def path(start: tuple, goal: tuple, _map: np.array, calc=True) -> list:
     index = [start, goal]
     index.sort()
@@ -207,11 +211,13 @@ def path(start: tuple, goal: tuple, _map: np.array, calc=True) -> list:
     if reverse: _path.reverse()
     return _path
 
+
 def condition2comp(_condition: dict):
     return (_condition["agent_pos"],
             _condition["jobs"],
             _condition["idle_goals"],
             _condition["grid"])
+
 
 def comp2condition(agent_pos: list,
                    jobs: list,
@@ -224,15 +230,18 @@ def comp2condition(agent_pos: list,
         "grid": grid
     }
 
+
 def state2comp(_state: tuple) -> tuple:
     return (_state[0],
             _state[1],
             _state[2])
 
+
 def comp2state(agent_job: tuple,
                agent_idle: tuple,
                blocked: tuple) -> tuple:
     return (agent_job, agent_idle, blocked)
+
 
 def goal_test(_condition, current):
     (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
