@@ -9,28 +9,46 @@ save = {}
 
 
 def plan(agent_pos, jobs, idle_goals, grid, plot=False):
+    """
+    Main entry point for planner
+    :param agent_pos: agent poses
+    :param jobs: jobs to plan for (((s_x, s_y), (g_x, g_y)), ...)
+    :param idle_goals: idle goals to consider (((g_x, g_y), (t_mu, t_std)), ...)
+    :param grid: the map (2D-space + time)
+    :param plot: whether to plot conditions and results or not
+    :return: tuple of tuples of agent -> job allocations,
+                                agent -> idle goal allocations and
+                                blocked map areas
+    """
     if plot:
+        # Plot input conditions
         plt.style.use('bmh')
         fig, ax = plt.subplots()
         ax.set_aspect('equal')
+
+        # Set ticklines to between the cells
         major_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 2)
         minor_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 1) + .5
-
         ax.set_xticks(major_ticks)
         ax.set_xticks(minor_ticks, minor=True)
         ax.set_yticks(major_ticks)
         ax.set_yticks(minor_ticks, minor=True)
-
         ax.grid(which='minor', alpha=0.5)
         ax.grid(which='major', alpha=0.2)
 
+        # Make positive y pointing up
+        ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
+
+        # Show map
         plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
+        # Agents
         agents = np.array(agent_pos)
         plt.scatter(agents[:, 0],
                     agents[:, 1],
                     s=np.full(agents.shape[0], 100),
                     color='blue',
                     alpha=.9)
+        # Jobs
         for j in jobs:
             plt.arrow(x=j[0][0],
                       y=j[0][1],
@@ -40,6 +58,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
                       length_includes_head=True,
                       ec='r',
                       fill=False)
+        # Idle Goals
         igs = []
         for ai in idle_goals:
             igs.append(ai[0])
@@ -49,12 +68,16 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
                     s=np.full(igsa.shape[0], 100),
                     color='g',
                     alpha=.9)
+        # Legendary!
         plt.legend(["Agents", "Idle Goals"])
         plt.title("Problem Configuration and Solution")
+
+    # result data structures
     agent_job = ()
     agent_idle = ()
     blocked = ()
 
+    # planning!
     (agent_job, agent_idle, blocked
      ) = astar_base(start=comp2state(agent_job, agent_idle, blocked),
                     condition=comp2condition(agent_pos, jobs, idle_goals, grid),
@@ -64,6 +87,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
                     cost=cost)
 
     if plot:
+        # plot agent -> job allocation
         for aj in agent_job:
             plt.arrow(x=agent_pos[aj[0]][0],
                       y=agent_pos[aj[0]][1],
@@ -72,6 +96,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
                       ec='r',
                       fill=False,
                       linestyle='dotted')
+        # plot agent -> idle goal allocations
         for ai in agent_idle:
             plt.arrow(x=agent_pos[ai[0]][0],
                       y=agent_pos[ai[0]][1],
@@ -86,9 +111,12 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
     return agent_job, agent_idle, blocked
 
 
-def heuristic(_condition, _state):
+def heuristic(_condition: dict, _state: tuple):
     """
     Estimation from this state to the goal
+    :param _condition: Input condition (
+    :param _state:
+    :return: cost heuristic for the given state
     """
     (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, _) = state2comp(_state)
@@ -121,9 +149,12 @@ def heuristic(_condition, _state):
     return _cost
 
 
-def get_children(_condition, _state):
+def get_children(_condition: dict, _state: tuple) -> list:
     """
     Get all following states
+    :param _condition: The conditions of the problem
+    :param _state: The parent state
+    :return: List of children
     """
     (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
@@ -156,9 +187,9 @@ def get_children(_condition, _state):
         return []
 
 
-def clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs):
+def clear_set(agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals: list, jobs: list) -> tuple:
     """
-    Clear condition sets of agents, jobs and idle goals already taken care or
+    Clear condition sets of agents, jobs and idle goals already assigned with each other
     """
     cp_agent_pos = agent_pos.copy()
     cp_idle_goals = idle_goals.copy()
@@ -174,11 +205,18 @@ def clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs):
     return cp_agent_pos, cp_idle_goals, cp_jobs
 
 
-def cost(_condition, _state1, _state2):
+def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
+    """
+    Get the cost increase for a change from _state1 to _state2
+    :param _condition: The conditions of the problem
+    :param _state1: The previous state
+    :param _state2: The following state
+    :return: The cost increase between _state1 and _state2
+    """
     (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job1, agent_idle1, _) = state2comp(_state1)
     (agent_job2, agent_idle2, _) = state2comp(_state2)
-    _cost = 0
+    _cost = 0.
     for aj in agent_job2:
         if aj not in agent_job1:
             agent = agent_pos[aj[0]]
@@ -196,7 +234,17 @@ def cost(_condition, _state1, _state2):
     return _cost
 
 
-def path(start: tuple, goal: tuple, _map: np.array, calc=True) -> list:
+def path(start: tuple, goal: tuple, _map: np.array, calc: bool = True) -> list:
+    """
+    Calculate or return pre-calculated path from start to goal
+    :param start: The start to start from
+    :param goal: The goal to plan to
+    :param _map: The map to plan on
+    :param calc: whether or not the path should be calculated
+                 if no saved id available.
+                 (returns False if not saved)
+    :return: the path
+    """
     index = [start, goal]
     index.sort()
     reverse = index != [start, goal]
@@ -212,7 +260,22 @@ def path(start: tuple, goal: tuple, _map: np.array, calc=True) -> list:
     return _path
 
 
+def goal_test(_condition: dict, _state: tuple) -> bool:
+    """
+    Test if a state is the goal state ragrding given conditions
+    :param _condition: Given conditions
+    :param _state: State to check
+    :return: Result of the test
+    """
+    (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
+    (agent_job, agent_idle, _) = state2comp(_state)
+    return len(agent_pos) == len(agent_job) + len(agent_idle)
+
+
 def condition2comp(_condition: dict):
+    """
+    Transform the condition dict to its components
+    """
     return (_condition["agent_pos"],
             _condition["jobs"],
             _condition["idle_goals"],
@@ -223,6 +286,9 @@ def comp2condition(agent_pos: list,
                    jobs: list,
                    idle_goals: list,
                    grid: np.array):
+    """
+    Transform condition sections into dict to use
+    """
     return {
         "agent_pos": agent_pos,
         "jobs": jobs,
@@ -232,6 +298,9 @@ def comp2condition(agent_pos: list,
 
 
 def state2comp(_state: tuple) -> tuple:
+    """
+    Transform the state tuple to its components
+    """
     return (_state[0],
             _state[1],
             _state[2])
@@ -240,10 +309,9 @@ def state2comp(_state: tuple) -> tuple:
 def comp2state(agent_job: tuple,
                agent_idle: tuple,
                blocked: tuple) -> tuple:
+    """
+    Transform state sections into tuple to use
+    """
     return (agent_job, agent_idle, blocked)
 
 
-def goal_test(_condition, current):
-    (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
-    (agent_job, agent_idle, _) = state2comp(current)
-    return len(agent_pos) == len(agent_job) + len(agent_idle)
