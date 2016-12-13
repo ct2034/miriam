@@ -19,7 +19,8 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
         # the node in openSet having the lowest fScore[] value
         current = argmin_f_open(open, f_score_open)
 
-        if goal_test(condition, current): return current
+        if goal_test(condition, current):
+            return current
 
         i_rm = open.index(current)
         open.remove(current)

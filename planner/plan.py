@@ -112,7 +112,7 @@ def get_children(_condition, _state):
     agent_pos = list(agent_pos)
     jobs = list(jobs)
     idle_goals = list(idle_goals)
-    if len(left_jobs) > 0:  # still jobs to assign
+    if len(left_jobs) > 0:  # still jobs to assign - try with all left agents
         # TODO: what if there are to many jobs?
         for a in left_agent_pos:
             l = list(agent_job).copy()
@@ -122,13 +122,13 @@ def get_children(_condition, _state):
                                        agent_idle,
                                        blocked))
         return children
-    elif len(left_idle_goals) > 0:  # only idle goals to assign
+    elif len(left_idle_goals) > 0:  # only idle goals to assign - try with all left agents
         for a in left_agent_pos:
             l = list(agent_idle).copy()
             l.append((agent_pos.index(a),
-                      jobs.index(left_jobs[0])))
-            children.append(comp2state(tuple(l),
-                                       agent_idle,
+                      idle_goals.index(left_idle_goals[0])))
+            children.append(comp2state(agent_job,
+                                       tuple(l),
                                        blocked))
         return children
     else:  # all assigned
@@ -139,14 +139,18 @@ def clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs):
     """
     Clear condition sets of agents, jobs and idle goals already taken care or
     """
+    cp_agent_pos = agent_pos.copy()
+    cp_idle_goals = idle_goals.copy()
+    cp_jobs = jobs.copy()
+
     for aj in agent_job:
-        agent_pos.remove(agent_pos[aj[0]])
-        jobs.remove(jobs[aj[1]])
+        cp_agent_pos.remove(agent_pos[aj[0]])
+        cp_jobs.remove(jobs[aj[1]])
     for ai in agent_idle:
-        agent_pos.remove(agent_pos[ai[0]])
-        idle_goals.remove(idle_goals[ai[1]])
+        cp_agent_pos.remove(agent_pos[ai[0]])
+        cp_idle_goals.remove(idle_goals[ai[1]])
     # TODO: sort by lengths
-    return agent_pos, idle_goals, jobs
+    return cp_agent_pos, cp_idle_goals, cp_jobs
 
 
 def cost(_condition, _state1, _state2):
