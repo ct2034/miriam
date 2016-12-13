@@ -31,8 +31,8 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
         plt.scatter(agents[:, 0],
                     agents[:, 1],
                     s=np.full(agents.shape[0], 100),
-                    c=np.full(agents.shape[0], 0.98668316),
-                    alpha=.5)
+                    color='blue',
+                    alpha=.9)
         for j in jobs:
             plt.arrow(x=j[0][0],
                       y=j[0][1],
@@ -47,9 +47,10 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
         plt.scatter(igsa[:, 0],
                     igsa[:, 1],
                     s=np.full(igsa.shape[0], 100),
-                    c=np.full(igsa.shape[0], 0.8863462),  # TODO: Different colors
-                    alpha=.5)
+                    color='green',
+                    alpha=.9)
         plt.legend(["Agents", "Idle Goals"])
+        plt.title("Problem Configuration")
         plt.show()
     agent_job = ()
     agent_idle = ()
@@ -65,11 +66,11 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
     return agent_job, agent_idle
 
 
-def heuristic(_condition, _state, _map):
+def heuristic(_condition, _state):
     """
     Estimation from this state to the goal
     """
-    (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
+    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, _) = state2comp(_state)
     _cost = 0
 
@@ -97,6 +98,7 @@ def heuristic(_condition, _state, _map):
             pass
             # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
 
+    return _cost
 
 def get_children(_condition, _state):
     """
@@ -138,11 +140,11 @@ def clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs):
     Clear condition sets of agents, jobs and idle goals already taken care or
     """
     for aj in agent_job:
-        agent_pos.remove(aj[0])
-        jobs.remove(aj[1])
+        agent_pos.remove(agent_pos[aj[0]])
+        jobs.remove(jobs[aj[1]])
     for ai in agent_idle:
-        agent_pos.remove(ai[0])
-        idle_goals.remove(ai[1])
+        agent_pos.remove(agent_pos[ai[0]])
+        idle_goals.remove(idle_goals[ai[1]])
     # TODO: sort by lengths
     return agent_pos, idle_goals, jobs
 

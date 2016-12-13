@@ -5,14 +5,12 @@ based on: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode"""
 
 
 def astar_base(start, condition, heuristic, get_children, cost, goal_test):
-    _, _, _, grid = condition
-
     closed = []
     open = [start]
     g_score = {}
     g_score[start] = 0
     f_score = {}
-    f_score[start] = heuristic(condition, start, grid)
+    f_score[start] = heuristic(condition, start)
 
     f_score_open = np.array([])
     f_score_open = np.append(f_score_open, f_score[start])
@@ -43,7 +41,8 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             else:
                 append = False
             g_score[neighbor] = tentative_g_score
-            f_score[neighbor] = g_score[neighbor] + heuristic(condition, neighbor, grid)
+            f_score[neighbor] = g_score[neighbor]
+            f_score[neighbor] += heuristic(condition, neighbor)
             if append:
                 f_score_open = np.append(f_score_open, f_score[neighbor])
 

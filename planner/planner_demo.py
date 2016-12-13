@@ -14,4 +14,4 @@ idle_goals = [((9, 7), (5, .5))]  # one idle goal 9,7 with P~N(5,.5)
 agent_job = [(0, 0), (2, 1)]
 agent_idle = [(1, 0)]
 
-res_agent_job, res_agent_idle = plan(agent_pos, jobs, idle_goals, grid, plot=True)
+res_agent_job, res_agent_idle = plan(agent_pos, jobs, idle_goals, grid, plot=False)
