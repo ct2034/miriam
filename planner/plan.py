@@ -440,9 +440,9 @@ def get_blocks_dict(blocked):
     for b in blocked:
         if b[1].__class__ == int:  # a block, not a conflict
             if b[1] in blocks.keys():
-                blocks[b[1]] += b[0]
+                blocks[b[1]] += [b[0], ]
             else:
-                blocks[b[1]] = b[0]
+                blocks[b[1]] = [b[0], ]
     return blocks
 
 
@@ -457,11 +457,12 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
     :return: the path
     """
     index = tuple([start, goal]) + tuple(blocked)
-    if len(blocked) > 0:
-        _map = _map.copy()
-        _map[(blocked[1],
-              blocked[0],
-              blocked[2])] = -1
+    if len(blocked) > 0:  # TODO: this should contain each entry only once!
+        for b in blocked:
+            _map = _map.copy()
+            _map[(b[1],
+                  b[0],
+                  b[2])] = -1
 
     if index not in path_save.keys():
         if calc:  # if we want to calc (i.e. find the cost)
