@@ -36,7 +36,6 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='path_save.pkl'):
         plt.style.use('bmh')
         fig = plt.figure()
         ax = fig.add_subplot(121)
-        ax3 = fig.add_subplot(122, projection='3d')
         ax.set_aspect('equal')
 
         # Set ticklines to between the cells
@@ -112,6 +111,10 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='path_save.pkl'):
             print(e)
 
     if plot:
+        from mpl_toolkits.mplot3d import Axes3D
+        _ = Axes3D
+        ax3 = fig.add_subplot(122, projection='3d')
+
         # plot agent -> job allocation
         for aj in agent_job:
             plt.arrow(x=agent_pos[aj[0]][0],
@@ -132,8 +135,6 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='path_save.pkl'):
                       linestyle='dotted')
 
         # Paths
-        from mpl_toolkits.mplot3d import Axes3D
-        _ = Axes3D
         legend_str = []
         i = 0
         for p in _paths:
