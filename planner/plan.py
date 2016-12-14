@@ -1,15 +1,16 @@
+import pickle
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm
 
-import pickle
-
 from astar.astar_grid48con import astar_grid4con, path_length, distance
 from planner.base import astar_base
 
-paths = {}
+path_save = {}
 
-def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
+
+def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='path_save.pkl'):
     """
     Main entry point for planner
     :param agent_pos: agent poses
@@ -17,16 +18,16 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
     :param idle_goals: idle goals to consider (((g_x, g_y), (t_mu, t_std)), ...)
     :param grid: the map (2D-space + time)
     :param plot: whether to plot conditions and results or not
-    :param fname: filename to save / read paths (set to False to not do this)
+    :param fname: filename to save / read path_save (set to False to not do this)
     :return: tuple of tuples of agent -> job allocations, agent -> idle goal allocations and blocked map areas
     """
 
-    # load paths
+    # load path_save
     if fname:
-        global paths
+        global path_save
         try:
             with open(fname, 'rb') as f:
-                paths = pickle.load(f)
+                path_save = pickle.load(f)
         except FileNotFoundError as e:
             print("WARN: File", fname, "does not exist")
 
@@ -35,6 +36,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
         plt.style.use('bmh')
         fig = plt.figure()
         ax = fig.add_subplot(121)
+        ax3 = fig.add_subplot(122, projection='3d')
         ax.set_aspect('equal')
 
         # Set ticklines to between the cells
@@ -99,14 +101,13 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
                     heuristic=heuristic,
                     cost=cost)
 
-    assert len(blocked) == 0, "There are blocked points in the final state"
     _paths = get_paths(condition, comp2state(agent_job, agent_idle, blocked))
 
-    # save paths
+    # save path_save
     if fname:
         try:
             with open(fname, 'wb') as f:
-                pickle.dump(paths, f, pickle.HIGHEST_PROTOCOL)
+                pickle.dump(path_save, f, pickle.HIGHEST_PROTOCOL)
         except Exception as e:
             print(e)
 
@@ -133,7 +134,6 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
         # Paths
         from mpl_toolkits.mplot3d import Axes3D
         _ = Axes3D
-        ax3 = fig.add_subplot(122, projection='3d')
         legend_str = []
         i = 0
         for p in _paths:
@@ -152,37 +152,63 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
 
 def get_paths(_condition: dict, _state: tuple) -> tuple:
     """
-    Get the paths for a given state
+    Get the path_save for a given state
     :param _condition: Input condition (
     :param _state:
-    :return: tuple of paths for agents
+    :return: tuple of path_save for agents
     """
     (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
-    (agent_job, agent_idle, _) = state2comp(_state)
+    (agent_job, agent_idle, blocked) = state2comp(_state)
     agent_job = np.array(agent_job)
     agent_idle = np.array(agent_idle)
     _paths = []
+    blocks = get_blocks_dict(blocked)
     for ia in range(len(agent_pos)):
+        if ia in blocks.keys():
+            block = blocks[ia]
+        else:
+            block = []
         for aj in agent_job:
             if aj[0] == ia:
-                p = concat_paths(path(agent_pos[ia], jobs[aj[1]][0], _map, calc=False),
-                                 path(jobs[aj[1]][0], jobs[aj[1]][1], _map, calc=False))
+                p = concat_paths(path(agent_pos[ia], jobs[aj[1]][0], _map, block, calc=True),
+                                 path(jobs[aj[1]][0], jobs[aj[1]][1], _map, block, calc=True))
                 _paths.append(p)
                 break
         for ai in agent_idle:
             if ai[0] == ia:
-                _paths.append(path(agent_pos[ia], idle_goals[ai[1]][0], _map, calc=False))
+                _paths.append(path(agent_pos[ia], idle_goals[ai[1]][0], _map, block, calc=True))
                 break
-    assert len(_paths) == len(agent_pos), "Not all agents have a path (or some have more)"
+    assert len(_paths) <= len(agent_pos), "More paths than agents"
     return _paths
+
+
+def find_collision(_paths):
+    """
+    Find collisions in a set of path_save
+    :param _paths: set of path_save
+    :return: first found collisions
+    """
+    from_agent = []
+    all_paths = []
+    i = 0
+    seen = set()
+    for _path in _paths:
+        for point in _path:
+            if point in seen:  # collision
+                return tuple((point, (i, from_agent[all_paths.index(point)])))
+            seen.add(point)
+            all_paths.append(point)
+            from_agent.append(i)
+        i += 1  # next path (of next agent)
+    return ()
 
 
 def concat_paths(path1, path2):
     """
-    Append to paths to each other
+    Append to path_save to each other
     :param path1: First path
     :param path2: Second path
-    :return: Both paths
+    :return: Both path_save
     """
     if (path1[-1][0] == path2[0][0]) and (path1[-1][1] == path2[0][1]):
         path2.remove(path2[0])
@@ -214,7 +240,7 @@ def heuristic(_condition: dict, _state: tuple) -> float:
 
     l = []
     for j in jobs:
-        p = path(j[0], j[1], _map, False)
+        p = path(j[0], j[1], _map, [], False)
         if p:  # if there was a path in the dict
             l.append(path_length(p))
         else:
@@ -228,7 +254,6 @@ def heuristic(_condition: dict, _state: tuple) -> float:
             if i < len(l):
                 _cost += l[i]
                 # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
-
     return _cost
 
 
@@ -243,31 +268,51 @@ def get_children(_condition: dict, _state: tuple) -> list:
     (agent_job, agent_idle, blocked) = state2comp(_state)
     (left_agent_pos, left_idle_goals, left_jobs
      ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
-    children = []
-    agent_pos = list(agent_pos)
-    jobs = list(jobs)
-    idle_goals = list(idle_goals)
-    if len(left_jobs) > 0:  # still jobs to assign - try with all left agents
-        # TODO: what if there are too many jobs?
-        for a in left_agent_pos:
-            l = list(agent_job).copy()
-            l.append((agent_pos.index(a),
-                      jobs.index(left_jobs[0])))
-            children.append(comp2state(tuple(l),
-                                       agent_idle,
-                                       blocked))
-        return children
-    elif len(left_idle_goals) > 0:  # only idle goals to assign - try with all left agents
-        for a in left_agent_pos:
-            l = list(agent_idle).copy()
-            l.append((agent_pos.index(a),
-                      idle_goals.index(left_idle_goals[0])))
-            children.append(comp2state(agent_job,
-                                       tuple(l),
-                                       blocked))
-        return children
-    else:  # all assigned
-        return []
+
+    eval_blocked = False
+    for i in range(len(blocked)):
+        if blocked[i][1].__class__ != int:  # two agents blocked
+            eval_blocked = True
+            break
+
+    if eval_blocked:
+        blocked1 = []
+        blocked2 = []
+        for j in range(len(blocked)):
+            if len(blocked[i][1]) > 1:  # a conflict: two agents here
+                blocked1.append((blocked[i][0], blocked[i][1][0]))
+                blocked2.append((blocked[i][0], blocked[i][1][1]))
+            else:
+                blocked1.append(blocked[i])
+                blocked2.append(blocked[i])
+        return [comp2state(agent_job, agent_idle, tuple(blocked1)),
+                comp2state(agent_job, agent_idle, tuple(blocked2))]
+    else:
+        children = []
+        agent_pos = list(agent_pos)
+        jobs = list(jobs)
+        idle_goals = list(idle_goals)
+        if len(left_jobs) > 0:  # still jobs to assign - try with all left agents
+            # TODO: what if there are too many jobs?
+            for a in left_agent_pos:
+                l = list(agent_job).copy()
+                l.append((agent_pos.index(a),
+                          jobs.index(left_jobs[0])))
+                children.append(comp2state(tuple(l),
+                                           agent_idle,
+                                           blocked))
+            return children
+        elif len(left_idle_goals) > 0:  # only idle goals to assign - try with all left agents
+            for a in left_agent_pos:
+                l = list(agent_idle).copy()
+                l.append((agent_pos.index(a),
+                          idle_goals.index(left_idle_goals[0])))
+                children.append(comp2state(agent_job,
+                                           tuple(l),
+                                           blocked))
+            return children
+        else:  # all assigned
+            return []
 
 
 def clear_set(agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals: list, jobs: list) -> tuple:
@@ -297,51 +342,133 @@ def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
     :return: The cost increase between _state1 and _state2
     """
     (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
-    (agent_job1, agent_idle1, _) = state2comp(_state1)
-    (agent_job2, agent_idle2, _) = state2comp(_state2)
+    (agent_job1, agent_idle1, blocked1) = state2comp(_state1)
+    (agent_job2, agent_idle2, blocked2) = state2comp(_state2)
     _cost = 0.
-    for aj in agent_job2:
-        if aj not in agent_job1:
-            agent = agent_pos[aj[0]]
-            job = jobs[aj[1]]
-            _cost += path_length(path(agent, job[0], _map))
-            _cost += path_length(path(job[0], job[1], _map))
-    for ai in agent_idle2:
-        if ai not in agent_idle1:
-            agent = agent_pos[ai[0]]
-            goal = idle_goals[ai[1]]
-            path_len = path_length(path(agent, goal[0], _map))
-            # taking cumulative distribution from std, making in cheaper to arrive early
-            p = norm.cdf(path_len, loc=goal[1][0], scale=goal[1][1])
-            _cost += (p * path_len)
-    return _cost
+
+    # assigning blocks to agents
+    blocks1 = get_blocks_dict(blocked1)
+    if blocked2 != blocked1:  # blocks were added
+        #  assigning blocks to agents
+        blocks_new = {}
+        for b in blocked2:
+            if (b[1].__class__ == int and  # a block, not a conflict
+                        b not in blocked1):  # new
+                if b[1] in blocks_new.keys():
+                    blocks_new[b[1]] += b[0]
+                else:
+                    blocks_new[b[1]] = b[0]
+        for aj in agent_job2:
+            if aj not in agent_job1:
+                agent = agent_pos[aj[0]]
+                if agent in blocks1.keys():
+                    block1 = blocks1[agent]
+                    block2 = blocks1[agent]
+                else:
+                    block1 = []
+                    block2 = []
+                if agent in blocks_new.keys():
+                    block2 += blocks_new[agent]
+                job = jobs[aj[1]]
+                _cost += path_length(path(agent, job[0], _map, block2)) - path_length(path(agent, job[0], _map, block1))
+                _cost += path_length(path(job[0], job[1], _map, block2)) - path_length(
+                    path(agent, job[0], _map, block1))
+        for ai in agent_idle2:
+            if ai not in agent_idle1:
+                agent = agent_pos[ai[0]]
+                if agent in blocks1.keys():
+                    block1 = blocks1[agent]
+                    block2 = blocks1[agent]
+                else:
+                    block1 = []
+                    block2 = []
+                if agent in blocks_new.keys():
+                    block2 += blocks_new[agent]
+                goal = idle_goals[ai[1]]
+                path_len = path_length(path(agent, goal[0], _map, block2))
+                # taking cumulative distribution from std, making in cheaper to arrive early
+                p = norm.cdf(path_len, loc=goal[1][0], scale=goal[1][1])
+                path_len2 = path_length(path(agent, goal[0], _map, block2))
+                p2 = norm.cdf(path_len, loc=goal[1][0], scale=goal[1][1])
+                _cost += (p2 * path_len2) - (p * path_len)
+    elif agent_job2 != agent_job1 or \
+                    agent_idle2 != agent_idle1:
+        # finding paths
+        for aj in agent_job2:
+            if aj not in agent_job1:
+                agent = agent_pos[aj[0]]
+                if agent in blocks1.keys():
+                    block = blocks1[agent]
+                else:
+                    block = []
+                job = jobs[aj[1]]
+                _cost += path_length(path(agent, job[0], _map, block))
+                _cost += path_length(path(job[0], job[1], _map, block))
+        for ai in agent_idle2:
+            if ai not in agent_idle1:
+                agent = agent_pos[ai[0]]
+                if agent in blocks1.keys():
+                    block = blocks1[agent]
+                else:
+                    block = []
+                goal = idle_goals[ai[1]]
+                path_len = path_length(path(agent, goal[0], _map, block))
+                # taking cumulative distribution from std, making in cheaper to arrive early
+                p = norm.cdf(path_len, loc=goal[1][0], scale=goal[1][1])
+                _cost += (p * path_len)
+
+    else:
+        assert False, "nothing changed in this state transition"
+
+    # finding collisions in paths
+    collision = find_collision(get_paths(_condition, _state2))
+    if collision != ():
+        _cost += 1
+        if blocked2 == ():
+            blocked2 = (collision,)
+        else:
+            blocked2 = blocked2 + (collision,)
+        _state2 = comp2state(agent_job2, agent_idle2, blocked2)
+    return _cost, _state2
 
 
-def path(start: tuple, goal: tuple, _map: np.array, calc: bool = True) -> list:
+def get_blocks_dict(blocked):
+    blocks = {}
+    for b in blocked:
+        if b[1].__class__ == int:  # a block, not a conflict
+            if b[1] in blocks.keys():
+                blocks[b[1]] += b[0]
+            else:
+                blocks[b[1]] = b[0]
+    return blocks
+
+
+def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = True) -> list:
     """
     Calculate or return pre-calculated path from start to goal
     :param start: The start to start from
     :param goal: The goal to plan to
     :param _map: The map to plan on
-    :param calc: whether or not the path should be calculated
-                 if no saved id available.
-                 (returns False if not saved)
+    :param blocked: List of blocked points for agents e.g. ((x, y, t), agent)
+    :param calc: whether or not the path should be calculated if no saved id available. (returns False if not saved)
     :return: the path
     """
-    index = [start, goal]
-    index.sort()
-    reverse = index != [start, goal]
+    index = tuple([start, goal]) + tuple(blocked)
+    if len(blocked) > 0:
+        _map = _map.copy()
+        _map[(blocked[1],
+              blocked[0],
+              blocked[2])] = -1
 
-    if tuple(index) not in paths.keys():
+    if index not in path_save.keys():
         if calc:  # if we want to calc (i.e. find the cost)
-            paths[tuple(index)] = astar_grid4con((index[0] + (0,)),
-                                                 (index[1] + (_map.shape[0] * 5,)),
-                                                 _map.swapaxes(0, 1))
+            path_save[index] = astar_grid4con((start + (0,)),
+                                              (goal + (_map.shape[2] - 1,)),
+                                              _map.swapaxes(0, 1))
         else:
             return False
 
-    _path = paths[tuple(index)].copy()
-    if reverse: _path.reverse()
+    _path = path_save[index].copy()
     return _path
 
 
@@ -353,8 +480,13 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
     :return: Result of the test
     """
     (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
-    (agent_job, agent_idle, _) = state2comp(_state)
-    return len(agent_pos) == len(agent_job) + len(agent_idle)
+    (agent_job, agent_idle, blocked) = state2comp(_state)
+    agents_blocked = False
+    for i in range(len(blocked)):
+        if blocked[i][1].__class__ != int:  # two agents blocked
+            agents_blocked = True
+            break
+    return (len(agent_pos) == len(agent_job) + len(agent_idle)) and not agents_blocked
 
 
 def condition2comp(_condition: dict):

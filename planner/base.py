@@ -32,7 +32,8 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             if neighbor in closed:
                 continue  # Ignore the neighbor which is already evaluated.
             # The distance from start to a neighbor
-            tentative_g_score = g_score[current] + cost(condition, current, neighbor)
+            c, neighbor = cost(condition, current, neighbor)
+            tentative_g_score = g_score[current] + c
 
             append = True
             if neighbor not in open:  # Discover a new node

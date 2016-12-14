@@ -1,7 +1,9 @@
 import datetime
-import numpy as np
-import planner.plan
 import os
+
+import numpy as np
+
+import planner.plan
 
 
 def test_basic():
@@ -47,10 +49,30 @@ def test_file():
     time2 = (datetime.datetime.now() - start_time).total_seconds()
     try:
         assert time2 < time1, "It was not faster to work with saved data"
-        print("Saving paths saved us", 100 * (time1 - time2) / time1, "% of time")
+        print("Saving path_save saved us", 100 * (time1 - time2) / time1, "% of time")
     finally:
         os.remove(fname)
         assert not os.path.exists(fname), "File exists after delete"
+
+
+def test_collision():
+    grid = np.zeros([10, 10, 50])
+    grid[2:8, 0:4, :] = -1
+    grid[2:8, 5:10, :] = -1
+    agent_pos = [(3, 1), (5, 1)]
+    idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
+
+    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, [], idle_goals, grid, fname=False,
+                                                                 plot=False)
+    assert len(res_agent_job) == 0, "We don't have to assign jobs"
+
+    ps = res_paths[0] + res_paths[1]
+    pss = []
+    for m in map(hash, ps):
+        pss.append(m)
+    pss = np.array(pss)
+    unique = np.unique(pss)
+    assert len(pss) == len(unique), "Collisions in path_save"
 
 
 def test_concat_paths():
