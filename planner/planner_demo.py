@@ -17,8 +17,8 @@ agent_idle = [(1, 0)]
 
 start_time = datetime.datetime.now()
 
-res_agent_job, res_agent_idle, res_blocked = plan(agent_pos, jobs, idle_goals, grid, plot=True)
+res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, idle_goals, grid, plot=True)
 
 print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
 
-print(res_agent_job, res_agent_idle, res_blocked)
+print(res_agent_job, res_agent_idle, res_paths)

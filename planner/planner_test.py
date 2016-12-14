@@ -3,12 +3,13 @@ import numpy as np
 import planner.plan
 import os
 
+
 def test_basic():
     agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data()
 
     start_time = datetime.datetime.now()
 
-    res_agent_job, res_agent_idle, res_blocked = planner.plan.plan(agent_pos, jobs, idle_goals, grid, fname=False)
+    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, idle_goals, grid, fname=False)
 
     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
 
@@ -50,3 +51,11 @@ def test_file():
     finally:
         os.remove(fname)
         assert not os.path.exists(fname), "File exists after delete"
+
+
+def test_concat_paths():
+    path1 = [(1, 1, 0), (1, 2, 1), (1, 3, 2)]
+    path2 = [(1, 3, 0), (2, 3, 1), (3, 3, 2)]
+    res_path = [(1, 1, 0), (1, 2, 1), (1, 3, 2), (2, 3, 3), (3, 3, 4)]
+
+    assert res_path == planner.plan.concat_paths(path1, path2), "Wrong merging"

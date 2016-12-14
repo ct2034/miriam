@@ -9,7 +9,6 @@ from planner.base import astar_base
 
 paths = {}
 
-
 def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
     """
     Main entry point for planner
@@ -26,7 +25,6 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
     if fname:
         try:
             with open(fname, 'rb') as f:
-                global paths
                 paths = pickle.load(f)
         except FileNotFoundError as e:
             print("WARN: File", fname, "does not exist")
@@ -34,7 +32,8 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
     if plot:
         # Plot input conditions
         plt.style.use('bmh')
-        fig, ax = plt.subplots()
+        fig = plt.figure()
+        ax = fig.add_subplot(121)
         ax.set_aspect('equal')
 
         # Set ticklines to between the cells
@@ -79,6 +78,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
                     s=np.full(igsa.shape[0], 100),
                     color='g',
                     alpha=.9)
+
         # Legendary!
         plt.legend(["Agents", "Idle Goals"])
         plt.title("Problem Configuration and Solution")
@@ -87,15 +87,19 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
     agent_job = ()
     agent_idle = ()
     blocked = ()
+    condition = comp2condition(agent_pos, jobs, idle_goals, grid)
 
     # planning!
     (agent_job, agent_idle, blocked
      ) = astar_base(start=comp2state(agent_job, agent_idle, blocked),
-                    condition=comp2condition(agent_pos, jobs, idle_goals, grid),
+                    condition=condition,
                     goal_test=goal_test,
                     get_children=get_children,
                     heuristic=heuristic,
                     cost=cost)
+
+    assert len(blocked) == 0, "There are blocked points in the final state"
+    _paths = get_paths(condition, comp2state(agent_job, agent_idle, blocked))
 
     # save paths
     if fname:
@@ -124,13 +128,72 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
                       ec='g',
                       fill=False,
                       linestyle='dotted')
+
+        # Paths
+        from mpl_toolkits.mplot3d import Axes3D
+        _ = Axes3D
+        ax3 = fig.add_subplot(122, projection='3d')
+        legend_str = []
+        i = 0
+        for p in _paths:
+            pa = np.array(p)
+            ax3.plot(xs=pa[:, 0],
+                     ys=pa[:, 1],
+                     zs=pa[:, 2])
+            legend_str.append("Agent " + str(i))
+            i += 1
+        plt.legend(legend_str)
+
         plt.show()
 
-    # TODO: also give out paths!
-    return agent_job, agent_idle, blocked
+    return agent_job, agent_idle, _paths
 
 
-def heuristic(_condition: dict, _state: tuple):
+def get_paths(_condition: dict, _state: tuple) -> tuple:
+    """
+    Get the paths for a given state
+    :param _condition: Input condition (
+    :param _state:
+    :return: tuple of paths for agents
+    """
+    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
+    (agent_job, agent_idle, _) = state2comp(_state)
+    agent_job = np.array(agent_job)
+    agent_idle = np.array(agent_idle)
+    _paths = []
+    for ia in range(len(agent_pos)):
+        for aj in agent_job:
+            if aj[0] == ia:
+                p = concat_paths(path(agent_pos[ia], jobs[aj[1]][0], _map, calc=False),
+                                 path(jobs[aj[1]][0], jobs[aj[1]][1], _map, calc=False))
+                _paths.append(p)
+                break
+        for ai in agent_idle:
+            if ai[0] == ia:
+                _paths.append(path(agent_pos[ia], idle_goals[ai[1]][0], _map, calc=False))
+                break
+    assert len(_paths) == len(agent_pos), "Not all agents have a path (or some have more)"
+    return _paths
+
+
+def concat_paths(path1, path2):
+    """
+    Append to paths to each other
+    :param path1: First path
+    :param path2: Second path
+    :return: Both paths
+    """
+    if (path1[-1][0] == path2[0][0]) and (path1[-1][1] == path2[0][1]):
+        path2.remove(path2[0])
+    d = len(path1) - 1
+    for i in range(len(path2)):
+        path1.append((path2[i][0],
+                      path2[i][1],
+                      path2[i][2] + d))
+    return path1
+
+
+def heuristic(_condition: dict, _state: tuple) -> float:
     """
     Estimation from this state to the goal
     :param _condition: Input condition (
@@ -139,7 +202,7 @@ def heuristic(_condition: dict, _state: tuple):
     """
     (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, _) = state2comp(_state)
-    _cost = 0
+    _cost = 0.
 
     # what to assign
     n_jobs2assign = len(agent_pos) - len(agent_job)
@@ -270,7 +333,9 @@ def path(start: tuple, goal: tuple, _map: np.array, calc: bool = True) -> list:
 
     if tuple(index) not in paths.keys():
         if calc:  # if we want to calc (i.e. find the cost)
-            paths[tuple(index)] = astar_grid4con((index[0] + (0,)), (index[1] + (_map.shape[0] * 5,)), _map)
+            paths[tuple(index)] = astar_grid4con((index[0] + (0,)),
+                                                 (index[1] + (_map.shape[0] * 5,)),
+                                                 _map.swapaxes(0, 1))
         else:
             return False
 
