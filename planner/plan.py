@@ -23,6 +23,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
 
     # load paths
     if fname:
+        global paths
         try:
             with open(fname, 'rb') as f:
                 paths = pickle.load(f)
