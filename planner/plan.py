@@ -2,13 +2,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm
 
+import pickle
+
 from astar.astar_grid48con import astar_grid4con, path_length, distance
 from planner.base import astar_base
 
-save = {}
+paths = {}
 
 
-def plan(agent_pos, jobs, idle_goals, grid, plot=False):
+def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='paths.pkl'):
     """
     Main entry point for planner
     :param agent_pos: agent poses
@@ -16,10 +18,19 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
     :param idle_goals: idle goals to consider (((g_x, g_y), (t_mu, t_std)), ...)
     :param grid: the map (2D-space + time)
     :param plot: whether to plot conditions and results or not
-    :return: tuple of tuples of agent -> job allocations,
-                                agent -> idle goal allocations and
-                                blocked map areas
+    :param fname: filename to save / read paths (set to False to not do this)
+    :return: tuple of tuples of agent -> job allocations, agent -> idle goal allocations and blocked map areas
     """
+
+    # load paths
+    if fname:
+        try:
+            with open(fname, 'rb') as f:
+                global paths
+                paths = pickle.load(f)
+        except FileNotFoundError as e:
+            print("WARN: File", fname, "does not exist")
+
     if plot:
         # Plot input conditions
         plt.style.use('bmh')
@@ -86,6 +97,14 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False):
                     heuristic=heuristic,
                     cost=cost)
 
+    # save paths
+    if fname:
+        try:
+            with open(fname, 'wb') as f:
+                pickle.dump(paths, f, pickle.HIGHEST_PROTOCOL)
+        except Exception as e:
+            print(e)
+
     if plot:
         # plot agent -> job allocation
         for aj in agent_job:
@@ -144,7 +163,7 @@ def heuristic(_condition: dict, _state: tuple):
         for i in range(len(agent_pos)):
             if i < len(l):
                 _cost += l[i]
-        pass  # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
+                # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
 
     return _cost
 
@@ -249,13 +268,13 @@ def path(start: tuple, goal: tuple, _map: np.array, calc: bool = True) -> list:
     index.sort()
     reverse = index != [start, goal]
 
-    if tuple(index) not in save.keys():
+    if tuple(index) not in paths.keys():
         if calc:  # if we want to calc (i.e. find the cost)
-            save[tuple(index)] = astar_grid4con((index[0] + (0,)), (index[1] + (_map.shape[0] * 5,)), _map)
+            paths[tuple(index)] = astar_grid4con((index[0] + (0,)), (index[1] + (_map.shape[0] * 5,)), _map)
         else:
             return False
 
-    _path = save[tuple(index)].copy()
+    _path = paths[tuple(index)].copy()
     if reverse: _path.reverse()
     return _path
 
@@ -313,5 +332,3 @@ def comp2state(agent_job: tuple,
     Transform state sections into tuple to use
     """
     return (agent_job, agent_idle, blocked)
-
-
