@@ -136,15 +136,15 @@ def heuristic(_condition: dict, _state: tuple):
             l.append(path_length(p))
         else:
             l.append(distance(j[0], j[1]))
-
     l.sort()
-    if __name__ == '__main__':
-        if len(l) > len(agent_pos):  # we assign only jobs
-            for i in range(len(agent_pos)):
+    if len(l) > len(agent_pos):  # we assign only jobs
+        for i in range(len(agent_pos)):
+            _cost += l[i]
+    else:  # we have to assign idle_goals, two
+        for i in range(len(agent_pos)):
+            if i < len(l):
                 _cost += l[i]
-        else:  # we have to assign idle_goals, two
-            pass
-            # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
+        pass  # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
 
     return _cost
 
