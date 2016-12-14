@@ -23,7 +23,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='path_save.pkl'):
     """
 
     # load path_save
-    if fname:
+    if fname:  # TODO: check if file was created on same map
         global path_save
         try:
             with open(fname, 'rb') as f:
@@ -84,6 +84,8 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='path_save.pkl'):
         # Legendary!
         plt.legend(["Agents", "Idle Goals"])
         plt.title("Problem Configuration and Solution")
+
+        # plt.show()
 
     # result data structures
     agent_job = ()
