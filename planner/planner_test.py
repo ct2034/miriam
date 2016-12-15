@@ -11,7 +11,7 @@ def test_basic():
 
     start_time = datetime.datetime.now()
 
-    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, idle_goals, grid, fname=False)
+    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, idle_goals, grid, filename=False)
 
     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
 
@@ -40,12 +40,12 @@ def test_file():
 
     agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data(2)
     start_time = datetime.datetime.now()
-    planner.plan.plan(agent_pos, jobs, idle_goals, grid, fname=fname)
+    planner.plan.plan(agent_pos, jobs, idle_goals, grid, filename=fname)
     time1 = (datetime.datetime.now() - start_time).total_seconds()
     assert os.path.isfile(fname), "Algorithm has not created a file"
 
     start_time = datetime.datetime.now()
-    planner.plan.plan(agent_pos, jobs, idle_goals, grid, fname=fname)
+    planner.plan.plan(agent_pos, jobs, idle_goals, grid, filename=fname)
     time2 = (datetime.datetime.now() - start_time).total_seconds()
     try:
         assert time2 < time1, "It was not faster to work with saved data"
@@ -62,7 +62,7 @@ def test_collision():
     agent_pos = [(3, 1), (5, 1)]
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
 
-    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, [], idle_goals, grid, fname=False,
+    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, [], idle_goals, grid, filename=False,
                                                                  plot=False)
     assert len(res_agent_job) == 0, "We don't have to assign jobs"
 
