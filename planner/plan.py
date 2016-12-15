@@ -4,13 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm
 
-from astar.astar_grid48con import astar_grid4con, path_length, distance
+from astar.astar_grid48con import astar_grid4con, distance
 from planner.base import astar_base
 
 path_save = {}
 
 
-def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='path_save.pkl'):
+def plan(agent_pos: list, jobs: list, idle_goals: list, grid: np.array, plot: bool = False,
+         fname: str = 'path_save.pkl'):
     """
     Main entry point for planner
     :param agent_pos: agent poses
@@ -153,112 +154,7 @@ def plan(agent_pos, jobs, idle_goals, grid, plot=False, fname='path_save.pkl'):
     return agent_job, agent_idle, _paths
 
 
-def get_paths(_condition: dict, _state: tuple) -> tuple:
-    """
-    Get the path_save for a given state
-    :param _condition: Input condition (
-    :param _state:
-    :return: tuple of path_save for agents
-    """
-    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
-    (agent_job, agent_idle, blocked) = state2comp(_state)
-    agent_job = np.array(agent_job)
-    agent_idle = np.array(agent_idle)
-    _paths = []
-    blocks = get_blocks_dict(blocked)
-    for ia in range(len(agent_pos)):
-        if ia in blocks.keys():
-            block = blocks[ia]
-        else:
-            block = []
-        for aj in agent_job:
-            if aj[0] == ia:
-                p = concat_paths(path(agent_pos[ia], jobs[aj[1]][0], _map, block, calc=True),
-                                 path(jobs[aj[1]][0], jobs[aj[1]][1], _map, block, calc=True))
-                _paths.append(p)
-                break
-        for ai in agent_idle:
-            if ai[0] == ia:
-                _paths.append(path(agent_pos[ia], idle_goals[ai[1]][0], _map, block, calc=True))
-                break
-    assert len(_paths) <= len(agent_pos), "More paths than agents"
-    return _paths
-
-
-def find_collision(_paths):
-    """
-    Find collisions in a set of path_save
-    :param _paths: set of path_save
-    :return: first found collisions
-    """
-    from_agent = []
-    all_paths = []
-    i = 0
-    seen = set()
-    for _path in _paths:
-        for point in _path:
-            if point in seen:  # collision
-                return tuple((point, (i, from_agent[all_paths.index(point)])))
-            seen.add(point)
-            all_paths.append(point)
-            from_agent.append(i)
-        i += 1  # next path (of next agent)
-    return ()
-
-
-def concat_paths(path1, path2):
-    """
-    Append to path_save to each other
-    :param path1: First path
-    :param path2: Second path
-    :return: Both path_save
-    """
-    if (path1[-1][0] == path2[0][0]) and (path1[-1][1] == path2[0][1]):
-        path2.remove(path2[0])
-    d = len(path1) - 1
-    for i in range(len(path2)):
-        path1.append((path2[i][0],
-                      path2[i][1],
-                      path2[i][2] + d))
-    return path1
-
-
-def heuristic(_condition: dict, _state: tuple) -> float:
-    """
-    Estimation from this state to the goal
-    :param _condition: Input condition (
-    :param _state:
-    :return: cost heuristic for the given state
-    """
-    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
-    (agent_job, agent_idle, _) = state2comp(_state)
-    _cost = 0.
-
-    # what to assign
-    n_jobs2assign = len(agent_pos) - len(agent_job)
-    if n_jobs2assign == 0: return 0
-
-    (agent_pos, idle_goals, jobs
-     ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
-
-    l = []
-    for j in jobs:
-        p = path(j[0], j[1], _map, [], False)
-        if p:  # if there was a path in the dict
-            l.append(path_length(p))
-        else:
-            l.append(distance(j[0], j[1]))
-    l.sort()
-    if len(l) > len(agent_pos):  # we assign only jobs
-        for i in range(len(agent_pos)):
-            _cost += l[i]
-    else:  # we have to assign idle_goals, two
-        for i in range(len(agent_pos)):
-            if i < len(l):
-                _cost += l[i]
-                # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
-    return _cost
-
+# Main methods
 
 def get_children(_condition: dict, _state: tuple) -> list:
     """
@@ -318,24 +214,6 @@ def get_children(_condition: dict, _state: tuple) -> list:
             return []
 
 
-def clear_set(agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals: list, jobs: list) -> tuple:
-    """
-    Clear condition sets of agents, jobs and idle goals already assigned with each other
-    """
-    cp_agent_pos = agent_pos.copy()
-    cp_idle_goals = idle_goals.copy()
-    cp_jobs = jobs.copy()
-
-    for aj in agent_job:
-        cp_agent_pos.remove(agent_pos[aj[0]])
-        cp_jobs.remove(jobs[aj[1]])
-    for ai in agent_idle:
-        cp_agent_pos.remove(agent_pos[ai[0]])
-        cp_idle_goals.remove(idle_goals[ai[1]])
-    # TODO: sort by lengths, i.e. metric of assignment order
-    return cp_agent_pos, cp_idle_goals, cp_jobs
-
-
 def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
     """
     Get the cost increase for a change from _state1 to _state2
@@ -373,8 +251,9 @@ def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
                 if agent in blocks_new.keys():
                     block2 += blocks_new[agent]
                 job = jobs[aj[1]]
-                _cost += path_length(path(agent, job[0], _map, block2)) - path_length(path(agent, job[0], _map, block1))
-                _cost += path_length(path(job[0], job[1], _map, block2)) - path_length(
+                _cost += path_duration(path(agent, job[0], _map, block2)) - path_duration(
+                    path(agent, job[0], _map, block1))
+                _cost += path_duration(path(job[0], job[1], _map, block2)) - path_duration(
                     path(agent, job[0], _map, block1))
         for ai in agent_idle2:
             if ai not in agent_idle1:
@@ -388,10 +267,10 @@ def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
                 if agent in blocks_new.keys():
                     block2 += blocks_new[agent]
                 goal = idle_goals[ai[1]]
-                path_len = path_length(path(agent, goal[0], _map, block2))
+                path_len = path_duration(path(agent, goal[0], _map, block2))
                 # taking cumulative distribution from std, making in cheaper to arrive early
                 p = norm.cdf(path_len, loc=goal[1][0], scale=goal[1][1])
-                path_len2 = path_length(path(agent, goal[0], _map, block2))
+                path_len2 = path_duration(path(agent, goal[0], _map, block2))
                 p2 = norm.cdf(path_len, loc=goal[1][0], scale=goal[1][1])
                 _cost += (p2 * path_len2) - (p * path_len)
     elif agent_job2 != agent_job1 or \
@@ -405,8 +284,8 @@ def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
                 else:
                     block = []
                 job = jobs[aj[1]]
-                _cost += path_length(path(agent, job[0], _map, block))
-                _cost += path_length(path(job[0], job[1], _map, block))
+                _cost += path_duration(path(agent, job[0], _map, block))
+                _cost += path_duration(path(job[0], job[1], _map, block))
         for ai in agent_idle2:
             if ai not in agent_idle1:
                 agent = agent_pos[ai[0]]
@@ -415,7 +294,7 @@ def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
                 else:
                     block = []
                 goal = idle_goals[ai[1]]
-                path_len = path_length(path(agent, goal[0], _map, block))
+                path_len = path_duration(path(agent, goal[0], _map, block))
                 # taking cumulative distribution from std, making in cheaper to arrive early
                 p = norm.cdf(path_len, loc=goal[1][0], scale=goal[1][1])
                 _cost += (p * path_len)
@@ -435,15 +314,78 @@ def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
     return _cost, _state2
 
 
-def get_blocks_dict(blocked):
-    blocks = {}
-    for b in blocked:
-        if b[1].__class__ == int:  # a block, not a conflict
-            if b[1] in blocks.keys():
-                blocks[b[1]] += [b[0], ]
-            else:
-                blocks[b[1]] = [b[0], ]
-    return blocks
+def heuristic(_condition: dict, _state: tuple) -> float:
+    """
+    Estimation from this state to the goal
+    :param _condition: Input condition (
+    :param _state:
+    :return: cost heuristic for the given state
+    """
+    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
+    (agent_job, agent_idle, _) = state2comp(_state)
+    _cost = 0.
+
+    # what to assign
+    n_jobs2assign = len(agent_pos) - len(agent_job)
+    if n_jobs2assign == 0: return 0
+
+    (agent_pos, idle_goals, jobs
+     ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
+
+    l = []
+    for j in jobs:
+        p = path(j[0], j[1], _map, [], False)
+        if p:  # if there was a path in the dict
+            l.append(path_duration(p))
+        else:
+            l.append(distance(j[0], j[1]))
+    l.sort()
+    if len(l) > len(agent_pos):  # we assign only jobs
+        for i in range(len(agent_pos)):
+            _cost += l[i]
+    else:  # we have to assign idle_goals, two
+        for i in range(len(agent_pos)):
+            if i < len(l):
+                _cost += l[i]
+                # TODO: think about this part of the heuristic. Problem is: we dont know, which agent
+    return _cost
+
+
+def goal_test(_condition: dict, _state: tuple) -> bool:
+    """
+    Test if a state is the goal state regarding given conditions
+    :param _condition: Given conditions
+    :param _state: State to check
+    :return: Result of the test
+    """
+    (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
+    (agent_job, agent_idle, blocked) = state2comp(_state)
+    agents_blocked = False
+    for i in range(len(blocked)):
+        if blocked[i][1].__class__ != int:  # two agents blocked
+            agents_blocked = True
+            break
+    return (len(agent_pos) == len(agent_job) + len(agent_idle)) and not agents_blocked
+
+
+# Helpers
+
+def clear_set(agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals: list, jobs: list) -> tuple:
+    """
+    Clear condition sets of agents, jobs and idle goals already assigned with each other
+    """
+    cp_agent_pos = agent_pos.copy()
+    cp_idle_goals = idle_goals.copy()
+    cp_jobs = jobs.copy()
+
+    for aj in agent_job:
+        cp_agent_pos.remove(agent_pos[aj[0]])
+        cp_jobs.remove(jobs[aj[1]])
+    for ai in agent_idle:
+        cp_agent_pos.remove(agent_pos[ai[0]])
+        cp_idle_goals.remove(idle_goals[ai[1]])
+    # TODO: sort by lengths, i.e. metric of assignment order
+    return cp_agent_pos, cp_idle_goals, cp_jobs
 
 
 def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = True) -> list:
@@ -476,22 +418,97 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
     return _path
 
 
-def goal_test(_condition: dict, _state: tuple) -> bool:
-    """
-    Test if a state is the goal state ragrding given conditions
-    :param _condition: Given conditions
-    :param _state: State to check
-    :return: Result of the test
-    """
-    (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
-    (agent_job, agent_idle, blocked) = state2comp(_state)
-    agents_blocked = False
-    for i in range(len(blocked)):
-        if blocked[i][1].__class__ != int:  # two agents blocked
-            agents_blocked = True
-            break
-    return (len(agent_pos) == len(agent_job) + len(agent_idle)) and not agents_blocked
+def path_duration(path: list) -> int:
+    """Measure the duration that the traveling of a path would take
+    :param path: The path to measure
+    :returns The durtion"""
+    return len(path) - 1  # assuming all steps take one time unit
 
+
+# Collision Helpers
+
+def get_paths(_condition: dict, _state: tuple) -> tuple:
+    """
+    Get the path_save for a given state
+    :param _condition: Input condition (
+    :param _state:
+    :return: tuple of path_save for agents
+    """
+    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
+    (agent_job, agent_idle, blocked) = state2comp(_state)
+    agent_job = np.array(agent_job)
+    agent_idle = np.array(agent_idle)
+    _paths = []
+    blocks = get_blocks_dict(blocked)
+    for ia in range(len(agent_pos)):
+        if ia in blocks.keys():
+            block = blocks[ia]
+        else:
+            block = []
+        for aj in agent_job:
+            if aj[0] == ia:
+                p = concat_paths(path(agent_pos[ia], jobs[aj[1]][0], _map, block, calc=True),
+                                 path(jobs[aj[1]][0], jobs[aj[1]][1], _map, block, calc=True))
+                _paths.append(p)
+                break
+        for ai in agent_idle:
+            if ai[0] == ia:
+                _paths.append(path(agent_pos[ia], idle_goals[ai[1]][0], _map, block, calc=True))
+                break
+    assert len(_paths) <= len(agent_pos), "More paths than agents"
+    return _paths
+
+
+def find_collision(_paths: list) -> tuple:
+    """
+    Find collisions in a set of path_save
+    :param _paths: set of path_save
+    :return: first found collisions
+    """
+    from_agent = []
+    all_paths = []
+    i = 0
+    seen = set()
+    for _path in _paths:
+        for point in _path:
+            if point in seen:  # collision
+                return tuple((point, (i, from_agent[all_paths.index(point)])))
+            seen.add(point)
+            all_paths.append(point)
+            from_agent.append(i)
+        i += 1  # next path (of next agent)
+    return ()
+
+
+def concat_paths(path1: list, path2: list) -> list:
+    """
+    Append to path_save to each other
+    :param path1: First path
+    :param path2: Second path
+    :return: Both path_save
+    """
+    if (path1[-1][0] == path2[0][0]) and (path1[-1][1] == path2[0][1]):
+        path2.remove(path2[0])
+    d = len(path1) - 1
+    for i in range(len(path2)):
+        path1.append((path2[i][0],
+                      path2[i][1],
+                      path2[i][2] + d))
+    return path1
+
+
+def get_blocks_dict(blocked):
+    blocks = {}
+    for b in blocked:
+        if b[1].__class__ == int:  # a block, not a conflict
+            if b[1] in blocks.keys():
+                blocks[b[1]] += [b[0], ]
+            else:
+                blocks[b[1]] = [b[0], ]
+    return blocks
+
+
+# Data Helpers
 
 def condition2comp(_condition: dict):
     """

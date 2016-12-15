@@ -14,8 +14,17 @@ idle_goals = [((9, 7), (5, .5)), ((9, 8), (20, .5))]
 
 start_time = datetime.datetime.now()
 
-res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, idle_goals, grid, plot=False, fname=False)
+(res_agent_job,
+ res_agent_idle,
+ res_paths) = plan(agent_pos,
+                   jobs,
+                   idle_goals,
+                   grid,
+                   plot=True,
+                   fname=False)
 
-print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
+print("computation time:",
+      (datetime.datetime.now() - start_time).total_seconds(),
+      "s")
 
 print(res_agent_job, res_agent_idle, res_paths)
