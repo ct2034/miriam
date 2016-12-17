@@ -35,7 +35,10 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
             logging.warning("WARN: File %s does not exist", filename)
 
     # result data structures
-    agent_job = ()
+    agent_job = []
+    for aj in alloc_jobs:
+        agent_job.append(tuple(aj))
+    agent_job = tuple(agent_job)
     agent_idle = ()
     blocked = ()
     condition = comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid)
@@ -256,7 +259,7 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     :param _state:
     :return: cost heuristic for the given state
     """
-    (agent_pos, jobs, jobs_alloc, idle_goals, _map) = condition2comp(_condition)
+    (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, _) = state2comp(_state)
     _cost = 0.
 
@@ -271,7 +274,7 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     l = []
     for i_job in range(len(jobs)):
         j = jobs[i_job]
-        for ja in jobs_alloc:
+        for ja in alloc_jobs:
             if ja[1] == i_job:
                 _cost += distance(agent_pos[ja[0]], j[1])
                 break
@@ -387,7 +390,7 @@ def get_paths(_condition: dict, _state: tuple) -> list:
     :param _state:
     :return: tuple of path_save for agents
     """
-    (agent_pos, jobs, jobs_alloc, idle_goals, _map) = condition2comp(_condition)
+    (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
     agent_job = np.array(agent_job)
     agent_idle = np.array(agent_idle)
@@ -401,7 +404,7 @@ def get_paths(_condition: dict, _state: tuple) -> list:
             block = []
         for aj in agent_job:
             if aj[0] == ia:
-                if tuple(aj) in jobs_alloc:  # only need to go to goal
+                if tuple(aj) in alloc_jobs:  # only need to go to goal
                     _paths.append(path(agent_pos[ia], jobs[aj[1]][1], _map, block, calc=True))
                 else:
                     p1 = path(agent_pos[ia], jobs[aj[1]][0], _map, block, calc=True)
@@ -495,14 +498,14 @@ def condition2comp(_condition: dict):
     """
     return (_condition["agent_pos"],
             _condition["jobs"],
-            _condition["jobs_alloc"],
+            _condition["alloc_jobs"],
             _condition["idle_goals"],
             _condition["grid"])
 
 
 def comp2condition(agent_pos: list,
                    jobs: list,
-                   jobs_alloc: list,
+                   alloc_jobs: list,
                    idle_goals: list,
                    grid: np.array):
     """
@@ -511,7 +514,7 @@ def comp2condition(agent_pos: list,
     return {
         "agent_pos": agent_pos,
         "jobs": jobs,
-        "jobs_alloc": jobs_alloc,
+        "alloc_jobs": alloc_jobs,
         "idle_goals": idle_goals,
         "grid": grid
     }
