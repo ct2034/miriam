@@ -11,7 +11,7 @@ def test_basic():
 
     start_time = datetime.datetime.now()
 
-    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, idle_goals, grid, filename=False)
+    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, idle_goals, grid, filename='')
 
     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
 
@@ -62,7 +62,7 @@ def test_collision():
     agent_pos = [(3, 1), (5, 1)]
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
 
-    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, [], idle_goals, grid, filename=False,
+    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, [], idle_goals, grid, filename='',
                                                                  plot=False)
     assert len(res_agent_job) == 0, "We don't have to assign jobs"
 

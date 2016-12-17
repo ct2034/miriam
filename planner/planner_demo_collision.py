@@ -21,7 +21,7 @@ start_time = datetime.datetime.now()
                    idle_goals,
                    grid,
                    plot=True,
-                   filename=False)
+                   filename='')
 
 print("computation time:",
       (datetime.datetime.now() - start_time).total_seconds(),
