@@ -11,12 +11,13 @@ from planner.base import astar_base
 path_save = {}
 
 
-def plan(agent_pos: list, jobs: list, idle_goals: list, grid: np.array, plot: bool = False,
+def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array, plot: bool = False,
          filename: str = 'path_save.pkl'):
     """
     Main entry point for planner
     :param agent_pos: agent poses
     :param jobs: jobs to plan for (((s_x, s_y), (g_x, g_y)), ...)
+    :param alloc_jobs: preallocation of agent to a job (i.e. will travel to its goal)
     :param idle_goals: idle goals to consider (((g_x, g_y), (t_mu, t_std)), ...)
     :param grid: the map (2D-space + time)
     :param plot: whether to plot conditions and results or not
@@ -37,7 +38,7 @@ def plan(agent_pos: list, jobs: list, idle_goals: list, grid: np.array, plot: bo
     agent_job = ()
     agent_idle = ()
     blocked = ()
-    condition = comp2condition(agent_pos, jobs, idle_goals, grid)
+    condition = comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid)
 
     # planning!
     (agent_job, agent_idle, blocked
@@ -163,7 +164,7 @@ def get_children(_condition: dict, _state: tuple) -> list:
     :param _state: The parent state
     :return: List of children
     """
-    (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
+    (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
     (left_agent_pos, left_idle_goals, left_jobs
      ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
@@ -221,7 +222,7 @@ def cost(_condition: dict, _state: tuple) -> float:
     :param _state: The state to evaluate
     :return: The cost increase between _state1 and _state2
     """
-    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
+    (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, block_state) = state2comp(_state)
     _cost = 0.
 
@@ -255,7 +256,7 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     :param _state:
     :return: cost heuristic for the given state
     """
-    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
+    (agent_pos, jobs, jobs_alloc, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, _) = state2comp(_state)
     _cost = 0.
 
@@ -268,20 +269,26 @@ def heuristic(_condition: dict, _state: tuple) -> float:
      ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
 
     l = []
-    for j in jobs:
-        p = path(j[0], j[1], _map, [], False)
-        if p:  # if there was a path in the dict
-            l.append(path_duration(p) ** 2)
+    for i_job in range(len(jobs)):
+        j = jobs[i_job]
+        for ja in jobs_alloc:
+            if ja[1] == i_job:
+                _cost += distance(agent_pos[ja[0]], j[1])
+                break
         else:
-            l.append(distance(j[0], j[1]))
+            p = path(j[0], j[1], _map, [], False)
+            if p:  # if there was a path in the dict
+                l.append(path_duration(p) ** 2)
+            else:
+                l.append(distance(j[0], j[1]))
     l.sort()
     if len(l) > len(agent_pos):  # we assign only jobs
-        for i in range(len(agent_pos)):
-            _cost += l[i]
+        for i_agent in range(len(agent_pos)):
+            _cost += l[i_agent]
     else:  # we have to assign idle_goals, two
-        for i in range(len(agent_pos)):
-            if i < len(l):
-                _cost += l[i]
+        for i_agent in range(len(agent_pos)):
+            if i_agent < len(l):
+                _cost += l[i_agent]
                 # TODO: think about this part of the heuristic. Problem is: we don't know, which agent
     return _cost
 
@@ -293,7 +300,7 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
     :param _state: State to check
     :return: Result of the test
     """
-    (agent_pos, jobs, idle_goals, _) = condition2comp(_condition)
+    (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
     agents_blocked = False
     for i in range(len(blocked)):
@@ -380,7 +387,7 @@ def get_paths(_condition: dict, _state: tuple) -> list:
     :param _state:
     :return: tuple of path_save for agents
     """
-    (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
+    (agent_pos, jobs, jobs_alloc, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
     agent_job = np.array(agent_job)
     agent_idle = np.array(agent_idle)
@@ -394,15 +401,18 @@ def get_paths(_condition: dict, _state: tuple) -> list:
             block = []
         for aj in agent_job:
             if aj[0] == ia:
-                p1 = path(agent_pos[ia], jobs[aj[1]][0], _map, block, calc=True)
-                p1l = len(p1)
-                block2 = []
-                for b in block:
-                    if b[2] > p1l:
-                        block2.append((b[0], b[1], b[2] - p1l))
-                p = concat_paths(p1.copy(),
-                                 path(jobs[aj[1]][0], jobs[aj[1]][1], _map, block2, calc=True))
-                _paths.append(p)
+                if tuple(aj) in jobs_alloc:  # only need to go to goal
+                    _paths.append(path(agent_pos[ia], jobs[aj[1]][1], _map, block, calc=True))
+                else:
+                    p1 = path(agent_pos[ia], jobs[aj[1]][0], _map, block, calc=True)
+                    p1l = len(p1)
+                    block2 = []
+                    for b in block:
+                        if b[2] > p1l:
+                            block2.append((b[0], b[1], b[2] - p1l))
+                    p = concat_paths(p1.copy(),
+                                     path(jobs[aj[1]][0], jobs[aj[1]][1], _map, block2, calc=True))
+                    _paths.append(p)
                 sth_for_agent = True
                 break
         for ai in agent_idle:
@@ -485,12 +495,14 @@ def condition2comp(_condition: dict):
     """
     return (_condition["agent_pos"],
             _condition["jobs"],
+            _condition["jobs_alloc"],
             _condition["idle_goals"],
             _condition["grid"])
 
 
 def comp2condition(agent_pos: list,
                    jobs: list,
+                   jobs_alloc: list,
                    idle_goals: list,
                    grid: np.array):
     """
@@ -499,6 +511,7 @@ def comp2condition(agent_pos: list,
     return {
         "agent_pos": agent_pos,
         "jobs": jobs,
+        "jobs_alloc": jobs_alloc,
         "idle_goals": idle_goals,
         "grid": grid
     }
