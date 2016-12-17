@@ -54,7 +54,7 @@ def cost(a, b, grid=False):
 def distance(a: tuple, b: tuple) -> float:
     space_dist = np.abs(a[0] - b[0]) + np.abs(a[1] - b[1])  # Manhattan Distance
     if space_dist == 0:
-        return 1.9  # waiting is a bit cheaper then driving twice
+        return 1  # waiting has the same cost as driving once (tbd)
     else:
         return space_dist
 
@@ -68,7 +68,7 @@ def distance_grid(a, b):
         ):
         return 1
     elif dist_tuple == (0, 0):
-        return 1.9  # waiting is a bit cheaper then driving twice
+        return 1  # waiting has the same cost as driving once (tbd)
     else:
         raise ArithmeticError("Unknown Distance")
 

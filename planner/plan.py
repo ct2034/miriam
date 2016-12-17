@@ -115,6 +115,7 @@ def plan(agent_pos: list, jobs: list, idle_goals: list, grid: np.array, plot: bo
         from mpl_toolkits.mplot3d import Axes3D
         _ = Axes3D
         ax3 = fig.add_subplot(122, projection='3d')
+        ax3.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
 
         # plot agent -> job allocation
         for aj in agent_job:
@@ -232,18 +233,17 @@ def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
             agent = agent_pos[aj[0]]
             block1, block2 = get_block_diff(aj[0], block_dict1, block_dict2)
             job = jobs[aj[1]]
-            _cost += path_duration(path(agent, job[0], _map, block2)) ** 2 - path_duration(
-                path(agent, job[0], _map, block1)) ** 2
-            _cost += path_duration(path(job[0], job[1], _map, block2)) ** 2 - path_duration(
-                path(agent, job[0], _map, block1)) ** 2
+            _cost += path_duration(concat_paths(path(agent, job[0], _map, block2),
+                                                path(job[0], job[1], _map, block2))) ** 2 - path_duration(
+                concat_paths(path(agent, job[0], _map, block1), path(job[0], job[1], _map, block1))) ** 2
         for ai in agent_idle2:
             agent = agent_pos[ai[0]]
             block1, block2 = get_block_diff(agent, block_dict1, block_dict2)
             idle_goal = idle_goals[ai[1]]
-            path_len = path_duration(path(agent, idle_goal[0], _map, block1)) ** 2
+            path_len = path_duration(path(agent, idle_goal[0], _map, block1))
             # taking cumulative distribution from std, making in cheaper to arrive early
             p = norm.cdf(path_len, loc=idle_goal[1][0], scale=idle_goal[1][1])
-            path_len2 = path_duration(path(agent, idle_goal[0], _map, block2)) ** 2
+            path_len2 = path_duration(path(agent, idle_goal[0], _map, block2))
             p2 = norm.cdf(path_len, loc=idle_goal[1][0], scale=idle_goal[1][1])
             _cost += (p2 * path_len2) - (p * path_len)  # minus cost from previous state
     elif (agent_job2 != agent_job1 or
@@ -425,6 +425,7 @@ def get_paths(_condition: dict, _state: tuple) -> list:
     _paths = []
     blocks = get_blocks_dict(blocked)
     for ia in range(len(agent_pos)):
+        sth_for_agent = False
         if ia in blocks.keys():
             block = blocks[ia]
         else:
@@ -440,12 +441,16 @@ def get_paths(_condition: dict, _state: tuple) -> list:
                 p = concat_paths(p1.copy(),
                                  path(jobs[aj[1]][0], jobs[aj[1]][1], _map, block2, calc=True))
                 _paths.append(p)
+                sth_for_agent = True
                 break
         for ai in agent_idle:
             if ai[0] == ia:
                 _paths.append(path(agent_pos[ia], idle_goals[ai[1]][0], _map, block, calc=True))
+                sth_for_agent = True
                 break
-    assert len(_paths) <= len(agent_pos), "More paths than agents"
+        if not sth_for_agent:
+            _paths.append([])
+    assert len(_paths) == len(agent_pos), "More or less paths than agents"
     return _paths
 
 
