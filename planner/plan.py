@@ -2,6 +2,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
+import logging
 from scipy.stats import norm
 
 from astar.astar_grid48con import astar_grid4con, distance
@@ -30,7 +31,7 @@ def plan(agent_pos: list, jobs: list, idle_goals: list, grid: np.array, plot: bo
             with open(filename, 'rb') as f:
                 path_save = pickle.load(f)
         except FileNotFoundError:
-            print("WARN: File", filename, "does not exist")
+            logging.warning("WARN: File %s does not exist", filename)
 
     # result data structures
     agent_job = ()
@@ -213,77 +214,38 @@ def get_children(_condition: dict, _state: tuple) -> list:
             return []
 
 
-def cost(_condition: dict, _state1: tuple, _state2: tuple) -> float:
+def cost(_condition: dict, _state: tuple) -> float:
     """
     Get the cost increase for a change from _state1 to _state2
     :param _condition: The conditions of the problem
-    :param _state1: The previous state
-    :param _state2: The following state
+    :param _state: The state to evaluate
     :return: The cost increase between _state1 and _state2
     """
     (agent_pos, jobs, idle_goals, _map) = condition2comp(_condition)
-    (agent_job1, agent_idle1, block_state1) = state2comp(_state1)
-    (agent_job2, agent_idle2, block_state2) = state2comp(_state2)
+    (agent_job, agent_idle, block_state) = state2comp(_state)
     _cost = 0.
 
-    block_dict1 = get_blocks_dict(block_state1)
-    block_dict2 = get_blocks_dict(block_state2)
-    if block_state2 != block_state1:  # blocks were added
-        for aj in agent_job2:
-            agent = agent_pos[aj[0]]
-            block1, block2 = get_block_diff(aj[0], block_dict1, block_dict2)
-            job = jobs[aj[1]]
-            _cost += path_duration(concat_paths(path(agent, job[0], _map, block2),
-                                                path(job[0], job[1], _map, block2))) ** 2 - path_duration(
-                concat_paths(path(agent, job[0], _map, block1), path(job[0], job[1], _map, block1))) ** 2
-        for ai in agent_idle2:
-            agent = agent_pos[ai[0]]
-            block1, block2 = get_block_diff(agent, block_dict1, block_dict2)
-            idle_goal = idle_goals[ai[1]]
-            path_len = path_duration(path(agent, idle_goal[0], _map, block1))
-            # taking cumulative distribution from std, making in cheaper to arrive early
-            p = norm.cdf(path_len, loc=idle_goal[1][0], scale=idle_goal[1][1])
-            path_len2 = path_duration(path(agent, idle_goal[0], _map, block2))
-            p2 = norm.cdf(path_len, loc=idle_goal[1][0], scale=idle_goal[1][1])
-            _cost += (p2 * path_len2) - (p * path_len)  # minus cost from previous state
-    elif (agent_job2 != agent_job1 or
-                  agent_idle2 != agent_idle1):
-        # finding paths
-        for aj in agent_job2:
-            if aj not in agent_job1:
-                agent = agent_pos[aj[0]]
-                if agent in block_dict1.keys():
-                    block = block_dict1[agent]
-                else:
-                    block = []
-                job = jobs[aj[1]]
-                _cost += (path_duration(path(agent, job[0], _map, block)) ** 2 + path_duration(
-                    path(job[0], job[1], _map, block))) ** 2
-        for ai in agent_idle2:
-            if ai not in agent_idle1:
-                agent = agent_pos[ai[0]]
-                if agent in block_dict1.keys():
-                    block = block_dict1[agent]
-                else:
-                    block = []
-                idle_goal = idle_goals[ai[1]]
-                path_len = path_duration(path(agent, idle_goal[0], _map, block)) ** 2
-                # taking cumulative distribution from std, making in cheaper to arrive early
-                p = norm.cdf(path_len, loc=idle_goal[1][0], scale=idle_goal[1][1])
-                _cost += (p * path_len)
-    else:
-        assert False, "nothing changed in this state transition"
+    _paths = get_paths(_condition, _state)
+    for i_agent in range(len(_paths)):
+        path = _paths[i_agent]
+        for i_aj in range(len(agent_job)):
+            if agent_job[i_aj][0] == i_agent:  # Job
+                _cost += path_duration(path) ** 2
+                break
+        for i_ai in range(len(agent_idle)):
+            if agent_idle[i_ai][0] == i_agent:  # Idle Goal
+                idle_goal_stat = idle_goals[i_ai][1]
+                path_len = path_duration(path)
+                prob = norm.cdf(path_len, loc=idle_goal_stat[0], scale=idle_goal_stat[1])
+                _cost += (prob * path_len) ** 2
+                break
 
     # finding collisions in paths
-    collision = find_collision(get_paths(_condition, _state2))
+    collision = find_collision(_paths)
     if collision != ():
-        _cost += 1
-        if block_state2 == ():
-            block_state2 = (collision,)
-        else:
-            block_state2 = block_state2 + (collision,)
-        _state2 = comp2state(agent_job2, agent_idle2, block_state2)
-    return _cost, _state2
+        block_state += (collision,)
+        _state = comp2state(agent_job, agent_idle, block_state)
+    return _cost, _state
 
 
 def heuristic(_condition: dict, _state: tuple) -> float:

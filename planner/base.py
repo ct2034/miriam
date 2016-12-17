@@ -32,8 +32,8 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             if neighbor in closed:
                 continue  # Ignore the neighbor which is already evaluated.
             # The distance from start to a neighbor
-            c, neighbor = cost(condition, current, neighbor)
-            tentative_g_score = g_score[current] + c
+            c, neighbor = cost(condition, neighbor)
+            tentative_g_score = c
 
             append = True
             if neighbor not in open:  # Discover a new node
@@ -51,6 +51,6 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     raise RuntimeError("Can not find a path")
 
 
-def argmin_f_open(open, f_score_open):
-    assert len(open) == len(f_score_open), "Lenghts must be equal"
-    return open[np.argmin(f_score_open)]
+def argmin_f_open(open_list, f_score_open):
+    assert len(open_list) == len(f_score_open), "Lengths must be equal"
+    return open_list[np.argmin(f_score_open)]
