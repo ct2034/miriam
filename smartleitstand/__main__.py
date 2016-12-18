@@ -1,9 +1,12 @@
-import time, threading, sys
-from numpy import *
-from PyQt4 import QtGui, QtCore
+import threading
+import time
 
-from simulation import SimpSim
-from vis import Vis
+from PyQt4 import QtGui
+from numpy import *
+
+from smartleitstand.simulation import SimpSim
+from smartleitstand.vis import Vis
+
 
 def testing(thread: SimpSim):
     width = 100
@@ -42,6 +45,7 @@ def testing(thread: SimpSim):
     time.sleep(1)
     thread.stop()
 
+
 if __name__ == '__main__':
     print("__main__.py ...")
 
@@ -68,7 +72,3 @@ if __name__ == '__main__':
         window = Vis(simThread=simThread)
         window.show()
         sys.exit(app.exec_())
-
-    # robotarium
-    robotarium = True
-    if robotarium:
