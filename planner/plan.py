@@ -5,7 +5,7 @@ import numpy as np
 import logging
 from scipy.stats import norm
 
-from astar.astar_grid48con import astar_grid4con, distance
+from astar.astar_grid48con import astar_grid4con, distance_manhattan
 from planner.base import astar_base
 
 path_save = {}
@@ -276,14 +276,14 @@ def heuristic(_condition: dict, _state: tuple) -> float:
         j = jobs[i_job]
         for ja in alloc_jobs:
             if ja[1] == i_job:
-                _cost += distance(agent_pos[ja[0]], j[1])
+                _cost += distance_manhattan(agent_pos[ja[0]], j[1])
                 break
         else:
             p = path(j[0], j[1], _map, [], False)
             if p:  # if there was a path in the dict
                 l.append(path_duration(p) ** 2)
             else:
-                l.append(distance(j[0], j[1]))
+                l.append(distance_manhattan(j[0], j[1]))
     l.sort()
     if len(l) > len(agent_pos):  # we assign only jobs
         for i_agent in range(len(agent_pos)):

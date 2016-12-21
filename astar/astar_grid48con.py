@@ -46,12 +46,20 @@ def heuristic(a, b, grid: np.array = False):
 
 def cost(a, b, grid=False):
     if grid:  # costmap values
-        return grid[a] * distance_grid(a, b)
+        return grid[a] * distance_manhattan(a, b)
     else:
-        return distance_grid(a, b)
+        return distance_manhattan(a, b)
 
 
 def distance(a: tuple, b: tuple) -> float:
+    space_dist = np.linalg.norm((np.abs(a[0] - b[0]), np.abs(a[1] - b[1])))
+    if space_dist == 0:
+        return 1  # waiting has the same cost as driving once (tbd)
+    else:
+        return space_dist
+
+
+def distance_manhattan(a, b):
     space_dist = np.abs(a[0] - b[0]) + np.abs(a[1] - b[1])  # Manhattan Distance
     if space_dist == 0:
         return 1  # waiting has the same cost as driving once (tbd)
@@ -59,26 +67,12 @@ def distance(a: tuple, b: tuple) -> float:
         return space_dist
 
 
-def distance_grid(a, b):
-    dist_tuple = (a[0] - b[0], a[1] - b[1])
-    if ((dist_tuple == (1, 0)) |
-            (dist_tuple == (-1, 0)) |
-            (dist_tuple == (0, 1)) |
-            (dist_tuple == (0, -1))
-        ):
-        return 1
-    elif dist_tuple == (0, 0):
-        return 1  # waiting has the same cost as driving once (tbd)
-    else:
-        raise ArithmeticError("Unknown Distance")
-
-
 def path_length(path: list) -> int:
     """Path length calculation (for eval only)"""
     l = 0
     for i in range(len(path)):
         if i != 0:
-            l += distance_grid(path[i - 1], path[i])
+            l += distance_manhattan(path[i - 1], path[i])
     return l
 
 
