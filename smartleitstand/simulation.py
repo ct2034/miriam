@@ -1,5 +1,8 @@
 import time
 
+import logging
+logging.basicConfig(level=logging.WARN)
+
 from smartleitstand import msb, which_car
 from PyQt4 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -91,7 +94,12 @@ class SimpSim(QtCore.QThread):
                 emit_car(msb, c)
 
         SimpSim.running = True
-        SimpSim.scheduler.start()
+        if SimpSim.scheduler.running:
+            logging.info("Resuming")
+            SimpSim.scheduler.resume()
+        else:
+            logging.info("Resuming")
+            SimpSim.scheduler.start()
         self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width, height, SimpSim.cars)
 
         SimpSim.i = 0
@@ -105,7 +113,9 @@ class SimpSim(QtCore.QThread):
         SimpSim.cars = []
         Car.nextId = 0
 
-        SimpSim.scheduler.shutdown()
+        if SimpSim.scheduler.running:
+            logging.info("Pause")
+            SimpSim.scheduler.pause()
 
         print('end-start= ', time.time() - self.startTime)
         print('i= ', SimpSim.i)
