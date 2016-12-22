@@ -267,9 +267,6 @@ try {
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<NumericType><![CDATA[double]]></NumericType>
 						<SdArray>false</SdArray>
-						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[600]]></Code>
-						</DefaultValue>
 						<ParameterEditor>
 							<Id>1474629344460</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
@@ -292,9 +289,6 @@ try {
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<NumericType><![CDATA[double]]></NumericType>
 						<SdArray>false</SdArray>
-						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[300]]></Code>
-						</DefaultValue>
 						<ParameterEditor>
 							<Id>1474629356116</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
@@ -317,9 +311,6 @@ try {
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<NumericType><![CDATA[double]]></NumericType>
 						<SdArray>false</SdArray>
-						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[5]]></Code>
-						</DefaultValue>
 						<ParameterEditor>
 							<Id>1474629707818</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
@@ -342,9 +333,6 @@ try {
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<NumericType><![CDATA[double]]></NumericType>
 						<SdArray>false</SdArray>
-						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[10]]></Code>
-						</DefaultValue>
 						<ParameterEditor>
 							<Id>1477328361032</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
@@ -850,7 +838,7 @@ try {
 						<Parameter>
 							<Name><![CDATA[locationX]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[5]]></Code>
+								<Code><![CDATA[20]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -3244,16 +3232,28 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 
 			<Parameters>			
 				<Parameter>
-					<ParameterName><![CDATA[width]]></ParameterName>
-				</Parameter>
-				<Parameter>
 					<ParameterName><![CDATA[height]]></ParameterName>
+					<ParameterValue Class="CodeValue">
+						<Code><![CDATA[200]]></Code>
+					</ParameterValue>
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[nAgvs]]></ParameterName>
+					<ParameterValue Class="CodeValue">
+						<Code><![CDATA[3]]></Code>
+					</ParameterValue>
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[timeScale]]></ParameterName>
+					<ParameterValue Class="CodeValue">
+						<Code><![CDATA[2]]></Code>
+					</ParameterValue>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[width]]></ParameterName>
+					<ParameterValue Class="CodeValue">
+						<Code><![CDATA[200]]></Code>
+					</ParameterValue>
 				</Parameter>
 			</Parameters>			
 			<PresentationProperties 
