@@ -1,32 +1,33 @@
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 import time
+
 from numpy import *
-from PyQt4 import QtGui, QtCore
-
-from vfk_msb_py.msb_ws4py_client import MsbWsClient
 from vfk_msb_py.msb_classes import *
-# from vfk_msb_py.msb_communicate import *
+from vfk_msb_py.msb_ws4py_client import MsbWsClient
 
-import simulation
+from smartleitstand import simulation
 
 def callback(m):
     if "NIO" in str(m):
-        print(m)
+        logging.warning(m)
 
 
 def callback_start(message_dict):
-    print("start sim")
+    logging.info("start sim")
     args = message_dict['functionParameters'][0]['value']
     wait_for_sim()
     try:
         Msb.s.start_sim(args['x'], args['y'], args['n_agvs'])
     except KeyError as e:
-        print("error using: ")
-        print(args)
+        logging.error("error using: " + str(args))
 
 
 def callback_job(message_dict):
     args = message_dict['functionParameters'][0]['value']
-    print(args)
+    logging.info("callback_job: " + str(args))
     wait_for_sim()
     Msb.s.new_job(
         array([args['start_x'], args['start_y']]),
@@ -34,15 +35,16 @@ def callback_job(message_dict):
         args['id']
     )
 
+
 def callback_stop(message_dict):
-    print("stop sim")
+    logging.info("callback_stop")
     wait_for_sim()
     Msb.s.stop()
 
 
 def callback_timing(message_dict):
     args = message_dict['functionParameters'][0]['value']
-    print(args)
+    logging.info("callback_timing")
     Msb.s.set_speed_multiplier(args)
 
 
@@ -52,11 +54,10 @@ def wait_for_sim():
 
 
 class Msb():
-    s = False
+    s = None
 
     def __init__(self, s):
         Msb.s = s
-        print("s: " + str(s))
 
         # Msb.mwc = MsbWsClient('ws://atm.virtualfortknox.de/msb', callback)
         # Msb.mwc = MsbWsClient('ws://ipa.virtualfortknox.de/msb', callback)
@@ -153,7 +154,7 @@ class Msb():
         )
         Msb.application = Application(
             uuid="3785b920-3777-43ad-9199-b5362d9ef4b6",
-                token="b5362d9ef4b6",
+            token="b5362d9ef4b6",
             name="AGV sim",
             description="Simulation of AGVs",
             events=[Msb.ePose, Msb.eReached, Msb.eAGVAssignment, Msb.eReachedStart],

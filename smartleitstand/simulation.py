@@ -1,7 +1,7 @@
+import logging
 import time
 
-import logging
-logging.basicConfig(level=logging.WARN)
+logging.basicConfig(level=logging.INFO)
 
 from smartleitstand import msb, which_car
 from PyQt4 import QtCore
@@ -11,7 +11,7 @@ from numpy import *
 
 def work_queue():
     freeCars = []
-    routeTodo = False
+    routeTodo = None
     for c in SimpSim.cars:
         if not c.route and len(SimpSim.queue) > 0:
             freeCars.append(c)
@@ -25,14 +25,13 @@ def work_queue():
 
 def emit_car(msb, car):
     data = {"id": car.id, "x": float(car.pose[0]), "y": float(car.pose[1])}
-    print(data)
+    logging.debug(data)
     msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.ePose, data=data)
 
 
 def iterate():
     try:
         if SimpSim.running:
-            # print(".")
             work_queue()
             for j in SimpSim.activeRoutes:
                 if not j.finished:
@@ -43,7 +42,7 @@ def iterate():
                     )
             SimpSim.i += 1
     except Exception as e:
-        print("ERROR:", str(e))
+        logging.error("ERROR:", str(e))
         raise e
 
 
@@ -63,7 +62,7 @@ class SimpSim(QtCore.QThread):
 
     def __init__(self, msb_select: bool, parent=None):
         QtCore.QThread.__init__(self, parent)
-        print("init Simulation")
+        logging.info("init Simulation")
 
         self.msb_select = msb_select
         if msb_select:
@@ -87,6 +86,7 @@ class SimpSim(QtCore.QThread):
     def start_sim(self, width, height, number_agvs):
         self.area = zeros([width, height])
         self.number_agvs = number_agvs
+        SimpSim.cars = []
         for i in range(self.number_agvs):
             c = Car(self)
             SimpSim.cars.append(c)
@@ -117,16 +117,17 @@ class SimpSim(QtCore.QThread):
             logging.info("Pause")
             SimpSim.scheduler.pause()
 
-        print('end-start= ', time.time() - self.startTime)
-        print('i= ', SimpSim.i)
-        print('i*SimTime= ', SimpSim.i * SimpSim.simTime)
-        print('missing: ', time.time() - self.startTime - SimpSim.i * SimpSim.simTime, 's')
+        logging.info('end-start= ', time.time() - self.startTime)
+        logging.info('i= ', SimpSim.i)
+        logging.info('i*SimTime= ', SimpSim.i * SimpSim.simTime)
+        logging.info('missing: ', time.time() - self.startTime - SimpSim.i * SimpSim.simTime, 's')
 
     def new_job(self, a, b, job_id):
         SimpSim.queue.append(Route(a, b, False, job_id, self))
 
     def set_speed_multiplier(self, multiplier):
         SimpSim.speedMultiplier = multiplier
+
 
 def get_distance(a, b):
     assert a.size is 2, "A point needs to have two coordinates"
@@ -157,11 +158,11 @@ class Route(object):
 
         self.finished = False
 
-        print(
-            "Created route with id",
-            str(self.id),
-            "distance:",
-            self.distance
+        logging.info(
+            "Created route with id " +
+            str(self.id) +
+            " distance: " +
+            str(self.distance)
         )
 
     def assign_car(self, car):
@@ -180,11 +181,12 @@ class Route(object):
 
     def new_step(self, stepSize):
         if not self.onRoute:  # on way to start
-            self.car.setPose(
-                stepSize * self.preVector /
-                self.preDistance +
-                self.car.pose
-            )
+            if self.preDistance > 0:
+                self.car.setPose(
+                    stepSize * self.preVector /
+                    self.preDistance +
+                    self.car.pose
+                )
 
             self.preRemaining -= stepSize
 
@@ -192,7 +194,7 @@ class Route(object):
                 self.onRoute = True
                 self.car.setPose(self.start)
                 self.preRemaining = 0
-                print(self.to_string(), "reached Start")
+                logging.info(self.to_string() + " reached Start")
                 if self.sim.msb_select:
                     data = {"agvId": self.car.id, "jobId": self.id}
                     msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReachedStart, data=data)
@@ -210,7 +212,7 @@ class Route(object):
                 self.car.setPose(self.goal)
                 self.remaining = 0
                 self.finished = True
-                print(self.to_string(), "reached Goal")
+                logging.info(self.to_string() + " reached Goal")
                 if self.sim.msb_select:
                     msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
 
@@ -242,7 +244,10 @@ class Car(object):
         self.id = Car.nextId
         Car.nextId += 1
 
-        print("New car:", str(self.id), "at", str(self.pose))
+        logging.info("New car:" +
+                     str(self.id) +
+                     " at "
+                     + str(self.pose))
 
     def setPose(self, pose):
         self.pose = pose

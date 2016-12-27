@@ -1,3 +1,8 @@
+import logging
+
+FORMAT = "%(asctime)s %(levelname)s %(message)s"
+logging.basicConfig(format=FORMAT, level=logging.INFO)
+logging.getLogger("apscheduler").setLevel(logging.WARN)
 import threading
 import time
 
@@ -47,7 +52,7 @@ def testing(thread: SimpSim):
 
 
 if __name__ == '__main__':
-    print("__main__.py ...")
+    logging.info("__main__.py ...")
 
     # init switches
     msb = False
