@@ -75,6 +75,27 @@ def test_collision():
     assert len(pss) == len(unique), "Collisions in path_save"
 
 
+def test_consecutive_jobs():
+    grid = np.zeros([10, 10, 50])
+    agent_pos = [(1, 1)]
+    idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
+    jobs = [((2, 0), (2, 9), -6), ((7, 3), (3, 3), -1.5), ((3, 4), (5, 1), 0)]
+
+    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos=agent_pos,
+                                                                 jobs=jobs,
+                                                                 alloc_jobs=[],
+                                                                 idle_goals=idle_goals,
+                                                                 grid=grid,
+                                                                 filename='',
+                                                                 plot=False)
+
+    assert len(res_agent_idle) == 0, "We don't have to assign idle goals"
+    assert len(res_agent_job) == 1, "Not one assigned job"
+    assert len(res_agent_job[0][1]) == 3, "Not all jobs assigned to one agent"
+    assert len(res_paths) == 1, "Not one path sets for the agent"
+    assert len(res_paths[0]) == 3, "Not three paths for the agent"
+
+
 def test_concat_paths():
     path1 = [(1, 1, 0), (1, 2, 1), (1, 3, 2)]
     path2 = [(1, 3, 0), (2, 3, 1), (3, 3, 2)]

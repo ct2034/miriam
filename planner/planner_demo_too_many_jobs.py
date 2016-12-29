@@ -3,15 +3,15 @@ import datetime
 
 from planner.plan import plan
 
-grid = np.zeros([20, 20, 101])
-grid[4, 0:16, :] = -1
-grid[4, 17:20, :] = -1
+grid = np.zeros([10, 10, 101])
+grid[4, 0:6, :] = -1
+grid[8, 4:9, :] = -1
 
 # input
-agent_pos = [(6, 3), (15, 3), (16, 2), (17, 3)]
-jobs = [((1, 6), (9, 6), -6), ((7, 3), (3, 3), -1.5), ((17, 14), (17, 5), 0)]
+agent_pos = [(8, 2), (2, 1)]
+jobs = [((2, 0), (2, 9), -6), ((7, 3), (3, 3), -1.5), ((3, 4), (5, 1), 0)]
 idle_goals = [((9, 7), (5, .5)), ((9, 8), (20, .5))]
-alloc_jobs = [(0, 1)]
+alloc_jobs = []
 
 start_time = datetime.datetime.now()
 

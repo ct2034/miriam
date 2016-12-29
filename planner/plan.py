@@ -16,7 +16,7 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     """
     Main entry point for planner
     :param agent_pos: agent poses
-    :param jobs: jobs to plan for (((s_x, s_y), (g_x, g_y)), ...)
+    :param jobs: jobs to plan for (((s_x, s_y), (g_x, g_y), time), ((s_x ...), ..., time), ...) where time might be negative value if job is waiting
     :param alloc_jobs: preallocation of agent to a job (i.e. will travel to its goal)
     :param idle_goals: idle goals to consider (((g_x, g_y), (t_mu, t_std)), ...)
     :param grid: the map (2D-space + time)
@@ -163,9 +163,14 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
 def get_children(_condition: dict, _state: tuple) -> list:
     """
     Get all following states
-    :param _condition: The conditions of the problem
-    :param _state: The parent state
-    :return: List of children
+
+    Args:
+        _condition: The conditions of the problem
+        _state: The parent state
+            to be expanded
+
+    Returns:
+        A list of children
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
@@ -341,7 +346,7 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
     :param _map: The map to plan on
     :param blocked: List of blocked points for agents e.g. ((x, y, t), agent)
     :param calc: whether or not the path should be calculated if no saved id available. (returns False if not saved)
-    :return: the path
+    :return: the path as list of tuples
     """
     index = tuple([start, goal]) + tuple(blocked)
     seen = set()
@@ -386,9 +391,9 @@ def path_duration(_path: list) -> int:
 def get_paths(_condition: dict, _state: tuple) -> list:
     """
     Get the path_save for a given state
-    :param _condition: Input condition (
+    :param _condition: Input condition
     :param _state:
-    :return: tuple of path_save for agents
+    :return: list of tuples per agent with all paths for this agent as lists of tuples of coords [([(..)])]
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
@@ -397,15 +402,16 @@ def get_paths(_condition: dict, _state: tuple) -> list:
     _paths = []
     blocks = get_blocks_dict(blocked)
     for ia in range(len(agent_pos)):
-        sth_for_agent = False
+        paths_for_agent = tuple()
         if ia in blocks.keys():
             block = blocks[ia]
         else:
             block = []
         for aj in agent_job:
             if aj[0] == ia:
-                if tuple(aj) in alloc_jobs:  # only need to go to goal
-                    _paths.append(path(agent_pos[ia], jobs[aj[1]][1], _map, block, calc=True))
+                if tuple(aj[0:2]) in alloc_jobs:  # first only need to go to goal
+                    p = path(agent_pos[ia], jobs[aj[1]][1], _map, block, calc=True)
+                    paths_for_agent += (p,)
                 else:
                     p1 = path(agent_pos[ia], jobs[aj[1]][0], _map, block, calc=True)
                     p1l = len(p1)
@@ -423,8 +429,7 @@ def get_paths(_condition: dict, _state: tuple) -> list:
                 _paths.append(path(agent_pos[ia], idle_goals[ai[1]][0], _map, block, calc=True))
                 sth_for_agent = True
                 break
-        if not sth_for_agent:
-            _paths.append([])
+        _paths.append(paths_for_agent)
     assert len(_paths) == len(agent_pos), "More or less paths than agents"
     return _paths
 
