@@ -67,10 +67,13 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
 
             if append:
                 f_score_open = np.append(f_score_open, f_score[neighbor])
-
-    raise RuntimeError("Can not find a path")
+    raise NoPathException("Can not find a path")
 
 
 def argmin_f_open(open, f_score_open):
     assert len(open) == len(f_score_open), "Lenghts must be equal"
     return open[np.argmin(f_score_open)]
+
+
+class NoPathException(Exception):
+    pass

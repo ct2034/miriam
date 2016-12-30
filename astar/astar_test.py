@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 
 from astar import astar_grid48con
+from astar.base import NoPathException
 
 grid = np.zeros([10, 10, 10])
 
@@ -44,7 +45,7 @@ def astar_wait():
 
     try:
         path = astar_grid48con.astar_grid4con(start, goal, _grid)
-    except RuntimeError as e:
+    except NoPathException as e:
         print("Could not find path")
         return 0, (datetime.datetime.now() - startt).total_seconds()
 

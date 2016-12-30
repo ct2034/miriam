@@ -48,7 +48,7 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             if append:
                 f_score_open = np.append(f_score_open, f_score[neighbor])
 
-    raise RuntimeError("Can not find a path")
+    raise RuntimeError("Can not find a solution")
 
 
 def argmin_f_open(open_list, f_score_open):
