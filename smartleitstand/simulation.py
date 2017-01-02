@@ -235,7 +235,7 @@ class Car(object):
 
         assert s.__class__ is SimpSim, "Pass the simulation object to the new car"
         self.pose = array([
-            50, 10
+            10, 15
             # random.randint(0, s.area.shape[0]),
             # random.randint(0, s.area.shape[1])
         ])

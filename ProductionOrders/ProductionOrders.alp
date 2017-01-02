@@ -39,7 +39,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 import com.fasterxml.jackson.databind.ser.std.StdArraySerializers.BooleanArraySerializer;
-import org.springframework.core.env.SystemEnvironmentPropertySource;]]></Import>
+import org.springframework.core.env.SystemEnvironmentPropertySource;
+import com.google.common.collect.Sets.SetView;]]></Import>
 			<StartupCode><![CDATA[System.out.println("Hello Anylogic!");
 String version = System.getProperty("java.version");
 System.out.println("Java version: " + version);
@@ -171,7 +172,9 @@ try {
 } catch (Exception e) {
 	System.out.println("Exception: " + e.toString());
 	e.printStackTrace();
-}]]></StartupCode>
+}
+
+getPresentation().setPresentable(getEngine().getRoot());]]></StartupCode>
 			<DestroyCode><![CDATA[try {	
 	System.out.println("EMIT - STOP");			
 	if(connected) handler.publish("STOP", 0);
@@ -212,8 +215,8 @@ try {
 						<Unit Class="TimeUnits"><![CDATA[SECOND]]></Unit>
 					</StepDurationCode>
 					<SpaceType>CONTINUOUS</SpaceType>
-					<WidthCode><![CDATA[500]]></WidthCode>
-					<HeightCode><![CDATA[500]]></HeightCode>
+					<WidthCode><![CDATA[20]]></WidthCode>
+					<HeightCode><![CDATA[20]]></HeightCode>
 					<ZHeightCode><![CDATA[0]]></ZHeightCode>
 					<ColumnsCountCode><![CDATA[100]]></ColumnsCountCode>
 					<RowsCountCode><![CDATA[100]]></RowsCountCode>
@@ -886,13 +889,13 @@ finally {
 						<Parameter>
 							<Name><![CDATA[locationX]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[20]]></Code>
+								<Code><![CDATA[2]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[locationY]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[20]]></Code>
+								<Code><![CDATA[2]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -2109,6 +2112,21 @@ checktofree();]]></Code>
 					<Scaling>NONE</Scaling>
 					<Zoom>1.0</Zoom>
 				</Area>
+				<Area>
+					<Id>1483380121646</Id>
+					<Name><![CDATA[main]]></Name>
+					<X>0</X><Y>0</Y>
+					<Label><X>0</X><Y>-10</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Title><![CDATA[Main  ...]]></Title>
+					<Width>100</Width>
+					<Height>100</Height>
+					<AlignTo>TOP_LEFT</AlignTo>
+					<Scaling>SPECIFIED_ZOOM</Scaling>
+					<Zoom>10.0</Zoom>
+				</Area>
 			</Areas>
 
 		</ActiveObjectClass>
@@ -2376,6 +2394,8 @@ checktofree();]]></Code>
 					<EmbeddedIcon>false</EmbeddedIcon>
 					<Z>0</Z>
 					<Rotation>0.0</Rotation>
+					<ScaleXCode><![CDATA[.1]]></ScaleXCode>
+					<ScaleYCode><![CDATA[.1]]></ScaleYCode>
 
 			<Shapes>
 				<Rectangle>
@@ -2732,7 +2752,7 @@ checktofree();]]></Code>
 				<EmbeddedObjectPresentation>
 					<Id>1482159412001</Id>
 					<Name><![CDATA[order_presentation]]></Name>
-					<X>7</X><Y>0</Y>
+					<X>0.7</X><Y>0</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>false</PresentationFlag>
@@ -2896,7 +2916,7 @@ checktofree();]]></Code>
 				<Rectangle>
 					<Id>1473766433232</Id>
 					<Name><![CDATA[rectangle]]></Name>
-					<X>-10</X><Y>-10</Y>
+					<X>-0.5</X><Y>-0.5</Y>
 					<Label><X>10</X><Y>10</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -2906,12 +2926,12 @@ checktofree();]]></Code>
 					<EmbeddedIcon>false</EmbeddedIcon>
 					<Z>0</Z>
 					<ZHeight>10</ZHeight>
-					<LineWidth>1</LineWidth>
+					<LineWidth>0.05</LineWidth>
 					<LineColor>-16777216</LineColor>
 					<LineMaterial>null</LineMaterial>
 					<LineStyle>DOTTED</LineStyle>
-					<Width>20</Width>
-					<Height>20</Height>
+					<Width>1</Width>
+					<Height>1</Height>
 					<Rotation>0.0</Rotation>
 					<FillColor>-16711936</FillColor>
 					<FillMaterial>null</FillMaterial>
@@ -3277,7 +3297,7 @@ lastY = getY();]]></Body>
 				<Rectangle>
 					<Id>1476365836902</Id>
 					<Name><![CDATA[rectangle]]></Name>
-					<X>-5</X><Y>-5</Y>
+					<X>-0.5</X><Y>-0.5</Y>
 					<Label><X>10</X><Y>10</Y></Label>
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -3287,6 +3307,8 @@ lastY = getY();]]></Body>
 					<EmbeddedIcon>false</EmbeddedIcon>
 					<Z>0</Z>
 					<ZHeight>10</ZHeight>
+					<ScaleXCode><![CDATA[.1]]></ScaleXCode>
+					<ScaleYCode><![CDATA[.1]]></ScaleYCode>
 					<LineWidth>1</LineWidth>
 					<LineColor>-16777216</LineColor>
 					<LineMaterial>null</LineMaterial>
@@ -3335,8 +3357,7 @@ lastY = getY();]]></Body>
 			</Frame>
 			<CommandLineArguments><![CDATA[-Dlogback.configurationFile=/tmp/config.xml]]></CommandLineArguments>
 			<InitialSetupCode><![CDATA[if ( getState() == IDLE )
-	run();
-getPresentation().setPresentable( getEngine().getRoot() );]]></InitialSetupCode>
+	run();]]></InitialSetupCode>
 			<MaximumMemory>256</MaximumMemory>
 			<RandomNumberGenerationType>fixedSeed</RandomNumberGenerationType>
 			<CustomGeneratorCode>new Random()</CustomGeneratorCode>
@@ -3404,7 +3425,7 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 				<Parameter>
 					<ParameterName><![CDATA[height]]></ParameterName>
 					<ParameterValue Class="CodeValue">
-						<Code><![CDATA[200]]></Code>
+						<Code><![CDATA[20]]></Code>
 					</ParameterValue>
 				</Parameter>
 				<Parameter>
@@ -3416,13 +3437,13 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 				<Parameter>
 					<ParameterName><![CDATA[timeScale]]></ParameterName>
 					<ParameterValue Class="CodeValue">
-						<Code><![CDATA[10]]></Code>
+						<Code><![CDATA[2]]></Code>
 					</ParameterValue>
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[width]]></ParameterName>
 					<ParameterValue Class="CodeValue">
-						<Code><![CDATA[200]]></Code>
+						<Code><![CDATA[20]]></Code>
 					</ParameterValue>
 				</Parameter>
 			</Parameters>			
