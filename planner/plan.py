@@ -51,9 +51,13 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
 
     # result data structures
     agent_job = []
+
+    for _ in range(len(agent_pos)):
+        agent_job.append(tuple())
     for aj in alloc_jobs:
-        agent_job.append(tuple(aj))
+        agent_job[aj[0]] = (aj[1],)
     agent_job = tuple(agent_job)
+
     _agent_idle = ()
     blocked = ()
     condition = comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid)
@@ -138,12 +142,12 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         ax3.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
 
         # plot agent -> job allocation
-        for ajt in agent_job:
-            for aj in ajt[1]:
-                plt.arrow(x=agent_pos[ajt[0]][0],
-                          y=agent_pos[ajt[0]][1],
-                          dx=(jobs[aj][0][0] - agent_pos[ajt[0]][0]),
-                          dy=(jobs[aj][0][1] - agent_pos[ajt[0]][1]),
+        for i_a in range(len(agent_pos)):
+            for i_j in agent_job[i_a]:
+                plt.arrow(x=agent_pos[i_a][0],
+                          y=agent_pos[i_a][1],
+                          dx=(jobs[i_j][0][0] - agent_pos[i_a][0]),
+                          dy=(jobs[i_j][0][1] - agent_pos[i_a][1]),
                           ec='r',
                           fill=False,
                           linestyle='dotted')
@@ -221,37 +225,25 @@ def get_children(_condition: dict, _state: tuple) -> list:
         jobs = list(jobs)
         idle_goals = list(idle_goals)
         if len(left_jobs) > 0:  # still jobs to assign - try with all left agents
-            for left_job in left_jobs:  # this makes many children ... TODO: awesome heuristic!!
+            for left_job in left_jobs:  # this makes many children ...
                 job_to_assign = jobs.index(left_job)
-                for a in range(len(agent_pos)):
-                    has_assignment = False
+                for i_a in range(len(agent_pos)):
                     agent_job_new = agent_job.copy()
-                    for aj in agent_job:
-                        if aj[0] == a:
-                            has_assignment = True  # agent has an assignment
-                            aj_new = (aj[0], tuple(aj[1]) + tuple([job_to_assign]))
-                            aji = agent_job.index(aj)  # where to insert
-
-                            agent_job_new[aji] = aj_new
-                            children.append(comp2state(tuple(agent_job_new),
-                                                       _agent_idle,
-                                                       blocked))
-                            break
-                    if not has_assignment:
-                        aj = (a, (job_to_assign,))
-                        agent_job_new.append(aj)
-                        children.append(comp2state(tuple(agent_job_new),
-                                                   _agent_idle,
-                                                   blocked))
+                    agent_job_new[i_a] += (job_to_assign,)
+                    children.append(comp2state(tuple(agent_job_new),
+                                               _agent_idle,
+                                               blocked))
             return children
-        elif len(left_idle_goals) > 0:  # only idle goals to assign - try with all left agents
-            for a in left_agent_pos:
-                l = list(_agent_idle).copy()
-                l.append((agent_pos.index(a),
-                          idle_goals.index(left_idle_goals[0])))
-                children.append(comp2state(tuple(agent_job),
-                                           tuple(l),
-                                           blocked))
+        elif (len(left_idle_goals) > 0) & (
+                    len(left_agent_pos) > 0):  # only idle goals to assign - try with all left agents
+            for i_a in range(len(left_agent_pos)):
+                for i_ig in range(len(left_idle_goals)):
+                    agent_idle_new = list(_agent_idle).copy()
+                    agent_idle_new.append(((agent_pos.index(left_agent_pos[i_a])),
+                                           idle_goals.index(left_idle_goals[i_ig])))
+                    children.append(comp2state(tuple(agent_job),
+                                               tuple(agent_idle_new),
+                                               blocked))
             return children
         else:  # all assigned
             return []
@@ -273,22 +265,26 @@ def cost(_condition: dict, _state: tuple) -> float:
     _cost = 0.
 
     _paths = get_paths(_condition, _state)
-    for i_agent in range(len(_paths)):
-        pathset = list(_paths[i_agent])
-        job_assignment = list(filter(lambda x: x[0] == i_agent, agent_job))
-        if job_assignment:
-            assert len(job_assignment) == 1, "Multiple agent entries"
-            jobs = job_assignment[0][1]
-            if (i_agent, jobs[0]) in alloc_jobs:  # first entry is a preallocated job
+    for i_a in range(len(_paths)):
+        pathset = list(_paths[i_a])
+        assigned_jobs = agent_job[i_a]
+        if len(assigned_jobs) > 0:
+            if (i_a, assigned_jobs[0]) in alloc_jobs:  # first entry is a preallocated job
                 assert len(pathset) % 2 == 1, "Must be odd number of paths"  # since first is one only
-                for p in pathset[1::2]:
+                i = 1
+                for p in pathset[2::2]:
                     _cost += p[-1][2]
+                    _cost += jobs[assigned_jobs[i]][2] * -1  # waiting time before job was touched
+                    i += 1
             else:
                 assert len(pathset) % 2 == 0, "Must be even number of paths"
-                for p in pathset[0::2]:
-                    _cost += p[-1][2]  # each arrival time TODO: waiting time in job list
-            break
-        idle_assignment = list(filter(lambda x: x[0] == i_agent, _agent_idle))
+                i = 0
+                for p in pathset[1::2]:
+                    _cost += p[-1][2]  # each arrival time
+                    _cost += jobs[assigned_jobs[i]][2] * -1  # waiting time before job was touched
+                    i += 1
+            assert i == len(assigned_jobs), "Not handled all assigned jobs"
+        idle_assignment = list(filter(lambda x: x[0] == i_a, _agent_idle))
         if idle_assignment:
             assert len(idle_assignment) == 1, "Multiple agent entries"
             i_idle_goal = idle_assignment[0][1]
@@ -297,13 +293,17 @@ def cost(_condition: dict, _state: tuple) -> float:
             assert len(pathset) == 1, "an agent with idle goal must only have one path in its set"
             prob = norm.cdf(path_len, loc=idle_goal_stat[0], scale=idle_goal_stat[1])
             _cost += (prob * path_len)
-            break
 
     # finding collisions in paths
     collision = find_collision(_paths)
     if collision != ():
         block_state += (collision,)
         _state = comp2state(agent_job, _agent_idle, block_state)
+    for bs in block_state:
+        if not bs[1].__class__ == int:  # a collision
+            _cost += 1  # a little more expensive when there is a collision
+        else:
+            _cost += .1  # a little when there is a block
     return _cost, _state
 
 
@@ -322,36 +322,25 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     (agent_job, _agent_idle, _) = state2comp(_state)
     _cost = 0.
 
-    # what to assign
-    n_jobs2assign = len(agent_pos) - len(agent_job)
-    if n_jobs2assign == 0:
-        return 0
-
-    (agent_pos, idle_goals, jobs
+    (left_agent_pos, left_idle_goals, left_jobs
      ) = clear_set(_agent_idle, agent_job, agent_pos, idle_goals, jobs)
 
-    l = []
-    for i_job in range(len(jobs)):
-        j = jobs[i_job]
-        for ja in alloc_jobs:
-            if ja[1] == i_job:
-                _cost += distance_manhattan(agent_pos[ja[0]], j[1])
-                break
+    agents = []
+    paths = get_paths(_condition, _state)
+    assert len(paths) == len(agent_pos), "All agents should have paths"
+    for i_agent in range(len(paths)):
+        pathset = paths[i_agent]
+        if pathset:
+            agents.append(pathset[-1][-1][0:2])  # last pose of agent
         else:
-            p = path(j[0], j[1], _map, [], False)
-            if p:  # if there was a path in the dict
-                l.append(path_duration(p) ** 2)
-            else:
-                l.append(distance_manhattan(j[0], j[1]))
-    l.sort()
-    if len(l) > len(agent_pos):  # we assign only jobs
-        for i_agent in range(len(agent_pos)):
-            _cost += l[i_agent]
-    else:  # we have to assign idle_goals, two
-        for i_agent in range(len(agent_pos)):
-            if i_agent < len(l):
-                _cost += l[i_agent]
-                # TODO: think about this part of the heuristic. Problem is: we don't know, which agent
+            agents.append(agent_pos[i_agent])  # no path yet
+
+    for i_job in range(len(left_jobs)):
+        # closest agent pose to this jobs start
+        nearest_agent = get_nearest(agents, jobs[i_job][0])
+        _cost += distance_no_calc(nearest_agent, jobs[i_job][0])
+        _cost += distance_no_calc(jobs[i_job][0], jobs[i_job][1])
+
     return _cost
 
 
@@ -368,18 +357,26 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
     (agent_job, _agent_idle, blocked) = state2comp(_state)
-    agents_blocked = False
+
     for i in range(len(blocked)):
         if blocked[i][1].__class__ != int:  # two agents blocked
-            agents_blocked = True
-            break
+            return False
+
     if len(agent_job) > 0:
-        assigned_jobs = functools.reduce(lambda l, j: l + j[1], agent_job, tuple())
+        assigned_jobs = functools.reduce(lambda l, j: l + j, agent_job, tuple())
     else:
         assigned_jobs = ()
-    return ((len(agent_pos) == len(agent_job) + len(_agent_idle)) and  # all agents have assignments
-            len(assigned_jobs) == len(jobs) and  # all jobs are assigned
-            not agents_blocked)
+    if len(assigned_jobs) < len(jobs):  # not all jobs assigned
+        return False
+
+    agent_assigned = list(map(lambda x: len(x) > 0, agent_job))  # jobs?
+    for ai in _agent_idle:
+        agent_assigned[ai[0]] = True  # idle goals
+    if not np.array(agent_assigned).all():  # not all agents have something to do
+        return False
+
+    # if all test are ok ..
+    return True
 
 
 # Path Helpers
@@ -402,10 +399,11 @@ def clear_set(_agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals:
     cp_idle_goals = idle_goals.copy()
     cp_jobs = jobs.copy()
 
-    for ajs in agent_job:
-        cp_agent_pos.remove(agent_pos[ajs[0]])
-        for j in ajs[1]:
-            cp_jobs.remove(jobs[j])
+    for i_a in range(len(agent_pos)):
+        if len(agent_job[i_a]) > 0:  # this has jobs
+            cp_agent_pos.remove(agent_pos[i_a])  # remove agent
+            for j in agent_job[i_a]:
+                cp_jobs.remove(jobs[j])
     for ai in _agent_idle:
         cp_agent_pos.remove(agent_pos[ai[0]])
         cp_idle_goals.remove(idle_goals[ai[1]])
@@ -462,6 +460,24 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
     return _path
 
 
+def distance_no_calc(start: tuple, goal: tuple):
+    """
+    Return actual path length if precalculated available, else the manhattan distance
+
+    Args:
+      start: from
+      goal: to
+
+    Returns:
+      Distance
+    """
+    index = tuple([start, goal])
+    if index in path_save.keys():
+        return path_duration(path_save[index])
+    else:
+        return distance_manhattan(start, goal)
+
+
 def path_duration(_path: list) -> int:
     """
     Measure the duration that the traveling of a path would take
@@ -494,39 +510,33 @@ def get_paths(_condition: dict, _state: tuple) -> list:
     _agent_idle = np.array(_agent_idle)
     _paths = []
     blocks = get_blocks_dict(blocked)
-    for ia in range(len(agent_pos)):
+    for i_a in range(len(agent_pos)):
         paths_for_agent = tuple()
-        if ia in blocks.keys():
-            block = blocks[ia]
+        if i_a in blocks.keys():
+            block = blocks[i_a]
         else:
             block = []
-        for aj in agent_job:
-            if aj[0] == ia:  # the agent we are looking for
-                assigned_jobs = aj[1]
-                pose = agent_pos[ia][0:2]
-                t_shift = 0
-                for job in assigned_jobs:
-                    if (ia, job) in alloc_jobs:  # can be first only; need to go to goal only
-                        p = path(pose, jobs[job][1], _map, block, calc=True)
-                    else:
-                        # trip to start
-                        if len(paths_for_agent) > 0:
-                            pose, t_shift = get_last_pose_and_t(paths_for_agent)
-                        p1 = path(pose, jobs[job][0], _map, block, calc=True)
-                        paths_for_agent += (timeshift_path(p1, t_shift),)
-                        # start to goal
-                        p1l = p1[-1][2]
-                        block2 = []
-                        for b in block:
-                            if b[2] > p1l:
-                                block2.append((b[0], b[1], b[2] - p1l))
-                        _, t_shift = get_last_pose_and_t(paths_for_agent)
-                        p = path(jobs[job][0], jobs[job][1], _map, block2, calc=True)
-                    paths_for_agent += (timeshift_path(p, t_shift),)
-                break  # for this agent
+        assigned_jobs = agent_job[i_a]
+        pose = agent_pos[i_a][0:2]
+        t_shift = 0
+        for job in assigned_jobs:
+            if (i_a, job) in alloc_jobs:  # can be first only; need to go to goal only
+                p = path(pose, jobs[job][1], _map, block, calc=True)
+            else:
+                # trip to start
+                if len(paths_for_agent) > 0:
+                    pose, t_shift = get_last_pose_and_t(paths_for_agent)
+                block1 = time_shift_blocks(block, t_shift)
+                p1 = path(pose, jobs[job][0], _map, block1, calc=True)
+                paths_for_agent += (time_shift_path(p1, t_shift),)
+                # start to goal
+                _, t_shift = get_last_pose_and_t(paths_for_agent)
+                block2 = time_shift_blocks(block, t_shift)
+                p = path(jobs[job][0], jobs[job][1], _map, block2, calc=True)
+            paths_for_agent += (time_shift_path(p, t_shift),)
         for ai in _agent_idle:
-            if ai[0] == ia:
-                p = (path(agent_pos[ia], idle_goals[ai[1]][0], _map, block, calc=True))
+            if ai[0] == i_a:
+                p = (path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, calc=True))
                 paths_for_agent += (p,)
                 break  # found for this agent
         _paths.append(paths_for_agent)
@@ -534,9 +544,28 @@ def get_paths(_condition: dict, _state: tuple) -> list:
     return _paths
 
 
+def time_shift_blocks(block, t):
+    blocks_for_this_agent = []
+    for b in block:
+        if b[2] > t:  # is after the shift (for this or later paths)
+            blocks_for_this_agent.append((b[0], b[1], b[2] - t))
+    return blocks_for_this_agent
+
+
 def get_last_pose_and_t(paths_for_agent, ):
     last = paths_for_agent[-1][-1]
     return last[0:2], last[2] + 1
+
+
+def get_nearest(points, coord):
+    """
+    Return closest point to coord from points
+    source: https://stackoverflow.com/a/37376187/1493204
+    """
+    dists = [(pow(point[0] - coord[0], 2) + pow(point[1] - coord[1], 2), point)
+             for point in points]  # list of (dist, point) tuples
+    nearest = min(dists)
+    return nearest[1]
 
 
 def find_collision(_paths: list) -> tuple:
@@ -588,7 +617,7 @@ def concat_paths(path1: list, path2: list) -> list:
     return path1
 
 
-def timeshift_path(_path: list, t: int) -> list:
+def time_shift_path(_path: list, t: int) -> list:
     """
     Shift a path to a certain time
 

@@ -3398,7 +3398,7 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 				<Parameter>
 					<ParameterName><![CDATA[timeScale]]></ParameterName>
 					<ParameterValue Class="CodeValue">
-						<Code><![CDATA[2]]></Code>
+						<Code><![CDATA[20]]></Code>
 					</ParameterValue>
 				</Parameter>
 				<Parameter>

@@ -1,8 +1,5 @@
 import numpy as np
 
-"""My A* Planner
-based on: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode"""
-
 
 def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     closed = []

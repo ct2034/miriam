@@ -1,13 +1,11 @@
 import datetime
 import os
-import unittest
 
 import numpy as np
 
 import planner.plan
 
 
-@unittest.skip("tbd...")
 def test_basic():
     agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data()
 
@@ -26,10 +24,10 @@ def get_data(n=1):
     grid[4 * n, 2 * n:8 * n, :] = -1
     # input
     agent_pos = [(1 * n, 1 * n), (9 * n, 1 * n), (3 * n, 1 * n)]  # three agents
-    jobs = [((1 * n, 6 * n), (9 * n, 6 * n)), ((3 * n, 3 * n), (7 * n, 3 * n))]  # two jobs 1,6 -> 9,1, 3,3 -> 7,3
+    jobs = [((1 * n, 6 * n), (9 * n, 6 * n), 0), ((3 * n, 3 * n), (7 * n, 3 * n), 0)]  # two jobs 1,6 -> 9,1, 3,3 -> 7,3
     idle_goals = [((9 * n, 7 * n), (5, .5))]  # one idle goal 9,7 with P~N(5,.5)
     # expected results
-    agent_job = ((0, 0), (2, 1))
+    agent_job = ((0,), (), (1,))
     agent_idle = ((1, 0),)
     return agent_idle, agent_job, agent_pos, grid, idle_goals, jobs
 
@@ -66,7 +64,7 @@ def test_collision():
 
     res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, [], [], idle_goals, grid, filename='',
                                                                  plot=False)
-    assert len(res_agent_job) == 0, "We don't have to assign jobs"
+    assert np.array(map(lambda x: len(x) == 0, res_agent_job)).all(), "We don't have to assign jobs"
 
     ps = res_paths[0][0] + res_paths[1][0]
     pss = []
@@ -93,7 +91,7 @@ def test_consecutive_jobs():
 
     assert len(res_agent_idle) == 0, "We don't have to assign idle goals"
     assert len(res_agent_job) == 1, "Not one assigned job"
-    assert len(res_agent_job[0][1]) == 3, "Not all jobs assigned to one agent"
+    assert len(res_agent_job[0]) == 3, "Not all jobs assigned to first agent"
     assert len(res_paths) == 1, "Not one path sets for the agent"
     assert len(res_paths[0]) == 6, "Not six paths for the agent"  # being six due to the oaths to start
 
@@ -107,4 +105,8 @@ def test_concat_paths():
 
 
 def test_timeshift_path():
-    assert [(1, 2, 2), (2, 2, 3)] == planner.plan.timeshift_path([(1, 2, 0), (2, 2, 1)], 2), "Wrong shifting"
+    assert [(1, 2, 2), (2, 2, 3)] == planner.plan.time_shift_path([(1, 2, 0), (2, 2, 1)], 2), "Wrong shifting"
+
+
+def test_get_nearest():
+    assert (1, 1) == planner.plan.get_nearest([(1, 0), (1, 1), (1, 2)], (0, 1))
