@@ -86,6 +86,7 @@ class SimpSim(QtCore.QThread):
     def start_sim(self, width, height, number_agvs):
         self.area = zeros([width, height])
         self.number_agvs = number_agvs
+        Car.nextId = 0
         SimpSim.cars = []
         for i in range(self.number_agvs):
             c = Car(self)
@@ -117,10 +118,10 @@ class SimpSim(QtCore.QThread):
             logging.info("Pause")
             SimpSim.scheduler.pause()
 
-        logging.info('end-start= ', time.time() - self.startTime)
-        logging.info('i= ', SimpSim.i)
-        logging.info('i*SimTime= ', SimpSim.i * SimpSim.simTime)
-        logging.info('missing: ', time.time() - self.startTime - SimpSim.i * SimpSim.simTime, 's')
+        logging.info('end-start= ' + str(time.time() - self.startTime))
+        logging.info('i= ' + str(SimpSim.i))
+        logging.info('i*SimTime= ' + str(SimpSim.i * SimpSim.simTime))
+        logging.info('missing: ' + str(time.time() - self.startTime - SimpSim.i * SimpSim.simTime) + 's')
 
     def new_job(self, a, b, job_id):
         SimpSim.queue.append(Route(a, b, False, job_id, self))
@@ -194,7 +195,7 @@ class Route(object):
                 self.onRoute = True
                 self.car.setPose(self.start)
                 self.preRemaining = 0
-                logging.info(self.to_string() + " reached Start")
+                logging.info(str(self) + " reached Start")
                 if self.sim.msb_select:
                     data = {"agvId": self.car.id, "jobId": self.id}
                     msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReachedStart, data=data)
@@ -212,7 +213,7 @@ class Route(object):
                 self.car.setPose(self.goal)
                 self.remaining = 0
                 self.finished = True
-                logging.info(self.to_string() + " reached Goal")
+                logging.info(str(self) + " reached Goal")
                 if self.sim.msb_select:
                     msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
 
@@ -220,7 +221,7 @@ class Route(object):
         if self.sim.msb_select:
             emit_car(msb, self.car)
 
-    def to_string(self):
+    def __str__(self):
         return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))
 
 
@@ -252,3 +253,6 @@ class Car(object):
     def setPose(self, pose):
         self.pose = pose
         self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
+
+    def __str__(self):
+        return "".join(("C", str(self.id), ":", str(self.pose)))

@@ -18,6 +18,7 @@
 			<Name><![CDATA[Main]]></Name>
 			<AdditionalClassCode><![CDATA[ClientHandler handler;
 boolean connected = false;
+boolean lock = false;
 Random random = new Random();]]></AdditionalClassCode>
 			<ClientAreaTopLeft><X>0</X><Y>0</Y></ClientAreaTopLeft>
 			<PresentationTopGroupPersistent>true</PresentationTopGroupPersistent>
@@ -36,7 +37,9 @@ import com.anylogic.engine.analysis.Chart.InterpolationType;
 import com.anylogic.engine.analysis.Chart.PointStyle;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;]]></Import>
+import java.awt.event.MouseAdapter;
+import com.fasterxml.jackson.databind.ser.std.StdArraySerializers.BooleanArraySerializer;
+import org.springframework.core.env.SystemEnvironmentPropertySource;]]></Import>
 			<StartupCode><![CDATA[System.out.println("Hello Anylogic!");
 String version = System.getProperty("java.version");
 System.out.println("Java version: " + version);
@@ -45,6 +48,8 @@ this.getEngine().setRealTimeScale(timeScale);
 
 Object waitLock = new Object();
 final Main main = this;
+
+lock = false; 
 
 final ClientWebSocketHandlerFactory factory = ClientWebSocketHandlerFactory.getInstance("./CERTS.trs");
 Thread thread = new Thread(new Runnable() {
@@ -606,12 +611,22 @@ try {
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>true</ShowLabel>
-					<Body><![CDATA[for(int i = 0; i < processWait.size(); i++){
-	Order o = processWait.get(i);
-	if(o.goalStation.free){
-		processWait.free(o);
-		o.goalStation.free = false;
+					<Body><![CDATA[try{
+	lock = true;
+	for(int i = 0; i < processWait.size(); i++){
+		Order o = processWait.get(i);
+		if(o.goalStation.free){
+			processWait.free(o);
+			o.goalStation.free = false;
+		}
 	}
+}
+catch (Exception e) {
+	System.out.println("checktofree EXCEPTION");
+	e.printStackTrace();
+}
+finally {
+	lock = false;
 }]]></Body>
 				</Function>
 			</Functions>
@@ -1404,6 +1419,8 @@ agent.goalStation.free = false;]]></Code>
 							<Value Class="CodeValue">
 								<Code><![CDATA[agent.goalStation.rectangle.setFillColor(Color.GREEN);
 agent.goalStation.free = true;
+
+while (lock) { System.out.println(""); }
 checktofree();]]></Code>
 							</Value>
 						</Parameter>
@@ -1782,7 +1799,8 @@ checktofree();]]></Code>
 						<Parameter>
 							<Name><![CDATA[onEnter]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[checktofree();]]></Code>
+								<Code><![CDATA[while (lock) { System.out.println(""); }
+checktofree();]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -3398,7 +3416,7 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 				<Parameter>
 					<ParameterName><![CDATA[timeScale]]></ParameterName>
 					<ParameterValue Class="CodeValue">
-						<Code><![CDATA[20]]></Code>
+						<Code><![CDATA[10]]></Code>
 					</ParameterValue>
 				</Parameter>
 				<Parameter>
@@ -3501,6 +3519,7 @@ public class FunctionContainer implements Serializable {
 			}
 		}
 		catch (Exception e) {
+			System.out.println("agvAssignment EXCEPTION");
 			e.printStackTrace();
 		}
 	}
@@ -3525,6 +3544,7 @@ public class FunctionContainer implements Serializable {
 			
 		}
 		catch (Exception e) {
+			System.out.println("pose EXCEPTION");
 			e.printStackTrace();
 		}
 	}
@@ -3539,14 +3559,15 @@ public class FunctionContainer implements Serializable {
 					o.rectangle.setVisible(true);
 					o.agv.order_presentation.setVisible(false);
 					main.transportDelay.stopDelay(o);
-					o.agv.order = null;
-					o.agv = null;
+					//o.agv.order = null;
+					//o.agv = null;
 					o.onCar = false;
 				}
 			}
 			System.out.println("reached END");
 		}
 		catch (Exception e) {
+			System.out.println("reached EXCEPTION");
 			e.printStackTrace();
 		}
 	}
@@ -3572,6 +3593,7 @@ public class FunctionContainer implements Serializable {
 			System.out.println("reachedStart END");
 		}
 		catch (Exception e) {
+			System.out.println("reachedStart EXCEPTION");
 			e.printStackTrace();
 		}
 	}
