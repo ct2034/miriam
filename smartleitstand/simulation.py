@@ -16,10 +16,10 @@ def work_queue():
     freeCars = []
     routeTodo = None
     for c in SimpSim.cars:
-        if not c.route and len(SimpSim.queue) > 0:
+        if not c.route:
             freeCars.append(c)
-            routeTodo = SimpSim.queue.pop()
-            break
+    if len(SimpSim.queue) > 0:
+        routeTodo = SimpSim.queue.pop()
     if routeTodo:
         routeTodo.assign_car(which_car(freeCars, routeTodo, []))
         SimpSim.activeRoutes.append(routeTodo)
@@ -50,7 +50,7 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = 10
+    driveSpeed = 5
     speedMultiplier = 1
     simTime = .1
     running = False

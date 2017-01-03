@@ -1,3 +1,5 @@
+import random
+
 from smartleitstand.route import Route, Car
 
 class Module:
@@ -7,9 +9,5 @@ class Module:
 
 class Random(Module):
     def which_car(self, cars: list, route_todo: Route, routes_queue: list) -> Car:
-        print("### SMARTLEITSTAND ###")
-        print("cars:" + "; ".join(map(str, cars)))
-        print("route_todo:" + route_todo.__str__())
-        print("routes_queue:" + str(routes_queue))
-        print("######################")
-        return cars[0]
+        rand = random.Random()
+        return cars[rand.randint(0, len(cars) - 1)]
