@@ -72,8 +72,8 @@ if __name__ == '__main__':
 
     # vis
     # vis = True
-    if vis:
-        app = QtGui.QApplication(sys.argv)
-        window = Vis(simThread=simThread)
-        window.show()
-        sys.exit(app.exec_())
+        # if vis:
+        #     app = QtGui.QApplication(sys.argv)
+        #     window = Vis(simThread=simThread)
+        #     window.show()
+        #     sys.exit(app.exec_())

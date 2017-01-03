@@ -1,7 +1,6 @@
-from simulation import Route, Car
-from smartleitstand.smartl_modules.random import Random
+from smartleitstand.smartl_modules import *
 
 
-def which_car(cars: list, route_todo: Route, routes_queue: list) -> Car:
+def which_car(cars: list, route_todo, routes_queue: list) -> Car:
     module = Random()
-    module.which_car(cars, route_todo, routes_queue)
+    return module.which_car(cars, route_todo, routes_queue)
