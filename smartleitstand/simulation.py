@@ -1,30 +1,13 @@
 import logging
-
-logging.basicConfig(level=logging.INFO)
-
 import time
 
-from smartleitstand.route import Route, Car, emit_car
-from smartleitstand.which_car import which_car
-from smartleitstand import msb
 from PyQt4 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
-
-def work_queue():
-    freeCars = []
-    routeTodo = None
-    for c in SimpSim.cars:
-        if not c.route:
-            freeCars.append(c)
-    if len(SimpSim.queue) > 0:
-        routeTodo = SimpSim.queue.pop()
-    if routeTodo:
-        routeTodo.assign_car(which_car(freeCars, routeTodo, []))
-        SimpSim.activeRoutes.append(routeTodo)
-        # SimpSim.v.update_queue(SimpSim.queue)
-
+from smartleitstand import msb
+from smartleitstand.modules import which_car
+from smartleitstand.route import Route, Car, emit_car
 
 
 def iterate():
@@ -42,6 +25,16 @@ def iterate():
     except Exception as e:
         logging.error("ERROR:", str(e))
         raise e
+
+
+def work_queue():
+    route_todo = None
+    if len(SimpSim.queue) > 0:
+        route_todo = SimpSim.queue.pop()
+    if route_todo:
+        route_todo.assign_car(which_car(SimpSim.cars, route_todo, []))
+        SimpSim.activeRoutes.append(route_todo)
+        # SimpSim.v.update_queue(SimpSim.queue)
 
 
 class SimpSim(QtCore.QThread):
