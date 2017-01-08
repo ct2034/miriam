@@ -10,6 +10,12 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
     # time_len = heuristic(start, goal, map) * 20
     # ------
 
+    start_int = (int(start[0]),
+                 int(start[1]),
+                 int(start[2]))
+
+    start = start_int
+
     have_map = np.max(map) > 0  # having a costmap
     # The set of nodes already evaluated.
     closed = []

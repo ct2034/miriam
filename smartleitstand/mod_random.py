@@ -16,5 +16,5 @@ class Random(Module):
         else:
             return None  # No free car
 
-    def new_job(self, route_todo: Route):
+    def new_job(self, cars, routes_queue):
         pass

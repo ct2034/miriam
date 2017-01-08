@@ -8,8 +8,6 @@ from numpy import *
 from vfk_msb_py.msb_classes import *
 from vfk_msb_py.msb_ws4py_client import MsbWsClient
 
-from smartleitstand import simulation
-
 def callback(m):
     if "NIO" in str(m):
         logging.warning(m)

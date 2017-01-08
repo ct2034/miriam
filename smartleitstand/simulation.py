@@ -6,52 +6,25 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
 from smartleitstand import msb
-from smartleitstand.modules import which_car
 from smartleitstand.route import Route, Car, emit_car
-
-
-def iterate():
-    try:
-        if SimpSim.running:
-            work_queue()
-            for j in SimpSim.activeRoutes:
-                if not j.finished:
-                    j.new_step(
-                        SimpSim.driveSpeed *
-                        SimpSim.speedMultiplier *
-                        SimpSim.simTime
-                    )
-            SimpSim.i += 1
-    except Exception as e:
-        logging.error("ERROR:", str(e))
-        raise e
-
-
-def work_queue():
-    route_todo = None
-    if len(SimpSim.queue) > 0:
-        route_todo = SimpSim.queue.pop()
-    if route_todo:
-        route_todo.assign_car(which_car(SimpSim.cars, route_todo, []))
-        SimpSim.activeRoutes.append(route_todo)
-        # SimpSim.v.update_queue(SimpSim.queue)
 
 
 class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
-
     queue = []
     activeRoutes = []
     cars = []
     driveSpeed = 5
     speedMultiplier = 1
-    simTime = .1
+    simTime = .2
     running = False
     scheduler = BackgroundScheduler()
     i = 0
     startTime = time.time()
 
-    def __init__(self, msb_select: bool, parent=None):
+    def __init__(self, msb_select: bool, mod, parent=None):
+        self.module = mod
+
         QtCore.QThread.__init__(self, parent)
         logging.info("init Simulation")
 
@@ -63,11 +36,11 @@ class SimpSim(QtCore.QThread):
         self.number_agvs = 1
 
         SimpSim.scheduler.add_job(
-            func=iterate,
+            func=self.iterate,
             trigger='interval',
             id="sim_iterate",
             seconds=SimpSim.simTime,
-            max_instances=1,
+            max_instances=2,
             replace_existing=True  # for restarting
         )
 
@@ -116,9 +89,37 @@ class SimpSim(QtCore.QThread):
 
     def new_job(self, a, b, job_id):
         SimpSim.queue.append(Route(a, b, None, job_id, self))
+        self.module.new_job(SimpSim.cars, SimpSim.queue)
 
     def set_speed_multiplier(self, multiplier):
         SimpSim.speedMultiplier = multiplier
+
+    def iterate(self):
+        logging.debug("it ...")
+        try:
+            if SimpSim.running:
+                self.work_queue()
+                for j in SimpSim.activeRoutes:
+                    if not j.finished:
+                        j.new_step(
+                            SimpSim.driveSpeed *
+                            SimpSim.speedMultiplier *
+                            SimpSim.simTime
+                        )
+                SimpSim.i += 1
+        except Exception as e:
+            logging.error("ERROR:" + str(e))
+            raise e
+        logging.debug("... it")
+
+    def work_queue(self):
+        route_todo = None
+        for r in SimpSim.queue:
+            c = self.module.which_car(SimpSim.cars, r, SimpSim.queue.copy())
+            if c:
+                r.assign_car(c)
+                SimpSim.activeRoutes.append(r)
+                # SimpSim.v.update_queue(SimpSim.queue)
 
 
 def get_distance(a, b):

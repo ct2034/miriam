@@ -22,7 +22,7 @@ start_time = datetime.datetime.now()
                    alloc_jobs,
                    idle_goals,
                    grid,
-                   plot=True,
+                   plot=False,
                    filename='')
 
 print("computation time:",

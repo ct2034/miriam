@@ -1,12 +1,8 @@
-from smartleitstand.route import Route, Car
 
 
 class Module:
-    def which_car(self, cars: list, route_todo: Route, routes_queue: list) -> Car:
+    def which_car(self, cars, route_todo, routes_queue):
         raise NotImplementedError()
 
-    def work_queue(self):
-        raise NotImplementedError()
-
-    def new_job(self, route_todo: Route):
+    def new_job(self, cars, routes_queue):
         raise NotImplementedError()

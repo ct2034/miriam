@@ -1,4 +1,6 @@
 import logging
+import datetime
+import random
 
 from PyQt4 import QtCore
 from numpy import linalg
@@ -35,6 +37,8 @@ class Route(object):
         self.preDistance = None
         self.preRemaining = None
 
+        self.creationTime = datetime.datetime.now()
+
         logging.info(
             "Created route with id " +
             str(self.id) +
@@ -45,7 +49,7 @@ class Route(object):
     def assign_car(self, _car):
         self.car = _car
         if _car:  # if we are setting a car
-            assert _car.route == False, "car is not on a route"
+            # assert _car.route == self, "car should not be on another route already"
             _car.route = self
 
             self.preVector = self.start - _car.pose
@@ -91,6 +95,7 @@ class Route(object):
                 self.car.setPose(self.goal)
                 self.remaining = 0
                 self.finished = True
+                self.sim.queue.remove(self)
                 logging.info(str(self) + " reached Goal")
                 if self.sim.msb_select:
                     msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
@@ -99,8 +104,13 @@ class Route(object):
         if self.sim.msb_select:
             emit_car(msb, self.car)
 
+    def toJobTuple(self):
+        return ((self.start[0], self.start[1]),
+                (self.goal[0], self.goal[1]),
+                (self.creationTime - datetime.datetime.now()).total_seconds())
+
     def __str__(self):
-        return " ".join(("R", str(self.id), ":", str(self.start), "->", str(self.goal)))
+        return "R%d: %s -> %s" % (self.id, str(self.start), str(self.goal))
 
 
 def emit_car(msb, car):
@@ -119,9 +129,9 @@ class Car(object):
 
         # assert s.__class__ is SimpSim, "Pass the simulation object to the new car"
         self.pose = array([
-            10, 15
-            # random.randint(0, s.area.shape[0]),
-            # random.randint(0, s.area.shape[1])
+            # 10, 15
+            random.randint(0, s.area.shape[0]),
+            random.randint(0, s.area.shape[1])
         ])
 
         self.route = False
@@ -138,5 +148,8 @@ class Car(object):
         self.pose = pose
         self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
 
+    def toTuple(self):
+        return tuple(self.pose)
+
     def __str__(self):
-        return "".join(("C", str(self.id), ":", str(self.pose)))
+        return "C%d: [%.2f %.2f]" % (self.id, self.pose[0], self.pose[1])

@@ -1,10 +1,14 @@
 import logging
 import threading
 import time
+import sys
+import numpy as np
 
 from PyQt4 import QtGui
 from numpy import *
 
+from smartleitstand.mod_cbsextension import Cbsext
+from smartleitstand.mod_random import Random
 from smartleitstand.simulation import SimpSim
 from smartleitstand.vis import Vis
 
@@ -14,8 +18,8 @@ logging.getLogger("apscheduler").setLevel(logging.WARN)
 
 
 def testing(thread: SimpSim):
-    width = 100
-    height = 100
+    width = 20
+    height = 20
 
     time.sleep(.5)
     thread.start_sim(width, height, 3)
@@ -41,11 +45,15 @@ if __name__ == '__main__':
     msb = False
     test = False
     vis = False
-    robotarium = False
+
+    # module
+    # mod = Random()
+    mod = Cbsext(np.zeros([21, 21, 51]))
+
 
     # sim
     # msb = True
-    simThread = SimpSim(msb)
+    simThread = SimpSim(msb, mod)
     simThread.start()
 
     # test
@@ -54,7 +62,7 @@ if __name__ == '__main__':
         threading.Thread(target=testing, args=(simThread,)).start()
 
     # vis
-    # vis = True
+    vis = True
     if vis:
         app = QtGui.QApplication(sys.argv)
         window = Vis(simThread=simThread)

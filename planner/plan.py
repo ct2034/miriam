@@ -530,7 +530,8 @@ def get_paths(_condition: dict, _state: tuple) -> list:
                 p1 = path(pose, jobs[job][0], _map, block1, calc=True)
                 paths_for_agent += (time_shift_path(p1, t_shift),)
                 # start to goal
-                _, t_shift = get_last_pose_and_t(paths_for_agent)
+                pose, t_shift = get_last_pose_and_t(paths_for_agent)
+                assert pose == jobs[job][0], "Last pose should be the start"
                 block2 = time_shift_blocks(block, t_shift)
                 p = path(jobs[job][0], jobs[job][1], _map, block2, calc=True)
             paths_for_agent += (time_shift_path(p, t_shift),)
@@ -586,6 +587,8 @@ def find_collision(_paths: list) -> tuple:
         for _path in _pathset:
             for point in _path:
                 if point in seen:  # collision
+                    assert len(from_agent) == len(all_paths), "Something went wrong"
+                    assert len(from_agent) == len(seen), "Something went wrong"
                     return tuple((point, (ia, from_agent[all_paths.index(point)])))
                 seen.add(point)
                 all_paths.append(point)
