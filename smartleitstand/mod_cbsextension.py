@@ -2,6 +2,7 @@ import datetime
 import os
 import logging
 import time
+import numpy as np
 
 from smartleitstand.mod import Module
 from smartleitstand.route import Route, Car
@@ -45,11 +46,13 @@ class Cbsext(Module):
         if self.planning:
             logging.warning("already planning")
             while (self.planning):
-                time.sleep(.01)
+                time.sleep(.1)
         self.planning = True
         agent_pos = []
         for c in cars:
-            agent_pos.append(c.toTuple())
+            t = c.toTuple()
+            assert not t[0].__class__ is np.ndarray
+            agent_pos.append(t)
 
         jobs = []
         alloc_jobs = []
@@ -60,7 +63,7 @@ class Cbsext(Module):
                 alloc_jobs.append((self.get_car_i(cars, r.car), i_route))
 
         idle_goals = [((10, 10), (50, 20)), ((10, 11), (50, 20),),
-                      ((10, 9), (50, 20),)]  # one idle goal 9,7 with P~N(5,.5)
+                      ((10, 9), (50, 20),)]  # TODO: we have to learn these!
 
         planning_start = datetime.datetime.now()
         (self.agent_job,
@@ -73,6 +76,10 @@ class Cbsext(Module):
                             plot=False,
                             filename=self.fname)
         logging.info("Planning took %.4fs" % (datetime.datetime.now() - planning_start).total_seconds())
+
+        # save the paths in cars
+        for i_car in range(len(cars)):
+            cars[i_car].setPaths(self.paths[i_car])
 
         self.plan_params = (cars, routes_queue)  # how we have planned last time
         self.planning = False

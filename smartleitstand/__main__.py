@@ -37,6 +37,8 @@ def testing(thread: SimpSim):
     time.sleep(20)
     thread.stop()
 
+    # TODO: Write test cases !! (to be executed in travis)
+
 
 if __name__ == '__main__':
     logging.info("__main__.py ...")
