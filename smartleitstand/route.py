@@ -72,17 +72,17 @@ class Route(object):
             i_prev = self.car.i
             self.car.i += stepSize
             i_prev_round = int(np.ceil(i_prev))
-            i_next_round = int(np.floor(self.car.i))
+            i_next_round = min(int(np.floor(self.car.i)), len(self.car.paths) - 1)
 
             # e.g.
 
             #   1     2     3
-            #      ^    ^
-            # i_prev    car.i
+            #       ^   ^
+            #  i_prev   car.i
 
             # -> consider pos of t = 2
 
-            if i_prev_round > i_next_round:  # we have not moved to a new cell
+            if i_prev_round >= i_next_round:  # we have not moved to a new cell
                 return
 
             if not self.finished:
