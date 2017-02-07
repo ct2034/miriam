@@ -54,17 +54,17 @@ if __name__ == '__main__':
 
 
     # sim
-    # msb = True
+    msb = True
     simThread = SimpSim(msb, mod)
     simThread.start()
 
     # test
-    test = True
+    # test = True
     if test:
         threading.Thread(target=testing, args=(simThread,)).start()
 
     # vis
-    vis = True
+    # vis = True
     if vis:
         app = QtGui.QApplication(sys.argv)
         window = Vis(simThread=simThread)

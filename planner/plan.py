@@ -82,58 +82,7 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
             print(e)
 
     if plot:
-        # Plot input conditions
-        plt.style.use('bmh')
-        fig = plt.figure()
-        ax = fig.add_subplot(121)
-        ax.set_aspect('equal')
-
-        # Set grid lines to between the cells
-        major_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 2)
-        minor_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 1) + .5
-        ax.set_xticks(major_ticks)
-        ax.set_xticks(minor_ticks, minor=True)
-        ax.set_yticks(major_ticks)
-        ax.set_yticks(minor_ticks, minor=True)
-        ax.grid(which='minor', alpha=0.5)
-        ax.grid(which='major', alpha=0.2)
-
-        # Make positive y pointing up
-        ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
-
-        # Show map
-        plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
-        # Agents
-        agents = np.array(agent_pos)
-        plt.scatter(agents[:, 0],
-                    agents[:, 1],
-                    s=np.full(agents.shape[0], 100),
-                    color='blue',
-                    alpha=.9)
-        # Jobs
-        for j in jobs:
-            plt.arrow(x=j[0][0],
-                      y=j[0][1],
-                      dx=(j[1][0] - j[0][0]),
-                      dy=(j[1][1] - j[0][1]),
-                      head_width=.3, head_length=.7,
-                      length_includes_head=True,
-                      ec='r',
-                      fill=False)
-        # Idle Goals
-        igs = []
-        for ai in idle_goals:
-            igs.append(ai[0])
-        igs_array = np.array(igs)
-        plt.scatter(igs_array[:, 0],
-                    igs_array[:, 1],
-                    s=np.full(igs_array.shape[0], 100),
-                    color='g',
-                    alpha=.9)
-
-        # Legendary!
-        plt.legend(["Agents", "Idle Goals"])
-        plt.title("Problem Configuration and Solution")
+        fig = plot_inputs(agent_pos, idle_goals, jobs, grid)
 
         # plt.show()
         from mpl_toolkits.mplot3d import Axes3D
@@ -178,6 +127,61 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         plt.show()
 
     return agent_job, _agent_idle, _paths
+
+
+def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False):
+    # Plot input conditions
+    plt.style.use('bmh')
+    fig = plt.figure()
+    # ax = fig.add_subplot(121)
+    ax = fig.add_subplot(111)
+    ax.set_aspect('equal')
+    # Set grid lines to between the cells
+    major_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 2)
+    minor_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 1) + .5
+    ax.set_xticks(major_ticks)
+    ax.set_xticks(minor_ticks, minor=True)
+    ax.set_yticks(major_ticks)
+    ax.set_yticks(minor_ticks, minor=True)
+    ax.grid(which='minor', alpha=0.5)
+    ax.grid(which='major', alpha=0.2)
+    # Make positive y pointing up
+    ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
+    # Show map
+    plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
+    # Agents
+    agents = np.array(agent_pos)
+    plt.scatter(agents[:, 0],
+                agents[:, 1],
+                s=np.full(agents.shape[0], 100),
+                color='blue',
+                alpha=.9)
+    # Jobs
+    for j in jobs:
+        plt.arrow(x=j[0][0],
+                  y=j[0][1],
+                  dx=(j[1][0] - j[0][0]),
+                  dy=(j[1][1] - j[0][1]),
+                  head_width=.3, head_length=.7,
+                  length_includes_head=True,
+                  ec='r',
+                  fill=False)
+    # Idle Goals
+    igs = []
+    for ai in idle_goals:
+        igs.append(ai[0])
+    igs_array = np.array(igs)
+    plt.scatter(igs_array[:, 0],
+                igs_array[:, 1],
+                s=np.full(igs_array.shape[0], 100),
+                color='g',
+                alpha=.9)
+    # Legendary!
+    plt.legend(["Agents", "Idle Goals"])
+    plt.title("Problem Configuration and Solution")
+    if show:
+        plt.show()
+    return fig
 
 
 # Main methods
@@ -249,7 +253,7 @@ def get_children(_condition: dict, _state: tuple) -> list:
             return []
 
 
-def cost(_condition: dict, _state: tuple) -> float:
+def cost(_condition: dict, _state: tuple):
     """
     Get the cost increase for a change from _state1 to _state2
 
@@ -265,6 +269,8 @@ def cost(_condition: dict, _state: tuple) -> float:
     _cost = 0.
 
     _paths = get_paths(_condition, _state)
+    if _paths is False:
+        return 99999, _state
     for i_a in range(len(_paths)):
         pathset = list(_paths[i_a])
         assigned_jobs = agent_job[i_a]
@@ -325,19 +331,27 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     (left_agent_pos, left_idle_goals, left_jobs
      ) = clear_set(_agent_idle, agent_job, agent_pos, idle_goals, jobs)
 
-    agents = []
     paths = get_paths(_condition, _state)
+    if paths is False:
+        return 99999  # no feasible path set
+
+    agentposes = []
     assert len(paths) == len(agent_pos), "All agents should have paths"
     for i_agent in range(len(paths)):
         pathset = paths[i_agent]
         if pathset:
-            agents.append(pathset[-1][-1][0:2])  # last pose of agent
+            agentposes.append(pathset[-1][-1][0:2])  # last pose of agent
         else:
-            agents.append(agent_pos[i_agent])  # no path yet
+            agentposes.append(agent_pos[i_agent])  # no path yet
 
     for i_job in range(len(left_jobs)):
+        agentposes.append(jobs[i_job][1])
+
+    for i_job in range(len(left_jobs)):
+        agentposes_no_self = agentposes.copy()
+        agentposes_no_self.remove(jobs[i_job][1])
         # closest agent pose to this jobs start
-        nearest_agent = get_nearest(agents, jobs[i_job][0])
+        nearest_agent = get_nearest(agentposes_no_self, jobs[i_job][0])
         _cost += distance_no_calc(nearest_agent, jobs[i_job][0])
         _cost += distance_no_calc(jobs[i_job][0], jobs[i_job][1])
 
@@ -424,19 +438,24 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
     Returns:
       the path as list of tuples
       or [] if no path found
-      or False if
+      or False if path shouldn't have been calculated but was not saved either
     """
-    index = tuple([start, goal]) + tuple(blocked)
     seen = set()
+    for b in blocked:
+        if b[0:2] == start or b[0:2] == goal:
+            return []  # blocked at start or goal (infeasible path)
+
     if len(blocked) > 0:
         for b in blocked:
             _map = _map.copy()
             _map[(b[1],
                   b[0],
                   b[2])] = -1
-            assert b not in seen, "Duplicate blocked entries"
+            if b in seen:
+                assert False, "Duplicate blocked entries"
             seen.add(b)
 
+    index = tuple([start, goal]) + tuple(blocked)
     if index not in path_save.keys():
         if calc:  # if we want to calc (i.e. find the cost)
             assert len(start) == 2, "Should be called with only spatial coords"
@@ -504,6 +523,7 @@ def get_paths(_condition: dict, _state: tuple) -> list:
 
     Returns:
       list of tuples per agent with all paths for this agent as lists of tuples of coords [([(..)])]
+      False if one agent was not able to reach its goal
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, _agent_idle, blocked) = state2comp(_state)
@@ -522,22 +542,30 @@ def get_paths(_condition: dict, _state: tuple) -> list:
         for job in assigned_jobs:
             if (i_a, job) in alloc_jobs:  # can be first only; need to go to goal only
                 p = path(pose, jobs[job][1], _map, block, calc=True)
+                if p == []:
+                    return False
             else:
                 # trip to start
                 if len(paths_for_agent) > 0:
                     pose, t_shift = get_last_pose_and_t(paths_for_agent)
                 block1 = time_shift_blocks(block, t_shift)
                 p1 = path(pose, jobs[job][0], _map, block1, calc=True)
+                if p1 == []:
+                    return False
                 paths_for_agent += (time_shift_path(p1, t_shift),)
                 # start to goal
                 pose, t_shift = get_last_pose_and_t(paths_for_agent)
                 assert pose == jobs[job][0], "Last pose should be the start"
                 block2 = time_shift_blocks(block, t_shift)
                 p = path(jobs[job][0], jobs[job][1], _map, block2, calc=True)
+                if p == []:
+                    return False
             paths_for_agent += (time_shift_path(p, t_shift),)
         for ai in _agent_idle:
             if ai[0] == i_a:
                 p = (path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, calc=True))
+                if p == []:
+                    return False
                 paths_for_agent += (p,)
                 break  # found for this agent
         _paths.append(paths_for_agent)

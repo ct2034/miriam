@@ -1,5 +1,7 @@
 import datetime
 import os
+import random
+import logging
 
 import numpy as np
 
@@ -7,7 +9,7 @@ import planner.plan
 
 
 def test_basic():
-    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data()
+    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian()
 
     start_time = datetime.datetime.now()
 
@@ -19,7 +21,7 @@ def test_basic():
     assert res_agent_idle == agent_idle, "wrong agent -> idle_goal assignment"
 
 
-def get_data(n=1):
+def get_data_labyrinthian(n=1):
     grid = np.zeros([10 * n, 10 * n, 51 * n])
     grid[4 * n, 2 * n:8 * n, :] = -1
     # input
@@ -32,13 +34,79 @@ def get_data(n=1):
     return agent_idle, agent_job, agent_pos, grid, idle_goals, jobs
 
 
+def get_unique_coords(max_x, max_y, reset=False):
+    global used_coords
+    if reset:
+        used_coords = set()
+    else:
+        max_x -= 1
+        max_y -= 1
+        c = (random.randint(0, max_x),
+             random.randint(0, max_y))
+        while (c in used_coords):
+            c = (random.randint(0, max_x),
+                 random.randint(0, max_y))
+        assert c not in used_coords
+        used_coords.add(c)
+        return c
+
+
+def get_data_random(map_res=10, map_fill_perc=20, agent_n=4, job_n=4, idle_goals_n=2):
+    get_unique_coords(None, None, True)  # just to reset ..
+    grid = np.zeros([map_res, map_res, map_res ** 2])
+
+    # Fill the map
+    for i in range(int(np.floor(map_fill_perc / 100 * map_res ** 2))):
+        c = get_unique_coords(map_res, map_res)
+        grid[c[1], c[0], :] = -1
+
+    # agents
+    agent_pos = []
+    for i in range(agent_n):
+        agent_pos.append(get_unique_coords(map_res, map_res))
+
+    # jobs
+    jobs = []
+    for i in range(job_n):
+        jobs.append((get_unique_coords(map_res, map_res),
+                     get_unique_coords(map_res, map_res),
+                     random.randint(0, 4)))
+
+    idle_goals = []
+    for i in range(idle_goals_n):
+        idle_goals.append((get_unique_coords(map_res, map_res),
+                           (random.randint(0, 4),
+                            random.randint(1, 20) / 10))
+                          )
+
+    return agent_pos, grid, idle_goals, jobs
+
+
+def test_rand():
+    for i in range(5):
+        print("\nTEST", i)
+        agent_pos, grid, idle_goals, jobs = get_data_random(10, 5, 3, 3, 5)
+
+        start_time = datetime.datetime.now()
+
+        res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename='')
+
+        print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
+        print("RESULTS:\nres_agent_job", res_agent_job)
+        print("res_agent_idle", res_agent_idle)
+        if res_paths is False:
+            logging.warning("NO SOLUTION")
+        else:
+            print("res_paths", res_paths)
+
+
 def test_file():
     fname = "/tmp/test.pkl"
     if os.path.exists(fname):
         os.remove(fname)
     assert not os.path.exists(fname), "File exists already"
 
-    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data(2)
+    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(2)
     start_time = datetime.datetime.now()
     planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
     time1 = (datetime.datetime.now() - start_time).total_seconds()

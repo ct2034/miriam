@@ -30,6 +30,10 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
                 continue  # Ignore the neighbor which is already evaluated.
             # The distance from start to a neighbor
             c, neighbor = cost(condition, neighbor)
+            if c >= 99999:
+                closed.append(neighbor)
+                continue  # This is not part of a plan
+
             tentative_g_score = c
 
             append = True
