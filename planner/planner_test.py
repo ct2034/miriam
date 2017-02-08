@@ -1,4 +1,5 @@
 import datetime
+import getpass
 import os
 import random
 import logging
@@ -98,6 +99,12 @@ def test_rand():
             logging.warning("NO SOLUTION")
         else:
             print("res_paths", res_paths)
+
+
+def test_benchmark():
+    print('USER:', getpass.getuser())
+    if getpass.getuser() == 'travis':
+        import planner.planner_demo_rand
 
 
 def test_file():
