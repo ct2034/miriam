@@ -1,3 +1,4 @@
+import getpass
 import random
 
 import numpy as np
@@ -39,10 +40,10 @@ n_a_s = [2, 3, 4, 5]
 results_mean = np.zeros([len(n_j_s), len(n_a_s)])
 results_std = np.zeros([len(n_j_s), len(n_a_s)])
 
-if getpass.getuser() == 'travis:
+if getpass.getuser() == 'travis':
     n = 500
 else:
-    n = 5
+    n = 8
 
 for n_j, n_a in product(n_j_s, n_a_s):
     print(n_j, n_a)
