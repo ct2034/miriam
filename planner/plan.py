@@ -125,6 +125,8 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
 
         plt.show()
 
+    pool.close()
+
     return agent_job, _agent_idle, _paths
 
 
