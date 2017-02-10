@@ -171,27 +171,27 @@ def test_benchmark():
         import planner.planner_demo_rand
 
 
-def test_file():
-    fname = "/tmp/test.pkl"
-    if os.path.exists(fname):
-        os.remove(fname)
-    assert not os.path.exists(fname), "File exists already"
-
-    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(2)
-    start_time = datetime.datetime.now()
-    planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
-    time1 = (datetime.datetime.now() - start_time).total_seconds()
-    assert os.path.isfile(fname), "Algorithm has not created a file"
-
-    start_time = datetime.datetime.now()
-    planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
-    time2 = (datetime.datetime.now() - start_time).total_seconds()
-    try:
-        assert time2 < time1, "It was not faster to work with saved data"
-        print("Saving path_save saved us", 100 * (time1 - time2) / time1, "% of time")
-    finally:
-        os.remove(fname)
-        assert not os.path.exists(fname), "File exists after delete"
+# def test_file():
+#     fname = "/tmp/test.pkl"
+#     if os.path.exists(fname):
+#         os.remove(fname)
+#     assert not os.path.exists(fname), "File exists already"
+#
+#     agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(2)
+#     start_time = datetime.datetime.now()
+#     planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+#     time1 = (datetime.datetime.now() - start_time).total_seconds()
+#     assert os.path.isfile(fname), "Algorithm has not created a file"
+#
+#     start_time = datetime.datetime.now()
+#     planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+#     time2 = (datetime.datetime.now() - start_time).total_seconds()
+#     try:
+#         assert time2 < time1, "It was not faster to work with saved data"
+#         print("Saving path_save saved us", 100 * (time1 - time2) / time1, "% of time")
+#     finally:
+#         os.remove(fname)
+#         assert not os.path.exists(fname), "File exists after delete"
 
 
 def test_collision():

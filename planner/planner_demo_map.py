@@ -7,7 +7,7 @@ from itertools import *
 from planner.plan import plan
 from planner.planner_test import load_map
 
-_map = load_map('map.png')
+_map = load_map('planner/map.png')
 grid = np.repeat(_map[:, :, np.newaxis], 100, axis=2)
 
 landmarks = [(1, 1),
