@@ -4,6 +4,7 @@ import pickle
 import uuid
 
 import matplotlib.pyplot as plt
+import multiprocessing
 import numpy as np
 from scipy.stats import norm
 
@@ -44,6 +45,10 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     # load path_save
     if filename:  # TODO: check if file was created on same map
         load_paths(filename)
+    n_processes = multiprocessing.cpu_count() # TODO: mutex!
+    print("Running with", n_processes, "Processes")
+    global pool
+    pool = multiprocessing.Pool(processes=4)
 
     agent_job = []
 
@@ -478,6 +483,58 @@ def pre_calc_paths(jobs, idle_goals, grid, fname=None):
 
 # Collision Helpers
 
+
+def get_paths_for_agent(vals):
+    _agent_idle = vals['_agent_idle']
+    _map = vals['_map']
+    agent_job = vals['agent_job']
+    agent_pos = vals['agent_pos']
+    alloc_jobs = vals['alloc_jobs']
+    blocks = vals['blocks']
+    i_a = vals['i_a']
+    idle_goals = vals['idle_goals']
+    jobs = vals['jobs']
+    #-------
+    paths_for_agent = tuple()
+    if i_a in blocks.keys():
+        block = blocks[i_a]
+    else:
+        block = []
+    assigned_jobs = agent_job[i_a]
+    pose = agent_pos[i_a][0:2]
+    t_shift = 0
+    for job in assigned_jobs:
+        if (i_a, job) in alloc_jobs:  # can be first only; need to go to goal only
+            p = path(pose, jobs[job][1], _map, block, calc=True)
+            # if not p:
+            #     return False
+        else:
+            # trip to start
+            if len(paths_for_agent) > 0:
+                pose, t_shift = get_last_pose_and_t(paths_for_agent)
+            block1 = time_shift_blocks(block, t_shift)
+            p1 = path(pose, jobs[job][0], _map, block1, calc=True)
+            # if not p1:
+            #     return False
+            paths_for_agent += (time_shift_path(p1, t_shift),)
+            # start to goal
+            pose, t_shift = get_last_pose_and_t(paths_for_agent)
+            assert pose == jobs[job][0], "Last pose should be the start"
+            block2 = time_shift_blocks(block, t_shift)
+            p = path(jobs[job][0], jobs[job][1], _map, block2, calc=True)
+            # if not p:
+            #     return False
+        paths_for_agent += (time_shift_path(p, t_shift),)
+    for ai in _agent_idle:
+        if ai[0] == i_a:
+            p = (path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, calc=True))
+            # if not p:
+            #     return False
+            paths_for_agent += (p,)
+            break  # found for this agent
+    return paths_for_agent
+
+
 def get_paths(_condition: dict, _state: tuple):
     """
     Get the path_save for a given state
@@ -495,45 +552,21 @@ def get_paths(_condition: dict, _state: tuple):
     _agent_idle = np.array(_agent_idle)
     _paths = []
     blocks = get_blocks_dict(blocked)
+    valss = []
     for i_a in range(len(agent_pos)):
-        paths_for_agent = tuple()
-        if i_a in blocks.keys():
-            block = blocks[i_a]
-        else:
-            block = []
-        assigned_jobs = agent_job[i_a]
-        pose = agent_pos[i_a][0:2]
-        t_shift = 0
-        for job in assigned_jobs:
-            if (i_a, job) in alloc_jobs:  # can be first only; need to go to goal only
-                p = path(pose, jobs[job][1], _map, block, calc=True)
-                if not p:
-                    return False
-            else:
-                # trip to start
-                if len(paths_for_agent) > 0:
-                    pose, t_shift = get_last_pose_and_t(paths_for_agent)
-                block1 = time_shift_blocks(block, t_shift)
-                p1 = path(pose, jobs[job][0], _map, block1, calc=True)
-                if not p1:
-                    return False
-                paths_for_agent += (time_shift_path(p1, t_shift),)
-                # start to goal
-                pose, t_shift = get_last_pose_and_t(paths_for_agent)
-                assert pose == jobs[job][0], "Last pose should be the start"
-                block2 = time_shift_blocks(block, t_shift)
-                p = path(jobs[job][0], jobs[job][1], _map, block2, calc=True)
-                if not p:
-                    return False
-            paths_for_agent += (time_shift_path(p, t_shift),)
-        for ai in _agent_idle:
-            if ai[0] == i_a:
-                p = (path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, calc=True))
-                if not p:
-                    return False
-                paths_for_agent += (p,)
-                break  # found for this agent
-        _paths.append(paths_for_agent)
+        valss.append({'_agent_idle': _agent_idle,
+                '_map': _map,
+                'agent_job': agent_job,
+                'agent_pos': agent_pos,
+                'alloc_jobs': alloc_jobs,
+                'blocks': blocks,
+                'i_a': i_a,
+                'idle_goals': idle_goals,
+                'jobs': jobs})
+    global pool
+    _paths = list(pool.map(get_paths_for_agent, valss))
+    # if len(list(filter(lambda x: x == False, _paths))):
+    #     return False
     assert len(_paths) == len(agent_pos), "More or less paths than agents"
     return _paths
 
