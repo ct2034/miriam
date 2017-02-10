@@ -41,7 +41,7 @@ while len(jobs) < n_j:
         jobs.append(j)
 
 idle_goals = []
-for i in range(len(landmarks)) - 6:
+for i in range(len(landmarks) - 6):
     idle_goals.append(
         (landmarks[i], (random.randint(0, 20), random.randint(1, 50)/10))
     )
