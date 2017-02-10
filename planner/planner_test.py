@@ -6,22 +6,20 @@ import logging
 
 import multiprocessing
 import numpy as np
+import png
 import psutil
 
 import planner.plan
 
 
-def test_basic():
-    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian()
+def load_map(fname = 'planner/map.png'):
+    r = png.Reader(filename=fname)
 
-    start_time = datetime.datetime.now()
+    x, y, iter, color = r.read()
 
-    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename='')
-
-    print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
-
-    assert res_agent_job == agent_job, "wrong agent -> job assignment"
-    assert res_agent_idle == agent_idle, "wrong agent -> idle_goal assignment"
+    m = np.vstack(map(np.sign, iter))
+    m = np.array(m, dtype=np.int8) - 1
+    return m
 
 
 def get_system_parameters():
@@ -96,6 +94,58 @@ def get_data_random(map_res=10, map_fill_perc=20, agent_n=4, job_n=4, idle_goals
     return agent_pos, grid, idle_goals, jobs
 
 
+def test_basic():
+    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian()
+
+    start_time = datetime.datetime.now()
+
+    res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename='')
+
+    print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
+
+    assert res_agent_job == agent_job, "wrong agent -> job assignment"
+    assert res_agent_idle == agent_idle, "wrong agent -> idle_goal assignment"
+
+
+# def test_map():
+#     grid = load_map()
+#     poses = [(1,1),
+#              (3,1),
+#              (5,1),
+#              (7,1),
+#              (9,1),
+#              (8,5),
+#              (1,6),
+#              (9,7),
+#              (1,8),
+#              (9,9)]
+#
+#     n = 6
+#     agent_pos = []
+#     while len(agent_pos) < n:
+#         p = random.choice(poses)
+#         if p not in agent_pos:
+#             agent_pos.append(p)
+#
+#     jobp = []
+#     while len(jobp) < n:
+#         p = random.choice(poses)
+#         if p not in jobp:
+#             jobp.append(p)
+#
+#
+#
+#
+#     start_time = datetime.datetime.now()
+#
+#     res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename='')
+#
+#     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
+#
+#     assert res_agent_job == agent_job, "wrong agent -> job assignment"
+#     assert res_agent_idle == agent_idle, "wrong agent -> idle_goal assignment"
+
+
 def test_rand():
     for i in range(5):
         print("\nTEST", i)
@@ -117,6 +167,7 @@ def test_rand():
 def test_benchmark():
     user, _, _ = get_system_parameters()
     if user == 'travis':
+        import planner.planner_demo_map
         import planner.planner_demo_rand
 
 

@@ -3,7 +3,7 @@ import datetime
 
 from planner.plan import plan
 
-grid = np.zeros([10, 100, 51])
+grid = np.zeros([10, 10, 51])
 grid[4, 2:8, :] = -1
 
 # input

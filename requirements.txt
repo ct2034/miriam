@@ -6,3 +6,4 @@ ws4py
 pymongo
 pymc3
 psutil
+pypng

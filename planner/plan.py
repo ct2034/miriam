@@ -122,6 +122,7 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
                 legend_str.append("Agent " + str(i))
             i += 1
         plt.legend(legend_str)
+        plt.title("Solution")
 
         plt.show()
 
@@ -690,12 +691,12 @@ def clear_set(_agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals:
     return cp_agent_pos, cp_idle_goals, cp_jobs
 
 
-def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False):
+def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
     # Plot input conditions
     plt.style.use('bmh')
     fig = plt.figure()
     # ax = fig.add_subplot(121)
-    ax = fig.add_subplot(111)
+    ax = fig.add_subplot(subplot)
     ax.set_aspect('equal')
     # Set grid lines to between the cells
     major_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 2)
@@ -739,7 +740,7 @@ def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False):
                 alpha=.9)
     # Legendary!
     plt.legend(["Agents", "Idle Goals"])
-    plt.title("Problem Configuration and Solution")
+    plt.title("Problem Configuration")
     if show:
         plt.show()
     return fig

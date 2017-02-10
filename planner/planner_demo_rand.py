@@ -10,8 +10,8 @@ import planner.plan
 from planner.plan import plan
 from planner.planner_test import get_data_random
 
-agent_n_s = [2, 4, 6, 8]
-map_res_s = [10, 14, 18, 20]
+agent_n_s = [2, 4, 6]
+map_res_s = [10, 14]
 
 results_mean = np.zeros([len(agent_n_s), len(map_res_s)])
 results_std = np.zeros([len(agent_n_s), len(map_res_s)])
