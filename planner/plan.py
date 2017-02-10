@@ -47,8 +47,8 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     # load path_save
     if filename:  # TODO: check if file was created on same map
         load_paths(filename)
-    n_processes = multiprocessing.cpu_count() # TODO: mutex!
-    print("Running with", n_processes, "Processes")
+
+    n_processes = multiprocessing.cpu_count()
     global pool
     pool = multiprocessing.Pool(processes=4)
 

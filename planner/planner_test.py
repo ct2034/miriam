@@ -4,7 +4,9 @@ import os
 import random
 import logging
 
+import multiprocessing
 import numpy as np
+import psutil
 
 import planner.plan
 
@@ -20,6 +22,17 @@ def test_basic():
 
     assert res_agent_job == agent_job, "wrong agent -> job assignment"
     assert res_agent_idle == agent_idle, "wrong agent -> idle_goal assignment"
+
+
+def get_system_parameters():
+    user = getpass.getuser()
+    print("\n-----\nUser:", user)
+    cores = multiprocessing.cpu_count()
+    print("CPUs:", cores)
+    memory = psutil.virtual_memory().total
+    print("Total Memory: %e" % memory)
+    print("-----\n")
+    return user, cores, memory
 
 
 def get_data_labyrinthian(n=1):
@@ -102,8 +115,8 @@ def test_rand():
 
 
 def test_benchmark():
-    print('USER:', getpass.getuser())
-    if getpass.getuser() == 'travis':
+    user, _, _ = get_system_parameters()
+    if user == 'travis':
         import planner.planner_demo_rand
 
 

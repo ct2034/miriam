@@ -10,16 +10,16 @@ import planner.plan
 from planner.plan import plan
 from planner.planner_test import get_data_random
 
-agent_n_s = [2, 3, 4]
-map_res_s = [10, 11, 12, 13]
+agent_n_s = [2, 4, 6, 8]
+map_res_s = [10, 14, 18, 20]
 
 results_mean = np.zeros([len(agent_n_s), len(map_res_s)])
 results_std = np.zeros([len(agent_n_s), len(map_res_s)])
 
 for agent_n, map_res in product(agent_n_s, map_res_s):
-    print("\nCombination agent_n:", agent_n, "map_res", map_res)
+    print("\n---------\nagent_n:", agent_n, "map_res", map_res)
     duration = []
-    for i in range(10):
+    for i in range(8):
         print("test", i)
         agent_pos, grid, idle_goals, jobs = get_data_random(map_res=map_res,
                                                             map_fill_perc=5,
