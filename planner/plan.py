@@ -5,6 +5,7 @@ import uuid
 
 import matplotlib.pyplot as plt
 import multiprocessing
+from threading import Lock
 import numpy as np
 from scipy.stats import norm
 
@@ -13,6 +14,7 @@ from astar.base import NoPathException
 from planner.base import astar_base
 
 path_save = {}
+path_save_lock = Lock()
 
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array, plot: bool = False,
@@ -369,7 +371,9 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
             seen.add(b)
 
     index = tuple([start, goal]) + tuple(blocked)
+    path_save_lock.acquire()
     if index not in path_save.keys():
+        path_save_lock.release()
         if calc:  # if we want to calc (i.e. find the cost)
             assert len(start) == 2, "Should be called with only spatial coords"
             try:
@@ -379,11 +383,14 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
             except NoPathException:
                 _path = []
 
+            path_save_lock.acquire()
             path_save[index] = _path
+            path_save_lock.release()
         else:
             return False
     else:
         _path = path_save[index]
+        path_save_lock.release()
 
     # _path = _path.copy()
     for b in blocked:
@@ -404,9 +411,13 @@ def distance_no_calc(start: tuple, goal: tuple):
       Distance
     """
     index = tuple([start, goal])
+    path_save_lock.acquire()
     if index in path_save.keys():
-        return path_duration(path_save[index])
+        p = path_save[index]
+        path_save_lock.release()
+        return path_duration(p)
     else:
+        path_save_lock.release()
         return distance_manhattan(start, goal)
 
 
@@ -506,30 +517,30 @@ def get_paths_for_agent(vals):
     for job in assigned_jobs:
         if (i_a, job) in alloc_jobs:  # can be first only; need to go to goal only
             p = path(pose, jobs[job][1], _map, block, calc=True)
-            # if not p:
-            #     return False
+            if not p:
+                return 0
         else:
             # trip to start
             if len(paths_for_agent) > 0:
                 pose, t_shift = get_last_pose_and_t(paths_for_agent)
             block1 = time_shift_blocks(block, t_shift)
             p1 = path(pose, jobs[job][0], _map, block1, calc=True)
-            # if not p1:
-            #     return False
+            if not p1:
+                return 0
             paths_for_agent += (time_shift_path(p1, t_shift),)
             # start to goal
             pose, t_shift = get_last_pose_and_t(paths_for_agent)
             assert pose == jobs[job][0], "Last pose should be the start"
             block2 = time_shift_blocks(block, t_shift)
             p = path(jobs[job][0], jobs[job][1], _map, block2, calc=True)
-            # if not p:
-            #     return False
+            if not p:
+                return 0
         paths_for_agent += (time_shift_path(p, t_shift),)
     for ai in _agent_idle:
         if ai[0] == i_a:
             p = (path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, calc=True))
-            # if not p:
-            #     return False
+            if not p:
+                return 0
             paths_for_agent += (p,)
             break  # found for this agent
     return paths_for_agent
@@ -565,8 +576,8 @@ def get_paths(_condition: dict, _state: tuple):
                 'jobs': jobs})
     global pool
     _paths = list(pool.map(get_paths_for_agent, valss))
-    # if len(list(filter(lambda x: x == False, _paths))):
-    #     return False
+    if len(list(filter(lambda x: x is 0, _paths))):
+        return False
     assert len(_paths) == len(agent_pos), "More or less paths than agents"
     return _paths
 
@@ -811,7 +822,9 @@ def comp2state(agent_job: tuple,
 def save_paths(filename):
     try:
         with open(filename, 'wb') as f:
+            path_save_lock.acquire()
             pickle.dump(path_save, f, pickle.HIGHEST_PROTOCOL)
+            path_save_lock.release()
     except Exception as e:
         print(e)
 

@@ -19,7 +19,7 @@ results_std = np.zeros([len(agent_n_s), len(map_res_s)])
 for agent_n, map_res in product(agent_n_s, map_res_s):
     print("\nCombination agent_n:", agent_n, "map_res", map_res)
     duration = []
-    for i in range(5):
+    for i in range(10):
         print("test", i)
         agent_pos, grid, idle_goals, jobs = get_data_random(map_res=map_res,
                                                             map_fill_perc=5,
