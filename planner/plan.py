@@ -2,6 +2,7 @@ import functools
 import logging
 import pickle
 import uuid
+from functools import reduce
 
 import matplotlib.pyplot as plt
 import multiprocessing
@@ -14,8 +15,6 @@ from astar.base import NoPathException
 from planner.base import astar_base
 
 path_save = {}
-path_save_lock = Lock()
-
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array, plot: bool = False,
          filename: str = 'path_save.pkl'):
@@ -48,9 +47,11 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     if filename:  # TODO: check if file was created on same map
         load_paths(filename)
 
-    n_processes = multiprocessing.cpu_count()
     global pool
-    pool = multiprocessing.Pool(processes=4)
+    n = multiprocessing.cpu_count()
+    if n <= 4:
+        n = n * 2
+    pool = multiprocessing.Pool(processes=n)
 
     agent_job = []
 
@@ -294,14 +295,28 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     for i_job in range(len(left_jobs)):
         agentposes.append(jobs[i_job][1])
 
+    valss = []
     for i_job in range(len(left_jobs)):
-        agentposes_no_self = agentposes.copy()
-        agentposes_no_self.remove(jobs[i_job][1])
-        # closest agent pose to this jobs start
-        nearest_agent = get_nearest(agentposes_no_self, jobs[i_job][0])
-        _cost += distance_no_calc(nearest_agent, jobs[i_job][0])
-        _cost += distance_no_calc(jobs[i_job][0], jobs[i_job][1])
+        valss.append({'agentposes': agentposes,
+                      'i_job': i_job,
+                      'jobs': jobs})
+    job_costs = list(pool.map(heuristic_per_job, valss))
+    _cost += reduce(lambda a, b: a + b, job_costs, 0)
 
+    return _cost
+
+
+def heuristic_per_job(vals):
+    agentposes = vals['agentposes']
+    i_job = vals['i_job']
+    jobs = vals['jobs']
+    _cost = 0
+    agentposes_no_self = agentposes.copy()
+    agentposes_no_self.remove(jobs[i_job][1])
+    # closest agent pose to this jobs start
+    nearest_agent = get_nearest(agentposes_no_self, jobs[i_job][0])
+    _cost += distance_no_calc(nearest_agent, jobs[i_job][0])
+    _cost += distance_no_calc(jobs[i_job][0], jobs[i_job][1])
     return _cost
 
 
@@ -342,7 +357,7 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
 
 # Path Helpers
 
-def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = True):
+def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_process, calc: bool = True):
     """
     Calculate or return pre-calculated path from start to goal
 
@@ -361,7 +376,7 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
     seen = set()
     for b in blocked:
         if b[0:2] == start or b[0:2] == goal:
-            return []  # blocked at start or goal (infeasible path)
+            return [], {}  # blocked at start or goal (infeasible path)
 
     if len(blocked) > 0:
         for b in blocked:
@@ -374,9 +389,7 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
             seen.add(b)
 
     index = tuple([start, goal]) + tuple(blocked)
-    path_save_lock.acquire()
     if index not in path_save.keys():
-        path_save_lock.release()
         if calc:  # if we want to calc (i.e. find the cost)
             assert len(start) == 2, "Should be called with only spatial coords"
             try:
@@ -386,20 +399,17 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, calc: bool = 
             except NoPathException:
                 _path = []
 
-            path_save_lock.acquire()
-            path_save[index] = _path
-            path_save_lock.release()
+            path_save_process[index] = _path
         else:
-            return False
+            return False, {}
     else:
         _path = path_save[index]
-        path_save_lock.release()
 
     # _path = _path.copy()
     for b in blocked:
         if b in _path:
             assert False, "Path still contains the collision"
-    return _path
+    return _path, path_save_process
 
 
 def distance_no_calc(start: tuple, goal: tuple):
@@ -414,13 +424,10 @@ def distance_no_calc(start: tuple, goal: tuple):
       Distance
     """
     index = tuple([start, goal])
-    path_save_lock.acquire()
     if index in path_save.keys():
         p = path_save[index]
-        path_save_lock.release()
         return path_duration(p)
     else:
-        path_save_lock.release()
         return distance_manhattan(start, goal)
 
 
@@ -499,6 +506,7 @@ def pre_calc_paths(jobs, idle_goals, grid, fname=None):
 
 
 def get_paths_for_agent(vals):
+    path_save_process = {}
     _agent_idle = vals['_agent_idle']
     _map = vals['_map']
     agent_job = vals['agent_job']
@@ -508,7 +516,7 @@ def get_paths_for_agent(vals):
     i_a = vals['i_a']
     idle_goals = vals['idle_goals']
     jobs = vals['jobs']
-    #-------
+    # -------
     paths_for_agent = tuple()
     if i_a in blocks.keys():
         block = blocks[i_a]
@@ -519,7 +527,7 @@ def get_paths_for_agent(vals):
     t_shift = 0
     for job in assigned_jobs:
         if (i_a, job) in alloc_jobs:  # can be first only; need to go to goal only
-            p = path(pose, jobs[job][1], _map, block, calc=True)
+            p, path_save_process = path(pose, jobs[job][1], _map, block, path_save_process, calc=True)
             if not p:
                 return 0
         else:
@@ -527,7 +535,7 @@ def get_paths_for_agent(vals):
             if len(paths_for_agent) > 0:
                 pose, t_shift = get_last_pose_and_t(paths_for_agent)
             block1 = time_shift_blocks(block, t_shift)
-            p1 = path(pose, jobs[job][0], _map, block1, calc=True)
+            p1, path_save_process = path(pose, jobs[job][0], _map, block1, path_save_process, calc=True)
             if not p1:
                 return 0
             paths_for_agent += (time_shift_path(p1, t_shift),)
@@ -535,18 +543,18 @@ def get_paths_for_agent(vals):
             pose, t_shift = get_last_pose_and_t(paths_for_agent)
             assert pose == jobs[job][0], "Last pose should be the start"
             block2 = time_shift_blocks(block, t_shift)
-            p = path(jobs[job][0], jobs[job][1], _map, block2, calc=True)
+            p, path_save_process = path(jobs[job][0], jobs[job][1], _map, block2, path_save_process, calc=True)
             if not p:
                 return 0
         paths_for_agent += (time_shift_path(p, t_shift),)
     for ai in _agent_idle:
         if ai[0] == i_a:
-            p = (path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, calc=True))
+            p, path_save_process = (path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, path_save_process, calc=True))
             if not p:
                 return 0
             paths_for_agent += (p,)
             break  # found for this agent
-    return paths_for_agent
+    return paths_for_agent, path_save_process
 
 
 def get_paths(_condition: dict, _state: tuple):
@@ -569,18 +577,21 @@ def get_paths(_condition: dict, _state: tuple):
     valss = []
     for i_a in range(len(agent_pos)):
         valss.append({'_agent_idle': _agent_idle,
-                '_map': _map,
-                'agent_job': agent_job,
-                'agent_pos': agent_pos,
-                'alloc_jobs': alloc_jobs,
-                'blocks': blocks,
-                'i_a': i_a,
-                'idle_goals': idle_goals,
-                'jobs': jobs})
+                      '_map': _map,
+                      'agent_job': agent_job,
+                      'agent_pos': agent_pos,
+                      'alloc_jobs': alloc_jobs,
+                      'blocks': blocks,
+                      'i_a': i_a,
+                      'idle_goals': idle_goals,
+                      'jobs': jobs})
     global pool
-    _paths = list(pool.map(get_paths_for_agent, valss))
-    if len(list(filter(lambda x: x is 0, _paths))):
-        return False
+    res = list(pool.map(get_paths_for_agent, valss))
+    for r in res:
+        if r is 0:
+            return False
+        _paths.append(r[0])
+        path_save.update(r[1])
     assert len(_paths) == len(agent_pos), "More or less paths than agents"
     return _paths
 
@@ -825,9 +836,7 @@ def comp2state(agent_job: tuple,
 def save_paths(filename):
     try:
         with open(filename, 'wb') as f:
-            path_save_lock.acquire()
             pickle.dump(path_save, f, pickle.HIGHEST_PROTOCOL)
-            path_save_lock.release()
     except Exception as e:
         print(e)
 

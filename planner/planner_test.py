@@ -107,45 +107,6 @@ def test_basic():
     assert res_agent_idle == agent_idle, "wrong agent -> idle_goal assignment"
 
 
-# def test_map():
-#     grid = load_map()
-#     poses = [(1,1),
-#              (3,1),
-#              (5,1),
-#              (7,1),
-#              (9,1),
-#              (8,5),
-#              (1,6),
-#              (9,7),
-#              (1,8),
-#              (9,9)]
-#
-#     n = 6
-#     agent_pos = []
-#     while len(agent_pos) < n:
-#         p = random.choice(poses)
-#         if p not in agent_pos:
-#             agent_pos.append(p)
-#
-#     jobp = []
-#     while len(jobp) < n:
-#         p = random.choice(poses)
-#         if p not in jobp:
-#             jobp.append(p)
-#
-#
-#
-#
-#     start_time = datetime.datetime.now()
-#
-#     res_agent_job, res_agent_idle, res_paths = planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename='')
-#
-#     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
-#
-#     assert res_agent_job == agent_job, "wrong agent -> job assignment"
-#     assert res_agent_idle == agent_idle, "wrong agent -> idle_goal assignment"
-
-
 def test_rand():
     for i in range(5):
         print("\nTEST", i)
@@ -165,33 +126,33 @@ def test_rand():
 
 
 def test_benchmark():
+    import planner.planner_demo_map
     user, _, _ = get_system_parameters()
     if user == 'travis':
-        import planner.planner_demo_map
         import planner.planner_demo_rand
 
 
-# def test_file():
-#     fname = "/tmp/test.pkl"
-#     if os.path.exists(fname):
-#         os.remove(fname)
-#     assert not os.path.exists(fname), "File exists already"
-#
-#     agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(2)
-#     start_time = datetime.datetime.now()
-#     planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
-#     time1 = (datetime.datetime.now() - start_time).total_seconds()
-#     assert os.path.isfile(fname), "Algorithm has not created a file"
-#
-#     start_time = datetime.datetime.now()
-#     planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
-#     time2 = (datetime.datetime.now() - start_time).total_seconds()
-#     try:
-#         assert time2 < time1, "It was not faster to work with saved data"
-#         print("Saving path_save saved us", 100 * (time1 - time2) / time1, "% of time")
-#     finally:
-#         os.remove(fname)
-#         assert not os.path.exists(fname), "File exists after delete"
+def test_file():
+    fname = "/tmp/test.pkl"
+    if os.path.exists(fname):
+        os.remove(fname)
+    assert not os.path.exists(fname), "File exists already"
+
+    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(2)
+    start_time = datetime.datetime.now()
+    planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+    time1 = (datetime.datetime.now() - start_time).total_seconds()
+    assert os.path.isfile(fname), "Algorithm has not created a file"
+
+    start_time = datetime.datetime.now()
+    planner.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+    time2 = (datetime.datetime.now() - start_time).total_seconds()
+    try:
+        assert time2 < time1, "It was not faster to work with saved data"
+        print("Saving path_save saved us", 100 * (time1 - time2) / time1, "% of time")
+    finally:
+        os.remove(fname)
+        assert not os.path.exists(fname), "File exists after delete"
 
 
 def test_collision():
