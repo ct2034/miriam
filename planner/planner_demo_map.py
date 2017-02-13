@@ -41,7 +41,7 @@ results_mean = np.zeros([len(n_j_s), len(n_a_s)])
 results_std = np.zeros([len(n_j_s), len(n_a_s)])
 
 if getpass.getuser() == 'travis':
-    n = 500
+    n = 200
 else:
     n = 1
 
