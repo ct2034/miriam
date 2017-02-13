@@ -304,7 +304,8 @@ def heuristic(_condition: dict, _state: tuple) -> float:
             valss.append({'agentposes': left_agent_pos,
                           'idle_goal': ig})
 
-    job_costs = list(pool.map(heuristic_per_job, valss))
+    # job_costs = list(pool.map(heuristic_per_job, valss))
+    job_costs = list(map(heuristic_per_job, valss))
     _cost += reduce(lambda a, b: a + b, job_costs, 0)
 
     return _cost
