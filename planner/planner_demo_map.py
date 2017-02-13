@@ -34,8 +34,8 @@ agents = [(1, 1),
           (3, 9),
           (7, 8)]
 
-n_j_s = [2, 3, 4]
-n_a_s = [2, 3, 4, 5, 6]
+n_j_s = [2, 6]
+n_a_s = [4, 5, 6]
 
 results_mean = np.zeros([len(n_j_s), len(n_a_s)])
 results_std = np.zeros([len(n_j_s), len(n_a_s)])
