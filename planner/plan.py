@@ -357,7 +357,7 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
 
 # Path Helpers
 
-def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_process, calc: bool = True):
+def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_process: dict = {}, calc: bool = True):
     """
     Calculate or return pre-calculated path from start to goal
 
@@ -366,6 +366,7 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
       goal: The goal to plan to
       _map: The map to plan on
       blocked: List of blocked points for agents e.g. ((x, y, t), agent)
+      path_save_process: pre-processed paths are saved here
       calc: whether or not the path should be calculated if no saved id available. (returns False if not saved)
 
     Returns:

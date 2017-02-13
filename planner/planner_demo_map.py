@@ -34,8 +34,8 @@ agents = [(1, 1),
           (3, 9),
           (7, 8)]
 
-n_j_s = [1, 2, 3]
-n_a_s = [2, 3, 4, 5]
+n_j_s = [2, 3, 4]
+n_a_s = [2, 3, 4, 5, 6]
 
 results_mean = np.zeros([len(n_j_s), len(n_a_s)])
 results_std = np.zeros([len(n_j_s), len(n_a_s)])
@@ -43,7 +43,7 @@ results_std = np.zeros([len(n_j_s), len(n_a_s)])
 if getpass.getuser() == 'travis':
     n = 500
 else:
-    n = 8
+    n = 1
 
 for n_j, n_a in product(n_j_s, n_a_s):
     print(n_j, n_a)
