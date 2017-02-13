@@ -294,12 +294,16 @@ def heuristic(_condition: dict, _state: tuple) -> float:
 
     for i_job in range(len(left_jobs)):
         agentposes.append(jobs[i_job][1])
-
     valss = []
     for i_job in range(len(left_jobs)):
         valss.append({'agentposes': agentposes,
-                      'i_job': i_job,
-                      'jobs': jobs})
+                      'job': jobs[i_job]})
+
+    if left_agent_pos:
+        for ig in left_idle_goals:
+            valss.append({'agentposes': left_agent_pos,
+                          'idle_goal': ig})
+
     job_costs = list(pool.map(heuristic_per_job, valss))
     _cost += reduce(lambda a, b: a + b, job_costs, 0)
 
@@ -308,15 +312,24 @@ def heuristic(_condition: dict, _state: tuple) -> float:
 
 def heuristic_per_job(vals):
     agentposes = vals['agentposes']
-    i_job = vals['i_job']
-    jobs = vals['jobs']
-    _cost = 0
-    agentposes_no_self = agentposes.copy()
-    agentposes_no_self.remove(jobs[i_job][1])
-    # closest agent pose to this jobs start
-    nearest_agent = get_nearest(agentposes_no_self, jobs[i_job][0])
-    _cost += distance_no_calc(nearest_agent, jobs[i_job][0])
-    _cost += distance_no_calc(jobs[i_job][0], jobs[i_job][1])
+    if 'job' in vals.keys():
+        job = vals['job']
+        _cost = 0
+        agentposes_no_self = agentposes.copy()
+        agentposes_no_self.remove(job[1])
+        # closest agent pose to this jobs start
+        nearest_agent = get_nearest(agentposes_no_self, job[0])
+        _cost += distance_no_calc(nearest_agent, job[0])
+        _cost += distance_no_calc(job[0], job[1])
+    elif 'idle_goal' in vals.keys():
+        idle_goal = vals['idle_goal']
+        _cost = 0
+        nearest_agent = get_nearest(agentposes, idle_goal[0])
+        path_len = distance_no_calc(nearest_agent, idle_goal[0])
+        prob = norm.cdf(path_len, loc=idle_goal[1][0], scale=idle_goal[1][1])
+        _cost += (prob * path_len)
+    else:
+        raise AssertionError("The call dictionary was built wrongly")
     return _cost
 
 
