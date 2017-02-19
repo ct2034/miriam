@@ -16,7 +16,7 @@ class SimpSim(QtCore.QThread):
     cars = []
     driveSpeed = 10
     speedMultiplier = 1
-    simTime = .2
+    simTime = 1
     running = False
     scheduler = BackgroundScheduler()
     i = 0

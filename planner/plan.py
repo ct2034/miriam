@@ -6,7 +6,6 @@ from functools import reduce
 
 import matplotlib.pyplot as plt
 import multiprocessing
-from threading import Lock
 import numpy as np
 from scipy.stats import norm
 

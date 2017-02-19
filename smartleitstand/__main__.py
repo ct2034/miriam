@@ -1,14 +1,12 @@
 import logging
 import threading
 import time
-import sys
 import numpy as np
 
 from PyQt4 import QtGui
 from numpy import *
 
 from smartleitstand.mod_cbsextension import Cbsext
-from smartleitstand.mod_random import Random
 from smartleitstand.simulation import SimpSim
 from smartleitstand.vis import Vis
 
@@ -28,8 +26,8 @@ def testing(thread: SimpSim):
 
     for i in range(4):
         thread.new_job(
-            array([random.randint(0, width), random.randint(0, height)]),
-            array([random.randint(0, width), random.randint(0, height)]),
+            np.array([random.randint(0, width), random.randint(0, height)]),
+            np.array([random.randint(0, width), random.randint(0, height)]),
             random.randint(0, 1000)
         )
         time.sleep(.1)
