@@ -1,13 +1,13 @@
 import datetime
-import os
 import logging
+import os
 import time
+
 import numpy as np
 
+from smartleitstand.cbs_ext.plan import plan
 from smartleitstand.mod import Module
 from smartleitstand.route import Route, Car
-
-from planner.plan import plan
 
 
 class Cbsext(Module):
