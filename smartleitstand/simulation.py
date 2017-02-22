@@ -91,6 +91,11 @@ class SimpSim(QtCore.QThread):
         SimpSim.queue.append(Route(a, b, None, job_id, self))
         self.module.new_job(SimpSim.cars, SimpSim.queue)
 
+    def is_finished(self, id):
+        routes = list(filter(lambda r: r.id == id, SimpSim.activeRoutes + SimpSim.queue))
+        assert len(routes) >= 1, "There should be one route with this id"
+        return routes[0].finished
+
     def set_speed_multiplier(self, multiplier):
         SimpSim.speedMultiplier = multiplier
 
@@ -118,7 +123,8 @@ class SimpSim(QtCore.QThread):
             c = self.module.which_car(SimpSim.cars, r, SimpSim.queue.copy())
             if c:
                 r.assign_car(c)
-                SimpSim.activeRoutes.append(r)
+                if r not in SimpSim.activeRoutes:
+                    SimpSim.activeRoutes.append(r)
                 # SimpSim.v.update_queue(SimpSim.queue)
 
 
