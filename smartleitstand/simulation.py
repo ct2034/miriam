@@ -14,9 +14,9 @@ class SimpSim(QtCore.QThread):
     queue = []
     activeRoutes = []
     cars = []
-    driveSpeed = 10
+    driveSpeed = 5
     speedMultiplier = 1
-    simTime = 1
+    simTime = .2
     running = False
     scheduler = BackgroundScheduler()
     i = 0

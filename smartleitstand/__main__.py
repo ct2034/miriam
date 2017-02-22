@@ -2,11 +2,13 @@ import logging
 import threading
 import time
 import numpy as np
+import sys
 
 from PyQt4 import QtGui
 from numpy import *
 
 from smartleitstand.mod_cbsextension import Cbsext
+from smartleitstand.mod_random import Random
 from smartleitstand.simulation import SimpSim
 from smartleitstand.vis import Vis
 
@@ -47,22 +49,22 @@ if __name__ == '__main__':
     vis = False
 
     # module
-    # mod = Random()
-    mod = Cbsext(np.zeros([21, 21, 51]))
+    mod = Random()
+    # mod = Cbsext(np.zeros([21, 21, 51]))
 
 
     # sim
-    msb = True
+    # msb = True
     simThread = SimpSim(msb, mod)
     simThread.start()
 
     # test
-    # test = True
+    test = True
     if test:
         threading.Thread(target=testing, args=(simThread,)).start()
 
     # vis
-    # vis = True
+    vis = True
     if vis:
         app = QtGui.QApplication(sys.argv)
         window = Vis(simThread=simThread)
