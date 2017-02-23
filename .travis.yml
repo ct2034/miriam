@@ -6,7 +6,7 @@ python:
 # command to install dependencies
 install:
   - "pip install -r requirements.txt"
-  - sudo apt-get install python-qt4
+  - sudo apt-get install python3-pyqt4
 
 # command to run tests
 script: py.test -vs
