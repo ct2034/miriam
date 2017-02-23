@@ -7,8 +7,8 @@ import logging
 
 from smartleitstand.mod_random import Random
 from smartleitstand.simulation import SimpSim
-from smartleitstand.process_sim import Station
-from smartleitstand.process_sim import Product
+from smartleitstand.process_sim.Station import Station
+from smartleitstand.process_sim.Product import Product
 
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
@@ -84,7 +84,8 @@ class Transport_Handler(object):
             print("Keine XML gefunden, lade Ersatzwerte", self.flow)
 
 
-def process_test():
+
+def test_process():
     mod = Random()
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
@@ -94,4 +95,4 @@ def process_test():
 
 
 if __name__ == "__main__":
-    process_test()
+    test_process()
