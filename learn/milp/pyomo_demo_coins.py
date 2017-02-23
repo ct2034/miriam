@@ -1,5 +1,5 @@
 from __future__ import division
-from pyomo.environ import *
+from pyomo.environ import ConcreteModel, NonNegativeIntegers, Objective, Expression, Constraint
 from pyomo.opt import SolverFactory
 import numpy as np
 
