@@ -1,7 +1,7 @@
 import datetime
 
 import numpy as np
-from astar import astar_grid48con
+from smartleitstand.astar import astar_grid48con
 
 from smartleitstand.astar.base import NoPathException
 

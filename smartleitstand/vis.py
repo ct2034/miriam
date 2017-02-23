@@ -24,11 +24,11 @@ class Vis(QtGui.QWidget):
     msbThread = False
     scene = False
 
-    def __init__(self, simThread, parent=None):
+    def __init__(self, sim_thread, parent=None):
         QtGui.QWidget.__init__(self, parent)
         print("init vis")
-        print("simThread: " + str(simThread))
-        Vis.simThread = simThread
+        print("simThread: " + str(sim_thread))
+        Vis.simThread = sim_thread
         self.connect(Vis.simThread, QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), self.open)
         self.connect(Vis.simThread, QtCore.SIGNAL("update_car(PyQt_PyObject)"), self.update_car)
         self.connect(Vis.simThread, QtCore.SIGNAL("update_route(PyQt_PyObject)"), self.update_route)

@@ -7,8 +7,8 @@ from functools import reduce
 
 import matplotlib.pyplot as plt
 import numpy as np
-from astar.astar_grid48con import astar_grid4con, distance_manhattan
-from cbs_ext.base import astar_base
+from smartleitstand.astar.astar_grid48con import astar_grid4con, distance_manhattan
+from smartleitstand.cbs_ext.base import astar_base
 from scipy.stats import norm
 
 from smartleitstand.astar.base import NoPathException

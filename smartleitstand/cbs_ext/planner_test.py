@@ -9,6 +9,8 @@ import numpy as np
 import png
 import psutil
 
+import smartleitstand.cbs_ext.plan
+
 
 def load_map(fname = 'planner/map.png'):
     r = png.Reader(filename=fname)
