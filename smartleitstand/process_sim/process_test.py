@@ -1,24 +1,15 @@
 #!/usr/bin/python
 
-# Klassischer Aufbau: Imports, Definitionen, Ausführung
-import sys
-from PyQt4 import QtGui
 from datetime import datetime
-from time import clock
 from time import sleep
-from numpy import linalg as LA
-# Eigene importe
-from Station import Station
-from Product import Product
 import threading
-
-import numpy as np
+import logging
 
 from smartleitstand.mod_random import Random
 from smartleitstand.simulation import SimpSim
-import logging
+from smartleitstand.process_sim import Station
+from smartleitstand.process_sim import Product
 
-from smartleitstand.vis import Vis
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
@@ -72,14 +63,16 @@ class Transport_Handler(object):
         if (False):
             pass
         else:
-            self.stations = [Station("Lager", [0, 0]),
-                             Station("Trennen", [0, 1]),
-                             Station("Bohren", [1, 0]),
-                             Station("Fuegen", [3, 2]),
-                             Station("Schweißen", [6, 3]),
-                             Station("Polieren", [5, 4]),
-                             Station("Ausgang", [6, 6]),
-                             ]
+            self.stations = [
+                Station("Lager", [0, 0]),
+                Station("Trennen", [0, 1]),
+                Station("Bohren", [1, 0]),
+                Station("Fuegen", [3, 2]),
+                Station("Schweißen", [6, 3]),
+                Station("Polieren", [5, 4]),
+                Station("Ausgang", [6, 6]),
+            ]
+            a = Station("a")
             self.flow = [[0, 2],
                          [1, 3],
                          [2, 1],
@@ -91,20 +84,14 @@ class Transport_Handler(object):
             print("Keine XML gefunden, lade Ersatzwerte", self.flow)
 
 
-## Main
-def run():
+def process_test():
+    mod = Random()
+    agv_sim = SimpSim(False, mod)
+    agv_sim.start()
     agv_sim.start_sim(20, 20, 1)
     start_object = Transport_Handler()
     start_object.start(2, agv_sim)
 
 
-
-mod = Random()
-agv_sim = SimpSim(False, mod)
-agv_sim.start()
-
-app = QtGui.QApplication(sys.argv)
-window = Vis(sim_thread=agv_sim)
-window.show()
-
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    process_test()

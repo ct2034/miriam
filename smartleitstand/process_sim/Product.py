@@ -2,7 +2,7 @@ import random
 from time import clock
 import threading
 
-from Station import Station
+from smartleitstand.process_sim import Station
 from numpy import linalg as LA
 import numpy as np
 from time import sleep
