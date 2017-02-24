@@ -1,5 +1,6 @@
 import logging
 import time
+from _md5 import md5
 
 from PyQt4 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -11,16 +12,20 @@ from smartleitstand.route import Route, Car, emit_car
 
 class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
-    queue = []
-    activeRoutes = []
+    queued_routes = []
+    active_routes = []
+    finished_routes = []
+    old_queue_hash = 0
+
     cars = []
-    driveSpeed = 5
+    driveSpeed = 2
     speedMultiplier = 1
-    simTime = .2
+    simTime = .5
     running = False
     scheduler = BackgroundScheduler()
     i = 0
     startTime = time.time()
+    replan = True
 
     def __init__(self, msb_select: bool, mod, parent=None):
         self.module = mod
@@ -40,7 +45,7 @@ class SimpSim(QtCore.QThread):
             trigger='interval',
             id="sim_iterate",
             seconds=SimpSim.simTime,
-            max_instances=2,
+            max_instances=1,
             replace_existing=True  # for restarting
         )
 
@@ -73,8 +78,8 @@ class SimpSim(QtCore.QThread):
     def stop(self):
         SimpSim.running = False
         self.area = False
-        SimpSim.queue = []
-        SimpSim.activeRoutes = []
+        SimpSim.queued_routes = []
+        SimpSim.active_routes = []
         SimpSim.cars = []
         Car.nextId = 0
 
@@ -88,11 +93,14 @@ class SimpSim(QtCore.QThread):
         logging.info('missing: ' + str(time.time() - self.startTime - SimpSim.i * SimpSim.simTime) + 's')
 
     def new_job(self, a, b, job_id):
-        SimpSim.queue.append(Route(a, b, None, job_id, self))
-        self.module.new_job(SimpSim.cars, SimpSim.queue)
+        SimpSim.queued_routes.append(Route(a, b, None, job_id, self))
+        self.module.new_job(SimpSim.cars, SimpSim.queued_routes, SimpSim.active_routes)
 
     def is_finished(self, id):
-        routes = list(filter(lambda r: r.id == id, SimpSim.activeRoutes + SimpSim.queue))
+        routes = list(filter(lambda r: r.id == id,
+                             SimpSim.active_routes +
+                             SimpSim.queued_routes +
+                             SimpSim.finished_routes))
         assert len(routes) >= 1, "There should be one route with this id"
         return routes[0].finished
 
@@ -104,7 +112,7 @@ class SimpSim(QtCore.QThread):
         try:
             if SimpSim.running:
                 self.work_queue()
-                for j in SimpSim.activeRoutes:
+                for j in SimpSim.active_routes:
                     if not j.finished:
                         j.new_step(
                             SimpSim.driveSpeed *
@@ -119,16 +127,21 @@ class SimpSim(QtCore.QThread):
 
     def work_queue(self):
         route_todo = None
-        for r in SimpSim.queue:
-            c = self.module.which_car(SimpSim.cars, r, SimpSim.queue.copy())
-            if c:
-                r.assign_car(c)
-                if r not in SimpSim.activeRoutes:
-                    SimpSim.activeRoutes.append(r)
-                # SimpSim.v.update_queue(SimpSim.queue)
+        for r in SimpSim.queued_routes:
+            if self.replan:
+                c = self.module.which_car(SimpSim.cars.copy(), r, SimpSim.queued_routes.copy(), SimpSim.active_routes.copy())
+                if c:
+                    r.assign_car(c)
+                    if r not in SimpSim.active_routes:
+                        SimpSim.active_routes.append(r)
+                self.replan = False
 
 
 def get_distance(a, b):
     assert a.size is 2, "A point needs to have two coordinates"
     assert b.size is 2, "B point needs to have two coordinates"
     return linalg.norm(a - b)
+
+
+def listhash(l):
+    return sum(list(map(hash, l)))

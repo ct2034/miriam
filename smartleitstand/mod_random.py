@@ -5,7 +5,7 @@ from smartleitstand.route import Route, Car
 
 
 class Random(Module):
-    def which_car(self, cars: list, route_todo: Route, routes_queue: list) -> Car:
+    def which_car(self, cars: list, route_todo: Route, routes_queue: list, active_routes) -> Car:
         rand = random.Random()
         free_cars = []
         for c in cars:
@@ -16,5 +16,5 @@ class Random(Module):
         else:
             return None  # No free car
 
-    def new_job(self, cars, routes_queue):
+    def new_job(self, cars, routes_queue, active_routes):
         pass

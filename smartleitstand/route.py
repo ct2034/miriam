@@ -26,7 +26,7 @@ class Route(object):
         self.car = None
         self.assign_car(car)
 
-        self.onRoute = False
+        self.on_route = False
 
         self.vector = goal - start
         self.distance = linalg.norm(self.vector)
@@ -72,7 +72,7 @@ class Route(object):
             i_prev = self.car.i
             self.car.i += stepSize
             i_prev_round = int(np.ceil(i_prev))
-            i_next_round = min(int(np.floor(self.car.i)), len(self.car.paths) - 1)
+            i_next_round = int(np.floor(self.car.i))
 
             # e.g.
 
@@ -85,13 +85,15 @@ class Route(object):
             if i_prev_round >= i_next_round:  # we have not moved to a new cell
                 return
 
+            i_next_round = min(i_next_round, len(self.car.paths))
             if not self.finished:
                 for _i in range(i_prev_round, i_next_round):  # e.g. [2]
                     if self.car.paths[_i][0:2] == tuple(self.start):
                         self.atStart()
-                    if self.car.paths[_i][0:2] == tuple(self.goal):
+                    elif (self.car.paths[_i][0:2] == tuple(self.goal)) & self.on_route:  # @ goal
                         self.atGoal()
-                self.car.setPose(np.array(self.car.paths[_i][0:2]))
+                    else:  # somewhere else
+                        self.car.setPose(np.array(self.car.paths[_i][0:2]))
 
         self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
 
@@ -99,7 +101,7 @@ class Route(object):
             emit_car(msb, self.car)
 
     def old_stepping(self, stepSize):
-        if not self.onRoute:  # on way to start
+        if not self.on_route:  # on way to start
             if self.preDistance > 0:
                 self.car.setPose(
                     stepSize * self.preVector /
@@ -126,18 +128,23 @@ class Route(object):
     def atGoal(self):
         self.car.route = False
         self.car.setPose(self.goal)
+        self.car = False
         self.remaining = 0
         self.finished = True
-        self.sim.queue.remove(self)
+        self.sim.queued_routes.remove(self)
+        self.sim.active_routes.remove(self)
+        self.sim.finished_routes.append(self)
         logging.info(str(self) + " reached Goal")
+        self.sim.replan = True
         if self.sim.msb_select:
             msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
 
     def atStart(self):
-        self.onRoute = True
+        self.on_route = True
         self.car.setPose(self.start)
         self.preRemaining = 0
         logging.info(str(self) + " reached Start")
+        self.sim.replan = True
         if self.sim.msb_select:
             data = {"agvId": self.car.id, "jobId": self.id}
             msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReachedStart, data=data)
@@ -167,9 +174,9 @@ class Car(object):
 
         # assert s.__class__ is SimpSim, "Pass the simulation object to the new car"
         self.pose = array([
-            # 10, 15
-            random.randint(0, s.area.shape[0]),
-            random.randint(0, s.area.shape[1])
+            4, 4
+            # random.randint(0, s.area.shape[0]),
+            # random.randint(0, s.area.shape[1])
         ])
 
         self.route = False
@@ -187,6 +194,7 @@ class Car(object):
     def setPose(self, pose):
         self.pose = pose
         self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
+        logging.info("Car " + str(self.id) + " @ " + str(self.pose))
 
     def setPaths(self, _paths):
         self.i = 0
@@ -196,7 +204,8 @@ class Car(object):
 
     def toTuple(self):
         assert len(self.pose) == 2, "A cars pose must have 2 coordinates"
-        return tuple(self.pose)
+        return (int(self.pose[0]),
+                int(self.pose[1]))
 
     def __str__(self):
         return "C%d: [%.2f %.2f]" % (self.id, self.pose[0], self.pose[1])

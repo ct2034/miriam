@@ -1,4 +1,3 @@
-import numpy as np
 from time import sleep
 
 
@@ -12,9 +11,10 @@ class Station(object):
 
         print("Station " + name + " wurde erstellt.")
 
-    def process_Product(self, wait_time=1):
+    def process_Product(self, wait_time):
         self._is_blocked = True  # blocked till process is done
         assert wait_time < 360, "Wait time is higher than 360 seconds."
+        print("Station " + self.name + " processing for " + str(wait_time) + "s.")
         if (wait_time > 0):
             sleep(wait_time)
         self._is_blocked = False  # next Package is allowed

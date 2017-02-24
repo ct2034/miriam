@@ -68,8 +68,8 @@ class Transport_Handler(object):
         else:
             self.stations = [
                 Station("Lager", [0, 0]),
-                Station("Trennen", [0, 1]),
-                Station("Bohren", [1, 0]),
+                Station("Trennen", [3, 1]),
+                Station("Bohren", [1, 5]),
                 Station("Fuegen", [3, 2]),
                 Station("Schweißen", [6, 3]),
                 Station("Polieren", [5, 4]),
@@ -95,7 +95,7 @@ def test_process_Random():
 
 
 def test_process_Cbsext():
-    mod = Cbsext(np.zeros([21, 21, 51]))
+    mod = Cbsext(np.zeros([10, 10, 51]))
     t = run_with_module(mod)
     print("t:", t)
 
