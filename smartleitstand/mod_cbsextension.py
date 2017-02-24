@@ -83,9 +83,9 @@ class Cbsext(Module):
         # for j in jobs:
         #     assert j[0] in allpaths, "Start not in paths"
         #     assert j[1] in allpaths, "Goal not in paths"
-        for i_a in range(len(agent_pos)):
-            assert agent_pos[i_a][0] == cars[i_a].pose[0], "Pose problems"
-            assert agent_pos[i_a][1] == cars[i_a].pose[1], "Pose problems"
+        # for i_a in range(len(agent_pos)):
+        #     assert agent_pos[i_a][0] == cars[i_a].pose[0], "Pose problems"
+        #     assert agent_pos[i_a][1] == cars[i_a].pose[1], "Pose problems"
 
         # save the paths in cars
         for i_car in range(len(cars)):
