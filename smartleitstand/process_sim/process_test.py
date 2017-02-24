@@ -110,4 +110,4 @@ def run_with_module(mod):
 
 if __name__ == "__main__":
     test_process_Cbsext()
-    test_process_Random()
+    test_process_Random() # TODO: do proper path planning
