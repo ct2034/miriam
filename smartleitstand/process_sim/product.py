@@ -2,7 +2,7 @@ import random
 from time import clock
 import threading
 
-from smartleitstand.process_sim import Station
+from smartleitstand.process_sim import station
 from numpy import linalg as LA
 import numpy as np
 from time import sleep
@@ -13,7 +13,7 @@ class Product(object):
     sim_thread = None
     last_id = 0
 
-    def __init__(self, my_dad, stations=[Station], flow=[], n_id=0):
+    def __init__(self, my_dad, stations=[station], flow=[], n_id=0):
         self.my_dad = my_dad
         self.n_id = n_id
         self.stations = stations

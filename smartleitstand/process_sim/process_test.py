@@ -4,11 +4,13 @@ from datetime import datetime
 from time import sleep
 import threading
 import logging
+import numpy as np
 
+from smartleitstand.mod_cbsextension import Cbsext
 from smartleitstand.mod_random import Random
 from smartleitstand.simulation import SimpSim
-from smartleitstand.process_sim.Station import Station
-from smartleitstand.process_sim.Product import Product
+from smartleitstand.process_sim.station import Station
+from smartleitstand.process_sim.product import Product
 
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
@@ -52,6 +54,7 @@ class Transport_Handler(object):
         t_end = datetime.now()
         t_dt = (t_end - t_start).total_seconds()
         print("Der Vorgang mit", n, "Produkten dauerte", t_dt, "sekunden.")
+        return t_dt
 
     def register_products(self, prod=Product):
         self.product_list.append(prod)
@@ -85,14 +88,25 @@ class Transport_Handler(object):
 
 
 
-def test_process():
+def test_process_Random():
     mod = Random()
+    t = run_with_module(mod)
+    print("t:", t)
+
+
+def test_process_Cbsext():
+    mod = Cbsext(np.zeros([21, 21, 51]))
+    t = run_with_module(mod)
+    print("t:", t)
+
+
+def run_with_module(mod):
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
     agv_sim.start_sim(20, 20, 1)
     start_object = Transport_Handler()
-    start_object.start(2, agv_sim)
+    return start_object.start(2, agv_sim)
 
 
 if __name__ == "__main__":
-    test_process()
+    test_process_Cbsext()

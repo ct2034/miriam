@@ -19,7 +19,7 @@ class Cbsext(Module):
         self.grid = grid
 
         # data
-        self.fname = "/tmp/saves.pkl"
+        self.fname = "process_test.pkl"
         if os.path.exists(self.fname):
             os.remove(self.fname)
         self.planning = False
