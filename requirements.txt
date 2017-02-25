@@ -7,4 +7,3 @@ pymongo
 pymc3
 psutil
 pypng
-PyQt4
