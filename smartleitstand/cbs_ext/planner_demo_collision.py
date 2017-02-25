@@ -10,7 +10,7 @@ grid[4, 17:20, :] = -1
 
 # input
 agent_pos = [(6, 3), (15, 3), (16, 2), (17, 3)]
-jobs = [((1, 6), (9, 6), 0), ((7, 3), (3, 3), 0), ((17, 14), (17, 5), 0)]
+jobs = [((1, 6), (9, 6), 0), ((7, 3), (3, 3), 0), ((7, 3), (3, 3), 30), ((7, 3), (3, 3), 10)]
 idle_goals = [((9, 7), (5, .5)), ((9, 8), (20, .5))]
 alloc_jobs = [(0, 1)]
 
@@ -23,7 +23,7 @@ start_time = datetime.datetime.now()
                    alloc_jobs,
                    idle_goals,
                    grid,
-                   plot=False,
+                   plot=True,
                    filename='')
 
 print("computation time:",

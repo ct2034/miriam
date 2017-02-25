@@ -112,13 +112,17 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         legend_str = []
         i = 0
 
+        prop_cycle = plt.rcParams['axes.prop_cycle']
+        colors = prop_cycle.by_key()['color']
+
         assert _paths, "Paths have not been set"
         for _pathset in _paths:  # pathset per agent
             for p in _pathset:
                 pa = np.array(p)
                 ax3.plot(xs=pa[:, 0],
                          ys=pa[:, 1],
-                         zs=pa[:, 2])
+                         zs=pa[:, 2],
+                         color=colors[i])
                 legend_str.append("Agent " + str(i))
             i += 1
         plt.legend(legend_str)

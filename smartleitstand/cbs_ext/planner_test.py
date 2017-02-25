@@ -12,7 +12,7 @@ import psutil
 import smartleitstand.cbs_ext.plan
 
 
-def load_map(fname = 'planner/map.png'):
+def load_map(fname = 'cbs_ext/map.png'):
     r = png.Reader(filename=fname)
 
     x, y, iter, color = r.read()

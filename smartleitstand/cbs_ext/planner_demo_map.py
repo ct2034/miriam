@@ -4,11 +4,11 @@ import random
 from itertools import *
 
 import numpy as np
-from cbs_ext.plan import plan, plot_inputs
+from smartleitstand.cbs_ext.plan import plan, plot_inputs
 
 from smartleitstand.cbs_ext.planner_test import load_map
 
-_map = load_map('planner/map.png')
+_map = load_map('cbs_ext/map.png')
 grid = np.repeat(_map[:, :, np.newaxis], 100, axis=2)
 
 landmarks = [(1, 1),
@@ -54,8 +54,7 @@ for n_j, n_a in product(n_j_s, n_a_s):
         jobs = []
         while len(jobs) < n_j:
             j = (random.choice(landmarks), random.choice(landmarks), random.randint(0, 5))
-            if j[0] not in map(lambda x: x[0], jobs) and j[1] not in map(lambda x: x[1], jobs) and j[0] != j[1]:
-                jobs.append(j)
+            jobs.append(j)
 
         idle_goals = []
         for i_l in range(len(landmarks)):

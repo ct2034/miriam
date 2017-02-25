@@ -79,10 +79,13 @@ class Cbsext(Module):
                             filename=self.fname)
         logging.info("Planning took %.4fs" % (datetime.datetime.now() - planning_start).total_seconds())
 
-        # allpaths = list(map(lambda x: (x[0], x[1]), sum(sum(self.paths, ()), [])))
-        # for j in jobs:
-        #     assert j[0] in allpaths, "Start not in paths"
-        #     assert j[1] in allpaths, "Goal not in paths"
+        allpaths = list(map(lambda x: (x[0], x[1]), sum(sum(self.paths, ()), [])))
+        for j in jobs:
+            if j[0] not in allpaths or j[1] not in allpaths:
+                print('problem changed during planning, REPLANNING')
+                self.update_plan(self, cars, routes_queue, active_routes)
+                return
+
         # for i_a in range(len(agent_pos)):
         #     assert agent_pos[i_a][0] == cars[i_a].pose[0], "Pose problems"
         #     assert agent_pos[i_a][1] == cars[i_a].pose[1], "Pose problems"
