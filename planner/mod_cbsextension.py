@@ -2,9 +2,10 @@ import datetime
 import logging
 import os
 import time
-from multiprocessing import Process
-import numpy as np
 from multiprocessing import Pipe
+from multiprocessing import Process
+
+import numpy as np
 
 from planner.cbs_ext.plan import plan
 from planner.mod import Module
@@ -38,7 +39,7 @@ class Cbsext(Module):
                     if (i_route == self.agent_job[i_agent][0] or
                                 i_route == self.agent_job[i_agent][1]):  # MAYBE we are looking for second assignment
                         return cars[i_agent]
-                except IndexError: # if only one job is assigned (i.e. len(elf.agent_job[i_agent]) == 1 )
+                except IndexError:  # if only one job is assigned (i.e. len(elf.agent_job[i_agent]) == 1 )
                     pass
         # assert False, "No car assigned!"
         logging.warning("No car assigned!")
@@ -106,16 +107,17 @@ class Cbsext(Module):
             if car == cars[i_agent]:
                 return i_agent
 
+
 def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, plot, fname):
     (agent_job,
      agent_idle,
      paths) = plan(agent_pos,
-                    jobs,
-                    alloc_jobs,
-                    idle_goals,
-                    grid,
-                    plot,
-                    fname)
+                   jobs,
+                   alloc_jobs,
+                   idle_goals,
+                   grid,
+                   plot,
+                   fname)
     pipe.send((agent_job,
                agent_idle,
                paths))
