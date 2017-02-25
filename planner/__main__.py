@@ -7,10 +7,10 @@ import sys
 from PyQt4 import QtGui
 from numpy import *
 
-from smartleitstand.mod_cbsextension import Cbsext
-from smartleitstand.mod_random import Random
-from smartleitstand.simulation import SimpSim
-from smartleitstand.vis import Vis
+from planner.mod_cbsextension import Cbsext
+from planner.mod_random import Random
+from planner.simulation import SimpSim
+from planner.vis import Vis
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)

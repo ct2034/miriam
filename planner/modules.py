@@ -1,4 +1,4 @@
-from smartleitstand.route import Car
+from planner.route import Car
 
 
 def __init__(mod):

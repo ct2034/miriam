@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from smartleitstand import estimator as e
+from planner import estimator as e
 
 
 def generate_data(

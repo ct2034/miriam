@@ -1,7 +1,7 @@
 import random
 
-from smartleitstand.mod import Module
-from smartleitstand.route import Route, Car
+from planner.mod import Module
+from planner.route import Route, Car
 
 
 class Random(Module):

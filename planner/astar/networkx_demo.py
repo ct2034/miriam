@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-from smartleitstand.astar import astar_grid48con
+from planner.astar import astar_grid48con
 
 eight_con = False
 n = 10

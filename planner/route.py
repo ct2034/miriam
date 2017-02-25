@@ -41,7 +41,7 @@ class Route(object):
 
         if self.sim.msb_select:
             global msb
-            from smartleitstand import msb
+            from planner import msb
 
         logging.info(
             "Created route with id " +

@@ -5,7 +5,7 @@ from PyQt4 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
-from smartleitstand.route import Route, Car, emit_car
+from planner.route import Route, Car, emit_car
 
 
 class SimpSim(QtCore.QThread):
@@ -34,7 +34,7 @@ class SimpSim(QtCore.QThread):
         self.msb_select = msb_select
         if msb_select:
             global msb
-            from smartleitstand import msb
+            from planner import msb
             msb.Msb(self)
 
         self.area = zeros([1])

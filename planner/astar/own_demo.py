@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 
-from smartleitstand.astar import astar_grid48con
+from planner.astar import astar_grid48con
 
 
 def rand_coords(x, y):

@@ -6,10 +6,10 @@ from multiprocessing import Process
 import numpy as np
 from multiprocessing import Pipe
 
-from smartleitstand.cbs_ext.plan import plan
-from smartleitstand.mod import Module
-from smartleitstand.route import Route, Car
-from smartleitstand.simulation import listhash
+from planner.cbs_ext.plan import plan
+from planner.mod import Module
+from planner.route import Route, Car
+from planner.simulation import listhash
 
 
 class Cbsext(Module):

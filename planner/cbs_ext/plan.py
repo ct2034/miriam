@@ -7,11 +7,11 @@ from functools import reduce
 
 import matplotlib.pyplot as plt
 import numpy as np
-from smartleitstand.astar.astar_grid48con import astar_grid4con, distance_manhattan
-from smartleitstand.cbs_ext.base import astar_base
+from planner.astar.astar_grid48con import astar_grid4con, distance_manhattan
+from planner.cbs_ext.base import astar_base
 from scipy.stats import norm
 
-from smartleitstand.astar.base import NoPathException
+from planner.astar.base import NoPathException
 
 path_save = {}
 

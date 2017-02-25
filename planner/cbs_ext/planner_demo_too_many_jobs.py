@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 
-from smartleitstand.cbs_ext.plan import plan
+from planner.cbs_ext.plan import plan
 
 grid = np.zeros([10, 10, 101])
 grid[4, 0:6, :] = -1

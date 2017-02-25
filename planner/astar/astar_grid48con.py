@@ -1,6 +1,6 @@
 import numpy as np
 
-from smartleitstand.astar import base
+from planner.astar import base
 
 
 def reconstruct_path(came_from, current):

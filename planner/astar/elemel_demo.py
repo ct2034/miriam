@@ -4,7 +4,7 @@ elemel_astar = __import__("elemel_python-astar.src.astar")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from smartleitstand.astar import astar_grid48con
+from planner.astar import astar_grid48con
 
 grid = np.zeros([100, 100, 100])
 grid[:80, 20, :] = -1

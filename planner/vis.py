@@ -1,5 +1,5 @@
 from numpy import *
-import smartleitstand.simulation
+import planner.simulation
 from PyQt4 import QtGui, QtCore
 
 green = QtGui.QColor(10, 200, 10, 127)

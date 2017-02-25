@@ -7,11 +7,11 @@ import logging
 import numpy as np
 from timeout_decorator import timeout_decorator
 
-from smartleitstand.mod_cbsextension import Cbsext
-from smartleitstand.mod_random import Random
-from smartleitstand.simulation import SimpSim
-from smartleitstand.process_sim.station import Station
-from smartleitstand.process_sim.product import Product
+from planner.mod_cbsextension import Cbsext
+from planner.mod_random import Random
+from planner.simulation import SimpSim
+from planner.process_sim.station import Station
+from planner.process_sim.product import Product
 
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
