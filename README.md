@@ -1,6 +1,6 @@
 # miriam
 
-a **M**odular **I**nt**R**alog**I**stics **A**dvanced **M**anagement platform
+**M**odular **I**nt**R**alogistics **I**ntelligent pl**A**tfor**M**
 
 (new name?)
 
