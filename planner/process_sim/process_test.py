@@ -86,15 +86,16 @@ class Transport_Handler(object):
                          ]
             print("Keine XML gefunden, lade Ersatzwerte", self.flow)
 
+_map = np.zeros([10, 10, 51])
 
 def test_process_Random():
-    mod = Random()
+    mod = Random(_map)
     t = run_with_module(mod)
     print("t:", t)
 
 
 def test_process_Cbsext():
-    mod = Cbsext(np.zeros([10, 10, 51]))
+    mod = Cbsext(_map)
     t = run_with_module(mod)
     print("t:", t)
 
@@ -108,5 +109,5 @@ def run_with_module(mod):
 
 
 if __name__ == "__main__":
+    test_process_Random()
     test_process_Cbsext()
-    test_process_Random()  # TODO: do proper path planning
