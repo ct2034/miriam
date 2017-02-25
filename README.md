@@ -2,10 +2,8 @@
 
 **M**odular **I**nt**R**alogistics **I**ntelligent pl**A**tfor**M**
 
-(new name?)
+[![Build Status](https://travis-ci.org/ct2034/miriam.svg?branch=master)](https://travis-ci.org/ct2034/miriam)
 
+(new name!)
 
-~~smartleitstand~~
-[![Build Status](https://travis-ci.com/ct2034/smartleitstand.svg?token=h8cyxU2xaFZFLypWpbG5&branch=master)](https://travis-ci.com/ct2034/smartleitstand)
-
-[simulation](sim_anylogic)
+## [simulation](sim_anylogic)
