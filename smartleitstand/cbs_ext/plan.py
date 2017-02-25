@@ -48,14 +48,17 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
 
     global pool
     n = multiprocessing.cpu_count()
-    if n <= 4:
-        n = n * 2
     pool = multiprocessing.Pool(processes=n)
 
     agent_job = []
 
-    for _ in range(len(agent_pos)):
+    agent_pos_test = set()
+    for a in agent_pos:
+        # init agent_job allocation
         agent_job.append(tuple())
+        # check for duplicate agents
+        assert a not in agent_pos_test, "Duplicate agent poses"
+        agent_pos_test.add(a)
     for aj in alloc_jobs:
         agent_job[aj[0]] = (aj[1],)
     agent_job = tuple(agent_job)

@@ -5,6 +5,7 @@ from time import sleep
 import threading
 import logging
 import numpy as np
+from timeout_decorator import timeout_decorator
 
 from smartleitstand.mod_cbsextension import Cbsext
 from smartleitstand.mod_random import Random

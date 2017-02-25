@@ -140,6 +140,14 @@ class SimpSim(QtCore.QThread):
                         SimpSim.active_routes.append(r)
                 self.replan = False
 
+    def checkfree(self, car: Car, pose: ndarray):
+        cars_to_check = self.cars.copy()
+        cars_to_check.remove(car)
+        for c in cars_to_check:
+            if c.pose[0] == pose[0] and c.pose[1] == pose[1]:
+                return False
+        return True
+
 
 def get_distance(a, b):
     assert a.size is 2, "A point needs to have two coordinates"

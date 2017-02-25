@@ -195,9 +195,14 @@ class Car(object):
         self.paths = None
 
     def setPose(self, pose):
-        self.pose = pose
-        self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
-        logging.info("Car " + str(self.id) + " @ " + str(self.pose))
+        if self.sim.checkfree(self, pose):
+            self.pose = pose
+            self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
+            logging.info("Car " + str(self.id) + " @ " + str(self.pose))
+        else:
+            self.sim.replan = True
+            logging.warning("Car " + str(self.id) + " BLOCKED @ " + str(self.pose))
+
 
     def setPaths(self, _paths):
         self.i = 0

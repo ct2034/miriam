@@ -29,13 +29,16 @@ class Cbsext(Module):
     def which_car(self, cars: list, route_todo: Route, routes_queue: list, active_routes) -> Car:
         self.update_plan(cars, routes_queue, active_routes)
         assert len(routes_queue) > 0, "No routes to work with"
-        for i_route in range(len(routes_queue)):
-            if routes_queue[i_route] == route_todo:
-                break
+        i_route = routes_queue.index(route_todo)
         for i_agent in range(len(cars)):
             if len(self.agent_job[i_agent]) > 0:
-                if i_route == self.agent_job[i_agent][0]:
-                    return cars[i_agent]
+                try:
+                    if (i_route == self.agent_job[i_agent][0] or
+                                i_route == self.agent_job[i_agent][1]):  # MAYBE we are looking for second assignment
+                        return cars[i_agent]
+                except IndexError: # if only one job is assigned (i.e. len(elf.agent_job[i_agent]) == 1 )
+                    pass
+        assert False, "No car assigned!"
         return False
 
     def new_job(self, cars, routes_queue, active_routes):
@@ -83,7 +86,7 @@ class Cbsext(Module):
         for j in jobs:
             if j[0] not in allpaths or j[1] not in allpaths:
                 print('problem changed during planning, REPLANNING')
-                self.update_plan(self, cars, routes_queue, active_routes)
+                self.update_plan(cars, routes_queue, active_routes)
                 return
 
         # for i_a in range(len(agent_pos)):
