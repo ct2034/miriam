@@ -1,12 +1,30 @@
 language: python
 python:
   - "3.5"
-  - "3.5"
+  - "3.6"
+
+before_install:
+  - sudo mkdir -p /downloads
+  - sudo chmod a+rw /downloads
+  # - curl -L http://sourceforge.net/projects/pyqt/files/sip/sip-4.16.5/sip-4.16.5.tar.gz -o /downloads/sip.tar.gz 
+  - curl -L http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt-x11-gpl-4.11.3.tar.gz -o /downloads/pyqt4.tar.gz
+  # Builds
+  - sudo mkdir -p /builds
+  - sudo chmod a+rw /builds
 
 # command to install dependencies
 install:
+  #pyqt4
+  - sudo apt-get install -y libqt4-dev
+  - pushd /builds
+  - tar xzf /downloads/pyqt4.tar.gz --keep-newer-files
+  - pushd PyQt-x11-gpl-4.11.3
+  - python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtTest
+  - make
+  - sudo make install
+  - popd
+  #rest
   - "pip install -r requirements.txt"
-#  - sudo apt-get install python3-pyqt4*
 
 # command to run tests
 script: py.test -vs
