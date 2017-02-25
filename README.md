@@ -1,3 +1,9 @@
+# miriam
+
+a **M**odular **I**nt**R**alog**I**stics **A**dvanced **M**anagement platform
+
+
+
 # smartleitstand
 
 [![Build Status](https://travis-ci.com/ct2034/smartleitstand.svg?token=h8cyxU2xaFZFLypWpbG5&branch=master)](https://travis-ci.com/ct2034/smartleitstand)
