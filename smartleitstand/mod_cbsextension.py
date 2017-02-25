@@ -2,8 +2,9 @@ import datetime
 import logging
 import os
 import time
-
+from multiprocessing import Process
 import numpy as np
+from multiprocessing import Pipe
 
 from smartleitstand.cbs_ext.plan import plan
 from smartleitstand.mod import Module
@@ -25,6 +26,7 @@ class Cbsext(Module):
             os.remove(self.fname)
         self.planning = False
         self.plan_params_hash = False
+        self.process = False
 
     def which_car(self, cars: list, route_todo: Route, routes_queue: list, active_routes) -> Car:
         self.update_plan(cars, routes_queue, active_routes)
@@ -38,7 +40,8 @@ class Cbsext(Module):
                         return cars[i_agent]
                 except IndexError: # if only one job is assigned (i.e. len(elf.agent_job[i_agent]) == 1 )
                     pass
-        assert False, "No car assigned!"
+        # assert False, "No car assigned!"
+        logging.warning("No car assigned!")
         return False
 
     def new_job(self, cars, routes_queue, active_routes):
@@ -71,15 +74,24 @@ class Cbsext(Module):
                       ((5, 8), (50, 20),)]  # TODO: we have to learn these!
 
         planning_start = datetime.datetime.now()
+        parent_conn, child_conn = Pipe()
+        self.process = Process(target=plan_process,
+                               args=(child_conn,
+                                     agent_pos,
+                                     jobs,
+                                     alloc_jobs,
+                                     idle_goals,
+                                     self.grid,
+                                     False,
+                                     self.fname)
+                               )
+        self.process.start()
         (self.agent_job,
          self.agent_idle,
-         self.paths) = plan(agent_pos,
-                            jobs,
-                            alloc_jobs,
-                            idle_goals,
-                            self.grid,
-                            plot=False,
-                            filename=self.fname)
+         self.paths) = parent_conn.recv()
+        self.process.join(timeout=1)
+        self.process.terminate()
+
         logging.info("Planning took %.4fs" % (datetime.datetime.now() - planning_start).total_seconds())
 
         allpaths = list(map(lambda x: (x[0], x[1]), sum(sum(self.paths, ()), [])))
@@ -104,3 +116,17 @@ class Cbsext(Module):
         for i_agent in range(len(cars)):
             if car == cars[i_agent]:
                 return i_agent
+
+def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, plot, fname):
+    (agent_job,
+     agent_idle,
+     paths) = plan(agent_pos,
+                    jobs,
+                    alloc_jobs,
+                    idle_goals,
+                    grid,
+                    plot,
+                    fname)
+    pipe.send((agent_job,
+               agent_idle,
+               paths))

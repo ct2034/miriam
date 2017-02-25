@@ -138,7 +138,9 @@ class SimpSim(QtCore.QThread):
                     r.assign_car(c)
                     if r not in SimpSim.active_routes:
                         SimpSim.active_routes.append(r)
-                self.replan = False
+                    self.replan = False
+                else:  # no car
+                    self.replan = True
 
     def checkfree(self, car: Car, pose: ndarray):
         cars_to_check = self.cars.copy()
