@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
 
     # sim
-    # msb = True
+    msb = True
     simThread = SimpSim(msb, mod)
     simThread.start()
 

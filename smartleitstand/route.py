@@ -7,7 +7,6 @@ from PyQt4 import QtCore
 from numpy import linalg
 from numpy.core.numeric import ndarray, array
 
-from smartleitstand import msb
 
 
 class Route(object):
@@ -39,6 +38,10 @@ class Route(object):
         self.preRemaining = None
 
         self.creationTime = datetime.datetime.now()
+
+        if self.sim.msb_select:
+            global msb
+            from smartleitstand import msb
 
         logging.info(
             "Created route with id " +
