@@ -105,7 +105,9 @@ def run_with_module(mod):
     agv_sim.start()
     agv_sim.start_sim(20, 20, 2)
     start_object = Transport_Handler()
-    return start_object.start(3, agv_sim)
+    n = start_object.start(3, agv_sim)
+    agv_sim.stop()
+    return n
 
 
 if __name__ == "__main__":
