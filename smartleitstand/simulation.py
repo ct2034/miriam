@@ -1,12 +1,10 @@
 import logging
 import time
-from _md5 import md5
 
 from PyQt4 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
-from smartleitstand import msb
 from smartleitstand.route import Route, Car, emit_car
 
 
@@ -35,6 +33,8 @@ class SimpSim(QtCore.QThread):
 
         self.msb_select = msb_select
         if msb_select:
+            global msb
+            from smartleitstand import msb
             msb.Msb(self)
 
         self.area = zeros([1])
@@ -126,10 +126,14 @@ class SimpSim(QtCore.QThread):
         logging.debug("... it")
 
     def work_queue(self):
-        route_todo = None
+        print("q:" + str(len(self.queued_routes)) +
+              " | a:" + str(len(self.active_routes)) +
+              " | f:" + str(len(self.finished_routes)) +
+              " | r:" + str(int(self.replan)))
         for r in SimpSim.queued_routes:
             if self.replan:
-                c = self.module.which_car(SimpSim.cars.copy(), r, SimpSim.queued_routes.copy(), SimpSim.active_routes.copy())
+                c = self.module.which_car(SimpSim.cars.copy(), r, SimpSim.queued_routes.copy(),
+                                          SimpSim.active_routes.copy())
                 if c:
                     r.assign_car(c)
                     if r not in SimpSim.active_routes:
