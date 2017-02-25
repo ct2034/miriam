@@ -64,8 +64,8 @@ class Cbsext(Module):
             if r.on_route:
                 alloc_jobs.append((self.get_car_i(cars, r.car), i_route))
 
-        idle_goals = [((10, 10), (50, 20)), ((10, 11), (50, 20),),
-                      ((10, 9), (50, 20),)]  # TODO: we have to learn these!
+        idle_goals = [((2, 3), (50, 20)), ((0, 0), (50, 20),),
+                      ((5, 8), (50, 20),)]  # TODO: we have to learn these!
 
         planning_start = datetime.datetime.now()
         (self.agent_job,

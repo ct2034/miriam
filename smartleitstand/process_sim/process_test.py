@@ -103,7 +103,7 @@ def test_process_Cbsext():
 def run_with_module(mod):
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
-    agv_sim.start_sim(20, 20, 1)
+    agv_sim.start_sim(20, 20, 2)
     start_object = Transport_Handler()
     return start_object.start(3, agv_sim)
 
