@@ -126,23 +126,29 @@ class SimpSim(QtCore.QThread):
         logging.debug("... it")
 
     def work_queue(self):
-        print("q:" + str(len(self.queued_routes)) +
-              " | a:" + str(len(self.active_routes)) +
-              " | f:" + str(len(self.finished_routes)) +
-              " | r:" + str(int(self.replan)))
+        logging.debug("q:" + str(len(self.queued_routes)) +
+                      " | a:" + str(len(self.active_routes)) +
+                      " | f:" + str(len(self.finished_routes)) +
+                      " | r:" + str(int(self.replan)))
         for r in SimpSim.queued_routes:
-            if self.replan:
-                c = self.module.which_car(SimpSim.cars.copy(), r, SimpSim.queued_routes.copy(),
-                                          SimpSim.active_routes.copy())
-                if c:
-                    r.assign_car(c)
-                    if r not in SimpSim.active_routes:
-                        SimpSim.active_routes.append(r)
-                    self.replan = False
-                else:  # no car
-                    self.replan = True
+            c = self.module.which_car(SimpSim.cars.copy(), r, SimpSim.queued_routes.copy(),
+                                      SimpSim.active_routes.copy())
+            if c:
+                r.assign_car(c)
+                if r not in SimpSim.active_routes:
+                    SimpSim.active_routes.append(r)
+        if self.replan:  # have to replan for example when start reached
+            if len(SimpSim.active_routes) >0:
+                r = SimpSim.active_routes[0]
+            elif len(SimpSim.active_routes) >0:
+                r = SimpSim.active_routes[0]
+            else:
+                r = None
+            self.module.which_car(SimpSim.cars.copy(), r, SimpSim.queued_routes.copy(),
+                                  SimpSim.active_routes.copy())
+            self.replan = False
 
-    def checkfree(self, car: Car, pose: ndarray):
+    def check_free(self, car: Car, pose: ndarray):
         cars_to_check = self.cars.copy()
         cars_to_check.remove(car)
         for c in cars_to_check:
@@ -157,5 +163,5 @@ def get_distance(a, b):
     return linalg.norm(a - b)
 
 
-def listhash(l):
+def list_hash(l):
     return sum(list(map(hash, l)))

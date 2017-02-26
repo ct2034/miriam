@@ -1,6 +1,6 @@
 import datetime
 import logging
-import random
+import time
 
 import numpy as np
 from PyQt4 import QtCore
@@ -90,6 +90,9 @@ class Route(object):
 
             i_next_round = min(i_next_round, len(self.car.paths))
             if not self.finished:
+                while self.car.__class__ == bool:
+                    time.sleep(.1)
+                    logging.warning("Waiting for car to be assigned")
                 for _i in range(i_prev_round, i_next_round):  # e.g. [2]
                     if self.car.paths[_i][0:2] == tuple(self.start):
                         self.atStart()
@@ -195,7 +198,7 @@ class Car(object):
         self.paths = None
 
     def setPose(self, pose):
-        if self.sim.checkfree(self, pose):
+        if self.sim.check_free(self, pose):
             self.pose = pose
             self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
             logging.info("Car " + str(self.id) + " @ " + str(self.pose))

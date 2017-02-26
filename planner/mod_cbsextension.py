@@ -1,8 +1,5 @@
 import datetime
 import logging
-import os
-import time
-import logging
 from multiprocessing import Pipe
 from multiprocessing import Process
 
@@ -11,11 +8,12 @@ import numpy as np
 from planner.cbs_ext.plan import plan
 from planner.mod import Module
 from planner.route import Route, Car
-from planner.simulation import listhash
+from planner.simulation import list_hash
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 logging.getLogger("apscheduler").setLevel(logging.WARN)
+
 
 class Cbsext(Module):
     def __init__(self, grid):
@@ -38,23 +36,21 @@ class Cbsext(Module):
         assert len(routes_queue) > 0, "No routes to work with"
         i_route = routes_queue.index(route_todo)
         for i_agent in range(len(cars)):
-            if len(self.agent_job[i_agent]) > 0:
-                try:
-                    if (i_route == self.agent_job[i_agent][0] or
-                                i_route == self.agent_job[i_agent][1]):  # MAYBE we are looking for second assignment
-                        return cars[i_agent]
-                except IndexError:  # if only one job is assigned (i.e. len(elf.agent_job[i_agent]) == 1 )
-                    pass
-        # assert False, "No car assigned!"
-        logging.warning("No car assigned!")
+            if len(self.agent_job[i_agent]) > 0:  # has assignment
+                if i_route == self.agent_job[i_agent][0]:
+                    return cars[i_agent]
         return False
 
     def new_job(self, cars, routes_queue, active_routes):
         self.update_plan(cars, routes_queue, active_routes)
 
     def update_plan(self, cars, routes_queue, active_routes):
-        if listhash(cars + routes_queue + active_routes) == self.plan_params_hash:
+        if list_hash(cars + routes_queue + active_routes) == self.plan_params_hash:
             return
+        self.cars = cars
+        self.queued_routes = routes_queue
+        self.active_routes = active_routes
+
         if self.planning:
             try:
                 self.process.terminate()
@@ -77,14 +73,14 @@ class Cbsext(Module):
             if r.on_route:
                 alloc_jobs.append((self.get_car_i(cars, r.car), i_route))
 
-        idle_goals = [((0, 0), (10, 5)),
-                      ((4, 0), (10, 5),),
-                      ((9, 0), (10, 5),),
-                      ((9, 4), (10, 5),),
-                      ((9, 9), (10, 5),),
-                      ((4, 9), (10, 5),),
-                      ((0, 9), (10, 5),),
-                      ((0, 5), (10, 5),)]  # TODO: we have to learn these!
+        idle_goals = [((0, 0), (15, 3)),
+                      ((4, 0), (15, 3),),
+                      ((9, 0), (15, 3),),
+                      ((9, 4), (15, 3),),
+                      ((9, 9), (15, 3),),
+                      ((4, 9), (15, 3),),
+                      ((0, 9), (15, 3),),
+                      ((0, 5), (15, 3),)]  # TODO: we have to learn these!
 
         planning_start = datetime.datetime.now()
         parent_conn, child_conn = Pipe()
@@ -115,7 +111,7 @@ class Cbsext(Module):
         for i_car in range(len(cars)):
             cars[i_car].setPaths(self.paths[i_car])
 
-        self.plan_params_hash = listhash(cars + routes_queue + active_routes)  # how we have planned last time
+        self.plan_params_hash = list_hash(cars + routes_queue + active_routes)  # how we have planned last time
         self.planning = False
 
     def get_car_i(self, cars: list, car: Car):

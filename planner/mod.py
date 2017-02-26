@@ -6,3 +6,6 @@ class Module:
 
     def new_job(self, cars, routes_queue, active_routes):
         raise NotImplementedError()
+
+    def update_plan(self, cars, routes_queue, active_routes):
+        raise NotImplementedError()
