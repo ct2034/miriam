@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import time
+import logging
 from multiprocessing import Pipe
 from multiprocessing import Process
 
@@ -12,6 +13,9 @@ from planner.mod import Module
 from planner.route import Route, Car
 from planner.simulation import listhash
 
+FORMAT = "%(asctime)s %(levelname)s %(message)s"
+logging.basicConfig(format=FORMAT, level=logging.DEBUG)
+logging.getLogger("apscheduler").setLevel(logging.WARN)
 
 class Cbsext(Module):
     def __init__(self, grid):
@@ -52,9 +56,11 @@ class Cbsext(Module):
         if listhash(cars + routes_queue + active_routes) == self.plan_params_hash:
             return
         if self.planning:
-            logging.warning("already planning")
-            while (self.planning):
-                time.sleep(.1)
+            try:
+                self.process.terminate()
+                logging.warning("terminated (was already planning)")
+            except AttributeError as e:
+                logging.warning("error terminating: %s" % str(e))
         self.planning = True
         agent_pos = []
         for c in cars:
@@ -93,11 +99,15 @@ class Cbsext(Module):
                                      self.fname)
                                )
         self.process.start()
+        logging.debug("process started")
         (self.agent_job,
          self.agent_idle,
          self.paths) = parent_conn.recv()
+        logging.debug("process received")
         self.process.join(timeout=1)
+        logging.debug("process joined")
         self.process.terminate()
+        logging.debug("process terminated")
 
         logging.info("Planning took %.4fs" % (datetime.datetime.now() - planning_start).total_seconds())
 
