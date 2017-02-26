@@ -1,19 +1,21 @@
 import functools
 import logging
 import multiprocessing
+import os
 import pickle
 import uuid
 from functools import reduce
 
 import matplotlib.pyplot as plt
 import numpy as np
-from planner.astar.astar_grid48con import astar_grid4con, distance_manhattan
-from planner.cbs_ext.base import astar_base
 from scipy.stats import norm
 
+from planner.astar.astar_grid48con import astar_grid4con, distance_manhattan
 from planner.astar.base import NoPathException
+from planner.cbs_ext.base import astar_base
 
 path_save = {}
+
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array, plot: bool = False,
          filename: str = 'path_save.pkl'):
@@ -570,7 +572,8 @@ def get_paths_for_agent(vals):
         paths_for_agent += (time_shift_path(p, t_shift),)
     for ai in _agent_idle:
         if ai[0] == i_a:
-            p, path_save_process = (path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, path_save_process, calc=True))
+            p, path_save_process = (
+            path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, path_save_process, calc=True))
             if not p:
                 return 0
             paths_for_agent += (p,)

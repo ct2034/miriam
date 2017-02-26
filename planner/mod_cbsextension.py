@@ -22,9 +22,9 @@ class Cbsext(Module):
         self.grid = grid
 
         # data
-        self.fname = "process_test.pkl"
-        if os.path.exists(self.fname):
-            os.remove(self.fname)
+        self.fname = "planner/process_test.pkl"
+        # if os.path.exists(self.fname):
+        #     os.remove(self.fname)
         self.planning = False
         self.plan_params_hash = False
         self.process = False
