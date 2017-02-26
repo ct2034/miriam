@@ -71,8 +71,14 @@ class Cbsext(Module):
             if r.on_route:
                 alloc_jobs.append((self.get_car_i(cars, r.car), i_route))
 
-        idle_goals = [((2, 3), (50, 20)), ((0, 0), (50, 20),),
-                      ((5, 8), (50, 20),)]  # TODO: we have to learn these!
+        idle_goals = [((0, 0), (10, 5)),
+                      ((4, 0), (10, 5),),
+                      ((9, 0), (10, 5),),
+                      ((9, 4), (10, 5),),
+                      ((9, 9), (10, 5),),
+                      ((4, 9), (10, 5),),
+                      ((0, 9), (10, 5),),
+                      ((0, 5), (10, 5),)]  # TODO: we have to learn these!
 
         planning_start = datetime.datetime.now()
         parent_conn, child_conn = Pipe()

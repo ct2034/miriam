@@ -79,7 +79,7 @@ class Transport_Handler(object):
             self.flow = [[0, 2],
                          [1, 3],
                          [2, 1],
-                         [4, 4],
+                         [4, 2],
                          [3, 3],
                          [5, 3],
                          [6, 2]
@@ -103,15 +103,15 @@ def test_process_Cbsext():
 def run_with_module(mod):
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
-    agv_sim.start_sim(20, 20, 3)
+    agv_sim.start_sim(20, 20, 2)
     start_object = Transport_Handler()
-    n = start_object.start(5, agv_sim)
+    n = start_object.start(3, agv_sim)
     agv_sim.stop()
     return n
 
 
 if __name__ == "__main__":
-    t_random = test_process_Random()
     t_cbsext = test_process_Cbsext()
+    t_random = test_process_Random()
     print("Random:", str(t_random),
           "\nCbsExt:", str(t_cbsext))
