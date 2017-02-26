@@ -16,7 +16,7 @@ class SimpSim(QtCore.QThread):
     old_queue_hash = 0
 
     cars = []
-    driveSpeed = 2
+    driveSpeed = 4
     speedMultiplier = 1
     simTime = .5
     running = False

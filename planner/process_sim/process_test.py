@@ -68,12 +68,12 @@ class Transport_Handler(object):
         else:
             self.stations = [
                 Station("Lager", [0, 0]),
-                Station("Trennen", [3, 1]),
-                Station("Bohren", [1, 5]),
-                Station("Fuegen", [3, 2]),
-                Station("Schweißen", [6, 3]),
-                Station("Polieren", [5, 4]),
-                Station("Ausgang", [6, 6]),
+                Station("Trennen", [9, 9]),
+                Station("Bohren", [4, 0]),
+                Station("Fuegen", [4, 9]),
+                Station("Schweißen", [0, 9]),
+                Station("Polieren", [0, 4]),
+                Station("Ausgang", [9, 4]),
             ]
             a = Station("a")
             self.flow = [[0, 2],
@@ -91,25 +91,27 @@ _map = np.zeros([10, 10, 51])
 def test_process_Random():
     mod = Random(_map)
     t = run_with_module(mod)
-    print("t:", t)
+    return t
 
 
 def test_process_Cbsext():
     mod = Cbsext(_map)
     t = run_with_module(mod)
-    print("t:", t)
+    return t
 
 
 def run_with_module(mod):
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
-    agv_sim.start_sim(20, 20, 2)
+    agv_sim.start_sim(20, 20, 3)
     start_object = Transport_Handler()
-    n = start_object.start(3, agv_sim)
+    n = start_object.start(5, agv_sim)
     agv_sim.stop()
     return n
 
 
 if __name__ == "__main__":
-    test_process_Random()
-    test_process_Cbsext()
+    t_random = test_process_Random()
+    t_cbsext = test_process_Cbsext()
+    print("Random:", str(t_random),
+          "\nCbsExt:", str(t_cbsext))
