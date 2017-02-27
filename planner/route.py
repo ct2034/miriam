@@ -61,8 +61,6 @@ class Route(object):
         elif self.state == RouteState.TO_START:  # had another car already
             assert self.car, "Should have had a car"
             self.car = _car
-
-            assert _car.route, "Car should be on another route already"
             _car.route = self
         else:
             assert False, "Can not assign car in state " + str(self.state)
