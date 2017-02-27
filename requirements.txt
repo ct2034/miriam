@@ -7,3 +7,4 @@ pymongo
 pymc3
 psutil
 pypng
+sip
