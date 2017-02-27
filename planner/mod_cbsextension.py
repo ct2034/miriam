@@ -5,7 +5,7 @@ from multiprocessing import Process
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan
+from planner.cbs_ext.plan import plan, get_paths, comp2condition, comp2state
 from planner.mod import Module
 from planner.route import Route, Car
 from planner.simulation import list_hash
@@ -22,15 +22,28 @@ def get_car_i(cars: list, car: Car):
 
 
 def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, plot, fname):
-    (agent_job,
-     agent_idle,
-     paths) = plan(agent_pos,
-                   jobs,
-                   alloc_jobs,
-                   idle_goals,
-                   grid,
-                   plot,
-                   fname)
+    try:
+        (agent_job,
+         agent_idle,
+         paths) = plan(agent_pos,
+                       jobs,
+                       alloc_jobs,
+                       idle_goals,
+                       grid,
+                       False,
+                       fname)
+    except RuntimeError as e:
+        # Could not find a solution, returning just anything .. TODO: something better?
+        logging.warning(str(e))
+        agent_job = []
+        for a in agent_pos:
+            agent_job.append(tuple())
+        agent_job[0] = (0,)
+        agent_idle = ()
+        paths = get_paths(comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid),
+                          comp2state(tuple(agent_job), agent_idle, ()))
+
+
     pipe.send((agent_job,
                agent_idle,
                paths))
@@ -79,9 +92,10 @@ class Cbsext(Module):
         alloc_jobs = []
         for i_route in range(len(routes)):
             r = routes[i_route]
-            jobs.append(r.to_job_tuple())
-            if r.is_on_route():
-                alloc_jobs.append((get_car_i(cars, r.car), i_route))
+            if not r.is_finished():  # all but the finished ones
+                jobs.append(r.to_job_tuple())
+                if r.is_on_route():
+                    alloc_jobs.append((get_car_i(cars, r.car), i_route))
 
         idle_goals = [((0, 0), (15, 3)),
                       ((4, 0), (15, 3),),
