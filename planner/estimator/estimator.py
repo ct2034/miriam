@@ -89,7 +89,7 @@ def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, st
                 step = pm.NUTS()
 
                 _s.trace = pm.sample(500, step, start=start, progressbar=True)
-                print("sample finished")
+                print("sample is_finished")
                 timing()
 
                 info(_s, True)

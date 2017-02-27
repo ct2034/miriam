@@ -41,7 +41,7 @@ class Product(object):
                 # Produkt fährt zum Ausgang
                 self.transport_to_next_station()
                 self.__is_finished = True
-                print("Product Nr. ", self.n_id, "is finished")
+                print("Product Nr. ", self.n_id, "is is_finished")
             else:
                 self.transport_to_next_station()
                 self.process_Product()

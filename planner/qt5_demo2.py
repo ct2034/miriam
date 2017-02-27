@@ -21,7 +21,7 @@ class Window(QWidget):
         self.viewer = QLabel()
         self.viewer.setFixedSize(300, 300)
 
-        self.connect(self.thread, SIGNAL("finished()"), self.updateUi)
+        self.connect(self.thread, SIGNAL("is_finished()"), self.updateUi)
         self.connect(self.thread, SIGNAL("terminated()"), self.updateUi)
         self.connect(self.thread, SIGNAL("output(QRect, QImage)"), self.addImage)
         self.connect(self.startButton, SIGNAL("clicked()"), self.makePicture)

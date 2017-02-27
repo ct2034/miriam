@@ -9,7 +9,7 @@ class Random(Module):
     def __init__(self, grid):
         self.grid = grid
 
-    def which_car(self, cars: list, route_todo: Route, routes_queue: list, active_routes) -> Car:
+    def which_car(self, cars: list, route_todo: Route, routes: list) -> Car:
         rand = random.Random()
         free_cars = []
         for c in cars:
@@ -22,7 +22,7 @@ class Random(Module):
         else:
             return None  # No free car
 
-    def new_job(self, cars, routes_queue, active_routes):
+    def new_job(self, cars, routes):
         pass
 
     def plan(self, car, route):

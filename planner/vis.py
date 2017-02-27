@@ -93,7 +93,7 @@ class Vis(QtGui.QWidget):
         #         Vis.routeLines[route.id].setArrow('last')
             elif route.onRoute:
                 Vis.routeLines[route.id].setPen(QtGui.QPen(red))
-            elif route.finished:
+            elif route.is_finished:
                 print("hide")
                 Vis.routeLines[route.id].hide()
 

@@ -1,11 +1,8 @@
 
 
 class Module:
-    def which_car(self, cars, route_todo, routes_queue, active_routes):
+    def which_car(self, cars, route_todo, routes):
         raise NotImplementedError()
 
-    def new_job(self, cars, routes_queue, active_routes):
-        raise NotImplementedError()
-
-    def update_plan(self, cars, routes_queue, active_routes):
+    def new_job(self, cars, routes):
         raise NotImplementedError()

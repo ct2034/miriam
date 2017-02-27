@@ -5,28 +5,40 @@ from PyQt4 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
-from planner.route import Route, Car, emit_car
+from planner.route import Route, RouteState, Car, emit_car
+
+msb = None
+
+
+def set_speed_multiplier(multiplier):
+    SimpSim.speedMultiplier = multiplier
+
+
+def get_distance(a, b):
+    assert a.size is 2, "A point needs to have two coordinates"
+    assert b.size is 2, "B point needs to have two coordinates"
+    return linalg.norm(a - b)
+
+
+def list_hash(l):
+    return sum(list(map(hash, l)))
 
 
 class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
-    queued_routes = []
-    active_routes = []
-    finished_routes = []
-    old_queue_hash = 0
-
+    routes = []
     cars = []
-    driveSpeed = 4
+    driveSpeed = .9  # m/s
     speedMultiplier = 1
-    simTime = .5
+    simTime = 1  # s
     running = False
     scheduler = BackgroundScheduler()
     i = 0
     startTime = time.time()
     replan = True
 
-    def __init__(self, msb_select: bool, mod, parent=None):
-        self.module = mod
+    def __init__(self, msb_select: bool, _mod, parent=None):
+        self.module = _mod
 
         QtCore.QThread.__init__(self, parent)
         logging.info("init Simulation")
@@ -78,8 +90,7 @@ class SimpSim(QtCore.QThread):
     def stop(self):
         SimpSim.running = False
         self.area = False
-        SimpSim.queued_routes = []
-        SimpSim.active_routes = []
+        SimpSim.routes = []
         SimpSim.cars = []
         Car.nextId = 0
 
@@ -93,60 +104,59 @@ class SimpSim(QtCore.QThread):
         logging.info('missing: ' + str(time.time() - self.startTime - SimpSim.i * SimpSim.simTime) + 's')
 
     def new_job(self, a, b, job_id):
-        SimpSim.queued_routes.append(Route(a, b, None, job_id, self))
-        self.module.new_job(SimpSim.cars, SimpSim.queued_routes, SimpSim.active_routes)
+        SimpSim.routes.append(Route(a, b, job_id, self))
+        self.module.new_job(SimpSim.cars, SimpSim.routes)
 
-    def is_finished(self, id):
-        routes = list(filter(lambda r: r.id == id,
-                             SimpSim.active_routes +
-                             SimpSim.queued_routes +
-                             SimpSim.finished_routes))
-        assert len(routes) >= 1, "There should be one route with this id"
-        return routes[0].finished
-
-    def set_speed_multiplier(self, multiplier):
-        SimpSim.speedMultiplier = multiplier
+    def is_finished(self, _id):
+        route = list(filter(lambda r: r.id == _id, self.routes))
+        assert len(route) == 1, "There should be exactly one route with this id"
+        return route[0].is_finished()
 
     def iterate(self):
         logging.debug("it ...")
         try:
             if SimpSim.running:
-                self.work_queue()
-                for j in SimpSim.active_routes:
-                    if not j.finished:
+                self.work_routes()
+                for j in self.routes:
+                    if j.is_running():
                         j.new_step(
                             SimpSim.driveSpeed *
                             SimpSim.speedMultiplier *
                             SimpSim.simTime
                         )
                 SimpSim.i += 1
-        except Exception as e:
-            logging.error("ERROR:" + str(e))
-            raise e
+        except Exception as _e:
+            logging.error("ERROR:" + str(_e))
+            raise _e
         logging.debug("... it")
 
-    def work_queue(self):
-        logging.debug("q:" + str(len(self.queued_routes)) +
-                      " | a:" + str(len(self.active_routes)) +
-                      " | f:" + str(len(self.finished_routes)) +
-                      " | r:" + str(int(self.replan)))
-        for r in SimpSim.queued_routes:
-            c = self.module.which_car(SimpSim.cars.copy(), r, SimpSim.queued_routes.copy(),
-                                      SimpSim.active_routes.copy())
-            if c:
-                r.assign_car(c)
-                if r not in SimpSim.active_routes:
-                    SimpSim.active_routes.append(r)
-        if self.replan:  # have to replan for example when start reached
-            if len(SimpSim.active_routes) >0:
-                r = SimpSim.active_routes[0]
-            elif len(SimpSim.active_routes) >0:
-                r = SimpSim.active_routes[0]
-            else:
-                r = None
-            self.module.which_car(SimpSim.cars.copy(), r, SimpSim.queued_routes.copy(),
-                                  SimpSim.active_routes.copy())
-            self.replan = False
+    def work_routes(self):
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            n_queued = 0
+            n_to_start = 0
+            n_on_route = 0
+            n_finished = 0
+            for r in self.routes:
+                if r.state is RouteState.QUEUED:
+                    n_queued += 1
+                elif r.state is RouteState.TO_START:
+                    n_to_start += 1
+                elif r.state is RouteState.ON_ROUTE:
+                    n_on_route += 1
+                elif r.state is RouteState.FINISHED:
+                    n_finished += 1
+            assert len(self.routes) == n_queued + n_to_start + n_on_route + n_finished, "Not all routes have s state"
+            logging.debug("q:" + str(n_queued) +
+                          " | a:" + str(n_to_start) +
+                          " | f:" + str(n_on_route) +
+                          " | f:" + str(n_finished) +
+                          " | r:" + str(int(self.replan)))
+
+        for r in self.routes:
+            if not r.is_finished():  # for all but the finished ones
+                c = self.module.which_car(SimpSim.cars.copy(), r, self.routes)
+                if c:
+                    r.assign_car(c)
 
     def check_free(self, car: Car, pose: ndarray):
         cars_to_check = self.cars.copy()
@@ -155,13 +165,3 @@ class SimpSim(QtCore.QThread):
             if c.pose[0] == pose[0] and c.pose[1] == pose[1]:
                 return False
         return True
-
-
-def get_distance(a, b):
-    assert a.size is 2, "A point needs to have two coordinates"
-    assert b.size is 2, "B point needs to have two coordinates"
-    return linalg.norm(a - b)
-
-
-def list_hash(l):
-    return sum(list(map(hash, l)))
