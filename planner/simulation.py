@@ -28,7 +28,7 @@ class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
     routes = []
     cars = []
-    driveSpeed = .9  # m/s
+    driveSpeed = 0.9  # m/s
     speedMultiplier = 1
     simTime = 1  # s
     running = False
@@ -154,7 +154,7 @@ class SimpSim(QtCore.QThread):
 
         for r in self.routes:
             if not (r.is_finished() or r.is_on_route()):  # for all but the finished or on_route ones
-                c = self.module.which_car(SimpSim.cars.copy(), r, self.routes)
+                c = self.module.which_car(SimpSim.cars.copy(), r, list(filter(lambda r: not r.is_finished() and not r.is_on_route(), self.routes)))
                 if c:
                     r.assign_car(c)
 

@@ -2,7 +2,7 @@ import datetime
 import logging
 from multiprocessing import Pipe
 from multiprocessing import Process
-
+import time
 import numpy as np
 
 from planner.cbs_ext.plan import plan, get_paths, comp2condition, comp2state
@@ -21,7 +21,7 @@ def get_car_i(cars: list, car: Car):
             return i_agent
 
 
-def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, plot, fname):
+def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
     try:
         (agent_job,
          agent_idle,
@@ -106,10 +106,10 @@ class Cbsext(Module):
                       ((0, 9), (15, 3),),
                       ((0, 5), (15, 3),)]  # TODO: we have to learn these!
 
-        # if self.process:
-        #     if self.process.is_alive():
-        #         self.process.terminate()
-        #         logging.warning("terminated (was already planning)")
+        if self.process:
+            while self.process.is_alive():
+                logging.warning("waiting (is already planning)")
+                time.sleep(.4)
 
         planning_start = datetime.datetime.now()
         parent_conn, child_conn = Pipe()
@@ -120,7 +120,6 @@ class Cbsext(Module):
                                      alloc_jobs,
                                      idle_goals,
                                      self.grid,
-                                     False,
                                      self.fname)
                                )
         self.process.name = "cbs_ext planner"

@@ -51,8 +51,6 @@ class Route(object):
             self.car = _car
             self.state = RouteState.TO_START
             logging.debug(str(self))
-
-            assert not _car.route, "Car should not be on another route already"
             _car.route = self
 
             if self.sim.msb_select:
@@ -88,7 +86,7 @@ class Route(object):
             assert i_next_round <= len(self.car.paths) + 5, "shooting far over goal"
             i_next_round = min(i_next_round, len(self.car.paths) - 1)  # e.g. 3
             if not self.is_finished():
-                while self.car.__class__ == bool:
+                while not self.car:
                     time.sleep(.1)
                     logging.warning("Waiting for car to be assigned")
                 for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
