@@ -88,14 +88,15 @@ class Transport_Handler(object):
 
 _map = np.zeros([10, 10, 51])
 
-def test_process_Random():
-    mod = Random(_map)
+
+def test_process_Cbsext():
+    mod = Cbsext(_map)
     t = run_with_module(mod)
     return t
 
 
-def test_process_Cbsext():
-    mod = Cbsext(_map)
+def test_process_Random():
+    mod = Random(_map)
     t = run_with_module(mod)
     return t
 
