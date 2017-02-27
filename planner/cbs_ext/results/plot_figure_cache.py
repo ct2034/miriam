@@ -12,7 +12,6 @@ import itertools
 import matplotlib.pyplot as plt
 
 plt.style.use('bmh')
-
 filename = 'figure_cache.pkl'
 
 try:
@@ -26,4 +25,13 @@ plt.boxplot(res.T)
 plt.xlabel('Agents')
 plt.ylabel('Planning Time Saving [%]')
 
-plt.show()
+plt.savefig('figure_cache.png', bbox_inches='tight')
+
+plt.figure()
+plt.boxplot(res2.T)
+plt.xlabel('Agents')
+plt.ylabel('Planning Time [s]')
+ax = plt.gca()
+ax.set_yscale('log')
+
+plt.savefig('figure_planningtime.png', bbox_inches='tight')

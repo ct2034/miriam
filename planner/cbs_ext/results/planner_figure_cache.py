@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 from planner.cbs_ext.planner_test import get_data_random
 
+plt.style.use('bmh')
 fname = "/tmp/test.pkl"
 
 n_tests = 10
