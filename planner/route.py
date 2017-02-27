@@ -77,19 +77,21 @@ class Route(object):
 
             # e.g.
 
-            #   1     2     3
-            #       ^   ^
-            #  i_prev   car.i
+            # len() = 4 ..
+            # 0    1     2     3
+            #                ^   ^
+            #           i_prev   car.i
+            #              1.7   2.2
 
-            # -> consider pos of t = 2
+            # -> consider pos of t = 3
 
             assert i_next_round <= len(self.car.paths) + 5, "shooting far over goal"
-            i_next_round = min(i_next_round, len(self.car.paths) - 1)
+            i_next_round = min(i_next_round, len(self.car.paths) - 1)  # e.g. 3
             if not self.is_finished():
                 while self.car.__class__ == bool:
                     time.sleep(.1)
                     logging.warning("Waiting for car to be assigned")
-                for _i in range(i_prev_round, i_next_round + 1):  # e.g. [2]
+                for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
                     if self.car.paths[_i][0:2] == tuple(self.start):
                         self.at_start()
                     elif (self.car.paths[_i][0:2] == tuple(self.goal)) & self.is_on_route():  # @ goal
