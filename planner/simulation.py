@@ -147,8 +147,8 @@ class SimpSim(QtCore.QThread):
                     n_finished += 1
             assert len(self.routes) == n_queued + n_to_start + n_on_route + n_finished, "Not all routes have s state"
             logging.debug("q:" + str(n_queued) +
-                          " | a:" + str(n_to_start) +
-                          " | f:" + str(n_on_route) +
+                          " | ts:" + str(n_to_start) +
+                          " | or:" + str(n_on_route) +
                           " | f:" + str(n_finished) +
                           " | r:" + str(int(self.replan)))
 

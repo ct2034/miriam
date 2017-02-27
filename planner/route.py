@@ -84,7 +84,7 @@ class Route(object):
             # -> consider pos of t = 2
 
             assert i_next_round <= len(self.car.paths) + 5, "shooting far over goal"
-            i_next_round = min(i_next_round, len(self.car.paths))
+            i_next_round = min(i_next_round, len(self.car.paths) - 1)
             if not self.is_finished():
                 while self.car.__class__ == bool:
                     time.sleep(.1)
