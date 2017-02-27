@@ -153,7 +153,7 @@ class SimpSim(QtCore.QThread):
                           " | r:" + str(int(self.replan)))
 
         for r in self.routes:
-            if not r.is_finished():  # for all but the finished ones
+            if not (r.is_finished() or r.is_on_route()):  # for all but the finished or on_route ones
                 c = self.module.which_car(SimpSim.cars.copy(), r, self.routes)
                 if c:
                     r.assign_car(c)
