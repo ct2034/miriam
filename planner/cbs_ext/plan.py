@@ -1,7 +1,6 @@
 import functools
 import logging
 import multiprocessing
-import os
 import pickle
 import uuid
 from functools import reduce
@@ -64,6 +63,17 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     for aj in alloc_jobs:
         agent_job[aj[0]] = (aj[1],)
     agent_job = tuple(agent_job)
+
+    # making jobs unique
+    jobs_copy = jobs.copy()
+    jobs = []
+    jobs_set = set()
+    for j in jobs_copy:
+        while j in jobs_set:
+            j = (j[0], j[1], j[2] + .0001)
+        jobs.append(j)
+        jobs_set.add(j)
+
 
     _agent_idle = ()
     blocked = ()
@@ -194,8 +204,7 @@ def get_children(_condition: dict, _state: tuple) -> list:
                                                _agent_idle,
                                                blocked))
             return children
-        elif (len(left_idle_goals) > 0) & (
-                    len(left_agent_pos) > 0):  # only idle goals to assign - try with all left agents
+        elif (len(left_idle_goals) > 0) & (len(jobs) < len(agent_pos)):  # only idle goals if more agents than jobs
             for i_a in range(len(left_agent_pos)):
                 for i_ig in range(len(left_idle_goals)):
                     agent_idle_new = list(_agent_idle).copy()
