@@ -35,7 +35,6 @@ class SimpSim(QtCore.QThread):
     scheduler = BackgroundScheduler()
     i = 0
     startTime = time.time()
-    replan = True
 
     def __init__(self, msb_select: bool, _mod, parent=None):
         self.module = _mod
@@ -149,12 +148,11 @@ class SimpSim(QtCore.QThread):
             logging.debug("q:" + str(n_queued) +
                           " | ts:" + str(n_to_start) +
                           " | or:" + str(n_on_route) +
-                          " | f:" + str(n_finished) +
-                          " | r:" + str(int(self.replan)))
+                          " | f:" + str(n_finished))
 
         for r in self.routes:
             if not (r.is_finished() or r.is_on_route()):  # for all but the finished or on_route ones
-                c = self.module.which_car(SimpSim.cars.copy(), r, list(filter(lambda r: not r.is_finished() and not r.is_on_route(), self.routes)))
+                c = self.module.which_car(SimpSim.cars.copy(), r, self.routes)
                 if c:
                     r.assign_car(c)
 

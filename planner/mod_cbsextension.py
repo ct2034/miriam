@@ -65,6 +65,7 @@ class Cbsext(Module):
         self.process = False
 
     def which_car(self, cars: list, route_todo: Route, routes: list) -> Car:
+        routes = self.get_routes_to_plan(routes)
         self.update_plan(cars, routes)
         assert len(routes) > 0, "No routes to work with"
         i_route = routes.index(route_todo)
@@ -78,8 +79,14 @@ class Cbsext(Module):
         self.update_plan(cars, routes)
 
     def update_plan(self, cars, routes):
+        routes = self.get_routes_to_plan(routes)
         if list_hash(cars + routes) == self.plan_params_hash:
             return
+
+        if self.process:
+            while self.process.is_alive():
+                logging.warning("waiting (is already planning)")
+                time.sleep(.4)
 
         agent_pos = []
         for c in cars:
@@ -105,11 +112,6 @@ class Cbsext(Module):
                       ((4, 9), (15, 3),),
                       ((0, 9), (15, 3),),
                       ((0, 5), (15, 3),)]  # TODO: we have to learn these!
-
-        if self.process:
-            while self.process.is_alive():
-                logging.warning("waiting (is already planning)")
-                time.sleep(.4)
 
         planning_start = datetime.datetime.now()
         parent_conn, child_conn = Pipe()
@@ -141,3 +143,6 @@ class Cbsext(Module):
             cars[i_car].setPaths(self.paths[i_car])
 
         self.plan_params_hash = list_hash(cars + routes)  # how we have planned last time
+
+    def get_routes_to_plan(self, routes):
+        return list(filter(lambda r: not r.is_finished(), routes))

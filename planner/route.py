@@ -48,6 +48,7 @@ class Route(object):
             # nothing changed
             return
         if self.state == RouteState.QUEUED:  # starting the route
+            self.free_car(_car)
             self.car = _car
             self.state = RouteState.TO_START
             logging.debug(str(self))
@@ -57,46 +58,52 @@ class Route(object):
                 data = {"agvId": self.car.id, "jobId": self.id}
                 msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eAGVAssignment, data=data)
         elif self.state == RouteState.TO_START:  # had another car already
+            self.free_car(_car)
             assert self.car, "Should have had a car"
             self.car = _car
             _car.route = self
         else:
             assert False, "Can not assign car in state " + str(self.state)
 
+    def free_car(self, _car):
+        if _car.route:
+            _car.route.state = RouteState.QUEUED  # Other route is now queued again
+            if _car.route.car:
+                _car.route.car = False  # not on that route any more
+
     def new_step(self, stepSize):
-        if not self.car:
-            return
-        else:  # wrk with a path ...
+        assert self.car, "Should have a car"
+        i_prev = self.car.i
+        self.car.i += stepSize
+        i_prev_round = int(np.ceil(i_prev))
+        i_next_round = int(np.floor(self.car.i))
 
-            i_prev = self.car.i
-            self.car.i += stepSize
-            i_prev_round = int(np.ceil(i_prev))
-            i_next_round = int(np.floor(self.car.i))
+        # e.g.
 
-            # e.g.
+        # len() = 4 ..
+        # 0    1     2     3
+        #                ^   ^
+        #           i_prev   car.i
+        #              1.7   2.2
 
-            # len() = 4 ..
-            # 0    1     2     3
-            #                ^   ^
-            #           i_prev   car.i
-            #              1.7   2.2
+        # -> consider pos of t = 3
 
-            # -> consider pos of t = 3
-
-            assert i_next_round <= len(self.car.paths) + 5, "shooting far over goal"
-            i_next_round = min(i_next_round, len(self.car.paths) - 1)  # e.g. 3
-            if not self.is_finished():
-                while not self.car:
-                    time.sleep(.1)
-                    logging.warning("Waiting for car to be assigned")
-                for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
-                    if self.car.paths[_i][0:2] == tuple(self.start):
-                        self.at_start()
-                    elif (self.car.paths[_i][0:2] == tuple(self.goal)) & self.is_on_route():  # @ goal
-                        self.at_goal()
-                    # somewhere else
-                    if self.is_running():
-                        self.car.setPose(np.array(self.car.paths[_i][0:2]))
+        assert i_next_round <= len(self.car.paths) + 5, "shooting far over goal"
+        i_next_round = min(i_next_round, len(self.car.paths) - 1)  # e.g. 3
+        assert not self.is_finished(), "Should not be finished"
+        # while not self.car:
+        #     time.sleep(.1)
+        #     logging.warning("Waiting for car to be assigned")
+        for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
+            if (self.car.paths[_i][0:2] == tuple(self.start)) or \
+                    (tuple(self.car.pose) == tuple(self.start)):
+                self.at_start()
+            elif ((self.car.paths[_i][0:2] == tuple(self.goal)) & self.is_on_route()) or \
+                    (tuple(self.car.pose) == tuple(self.start)):  # @ goal
+                self.at_goal()
+            # somewhere else
+            if self.is_running():
+                self.car.setPose(np.array(self.car.paths[_i][0:2]))
 
         self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
 
@@ -139,7 +146,8 @@ class Route(object):
                       (self.creationTime - datetime.datetime.now()).total_seconds()])
 
     def __str__(self):
-        return "R%d: %s -> %s (%s) = %s" % (self.id, str(self.start), str(self.goal), str(self.state).split('.')[1], str(self.car))
+        return "R%d: %s -> %s (%s) = %s" % (
+            self.id, str(self.start), str(self.goal), str(self.state).split('.')[1], str(self.car))
 
 
 def emit_car(msb, car):
