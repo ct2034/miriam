@@ -107,6 +107,7 @@ class Route(object):
             elif ((self.car.paths[_i][0:2] == tuple(self.goal)) & self.is_on_route()) or \
                     (tuple(self.car.pose) == tuple(self.start)):  # @ goal
                 self.at_goal()
+                break
             # somewhere else
             if self.is_running():
                 self.car.setPose(np.array(self.car.paths[_i][0:2]))

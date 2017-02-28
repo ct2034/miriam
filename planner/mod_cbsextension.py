@@ -43,7 +43,6 @@ def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
         paths = get_paths(comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid),
                           comp2state(tuple(agent_job), agent_idle, ()))
 
-
     pipe.send((agent_job,
                agent_idle,
                paths))
