@@ -1,6 +1,7 @@
 import logging
 import time
 
+from threading import Lock
 from PyQt4 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
@@ -28,7 +29,7 @@ class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
     routes = []
     cars = []
-    driveSpeed = 0.9  # m/s
+    driveSpeed = 2.1  # m/s
     speedMultiplier = 1
     simTime = 1  # s
     running = False
@@ -37,10 +38,9 @@ class SimpSim(QtCore.QThread):
     startTime = time.time()
 
     def __init__(self, msb_select: bool, _mod, parent=None):
-        self.module = _mod
-
         QtCore.QThread.__init__(self, parent)
         logging.info("init Simulation")
+        self.lock = Lock()
 
         self.msb_select = msb_select
         if msb_select:
@@ -50,6 +50,7 @@ class SimpSim(QtCore.QThread):
 
         self.area = zeros([1])
         self.number_agvs = 1
+        self.module = _mod
 
         SimpSim.scheduler.add_job(
             func=self.iterate,
@@ -103,16 +104,22 @@ class SimpSim(QtCore.QThread):
         logging.info('missing: ' + str(time.time() - self.startTime - SimpSim.i * SimpSim.simTime) + 's')
 
     def new_job(self, a, b, job_id):
+        self.lock.acquire()
         SimpSim.routes.append(Route(a, b, job_id, self))
         self.module.new_job(SimpSim.cars, SimpSim.routes)
+        self.lock.release()
 
     def is_finished(self, _id):
+        self.lock.acquire()
         route = list(filter(lambda r: r.id == _id, self.routes))
         assert len(route) == 1, "There should be exactly one route with this id"
-        return route[0].is_finished()
+        is_finished = route[0].is_finished()
+        self.lock.release()
+        return is_finished
 
     def iterate(self):
         logging.debug("it ...")
+        self.lock.acquire()
         try:
             if SimpSim.running:
                 self.work_routes()
@@ -127,6 +134,7 @@ class SimpSim(QtCore.QThread):
         except Exception as _e:
             logging.error("ERROR:" + str(_e))
             raise _e
+        self.lock.release()
         logging.debug("... it")
 
     def work_routes(self):

@@ -1,6 +1,7 @@
 import datetime
 import logging
 import time
+from threading import Lock
 from enum import Enum
 
 import numpy as np
@@ -15,6 +16,7 @@ class Route(object):
     """a route to be simulated"""
 
     def __init__(self, start, goal, _id, s):
+        self.lock = Lock()
         self.sim = s
 
         self.id = _id
@@ -43,9 +45,11 @@ class Route(object):
         logging.debug(str(self))
 
     def assign_car(self, _car):
+        self.lock.acquire()
         logging.debug(str(self))
         if self.car == _car:
             # nothing changed
+            self.lock.release()
             return
         if self.state == RouteState.QUEUED:  # starting the route
             self.free_car(_car)
@@ -64,6 +68,7 @@ class Route(object):
             _car.route = self
         else:
             assert False, "Can not assign car in state " + str(self.state)
+        self.lock.release()
 
     def free_car(self, _car):
         if _car.route:
@@ -72,6 +77,7 @@ class Route(object):
                 _car.route.car = False  # not on that route any more
 
     def new_step(self, stepSize):
+        self.lock.acquire()
         assert self.car, "Should have a car"
         i_prev = self.car.i
         self.car.i += stepSize
@@ -91,9 +97,9 @@ class Route(object):
         assert i_next_round <= len(self.car.paths) + 5, "shooting far over goal"
         i_next_round = min(i_next_round, len(self.car.paths) - 1)  # e.g. 3
         assert not self.is_finished(), "Should not be finished"
-        # while not self.car:
-        #     time.sleep(.1)
-        #     logging.warning("Waiting for car to be assigned")
+        while self.car is None:
+            time.sleep(.1)
+            logging.warning("Waiting for car to be assigned")
         for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
             if (self.car.paths[_i][0:2] == tuple(self.start)) or \
                     (tuple(self.car.pose) == tuple(self.start)):
@@ -109,6 +115,7 @@ class Route(object):
 
         if self.sim.msb_select:
             emit_car(msb, self.car)
+        self.lock.release()
 
     def at_goal(self):
         self.car.route = None
