@@ -14,28 +14,10 @@ FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
 logging.getLogger("apscheduler").setLevel(logging.WARN)
 
-stations = [[0, 0],
-            [9, 9],
-            [4, 0],
-            [4, 9],
-            [0, 9],
-            [0, 4],
-            [9, 4]]
-
-flow = [[0, 2],
-        [1, 3],
-        [2, 1],
-        [4, 2],
-        [3, 3],
-        [5, 3],
-        [6, 2]
-        ]
-
-products_todo = 3
 t_step = .1
 
 
-def run(agv_sim):
+def run(agv_sim, stations, flow, products_todo):
     print("START")
     state = np.zeros(products_todo)
     t_left = np.zeros(products_todo)
@@ -101,7 +83,23 @@ def run_with_module(mod):
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
     agv_sim.start_sim(20, 20, 2)
-    n = run(agv_sim)
+    stations = [[0, 0],
+                [9, 9],
+                [4, 0],
+                [4, 9],
+                [0, 9],
+                [0, 4],
+                [9, 4]]
+    flow = [[0, 2],
+            [1, 3],
+            [2, 1],
+            [4, 2],
+            [3, 3],
+            [5, 3],
+            [6, 2]
+            ]
+    products_todo = 3
+    n = run(agv_sim, stations, flow, products_todo)
     agv_sim.stop_sim()
     return n
 
