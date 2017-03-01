@@ -8,7 +8,7 @@ from planner.cbs_ext.plan import plan, plot_inputs
 
 from planner.cbs_ext.planner_test import load_map
 
-_map = load_map('cbs_ext/map.png')
+_map = load_map('map.png')
 grid = np.repeat(_map[:, :, np.newaxis], 100, axis=2)
 
 landmarks = [(1, 1),
@@ -34,8 +34,8 @@ agents = [(1, 1),
           (3, 9),
           (7, 8)]
 
-n_j_s = [2, 4, 6]
-n_a_s = [4, 5, 6]
+n_j_s = [4]
+n_a_s = [4]
 
 results_mean = np.zeros([len(n_j_s), len(n_a_s)])
 results_std = np.zeros([len(n_j_s), len(n_a_s)])
@@ -69,7 +69,7 @@ for n_j, n_a in product(n_j_s, n_a_s):
 
         start_time = datetime.datetime.now()
         try:
-            res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, plot=False,
+            res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, plot=True,
                                                             filename='map_test.pkl')
         except RuntimeError:
             # logging.warning("NO SOLUTION (exception)")

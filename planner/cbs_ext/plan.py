@@ -13,6 +13,8 @@ from planner.astar.astar_grid48con import astar_grid4con, distance_manhattan
 from planner.astar.base import NoPathException
 from planner.cbs_ext.base import astar_base
 
+plt.style.use('bmh')
+
 path_save = {}
 
 
@@ -143,6 +145,7 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         plt.legend(legend_str)
         plt.title("Solution")
 
+        plt.tight_layout()
         plt.show()
 
     pool.close()
@@ -783,8 +786,8 @@ def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
                 color='g',
                 alpha=.9)
     # Legendary!
-    plt.legend(["Agents", "Idle Goals"])
-    plt.title("Problem Configuration")
+    plt.legend(["Agent", "Idle Task"])
+    plt.title("State Variables")
     if show:
         plt.show()
     return fig

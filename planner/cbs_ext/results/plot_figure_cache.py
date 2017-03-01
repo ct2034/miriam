@@ -20,14 +20,16 @@ try:
 except FileNotFoundError:
     print("WARN: File %s does not exist", filename)
 
-plt.figure()
+plt.figure(figsize=[5, 3])
 plt.boxplot(res.T)
 plt.xlabel('Agents')
 plt.ylabel('Planning Time Saving [%]')
+ax = plt.gca()
+ax.set_ylim(bottom=18, top=102)
 
 plt.savefig('figure_cache.png', bbox_inches='tight')
 
-plt.figure()
+plt.figure(figsize=[5, 3])
 plt.boxplot(res2.T)
 plt.xlabel('Agents')
 plt.ylabel('Planning Time [s]')
