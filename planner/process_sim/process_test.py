@@ -22,15 +22,15 @@ stations = [[0, 0],
             [9, 4]]
 
 flow = [[0, 2],
-        # [1, 3],
-        # [2, 1],
-        # [4, 2],
-        # [3, 3],
-        # [5, 3],
+        [1, 3],
+        [2, 1],
+        [4, 2],
+        [3, 3],
+        [5, 3],
         [6, 2]
         ]
 
-products_todo = 1
+products_todo = 3
 t_step = .1
 
 
@@ -38,6 +38,7 @@ def run(agv_sim):
     print("START")
     state = np.zeros(products_todo)
     t_left = np.zeros(products_todo)
+    blocked = np.zeros(len(stations)) - 1
     t_start = datetime.now()
     products_finished = 0
     while products_finished < products_todo:
@@ -46,21 +47,25 @@ def run(agv_sim):
                 if agv_sim.is_finished(hash(p + 100 * (state[p] - .5))):
                     state[p] += .5
                     t_left[p] = flow[int(state[p])][1]
-                    print("PRODUCT %d in state %1.1f" % (p + 1, state[p]))
+                    print("PRODUCT %d in state %1.0f" % (p + 1, state[p]))
             else:  # in station
                 if state[p] == len(flow) - 1:  # finished
                     state[p] = len(flow)
                     products_finished += 1
                     print("PRODUCT %d FINISHED" % (p + 1))
                 elif state[p] < len(flow) - 1:  # running
-                    if t_left[p] <= 0:
+                    if (t_left[p] <= 0) & (blocked[int(state[p])] == p):
                         agv_sim.new_job(np.array(stations[flow[int(state[p])][0]], dtype=int),
                                         np.array(stations[flow[int(state[p]) + 1][0]], dtype=int),
                                         hash(p + 100 * state[p]))
+                        blocked[int(state[p])] = -1
                         state[p] += .5
-                        print("PRODUCT %d in state %1f" % (p + 1, state[p]))
-                    else:
+                        print("PRODUCT %d in state %1.1f" % (p + 1, state[p]))
+                    elif blocked[int(state[p])] == p:
                         t_left[p] -= t_step
+                    elif blocked[int(state[p])] == -1: # free
+                        blocked[int(state[p])] = p
+
         time.sleep(t_step)
 
     t_finished = datetime.now()
