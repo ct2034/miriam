@@ -37,7 +37,7 @@ def callback_job(message_dict):
 def callback_stop(message_dict):
     logging.info("callback_stop")
     wait_for_sim()
-    Msb.s.stop()
+    Msb.s.stop_sim()
 
 
 def callback_timing(message_dict):

@@ -87,7 +87,7 @@ class SimpSim(QtCore.QThread):
         SimpSim.i = 0
         self.startTime = time.time()
 
-    def stop(self):
+    def stop_sim(self):
         SimpSim.running = False
         self.area = False
         SimpSim.routes = []

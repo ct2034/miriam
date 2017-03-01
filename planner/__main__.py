@@ -35,7 +35,7 @@ def testing(thread: SimpSim):
         time.sleep(.1)
 
     time.sleep(20)
-    thread.stop()
+    thread.stop_sim()
 
 
 if __name__ == '__main__':

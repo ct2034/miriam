@@ -46,7 +46,7 @@ class Route(object):
 
     def assign_car(self, _car):
         self.lock.acquire()
-        logging.debug(str(self))
+        logging.debug("Assigning a car to " + str(self))
         if self.car == _car:
             # nothing changed
             self.lock.release()
@@ -63,7 +63,7 @@ class Route(object):
                 msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eAGVAssignment, data=data)
         elif self.state == RouteState.TO_START:  # had another car already
             self.free_car(_car)
-            assert self.car, "Should have had a car"
+            # assert self.car, "Should have had a car, had: " + str(self.car) + ", should get: " + str(_car)
             self.car = _car
             _car.route = self
         else:
@@ -74,7 +74,7 @@ class Route(object):
         if _car.route:
             _car.route.state = RouteState.QUEUED  # Other route is now queued again
             if _car.route.car:
-                _car.route.car = False  # not on that route any more
+                _car.route.car = None  # not on that route any more
 
     def new_step(self, stepSize):
         self.lock.acquire()
@@ -125,7 +125,6 @@ class Route(object):
         assert self.state == RouteState.ON_ROUTE, "must have been on route before"
         self.state = RouteState.FINISHED
         logging.info(str(self) + " reached Goal")
-        self.sim.replan = True
         if self.sim.msb_select:
             msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
 
@@ -134,7 +133,6 @@ class Route(object):
         self.state = RouteState.ON_ROUTE
         self.preRemaining = 0
         logging.info(str(self) + " reached Start")
-        self.sim.replan = True
         if self.sim.msb_select:
             data = {"agvId": self.car.id, "jobId": self.id}
             msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReachedStart, data=data)
@@ -197,7 +195,6 @@ class Car(object):
             self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
             logging.info("Car " + str(self.id) + " @ " + str(self.pose))
         else:
-            self.sim.replan = True
             logging.warning("Car " + str(self.id) + " BLOCKED @ " + str(self.pose))
 
     def setPaths(self, _paths):
