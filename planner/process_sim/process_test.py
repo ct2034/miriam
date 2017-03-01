@@ -6,6 +6,7 @@ import time
 import numpy as np
 
 from planner.mod_cbsextension import Cbsext
+from planner.mod_nearest import Nearest
 from planner.mod_random import Random
 from planner.simulation import SimpSim
 
@@ -63,7 +64,7 @@ def run(agv_sim):
                         print("PRODUCT %d in state %1.1f" % (p + 1, state[p]))
                     elif blocked[int(state[p])] == p:
                         t_left[p] -= t_step
-                    elif blocked[int(state[p])] == -1: # free
+                    elif blocked[int(state[p])] == -1:  # free
                         blocked[int(state[p])] = p
 
         time.sleep(t_step)
@@ -90,6 +91,12 @@ def test_process_Random():
     return t
 
 
+def test_process_Nearest():
+    mod = Nearest(_map)
+    t = run_with_module(mod)
+    return t
+
+
 def run_with_module(mod):
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
@@ -100,7 +107,9 @@ def run_with_module(mod):
 
 
 if __name__ == "__main__":
+    t_nearest = test_process_Nearest()
     t_cbsext = test_process_Cbsext()
     t_random = test_process_Random()
     print("Random:", str(t_random),
+          "\nNearest:", str(t_nearest),
           "\nCbsExt:", str(t_cbsext))
