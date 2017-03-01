@@ -20,9 +20,9 @@ class Nearest(Module):
                     free_cars_poses.append(c.pose)
             else:  # no route assigned yet
                 free_cars.append(c)
-                free_cars_poses.append(c.pose)
+                free_cars_poses.append(tuple(c.pose))
         if len(free_cars) > 0:
-            nearest = get_nearest(free_cars_poses, route_todo.start)
+            nearest = get_nearest(free_cars_poses, tuple(route_todo.start))
             i_car = free_cars_poses.index(nearest)
             car = free_cars[i_car]
             car.setPaths(self.plan(car, route_todo))
