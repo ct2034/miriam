@@ -48,7 +48,6 @@ if __name__ == '__main__':
 
     # module
     mod = Random()
-    # mod = Cbsext(np.zeros([21, 21, 51]))
 
 
     # sim

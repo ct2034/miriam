@@ -139,30 +139,33 @@ class SimpSim(QtCore.QThread):
 
     def work_routes(self):
         if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
-            n_queued = 0
-            n_to_start = 0
-            n_on_route = 0
-            n_finished = 0
-            for r in self.routes:
-                if r.state is RouteState.QUEUED:
-                    n_queued += 1
-                elif r.state is RouteState.TO_START:
-                    n_to_start += 1
-                elif r.state is RouteState.ON_ROUTE:
-                    n_on_route += 1
-                elif r.state is RouteState.FINISHED:
-                    n_finished += 1
-            assert len(self.routes) == n_queued + n_to_start + n_on_route + n_finished, "Not all routes have s state"
-            logging.debug("q:" + str(n_queued) +
-                          " | ts:" + str(n_to_start) +
-                          " | or:" + str(n_on_route) +
-                          " | f:" + str(n_finished))
+            self.print_debug_info()
 
         for r in self.routes:
             if not (r.is_finished() or r.is_on_route()):  # for all but the finished or on_route ones
                 c = self.module.which_car(SimpSim.cars.copy(), r, self.routes)
                 if c:
                     r.assign_car(c)
+
+    def print_debug_info(self):
+        n_queued = 0
+        n_to_start = 0
+        n_on_route = 0
+        n_finished = 0
+        for r in self.routes:
+            if r.state is RouteState.QUEUED:
+                n_queued += 1
+            elif r.state is RouteState.TO_START:
+                n_to_start += 1
+            elif r.state is RouteState.ON_ROUTE:
+                n_on_route += 1
+            elif r.state is RouteState.FINISHED:
+                n_finished += 1
+        assert len(self.routes) == n_queued + n_to_start + n_on_route + n_finished, "Not all routes have s state"
+        logging.debug("q:" + str(n_queued) +
+                      " | ts:" + str(n_to_start) +
+                      " | or:" + str(n_on_route) +
+                      " | f:" + str(n_finished))
 
     def check_free(self, car: Car, pose: ndarray):
         cars_to_check = self.cars.copy()
