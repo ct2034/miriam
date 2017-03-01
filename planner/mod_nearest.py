@@ -25,7 +25,7 @@ class Nearest(Module):
             nearest = get_nearest(free_cars_poses, tuple(route_todo.start))
             i_car = free_cars_poses.index(nearest)
             car = free_cars[i_car]
-            car.setPaths(self.plan(car, route_todo))
+            car.set_paths(self.plan(car, route_todo))
             return car
         else:
             return None  # No free car

@@ -208,7 +208,7 @@ def get_children(_condition: dict, _state: tuple) -> list:
             for i_a in range(len(left_agent_pos)):
                 for i_ig in range(len(left_idle_goals)):
                     agent_idle_new = list(_agent_idle).copy()
-                    agent_idle_new.append(((agent_pos.index(left_agent_pos[i_a])),
+                    agent_idle_new.append((agent_pos.index(left_agent_pos[i_a]),
                                            idle_goals.index(left_idle_goals[i_ig])))
                     children.append(comp2state(tuple(agent_job),
                                                tuple(agent_idle_new),

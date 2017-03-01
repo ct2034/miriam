@@ -97,7 +97,7 @@ class Cbsext(Module):
 
         agent_pos = []
         for c in cars:
-            t = c.toTuple()
+            t = c.to_tuple()
             assert not t[0].__class__ is np.ndarray
             assert t[0] == c.pose[0], "Problems with pose"
             agent_pos.append(t)
@@ -147,7 +147,7 @@ class Cbsext(Module):
 
         # save the paths in cars
         for i_car in range(len(cars)):
-            cars[i_car].setPaths(self.paths[i_car])
+            cars[i_car].set_paths(self.paths[i_car])
 
         self.plan_params_hash = list_hash(cars + routes)  # how we have planned last time
         self.lock.release()

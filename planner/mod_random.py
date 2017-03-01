@@ -17,7 +17,7 @@ class Random(Module):
                 free_cars.append(c)
         if len(free_cars) > 0:
             car = free_cars[rand.randint(0, len(free_cars) - 1)]
-            car.setPaths(self.plan(car, route_todo))
+            car.set_paths(self.plan(car, route_todo))
             return car
         else:
             return None  # No free car

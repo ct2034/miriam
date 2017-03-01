@@ -133,7 +133,6 @@ class SimpSim(QtCore.QThread):
                 SimpSim.i += 1
         except Exception as _e:
             logging.error("ERROR:" + str(_e))
-            raise _e
         self.lock.release()
         logging.debug("... it")
 
@@ -143,7 +142,7 @@ class SimpSim(QtCore.QThread):
 
         for r in self.routes:
             if not (r.is_finished() or r.is_on_route()):  # for all but the finished or on_route ones
-                c = self.module.which_car(SimpSim.cars.copy(), r, self.routes)
+                c = self.module.which_car(SimpSim.cars, r, SimpSim.routes)
                 if c:
                     r.assign_car(c)
 

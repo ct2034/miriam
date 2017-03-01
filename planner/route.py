@@ -32,11 +32,7 @@ class Route(object):
         self.vector = goal - start
         self.distance = linalg.norm(self.vector)
 
-        self.preVector = None
-        self.preDistance = None
-        self.preRemaining = None
-
-        self.creationTime = datetime.datetime.now()
+        self.creation_time = datetime.datetime.now()
 
         if self.sim.msb_select:
             global msb
@@ -110,7 +106,7 @@ class Route(object):
                 break
             # somewhere else
             if self.is_running():
-                self.car.setPose(np.array(self.car.paths[_i][0:2]))
+                self.car.set_pose(np.array(self.car.paths[_i][0:2]))
 
         self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
 
@@ -120,7 +116,7 @@ class Route(object):
 
     def at_goal(self):
         self.car.route = None
-        self.car.setPose(self.goal)
+        self.car.set_pose(self.goal)
         self.car = None
         assert self.state == RouteState.ON_ROUTE, "must have been on route before"
         self.state = RouteState.FINISHED
@@ -129,7 +125,7 @@ class Route(object):
             msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
 
     def at_start(self):
-        self.car.setPose(self.start)
+        self.car.set_pose(self.start)
         self.state = RouteState.ON_ROUTE
         self.preRemaining = 0
         logging.info(str(self) + " reached Start")
@@ -149,7 +145,7 @@ class Route(object):
     def to_job_tuple(self):
         return tuple([(self.start[0], self.start[1]),
                       (self.goal[0], self.goal[1]),
-                      (self.creationTime - datetime.datetime.now()).total_seconds()])
+                      (datetime.datetime.now() - self.creation_time).total_seconds()])
 
     def __str__(self):
         return "R%d: %s -> %s (%s) = %s" % (
@@ -188,22 +184,27 @@ class Car(object):
                      + str(self.pose))
 
         self.paths = None
+        self.lock = Lock()
 
-    def setPose(self, pose):
+    def set_pose(self, pose):
+        self.lock.acquire()
         if self.sim.check_free(self, pose):
             self.pose = pose
             self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
             logging.info("Car " + str(self.id) + " @ " + str(self.pose))
         else:
             logging.warning("Car " + str(self.id) + " BLOCKED @ " + str(self.pose))
+        self.lock.release()
 
-    def setPaths(self, _paths):
+    def set_paths(self, _paths):
+        self.lock.acquire()
         self.i = 0
         self.paths = []
         for path in _paths:
             self.paths += path
+        self.lock.release()
 
-    def toTuple(self):
+    def to_tuple(self):
         assert len(self.pose) == 2, "A cars pose must have 2 coordinates"
         return (int(self.pose[0]),
                 int(self.pose[1]))
