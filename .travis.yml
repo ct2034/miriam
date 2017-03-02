@@ -1,8 +1,8 @@
 language: python
 cache: 
   - pip
-  directories:
-    - '$HOME/.sonar/cache'
+  # directories:
+  #   - '$HOME/.sonar/cache'
 
 addons:
   sonarqube:
