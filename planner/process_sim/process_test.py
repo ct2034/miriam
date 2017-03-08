@@ -112,7 +112,7 @@ def run_with_module(mod, products_todo=3, n_agv=2):
     stations = __read_stations();
 
 
-    flow = __read_flow();
+    flow = __read_flow(); #
 
     n = run(agv_sim, stations, flow, products_todo)
     agv_sim.stop_sim()
