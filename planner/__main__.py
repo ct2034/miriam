@@ -47,7 +47,7 @@ if __name__ == '__main__':
     vis = False
 
     # module
-    mod = Random()
+   # mod = Random()
 
 
     # sim
