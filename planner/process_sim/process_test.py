@@ -15,8 +15,12 @@ FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
 logging.getLogger("apscheduler").setLevel(logging.WARN)
 
-t_step = .1
-
+### global variables
+t_step = .1 # sim stepsize
+x_res = 10 # size of map in x
+y_res = 10 # size of map in y
+_map = np.zeros([x_res, y_res, 51]) # create map of size x*y filled with zeroes (why 51 ? )
+### end global variables
 
 def run(agv_sim, stations, flow, products_todo):
     print("START")
@@ -27,17 +31,17 @@ def run(agv_sim, stations, flow, products_todo):
     products_finished = 0
     while products_finished < products_todo:
         for p in range(products_todo):
-            if state[p] % 1 == .5:  # in transport
-                if agv_sim.is_finished(hash(p + 100 * (state[p] - .5))):
+            if state[p] % 1 == .5:  # in transport state
+                if agv_sim.is_finished(hash(p + 100 * (state[p] - .5))): # unique transport hash
                     state[p] += .5
                     t_left[p] = flow[int(state[p])][1]
                     print("PRODUCT %d in state %1.0f" % (p + 1, state[p]))
             else:  # in station
-                if state[p] == len(flow) - 1:  # finished
+                if state[p] == len(flow) - 1:  # is finished at station and waits for  next step
                     state[p] = len(flow)
                     products_finished += 1
                     print("PRODUCT %d FINISHED" % (p + 1))
-                elif state[p] < len(flow) - 1:  # running
+                elif state[p] < len(flow) - 1:  # process at station is still running
                     if (t_left[p] <= 0) & (blocked[int(state[p])] == p):
                         agv_sim.new_job(np.array(stations[flow[int(state[p])][0]], dtype=int),
                                         np.array(stations[flow[int(state[p]) + 1][0]], dtype=int),
@@ -51,11 +55,7 @@ def run(agv_sim, stations, flow, products_todo):
                         blocked[int(state[p])] = p
     return (datetime.now() - t_start).total_seconds()
 
-x_res = 10
-y_res = 10
-_map = np.zeros([x_res, y_res, 51])
-
-
+###Test_modules {different algorithms per module}
 def test_process_cbsext():
     mod = Cbsext(_map)
     t = run_with_module(mod)
@@ -69,56 +69,38 @@ def test_process_random():
 
 
 def test_process_nearest():
-    mod = Nearest(_map)
+    mod = Nearest(_map) # load module nearest and run sim with it
     t = run_with_module(mod)
     return t
-
-
-def test_benchmark():
-    durations = np.zeros(2)
-    modules = [Nearest(_map), Cbsext(_map)]
-    for i_mod in range(len(modules)):
-        try:
-            durations[i_mod] = run_with_module(modules[i_mod], products_todo=3, n_agv=2)
-        except Exception as e:
-            logging.error("Exception on simulation level\n" + str(e))
-
-    print("RESULT:\n for ..")
-    print("modules: " + str(modules))
-    print(durations)
-
-
+###END
 
 def run_with_module(mod, products_todo=3, n_agv=2):
-    agv_sim = SimpSim(False, mod)
+    agv_sim = SimpSim(False, mod) # search for collision problems in simulation 08.03.17
     agv_sim.start()
     agv_sim.start_sim(x_res, y_res, n_agv)
-    # stations = [[0, 0],
-    #             [9, 9],
-    #             [4, 0],
-    #             [4, 9],
-    #             [0, 9],
-    #             [0, 4],
-    #             [9, 4]]
-    # flow = [[0, 2],
-    #         [1, 3],
-    #         [2, 1],
-    #         [4, 2],
-    #         [3, 3],
-    #         [5, 3],
-    #         [6, 2]
-    #         ]
 
     stations = __read_stations();
-
-
     flow = __read_flow(); #
 
-    n = run(agv_sim, stations, flow, products_todo)
+    n = run(agv_sim, stations, flow, products_todo) # here starts the real magic
     agv_sim.stop_sim()
     return n
 
-def __read_flow():
+# UNUSED CODE
+# def test_benchmark(): # init which tells, number of products and amount of agvs
+#     durations = np.zeros(2)
+#     modules = [Nearest(_map), Cbsext(_map)]
+#     for i_mod in range(len(modules)):
+#         try:
+#             durations[i_mod] = run_with_module(modules[i_mod], products_todo=3, n_agv=2)
+#         except Exception as e:
+#             logging.error("Exception on simulation level\n" + str(e))
+#
+#     print("RESULT:\n for ..")
+#     print("modules: " + str(modules))
+#     print(durations)
+
+def __read_flow(): # private function for importing product flow
     #Eingefuegt 08.03.2017 jm
     flow = list()
 
@@ -136,7 +118,7 @@ def __read_flow():
     print (flow)
     return flow;
 
-def __read_stations():
+def __read_stations(): # private function for importing stations
     #Eingefuegt 08.03.2017 jm
     stations = list()
 
@@ -158,9 +140,11 @@ def __read_stations():
     return stations;
 
 if __name__ == "__main__":
+    #Start different algorithms
     t_nearest = test_process_nearest()
     t_cbsext = test_process_cbsext()
     t_random = test_process_random()
+    # print results of each testrun
     print("Random:", str(t_random),
           "\nNearest:", str(t_nearest),
           "\nCbsExt:", str(t_cbsext))
