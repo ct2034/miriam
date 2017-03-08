@@ -3,9 +3,7 @@
 import logging
 from datetime import datetime
 import time
-import csv
 import numpy as np
-
 
 from planner.mod_cbsextension import Cbsext
 from planner.mod_nearest import Nearest
@@ -63,16 +61,16 @@ def test_process_cbsext():
     return t
 
 
-def test_process_random():
-     mod = Random(_map)
-     t = run_with_module(mod)
-     return t
-
-
-def test_process_nearest():
-     mod = Nearest(_map)
-     t = run_with_module(mod)
-     return t
+# def test_process_random():
+#     mod = Random(_map)
+#     t = run_with_module(mod)
+#     return t
+#
+#
+# def test_process_nearest():
+#     mod = Nearest(_map)
+#     t = run_with_module(mod)
+#     return t
 
 
 def test_benchmark():
@@ -94,66 +92,25 @@ def run_with_module(mod, products_todo=3, n_agv=2):
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
     agv_sim.start_sim(x_res, y_res, n_agv)
-    # stations = [[0, 0],
-    #             [9, 9],
-    #             [4, 0],
-    #             [4, 9],
-    #             [0, 9],
-    #             [0, 4],
-    #             [9, 4]]
-    # flow = [[0, 2],
-    #         [1, 3],
-    #         [2, 1],
-    #         [4, 2],
-    #         [3, 3],
-    #         [5, 3],
-    #         [6, 2]
-    #         ]
-    stations = __read_stations();
-    flow = __read_flow();
-
+    stations = [[0, 0],
+                [9, 9],
+                [4, 0],
+                [4, 9],
+                [0, 9],
+                [0, 4],
+                [9, 4]]
+    flow = [[0, 2],
+            [1, 3],
+            [2, 1],
+            [4, 2],
+            [3, 3],
+            [5, 3],
+            [6, 2]
+            ]
     n = run(agv_sim, stations, flow, products_todo)
     agv_sim.stop_sim()
     return n
 
-def __read_flow():
-    #Eingefuegt 08.03.2017 jm
-    flow = list()
-
-    with open('miriam_flow.csv', 'r') as flow_file:
-        rdr = csv.reader(flow_file, delimiter=',', quotechar='|')
-        for row in rdr:
-            entry = list()
-            for items in row:
-                if ((  items.startswith( '#') )): # ignore comments
-                    break;
-                else:
-                    entry.append(int(items));
-            if entry: # save entry to flow, if value is not null
-                flow.append(entry);
-    print (flow)
-    return flow;
-
-def __read_stations():
-    #Eingefuegt 08.03.2017 jm
-    stations = list()
-
-    with open('miriam_stations.csv', 'r') as stations_file:
-        rdr = csv.reader(stations_file, delimiter=',', quotechar='|')
-        for row in rdr:
-            entry = list()
-            for items in row:
-                if ((  items.startswith( '#') )): # ignore comments
-                    break;
-                elif (( items.isdigit() )): # sorts out station names
-                    entry.append(int(items));
-                #else : # adds station names into flow list, for future
-                 #   entry.append(items);
-
-            if entry: # ensures that no empty string will be saved in flow
-                stations.append(entry);
-    print (stations)
-    return stations;
 
 if __name__ == "__main__":
     t_nearest = test_process_nearest()
