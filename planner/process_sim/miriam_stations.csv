@@ -1,8 +1,8 @@
 #stationname,x,y
-station0,0,0
-station1,9,9
-station2,4,0
-station3,4,9
-station4,0,9
-station5,0,4
-station6,9,4
+storage,0,0
+flip,9,9
+press,4,0
+drill,4,9
+polish,0,9
+refurbish,0,4
+outgoing,9,4
