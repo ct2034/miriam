@@ -61,12 +61,10 @@ def test_process_cbsext():
     t = run_with_module(mod)
     return t
 
-
 def test_process_random():
     mod = Random(_map)
     t = run_with_module(mod)
     return t
-
 
 def test_process_nearest():
     mod = Nearest(_map) # load module nearest and run sim with it
@@ -141,8 +139,8 @@ def __read_stations(): # private function for importing stations
 
 if __name__ == "__main__":
     #Start different algorithms
-    t_nearest = test_process_nearest()
-    t_cbsext = test_process_cbsext()
+    #t_nearest = test_process_nearest() # works but has collisions
+    t_cbsext = test_process_cbsext() # cant find pkl file
     t_random = test_process_random()
     # print results of each testrun
     print("Random:", str(t_random),
