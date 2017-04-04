@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-import logging
-from datetime import datetime
-import time
 import csv
+from datetime import datetime
+import logging
 import numpy as np
+import time
 
 from planner.mod_cbsextension import Cbsext
 from planner.mod_nearest import Nearest
@@ -19,7 +19,7 @@ logging.getLogger("apscheduler").setLevel(logging.WARN)
 t_step = .1 # sim stepsize
 x_res = 10 # size of map in x
 y_res = 10 # size of map in y
-_map = np.zeros([x_res, y_res, 51]) # create map of size x*y filled with zeroes (why 51 ? )
+_map = np.zeros([x_res, y_res, 51]) # map with size of x*y and 51 timesteps(seconds) of planning ahead
 ### end global variables
 
 def run(agv_sim, stations, flow, products_todo):
@@ -73,7 +73,7 @@ def test_process_nearest():
 ###END
 
 def run_with_module(mod, products_todo=3, n_agv=2):
-    agv_sim = SimpSim(False, mod) # search for collision problems in simulation 08.03.17
+    agv_sim = SimpSim(False, mod) # ToDo: Sort out problems with colliding Objects
     agv_sim.start()
     agv_sim.start_sim(x_res, y_res, n_agv)
 
@@ -99,7 +99,6 @@ def run_with_module(mod, products_todo=3, n_agv=2):
 #     print(durations)
 
 def __read_flow(): # private function for importing product flow
-    #Eingefuegt 08.03.2017 jm
     flow = list()
 
     with open('miriam_flow.csv', 'r') as flow_file:
@@ -117,7 +116,6 @@ def __read_flow(): # private function for importing product flow
     return flow;
 
 def __read_stations(): # private function for importing stations
-    #Eingefuegt 08.03.2017 jm
     stations = list()
 
     with open('miriam_stations.csv', 'r') as stations_file:
@@ -139,8 +137,8 @@ def __read_stations(): # private function for importing stations
 
 if __name__ == "__main__":
     #Start different algorithms
-    #t_nearest = test_process_nearest() # works but has collisions
-    t_cbsext = test_process_cbsext() # cant find pkl file
+    t_nearest = test_process_nearest()
+    t_cbsext = test_process_cbsext()
     t_random = test_process_random()
     # print results of each testrun
     print("Random:", str(t_random),
