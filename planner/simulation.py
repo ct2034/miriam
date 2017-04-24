@@ -130,6 +130,11 @@ class SimpSim(QtCore.QThread):
                             SimpSim.speedMultiplier *
                             SimpSim.simTime
                         )
+                poses = set()
+                for c in self.cars:
+                    pose = tuple(c.pose)
+                    assert pose not in poses, "Collision!"
+                    poses.add(pose)
                 SimpSim.i += 1
         except Exception as _e:
             logging.error("ERROR:" + str(_e))
@@ -168,14 +173,14 @@ class SimpSim(QtCore.QThread):
                       " | f:" + str(n_finished))
 
     def check_free(self, car: Car, pose: ndarray):
-        cars_to_check = self.cars.copy()
-        cars_to_check.remove(car)
-        for c in cars_to_check:
-            if c.pose[0] == pose[0] and c.pose[1] == pose[1]:
-                raise RuntimeError(" ".join(["Collision of",
-                                             str(car),
-                                             "and",
-                                             str(c),
-                                             "@",
-                                             str(pose)]))
+        # cars_to_check = self.cars.copy()
+        # cars_to_check.remove(car)
+        # for c in cars_to_check:
+        #     if c.pose[0] == pose[0] and c.pose[1] == pose[1]:
+        #         raise RuntimeError(" ".join(["Collision of",
+        #                                      str(car),
+        #                                      "and",
+        #                                      str(c),
+        #                                      "@",
+        #                                      str(pose)]))
         return True
