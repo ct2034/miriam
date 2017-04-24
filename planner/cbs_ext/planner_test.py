@@ -195,7 +195,7 @@ def test_consecutive_jobs():
     assert len(res_paths[0]) == 6, "Not six paths for the agent"  # being six due to the oaths to start
 
 
-def test_cases(plot=False):
+def test_same_jobs(plot=False):
     grid = np.zeros([10, 10, 50])
     agent_pos = [(4, 3), (4, 4)]
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
@@ -233,4 +233,4 @@ def test_get_nearest():
 
 
 if __name__ == "__main__":
-    test_cases(True)
+    test_same_jobs(True)
