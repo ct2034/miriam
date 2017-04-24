@@ -363,15 +363,13 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
       or False if path shouldn't have been calculated but was not saved either
     """
     seen = set()
-    if len(blocked) > 0:
-        for b in blocked:
-            _map = _map.copy()
-            _map[(b[1],
-                  b[0],
-                  b[2])] = -1
-            if b in seen:
-                assert False, "Duplicate blocked entries"
-            seen.add(b)
+    for b in blocked:
+        _map = _map.copy()
+        _map[(b[1],
+              b[0],
+              b[2])] = -1
+        assert b not in seen, "Duplicate blocked entries"
+        seen.add(b)
 
     index = tuple([start, goal]) + tuple(blocked)
     if index not in path_save.keys():
@@ -392,7 +390,8 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
 
     for b in blocked:
         if b in _path:
-            assert False, "Path still contains the collision"
+            logging.warning("Path still contains the collision")
+            return False, {}
     return _path, path_save_process
 
 
@@ -584,7 +583,7 @@ def get_paths(_condition: dict, _state: tuple):
 def time_shift_blocks(block, t):
     blocks_for_this_agent = []
     for b in block:
-        if b[2] > t:  # is after the shift (for this or later paths)
+        if b[2] >= t:  # is after the shift (for this or later paths)
             blocks_for_this_agent.append((b[0], b[1], b[2] - t))
     return blocks_for_this_agent
 

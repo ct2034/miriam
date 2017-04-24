@@ -68,6 +68,7 @@ class Route(object):
 
     def free_car(self, _car):
         if _car.route:
+            assert _car.route.state == RouteState.TO_START, "This can only have been on the way"
             _car.route.state = RouteState.QUEUED  # Other route is now queued again
             if _car.route.car:
                 _car.route.car = None  # not on that route any more
@@ -174,6 +175,7 @@ class Car(object):
         ])
 
         self.route = False
+        self.idle_goal = False
 
         self.id = Car.nextId
         Car.nextId += 1
@@ -192,17 +194,25 @@ class Car(object):
             self.pose = pose
             self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
             logging.info("Car " + str(self.id) + " @ " + str(self.pose))
+            if self.idle_goal:
+                if self.pose[0] == self.idle_goal[0] & self.pose[1] == self.idle_goal[1]:
+                    logging.info("Car " + str(self.id) + " reached idle goal!!")
+                    self.idle_goal = False
         else:
             logging.warning("Car " + str(self.id) + " BLOCKED @ " + str(self.pose))
             raise RuntimeError("Collision ")
         self.lock.release()
 
-    def set_paths(self, _paths):
+    def set_paths(self, _paths, idle_goal=False):
         self.lock.acquire()
         self.i = 0
         self.paths = []
         for path in _paths:
             self.paths += path
+        if idle_goal:
+            assert not self.route.is_running(), "This should not be taken from an active route"
+            assert not self.route.car, "This should not be taken from a route that has a car"
+            self.idle_goal = idle_goal
         self.lock.release()
 
     def to_tuple(self):

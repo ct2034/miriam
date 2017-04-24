@@ -36,7 +36,7 @@ def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
                        fname)
     except Exception as e:
         # Could not find a solution, returning just anything .. TODO: something better?
-        logging.error(str(e))
+        logging.error("Could not find a solution, returning just anything \n", str(e))
         agent_job = []
         for a in agent_pos:
             agent_job.append(tuple())

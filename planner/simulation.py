@@ -110,7 +110,7 @@ class SimpSim(QtCore.QThread):
         self.lock.release()
 
     def is_finished(self, _id):
-        self.lock.acquire()
+        self.lock.acquire()  # TODO: deadlock?
         route = list(filter(lambda r: r.id == _id, self.routes))
         assert len(route) == 1, "There should be exactly one route with this id"
         is_finished = route[0].is_finished()
@@ -133,6 +133,7 @@ class SimpSim(QtCore.QThread):
                 SimpSim.i += 1
         except Exception as _e:
             logging.error("ERROR:" + str(_e))
+            raise _e
         self.lock.release()
         logging.debug("... it")
 
