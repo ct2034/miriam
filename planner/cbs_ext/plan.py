@@ -100,57 +100,12 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         fig = plot_inputs(agent_pos, idle_goals, jobs, grid)
 
         # plt.show()
-        from mpl_toolkits.mplot3d import Axes3D
-        _ = Axes3D
-        ax3 = fig.add_subplot(122, projection='3d')
-        ax3.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
-
-        # plot agent -> job allocation
-        for i_a in range(len(agent_pos)):
-            for i_j in agent_job[i_a]:
-                plt.arrow(x=agent_pos[i_a][0],
-                          y=agent_pos[i_a][1],
-                          dx=(jobs[i_j][0][0] - agent_pos[i_a][0]),
-                          dy=(jobs[i_j][0][1] - agent_pos[i_a][1]),
-                          ec='r',
-                          fill=False,
-                          linestyle='dotted')
-        # plot agent -> idle goal allocations
-        for ai in _agent_idle:
-            plt.arrow(x=agent_pos[ai[0]][0],
-                      y=agent_pos[ai[0]][1],
-                      dx=(idle_goals[ai[1]][0][0] - agent_pos[ai[0]][0]),
-                      dy=(idle_goals[ai[1]][0][1] - agent_pos[ai[0]][1]),
-                      ec='g',
-                      fill=False,
-                      linestyle='dotted')
-
-        # Paths
-        legend_str = []
-        i = 0
-
-        prop_cycle = plt.rcParams['axes.prop_cycle']
-        colors = prop_cycle.by_key()['color']
-
-        assert _paths, "Paths have not been set"
-        for _pathset in _paths:  # pathset per agent
-            for p in _pathset:
-                pa = np.array(p)
-                ax3.plot(xs=pa[:, 0],
-                         ys=pa[:, 1],
-                         zs=pa[:, 2],
-                         color=colors[i])
-                legend_str.append("Agent " + str(i))
-            i += 1
-        plt.legend(legend_str)
-        plt.title("Solution")
-
-        plt.tight_layout()
-        plt.show()
+        plot_results(_agent_idle, _paths, agent_job, agent_pos, fig, grid, idle_goals, jobs)
 
     pool.close()
 
     return agent_job, _agent_idle, _paths
+
 
 
 # Main methods
@@ -266,7 +221,7 @@ def cost(_condition: dict, _state: tuple):
             path_len = pathset[0][-1][2]  # this agent will have only one path in its set, or has it?
             assert len(pathset) == 1, "an agent with idle goal must only have one path in its set"
             prob = norm.cdf(path_len, loc=idle_goal_stat[0], scale=idle_goal_stat[1])
-            _cost += (prob * path_len)
+            _cost += prob * path_len
 
     # finding collisions in paths
     collision = find_collision(_paths)
@@ -324,7 +279,6 @@ def heuristic(_condition: dict, _state: tuple) -> float:
             valss.append({'agentposes': left_agent_pos,
                           'idle_goal': ig})
 
-    # job_costs = list(pool.map(heuristic_per_job, valss))
     job_costs = list(map(heuristic_per_job, valss))
     _cost += reduce(lambda a, b: a + b, job_costs, 0)
 
@@ -348,7 +302,7 @@ def heuristic_per_job(vals):
         nearest_agent = get_nearest(agentposes, idle_goal[0])
         path_len = distance_no_calc(nearest_agent, idle_goal[0])
         prob = norm.cdf(path_len, loc=idle_goal[1][0], scale=idle_goal[1][1])
-        _cost += (prob * path_len)
+        _cost += prob * path_len
     else:
         raise AssertionError("The call dictionary was built wrongly")
     return _cost
@@ -409,10 +363,6 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
       or False if path shouldn't have been calculated but was not saved either
     """
     seen = set()
-    for b in blocked:
-        if b[0:2] == start or b[0:2] == goal:
-            return [], {}  # blocked at start or goal (infeasible path)
-
     if len(blocked) > 0:
         for b in blocked:
             _map = _map.copy()
@@ -428,8 +378,8 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
         if calc:  # if we want to calc (i.e. find the cost)
             assert len(start) == 2, "Should be called with only spatial coords"
             try:
-                _path = astar_grid4con((start + (0,)),
-                                       (goal + (_map.shape[2] - 1,)),
+                _path = astar_grid4con(start + (0,),
+                                       goal + (_map.shape[2] - 1,),
                                        _map.swapaxes(0, 1))
             except NoPathException:
                 _path = []
@@ -440,7 +390,6 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
     else:
         _path = path_save[index]
 
-    # _path = _path.copy()
     for b in blocked:
         if b in _path:
             assert False, "Path still contains the collision"
@@ -739,10 +688,8 @@ def clear_set(_agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals:
 
 
 def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
-    # Plot input conditions
     plt.style.use('bmh')
     fig = plt.figure()
-    # ax = fig.add_subplot(121)
     ax = fig.add_subplot(subplot)
     ax.set_aspect('equal')
     # Set grid lines to between the cells
@@ -769,8 +716,8 @@ def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
     for j in jobs:
         plt.arrow(x=j[0][0],
                   y=j[0][1],
-                  dx=(j[1][0] - j[0][0]),
-                  dy=(j[1][1] - j[0][1]),
+                  dx=j[1][0] - j[0][0],
+                  dy=j[1][1] - j[0][1],
                   head_width=.3, head_length=.7,
                   length_includes_head=True,
                   ec='r',
@@ -791,6 +738,52 @@ def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
     if show:
         plt.show()
     return fig
+
+
+def plot_results(_agent_idle, _paths, agent_job, agent_pos, fig, grid, idle_goals, jobs):
+    from mpl_toolkits.mplot3d import Axes3D
+    _ = Axes3D
+    ax3 = fig.add_subplot(122, projection='3d')
+    ax3.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
+    # plot agent -> job allocation
+    for i_a in range(len(agent_pos)):
+        for i_j in agent_job[i_a]:
+            plt.arrow(x=agent_pos[i_a][0],
+                      y=agent_pos[i_a][1],
+                      dx=jobs[i_j][0][0] - agent_pos[i_a][0],
+                      dy=jobs[i_j][0][1] - agent_pos[i_a][1],
+                      ec='r',
+                      fill=False,
+                      linestyle='dotted')
+    # plot agent -> idle goal allocations
+    for ai in _agent_idle:
+        plt.arrow(x=agent_pos[ai[0]][0],
+                  y=agent_pos[ai[0]][1],
+                  dx=idle_goals[ai[1]][0][0] - agent_pos[ai[0]][0],
+                  dy=idle_goals[ai[1]][0][1] - agent_pos[ai[0]][1],
+                  ec='g',
+                  fill=False,
+                  linestyle='dotted')
+
+    # Paths
+    legend_str = []
+    i = 0
+    prop_cycle = plt.rcParams['axes.prop_cycle']
+    colors = prop_cycle.by_key()['color']
+    assert _paths, "Paths have not been set"
+    for _pathset in _paths:  # pathset per agent
+        for p in _pathset:
+            pa = np.array(p)
+            ax3.plot(xs=pa[:, 0],
+                     ys=pa[:, 1],
+                     zs=pa[:, 2],
+                     color=colors[i])
+            legend_str.append("Agent " + str(i))
+        i += 1
+    plt.legend(legend_str)
+    plt.title("Solution")
+    plt.tight_layout()
+    plt.show()
 
 
 def condition2comp(_condition: dict):

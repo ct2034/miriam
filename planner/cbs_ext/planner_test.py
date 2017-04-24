@@ -195,6 +195,27 @@ def test_consecutive_jobs():
     assert len(res_paths[0]) == 6, "Not six paths for the agent"  # being six due to the oaths to start
 
 
+def test_cases(plot=False):
+    grid = np.zeros([10, 10, 50])
+    agent_pos = [(4, 3), (4, 4)]
+    idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
+    jobs = [((0, 0), (9, 9), 0.358605), ((0, 0), (9, 9), 0.002422)]
+
+    res_agent_job, res_agent_idle, res_paths = planner.cbs_ext.plan.plan(agent_pos=agent_pos,
+                                                                         jobs=jobs,
+                                                                         alloc_jobs=[],
+                                                                         idle_goals=idle_goals,
+                                                                         grid=grid,
+                                                                         filename='',
+                                                                         plot=plot)
+
+    assert len(res_agent_idle) == 0, "We don't have to assign idle goals"
+    assert len(res_agent_job) == 2, "Not both jobs assigned"
+    assert len(res_agent_job[0]) == 1, "Not all jobs assigned to one agent"
+    assert len(res_agent_job[1]) == 1, "Not all jobs assigned to one agent"
+    assert len(res_paths) == 2, "Not two path sets for the agents"
+
+
 def test_concat_paths():
     path1 = [(1, 1, 1), (1, 2, 2), (1, 3, 3)]
     path2 = [(1, 3, 0), (2, 3, 1), (3, 3, 2)]
@@ -209,3 +230,7 @@ def test_timeshift_path():
 
 def test_get_nearest():
     assert (1, 1) == planner.cbs_ext.plan.get_nearest([(1, 0), (1, 1), (1, 2)], (0, 1))
+
+
+if __name__ == "__main__":
+    test_cases(True)

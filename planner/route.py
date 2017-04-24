@@ -194,6 +194,7 @@ class Car(object):
             logging.info("Car " + str(self.id) + " @ " + str(self.pose))
         else:
             logging.warning("Car " + str(self.id) + " BLOCKED @ " + str(self.pose))
+            raise RuntimeError("Collision ")
         self.lock.release()
 
     def set_paths(self, _paths):

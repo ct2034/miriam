@@ -171,5 +171,10 @@ class SimpSim(QtCore.QThread):
         cars_to_check.remove(car)
         for c in cars_to_check:
             if c.pose[0] == pose[0] and c.pose[1] == pose[1]:
-                return False
+                raise RuntimeError(" ".join(["Collision of",
+                                             str(car),
+                                             "and",
+                                             str(c),
+                                             "@",
+                                             str(pose)]))
         return True
