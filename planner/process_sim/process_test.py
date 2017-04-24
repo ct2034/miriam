@@ -75,7 +75,7 @@ def test_process_cbsext():
 
 def test_benchmark():
     durations = np.zeros(2)
-    modules = [Nearest(_map), Cbsext(_map)]
+    modules = [Cbsext(_map), Nearest(_map)]
     for i_mod in range(len(modules)):
         try:
             durations[i_mod] = run_with_module(modules[i_mod], products_todo=3, n_agv=2)
@@ -113,9 +113,4 @@ def run_with_module(mod, products_todo=3, n_agv=2):
 
 
 if __name__ == "__main__":
-    t_nearest = test_process_nearest()
-    t_cbsext = test_process_cbsext()
-    t_random = test_process_random()
-    print("Random:", str(t_random),
-          "\nNearest:", str(t_nearest),
-          "\nCbsExt:", str(t_cbsext))
+    test_benchmark()
