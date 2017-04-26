@@ -36,10 +36,10 @@ def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
                        fname)
     except Exception as e:
         # Could not find a solution, returning just anything .. TODO: something better?
-        logging.error("Could not find a solution, returning just anything \n", str(e))
+        logging.warning("Could not find a solution, returning just anything \n", str(e))
         agent_job = []
         for a in agent_pos:
-            agent_job.append(tuple())
+            agent_job.append(tuple(a))
         agent_job[0] = (0,)
         agent_idle = ()
         paths = get_paths(comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid),
@@ -48,6 +48,21 @@ def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
     pipe.send((agent_job,
                agent_idle,
                paths))
+
+
+def get_routes_to_plan(routes):
+    return list(filter(lambda r: not r.is_finished() and not r.is_idle_goal(), routes))
+
+
+def get_idle_goals_from(routes):
+    return list(filter(lambda r: r.is_idle_goal(), routes))
+
+
+def get_car_from_assignments(assignments, i_to_find, cars):
+    for i in range(len(assignments)):
+        if len(assignments[i]) and i_to_find == assignments[i][0]:
+            return cars[i]
+    return False
 
 
 class Cbsext(Module):
@@ -67,26 +82,39 @@ class Cbsext(Module):
         self.lock = Lock()
 
     def which_car(self, cars: list, route_todo: Route, routes: list) -> Car:
-        routes = self.get_routes_to_plan(routes)
+        idle_goals, jobs, routes = self.split_routes(routes)
         self.update_plan(cars, routes)
         assert len(routes) > 0, "No routes to work with"
         self.lock.acquire()
-        i_route = routes.index(route_todo)
-        for i_agent in range(len(cars)):
-            if len(self.agent_job[i_agent]) > 0:  # has assignment
-                if i_route == self.agent_job[i_agent][0]:
-                    self.lock.release()
-                    return cars[i_agent]
-        self.lock.release()
-        return False
+        c = False
+        if route_todo in jobs:
+            i_j = jobs.index(route_todo)
+            c = get_car_from_assignments(self.agent_job, i_j, cars)
+            self.lock.release()
+        elif route_todo in idle_goals:
+            i_ig = idle_goals.index(route_todo)
+            c = get_car_from_assignments(self.agent_idle, i_ig, cars)
+            self.lock.release()
+        else:
+            self.lock.release()
+        return c
+
+    def split_routes(self, routes):
+        jobs = get_routes_to_plan(routes)
+        idle_goals = get_idle_goals_from(routes)
+        routes = jobs + idle_goals
+        return idle_goals, jobs, routes
 
     def new_job(self, cars, routes):
         self.update_plan(cars, routes)
 
     def update_plan(self, cars, routes):
         self.lock.acquire()
-        routes = self.get_routes_to_plan(routes)
-        if list_hash(cars + routes) == self.plan_params_hash:
+        idle_goal_routes, jobs, routes = self.split_routes(routes)
+        if len(routes) < len(cars):  # to few jobs
+            self.lock.release()
+            return
+        if list_hash(cars + routes) == self.plan_params_hash:  # nothing changed
             self.lock.release()
             return
 
@@ -104,21 +132,16 @@ class Cbsext(Module):
 
         jobs = []
         alloc_jobs = []
-        for i_route in range(len(routes)):
-            r = routes[i_route]
+        idle_goals = []
+        for i_route in range(len(jobs)):
+            r = jobs[i_route]
             if not r.is_finished():  # all but the finished ones
                 jobs.append(r.to_job_tuple())
                 if r.is_on_route():
                     alloc_jobs.append((get_car_i(cars, r.car), i_route))
-
-        idle_goals = [((0, 0), (15, 3)),
-                      ((4, 0), (15, 3),),
-                      ((9, 0), (15, 3),),
-                      ((9, 4), (15, 3),),
-                      ((9, 9), (15, 3),),
-                      ((4, 9), (15, 3),),
-                      ((0, 9), (15, 3),),
-                      ((0, 5), (15, 3),)]  # TODO: we have to learn these!
+        for i_idle_goals in range(len(idle_goal_routes)):
+            ig = idle_goal_routes[i_idle_goals]
+            idle_goals.append(ig.to_job_tuple())
 
         planning_start = datetime.datetime.now()
         parent_conn, child_conn = Pipe()
@@ -149,8 +172,5 @@ class Cbsext(Module):
         for i_car in range(len(cars)):
             cars[i_car].set_paths(self.paths[i_car])
 
-        self.plan_params_hash = list_hash(cars + routes)  # how we have planned last time
+        self.plan_params_hash = list_hash(cars + jobs)  # how we have planned last time TODO: idle_goals
         self.lock.release()
-
-    def get_routes_to_plan(self, routes):
-        return list(filter(lambda r: not r.is_finished(), routes))

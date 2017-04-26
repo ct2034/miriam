@@ -54,17 +54,20 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     pool = multiprocessing.Pool(processes=n)
 
     agent_job = []
+    _agent_idle = []
 
     agent_pos_test = set()
     for a in agent_pos:
         # init agent_job allocation
         agent_job.append(tuple())
+        _agent_idle.append(tuple())
         # check for duplicate agents
         assert a not in agent_pos_test, "Duplicate agent poses"
         agent_pos_test.add(a)
     for aj in alloc_jobs:
         agent_job[aj[0]] = (aj[1],)
     agent_job = tuple(agent_job)
+    _agent_idle = tuple(_agent_idle)
 
     # making jobs unique
     jobs_copy = jobs.copy()
@@ -76,8 +79,6 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         jobs.append(j)
         jobs_set.add(j)
 
-
-    _agent_idle = ()
     blocked = ()
     condition = comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid)
 
@@ -163,14 +164,15 @@ def get_children(_condition: dict, _state: tuple) -> list:
                                                blocked))
             return children
         elif (len(left_idle_goals) > 0) & (len(jobs) < len(agent_pos)):  # only idle goals if more agents than jobs
+            _agent_idle = list(_agent_idle)
             for i_a in range(len(left_agent_pos)):
-                for i_ig in range(len(left_idle_goals)):
-                    agent_idle_new = list(_agent_idle).copy()
-                    agent_idle_new.append((agent_pos.index(left_agent_pos[i_a]),
-                                           idle_goals.index(left_idle_goals[i_ig])))
-                    children.append(comp2state(tuple(agent_job),
-                                               tuple(agent_idle_new),
-                                               blocked))
+                if not len(_agent_idle[i_a]):  # no idle goal yet
+                    for i_ig in range(len(left_idle_goals)):
+                        agent_idle_new = _agent_idle.copy()
+                        agent_idle_new[i_a] = (idle_goals.index(left_idle_goals[i_ig]),)
+                        children.append(comp2state(tuple(agent_job),
+                                                   tuple(agent_idle_new),
+                                                   blocked))
             return children
         else:  # all assigned
             return []
@@ -213,10 +215,10 @@ def cost(_condition: dict, _state: tuple):
                     _cost += jobs[assigned_jobs[i]][2] * -1  # waiting time before job was touched
                     i += 1
             assert i == len(assigned_jobs), "Not handled all assigned jobs"
-        idle_assignment = list(filter(lambda x: x[0] == i_a, _agent_idle))
+        idle_assignment = _agent_idle[i_a]
         if idle_assignment:
             assert len(idle_assignment) == 1, "Multiple agent entries"
-            i_idle_goal = idle_assignment[0][1]
+            i_idle_goal = idle_assignment[0]
             idle_goal_stat = idle_goals[i_idle_goal][1]
             path_len = pathset[0][-1][2]  # this agent will have only one path in its set, or has it?
             assert len(pathset) == 1, "an agent with idle goal must only have one path in its set"
@@ -334,8 +336,9 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
         return False
 
     agent_assigned = list(map(lambda x: len(x) > 0, agent_job))  # jobs?
-    for ai in _agent_idle:
-        agent_assigned[ai[0]] = True  # idle goals
+    for i_a in range(len(_agent_idle)):
+        if len(_agent_idle[i_a]):
+            agent_assigned[i_a] = True  # idle goals
     if not np.array(agent_assigned).all():  # not all agents have something to do
         return False
 
@@ -530,14 +533,12 @@ def get_paths_for_agent(vals):
             if not p:
                 return 0
         paths_for_agent += (time_shift_path(p, t_shift),)
-    for ai in _agent_idle:
-        if ai[0] == i_a:
-            p, path_save_process = (
-            path(agent_pos[i_a], idle_goals[ai[1]][0], _map, block, path_save_process, calc=True))
-            if not p:
-                return 0
-            paths_for_agent += (p,)
-            break  # found for this agent
+    if len(_agent_idle[i_a]):
+        p, path_save_process = (
+            path(agent_pos[i_a], idle_goals[_agent_idle[i_a][0]][0], _map, block, path_save_process, calc=True))
+        if not p:
+            return 0
+        paths_for_agent += (p,)
     return paths_for_agent, path_save_process
 
 
@@ -676,13 +677,13 @@ def clear_set(_agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals:
     cp_jobs = jobs.copy()
 
     for i_a in range(len(agent_pos)):
-        if len(agent_job[i_a]) > 0:  # this has jobs
+        if len(agent_job[i_a]):  # this has jobs
             cp_agent_pos.remove(agent_pos[i_a])  # remove agent
             for j in agent_job[i_a]:
                 cp_jobs.remove(jobs[j])
-    for ai in _agent_idle:
-        cp_agent_pos.remove(agent_pos[ai[0]])
-        cp_idle_goals.remove(idle_goals[ai[1]])
+        if len(_agent_idle[i_a]):  # an idle goal assigned
+            cp_agent_pos.remove(agent_pos[i_a])
+            cp_idle_goals.remove(idle_goals[_agent_idle[i_a][0]])
     return cp_agent_pos, cp_idle_goals, cp_jobs
 
 
@@ -755,14 +756,16 @@ def plot_results(_agent_idle, _paths, agent_job, agent_pos, fig, grid, idle_goal
                       fill=False,
                       linestyle='dotted')
     # plot agent -> idle goal allocations
-    for ai in _agent_idle:
-        plt.arrow(x=agent_pos[ai[0]][0],
-                  y=agent_pos[ai[0]][1],
-                  dx=idle_goals[ai[1]][0][0] - agent_pos[ai[0]][0],
-                  dy=idle_goals[ai[1]][0][1] - agent_pos[ai[0]][1],
-                  ec='g',
-                  fill=False,
-                  linestyle='dotted')
+    for i_a in range(len(_agent_idle)):
+        if len(_agent_idle[i_a]):
+            ig = idle_goals[_agent_idle[i_a][0]]
+            plt.arrow(x=agent_pos[i_a][0],
+                      y=agent_pos[i_a][1],
+                      dx=ig[0][0] - agent_pos[i_a][0],
+                      dy=ig[0][1] - agent_pos[i_a][1],
+                      ec='g',
+                      fill=False,
+                      linestyle='dotted')
 
     # Paths
     legend_str = []
@@ -856,7 +859,7 @@ def comp2state(agent_job: tuple,
       blocked: tuple: 
 
     Returns:
-
+      the state tuple
     """
     return agent_job, _agent_idle, blocked
 

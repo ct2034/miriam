@@ -224,6 +224,24 @@ def test_concat_paths():
     assert res_path == planner.cbs_ext.plan.concat_paths(path1, path2), "Wrong merging"
 
 
+def test_idle_goals(plot=False):
+    grid = np.zeros([10, 10, 50])
+    agent_pos = [(3, 8), (0, 1)]
+    idle_goals = [((3, 9), (2, 4)), ]
+    jobs = [((0, 0), (9, 9), 1), ]
+
+    res_agent_job, res_agent_idle, res_paths = planner.cbs_ext.plan.plan(agent_pos=agent_pos,
+                                                                         jobs=jobs,
+                                                                         alloc_jobs=[],
+                                                                         idle_goals=idle_goals,
+                                                                         grid=grid,
+                                                                         filename='',
+                                                                         plot=plot)
+
+    assert res_agent_job == ((), (0,))
+    assert res_agent_idle == ((0,), ())
+
+
 def test_timeshift_path():
     assert [(1, 2, 2), (2, 2, 3)] == planner.cbs_ext.plan.time_shift_path([(1, 2, 0), (2, 2, 1)], 2), "Wrong shifting"
 
@@ -233,4 +251,4 @@ def test_get_nearest():
 
 
 if __name__ == "__main__":
-    test_same_jobs(True)
+    test_idle_goals(True)

@@ -15,24 +15,29 @@ msb = None
 class Route(object):
     """a route to be simulated"""
 
-    def __init__(self, start, goal, _id, s):
+    def __init__(self, start, goal, _id, s, idle_goal_stats=False):
         self.lock = Lock()
         self.sim = s
 
         self.id = _id
-        self.state = RouteState.QUEUED
+        if idle_goal_stats:
+            self.state = RouteState.IDLE_GOAL_QUEUED
+            self.idle_goal_stats = idle_goal_stats
+            self.goal = goal
+        else:
+            self.state = RouteState.QUEUED
 
-        assert start.__class__ is ndarray, 'Start needs to be a numpy.ndarray'
-        self.start = start
-        assert goal.__class__ is ndarray, 'Goal needs to be a numpy.ndarray'
-        self.goal = goal
+            assert start.__class__ is ndarray, 'Start needs to be a numpy.ndarray'
+            self.start = start
+            assert goal.__class__ is ndarray, 'Goal needs to be a numpy.ndarray'
+            self.goal = goal
+
+            self.vector = goal - start
+            self.distance = linalg.norm(self.vector)
+
+            self.creation_time = datetime.datetime.now()
 
         self.car = None
-
-        self.vector = goal - start
-        self.distance = linalg.norm(self.vector)
-
-        self.creation_time = datetime.datetime.now()
 
         if self.sim.msb_select:
             global msb
@@ -59,7 +64,10 @@ class Route(object):
                 msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eAGVAssignment, data=data)
         elif self.state == RouteState.TO_START:  # had another car already
             self.free_car(_car)
-            # assert self.car, "Should have had a car, had: " + str(self.car) + ", should get: " + str(_car)
+            assert self.car, "Should have had a car, had: " + str(self.car) + ", should get: " + str(_car)
+            self.car = _car
+            _car.route = self
+        elif self.state == RouteState.IDLE_GOAL_QUEUED:  # is an idle goal
             self.car = _car
             _car.route = self
         else:
@@ -68,9 +76,10 @@ class Route(object):
 
     def free_car(self, _car):
         if _car.route:
-            assert _car.route.state == RouteState.TO_START, "This can only have been on the way"
-            _car.route.state = RouteState.QUEUED  # Other route is now queued again
-            if _car.route.car:
+            assert _car.route.is_re_assignable(), "This can only have been on the way or on a idle goal"
+            if _car.route.state != RouteState.IDLE_GOAL:  # not idle goal
+                _car.route.state = RouteState.QUEUED  # Other route is now queued again
+            if _car.route.car:  # also idle goals loose their car
                 _car.route.car = None  # not on that route any more
 
     def new_step(self, stepSize):
@@ -98,8 +107,9 @@ class Route(object):
             time.sleep(.1)
             logging.warning("Waiting for car to be assigned")
         for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
-            if (self.car.paths[_i][0:2] == tuple(self.start)) or \
-                    (tuple(self.car.pose) == tuple(self.start)):
+            if not self.is_idle_goal() and \
+                    ((self.car.paths[_i][0:2] == tuple(self.start)) or \
+                             (tuple(self.car.pose) == tuple(self.start))):
                 self.at_start()
             elif ((self.car.paths[_i][0:2] == tuple(self.goal)) & self.is_on_route()) or \
                     (tuple(self.car.pose) == tuple(self.start)):  # @ goal
@@ -128,14 +138,16 @@ class Route(object):
     def at_start(self):
         self.car.set_pose(self.start)
         self.state = RouteState.ON_ROUTE
-        self.preRemaining = 0
+        self.pre_remaining = 0
         logging.info(str(self) + " reached Start")
         if self.sim.msb_select:
             data = {"agvId": self.car.id, "jobId": self.id}
             msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReachedStart, data=data)
 
     def is_running(self):
-        return self.state == RouteState.TO_START or self.state == RouteState.ON_ROUTE
+        return (self.state == RouteState.TO_START or
+                self.state == RouteState.ON_ROUTE or
+                self.state == RouteState.IDLE_GOAL_RUNNING)
 
     def is_on_route(self):
         return self.state == RouteState.ON_ROUTE
@@ -143,14 +155,29 @@ class Route(object):
     def is_finished(self):
         return self.state == RouteState.FINISHED
 
+    def is_idle_goal(self):
+        return self.state == RouteState.IDLE_GOAL_RUNNING or self.state == RouteState.IDLE_GOAL_QUEUED
+
+    def is_re_assignable(self):
+        return self.state == RouteState.TO_START or self.is_idle_goal()
+
     def to_job_tuple(self):
-        return tuple([(self.start[0], self.start[1]),
-                      (self.goal[0], self.goal[1]),
-                      (datetime.datetime.now() - self.creation_time).total_seconds()])
+        if self.is_idle_goal():
+            return tuple([(self.goal[0], self.goal[1]),
+                          self.idle_goal_stats])
+
+        else:
+            return tuple([(self.start[0], self.start[1]),
+                          (self.goal[0], self.goal[1]),
+                          (datetime.datetime.now() - self.creation_time).total_seconds()])
 
     def __str__(self):
-        return "R%d: %s -> %s (%s) = %s" % (
-            self.id, str(self.start), str(self.goal), str(self.state).split('.')[1], str(self.car))
+        if self.is_idle_goal():
+            return "R%d: %s (%s) = %s" % (
+                self.id, str(self.goal), str(self.state).split('.')[1], str(self.car))
+        else:
+            return "R%d: %s -> %s (%s) = %s" % (
+                self.id, str(self.start), str(self.goal), str(self.state).split('.')[1], str(self.car))
 
 
 def emit_car(msb, car):
@@ -168,14 +195,13 @@ class Car(object):
         self.sim = s
 
         # assert s.__class__ is SimpSim, "Pass the simulation object to the new car"
-        self.pose = array([
+        self.pose = tuple(([
             4, 3 + Car.nextId
             # random.randint(0, s.area.shape[0]),
             # random.randint(0, s.area.shape[1])
-        ])
+        ]))
 
         self.route = False
-        self.idle_goal = False
 
         self.id = Car.nextId
         Car.nextId += 1
@@ -191,28 +217,20 @@ class Car(object):
     def set_pose(self, pose):
         self.lock.acquire()
         if self.sim.check_free(self, pose):
-            self.pose = pose
+            self.pose = tuple(pose)
             self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
             logging.info("Car " + str(self.id) + " @ " + str(self.pose))
-            if self.idle_goal:
-                if self.pose[0] == self.idle_goal[0] & self.pose[1] == self.idle_goal[1]:
-                    logging.info("Car " + str(self.id) + " reached idle goal!!")
-                    self.idle_goal = False
         else:
             logging.warning("Car " + str(self.id) + " BLOCKED @ " + str(self.pose))
             raise RuntimeError("Collision ")
         self.lock.release()
 
-    def set_paths(self, _paths, idle_goal=False):
+    def set_paths(self, _paths):
         self.lock.acquire()
         self.i = 0
         self.paths = []
         for path in _paths:
             self.paths += path
-        if idle_goal:
-            assert not self.route.is_running(), "This should not be taken from an active route"
-            assert not self.route.car, "This should not be taken from a route that has a car"
-            self.idle_goal = idle_goal
         self.lock.release()
 
     def to_tuple(self):
@@ -229,3 +247,5 @@ class RouteState(Enum):
     TO_START = 1
     ON_ROUTE = 2
     FINISHED = 3
+    IDLE_GOAL_QUEUED = 4
+    IDLE_GOAL_RUNNING = 5

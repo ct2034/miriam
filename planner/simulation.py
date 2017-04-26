@@ -109,6 +109,12 @@ class SimpSim(QtCore.QThread):
         self.module.new_job(SimpSim.cars, SimpSim.routes)
         self.lock.release()
 
+    def new_idle_goal(self, goal, stats, id):
+        self.lock.acquire()
+        SimpSim.routes.append(Route(-1, goal, id, self, stats))
+        self.module.new_job(SimpSim.cars, SimpSim.routes)
+        self.lock.release()
+
     def is_finished(self, _id):
         self.lock.acquire()  # TODO: deadlock?
         route = list(filter(lambda r: r.id == _id, self.routes))
@@ -132,7 +138,7 @@ class SimpSim(QtCore.QThread):
                         )
                 poses = set()
                 for c in self.cars:
-                    pose = tuple(c.pose)
+                    pose = c.pose
                     assert pose not in poses, "Collision!"
                     poses.add(pose)
                 SimpSim.i += 1
@@ -157,6 +163,8 @@ class SimpSim(QtCore.QThread):
         n_to_start = 0
         n_on_route = 0
         n_finished = 0
+        n_ig_queued = 0
+        n_ig_running = 0
         for r in self.routes:
             if r.state is RouteState.QUEUED:
                 n_queued += 1
@@ -166,21 +174,15 @@ class SimpSim(QtCore.QThread):
                 n_on_route += 1
             elif r.state is RouteState.FINISHED:
                 n_finished += 1
-        assert len(self.routes) == n_queued + n_to_start + n_on_route + n_finished, "Not all routes have s state"
+            elif r.state is RouteState.IDLE_GOAL_QUEUED:
+                n_ig_queued += 1
+            elif r.state is RouteState.IDLE_GOAL_RUNNING:
+                n_ig_running += 1
+        assert len(self.routes) == n_queued + n_to_start + n_on_route + \
+                                   n_finished + n_ig_queued + n_ig_running, "Not all routes have a state"
         logging.debug("q:" + str(n_queued) +
                       " | ts:" + str(n_to_start) +
                       " | or:" + str(n_on_route) +
-                      " | f:" + str(n_finished))
-
-    def check_free(self, car: Car, pose: ndarray):
-        # cars_to_check = self.cars.copy()
-        # cars_to_check.remove(car)
-        # for c in cars_to_check:
-        #     if c.pose[0] == pose[0] and c.pose[1] == pose[1]:
-        #         raise RuntimeError(" ".join(["Collision of",
-        #                                      str(car),
-        #                                      "and",
-        #                                      str(c),
-        #                                      "@",
-        #                                      str(pose)]))
-        return True
+                      " | f:" + str(n_finished) +
+                      " | igq:" + str(n_ig_queued) +
+                      " | igr:" + str(n_ig_running))
