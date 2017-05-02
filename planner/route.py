@@ -27,12 +27,14 @@ class Route(object):
         else:
             self.state = RouteState.QUEUED
 
-            assert start.__class__ is ndarray, 'Start needs to be a numpy.ndarray'
+            assert start.__class__ is tuple, 'Start needs to be a numpy.tuple'
+            assert len(start) == 2, 'Start should have 2 coords'
             self.start = start
-            assert goal.__class__ is ndarray, 'Goal needs to be a numpy.ndarray'
+            assert goal.__class__ is tuple, 'Goal needs to be a numpy.tuple'
+            assert len(goal) == 2, 'Goal should have 2 coords'
             self.goal = goal
 
-            self.vector = goal - start
+            self.vector = tuple(np.array(goal) - np.array(start))
             self.distance = linalg.norm(self.vector)
 
             self.creation_time = datetime.datetime.now()
@@ -70,6 +72,7 @@ class Route(object):
         elif self.state == RouteState.IDLE_GOAL_QUEUED:  # is an idle goal
             self.car = _car
             _car.route = self
+            self.state = RouteState.IDLE_GOAL_RUNNING
         else:
             assert False, "Can not assign car in state " + str(self.state)
         self.lock.release()
@@ -112,12 +115,12 @@ class Route(object):
                              (tuple(self.car.pose) == tuple(self.start))):
                 self.at_start()
             elif ((self.car.paths[_i][0:2] == tuple(self.goal)) & self.is_on_route()) or \
-                    (tuple(self.car.pose) == tuple(self.start)):  # @ goal
+                    (not self.is_idle_goal() and tuple(self.car.pose) == tuple(self.start)):  # @ goal
                 self.at_goal()
                 break
             # somewhere else
             if self.is_running():
-                self.car.set_pose(np.array(self.car.paths[_i][0:2]))
+                self.car.set_pose(tuple(self.car.paths[_i][0:2]))
 
         self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
 
@@ -129,8 +132,12 @@ class Route(object):
         self.car.route = None
         self.car.set_pose(self.goal)
         self.car = None
-        assert self.state == RouteState.ON_ROUTE, "must have been on route before"
-        self.state = RouteState.FINISHED
+        if self.is_idle_goal():
+            assert self.state == RouteState.IDLE_GOAL_RUNNING, "Must have been running"
+            self.state == RouteState.IDLE_GOAL_QUEUED  # queue it again
+        else:
+            assert self.state == RouteState.ON_ROUTE, "Must have been on route before"
+            self.state = RouteState.FINISHED
         logging.info(str(self) + " reached Goal")
         if self.sim.msb_select:
             msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
@@ -161,7 +168,7 @@ class Route(object):
     def is_re_assignable(self):
         return self.state == RouteState.TO_START or self.is_idle_goal()
 
-    def to_job_tuple(self):
+    def to_tuple(self):
         if self.is_idle_goal():
             return tuple([(self.goal[0], self.goal[1]),
                           self.idle_goal_stats])
@@ -178,6 +185,9 @@ class Route(object):
         else:
             return "R%d: %s -> %s (%s) = %s" % (
                 self.id, str(self.start), str(self.goal), str(self.state).split('.')[1], str(self.car))
+
+    def __hash__(self):
+        return hash(self.id)
 
 
 def emit_car(msb, car):
@@ -216,13 +226,9 @@ class Car(object):
 
     def set_pose(self, pose):
         self.lock.acquire()
-        if self.sim.check_free(self, pose):
-            self.pose = tuple(pose)
-            self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
-            logging.info("Car " + str(self.id) + " @ " + str(self.pose))
-        else:
-            logging.warning("Car " + str(self.id) + " BLOCKED @ " + str(self.pose))
-            raise RuntimeError("Collision ")
+        self.pose = tuple(pose)
+        self.sim.emit(QtCore.SIGNAL("update_car(PyQt_PyObject)"), self)
+        logging.info("Car " + str(self.id) + " @ " + str(self.pose))
         self.lock.release()
 
     def set_paths(self, _paths):
@@ -240,6 +246,9 @@ class Car(object):
 
     def __str__(self):
         return "C%d: [%.2f %.2f]" % (self.id, self.pose[0], self.pose[1])
+
+    def __hash__(self):
+        return hash(self.id) + hash(self.pose)
 
 
 class RouteState(Enum):

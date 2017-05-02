@@ -136,12 +136,12 @@ class Cbsext(Module):
         for i_route in range(len(jobs)):
             r = jobs[i_route]
             if not r.is_finished():  # all but the finished ones
-                jobs.append(r.to_job_tuple())
+                jobs.append(r.to_tuple())
                 if r.is_on_route():
                     alloc_jobs.append((get_car_i(cars, r.car), i_route))
         for i_idle_goals in range(len(idle_goal_routes)):
             ig = idle_goal_routes[i_idle_goals]
-            idle_goals.append(ig.to_job_tuple())
+            idle_goals.append(ig.to_tuple())
 
         planning_start = datetime.datetime.now()
         parent_conn, child_conn = Pipe()
@@ -172,5 +172,5 @@ class Cbsext(Module):
         for i_car in range(len(cars)):
             cars[i_car].set_paths(self.paths[i_car])
 
-        self.plan_params_hash = list_hash(cars + jobs)  # how we have planned last time TODO: idle_goals
+        self.plan_params_hash = list_hash(cars + routes)  # how we have planned last time TODO: idle_goals
         self.lock.release()
