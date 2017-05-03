@@ -108,7 +108,6 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     return agent_job, _agent_idle, _paths
 
 
-
 # Main methods
 
 def get_children(_condition: dict, _state: tuple) -> list:
@@ -125,9 +124,9 @@ def get_children(_condition: dict, _state: tuple) -> list:
 
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
-    (agent_job, _agent_idle, blocked) = state2comp(_state)
+    (agent_job, agent_idle, blocked) = state2comp(_state)
     (left_agent_pos, left_idle_goals, left_jobs
-     ) = clear_set(_agent_idle, agent_job, agent_pos, idle_goals, jobs)
+     ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
 
     eval_blocked = False
     for i in range(len(blocked)):
@@ -145,8 +144,8 @@ def get_children(_condition: dict, _state: tuple) -> list:
             else:
                 blocked1.append(blocked[i])
                 blocked2.append(blocked[i])
-        return [comp2state(agent_job, _agent_idle, tuple(blocked1)),
-                comp2state(agent_job, _agent_idle, tuple(blocked2))]
+        return [comp2state(agent_job, agent_idle, tuple(blocked1)),
+                comp2state(agent_job, agent_idle, tuple(blocked2))]
     else:
         children = []
         agent_pos = list(agent_pos)
@@ -160,15 +159,16 @@ def get_children(_condition: dict, _state: tuple) -> list:
                     agent_job_new = agent_job.copy()
                     agent_job_new[i_a] += (job_to_assign,)
                     children.append(comp2state(tuple(agent_job_new),
-                                               _agent_idle,
+                                               agent_idle,
                                                blocked))
             return children
-        elif (len(left_idle_goals) > 0) & (len(jobs) < len(agent_pos)):  # only idle goals if more agents than jobs
-            _agent_idle = list(_agent_idle)
-            for i_a in range(len(left_agent_pos)):
-                if not len(_agent_idle[i_a]):  # no idle goal yet
+        elif (len(left_idle_goals) > 0) & (len(left_jobs) == 0):  # only idle goals if more agents than jobs
+            agent_idle = list(agent_idle)
+            for i_la in range(len(left_agent_pos)):
+                i_a = agent_pos.index(left_agent_pos[i_la])  # which agent is it actually?
+                if not len(agent_idle[i_a]):  # no idle goal yet
                     for i_ig in range(len(left_idle_goals)):
-                        agent_idle_new = _agent_idle.copy()
+                        agent_idle_new = agent_idle.copy()
                         agent_idle_new[i_a] = (idle_goals.index(left_idle_goals[i_ig]),)
                         children.append(comp2state(tuple(agent_job),
                                                    tuple(agent_idle_new),
@@ -190,7 +190,7 @@ def cost(_condition: dict, _state: tuple):
       The **total** cost of this state
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
-    (agent_job, _agent_idle, block_state) = state2comp(_state)
+    (agent_job, agent_idle, block_state) = state2comp(_state)
     _cost = 0.
 
     _paths = get_paths(_condition, _state)
@@ -215,7 +215,7 @@ def cost(_condition: dict, _state: tuple):
                     _cost += jobs[assigned_jobs[i]][2] * -1  # waiting time before job was touched
                     i += 1
             assert i == len(assigned_jobs), "Not handled all assigned jobs"
-        idle_assignment = _agent_idle[i_a]
+        idle_assignment = agent_idle[i_a]
         if idle_assignment:
             assert len(idle_assignment) == 1, "Multiple agent entries"
             i_idle_goal = idle_assignment[0]
@@ -229,7 +229,7 @@ def cost(_condition: dict, _state: tuple):
     collision = find_collision(_paths)
     if collision != ():
         block_state += (collision,)
-        _state = comp2state(agent_job, _agent_idle, block_state)
+        _state = comp2state(agent_job, agent_idle, block_state)
     for bs in block_state:
         if not bs[1].__class__ == int:  # a collision
             _cost += 1  # a little more expensive when there is a collision
