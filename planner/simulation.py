@@ -67,7 +67,7 @@ class SimpSim(QtCore.QThread):
     def start_sim(self, width, height, number_agvs):
         self.area = zeros([width, height])
         self.number_agvs = number_agvs
-        Car.nextId = 0
+        Car.next_id = 0
         SimpSim.cars = []
         for i in range(self.number_agvs):
             c = Car(self)
@@ -92,7 +92,7 @@ class SimpSim(QtCore.QThread):
         self.area = False
         SimpSim.routes = []
         SimpSim.cars = []
-        Car.nextId = 0
+        Car.next_id = 0
 
         if SimpSim.scheduler.running:
             logging.info("Pause")
@@ -151,7 +151,6 @@ class SimpSim(QtCore.QThread):
     def work_routes(self):
         if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
             self.print_debug_info()
-
         for r in self.routes:
             if not (r.is_finished() or r.is_on_route()):  # for all but the finished or on_route ones
                 c = self.module.which_car(SimpSim.cars, r, SimpSim.routes)
@@ -184,5 +183,5 @@ class SimpSim(QtCore.QThread):
                       " | ts:" + str(n_to_start) +
                       " | or:" + str(n_on_route) +
                       " | f:" + str(n_finished) +
-                      " | igq:" + str(n_ig_queued) +
-                      " | igr:" + str(n_ig_running))
+                      " | iq:" + str(n_ig_queued) +
+                      " | ir:" + str(n_ig_running))

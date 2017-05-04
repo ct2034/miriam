@@ -7,9 +7,18 @@ from enum import Enum
 import numpy as np
 from PyQt4 import QtCore
 from numpy import linalg
-from numpy.core.numeric import ndarray, array
 
 msb = None
+
+
+def free_car(_car):
+    if _car.route:
+        assert _car.route.is_re_assignable(), "This can only have been on the way or on a idle goal"
+        if not _car.route.is_idle_goal():  # not idle goal
+            _car.route.state = RouteState.QUEUED  # Other route is now queued again
+        if _car.route.car:  # also idle goals loose their car
+            _car.route.state = RouteState.IDLE_GOAL_QUEUED
+        _car.route.car = None  # not on that route any more
 
 
 class Route(object):
@@ -45,17 +54,16 @@ class Route(object):
             global msb
             from planner import msb
 
-        logging.debug(str(self))
+        logging.debug("Init:" + str(self))
 
     def assign_car(self, _car):
         self.lock.acquire()
-        logging.debug("Assigning a car to " + str(self))
-        if self.car == _car:
-            # nothing changed
+        logging.debug("Assigning " + str(_car) + " car to " + str(self))
+        if self.car == _car:  # nothing changed
             self.lock.release()
             return
         if self.state == RouteState.QUEUED:  # starting the route
-            self.free_car(_car)
+            free_car(_car)
             self.car = _car
             self.state = RouteState.TO_START
             logging.debug(str(self))
@@ -65,11 +73,11 @@ class Route(object):
                 data = {"agvId": self.car.id, "jobId": self.id}
                 msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eAGVAssignment, data=data)
         elif self.state == RouteState.TO_START:  # had another car already
-            self.free_car(_car)
+            free_car(_car)
             assert self.car, "Should have had a car, had: " + str(self.car) + ", should get: " + str(_car)
             self.car = _car
             _car.route = self
-        elif self.state == RouteState.IDLE_GOAL_QUEUED:  # is an idle goal
+        elif self.is_idle_goal():  # is an idle goal
             self.car = _car
             _car.route = self
             self.state = RouteState.IDLE_GOAL_RUNNING
@@ -77,19 +85,11 @@ class Route(object):
             assert False, "Can not assign car in state " + str(self.state)
         self.lock.release()
 
-    def free_car(self, _car):
-        if _car.route:
-            assert _car.route.is_re_assignable(), "This can only have been on the way or on a idle goal"
-            if _car.route.state != RouteState.IDLE_GOAL:  # not idle goal
-                _car.route.state = RouteState.QUEUED  # Other route is now queued again
-            if _car.route.car:  # also idle goals loose their car
-                _car.route.car = None  # not on that route any more
-
-    def new_step(self, stepSize):
+    def new_step(self, step_size):
         self.lock.acquire()
         assert self.car, "Should have a car"
         i_prev = self.car.i
-        self.car.i += stepSize
+        self.car.i += step_size
         i_prev_round = int(np.ceil(i_prev))
         i_next_round = int(np.floor(self.car.i))
 
@@ -111,10 +111,10 @@ class Route(object):
             logging.warning("Waiting for car to be assigned")
         for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
             if not self.is_idle_goal() and \
-                    ((self.car.paths[_i][0:2] == tuple(self.start)) or \
-                             (tuple(self.car.pose) == tuple(self.start))):
+                    ((self.car.paths[_i][0:2] == tuple(self.start)) or
+                         (tuple(self.car.pose) == tuple(self.start))):
                 self.at_start()
-            elif ((self.car.paths[_i][0:2] == tuple(self.goal)) & self.is_on_route()) or \
+            elif ((self.car.paths[_i][0:2] == tuple(self.goal)) and (self.is_on_route() or self.is_idle_goal())) or \
                     (not self.is_idle_goal() and tuple(self.car.pose) == tuple(self.start)):  # @ goal
                 self.at_goal()
                 break
@@ -199,30 +199,18 @@ def emit_car(msb, car):
 class Car(object):
     """an AGV to be simulated"""
 
-    nextId = 0
+    next_id = 0
 
     def __init__(self, s):
         self.sim = s
-
-        # assert s.__class__ is SimpSim, "Pass the simulation object to the new car"
-        self.pose = tuple(([
-            4, 3 + Car.nextId
-            # random.randint(0, s.area.shape[0]),
-            # random.randint(0, s.area.shape[1])
-        ]))
-
+        self.pose = (4, 3 + Car.next_id)  # TODO: how to init?
         self.route = False
-
-        self.id = Car.nextId
-        Car.nextId += 1
-
-        logging.info("New car:" +
-                     str(self.id) +
-                     " at "
-                     + str(self.pose))
-
+        self.id = Car.next_id
+        Car.next_id += 1
         self.paths = None
         self.lock = Lock()
+
+        logging.debug("Init:" + str(self))
 
     def set_pose(self, pose):
         self.lock.acquire()
