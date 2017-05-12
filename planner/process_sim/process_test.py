@@ -2,7 +2,6 @@
 
 import logging
 from datetime import datetime
-import time
 import numpy as np
 
 from planner.mod_cbsextension import Cbsext
@@ -38,8 +37,8 @@ def run(agv_sim, stations, flow, products_todo):
                     print("PRODUCT %d FINISHED" % (p + 1))
                 elif state[p] < len(flow) - 1:  # running
                     if (t_left[p] <= 0) & (blocked[int(state[p])] == p):
-                        agv_sim.new_job(np.array(stations[flow[int(state[p])][0]], dtype=int),
-                                        np.array(stations[flow[int(state[p]) + 1][0]], dtype=int),
+                        agv_sim.new_job(tuple(stations[flow[int(state[p])][0]]),
+                                        tuple(stations[flow[int(state[p]) + 1][0]]),
                                         hash(p + 100 * state[p]))
                         blocked[int(state[p])] = -1
                         state[p] += .5
@@ -61,16 +60,16 @@ def test_process_cbsext():
     return t
 
 
-# def test_process_random():
-#     mod = Random(_map)
-#     t = run_with_module(mod)
-#     return t
-#
-#
-# def test_process_nearest():
-#     mod = Nearest(_map)
-#     t = run_with_module(mod)
-#     return t
+def test_process_random():
+    mod = Random(_map)
+    t = run_with_module(mod)
+    return t
+
+
+def test_process_nearest():
+    mod = Nearest(_map)
+    t = run_with_module(mod)
+    return t
 
 
 def test_benchmark():
@@ -81,6 +80,7 @@ def test_benchmark():
             durations[i_mod] = run_with_module(modules[i_mod], products_todo=3, n_agv=2)
         except Exception as e:
             logging.error("Exception on simulation level\n" + str(e))
+            raise e
 
     print("RESULT:\n for ..")
     print("modules: " + str(modules))
@@ -92,6 +92,18 @@ def run_with_module(mod, products_todo=3, n_agv=2):
     agv_sim = SimpSim(False, mod)
     agv_sim.start()
     agv_sim.start_sim(x_res, y_res, n_agv)
+    idle_goals = [((0, 0), (15, 3)),
+                  ((4, 0), (15, 3),),
+                  ((9, 0), (15, 3),),
+                  ((9, 4), (15, 3),),
+                  ((9, 9), (15, 3),),
+                  ((4, 9), (15, 3),),
+                  ((0, 9), (15, 3),),
+                  ((0, 5), (15, 3),)]  # TODO: we have to learn these!
+    id = 1000
+    for ig in idle_goals:
+        agv_sim.new_idle_goal(ig[0], ig[1], id)
+        id += 1
     stations = [[0, 0],
                 [9, 9],
                 [4, 0],
