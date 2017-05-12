@@ -92,7 +92,7 @@ class Route(object):
 
         # -> consider pos of t = 3
 
-        assert i_next_round <= len(self.car.paths) + 10, "shooting far over goal"
+        # assert i_next_round <= len(self.car.paths), "shooting far over goal: " + str(self) TODO: can we forget about this?
         i_next_round = min(i_next_round, len(self.car.paths) - 1)  # e.g. 3
         assert not self.is_finished(), "Should not be finished"
         while self.car is None:
