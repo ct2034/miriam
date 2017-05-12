@@ -175,7 +175,7 @@ class Route(object):
                 self.id, str(self.start), str(self.goal), str(self.state).split('.')[1], str(self.car))
 
     def __hash__(self):
-        return hash(self.id) + hash(self.goal)
+        return hash(hash(self.id) + hash(self.goal) + hash(self.state))
 
 
 def emit_car(msb, car):
@@ -231,7 +231,7 @@ class Car(object):
         return "C%d: [%.2f %.2f]" % (self.id, self.pose[0], self.pose[1])
 
     def __hash__(self):
-        return hash(self.id) + hash(self.get_route())
+        return hash(hash(self.id) + hash(self.get_route()))
 
 
 def free_car(_car: Car):
