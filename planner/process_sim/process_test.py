@@ -74,7 +74,7 @@ def test_process_nearest():
 
 def test_benchmark():
     durations = np.zeros(2)
-    modules = [Cbsext(_map), Nearest(_map)]
+    modules = [Nearest(_map), Cbsext(_map)]
     for i_mod in range(len(modules)):
         try:
             durations[i_mod] = run_with_module(modules[i_mod], products_todo=3, n_agv=2)
@@ -112,10 +112,10 @@ def run_with_module(mod, products_todo=3, n_agv=2):
                 [9, 4]]
     flow = [[0, 2],
             [1, 3],
-            # [2, 1],
-            # [4, 2],
-            # [3, 3],
-            # [5, 3],
+            [2, 1],
+            [4, 2],
+            [3, 3],
+            [5, 3],
             [6, 2]
             ]
     n = run(agv_sim, stations, flow, products_todo)

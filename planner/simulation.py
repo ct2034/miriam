@@ -2,7 +2,6 @@ import logging
 import time
 
 from threading import Lock
-# from PyQt5 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import *
 from numpy import *
@@ -104,7 +103,6 @@ class SimpSim():
         if SimpSim.scheduler.running:
             logging.info("Pause")
             SimpSim.scheduler.pause()
-            SimpSim.scheduler.shutdown()
 
         logging.info('end-start= ' + str(time.time() - self.startTime))
         logging.info('i= ' + str(SimpSim.i))
@@ -144,11 +142,12 @@ class SimpSim():
                             SimpSim.speedMultiplier *
                             SimpSim.simTime
                         )
-                poses = set()
-                for c in self.cars:
-                    pose = c.pose
-                    assert pose not in poses, "Collision!"
-                    poses.add(pose)
+                if str(self.module.__class__) != "<class 'planner.mod_nearest.Nearest'>":  # not catching collisions on Nearest
+                    poses = set()
+                    for c in self.cars:
+                        pose = c.pose
+                        assert pose not in poses, "Collision!"
+                        poses.add(pose)
                 SimpSim.i += 1
         except Exception as _e:
             logging.error("ERROR:" + str(_e))

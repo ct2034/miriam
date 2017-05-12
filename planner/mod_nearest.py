@@ -11,11 +11,14 @@ class Nearest(Module):
         self.grid = grid
 
     def which_car(self, cars: list, route_todo: Route, routes: list) -> Car:
+        if route_todo.is_idle_goal():
+            return None  # we don't care for idle goals here!!
         free_cars = []
         free_cars_poses = []
         for c in cars:
-            if c.route:
-                if not c.route.is_running() and not c.route.is_finished():
+            r = c.get_route()
+            if r:
+                if not r.is_running() and not r.is_finished():
                     free_cars.append(c)
                     free_cars_poses.append(c.pose)
             else:  # no route assigned yet
