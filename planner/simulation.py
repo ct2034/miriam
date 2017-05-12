@@ -142,7 +142,7 @@ class SimpSim():
                             SimpSim.speedMultiplier *
                             SimpSim.simTime
                         )
-                if str(self.module.__class__) != "<class 'planner.mod_nearest.Nearest'>":  # not catching collisions on Nearest
+                if str(self.module.__class__) == "<class 'planner.mod_nearest.Cbsext'>":  # only catching collisions on Cbsext
                     poses = set()
                     for c in self.cars:
                         pose = c.pose

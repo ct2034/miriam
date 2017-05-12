@@ -10,10 +10,12 @@ class Random(Module):
         self.grid = grid
 
     def which_car(self, cars: list, route_todo: Route, routes: list) -> Car:
+        if route_todo.is_idle_goal():
+            return None  # we don't care for idle goals here!!
         rand = random.Random()
         free_cars = []
         for c in cars:
-            if not c.route:
+            if not c.get_route():
                 free_cars.append(c)
         if len(free_cars) > 0:
             car = free_cars[rand.randint(0, len(free_cars) - 1)]
