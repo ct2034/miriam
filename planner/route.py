@@ -239,8 +239,11 @@ def free_car(_car: Car):
         assert _car.get_route().is_re_assignable(), "This can only have been on the way or on a idle goal"
         if _car.get_route().is_idle_goal():
             _car.get_route().state = RouteState.IDLE_GOAL_QUEUED  # back to queue
-        elif _car.get_route().car:  # also routes loose their car
+        else: # normal route
             _car.get_route().state = RouteState.QUEUED  # Other route is now queued again
+
+        if _car.get_route().car:  # also routes loose their car
+            _car.get_route().car = None
 
 
 class RouteState(Enum):
