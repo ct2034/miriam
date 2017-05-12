@@ -42,7 +42,7 @@ def get_data_labyrinthian(n=1):
     idle_goals = [((9 * n, 7 * n), (5, .5))]  # one idle goal 9,7 with P~N(5,.5)
     # expected results
     agent_job = ((0,), (), (1,))
-    agent_idle = ((1, 0),)
+    agent_idle = ((), (0,), ())
     return agent_idle, agent_job, agent_pos, grid, idle_goals, jobs
 
 
@@ -188,7 +188,7 @@ def test_consecutive_jobs():
                                                                          filename='',
                                                                          plot=False)
 
-    assert len(res_agent_idle) == 0, "We don't have to assign idle goals"
+    assert len(res_agent_idle[0]) == 0, "We don't have to assign idle goals"
     assert len(res_agent_job) == 1, "Not one assigned job"
     assert len(res_agent_job[0]) == 3, "Not all jobs assigned to first agent"
     assert len(res_paths) == 1, "Not one path sets for the agent"
@@ -209,7 +209,8 @@ def test_same_jobs(plot=False):
                                                                          filename='',
                                                                          plot=plot)
 
-    assert len(res_agent_idle) == 0, "We don't have to assign idle goals"
+    assert len(res_agent_idle[0]) == 0, "We don't have to assign idle goals"
+    assert len(res_agent_idle[1]) == 0, "We don't have to assign idle goals"
     assert len(res_agent_job) == 2, "Not both jobs assigned"
     assert len(res_agent_job[0]) == 1, "Not all jobs assigned to one agent"
     assert len(res_agent_job[1]) == 1, "Not all jobs assigned to one agent"

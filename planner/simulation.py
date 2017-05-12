@@ -2,7 +2,7 @@ import logging
 import time
 
 from threading import Lock
-from PyQt5 import QtCore
+# from PyQt5 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
@@ -25,7 +25,7 @@ def list_hash(l):
     return sum(list(map(hash, l)))
 
 
-class SimpSim(QtCore.QThread):
+class SimpSim():
     """simulation of multiple AGVs"""
     routes = []
     cars = []
@@ -38,7 +38,7 @@ class SimpSim(QtCore.QThread):
     startTime = time.time()
 
     def __init__(self, msb_select: bool, _mod, parent=None):
-        QtCore.QThread.__init__(self, parent)
+        # QtCore.QThread.__init__(self, parent)
         logging.info("init Simulation")
         self.lock = Lock()
 
@@ -61,10 +61,8 @@ class SimpSim(QtCore.QThread):
             replace_existing=True  # for restarting
         )
 
-    def run(self):
-        SimpSim.running = True
-
     def start_sim(self, width, height, number_agvs):
+        SimpSim.running = True
         self.area = zeros([width, height])
         self.number_agvs = number_agvs
         Car.next_id = 0
