@@ -4,6 +4,7 @@ import time
 from threading import Lock
 # from PyQt5 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.events import *
 from numpy import *
 
 from planner.route import Route, RouteState, Car, emit_car
@@ -23,6 +24,11 @@ def get_distance(a, b):
 
 def list_hash(l):
     return sum(list(map(hash, l)))
+
+
+def my_listener(event):
+    if event.exception:
+        SimpSim.scheduler.pause()
 
 
 class SimpSim():
@@ -60,6 +66,7 @@ class SimpSim():
             max_instances=1,
             replace_existing=True  # for restarting
         )
+        SimpSim.scheduler.add_listener(my_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
     def start_sim(self, width, height, number_agvs):
         SimpSim.running = True
