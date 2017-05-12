@@ -123,12 +123,15 @@ class Cbsext(Module):
                 logging.warning("waiting (is already planning)")
                 time.sleep(.4)
 
+        job_goals_and_agents = []
+
         agent_pos = []
         for c in cars:
             t = c.to_tuple()
             assert not t[0].__class__ is np.ndarray
             assert t[0] == c.pose[0], "Problems with pose"
             agent_pos.append(t)
+            job_goals_and_agents.append(t)
 
         jobs = []
         alloc_jobs = []
@@ -137,11 +140,13 @@ class Cbsext(Module):
             r = jobs_routes[i_route]
             if not r.is_finished():  # all but the finished ones
                 jobs.append(r.to_tuple())
+                job_goals_and_agents.append(r.goal)
                 if r.is_on_route():
                     alloc_jobs.append((get_car_i(cars, r.car), i_route))
         for i_idle_goals in range(len(idle_goal_routes)):
             ig = idle_goal_routes[i_idle_goals]
-            idle_goals.append(ig.to_tuple())
+            if ig.goal not in job_goals_and_agents:  # we only consider idle goals where no car goes or is anyway :)
+                idle_goals.append(ig.to_tuple())
 
         planning_start = datetime.datetime.now()
         parent_conn, child_conn = Pipe()
@@ -156,7 +161,7 @@ class Cbsext(Module):
                                )
         self.process.name = "cbs_ext planner"
         self.process.start()
-        logging.debug("process started")
+        # logging.debug("process started")
         (self.agent_job,
          self.agent_idle,
          self.paths) = parent_conn.recv()
