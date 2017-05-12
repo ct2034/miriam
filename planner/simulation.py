@@ -2,7 +2,7 @@ import logging
 import time
 
 from threading import Lock
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
@@ -29,7 +29,7 @@ class SimpSim(QtCore.QThread):
     """simulation of multiple AGVs"""
     routes = []
     cars = []
-    driveSpeed = 2.1  # m/s
+    driveSpeed = 1.0  # m/s
     speedMultiplier = 1
     simTime = 1  # s
     running = False
@@ -82,7 +82,7 @@ class SimpSim(QtCore.QThread):
         else:
             logging.info("Resuming")
             SimpSim.scheduler.start()
-        self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width, height, SimpSim.cars)
+        # self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width, height, SimpSim.cars)
 
         SimpSim.i = 0
         self.startTime = time.time()
@@ -185,3 +185,4 @@ class SimpSim(QtCore.QThread):
                       " | f:" + str(n_finished) +
                       " | iq:" + str(n_ig_queued) +
                       " | ir:" + str(n_ig_running))
+        assert (n_ig_running + n_on_route + n_to_start) <= len(self.cars), "There can be only so many routes running"

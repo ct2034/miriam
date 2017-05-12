@@ -110,7 +110,7 @@ class Cbsext(Module):
 
     def update_plan(self, cars, routes):
         self.lock.acquire()
-        idle_goal_routes, jobs, routes = self.split_routes(routes)
+        idle_goal_routes, jobs_routes, routes = self.split_routes(routes)
         if len(routes) < len(cars):  # to few jobs
             self.lock.release()
             return
@@ -133,8 +133,8 @@ class Cbsext(Module):
         jobs = []
         alloc_jobs = []
         idle_goals = []
-        for i_route in range(len(jobs)):
-            r = jobs[i_route]
+        for i_route in range(len(jobs_routes)):
+            r = jobs_routes[i_route]
             if not r.is_finished():  # all but the finished ones
                 jobs.append(r.to_tuple())
                 if r.is_on_route():
@@ -160,11 +160,11 @@ class Cbsext(Module):
         (self.agent_job,
          self.agent_idle,
          self.paths) = parent_conn.recv()
-        logging.debug("process received")
+        # logging.debug("process received")
         self.process.join(timeout=1)
-        logging.debug("process joined")
+        # logging.debug("process joined")
         self.process.terminate()
-        logging.debug("process terminated")
+        # logging.debug("process terminated")
 
         logging.info("Planning took %.4fs" % (datetime.datetime.now() - planning_start).total_seconds())
 
