@@ -28,7 +28,9 @@ def list_hash(l):
 
 def my_listener(event):
     if event.exception:
+        SimpSim.running = False
         SimpSim.scheduler.pause()
+        SimpSim.scheduler.s()
 
 
 class SimpSim():
@@ -102,6 +104,7 @@ class SimpSim():
         if SimpSim.scheduler.running:
             logging.info("Pause")
             SimpSim.scheduler.pause()
+            SimpSim.scheduler.shutdown()
 
         logging.info('end-start= ' + str(time.time() - self.startTime))
         logging.info('i= ' + str(SimpSim.i))
