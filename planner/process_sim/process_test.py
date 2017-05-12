@@ -73,8 +73,8 @@ def test_process_nearest():
 
 
 def test_benchmark():
-    durations = np.zeros(2)
     modules = [Random(_map), Nearest(_map), Cbsext(_map)]
+    durations = np.zeros(len(modules))
     for i_mod in range(len(modules)):
         try:
             durations[i_mod] = run_with_module(modules[i_mod], products_todo=3, n_agv=2)
