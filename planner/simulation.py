@@ -37,9 +37,9 @@ class SimpSim():
     """simulation of multiple AGVs"""
     routes = []
     cars = []
-    driveSpeed = 1.0  # m/s
+    driveSpeed = 2.  # m/s
     speedMultiplier = 1
-    simTime = 1  # s
+    simTime = .5  # s
     running = False
     scheduler = BackgroundScheduler()
     i = 0
