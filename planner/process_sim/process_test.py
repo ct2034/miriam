@@ -90,7 +90,6 @@ def test_benchmark():
 
 def run_with_module(mod, products_todo=3, n_agv=2):
     agv_sim = SimpSim(False, mod)
-    agv_sim.start()
     agv_sim.start_sim(x_res, y_res, n_agv)
     idle_goals = [((0, 0), (15, 3)),
                   ((4, 0), (15, 3),),
