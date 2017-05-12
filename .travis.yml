@@ -1,55 +1,21 @@
 language: python
 cache: 
   - pip
-  # directories:
-  #   - '$HOME/.sonar/cache'
 
-addons:
-  sonarqube:
-    token:
-      secure: "pjBF+tfVYORHz095EaV+7+4WWoGeQv83LiDoDFaSZPyBkOgLww3xMgQgzTVDOOIJDloooYXo0n8pdrWtmu5IxLSSJ0CnoTj0AWiQHn+0q1Iqvl6rWMnNJkMRN/G/RGocZ6omePoNFR3tVefibN8iFUpCj7+CFg7Hm/+k8MEFNtBezbzLtYb4H6uTz7O6+QZcbx2CYdktRDSwpVsI19jOob8JqId/gzap/NfL1D7kBYESbN8+jrVqmpOOt/L3DG26gZ/4zbQP33ahqOYmzYTX5zd5891eJWaQ8Cv56m0+jEg5H3zRbFL7XDk7v149c2SYqWK5aQY6X2G3+g+GW0jI71MClD0W5epcM7hnrcpwttX6aAk6xcPFZC83zWtOIKysor47kMeP7oqdKWQpQYPX6Rvo5wdHuuq66vvuThUUxBSwQQljSCeUW2fxSpDpQMl0nmyaPAtcC+sSbyCMOHYxhIdQ0vVBYQC3LbZyaTPcez4SSgjYD4F09VqiXeuSy3LySX7n93uMnzY8fZ3Wvh7jjL2YzNFOReB8VgFsG6TE80kZttJjyJoXdl/zPh4vuqNAUSCD/YqgHhIue7vCYUqTJIK966wdZo7rmiMNZXm9U9e5tndUDPEanghPCQ27EyRg8S0yM1ii+ubAdHX44Pg+YGRHPB73YZ3ndV6ySnFSmRc="
-
-jdk:
-  - oraclejdk8
+#addons:
+#  sonarqube:
+#    token:
+#      secure: "pjBF+tfVYORHz095EaV+7+4WWoGeQv83LiDoDFaSZPyBkOgLww3xMgQgzTVDOOIJDloooYXo0n8pdrWtmu5IxLSSJ0CnoTj0AWiQHn+0q1Iqvl6rWMnNJkMRN/G/RGocZ6omePoNFR3tVefibN8iFUpCj7+CFg7Hm/+k8MEFNtBezbzLtYb4H6uTz7O6+QZcbx2CYdktRDSwpVsI19jOob8JqId/gzap/NfL1D7kBYESbN8+jrVqmpOOt/L3DG26gZ/4zbQP33ahqOYmzYTX5zd5891eJWaQ8Cv56m0+jEg5H3zRbFL7XDk7v149c2SYqWK5aQY6X2G3+g+GW0jI71MClD0W5epcM7hnrcpwttX6aAk6xcPFZC83zWtOIKysor47kMeP7oqdKWQpQYPX6Rvo5wdHuuq66vvuThUUxBSwQQljSCeUW2fxSpDpQMl0nmyaPAtcC+sSbyCMOHYxhIdQ0vVBYQC3LbZyaTPcez4SSgjYD4F09VqiXeuSy3LySX7n93uMnzY8fZ3Wvh7jjL2YzNFOReB8VgFsG6TE80kZttJjyJoXdl/zPh4vuqNAUSCD/YqgHhIue7vCYUqTJIK966wdZo7rmiMNZXm9U9e5tndUDPEanghPCQ27EyRg8S0yM1ii+ubAdHX44Pg+YGRHPB73YZ3ndV6ySnFSmRc="
+#
+#jdk:
+#  - oraclejdk8
 
 python:
   - "3.6"
 
-#before_install:
-#    - sudo mkdir -p /downloads
-#    - sudo chmod a+rw /downloads
-#    - curl -L http://sourceforge.net/projects/pyqt/files/sip/sip-4.16.5/sip-4.16.5.tar.gz -o /downloads/sip.tar.gz
-#    - curl -L http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt-x11-gpl-4.11.3.tar.gz -o /downloads/pyqt4.tar.gz
-#    # Builds
-#    - sudo mkdir -p /builds
-#    - sudo chmod a+rw /builds
-
 install:
-#    - export DISPLAY=:99.0
-#    - sh -e /etc/init.d/xvfb start
-#    - sudo apt-get install -y libqt4-dev
-#    - sudo apt-get install -y mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev
-##    - sudo apt-get install -y python3-sip python3-sip-dev python3-pyqt4 cmake
-#    # Qt4
-#    - pushd /builds
-#    # SIP
-#    - tar xzf /downloads/sip.tar.gz --keep-newer-files
-#    - pushd sip-4.16.5
-#    - python configure.py
-#    - make
-#    - sudo make install
-#    - popd
-#    # PyQt4
-#    - tar xzf /downloads/pyqt4.tar.gz --keep-newer-files
-#    - pushd PyQt-x11-gpl-4.11.3
-#    - python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtTest
-#    - make
-#    - sudo make install
-#    - popd
-#    # Builds Complete
-#    - popd
     - pip install -r requirements.txt
 
 script:
-  - sonar-scanner
+#  - sonar-scanner
   - py.test -vs
