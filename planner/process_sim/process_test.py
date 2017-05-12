@@ -112,10 +112,10 @@ def run_with_module(mod, products_todo=3, n_agv=2):
                 [9, 4]]
     flow = [[0, 2],
             [1, 3],
-            [2, 1],
-            [4, 2],
-            [3, 3],
-            [5, 3],
+            # [2, 1],
+            # [4, 2],
+            # [3, 3],
+            # [5, 3],
             [6, 2]
             ]
     n = run(agv_sim, stations, flow, products_todo)
