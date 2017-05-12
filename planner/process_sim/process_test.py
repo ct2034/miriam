@@ -124,4 +124,4 @@ def run_with_module(mod, products_todo=3, n_agv=2):
 
 
 if __name__ == "__main__":
-    test_benchmark()
+    test_benchmark()  # :)
