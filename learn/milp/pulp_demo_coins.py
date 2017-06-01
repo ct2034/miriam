@@ -7,12 +7,12 @@ import random
 prob = LpProblem("testCoins", LpMinimize)
 
 # Variables
-c1 = LpVariable("c1", 0, cat='Integer')
-c2 = LpVariable("c2", 0, cat='Integer')
-c5 = LpVariable("c5", 0, cat='Integer')
-c10 = LpVariable("c10", 0, cat='Integer')
-c20 = LpVariable("c20", 0, cat='Integer')
-c50 = LpVariable("c50", 0, cat='Integer')
+c1 = LpVariable("c1", 0, cat=LpInteger)
+c2 = LpVariable("c2", 0, cat=LpInteger)
+c5 = LpVariable("c5", 0, cat=LpInteger)
+c10 = LpVariable("c10", 0, cat=LpInteger)
+c20 = LpVariable("c20", 0, cat=LpInteger)
+c50 = LpVariable("c50", 0, cat=LpInteger)
 # Objective
 prob += c1 + c2 + c5 + c10 + c20 + c50  # Amount of coins
 
@@ -22,7 +22,7 @@ prob += ((c1 * 1 +  # Values of coins
           c5 * 5 +
           c10 * 10 +
           c20 * 20 +
-          c50 * 50) == 88)  # Target value
+          c50 * 50) == 87)  # Target value
 
 GLPK().solve(prob)
 
