@@ -1,15 +1,13 @@
 import datetime
-import getpass
 import logging
-import multiprocessing
 import os
 import random
 
 import numpy as np
 import png
-import psutil
 
 import planner.cbs_ext.plan
+from benchmark_tools import get_system_parameters
 
 
 def load_map(fname = 'cbs_ext/map.png'):
@@ -20,17 +18,6 @@ def load_map(fname = 'cbs_ext/map.png'):
     m = np.vstack(map(np.sign, iter))
     m = np.array(m, dtype=np.int8) - 1
     return m
-
-
-def get_system_parameters():
-    user = getpass.getuser()
-    print("\n-----\nUser:", user)
-    cores = multiprocessing.cpu_count()
-    print("CPUs:", cores)
-    memory = psutil.virtual_memory().total
-    print("Total Memory: %e" % memory)
-    print("-----\n")
-    return user, cores, memory
 
 
 def get_data_labyrinthian(n=1):

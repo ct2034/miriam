@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
 import logging
+import random
 from datetime import datetime
 import numpy as np
 
+from benchmark_tools import get_system_parameters
 from planner.mod_cbsextension import Cbsext
 from planner.mod_nearest import Nearest
 from planner.mod_random import Random
@@ -15,6 +17,14 @@ logging.getLogger("apscheduler").setLevel(logging.WARN)
 
 t_step = .1
 
+user, _, _ = get_system_parameters()
+if user == 'travis':
+    flow_lenght = 7 # full
+    products_todo = random.randint(10, 20)
+else:
+    flow_lenght = 2
+    products_todo = 3
+logging.info("We will use products_todo = %d" % products_todo)
 
 def run(agv_sim, stations, flow, products_todo):
     print("START")
@@ -56,19 +66,28 @@ _map = np.zeros([x_res, y_res, 51])
 
 def test_process_cbsext():
     mod = Cbsext(_map)
-    t = run_with_module(mod)
+    t = run_with_module(mod,
+                        products_todo=products_todo,
+                        n_agv=4,
+                        flow_lenght=flow_lenght)
     return t
 
 
 def test_process_random():
     mod = Random(_map)
-    t = run_with_module(mod)
+    t = run_with_module(mod,
+                        products_todo=products_todo,
+                        n_agv=4,
+                        flow_lenght=flow_lenght)
     return t
 
 
 def test_process_nearest():
     mod = Nearest(_map)
-    t = run_with_module(mod)
+    t = run_with_module(mod,
+                        products_todo=products_todo,
+                        n_agv=4,
+                        flow_lenght=flow_lenght)
     return t
 
 
@@ -77,7 +96,10 @@ def test_benchmark():
     durations = np.zeros(len(modules))
     for i_mod in range(len(modules)):
         try:
-            durations[i_mod] = run_with_module(modules[i_mod], products_todo=3, n_agv=2)
+            durations[i_mod] = run_with_module(modules[i_mod],
+                                               products_todo=3,
+                                               n_agv=2,
+                                               flow_lenght=flow_lenght)
         except Exception as e:
             logging.error("Exception on simulation level\n" + str(e))
             raise e
@@ -88,7 +110,7 @@ def test_benchmark():
 
 
 
-def run_with_module(mod, products_todo=3, n_agv=2):
+def run_with_module(mod, products_todo=3, n_agv=2, flow_lenght=7):
     agv_sim = SimpSim(False, mod)
     agv_sim.start_sim(x_res, y_res, n_agv)
     idle_goals = [((0, 0), (15, 3)),
@@ -118,6 +140,8 @@ def run_with_module(mod, products_todo=3, n_agv=2):
             [5, 3],
             [6, 2]
             ]
+    assert len(flow) >= flow_lenght, "Can only select max lenght of flow %d"%len(flow)
+    flow = flow[:(flow_lenght-1)]
     n = run(agv_sim, stations, flow, products_todo)
     agv_sim.stop_sim()
     return n
