@@ -19,7 +19,7 @@ t_step = .1
 
 user, _, _ = get_system_parameters()
 if user == 'travis':
-    flow_lenght = 7 # full
+    flow_lenght = 7  # full
     products_todo = random.randint(10, 20)
 else:
     flow_lenght = 2
@@ -109,7 +109,6 @@ def test_benchmark():
     print(durations)
 
 
-
 def run_with_module(mod, products_todo=3, n_agv=2, flow_lenght=7):
     agv_sim = SimpSim(False, mod)
     agv_sim.start_sim(x_res, y_res, n_agv)
@@ -140,8 +139,8 @@ def run_with_module(mod, products_todo=3, n_agv=2, flow_lenght=7):
             [5, 3],
             [6, 2]
             ]
-    assert len(flow) >= flow_lenght, "Can only select max lenght of flow %d"%len(flow)
-    flow = flow[:(flow_lenght-1)]
+    assert len(flow) >= flow_lenght, "Can only select max lenght of flow %d" % len(flow)
+    flow = flow[:(flow_lenght - 1)]
     n = run(agv_sim, stations, flow, products_todo)
     agv_sim.stop_sim()
     return n
