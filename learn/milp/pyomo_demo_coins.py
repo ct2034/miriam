@@ -19,7 +19,7 @@ model.OBJ = Objective(expr=obj_expression(model))
 
 
 def _e(model):
-    return np.sum(np.multiply(values, list(model.ct)))
+    return np.dot(values, list(model.ct))
 
 
 model.e = Expression([0], rule=_e)

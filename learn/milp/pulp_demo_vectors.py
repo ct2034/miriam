@@ -6,18 +6,16 @@ from pulp import *
 prob = LpProblem("vector", LpMinimize)
 
 # Variables
-ax = LpVariable("ax", 0)
-ay = LpVariable("ay", 0)
-az = LpVariable("az", 0)
+a = [LpVariable("a" + str(i), 0) for i in range(3)]
 
 # Objective
-prob += (ax + ay + az)  # small vector
+prob += lpSum(a)  # small vector
 
 # Constraints
-prob += ((ax + ay + az) == 1)  # unity
+prob += ((lpSum(a)) == 1)  # unity
 
-prob += (ax == ay)  # middle in x-y pane
-prob += (ax == az)  # ??
+prob += (a[0] == a[1])  # middle in x-y pane
+prob += (a[0] == a[2])  # ??
 
 # Solve
 GLPK().solve(prob)
