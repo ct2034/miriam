@@ -11,58 +11,75 @@ def manhattan_dist(a, b):
 
 
 def optimize(agents, tasks):
-    # Precalculate lengths
+    # Precalculate distances
     # agents-tasks
-    lengths_at = np.zeros([len(agents), len(tasks)])
+    dist_at = np.zeros([len(agents), len(tasks)])
     for ia in range(len(agents)):
         for it in range(len(tasks)):
-            lengths_at[ia, it] = manhattan_dist(agents[ia], tasks[it][0])
+            dist_at[ia, it] = manhattan_dist(agents[ia], tasks[it][0])
     # tasks
-    lengths_t = np.zeros([len(tasks)])
+    dist_t = np.zeros([len(tasks)])
     for it in range(len(tasks)):
-        lengths_t[it] = manhattan_dist(tasks[it][0], tasks[it][1])
+        dist_t[it] = manhattan_dist(tasks[it][0], tasks[it][1])
     # tasks-tasks
-    lengths_tt = np.zeros([len(tasks), len(tasks)])
+    dist_tt = np.zeros([len(tasks), len(tasks)])
     for it1 in range(len(tasks)):
         for it2 in range(len(tasks)):
-            lengths_tt[it1, it2] = manhattan_dist(tasks[it1][1], tasks[it2][0])
+            dist_tt[it1, it2] = manhattan_dist(tasks[it1][1], tasks[it2][0])
 
     # Problem
     m = ConcreteModel()
 
-    # Variables
-    def init_n(_):
+    # Sets
+    def init_all(_):
         return ((a, c, t) for a in range(len(agents)) for c in range(len(tasks)) for t in range(len(tasks)))
-    m.n = Set(dimen=3, initialize=init_n)
-    m.assignments = Var(m.n,
+
+    m.all = Set(dimen=3, initialize=init_all)
+
+    def init_agents(_):
+        return (a for a in range(len(agents)))
+
+    m.agents = Set(dimen=1, initialize=init_agents)
+
+    def init_tasks(_):
+        return (t for t in range(len(tasks)))
+
+    m.tasks = Set(dimen=1, initialize=init_tasks)
+
+    # Variables
+    m.assignments = Var(m.all,
                         domain=Boolean)
 
     # Objective
     def total_duration(m):
         obj = 0
+        prev = 0
         for ia in range(len(agents)):  # for all agents
             # path to first task
-            for it in np.arange(1, len(tasks)):
-                obj += (m.assignments[ia, 0, it] * lengths_at[ia][it])
-                obj += (m.assignments[ia, 0, it] * lengths_t[it])
-            # for ic in np.arange(1, len(tasks)):
-            #     # from previous task end to this start
-            #     for it in np.arange(1, len(tasks)):
-            #         temp = np.dot(m.assignments[ia + 1, ic], lengths_tt)
-            #         obj += np.dot(m.assignments[ia + 1, ic + 1], temp)
-            #         obj += np.dot(m.assignments[ia + 1, ic + 1], lengths_t)
+            for it in m.tasks:
+                obj += (m.assignments[ia, 0, it] * dist_at[ia][it])
+                obj += (m.assignments[ia, 0, it] * dist_t[it])
+            for ic in range(1, len(tasks)):  # for all consecutive assignments
+                # from previous task end to this start
+                for it in m.tasks:
+                    for it_prev in m.tasks:
+                        obj += (m.assignments[ia, ic, it] * m.assignments[ia, ic - 1, it_prev] * dist_tt[it_prev][it])
+                    obj += (m.assignments[ia, ic, it] * dist_t[it])
         return obj
     m.duration = Objective(rule=total_duration)
 
     # Constraints
     # consecutive assignments only from beginning
-    def one_agent_per_task(m):
-        return m.assignments[1,0,1] == True
-    m.one_agent = Constraint(rule=one_agent_per_task)
+
+    # every task has exactly one agent
+    def one_agent_per_task(m, i):
+        return sum(m.assignments[a, c, i] for a in m.agents for c in m.tasks) == 1
+
+    m.one_agent = Constraint(m.tasks, rule=one_agent_per_task)
 
     # Solve
     prob = m.create_instance()
-    optim = SolverFactory('glpk')
+    optim = SolverFactory('ipopt')
     result = optim.solve(prob, tee=True)
 
     # Solution
