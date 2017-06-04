@@ -8,3 +8,4 @@ pymc3
 psutil
 pypng
 pyqt5
+pyomo
