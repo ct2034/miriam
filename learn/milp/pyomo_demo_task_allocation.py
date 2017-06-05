@@ -74,6 +74,8 @@ def optimize(agents, tasks):
                                m.assignments[ia, ic - 1, it_prev] * \
                                dist_tt[it_prev][it]
                     obj += (m.assignments[ia, ic, it] * dist_t[it])
+        for it in m.tasks:
+            prob += tasks[it][2]  # all tasks arival time, TODO: whats the difference then?
         return obj
     m.duration = Objective(rule=total_duration)
 
