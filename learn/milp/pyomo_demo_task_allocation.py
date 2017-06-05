@@ -12,6 +12,8 @@ def manhattan_dist(a, b):
 
 
 def optimize(agents, tasks):
+    # how long can consecutive tasks be at max?
+    consec_len = 1 + len(tasks) - len(agents)  # TODO: use this
     # Precalculate distances
     # agents-tasks
     dist_at = np.zeros([len(agents), len(tasks)])
@@ -33,7 +35,9 @@ def optimize(agents, tasks):
 
     # Sets
     def init_all(_):
-        return ((a, c, t) for a in range(len(agents)) for c in range(len(tasks)) for t in range(len(tasks)))
+        return ((a, c, t) for a in range(len(agents))
+                for c in range(len(tasks))
+                for t in range(len(tasks)))
     m.all = Set(dimen=3, initialize=init_all)
 
     def init_agents(_):
@@ -43,6 +47,11 @@ def optimize(agents, tasks):
     def init_tasks(_):
         return (t for t in range(len(tasks)))
     m.tasks = Set(dimen=1, initialize=init_tasks)
+
+    def init_cons_a_first(_):
+        return (t for t in range(1, len(tasks)))
+
+    m.cons_a_first = Set(dimen=1, initialize=init_cons_a_first)
 
     # Variables
     m.assignments = Var(m.all,
@@ -58,9 +67,9 @@ def optimize(agents, tasks):
                 obj += (m.assignments[ia, 0, it] * dist_at[ia][it])
                 obj += (m.assignments[ia, 0, it] * dist_t[it])
             for ic in range(1, len(tasks)):  # for all consecutive assignments
-                # from previous task end to this start
                 for it in m.tasks:
-                    for it_prev in m.tasks:
+                    for it_prev in m.tasks:  # for all possible previous tasks
+                        # from previous task end to this start
                         obj += m.assignments[ia, ic, it] * \
                                m.assignments[ia, ic - 1, it_prev] * \
                                dist_tt[it_prev][it]
@@ -69,17 +78,18 @@ def optimize(agents, tasks):
     m.duration = Objective(rule=total_duration)
 
     # Constraints
-    # actually binary
-    # def binary(m, ia, ic, it):
-    #     return isinstance(m.assignments[ia, ic, it], BooleanSet)
-    # m.binary = Constraint(m.all, rule=binary)
-
-    # consecutive assignments only from beginning
-
     # every task has exactly one agent
-    def one_agent_per_task(m, i):
-        return sum(m.assignments[a, c, i] for a in m.agents for c in m.tasks) == 1
+    def one_agent_per_task(m, i_t):
+        return sum(m.assignments[a, c, i_t] for a in m.agents for c in m.tasks) == 1
     m.one_agent = Constraint(m.tasks, rule=one_agent_per_task)
+
+    # consecutive assignments can only happen after a previous one (consecutive)
+    def consecutive(m, a, c):
+        now = sum([m.assignments[a, c, t] for t in m.tasks])
+        prev = sum([m.assignments[a, c - 1, t] for t in m.tasks])
+        return now <= prev
+
+    m.consec = Constraint(m.agents, m.cons_a_first, rule=consecutive)
 
     # Solve
     prob = m.create_instance()
@@ -93,5 +103,5 @@ def optimize(agents, tasks):
 
 if __name__ == "__main__":
     agent_pos = [(1, 1), (9, 1), (3, 1)]  # three agents
-    jobs = [((1, 6), (9, 6), 0), ((3, 3), (7, 3), 0), ((2, 4), (7, 8), 10)]
+    jobs = [((1, 6), (9, 6), 0), ((1, 3), (7, 3), 0), ((6, 6), (7, 8), 10)]
     optimize(agent_pos, jobs)
