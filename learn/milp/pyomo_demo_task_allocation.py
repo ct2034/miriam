@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 from itertools import *
 from pyomo.environ import *
+from pyomo.core import *
 from pyomo.opt import SolverFactory
 
 
@@ -33,22 +34,19 @@ def optimize(agents, tasks):
     # Sets
     def init_all(_):
         return ((a, c, t) for a in range(len(agents)) for c in range(len(tasks)) for t in range(len(tasks)))
-
     m.all = Set(dimen=3, initialize=init_all)
 
     def init_agents(_):
         return (a for a in range(len(agents)))
-
     m.agents = Set(dimen=1, initialize=init_agents)
 
     def init_tasks(_):
         return (t for t in range(len(tasks)))
-
     m.tasks = Set(dimen=1, initialize=init_tasks)
 
     # Variables
     m.assignments = Var(m.all,
-                        domain=Boolean)
+                        within=NonNegativeIntegers)
 
     # Objective
     def total_duration(m):
@@ -63,23 +61,29 @@ def optimize(agents, tasks):
                 # from previous task end to this start
                 for it in m.tasks:
                     for it_prev in m.tasks:
-                        obj += (m.assignments[ia, ic, it] * m.assignments[ia, ic - 1, it_prev] * dist_tt[it_prev][it])
+                        obj += m.assignments[ia, ic, it] * \
+                               m.assignments[ia, ic - 1, it_prev] * \
+                               dist_tt[it_prev][it]
                     obj += (m.assignments[ia, ic, it] * dist_t[it])
         return obj
     m.duration = Objective(rule=total_duration)
 
     # Constraints
+    # actually binary
+    # def binary(m, ia, ic, it):
+    #     return isinstance(m.assignments[ia, ic, it], BooleanSet)
+    # m.binary = Constraint(m.all, rule=binary)
+
     # consecutive assignments only from beginning
 
     # every task has exactly one agent
     def one_agent_per_task(m, i):
         return sum(m.assignments[a, c, i] for a in m.agents for c in m.tasks) == 1
-
     m.one_agent = Constraint(m.tasks, rule=one_agent_per_task)
 
     # Solve
     prob = m.create_instance()
-    optim = SolverFactory('ipopt')
+    optim = SolverFactory('cplex')
     result = optim.solve(prob, tee=True)
 
     # Solution
