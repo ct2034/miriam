@@ -1,0 +1,13 @@
+<launch>
+	<!--arg name="map_file" default="$(find auckbot_navigation)/maps/lab2.yaml"/-->
+
+	<!--- Run map_server -->
+	<!--node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/-->
+
+	<!--- Run AMCL -->
+	<include file="$(find multi_robot_nav)/launch/amcl_node.xml" />
+	
+	<!--- Run move base -->
+	<include file="$(find multi_robot_nav)/launch/move_base.xml" />
+</launch>
+
