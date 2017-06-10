@@ -9,3 +9,4 @@ psutil
 pypng
 pyqt5
 pyomo
+flask

@@ -60,22 +60,22 @@ def optimize(agents, tasks):
     # Objective
     def total_duration(m):
         obj = 0
-        prev = 0
         for ia in range(len(agents)):  # for all agents
             # path to first task
+            obj_agent = 0
             for it in m.tasks:
-                obj += (m.assignments[ia, 0, it] * dist_at[ia][it])
-                obj += (m.assignments[ia, 0, it] * dist_t[it])
+                obj_agent += (m.assignments[ia, 0, it] * dist_at[ia][it])
+                obj_agent += (m.assignments[ia, 0, it] * dist_t[it])
             for ic in range(1, len(tasks)):  # for all consecutive assignments
                 for it in m.tasks:
                     for it_prev in m.tasks:  # for all possible previous tasks
                         # from previous task end to this start
-                        obj += m.assignments[ia, ic, it] * \
-                               m.assignments[ia, ic - 1, it_prev] * \
-                               dist_tt[it_prev][it]
-                    obj += (m.assignments[ia, ic, it] * dist_t[it])
+                        obj_agent += m.assignments[ia, ic, it] * \
+                                     m.assignments[ia, ic - 1, it_prev] * \
+                                     dist_tt[it_prev][it]
+                    obj_agent += (m.assignments[ia, ic, it] * dist_t[it])
         for it in m.tasks:
-            prob += tasks[it][2]  # all tasks arival time, TODO: whats the difference then?
+            obj += tasks[it][2]  # all tasks arival time, TODO: whats the difference then?
         return obj
     m.duration = Objective(rule=total_duration)
 
@@ -105,5 +105,9 @@ def optimize(agents, tasks):
 
 if __name__ == "__main__":
     agent_pos = [(1, 1), (9, 1), (3, 1)]  # three agents
-    jobs = [((1, 6), (9, 6), 0), ((1, 3), (7, 3), 0), ((6, 6), (7, 8), 10)]
+    jobs = [((1, 6), (9, 6), 0),
+            ((1, 3), (7, 3), 0),
+            ((6, 6), (3, 8), 10),
+            ((4, 8), (7, 1), 10),
+            ((3, 4), (1, 5), 10)]
     optimize(agent_pos, jobs)
