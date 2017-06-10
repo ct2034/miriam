@@ -22,7 +22,7 @@
 		<file>world.png</file>
 		
 		<!-- The rest of params are ignored if file is an MRPT gridmap -->
-		<resolution>0.5</resolution>
+		<resolution>0.1</resolution>
 		
 		<!--<show_collisions>true</show_collisions>-->
 	</element>
@@ -63,10 +63,10 @@
 				
 		<!-- Sensors: -->
 		<sensor class="laser" name="laser1">
-			<pose> 0.60  0.0  0.0 </pose>
-			<fov_degrees>180</fov_degrees>
+			<pose> 0.0  0.0  0.0 </pose>
+			<fov_degrees>360</fov_degrees>
 			<nrays>181</nrays>
-			<range_std_noise>0.01</range_std_noise>
+			<range_std_noise>0.02</range_std_noise>
 			<angle_std_noise_deg>0.01</angle_std_noise_deg>
 		</sensor>
 	</vehicle:class>
@@ -81,7 +81,7 @@
 	</vehicle>
 
 	<vehicle name="r2" class="small_robot">
-		<init_pose>0 -10 0</init_pose>  <!-- In global coords: x,y, yaw(deg) -->
+		<init_pose>0 -2 0</init_pose>  <!-- In global coords: x,y, yaw(deg) -->
 		<init_vel>0 0 0</init_vel>  <!-- In local coords: vx,vy, omega(deg/s) -->
 	</vehicle>
 	
