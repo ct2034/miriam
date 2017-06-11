@@ -15,3 +15,4 @@ __pycache__
 .idea/
 .ipynb_checkpoints/
 *.sublime*
+*.pyc
