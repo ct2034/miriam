@@ -16,10 +16,11 @@ RUN source /opt/ros/kinetic/setup.bash;\
  cd /ws;\
  catkin_make
 
-# removing last line 
-RUN sed '$d' ros_entrypoint.sh | tee ros_entrypoint.sh 
 # adding some things
-RUN echo "source /ws/devel/setup.bash" >> /ros_entrypoint.sh
-RUN echo "export ROS_IP=$(hostname -I)" >> /ros_entrypoint.sh
-# executing ...
-RUN echo "roslaunch $PACKAGE navigation.launch" >> /ros_entrypoint.sh
+RUN echo "#!/bin/bash" | tee /ros_entrypoint.sh;\
+ echo "set -e" >> /ros_entrypoint.sh;\
+ echo "source /ws/devel/setup.bash" >> /ros_entrypoint.sh;\
+ echo "export ROS_IP=\$(hostname -I)" >> /ros_entrypoint.sh;\
+ echo "roslaunch $PACKAGE navigation.launch" >> /ros_entrypoint.sh
+
+RUN cat /ros_entrypoint.sh
