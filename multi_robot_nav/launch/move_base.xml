@@ -1,7 +1,7 @@
 <launch>
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" ns="$(env ROBOT)">
-    <remap from="/$(env ROBOT)/map" to="/simul_map"/>
+    <!--remap from="/$(env ROBOT)/map" to="/simul_map"/-->
     <param name="base_global_planner" value="navfn/NavfnROS" /> 
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
     <rosparam file="$(find multi_robot_nav)/config/base_local_planner_params.yaml" command="load" />
