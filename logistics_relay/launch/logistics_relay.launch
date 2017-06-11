@@ -1,0 +1,6 @@
+<launch>
+  <node name="relay" pkg="logistics_relay" type="relay.py" output="screen" ns="$(env ROBOT)">
+    <param name="map_frame" value="map" />
+    <param name="link_frame" value="$(env ROBOT)/base_link" /> 
+ </node>
+</launch>
