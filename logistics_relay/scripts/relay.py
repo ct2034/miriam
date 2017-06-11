@@ -3,7 +3,8 @@
 import rospy
 import tf
 from geometry_msgs.msg import PoseStamped
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Pose2D
+
 from nav_msgs.msg import OccupancyGrid
 from std_srvs.srv import Empty
 
@@ -36,13 +37,13 @@ def callbackGoal(data):
         "; " +
         str(data.y) +
         "; " +
-        str(data.z) +
+        str(data.theta) +
         ")"
     )
     #clear_costmaps()
-    pubGoal(data.x, data.y, data.z)
+    pubGoal(data.x, data.y, data.theta)
     #clear_costmaps()
-    pubGoal(data.x, data.y, data.z)
+    pubGoal(data.x, data.y, data.theta)
 
 def callbackMap(data):
     rospy.loginfo("RELAY recieved map")
@@ -75,12 +76,12 @@ if __name__ == '__main__':
     link_frame = rospy.get_param('~link_frame')
     rospy.loginfo("link_frame: " + link_frame)
 
-    rospy.Subscriber("logistics_goal", Point, callbackGoal)
+    rospy.Subscriber("logistics_goal", Pose2D, callbackGoal)
     rospy.Subscriber("map", OccupancyGrid, callbackMap)
     pubGoalPose = rospy.Publisher(
         'move_base_simple/goal', PoseStamped, queue_size=10)
     pubCurrentPose = rospy.Publisher(
-        'logistics_pose', Point, queue_size=10)
+        'logistics_pose', Pose2D, queue_size=10)
 
     clear_costmaps = rospy.ServiceProxy('move_base/clear_costmaps', Empty)
 
@@ -95,10 +96,10 @@ if __name__ == '__main__':
                 map_frame, link_frame, rospy.Time(0)
             )
 
-            p = Point()
+            p = Pose2D()
             p.x = position[0]
             p.y = position[1]
-            p.z = tf.transformations.euler_from_quaternion(quaternion)[2]
+            p.theta = tf.transformations.euler_from_quaternion(quaternion)[2]
 
             rospy.logdebug("RELAY pose " + str(p))
 
