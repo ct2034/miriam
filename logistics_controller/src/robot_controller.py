@@ -1,6 +1,7 @@
 #!/bin/env python2
 import sys
 import numpy as np
+import cherrypy
 
 PY2 = sys.version_info[0] == 2
 if PY2:
@@ -9,6 +10,25 @@ if PY2:
 
 scale = .5
 delta = np.array([6, 4])
+
+
+class Interface:
+    @cherrypy.expose
+    @cherrypy.tools.json_in()
+    def init(self):
+        data = cherrypy.request.json
+        assert 'n_agvs' in data, "Please provide parameter 'n_agvs'"
+        print(data['n_agvs'])
+
+    @cherrypy.expose
+    @cherrypy.tools.json_in()
+    def goal(self):
+        data = cherrypy.request.json
+        assert 'agv' in data, "Please provide parameter 'agv'"
+        assert 'x' in data, "Please provide parameter 'x'"
+        assert 'y' in data, "Please provide parameter 'y'"
+        assert 'theta' in data, "Please provide parameter 'theta'"
+        print(data)
 
 
 def map_to_plan(x_map):
@@ -20,6 +40,8 @@ def plan_to_map(x_plan):
     assert x_plan.__class__ == tuple, "Coordinates should be tuples"
     return tuple((np.array(x_plan) - delta) / scale)
 
+
+cherrypy.quickstart(Interface())
 
 if __name__ == "__main__":
     rospy.init_node('robot_controller', anonymous=True)
