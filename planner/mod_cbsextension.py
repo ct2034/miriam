@@ -1,16 +1,16 @@
 import datetime
 import logging
+import time
 from multiprocessing import Pipe
 from multiprocessing import Process
-import time
+from threading import Lock
+
 import numpy as np
+from planner.route import Route, Car
 
 from planner.cbs_ext.plan import plan, get_paths, comp2condition, comp2state
 from planner.mod import Module
-from planner.route import Route, Car
-from planner.simulation import list_hash
-
-from threading import Lock
+from simple_simulation.simulation import list_hash
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)

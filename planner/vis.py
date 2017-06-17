@@ -1,6 +1,5 @@
-from numpy import *
-import planner.simulation
 from PyQt4 import QtGui, QtCore
+from numpy import *
 
 green = QtGui.QColor(10, 200, 10, 127)
 blue = QtGui.QColor(10, 10, 200, 127)

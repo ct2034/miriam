@@ -3,13 +3,14 @@
 import logging
 import random
 from datetime import datetime
+
 import numpy as np
 
 from benchmark_tools import get_system_parameters
 from planner.mod_cbsextension import Cbsext
 from planner.mod_nearest import Nearest
 from planner.mod_random import Random
-from planner.simulation import SimpSim
+from simple_simulation.simulation import SimpSim
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
@@ -57,6 +58,7 @@ def run(agv_sim, stations, flow, products_todo):
                         t_left[p] -= t_step
                     elif blocked[int(state[p])] == -1:  # free
                         blocked[int(state[p])] = p
+    logging.debug("run END")
     return (datetime.now() - t_start).total_seconds()
 
 x_res = 10
@@ -139,7 +141,7 @@ def run_with_sim(agv_sim, products_todo=3, n_agv=2, flow_lenght=7):
             [6, 2]
             ]
     assert len(flow) >= flow_lenght, "Can only select max lenght of flow %d" % len(flow)
-    flow = flow[:flow_lenght - 1]
+    flow = flow[:(flow_lenght)]
     n = run(agv_sim, stations, flow, products_todo)
     agv_sim.stop_sim()
     return n

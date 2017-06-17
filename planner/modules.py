@@ -1,4 +1,4 @@
-from planner.route import Car
+from simple_simulation.route import Car
 
 
 def __init__(mod):

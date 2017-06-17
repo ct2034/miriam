@@ -1,5 +1,5 @@
-from planner.simulation import SimpSim
 from process_sim.process_test import run_with_sim
+from simple_simulation.simulation import SimpSim
 
 
 class RobotSim(SimpSim):

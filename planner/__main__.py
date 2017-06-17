@@ -1,16 +1,13 @@
 import logging
 import threading
 import time
-import numpy as np
-import sys
 
 from PyQt4 import QtGui
 from numpy import *
 
-from planner.mod_cbsextension import Cbsext
 from planner.mod_random import Random
-from planner.simulation import SimpSim
 from planner.vis import Vis
+from simple_simulation.simulation import SimpSim
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)

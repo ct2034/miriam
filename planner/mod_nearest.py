@@ -1,9 +1,7 @@
-import random
-
 from planner.astar.astar_grid48con import astar_grid4con
 from planner.cbs_ext.plan import get_nearest
 from planner.mod import Module
-from planner.route import Route, Car
+from simple_simulation.route import Route, Car
 
 
 class Nearest(Module):
