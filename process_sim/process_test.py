@@ -66,28 +66,28 @@ _map = np.zeros([x_res, y_res, 51])
 
 def test_process_cbsext():
     mod = Cbsext(_map)
-    t = run_with_module(mod,
-                        products_todo=products_todo,
-                        n_agv=4,
-                        flow_lenght=flow_lenght)
+    t = run_with_sim(SimpSim(False, mod),
+                     products_todo=products_todo,
+                     n_agv=4,
+                     flow_lenght=flow_lenght)
     return t
 
 
 def test_process_random():
     mod = Random(_map)
-    t = run_with_module(mod,
-                        products_todo=products_todo,
-                        n_agv=4,
-                        flow_lenght=flow_lenght)
+    t = run_with_sim(SimpSim(False, mod),
+                     products_todo=products_todo,
+                     n_agv=4,
+                     flow_lenght=flow_lenght)
     return t
 
 
 def test_process_nearest():
     mod = Nearest(_map)
-    t = run_with_module(mod,
-                        products_todo=products_todo,
-                        n_agv=4,
-                        flow_lenght=flow_lenght)
+    t = run_with_sim(SimpSim(False, mod),
+                     products_todo=products_todo,
+                     n_agv=4,
+                     flow_lenght=flow_lenght)
     return t
 
 
@@ -96,10 +96,10 @@ def test_benchmark():
     durations = np.zeros(len(modules))
     for i_mod in range(len(modules)):
         try:
-            durations[i_mod] = run_with_module(modules[i_mod],
-                                               products_todo=3,
-                                               n_agv=2,
-                                               flow_lenght=flow_lenght)
+            durations[i_mod] = run_with_sim(SimpSim(False, modules[i_mod]),
+                                            products_todo=3,
+                                            n_agv=2,
+                                            flow_lenght=flow_lenght)
         except Exception as e:
             logging.error("Exception on simulation level\n" + str(e))
             raise e
@@ -109,8 +109,7 @@ def test_benchmark():
     print(durations)
 
 
-def run_with_module(mod, products_todo=3, n_agv=2, flow_lenght=7):
-    agv_sim = SimpSim(False, mod)
+def run_with_sim(agv_sim, products_todo=3, n_agv=2, flow_lenght=7):
     agv_sim.start_sim(x_res, y_res, n_agv)
     idle_goals = [((0, 0), (15, 3)),
                   ((4, 0), (15, 3),),

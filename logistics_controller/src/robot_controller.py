@@ -12,18 +12,42 @@ scale = .5
 delta = np.array([6, 4])
 
 
+def callback_pose(self, data):
+    rospy.loginfo("received pose")
+    pose = data
+
+
 class Interface:
+    rospy.init_node('robot_controller', anonymous=True)
+    rospy.loginfo("CONTROLLER init")
+    initialized = False
+
+    n_robots = rospy.get_param('~n_robots')
+    rospy.loginfo("n_robots: " + str(n_robots))
+    # This will produce namespaces r1, r2, ...
+    ns_prefix = rospy.get_param('~ns_prefix', 'r')
+    rospy.loginfo("ns_prefix: " + ns_prefix)
+
+    robot_nss = [ns_prefix + str(i) for i in range(n_robots)]
+
+    pose = None
+
+    pose_subscribers = map(lambda ns: rospy.Subscriber(
+        ns + "/logistics_pose", Pose2D, callback_pose), robot_nss)
+
     @cherrypy.expose
     @cherrypy.tools.json_in()
     def init(self):
         data = cherrypy.request.json
-        assert 'n_agvs' in data, "Please provide parameter 'n_agvs'"
-        print(data['n_agvs'])
+        assert 'width' in data, "Please provide parameter 'width'"
+        assert 'height' in data, "Please provide parameter 'height'"
+        Interface.initialized = True
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
     def goal(self):
         data = cherrypy.request.json
+        assert Interface.initialized, "Please call /init first!"
         assert 'agv' in data, "Please provide parameter 'agv'"
         assert 'x' in data, "Please provide parameter 'x'"
         assert 'y' in data, "Please provide parameter 'y'"
@@ -41,29 +65,8 @@ def plan_to_map(x_plan):
     return tuple((np.array(x_plan) - delta) / scale)
 
 
-cherrypy.quickstart(Interface())
 
 if __name__ == "__main__":
-    rospy.init_node('robot_controller', anonymous=True)
-    rospy.loginfo("CONTROLLER init")
-
-    n_robots = rospy.get_param('~n_robots')
-    rospy.loginfo("n_robots: " + str(n_robots))
-    # This will produce namespaces r1, r2, ...
-    ns_prefix = rospy.get_param('~ns_prefix', 'r')
-    rospy.loginfo("ns_prefix: " + ns_prefix)
-
-    robot_nss = map(lambda i: ns_prefix + str(i + 1), range(n_robots))
-
-    pose = None
-
-
-    def callbackPose(data):
-        rospy.loginfo("received pose")
-        pose = data
-
-
-    pose_subscribers = map(lambda ns: rospy.Subscriber(
-        ns + "/logistics_pose", Pose2D, callbackPose), robot_nss)
-
+    cherrypy.config.update({'server.socket_port': 5432})
+    cherrypy.quickstart(Interface())
     rospy.spin()

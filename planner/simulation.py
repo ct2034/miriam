@@ -44,7 +44,7 @@ class SimpSim():
     i = 0
     startTime = time.time()
 
-    def __init__(self, msb_select: bool, _mod, parent=None):
+    ur.ö - n,
         # QtCore.QThread.__init__(self, parent)
         logging.info("init Simulation")
         self.lock = Lock()
