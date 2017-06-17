@@ -12,7 +12,7 @@ msb = None
 
 
 def set_speed_multiplier(multiplier):
-    SimpSim.speedMultiplier = multiplier
+    SimpSim.speed_multiplier = multiplier
 
 
 def get_distance(a, b):
@@ -36,15 +36,15 @@ class SimpSim():
     """simulation of multiple AGVs"""
     routes = []
     cars = []
-    driveSpeed = 2.  # m/s
-    speedMultiplier = 1
-    simTime = .5  # s
+    drive_speed = 2.  # m/s
+    speed_multiplier = 1
+    sim_time = .5  # s
     running = False
     scheduler = BackgroundScheduler()
     i = 0
-    startTime = time.time()
+    start_time = time.time()
 
-    ur.ö - n,
+    def __init__(self, msb_select: bool, _mod, parent=None):
         # QtCore.QThread.__init__(self, parent)
         logging.info("init Simulation")
         self.lock = Lock()
@@ -63,7 +63,7 @@ class SimpSim():
             func=self.iterate,
             trigger='interval',
             id="sim_iterate",
-            seconds=SimpSim.simTime,
+            seconds=SimpSim.sim_time,
             max_instances=1,
             replace_existing=True  # for restarting
         )
@@ -91,7 +91,7 @@ class SimpSim():
         # self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width, height, SimpSim.cars)
 
         SimpSim.i = 0
-        self.startTime = time.time()
+        self.start_time = time.time()
 
     def stop_sim(self):
         SimpSim.running = False
@@ -104,10 +104,10 @@ class SimpSim():
             logging.info("Pause")
             SimpSim.scheduler.pause()
 
-        logging.info('end-start= ' + str(time.time() - self.startTime))
+        logging.info('end-start= ' + str(time.time() - self.start_time))
         logging.info('i= ' + str(SimpSim.i))
-        logging.info('i*SimTime= ' + str(SimpSim.i * SimpSim.simTime))
-        logging.info('missing: ' + str(time.time() - self.startTime - SimpSim.i * SimpSim.simTime) + 's')
+        logging.info('i*SimTime= ' + str(SimpSim.i * SimpSim.sim_time))
+        logging.info('missing: ' + str(time.time() - self.start_time - SimpSim.i * SimpSim.sim_time) + 's')
 
     def new_job(self, a, b, job_id):
         self.lock.acquire()
@@ -138,9 +138,9 @@ class SimpSim():
                 for j in self.routes:
                     if j.is_running():
                         j.new_step(
-                            SimpSim.driveSpeed *
-                            SimpSim.speedMultiplier *
-                            SimpSim.simTime
+                            SimpSim.drive_speed *
+                            SimpSim.speed_multiplier *
+                            SimpSim.sim_time
                         )
                 if str(self.module.__class__) == "<class 'planner.mod_nearest.Cbsext'>":  # only catching collisions on Cbsext
                     poses = set()
