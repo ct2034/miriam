@@ -139,7 +139,7 @@ def run_with_sim(agv_sim, products_todo=3, n_agv=2, flow_lenght=7):
             [6, 2]
             ]
     assert len(flow) >= flow_lenght, "Can only select max lenght of flow %d" % len(flow)
-    flow = flow[:(flow_lenght - 1)]
+    flow = flow[:flow_lenght - 1]
     n = run(agv_sim, stations, flow, products_todo)
     agv_sim.stop_sim()
     return n
