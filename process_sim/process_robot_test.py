@@ -1,6 +1,6 @@
 from process_sim.process_test import run_with_sim
 from simple_simulation.simulation import SimpSim
-
+from planner.mod_cbsextension import Cbsext
 
 class RobotSim(SimpSim):
     def __init__(self, module):
@@ -9,7 +9,7 @@ class RobotSim(SimpSim):
 
 if __name__ == "__main__":
     n_agvs = 2
-    module = CbsExt()
+    module = Cbsext()
     run_with_sim(RobotSim(module),
                  products_todo=3,
                  n_agv=n_agvs,

@@ -6,7 +6,7 @@ from datetime import datetime
 
 import numpy as np
 
-from benchmark_tools import get_system_parameters
+from tools import get_system_parameters
 from planner.mod_cbsextension import Cbsext
 from planner.mod_nearest import Nearest
 from planner.mod_random import Random

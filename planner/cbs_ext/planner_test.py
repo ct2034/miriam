@@ -7,7 +7,7 @@ import numpy as np
 import png
 
 import planner.cbs_ext.plan
-from benchmark_tools import get_system_parameters
+from tools import get_system_parameters
 
 
 def load_map(fname = 'cbs_ext/map.png'):
