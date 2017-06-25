@@ -35,21 +35,26 @@ def optimize(agents, tasks):
 
     # Sets
     def init_all(_):
+        """
+        Initalize a Set variable for all elements of the assignments
+        :param _: We will not need data from the model here
+        :return: The set
+        """
         return ((a, c, t) for a in range(len(agents))
                 for c in range(len(tasks))
                 for t in range(len(tasks)))
     m.all = Set(dimen=3, initialize=init_all)
 
     def init_agents(_):
-        return (a for a in range(len(agents)))
+        return [a for a in range(len(agents))]
     m.agents = Set(dimen=1, initialize=init_agents)
 
     def init_tasks(_):
-        return (t for t in range(len(tasks)))
+        return [t for t in range(len(tasks))]
     m.tasks = Set(dimen=1, initialize=init_tasks)
 
     def init_cons_a_first(_):
-        return (t for t in range(1, len(tasks)))
+        return [t for t in range(1, len(tasks))]
 
     m.cons_a_first = Set(dimen=1, initialize=init_cons_a_first)
 
@@ -59,6 +64,11 @@ def optimize(agents, tasks):
 
     # Objective
     def total_duration(m):
+        """
+        Evaluating the sum of all jobs durations
+        :type m: ConcreteModel
+        :return: The objective
+        """
         obj = 0
         for ia in range(len(agents)):  # for all agents
             # path to first task
@@ -67,6 +77,7 @@ def optimize(agents, tasks):
                 obj_agent += (m.assignments[ia, 0, it] * dist_at[ia][it])
                 obj_agent += (m.assignments[ia, 0, it] * dist_t[it])
             for ic in range(1, len(tasks)):  # for all consecutive assignments
+                obj_agent += (m.assignments[ia, ic, it] * obj_agent)  # how did we get here?
                 for it in m.tasks:
                     for it_prev in m.tasks:  # for all possible previous tasks
                         # from previous task end to this start
@@ -75,7 +86,7 @@ def optimize(agents, tasks):
                                      dist_tt[it_prev][it]
                     obj_agent += (m.assignments[ia, ic, it] * dist_t[it])
         for it in m.tasks:
-            obj += tasks[it][2]  # all tasks arival time, TODO: whats the difference then?
+            obj += tasks[it][2]  # all tasks arrival time, TODO: whats the difference then?
         return obj
     m.duration = Objective(rule=total_duration)
 
@@ -84,6 +95,12 @@ def optimize(agents, tasks):
     def one_agent_per_task(m, i_t):
         return sum(m.assignments[a, c, i_t] for a in m.agents for c in m.tasks) == 1
     m.one_agent = Constraint(m.tasks, rule=one_agent_per_task)
+
+    # one agent can only have one task per time
+    def one_task_per_time(m, i_a, i_c):
+        return sum(m.assignments[i_a, i_c, t] for t in m.tasks) <= 1
+
+    m.one_task = Constraint(m.agents, m.tasks, rule=one_task_per_time)
 
     # consecutive assignments can only happen after a previous one (consecutive)
     def consecutive(m, a, c):
