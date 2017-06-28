@@ -74,17 +74,17 @@ def optimize(agents, tasks):
             # path to first task
             obj_agent = 0
             for it in m.tasks:
-                obj_agent += (m.assignments[ia, 0, it] * dist_at[ia][it])
-                obj_agent += (m.assignments[ia, 0, it] * dist_t[it])
+                obj_agent += m.assignments[ia, 0, it] * dist_at[ia][it]
+                obj_agent += m.assignments[ia, 0, it] * dist_t[it]
             for ic in range(1, len(tasks)):  # for all consecutive assignments
-                obj_agent += (m.assignments[ia, ic, it] * obj_agent)  # how did we get here?
+                obj_agent += m.assignments[ia, ic, it] * obj_agent  # how did we get here?
                 for it in m.tasks:
                     for it_prev in m.tasks:  # for all possible previous tasks
                         # from previous task end to this start
                         obj_agent += m.assignments[ia, ic, it] * \
                                      m.assignments[ia, ic - 1, it_prev] * \
                                      dist_tt[it_prev][it]
-                    obj_agent += (m.assignments[ia, ic, it] * dist_t[it])
+                    obj_agent += m.assignments[ia, ic, it] * dist_t[it]
         for it in m.tasks:
             obj += tasks[it][2]  # all tasks arrival time, TODO: whats the difference then?
         return obj
