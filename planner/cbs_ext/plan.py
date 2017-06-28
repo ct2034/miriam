@@ -726,14 +726,15 @@ def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
     igs = []
     for ai in idle_goals:
         igs.append(ai[0])
-    igs_array = np.array(igs)
-    plt.scatter(igs_array[:, 0],
-                igs_array[:, 1],
-                s=np.full(igs_array.shape[0], 100),
-                color='g',
-                alpha=.9)
-    # Legendary!
-    plt.legend(["Agent", "Idle Task"])
+    if igs:
+        igs_array = np.array(igs)
+        plt.scatter(igs_array[:, 0],
+                    igs_array[:, 1],
+                    s=np.full(igs_array.shape[0], 100),
+                    color='g',
+                    alpha=.9)
+        # Legendary!
+        plt.legend(["Agent", "Idle Task"])
     plt.title("State Variables")
     if show:
         plt.show()

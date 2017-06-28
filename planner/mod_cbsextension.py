@@ -6,7 +6,7 @@ from multiprocessing import Process
 from threading import Lock
 
 import numpy as np
-from planner.route import Route, Car
+from simple_simulation.route import Route, Car
 
 from planner.cbs_ext.plan import plan, get_paths, comp2condition, comp2state
 from planner.mod import Module

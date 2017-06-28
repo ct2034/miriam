@@ -5,6 +5,7 @@ import random
 
 import numpy as np
 import png
+from functools import reduce
 
 import planner.cbs_ext.plan
 from tools import get_system_parameters
@@ -18,6 +19,28 @@ def load_map(fname = 'cbs_ext/map.png'):
     m = np.vstack(map(np.sign, iter))
     m = np.array(m, dtype=np.int8) - 1
     return m
+
+
+def has_edge_collision(paths):
+    edges = {}
+    for agent_paths in paths:
+        if len(agent_paths) > 1:
+            path = reduce(agent_paths)
+        else:
+            path = agent_paths[0]
+        for i in range(len(path) - 1):
+            a, b = path[i][:2], path[i + 1][:2]
+            edge = (a, b) if a > b else (b, a)
+            t = path[i][2]
+            if t in edges.keys():
+                if edge in edges[t]:
+                    return True
+                else:
+                    edges[t].append(edge)
+            else:
+                edges[t] = []
+                edges[t].append(edge)
+    return False
 
 
 def get_data_labyrinthian(n=1):
@@ -230,6 +253,22 @@ def test_idle_goals(plot=False):
     assert res_agent_idle == ((0,), ())
 
 
+def test_vertexswap():
+    from planner.cbs_ext.planner_demo_vertexswap import values_vertexswap
+    grid, agent_pos, jobs, _, alloc_jobs, start_time = values_vertexswap()
+
+    (_,
+     _,
+     res_paths) = planner.cbs_ext.plan.plan(agent_pos,
+                                            jobs,
+                                            alloc_jobs,
+                                            [],
+                                            grid,
+                                            plot=False,
+                                            filename='')
+
+    assert not has_edge_collision(res_paths), "There are collisions in edges!"
+
 def test_timeshift_path():
     assert [(1, 2, 2), (2, 2, 3)] == planner.cbs_ext.plan.time_shift_path([(1, 2, 0), (2, 2, 1)], 2), "Wrong shifting"
 
@@ -239,4 +278,4 @@ def test_get_nearest():
 
 
 if __name__ == "__main__":
-    test_idle_goals(True)
+    test_vertexswap()
