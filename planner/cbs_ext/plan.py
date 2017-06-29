@@ -402,7 +402,6 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
 
     for b in blocked:
         if b[0] == VERTEX and b[1] in _path:
-            logging.warning("Path still contains the collision")
             return False, {}
             # TODO (maybe): test for edges?
     return _path, path_save_process
@@ -525,7 +524,7 @@ def get_paths_for_agent(vals):
         if (i_a, job) in alloc_jobs:  # can be first only; need to go to goal only
             p, path_save_process = path(pose, jobs[job][1], _map, block, path_save_process, calc=True)
             if not p:
-                return 0
+                return False
         else:
             # trip to start
             if len(paths_for_agent) > 0:
@@ -533,7 +532,7 @@ def get_paths_for_agent(vals):
             block1 = time_shift_blocks(block, t_shift)
             p1, path_save_process = path(pose, jobs[job][0], _map, block1, path_save_process, calc=True)
             if not p1:
-                return 0
+                return False
             paths_for_agent += (time_shift_path(p1, t_shift),)
             # start to goal
             pose, t_shift = get_last_pose_and_t(paths_for_agent)
@@ -541,13 +540,13 @@ def get_paths_for_agent(vals):
             block2 = time_shift_blocks(block, t_shift)
             p, path_save_process = path(jobs[job][0], jobs[job][1], _map, block2, path_save_process, calc=True)
             if not p:
-                return 0
+                return False
         paths_for_agent += (time_shift_path(p, t_shift),)
     if len(_agent_idle[i_a]):
         p, path_save_process = (
             path(agent_pos[i_a], idle_goals[_agent_idle[i_a][0]][0], _map, block, path_save_process, calc=True))
         if not p:
-            return 0
+            return False
         paths_for_agent += (p,)
     return paths_for_agent, path_save_process
 
@@ -583,7 +582,7 @@ def get_paths(_condition: dict, _state: tuple):
     global pool
     res = list(pool.map(get_paths_for_agent, valss))
     for r in res:
-        if r is 0:
+        if not r:
             return False
         _paths.append(r[0])
         path_save.update(r[1])
