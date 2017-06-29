@@ -5,8 +5,8 @@ import random
 from datetime import datetime
 
 import numpy as np
-from planner.mod_cbsextension import Cbsext
-from planner.mod_nearest import Nearest
+from simple_simulation.mod_cbsextension import Cbsext
+from simple_simulation.mod_nearest import Nearest
 
 from simple_simulation.mod_random import Random
 from simple_simulation.simulation import SimpSim
