@@ -21,8 +21,8 @@ VERTEX = 'vertex'
 EDGE = 'edge'
 
 
-def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array, plot: bool = False,
-         filename: str = 'path_save.pkl'):
+def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array,
+         plot: bool = False, filename: str = 'path_save.pkl', pathplanning_only: bool = False):
     """
     Main entry point for planner
 
@@ -42,6 +42,7 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
       grid: np.array: 
       plot: bool:  (Default value = False)
       filename: str:  (Default value = 'path_save.pkl')
+      pathplanning_only: bool: do the pathplanning only (this assumes each job to the same index agent)
 
     Returns:
       : tuple of tuples of agent -> job allocations, agent -> idle goal allocations and blocked map areas
@@ -69,6 +70,24 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         agent_pos_test.add(a)
     for aj in alloc_jobs:
         agent_job[aj[0]] = (aj[1],)
+
+    if pathplanning_only:
+        assert len(agent_pos) == len(jobs), 'For pathplanning_only please provide a job or pose per agent'
+        i = 0
+        for j in jobs:
+            agent_job[i] = (i,)
+            if len(j) == 2:  # a job
+                assert len(j[0]) == 2, "Job start coordinates are not two"
+                assert len(j[1]) == 2, "Job end coordinates are not two"
+                jobs[i] = (j[0], j[1], 0)  # faking a duration
+            elif len(j) == 1:  # a goal
+                assert len(j[0]) == 2, "Goal coordinates are not two"
+                alloc_jobs.append((i, i))
+                jobs[i] = ((0, 0), j[0], 0)  # faking a job
+            else:
+                assert False, 'Please provide only task coordinate tuples or single goals as jobs'
+            i += 1
+
     agent_job = tuple(agent_job)
     _agent_idle = tuple(_agent_idle)
 
