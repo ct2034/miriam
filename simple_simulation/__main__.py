@@ -5,9 +5,9 @@ import time
 from PyQt4 import QtGui
 from numpy import *
 
-from planner.vis import Vis
 from simple_simulation.mod_random import Random
 from simple_simulation.simulation import SimpSim
+from simple_simulation.vis import Vis
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)

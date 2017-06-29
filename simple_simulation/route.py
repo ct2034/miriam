@@ -1,8 +1,8 @@
 import datetime
 import logging
 import time
-from threading import Lock
 from enum import Enum
+from threading import Lock
 
 import numpy as np
 from numpy import linalg
@@ -42,7 +42,6 @@ class Route(object):
 
         if self.sim.msb_select:
             global msb
-            from planner import msb
 
         logging.debug("Init:" + str(self))
 

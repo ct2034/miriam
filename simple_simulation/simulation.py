@@ -52,7 +52,7 @@ class SimpSim():
         self.msb_select = msb_select
         if msb_select:
             global msb
-            from planner import msb
+            from simple_simulation import msb
             msb.Msb(self)
 
         self.area = zeros([1])
