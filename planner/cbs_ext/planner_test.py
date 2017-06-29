@@ -141,7 +141,7 @@ def test_basic():
 def test_rand():
     for i in range(5):
         print("\nTEST", i)
-        agent_pos, grid, idle_goals, jobs = get_data_random(10, 5, 3, 3, 5)
+        agent_pos, grid, idle_goals, jobs = get_data_random(10, 5, 3, i, 5)
 
         start_time = datetime.datetime.now()
 
@@ -295,4 +295,4 @@ def test_get_nearest():
 
 
 if __name__ == "__main__":
-    test_vertexswap()
+    test_same_jobs(True)

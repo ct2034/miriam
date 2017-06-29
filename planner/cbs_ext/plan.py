@@ -17,6 +17,9 @@ plt.style.use('bmh')
 
 path_save = {}
 
+VERTEX = 'vertex'
+EDGE = 'edge'
+
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array, plot: bool = False,
          filename: str = 'path_save.pkl'):
@@ -130,7 +133,7 @@ def get_children(_condition: dict, _state: tuple) -> list:
 
     eval_blocked = False
     for i in range(len(blocked)):
-        if blocked[i][1].__class__ != int:  # two agents blocked
+        if is_conflict_not_block(blocked[i]):  # two agents blocked
             eval_blocked = True
             break
 
@@ -138,9 +141,9 @@ def get_children(_condition: dict, _state: tuple) -> list:
         blocked1 = []
         blocked2 = []
         for i in range(len(blocked)):
-            if blocked[i][1].__class__ != int:  # two agents blocked
-                blocked1.append((blocked[i][0], blocked[i][1][0]))
-                blocked2.append((blocked[i][0], blocked[i][1][1]))
+            if is_conflict_not_block(blocked[i]):  # two agents blocked
+                blocked1.append((blocked[i][:-1], blocked[i][-1][0]))
+                blocked2.append((blocked[i][:-1], blocked[i][-1][1]))
             else:
                 blocked1.append(blocked[i])
                 blocked2.append(blocked[i])
@@ -194,7 +197,7 @@ def cost(_condition: dict, _state: tuple):
     _cost = 0.
 
     _paths = get_paths(_condition, _state)
-    if _paths is False:
+    if _paths == False:  # one path was not viable
         return 99999, _state
     for i_a in range(len(_paths)):
         pathset = list(_paths[i_a])
@@ -230,11 +233,11 @@ def cost(_condition: dict, _state: tuple):
     if collision != ():
         block_state += (collision,)
         _state = comp2state(agent_job, agent_idle, block_state)
-    for bs in block_state:
-        if not bs[1].__class__ == int:  # a collision
-            _cost += 1  # a little more expensive when there is a collision
-        else:
-            _cost += .1  # a little when there is a block
+    # for bs in block_state:
+    #     if not is_conflict_not_block(b):  # a collision
+    #         _cost += 1  # a little more expensive when there is a collision
+    #     else:
+    #         _cost += .1  # a little when there is a block
     return _cost, _state
 
 
@@ -324,8 +327,8 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
     (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
     (agent_job, _agent_idle, blocked) = state2comp(_state)
 
-    for i in range(len(blocked)):
-        if blocked[i][1].__class__ != int:  # two agents blocked
+    for b in blocked:
+        if is_conflict_not_block(b):  # two agents blocked
             return False
 
     if len(agent_job) > 0:
@@ -366,13 +369,19 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
       or False if path shouldn't have been calculated but was not saved either
     """
     seen = set()
+    _map = _map.copy()
     for b in blocked:
-        _map = _map.copy()
-        _map[(b[1],
-              b[0],
-              b[2])] = -1
-        assert b not in seen, "Duplicate blocked entries"
-        seen.add(b)
+        if b[0] == VERTEX:
+            v = b[1]
+            _map[(v[1],
+                  v[0],
+                  v[2])] = -1
+        elif b[0] == EDGE:
+            for v in b[1][0:2]:
+                _map[(v[1],
+                      v[0],
+                      b[1][2])] = -1
+                # TODO: actually block edge!
 
     index = tuple([start, goal]) + tuple(blocked)
     if index not in path_save.keys():
@@ -392,9 +401,10 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
         _path = path_save[index]
 
     for b in blocked:
-        if b in _path:
+        if b[0] == VERTEX and b[1] in _path:
             logging.warning("Path still contains the collision")
             return False, {}
+            # TODO (maybe): test for edges?
     return _path, path_save_process
 
 
@@ -581,11 +591,13 @@ def get_paths(_condition: dict, _state: tuple):
     return _paths
 
 
-def time_shift_blocks(block, t):
+def time_shift_blocks(blocks, t):
     blocks_for_this_agent = []
-    for b in block:
-        if b[2] >= t:  # is after the shift (for this or later paths)
-            blocks_for_this_agent.append((b[0], b[1], b[2] - t))
+    for b in blocks:
+        v = b[1]
+        if v[2] >= t:  # is after the shift (for this or later paths)
+            blocks_for_this_agent.append((b[0], (v[0], v[1], v[2] - t)))
+
     return blocks_for_this_agent
 
 
@@ -607,53 +619,78 @@ def get_nearest(points, coord):
 
 def find_collision(_paths: list) -> tuple:
     """
-    Find collisions in a set of path_save
+    Find collisions in a set of paths. Will return vortex or edge
 
     Args:
       _paths: set of path_save
 
     Returns:
-      first found collision
+      first found vortex or edge
     """
-    from_agent = []
-    all_paths = []
-    ia = 0  # agent iterator
-    seen = set()
-    for _pathset in _paths:  # pathset per agent
-        for _path in _pathset:
-            for point in _path:
-                if point in seen:  # collision
-                    assert len(from_agent) == len(all_paths), "Something went wrong"
-                    assert len(from_agent) == len(seen), "Something went wrong"
-                    return tuple((point, (ia, from_agent[all_paths.index(point)])))
-                seen.add(point)
-                all_paths.append(point)
-                from_agent.append(ia)
-        ia += 1  # next path (of next agent)
+    vortexes = {}
+    edges = {}
+    agent = 0
+    for agent_paths in _paths:
+        if all(map(lambda x: len(x) == 0, agent_paths)):
+            return ()  # no paths -> no collision
+        elif len(agent_paths) > 1:
+            path = reduce(lambda a, b: a + b, agent_paths)
+        else:
+            path = agent_paths[0]
+        for i in range(len(path)):
+            vortex = path[i][:2]
+            edge = None
+            if i + 1 < len(path):
+                a, b = path[i][:2], path[i + 1][:2]
+                edge = (a, b) if a > b else (b, a)
+            t = path[i][2]
+            if t in vortexes.keys():
+                if vortex in vortexes[t].keys():  # it is already someone there
+                    return VERTEX, vortex + (t,), (agent, vortexes[t][vortex])
+                else:
+                    vortexes[t][vortex] = agent
+            else:
+                vortexes[t] = {}
+                vortexes[t][vortex] = agent
+            if edge:
+                if t in edges.keys():
+                    if edge in edges[t].keys():
+                        return EDGE, edge + (t,), (agent, edges[t][edge])
+                    else:
+                        edges[t][edge] = agent
+                else:
+                    edges[t] = {}
+                    edges[t][edge] = agent
+        agent += 1
     return ()
+
+
+def is_conflict_not_block(blocked_i):
+    return blocked_i[-1].__class__ != int
 
 
 def get_blocks_dict(blocked):
     block_dict = {}
     for b in blocked:
-        if b[1].__class__ == int:  # a block, not a conflict
-            if b[1] in block_dict.keys():  # agent_nr
-                block_dict[b[1]] += [b[0], ]
+        if not is_conflict_not_block(b):  # a block, not a conflict
+            agent = b[-1]
+            if agent in block_dict.keys():  # agent_nr
+                block_dict[agent] += list(b[:1], )
             else:
-                block_dict[b[1]] = [b[0], ]
+                block_dict[agent] = list(b[:1], )
     return block_dict
 
 
-def get_block_diff(agent, blocks1, blocks_new):
-    if agent in blocks1.keys():
-        block1 = blocks1[agent]
-        block2 = blocks1[agent]
-    else:
-        block1 = []
-        block2 = []
-    if agent in blocks_new.keys():
-        block2 += blocks_new[agent]
-    return block1, block2
+# def get_block_diff(agent, blocks1, blocks_new):
+#     if agent in blocks1.keys():
+#         block1 = blocks1[agent]
+#         block2 = blocks1[agent]
+#     else:
+#         block1 = []
+#         block2 = []
+#     if agent in blocks_new.keys():
+#         block2 += blocks_new[agent]
+#     return block1, block2
 
 
 # Data Helpers
