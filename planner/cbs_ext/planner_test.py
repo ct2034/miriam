@@ -43,6 +43,27 @@ def has_edge_collision(paths):
     return False
 
 
+def has_vortex_collision(paths):
+    vortexes = {}
+    for agent_paths in paths:
+        if len(agent_paths) > 1:
+            path = reduce(agent_paths)
+        else:
+            path = agent_paths[0]
+        for i in range(len(path)):
+            vortex = path[i][:2]
+            t = path[i][2]
+            if t in vortexes.keys():
+                if vortex in vortexes[t]:
+                    return True
+                else:
+                    vortexes[t].append(vortex)
+            else:
+                vortexes[t] = []
+                vortexes[t].append(vortex)
+    return False
+
+
 def get_data_labyrinthian(n=1):
     grid = np.zeros([10 * n, 10 * n, 51 * n])
     grid[4 * n, 2 * n:8 * n, :] = -1
@@ -175,14 +196,8 @@ def test_collision():
                                                                          plot=False)
     assert np.array(map(lambda x: len(x) == 0, res_agent_job)).all(), "We don't have to assign jobs"
 
-    ps = res_paths[0][0] + res_paths[1][0]
-    pss = []
-    for m in map(hash, ps):
-        pss.append(m)
-    pss = np.array(pss)
-    unique = np.unique(pss)
-    assert len(pss) == len(unique), "Collisions in path_save"
-
+    assert not has_vortex_collision(res_paths), "There are collisions in vortexes!"
+    assert not has_edge_collision(res_paths), "There are collisions in edges!"
 
 def test_consecutive_jobs():
     grid = np.zeros([10, 10, 50])
@@ -267,7 +282,9 @@ def test_vertexswap():
                                             plot=False,
                                             filename='')
 
+    assert not has_vortex_collision(res_paths), "There are collisions in vortexes!"
     assert not has_edge_collision(res_paths), "There are collisions in edges!"
+
 
 def test_timeshift_path():
     assert [(1, 2, 2), (2, 2, 3)] == planner.cbs_ext.plan.time_shift_path([(1, 2, 0), (2, 2, 1)], 2), "Wrong shifting"
