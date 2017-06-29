@@ -295,4 +295,4 @@ def test_get_nearest():
 
 
 if __name__ == "__main__":
-    test_same_jobs(True)
+    test_rand()
