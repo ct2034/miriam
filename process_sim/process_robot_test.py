@@ -1,6 +1,7 @@
 from process_sim.process_test import run_with_sim
+from simple_simulation.mod_cbsextension import Cbsext
 from simple_simulation.simulation import SimpSim
-from planner.mod_cbsextension import Cbsext
+
 
 class RobotSim(SimpSim):
     def __init__(self, module):

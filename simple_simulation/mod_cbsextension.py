@@ -6,10 +6,10 @@ from multiprocessing import Process
 from threading import Lock
 
 import numpy as np
-from simple_simulation.route import Route, Car
 
 from planner.cbs_ext.plan import plan, get_paths, comp2condition, comp2state
-from planner.mod import Module
+from simple_simulation.mod import Module
+from simple_simulation.route import Route, Car
 from simple_simulation.simulation import list_hash
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
@@ -74,7 +74,7 @@ class Cbsext(Module):
         self.grid = grid
 
         # data
-        self.fname = "planner/process_test.pkl"
+        self.fname = "process_test.pkl"
         # if os.path.exists(self.fname):
         #     os.remove(self.fname)
         self.plan_params_hash = False

@@ -5,8 +5,8 @@ import time
 from PyQt4 import QtGui
 from numpy import *
 
-from planner.mod_random import Random
 from planner.vis import Vis
+from simple_simulation.mod_random import Random
 from simple_simulation.simulation import SimpSim
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"

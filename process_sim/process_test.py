@@ -5,12 +5,12 @@ import random
 from datetime import datetime
 
 import numpy as np
-
-from tools import get_system_parameters
 from planner.mod_cbsextension import Cbsext
 from planner.mod_nearest import Nearest
-from planner.mod_random import Random
+
+from simple_simulation.mod_random import Random
 from simple_simulation.simulation import SimpSim
+from tools import get_system_parameters
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
