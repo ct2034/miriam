@@ -414,7 +414,10 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
                       b[1][2])] = -1
                 # TODO: actually block edge!
 
-    index = tuple([start, goal]) + tuple(blocked)
+    blocked.sort()
+    startgoal = [start, goal]
+    startgoal.sort()
+    index = tuple(startgoal) + tuple(blocked)
     if index not in path_save.keys():
         if calc:  # if we want to calc (i.e. find the cost)
             assert len(start) == 2, "Should be called with only spatial coords"
