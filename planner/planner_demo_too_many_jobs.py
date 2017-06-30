@@ -2,14 +2,14 @@ import datetime
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan_cbsext
+from planner.cbs_ext.plan import plan as plan_cbsext
 
 grid = np.zeros([10, 10, 101])
 grid[4, 0:6, :] = -1
 grid[8, 4:9, :] = -1
 
 # input
-agent_pos = [(1, 1), (1, 2), (1, 3), (1, 4), (1, 5)]
+agent_pos = [(1, 1), (1, 5)]
 jobs = [((2, 0), (2, 9), 0),
         ((7, 3), (3, 3), 0),
         ((3, 5), (7, 1), 0),
@@ -29,7 +29,7 @@ start_time = datetime.datetime.now()
                           idle_goals,
                           grid,
                           plot=True,
-                          filename='')
+                          filename='too_many_jobs.pkl')
 
 print("computation time:",
       (datetime.datetime.now() - start_time).total_seconds(),

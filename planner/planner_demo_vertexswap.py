@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan_cbsext
+from planner.cbs_ext.plan import plan as plan_cbsext
 
 
 def values_vertexswap():

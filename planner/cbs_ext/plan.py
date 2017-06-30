@@ -178,34 +178,43 @@ def get_children(_condition: dict, _state: tuple) -> list:
         jobs = list(jobs)
         idle_goals = list(idle_goals)
         if len(left_jobs) > 0:  # still jobs to assign - try with all left agents
-            for left_job in left_jobs:  # this makes many children ...
-                job_to_assign = jobs.index(left_job)
-                for i_a in range(len(agent_pos)):
-                    agent_job_new = agent_job.copy()
-                    agent_job_new[i_a] += (job_to_assign,)
-                    children.append(comp2state(tuple(agent_job_new),
-                                               agent_idle,
-                                               blocked))
-            return children
+            return assign_jobs(agent_idle, agent_job, agent_pos, blocked, children, jobs, left_jobs)
         elif (len(left_idle_goals) > 0) & (len(left_jobs) == 0):  # only idle goals if more agents than jobs
-            agent_idle = list(agent_idle)
-            for i_la in range(len(left_agent_pos)):
-                i_a = agent_pos.index(left_agent_pos[i_la])  # which agent is it actually?
-                if not len(agent_idle[i_a]):  # no idle goal yet
-                    for i_ig in range(len(left_idle_goals)):
-                        agent_idle_new = agent_idle.copy()
-                        agent_idle_new[i_a] = (idle_goals.index(left_idle_goals[i_ig]),)
-                        children.append(comp2state(tuple(agent_job),
-                                                   tuple(agent_idle_new),
-                                                   blocked))
-            return children
+            return assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, children, idle_goals, left_agent_pos,
+                                     left_idle_goals)
         else:  # all assigned
             return []
 
 
+def assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, children, idle_goals, left_agent_pos, left_idle_goals):
+    agent_idle = list(agent_idle)
+    for i_la in range(len(left_agent_pos)):
+        i_a = agent_pos.index(left_agent_pos[i_la])  # which agent is it actually?
+        if not len(agent_idle[i_a]):  # no idle goal yet
+            for i_ig in range(len(left_idle_goals)):
+                agent_idle_new = agent_idle.copy()
+                agent_idle_new[i_a] = (idle_goals.index(left_idle_goals[i_ig]),)
+                children.append(comp2state(tuple(agent_job),
+                                           tuple(agent_idle_new),
+                                           blocked))
+    return children
+
+
+def assign_jobs(agent_idle, agent_job, agent_pos, blocked, children, jobs, left_jobs):
+    for left_job in left_jobs:  # this makes many children ...
+        job_to_assign = jobs.index(left_job)
+        for i_a in range(len(agent_pos)):
+            agent_job_new = agent_job.copy()
+            agent_job_new[i_a] += (job_to_assign,)
+            children.append(comp2state(tuple(agent_job_new),
+                                       agent_idle,
+                                       blocked))
+    return children
+
+
 def cost(_condition: dict, _state: tuple):
     """
-    Get the cost increase for a change from _state1 to _state2
+    Get the cost for this state
 
     Args:
       _condition: The conditions of the problem
@@ -700,18 +709,6 @@ def get_blocks_dict(blocked):
             else:
                 block_dict[agent] = list(b[:1], )
     return block_dict
-
-
-# def get_block_diff(agent, blocks1, blocks_new):
-#     if agent in blocks1.keys():
-#         block1 = blocks1[agent]
-#         block2 = blocks1[agent]
-#     else:
-#         block1 = []
-#         block2 = []
-#     if agent in blocks_new.keys():
-#         block2 += blocks_new[agent]
-#     return block1, block2
 
 
 # Data Helpers

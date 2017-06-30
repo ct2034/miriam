@@ -32,7 +32,6 @@ for i_agents in range(len(n_agent)):
             plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
         except RuntimeError:
             print("NO SOLUTION")
-            pass
         time1 = (datetime.datetime.now() - start_time).total_seconds()
         assert os.path.isfile(fname), "Algorithm has not created a file"
 
@@ -41,7 +40,6 @@ for i_agents in range(len(n_agent)):
             plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
         except RuntimeError:
             print("NO SOLUTION")
-            pass
         time2 = (datetime.datetime.now() - start_time).total_seconds()
 
         os.remove(fname)

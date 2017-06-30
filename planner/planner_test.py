@@ -7,7 +7,7 @@ from functools import reduce
 import numpy as np
 
 from planner.cbs_ext import plan
-from planner.cbs_ext.plan import plan_cbsext
+from planner.cbs_ext.plan import plan as plan_cbsext
 from tools import get_system_parameters
 
 
@@ -120,7 +120,7 @@ def test_basic():
 
     start_time = datetime.datetime.now()
 
-    res_agent_job, res_agent_idle, res_paths = plan.plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename='')
+    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename='')
 
     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
 
@@ -135,7 +135,7 @@ def test_rand():
 
         start_time = datetime.datetime.now()
 
-        res_agent_job, res_agent_idle, res_paths = plan.plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename='')
+        res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename='')
 
         print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
         print("RESULTS:\nres_agent_job", res_agent_job)
@@ -160,12 +160,12 @@ def test_file():
 
     agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(2)
     start_time = datetime.datetime.now()
-    plan.plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+    plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
     time1 = (datetime.datetime.now() - start_time).total_seconds()
     assert os.path.isfile(fname), "Algorithm has not created a file"
 
     start_time = datetime.datetime.now()
-    plan.plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+    plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
     time2 = (datetime.datetime.now() - start_time).total_seconds()
     try:
         assert time2 < time1, "It was not faster to work with saved data"
@@ -182,12 +182,13 @@ def test_collision():
     agent_pos = [(3, 1), (5, 1)]
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
 
-    res_agent_job, res_agent_idle, res_paths = plan.plan_cbsext(agent_pos, [], [], idle_goals, grid, filename='',
-                                                                plot=False)
+    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, [], [], idle_goals, grid, filename='',
+                                                           plot=False)
     assert np.array(map(lambda x: len(x) == 0, res_agent_job)).all(), "We don't have to assign jobs"
 
     assert not has_vortex_collision(res_paths), "There are collisions in vortexes!"
     assert not has_edge_collision(res_paths), "There are collisions in edges!"
+
 
 def test_consecutive_jobs():
     grid = np.zeros([10, 10, 50])
@@ -195,13 +196,13 @@ def test_consecutive_jobs():
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
     jobs = [((2, 0), (2, 9), -6), ((7, 3), (3, 3), -1.5), ((3, 4), (5, 1), 0)]
 
-    res_agent_job, res_agent_idle, res_paths = plan.plan_cbsext(agent_pos=agent_pos,
-                                                                jobs=jobs,
-                                                                alloc_jobs=[],
-                                                                idle_goals=idle_goals,
-                                                                grid=grid,
-                                                                filename='',
-                                                                plot=False)
+    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos=agent_pos,
+                                                           jobs=jobs,
+                                                           alloc_jobs=[],
+                                                           idle_goals=idle_goals,
+                                                           grid=grid,
+                                                           filename='',
+                                                           plot=False)
 
     assert len(res_agent_idle[0]) == 0, "We don't have to assign idle goals"
     assert len(res_agent_job) == 1, "Not one assigned job"
@@ -216,13 +217,13 @@ def test_same_jobs(plot=False):
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
     jobs = [((0, 0), (9, 9), 0.358605), ((0, 0), (9, 9), 0.002422)]
 
-    res_agent_job, res_agent_idle, res_paths = plan.plan_cbsext(agent_pos=agent_pos,
-                                                                jobs=jobs,
-                                                                alloc_jobs=[],
-                                                                idle_goals=idle_goals,
-                                                                grid=grid,
-                                                                filename='',
-                                                                plot=plot)
+    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos=agent_pos,
+                                                           jobs=jobs,
+                                                           alloc_jobs=[],
+                                                           idle_goals=idle_goals,
+                                                           grid=grid,
+                                                           filename='',
+                                                           plot=plot)
 
     assert len(res_agent_idle[0]) == 0, "We don't have to assign idle goals"
     assert len(res_agent_idle[1]) == 0, "We don't have to assign idle goals"
@@ -238,13 +239,13 @@ def test_idle_goals(plot=False):
     idle_goals = [((3, 9), (2, 4)), ]
     jobs = [((0, 0), (9, 9), 1), ]
 
-    res_agent_job, res_agent_idle, res_paths = plan.plan_cbsext(agent_pos=agent_pos,
-                                                                jobs=jobs,
-                                                                alloc_jobs=[],
-                                                                idle_goals=idle_goals,
-                                                                grid=grid,
-                                                                filename='',
-                                                                plot=plot)
+    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos=agent_pos,
+                                                           jobs=jobs,
+                                                           alloc_jobs=[],
+                                                           idle_goals=idle_goals,
+                                                           grid=grid,
+                                                           filename='',
+                                                           plot=plot)
 
     assert res_agent_job == ((), (0,))
     assert res_agent_idle == ((0,), ())
@@ -256,13 +257,13 @@ def test_vertexswap():
 
     (_,
      _,
-     res_paths) = plan.plan_cbsext(agent_pos,
-                                   jobs,
-                                   alloc_jobs,
-                                   [],
-                                   grid,
-                                   plot=False,
-                                   filename='')
+     res_paths) = plan_cbsext(agent_pos,
+                              jobs,
+                              alloc_jobs,
+                              [],
+                              grid,
+                              plot=False,
+                              filename='')
 
     assert not has_vortex_collision(res_paths), "There are collisions in vortexes!"
     assert not has_edge_collision(res_paths), "There are collisions in edges!"

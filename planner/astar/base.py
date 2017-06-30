@@ -5,11 +5,6 @@ based on: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode"""
 
 
 def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost):
-    # config
-    # """Time Dimension Size"""
-    # time_len = heuristic(start, goal, map) * 20
-    # ------
-
     start_int = (int(start[0]),
                  int(start[1]),
                  int(start[2]))
@@ -25,7 +20,7 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
     # For each node, which node it can most efficiently be reached from.
     # If a node can be reached from many nodes, cameFrom will eventually contain the
     # most efficient previous step.
-    cameFrom = {}
+    came_from = {}
 
     # For each node, the cost of getting from the start node to that node.
     g_score = np.full(map.shape, np.Inf)
@@ -44,7 +39,7 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
         current = argmin_f_open(open, f_score_open)  # the node in openSet having the lowest fScore[] value
 
         if current[0:2] == goal[0:2]:  # waiting at the goal for free
-            return reconstruct_path(cameFrom, current)
+            return reconstruct_path(came_from, current)
 
         i_rm = open.index(current)
         open.remove(current)
@@ -67,7 +62,7 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
                 append = False
 
             # This path is the best until now. Record it!
-            cameFrom[neighbor] = current
+            came_from[neighbor] = current
             g_score[neighbor] = tentative_g_score
             f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, goal, map if have_map else False)
 
