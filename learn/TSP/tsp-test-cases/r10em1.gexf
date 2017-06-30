@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?><gexf version="1.1" xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gexf.net/1.1draft/viz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance">
+  <graph defaultedgetype="undirected" mode="static">
+    <attributes class="node" mode="static">
+      <attribute id="0" title="y" type="double" />
+      <attribute id="1" title="x" type="double" />
+    </attributes>
+    <nodes>
+      <node id="0" label="0">
+        <attvalues>
+          <attvalue for="0" value="95.9573033768" />
+          <attvalue for="1" value="55.0099626252" />
+        </attvalues>
+      </node>
+      <node id="1" label="1">
+        <attvalues>
+          <attvalue for="0" value="85.1399596138" />
+          <attvalue for="1" value="37.8493267257" />
+        </attvalues>
+      </node>
+      <node id="2" label="2">
+        <attvalues>
+          <attvalue for="0" value="15.4404755496" />
+          <attvalue for="1" value="66.1312624321" />
+        </attvalues>
+      </node>
+      <node id="3" label="3">
+        <attvalues>
+          <attvalue for="0" value="26.6235556183" />
+          <attvalue for="1" value="82.3226054554" />
+        </attvalues>
+      </node>
+      <node id="4" label="4">
+        <attvalues>
+          <attvalue for="0" value="23.5196875421" />
+          <attvalue for="1" value="22.0108884896" />
+        </attvalues>
+      </node>
+      <node id="5" label="5">
+        <attvalues>
+          <attvalue for="0" value="74.3297856213" />
+          <attvalue for="1" value="5.2014473869" />
+        </attvalues>
+      </node>
+      <node id="6" label="6">
+        <attvalues>
+          <attvalue for="0" value="32.3349209795" />
+          <attvalue for="1" value="40.0301880345" />
+        </attvalues>
+      </node>
+      <node id="7" label="7">
+        <attvalues>
+          <attvalue for="0" value="58.4102218018" />
+          <attvalue for="1" value="45.7784663502" />
+        </attvalues>
+      </node>
+      <node id="8" label="8">
+        <attvalues>
+          <attvalue for="0" value="20.4598401141" />
+          <attvalue for="1" value="19.4081062684" />
+        </attvalues>
+      </node>
+      <node id="9" label="9">
+        <attvalues>
+          <attvalue for="0" value="6.14405026956" />
+          <attvalue for="1" value="31.6957935949" />
+        </attvalues>
+      </node>
+    </nodes>
+    <edges>
+      <edge id="0" source="0" target="1" weight="20.2855207122" />
+      <edge id="1" source="0" target="2" weight="81.2812578197" />
+      <edge id="2" source="0" target="3" weight="0.0" />
+      <edge id="3" source="0" target="4" weight="79.5999188544" />
+      <edge id="4" source="0" target="5" weight="54.3013601534" />
+      <edge id="5" source="0" target="6" weight="65.3620776039" />
+      <edge id="6" source="0" target="7" weight="38.6652797517" />
+      <edge id="7" source="0" target="8" weight="83.4707082464" />
+      <edge id="8" source="0" target="9" weight="0.0" />
+      <edge id="9" source="1" target="2" weight="75.218920267" />
+      <edge id="10" source="1" target="3" weight="73.4985854118" />
+      <edge id="11" source="1" target="4" weight="63.6232194718" />
+      <edge id="12" source="1" target="5" weight="0.0" />
+      <edge id="13" source="1" target="6" weight="52.8500545054" />
+      <edge id="14" source="1" target="7" weight="27.8809995998" />
+      <edge id="15" source="1" target="8" weight="0.0" />
+      <edge id="16" source="1" target="9" weight="79.235217316" />
+      <edge id="17" source="2" target="3" weight="19.6779284662" />
+      <edge id="18" source="2" target="4" weight="44.8539971825" />
+      <edge id="19" source="2" target="5" weight="84.7372008162" />
+      <edge id="20" source="2" target="6" weight="0.0" />
+      <edge id="21" source="2" target="7" weight="47.5461397101" />
+      <edge id="22" source="2" target="8" weight="46.9919923235" />
+      <edge id="23" source="2" target="9" weight="0.0" />
+      <edge id="24" source="3" target="4" weight="0.0" />
+      <edge id="25" source="3" target="5" weight="90.6838320922" />
+      <edge id="26" source="3" target="6" weight="42.6763197287" />
+      <edge id="27" source="3" target="7" weight="48.4341434321" />
+      <edge id="28" source="3" target="8" weight="63.2157068834" />
+      <edge id="29" source="3" target="9" weight="54.6121251966" />
+      <edge id="30" source="4" target="5" weight="53.518439598" />
+      <edge id="31" source="4" target="6" weight="20.0599974239" />
+      <edge id="32" source="4" target="7" weight="0.0" />
+      <edge id="33" source="4" target="8" weight="4.01710611928" />
+      <edge id="34" source="4" target="9" weight="19.8924648429" />
+      <edge id="35" source="5" target="6" weight="0.0" />
+      <edge id="36" source="5" target="7" weight="43.5881518322" />
+      <edge id="37" source="5" target="8" weight="55.7117598495" />
+      <edge id="38" source="5" target="9" weight="73.1522035652" />
+      <edge id="39" source="6" target="7" weight="26.7013860421" />
+      <edge id="40" source="6" target="8" weight="23.7968023467" />
+      <edge id="41" source="6" target="9" weight="27.4849747902" />
+      <edge id="42" source="7" target="8" weight="0.0" />
+      <edge id="43" source="7" target="9" weight="54.130161265" />
+      <edge id="44" source="8" target="9" weight="18.86608329" />
+    </edges>
+  </graph>
+</gexf>
