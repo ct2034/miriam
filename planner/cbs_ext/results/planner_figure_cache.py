@@ -1,13 +1,12 @@
 import datetime
-
-import numpy as np
+import os
 import pickle
 
-from planner.cbs_ext.plan import plan
-import os
 import matplotlib.pyplot as plt
+import numpy as np
 
-from planner.cbs_ext.planner_test import get_data_random
+from planner.cbs_ext.plan import plan
+from planner.planner_test import get_data_random
 
 plt.style.use('bmh')
 fname = "/tmp/test.pkl"

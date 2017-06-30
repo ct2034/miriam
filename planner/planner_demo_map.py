@@ -4,9 +4,9 @@ import random
 from itertools import *
 
 import numpy as np
-from planner.cbs_ext.plan import plan, plot_inputs
 
-from planner.cbs_ext.planner_test import load_map
+from planner.cbs_ext.plan import plan, plot_inputs
+from planner.planner_test import load_map
 
 _map = load_map('map.png')
 grid = np.repeat(_map[:, :, np.newaxis], 100, axis=2)
