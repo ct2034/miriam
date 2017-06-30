@@ -12,6 +12,9 @@ from scipy.stats import norm
 from planner.astar.astar_grid48con import astar_grid4con, distance_manhattan
 from planner.astar.base import NoPathException
 from planner.cbs_ext.base import astar_base
+from tools import ColoredLogger
+
+logging.setLoggerClass(ColoredLogger)
 
 plt.style.use('bmh')
 
@@ -252,11 +255,11 @@ def cost(_condition: dict, _state: tuple):
     if collision != ():
         block_state += (collision,)
         _state = comp2state(agent_job, agent_idle, block_state)
-    # for bs in block_state:
-    #     if not is_conflict_not_block(b):  # a collision
-    #         _cost += 1  # a little more expensive when there is a collision
-    #     else:
-    #         _cost += .1  # a little when there is a block
+    for b in block_state:
+        if not is_conflict_not_block(b):  # a collision
+            _cost += 1  # a little more expensive when there is a collision
+        else:
+            _cost += .1  # a little when there is a block
     return _cost, _state
 
 
@@ -777,6 +780,9 @@ def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
                   length_includes_head=True,
                   ec='r',
                   fill=False)
+    # Fake for legend...
+    plt.plot((0, 0), (.1, .1), 'r')
+
     # Idle Goals
     igs = []
     for ai in idle_goals:
@@ -789,7 +795,9 @@ def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
                     color='g',
                     alpha=.9)
         # Legendary!
-        plt.legend(["Agent", "Idle Task"])
+        plt.legend(["Transport Task", "Agent", "Idle Task"])
+    else:
+        plt.legend(["Transport Task", "Agent"])
     plt.title("State Variables")
     if show:
         plt.show()
@@ -801,27 +809,6 @@ def plot_results(_agent_idle, _paths, agent_job, agent_pos, fig, grid, idle_goal
     _ = Axes3D
     ax3 = fig.add_subplot(122, projection='3d')
     ax3.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
-    # plot agent -> job allocation
-    for i_a in range(len(agent_pos)):
-        for i_j in agent_job[i_a]:
-            plt.arrow(x=agent_pos[i_a][0],
-                      y=agent_pos[i_a][1],
-                      dx=jobs[i_j][0][0] - agent_pos[i_a][0],
-                      dy=jobs[i_j][0][1] - agent_pos[i_a][1],
-                      ec='r',
-                      fill=False,
-                      linestyle='dotted')
-    # plot agent -> idle goal allocations
-    for i_a in range(len(_agent_idle)):
-        if len(_agent_idle[i_a]):
-            ig = idle_goals[_agent_idle[i_a][0]]
-            plt.arrow(x=agent_pos[i_a][0],
-                      y=agent_pos[i_a][1],
-                      dx=ig[0][0] - agent_pos[i_a][0],
-                      dy=ig[0][1] - agent_pos[i_a][1],
-                      ec='g',
-                      fill=False,
-                      linestyle='dotted')
 
     # Paths
     legend_str = []

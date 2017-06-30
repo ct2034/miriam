@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan
+from planner.cbs_ext.plan import plan_cbsext
 
 
 def values_vertexswap():
@@ -23,13 +23,13 @@ if __name__ == "__main__":
 
     (res_agent_job,
      res_agent_idle,
-     res_paths) = plan(agent_pos,
-                       jobs,
-                       alloc_jobs,
-                       idle_goals,
-                       grid,
-                       plot=True,
-                       filename='')
+     res_paths) = plan_cbsext(agent_pos,
+                              jobs,
+                              alloc_jobs,
+                              idle_goals,
+                              grid,
+                              plot=True,
+                              filename='')
 
     print("computation time:",
           (datetime.datetime.now() - start_time).total_seconds(),

@@ -5,8 +5,8 @@ from itertools import *
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan, plot_inputs
-from planner.planner_test import load_map
+from planner.cbs_ext.plan import plan_cbsext, plot_inputs
+from tools import load_map
 
 _map = load_map('map.png')
 grid = np.repeat(_map[:, :, np.newaxis], 100, axis=2)
@@ -69,8 +69,8 @@ for n_j, n_a in product(n_j_s, n_a_s):
 
         start_time = datetime.datetime.now()
         try:
-            res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, plot=True,
-                                                            filename='map_test.pkl')
+            res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, plot=True,
+                                                                   filename='map_test.pkl')
         except RuntimeError:
             # logging.warning("NO SOLUTION (exception)")
             plot_inputs(agent_pos, idle_goals, jobs, grid, show=True, subplot=111)

@@ -1,5 +1,9 @@
+import logging
 import numpy as np
 
+from tools import ColoredLogger
+
+logging.setLoggerClass(ColoredLogger)
 
 def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     _, start = cost(condition, start)  # it may have collisions

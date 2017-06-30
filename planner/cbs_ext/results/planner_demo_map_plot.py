@@ -3,8 +3,8 @@ import random
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan
-from planner.planner_test import load_map
+from planner.cbs_ext.plan import plan_cbsext
+from tools import load_map
 
 _map = load_map('map.png')
 grid = np.repeat(_map[:, :, np.newaxis], 100, axis=2)
@@ -52,5 +52,5 @@ while len(agent_pos) < n_a:
         agent_pos.append(a)
 
 start_time = datetime.datetime.now()
-res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, plot=True,
-                                                filename='../map_test.pkl')
+res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, plot=True,
+                                                       filename='../map_test.pkl')

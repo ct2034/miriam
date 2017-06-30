@@ -5,7 +5,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
-from planner.cbs_ext.plan import plan
+from planner.cbs_ext.plan import plan_cbsext
 from planner.planner_test import get_data_random
 
 plt.style.use('bmh')
@@ -29,7 +29,7 @@ for i_agents in range(len(n_agent)):
 
         start_time = datetime.datetime.now()
         try:
-            plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+            plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
         except RuntimeError:
             print("NO SOLUTION")
             pass
@@ -38,7 +38,7 @@ for i_agents in range(len(n_agent)):
 
         start_time = datetime.datetime.now()
         try:
-            plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+            plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
         except RuntimeError:
             print("NO SOLUTION")
             pass

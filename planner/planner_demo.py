@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan
+from planner.cbs_ext.plan import plan_cbsext
 
 grid = np.zeros([10, 10, 51])
 grid[4, 2:8, :] = -1
@@ -14,7 +14,7 @@ idle_goals = [((9, 7), (5, .5))]  # one idle goal 9,7 with P~N(5,.5)
 
 start_time = datetime.datetime.now()
 
-res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, plot=True)
+res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, plot=True)
 
 print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
 print(res_agent_job, res_agent_idle, res_paths)
