@@ -25,7 +25,7 @@ EDGE = 'edge'
 
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array,
-         plot: bool = False, filename: str = 'path_save.pkl', pathplanning_only: bool = False):
+         plot: bool = False, filename: str = 'path_save.pkl', pathplanning_only_assignment=False):
     """
     Main entry point for planner
 
@@ -45,7 +45,7 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
       grid: np.array: 
       plot: bool:  (Default value = False)
       filename: str:  (Default value = 'path_save.pkl')
-      pathplanning_only: bool: do the pathplanning only (this assumes each job to the same index agent)
+      pathplanning_only_assignment: bool: do the pathplanning only (this assumes each job to the same index agent)
 
     Returns:
       : tuple of tuples of agent -> job allocations, agent -> idle goal allocations and blocked map areas
@@ -71,25 +71,22 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         # check for duplicate agents
         assert a not in agent_pos_test, "Duplicate agent poses"
         agent_pos_test.add(a)
+
+    if pathplanning_only_assignment:
+        logging.info("Pathplanning only!")
+        agent_job = pathplanning_only_assignment
+        for agent in range(len(agent_job)):
+            if len(agent_job[agent]) == 0:  # no assignment
+                new_job = ((0, 0), agent_pos[agent], 0)  # fake job
+                jobs.append(
+                    new_job
+                )
+                alloc_jobs.append(
+                    (agent, jobs.index(new_job))
+                )
+
     for aj in alloc_jobs:
         agent_job[aj[0]] = (aj[1],)
-
-    if pathplanning_only:
-        assert len(agent_pos) == len(jobs), 'For pathplanning_only please provide a job or pose per agent'
-        i = 0
-        for j in jobs:
-            agent_job[i] = (i,)
-            if len(j) == 2:  # a job
-                assert len(j[0]) == 2, "Job start coordinates are not two"
-                assert len(j[1]) == 2, "Job end coordinates are not two"
-                jobs[i] = (j[0], j[1], 0)  # faking a duration
-            elif len(j) == 1:  # a goal
-                assert len(j[0]) == 2, "Goal coordinates are not two"
-                alloc_jobs.append((i, i))
-                jobs[i] = ((0, 0), j[0], 0)  # faking a job
-            else:
-                assert False, 'Please provide only task coordinate tuples or single goals as jobs'
-            i += 1
 
     agent_job = tuple(agent_job)
     _agent_idle = tuple(_agent_idle)
@@ -356,22 +353,20 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
       Result of the test (true if goal, else false)
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
-    (agent_job, _agent_idle, blocked) = state2comp(_state)
+    (agent_job, agent_idle, blocked) = state2comp(_state)
+    (left_agent_pos, left_idle_goals, left_jobs
+     ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
 
     for b in blocked:
         if is_conflict_not_block(b):  # two agents blocked
             return False
 
-    if len(agent_job) > 0:
-        assigned_jobs = functools.reduce(lambda l, j: l + j, agent_job, tuple())
-    else:
-        assigned_jobs = ()
-    if len(assigned_jobs) < len(jobs):  # not all jobs assigned
+    if len(left_jobs) > 0:
         return False
 
     agent_assigned = list(map(lambda x: len(x) > 0, agent_job))  # jobs?
-    for i_a in range(len(_agent_idle)):
-        if len(_agent_idle[i_a]):
+    for i_a in range(len(agent_idle)):
+        if len(agent_idle[i_a]):
             agent_assigned[i_a] = True  # idle goals
     if not np.array(agent_assigned).all():  # not all agents have something to do
         return False

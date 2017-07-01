@@ -24,9 +24,9 @@ idle_goals = []
 
 print("MILP")
 start_time = datetime.datetime.now()
-res_agent_job, res_agent_idle, res_paths = plan_milp(agent_pos, jobs, grid, filename='map2_test.pkl')
+res_agent_job, res_paths = plan_milp(agent_pos, jobs, grid, filename='map2_test.pkl')
 print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
-print(res_agent_job, res_agent_idle, res_paths)
+print(res_agent_job, res_paths)
 
 print("CBSEXT")
 start_time = datetime.datetime.now()

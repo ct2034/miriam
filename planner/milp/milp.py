@@ -7,6 +7,8 @@ from pyomo.environ import *
 from pyomo.core import *
 from pyomo.opt import SolverFactory
 
+from planner.cbs_ext.plan import plan as plan_cbsext
+
 logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
 
 
@@ -15,7 +17,13 @@ def manhattan_dist(a, b):
 
 
 def plan_milp(agent_pos, jobs, grid, filename=None):
-    res = optimize(agent_pos, jobs)
+    res_agent_job = optimize(agent_pos, jobs)
+
+    _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
+                                  plot=False,
+                                  filename='pathplanning_only.pkl',
+                                  pathplanning_only_assignment=res_agent_job)
+    return res_agent_job, res_paths
 
 
 def optimize(agents, tasks):
@@ -131,7 +139,14 @@ def optimize(agents, tasks):
     prob.load(result)
     prob.display()
 
-    print(m.assignments)
+    agent_job = [tuple() for _ in m.agents]
+    act = list(m.all)
+    act.sort()
+    for a, c, t in act:
+        if prob.assignments[(a, c, t)].value:
+            agent_job[a] += (t,)
+
+    return agent_job
 
 
 if __name__ == "__main__":
