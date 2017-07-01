@@ -1,14 +1,21 @@
 from __future__ import division
 
+import logging
 import numpy as np
 from itertools import *
 from pyomo.environ import *
 from pyomo.core import *
 from pyomo.opt import SolverFactory
 
+logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
+
 
 def manhattan_dist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+
+def plan_milp(agent_pos, jobs, grid, filename=None):
+    res = optimize(agent_pos, jobs)
 
 
 def optimize(agents, tasks):
@@ -124,6 +131,8 @@ def optimize(agents, tasks):
     prob.load(result)
     prob.display()
 
+    print(m.assignments)
+
 
 if __name__ == "__main__":
     agent_pos = [(1, 1), (9, 1), (3, 1)]  # three agents
@@ -133,3 +142,11 @@ if __name__ == "__main__":
             ((4, 8), (7, 1), 10),
             ((3, 4), (1, 5), 10)]
     optimize(agent_pos, jobs)
+
+"""
+/usr/bin/python3.6 /home/cch/src/smartleitstand/planner/planner_milp_vs_cbsext.py
+computation time: 76025.224703 s
+((1,), (3, 2), (0,)) ((), (), ()) [([(0, 0, 0), (0, 1, 1), (0, 2, 2), (0, 3, 3), (0, 4, 4), (0, 5, 5), (0, 6, 6), (0, 7, 7), (0, 8, 8), (1, 8, 9)], [(1, 8, 10), (2, 8, 11), (3, 8, 12), (4, 8, 13), (5, 8, 14), (6, 8, 15), (7, 8, 16), (8, 8, 17), (8, 7, 18), (8, 6, 19), (7, 6, 20), (6, 6, 21), (5, 6, 22), (4, 6, 23), (3, 6, 24), (2, 6, 25), (2, 5, 26), (2, 4, 27)]), ([(3, 0, 0), (3, 1, 1), (3, 2, 2), (4, 2, 3), (5, 2, 4), (6, 2, 5), (7, 2, 6), (8, 2, 7), (8, 3, 8), (8, 4, 9), (8, 5, 10), (8, 6, 11), (8, 7, 12)], [(8, 7, 13), (8, 6, 14), (8, 5, 15), (8, 4, 16), (8, 3, 17), (8, 2, 18)], [(8, 2, 19), (8, 3, 20), (8, 4, 21), (8, 5, 22), (8, 6, 23), (7, 6, 24)], [(7, 6, 25), (8, 6, 26), (8, 7, 27), (8, 8, 28), (7, 8, 29), (6, 8, 30), (5, 8, 31), (4, 8, 32), (3, 8, 33)]), ([(2, 1, 0), (2, 2, 1), (1, 2, 2), (0, 2, 3), (0, 3, 4), (0, 4, 5), (0, 5, 6), (0, 6, 7), (0, 7, 8), (0, 8, 9)], [(0, 8, 10), (0, 7, 11), (0, 6, 12), (0, 5, 13), (0, 4, 14), (0, 3, 15), (0, 2, 16)])]
+
+Process finished with exit code 0
+"""
