@@ -364,12 +364,12 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
     if len(left_jobs) > 0:
         return False
 
-    agent_assigned = list(map(lambda x: len(x) > 0, agent_job))  # jobs?
-    for i_a in range(len(agent_idle)):
-        if len(agent_idle[i_a]):
-            agent_assigned[i_a] = True  # idle goals
-    if not np.array(agent_assigned).all():  # not all agents have something to do
-        return False
+    # agent_assigned = list(map(lambda x: len(x) > 0, agent_job))  # jobs?
+    # for i_a in range(len(agent_idle)):
+    #     if len(agent_idle[i_a]):
+    #         agent_assigned[i_a] = True  # idle goals
+    # if not np.array(agent_assigned).all():  # not all agents have something to do
+    #     return False
 
     # if all test are ok ..
     return True

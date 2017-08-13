@@ -10,8 +10,7 @@ dataset = np.array(
 # the points to measure
 testset = np.array(
     [[1., 1, 1, 1, 1],
-     [90, 90, 10, 10, 1],
-     [50, 50, 0, 8, 0]
+     [90, 90, 10, 10, 1]
      ])
 flann = FLANN()
 result, dists = flann.nn(

@@ -1,7 +1,6 @@
 FROM ros:kinetic-robot
 # connect to host via bridge
 ENV ROS_MASTER_URI=http://172.17.0.1:11311
-ENV PACKAGE=multi_robot_nav
 
 RUN apt-get update
 RUN apt-get install -y\
