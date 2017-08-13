@@ -39,10 +39,7 @@ def strictly_consec(agents, tasks):
     while len(free_tasks) > 0:
         free_tasks_ends = np.array(list(map(lambda a: a[1], free_tasks)), dtype=TYPE)
         free_tasks_starts = np.array(list(map(lambda a: a[0], free_tasks)), dtype=TYPE)
-        if len(free_tasks) > len(free_agents):
-            possible_starts = np.concatenate([free_agents, free_tasks_ends], axis=0)
-        else:
-            possible_starts = free_agents
+        possible_starts = np.concatenate([free_agents, free_tasks_ends], axis=0)
         flann = FLANN()
         result, dists = flann.nn(
             possible_starts,
