@@ -22,4 +22,4 @@ fig = plot_inputs(agent_pos, idle_goals, jobs, grid, show=False)
 
 (res_agent_job, res_paths) = plan_sc(agent_pos, jobs, grid)
 
-plot_results([], res_paths, res_agent_job, agent_pos, fig, grid, idle_goals)
+plot_results([], res_paths, res_agent_job, agent_pos, fig, grid, idle_goals, jobs)
