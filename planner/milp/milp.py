@@ -21,7 +21,7 @@ def plan_milp(agent_pos, jobs, grid, filename=None):
 
     _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
                                   plot=False,
-                                  filename='pathplanning_only.pkl',
+                                  filename=filename,
                                   pathplanning_only_assignment=res_agent_job)
     return res_agent_job, res_paths
 
@@ -156,7 +156,8 @@ if __name__ == "__main__":
             ((6, 6), (3, 8), 10),
             ((4, 8), (7, 1), 10),
             ((3, 4), (1, 5), 10)]
-    optimize(agent_pos, jobs)
+    grid = np.zeros([10, 10, 51])
+    plan_milp(agent_pos, jobs, grid)
 
 """
 /usr/bin/python3.6 /home/cch/src/smartleitstand/planner/planner_milp_vs_cbsext.py
