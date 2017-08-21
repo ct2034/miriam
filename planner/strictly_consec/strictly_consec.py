@@ -1,6 +1,5 @@
 import logging
 import numpy as np
-from itertools import *
 
 from pyflann import FLANN
 
@@ -34,7 +33,7 @@ def strictly_consec(agents_list, tasks):
     free_tasks = tasks.copy()
 
     consec = {}
-    agent_task = {}
+    agent_task_d = {}
 
     while len(free_tasks) > 0:
         free_tasks_ends = np.array(list(map(lambda a: a[1], free_tasks)), dtype=TYPE)
@@ -64,8 +63,17 @@ def strictly_consec(agents_list, tasks):
             consec[i_task_end] = tasks.index(free_tasks[i_free_tasks_start])  # after this task comes that
         else:  # an agent
             i_agent = agents_list.index(t(free_agents[i_possible_starts]))
-            agent_task[i_agent] = tasks.index(t(free_tasks[i_free_tasks_start]))
+            agent_task_d[i_agent] = tasks.index(t(free_tasks[i_free_tasks_start]))
             free_agents = np.delete(free_agents, i_possible_starts, axis=0)
         free_tasks.pop(i_free_tasks_start)
 
-    return agent_task, consec
+    agent_task = [tuple() for _ in range(len(agents_list))]
+    for k, v in agent_task_d.items():
+        agent_task[k] = (v,)
+        t_to_check = v
+        while t_to_check in consec.keys():
+            consec_t = consec[t_to_check]
+            agent_task[k] = agent_task[k] + (consec_t,)
+            t_to_check = consec_t
+
+    return agent_task
