@@ -14,23 +14,27 @@ from tools import get_system_parameters
 def has_edge_collision(paths):
     edges = {}
     for agent_paths in paths:
-        if len(agent_paths) > 1:
-            path = reduce(agent_paths)
-        else:
-            path = agent_paths[0]
-        for i in range(len(path) - 1):
-            a, b = path[i][:2], path[i + 1][:2]
-            edge = (a, b) if a > b else (b, a)
-            t = path[i][2]
-            if t in edges.keys():
-                if edge in edges[t]:
-                    return True
-                else:
-                    edges[t].append(edge)
-            else:
-                edges[t] = []
-                edges[t].append(edge)
+        path = reduce(agent_paths) if len(agent_paths) > 1 else agent_paths[0]
+        res, edges = has_path_edge_collision(path, edges)
+        if res:
+            return True
     return False
+
+
+def has_path_edge_collision(path, edges):
+    for i in range(len(path) - 1):
+        a, b = path[i][:2], path[i + 1][:2]
+        edge = (a, b) if a > b else (b, a)
+        t = path[i][2]
+        if t in edges.keys():
+            if edge in edges[t]:
+                return True, None
+            else:
+                edges[t].append(edge)
+        else:
+            edges[t] = []
+            edges[t].append(edge)
+    return False, edges
 
 
 def has_vortex_collision(paths):
@@ -76,7 +80,7 @@ def get_unique_coords(max_x, max_y, reset=False):
         max_y -= 1
         c = (random.randint(0, max_x),
              random.randint(0, max_y))
-        while (c in used_coords):
+        while c in used_coords:
             c = (random.randint(0, max_x),
                  random.randint(0, max_y))
         assert c not in used_coords
@@ -144,12 +148,6 @@ def test_rand():
             logging.warning("NO SOLUTION")
         else:
             print("res_paths", res_paths)
-
-
-def test_benchmark():
-    user, _, _ = get_system_parameters()
-    if user == 'travis':
-        pass
 
 
 def test_file():

@@ -43,6 +43,8 @@ if PY2:
             assert 'width' in data, "Please provide parameter 'width'"
             assert 'height' in data, "Please provide parameter 'height'"
             Interface.initialized = True
+            self.width = data['width']
+            self.height = data['height']
 
         @cherrypy.expose
         @cherrypy.tools.json_in()
@@ -54,6 +56,8 @@ if PY2:
             assert 'y' in data, "Please provide parameter 'y'"
             assert 'theta' in data, "Please provide parameter 'theta'"
             print(data)
+            self.goal = (data['x'], data['y'], data['theta'])
+            self.agv = data['agv']
 
 
 def map_to_plan(x_map):

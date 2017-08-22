@@ -32,8 +32,7 @@ def optimize(agents, tasks):
     # Precalculate distances
     # agents-tasks
     dist_at = np.zeros([len(agents), len(tasks)])
-    for ia in range(len(agents)):
-        for it in range(len(tasks)):
+    for ia, it in product(range(len(agents)), range(len(tasks))):
             dist_at[ia, it] = manhattan_dist(agents[ia], tasks[it][0])
     # tasks
     dist_t = np.zeros([len(tasks)])
@@ -41,9 +40,8 @@ def optimize(agents, tasks):
         dist_t[it] = manhattan_dist(tasks[it][0], tasks[it][1])
     # tasks-tasks
     dist_tt = np.zeros([len(tasks), len(tasks)])
-    for it1 in range(len(tasks)):
-        for it2 in range(len(tasks)):
-            dist_tt[it1, it2] = manhattan_dist(tasks[it1][1], tasks[it2][0])
+    for it1, it2 in product(range(len(tasks)), range(len(tasks))):
+        dist_tt[it1, it2] = manhattan_dist(tasks[it1][1], tasks[it2][0])
 
     # Problem
     m = ConcreteModel()
