@@ -17,42 +17,43 @@ def callback_pose(self, data):
     pose = data
 
 
-class Interface:
-    rospy.init_node('robot_controller', anonymous=True)
-    rospy.loginfo("CONTROLLER init")
-    initialized = False
+if PY2:
+    class Interface:
+        rospy.init_node('robot_controller', anonymous=True)
+        rospy.loginfo("CONTROLLER init")
+        initialized = False
 
-    n_robots = rospy.get_param('~n_robots')
-    rospy.loginfo("n_robots: " + str(n_robots))
-    # This will produce namespaces r1, r2, ...
-    ns_prefix = rospy.get_param('~ns_prefix', 'r')
-    rospy.loginfo("ns_prefix: " + ns_prefix)
+        n_robots = rospy.get_param('~n_robots')
+        rospy.loginfo("n_robots: " + str(n_robots))
+        # This will produce namespaces r1, r2, ...
+        ns_prefix = rospy.get_param('~ns_prefix', 'r')
+        rospy.loginfo("ns_prefix: " + ns_prefix)
 
-    robot_nss = [ns_prefix + str(i) for i in range(n_robots)]
+        robot_nss = [ns_prefix + str(i) for i in range(n_robots)]
 
-    pose = None
+        pose = None
 
-    pose_subscribers = map(lambda ns: rospy.Subscriber(
-        ns + "/logistics_pose", Pose2D, callback_pose), robot_nss)
+        pose_subscribers = map(lambda ns: rospy.Subscriber(
+            ns + "/logistics_pose", Pose2D, callback_pose), robot_nss)
 
-    @cherrypy.expose
-    @cherrypy.tools.json_in()
-    def init(self):
-        data = cherrypy.request.json
-        assert 'width' in data, "Please provide parameter 'width'"
-        assert 'height' in data, "Please provide parameter 'height'"
-        Interface.initialized = True
+        @cherrypy.expose
+        @cherrypy.tools.json_in()
+        def init(self):
+            data = cherrypy.request.json
+            assert 'width' in data, "Please provide parameter 'width'"
+            assert 'height' in data, "Please provide parameter 'height'"
+            Interface.initialized = True
 
-    @cherrypy.expose
-    @cherrypy.tools.json_in()
-    def goal(self):
-        data = cherrypy.request.json
-        assert Interface.initialized, "Please call /init first!"
-        assert 'agv' in data, "Please provide parameter 'agv'"
-        assert 'x' in data, "Please provide parameter 'x'"
-        assert 'y' in data, "Please provide parameter 'y'"
-        assert 'theta' in data, "Please provide parameter 'theta'"
-        print(data)
+        @cherrypy.expose
+        @cherrypy.tools.json_in()
+        def goal(self):
+            data = cherrypy.request.json
+            assert Interface.initialized, "Please call /init first!"
+            assert 'agv' in data, "Please provide parameter 'agv'"
+            assert 'x' in data, "Please provide parameter 'x'"
+            assert 'y' in data, "Please provide parameter 'y'"
+            assert 'theta' in data, "Please provide parameter 'theta'"
+            print(data)
 
 
 def map_to_plan(x_map):

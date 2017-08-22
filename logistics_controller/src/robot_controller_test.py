@@ -1,5 +1,5 @@
 #!/bin/env python2
-import logistics_controller as rc
+import logistics_controller.src.robot_controller as rc
 
 
 def conversion_plan_map_test_a():

@@ -7,7 +7,7 @@ from threading import Lock
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan_cbsext, get_paths, comp2condition, comp2state
+from planner.cbs_ext.plan import plan, get_paths, comp2condition, comp2state
 from simple_simulation.mod import Module
 from simple_simulation.route import Route, Car
 from simple_simulation.simulation import list_hash
@@ -27,13 +27,13 @@ def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
     try:
         (agent_job,
          agent_idle,
-         paths) = plan_cbsext(agent_pos,
-                              jobs,
-                              alloc_jobs,
-                              idle_goals,
-                              grid,
-                              False,
-                              fname)
+         paths) = plan(agent_pos,
+                       jobs,
+                       alloc_jobs,
+                       idle_goals,
+                       grid,
+                       False,
+                       fname)
     except Exception as e:
         # Could not find a solution, returning just anything .. TODO: something better?
         logging.warning("Could not find a solution, returning just anything \n", str(e))
