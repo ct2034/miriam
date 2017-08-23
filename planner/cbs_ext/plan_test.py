@@ -3,7 +3,7 @@ import numpy as np
 from planner.cbs_ext.plan import get_paths_for_agent
 
 vals = {
-    '_agent_idle': np.array([]),
+    '_agent_idle': [(), (), (), ()],
     '_map': np.zeros([10, 10, 100]),
     'agent_job': ((), (), (0, 1), ()),
     'agent_pos': [(4, 2), (5, 4), (3, 5), (5, 6)],
