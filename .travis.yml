@@ -7,22 +7,13 @@ services:
 
 before_install:
   - docker build -t miriam .
-
-#addons:
-#  sonarqube:
-#    token:
-#      secure: "pjBF+tfVYORHz095EaV+7+4WWoGeQv83LiDoDFaSZPyBkOgLww3xMgQgzTVDOOIJDloooYXo0n8pdrWtmu5IxLSSJ0CnoTj0AWiQHn+0q1Iqvl6rWMnNJkMRN/G/RGocZ6omePoNFR3tVefibN8iFUpCj7+CFg7Hm/+k8MEFNtBezbzLtYb4H6uTz7O6+QZcbx2CYdktRDSwpVsI19jOob8JqId/gzap/NfL1D7kBYESbN8+jrVqmpOOt/L3DG26gZ/4zbQP33ahqOYmzYTX5zd5891eJWaQ8Cv56m0+jEg5H3zRbFL7XDk7v149c2SYqWK5aQY6X2G3+g+GW0jI71MClD0W5epcM7hnrcpwttX6aAk6xcPFZC83zWtOIKysor47kMeP7oqdKWQpQYPX6Rvo5wdHuuq66vvuThUUxBSwQQljSCeUW2fxSpDpQMl0nmyaPAtcC+sSbyCMOHYxhIdQ0vVBYQC3LbZyaTPcez4SSgjYD4F09VqiXeuSy3LySX7n93uMnzY8fZ3Wvh7jjL2YzNFOReB8VgFsG6TE80kZttJjyJoXdl/zPh4vuqNAUSCD/YqgHhIue7vCYUqTJIK966wdZo7rmiMNZXm9U9e5tndUDPEanghPCQ27EyRg8S0yM1ii+ubAdHX44Pg+YGRHPB73YZ3ndV6ySnFSmRc="
-#
-#jdk:
-#  - oraclejdk8
+  - docker run miriam
 
 python:
   - "3.6"
 
 install:
-    - pip install -r requirements.txt
+ - pip install -r requirements.txt
 
 script:
-#  - sonar-scanner
-  - docker run miriam
   - py.test -vs
