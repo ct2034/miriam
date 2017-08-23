@@ -1,3 +1,4 @@
+pytest
 APScheduler
 numpy
 scipy
