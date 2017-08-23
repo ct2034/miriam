@@ -284,4 +284,4 @@ def test_get_nearest():
 
 
 if __name__ == "__main__":
-    test_rand()
+    test_file()

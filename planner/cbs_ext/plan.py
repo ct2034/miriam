@@ -412,7 +412,6 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
 
     blocked.sort()
     startgoal = [start, goal]
-    startgoal.sort()
     index = tuple(startgoal) + tuple(blocked)
     if index not in path_save.keys():
         if calc:  # if we want to calc (i.e. find the cost)
@@ -427,13 +426,16 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
             path_save_process[index] = _path
         else:
             return False, {}
-    else:
+    else:  # exists in the path_save
         _path = path_save[index]
 
     for b in blocked:
         if b[0] == VERTEX and b[1] in _path:
             return False, {}
             # TODO (maybe): test for edges?
+
+    assert start == _path[0][0:2], "Planed path starts not from start"
+    assert goal == _path[-1][0:2], "Planed path ends not in goal"
     return _path, path_save_process
 
 
@@ -507,6 +509,14 @@ def time_shift_path(_path: list, t: int) -> list:
     assert _path[0][2] == 0, "Input path should start at t=0"
     return list(map(lambda c: (c[0], c[1], c[2] + t), _path))
 
+
+def reverse_path(path: list) -> list:
+    out = []
+    i = 0
+    for n in path[::-1]:
+        out.append((n[0], n[1], i))
+        i += 1
+    return out
 
 def pre_calc_paths(jobs, idle_goals, grid, fname=None):
     for job in jobs:
