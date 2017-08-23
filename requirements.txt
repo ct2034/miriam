@@ -5,7 +5,6 @@ scipy
 iso8601
 ws4py
 pymongo
-pymc3
 psutil
 pypng
 pyqt5

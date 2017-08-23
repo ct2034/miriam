@@ -4,6 +4,7 @@ COPY requirements.txt /
 
 RUN pip install -r requirements.txt
 
-COPY . /
+RUN mkdir /miriam/
+COPY . /miriam/
 
-CMD ["py.test","-vs"]
+CMD ["py.test","/miriam/.","-vs"]
