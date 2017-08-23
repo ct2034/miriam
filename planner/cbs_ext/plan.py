@@ -434,6 +434,8 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
             return False, {}
             # TODO (maybe): test for edges?
 
+    if not _path: return False, {}
+
     assert start == _path[0][0:2], "Planed path starts not from start"
     assert goal == _path[-1][0:2], "Planed path ends not in goal"
     return _path, path_save_process
@@ -592,7 +594,7 @@ def get_paths_for_agent(vals):
 
 
 def get_paths(_condition: dict, _state: tuple):
-    """
+    """FeLg8Lumck
     Get the path_save for a given state
 
     Args:
