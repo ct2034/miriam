@@ -1,7 +1,9 @@
 FROM python:latest
 
-COPY . /
+COPY requirements.txt /
 
 RUN pip install -r requirements.txt
 
-CMD ["py.test" "-vs"]
+COPY . /
+
+CMD ["py.test","-vs"]
