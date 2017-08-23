@@ -101,6 +101,7 @@ def optimize(agents, tasks):
                                      m.assignments[ia, ic - 1, it_prev] * \
                                      dist_tt[it_prev][it]
                     obj_agent += m.assignments[ia, ic, it] * dist_t[it]
+            obj += obj_agent
         for it in m.tasks:
             obj += tasks[it][2]  # all tasks arrival time, TODO: whats the difference then?
         return obj
