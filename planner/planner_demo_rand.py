@@ -5,6 +5,7 @@ from itertools import *
 
 import numpy as np
 
+from planner.cbs_ext.plan import pre_calc_paths
 from planner.planner_test import get_data_random
 
 agent_n_s = [2, 4, 6]
@@ -26,7 +27,7 @@ for agent_n, map_res in product(agent_n_s, map_res_s):
 
         try:
             fname = ''
-            fname = smartleitstand.cbs_ext.plan.pre_calc_paths(jobs, idle_goals, grid)
+            fname = pre_calc_paths(jobs, idle_goals, grid)
 
             start_time = datetime.datetime.now()
             res_agent_job, res_agent_idle, res_paths = smartleitstand.cbs_ext.plan.plan(agent_pos, jobs, [], idle_goals, grid, filename=fname)
