@@ -2,6 +2,12 @@ language: python
 cache: 
   - pip
 
+services:
+  - docker
+
+before_install:
+  - docker build -t miriam .
+
 #addons:
 #  sonarqube:
 #    token:
@@ -18,4 +24,5 @@ install:
 
 script:
 #  - sonar-scanner
+  - docker run miriam
   - py.test -vs
