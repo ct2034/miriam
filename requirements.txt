@@ -2,6 +2,7 @@ pytest
 APScheduler
 numpy
 scipy
+matplotlib
 iso8601
 ws4py
 pymongo
