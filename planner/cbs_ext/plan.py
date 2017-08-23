@@ -550,25 +550,25 @@ def get_paths_for_agent(vals):
     assigned_jobs = agent_job[i_a]
     pose = agent_pos[i_a][0:2]
     t_shift = 0
-    for job in assigned_jobs:
-        if (i_a, job) in alloc_jobs:  # can be first only; need to go to goal only
-            p, path_save_process = path(pose, jobs[job][1], _map, block, path_save_process, calc=True)
+    for ij in assigned_jobs:
+        if (i_a, ij) in alloc_jobs:  # can be first only; need to go to goal only
+            p, path_save_process = path(pose, jobs[ij][1], _map, block, path_save_process, calc=True)
             if not p:
                 return False
         else:
             # trip to start
-            if len(paths_for_agent) > 0:
+            if len(paths_for_agent) > 0:  # no route yet -> keep pose
                 pose, t_shift = get_last_pose_and_t(paths_for_agent)
             block1 = time_shift_blocks(block, t_shift)
-            p1, path_save_process = path(pose, jobs[job][0], _map, block1, path_save_process, calc=True)
+            p1, path_save_process = path(pose, jobs[ij][0], _map, block1, path_save_process, calc=True)
             if not p1:
                 return False
             paths_for_agent += (time_shift_path(p1, t_shift),)
             # start to goal
             pose, t_shift = get_last_pose_and_t(paths_for_agent)
-            assert pose == jobs[job][0], "Last pose should be the start"
+            assert pose == jobs[ij][0], "Last pose should be the start"
             block2 = time_shift_blocks(block, t_shift)
-            p, path_save_process = path(jobs[job][0], jobs[job][1], _map, block2, path_save_process, calc=True)
+            p, path_save_process = path(jobs[ij][0], jobs[ij][1], _map, block2, path_save_process, calc=True)
             if not p:
                 return False
         paths_for_agent += (time_shift_path(p, t_shift),)
@@ -630,7 +630,7 @@ def time_shift_blocks(blocks, t):
     return blocks_for_this_agent
 
 
-def get_last_pose_and_t(paths_for_agent, ):
+def get_last_pose_and_t(paths_for_agent):
     last = paths_for_agent[-1][-1]
     return last[0:2], last[2] + 1
 

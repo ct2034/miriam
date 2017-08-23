@@ -3,6 +3,7 @@
 import logging
 import random
 from datetime import datetime
+import unittest2 as unittest
 
 import numpy as np
 from simple_simulation.mod_cbsextension import Cbsext
@@ -14,7 +15,7 @@ from tools import get_system_parameters
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
-logging.getLogger("apscheduler").setLevel(logging.WARN)
+logging.getLogger("apscheduler.scheduler").setLevel(logging.WARN)
 
 t_step = .1
 
@@ -66,6 +67,7 @@ y_res = 10
 _map = np.zeros([x_res, y_res, 51])
 
 
+@unittest.skipIf(True, 'Currently not in focus')
 def test_process_cbsext():
     mod = Cbsext(_map)
     t = run_with_sim(SimpSim(False, mod),
@@ -93,6 +95,7 @@ def test_process_nearest():
     return t
 
 
+@unittest.skipIf(True, 'Currently not in focus')
 def test_benchmark():
     modules = [Random(_map), Nearest(_map), Cbsext(_map)]
     durations = np.zeros(len(modules))
