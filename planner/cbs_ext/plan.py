@@ -75,15 +75,15 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     if pathplanning_only_assignment:
         logging.info("Pathplanning only!")
         agent_job = pathplanning_only_assignment
-        for agent in range(len(agent_job)):
-            if len(agent_job[agent]) == 0:  # no assignment
-                new_job = ((0, 0), agent_pos[agent], 0)  # fake job
-                jobs.append(
-                    new_job
-                )
-                alloc_jobs.append(
-                    (agent, jobs.index(new_job))
-                )
+        # for agent in range(len(agent_job)):
+        #     if len(agent_job[agent]) == 0:  # no assignment
+        #         new_job = ((0, 0), agent_pos[agent], 0)  # fake job
+        #         jobs.append(
+        #             new_job
+        #         )
+        #         alloc_jobs.append(
+        #             (agent, jobs.index(new_job))
+        #         )
 
     for aj in alloc_jobs:
         agent_job[aj[0]] = (aj[1],)
@@ -232,14 +232,12 @@ def cost(_condition: dict, _state: tuple):
         assigned_jobs = agent_job[i_a]
         if len(assigned_jobs) > 0:
             if (i_a, assigned_jobs[0]) in alloc_jobs:  # first entry is a preallocated job
-                assert len(pathset) % 2 == 1, "Must be odd number of paths"  # since first is one only
                 i = 1
                 for p in pathset[2::2]:
                     _cost += p[-1][2]
                     _cost += jobs[assigned_jobs[i]][2] * -1  # waiting time before job was touched
                     i += 1
             else:
-                assert len(pathset) % 2 == 0, "Must be even number of paths"
                 i = 0
                 for p in pathset[1::2]:
                     _cost += p[-1][2]  # each arrival time
@@ -252,7 +250,6 @@ def cost(_condition: dict, _state: tuple):
             i_idle_goal = idle_assignment[0]
             idle_goal_stat = idle_goals[i_idle_goal][1]
             path_len = pathset[0][-1][2]  # this agent will have only one path in its set, or has it?
-            assert len(pathset) == 1, "an agent with idle goal must only have one path in its set"
             prob = norm.cdf(path_len, loc=idle_goal_stat[0], scale=idle_goal_stat[1])
             _cost += prob * path_len
 
@@ -434,7 +431,8 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
             return False, {}
             # TODO (maybe): test for edges?
 
-    if not _path: return False, {}
+    if not _path:
+        return False, {}
 
     assert start == _path[0][0:2], "Planed path starts not from start"
     assert goal == _path[-1][0:2], "Planed path ends not in goal"
@@ -628,9 +626,31 @@ def get_paths(_condition: dict, _state: tuple):
             return False
         _paths.append(r[0])
         path_save.update(r[1])
+    longest = max(map(lambda p: len(reduce(lambda a, b: a + b, p, [])), _paths))
+    _paths = fill_up_paths(longest, _paths, agent_pos)
     assert len(_paths) == len(agent_pos), "More or less paths than agents"
     return _paths
 
+
+def fill_up_paths(longest, _paths, agent_pos):
+    if longest > 0:
+        res_paths = []
+        for ia, paths_for_agent in enumerate(_paths):
+            if paths_for_agent:
+                last = paths_for_agent[-1][-1]
+            else:
+                last = agent_pos[ia] + (-1,)
+            length = len(reduce(lambda a, b: a + b, paths_for_agent, []))
+            ts = range(last[2] + 1, longest)
+            if ts:
+                paths_for_agent += (
+                    list(map(lambda x: last[0:2] + (x,), ts))
+                    ,)
+            res_paths.append(paths_for_agent)
+        assert len(res_paths) == len(_paths), "Not all paths processed"
+        return res_paths
+    else:
+        return _paths
 
 def time_shift_blocks(blocks, t):
     blocks_for_this_agent = []

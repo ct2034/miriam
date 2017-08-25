@@ -20,29 +20,28 @@ def eval(_map, agents, jobs, fname):
     plot_results([], res_paths, agents, res_agent_job, plt.figure(), grid, [], jobs)
 
 
-# _map = load_map('corridor.png')
-# agents = [(0, 0),
-#           (0, 1)]
-# jobs = [((5, 0), (5, 2), 0),
-#         ((4, 2), (4, 0), 0),
-#         ((3, 0), (3, 2), 0),
-#         ]
-# eval(_map, agents, jobs, 'corridor.pkl')
+_map = load_map('corridor.png')
+agents = [(0, 0),
+          (0, 1)]
+jobs = [((5, 0), (5, 2), 0),
+        ((4, 2), (4, 0), 0),
+        ((3, 0), (3, 2), 0),
+        ]
+eval(_map, agents, jobs, 'corridor.pkl')
 
-
-# _map = load_map('mr_t.png')
-# agents = [(5, 1),
-#           (5, 3)]
-# jobs = [((4, 1), (4, 3), 0),
-#         ((3, 3), (3, 1), 0),
-#         ]
-# eval(_map, agents, jobs, 'mr_t.pkl')
+_map = load_map('mr_t.png')
+agents = [(5, 1),
+          (5, 3)]
+jobs = [((4, 1), (4, 3), 0),
+        ((3, 3), (3, 1), 0),
+        ]
+eval(_map, agents, jobs, 'mr_t.pkl')
 
 
 _map = load_map('line.png')
 agents = [(0, 0),
           (6, 0)]
-jobs = [((1, 0), (4, 0), 0),
-        ((5, 0), (2, 0), 0),
+jobs = [((1, 0), (6, 0), 0),
+        ((5, 0), (1, 0), 0),
         ]
 eval(_map, agents, jobs, 'line.pkl')
