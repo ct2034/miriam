@@ -627,15 +627,20 @@ def get_paths(_condition: dict, _state: tuple):
         _paths.append(r[0])
         path_save.update(r[1])
     longest = max(map(lambda p: len(reduce(lambda a, b: a + b, p, [])), _paths))
-    _paths = fill_up_paths(longest, _paths, agent_pos)
+    _paths = fill_up_paths(longest, _paths, agent_pos, blocks)
     assert len(_paths) == len(agent_pos), "More or less paths than agents"
     return _paths
 
 
-def fill_up_paths(longest, _paths, agent_pos):
+def fill_up_paths(longest, _paths, agent_pos, blocks):
     if longest > 0:
         res_paths = []
         for ia, paths_for_agent in enumerate(_paths):
+            blocks_for_agent = map(
+                lambda x: x[1], filter(
+                    lambda x: x[0] == 'vertex', blocks[ia]
+                )
+            ) if ia in blocks else []
             if paths_for_agent:
                 last = paths_for_agent[-1][-1]
             else:
@@ -643,9 +648,12 @@ def fill_up_paths(longest, _paths, agent_pos):
             length = len(reduce(lambda a, b: a + b, paths_for_agent, []))
             ts = range(last[2] + 1, longest)
             if ts:
-                paths_for_agent += (
-                    list(map(lambda x: last[0:2] + (x,), ts))
-                    ,)
+                standing_section = list(map(lambda x: last[0:2] + (x,), ts))
+                for block in blocks_for_agent:
+                    if block in standing_section:
+                        standing_section.remove(block)
+                        # logging.warning("Collision while standing")
+                paths_for_agent += (standing_section,)
             res_paths.append(paths_for_agent)
         assert len(res_paths) == len(_paths), "Not all paths processed"
         return res_paths

@@ -14,7 +14,7 @@ from tools import get_system_parameters
 def has_edge_collision(paths):
     edges = {}
     for agent_paths in paths:
-        path = reduce(agent_paths) if len(agent_paths) > 1 else agent_paths[0]
+        path = reduce(lambda a, b: a + b, agent_paths) if len(agent_paths) > 1 else agent_paths[0]
         res, edges = has_path_edge_collision(path, edges)
         if res:
             return True
@@ -41,7 +41,7 @@ def has_vortex_collision(paths):
     vortexes = {}
     for agent_paths in paths:
         if len(agent_paths) > 1:
-            path = reduce(agent_paths)
+            path = reduce(lambda a, b: a + b, agent_paths)
         else:
             path = agent_paths[0]
         for i in range(len(path)):

@@ -33,7 +33,7 @@ def optimize(agents, tasks):
     # agents-tasks
     dist_at = np.zeros([len(agents), len(tasks)])
     for ia, it in product(range(len(agents)), range(len(tasks))):
-            dist_at[ia, it] = manhattan_dist(agents[ia], tasks[it][0])
+        dist_at[ia, it] = manhattan_dist(agents[ia], tasks[it][0])
     # tasks
     dist_t = np.zeros([len(tasks)])
     for it in range(len(tasks)):
