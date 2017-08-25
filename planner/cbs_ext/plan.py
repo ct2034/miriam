@@ -592,7 +592,7 @@ def get_paths_for_agent(vals):
 
 
 def get_paths(_condition: dict, _state: tuple):
-    """FeLg8Lumck
+    """
     Get the path_save for a given state
 
     Args:
@@ -649,10 +649,10 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
             ts = range(last[2] + 1, longest)
             if ts:
                 standing_section = list(map(lambda x: last[0:2] + (x,), ts))
-                for block in blocks_for_agent:
-                    if block in standing_section:
-                        standing_section.remove(block)
-                        # logging.warning("Collision while standing")
+                # for block in blocks_for_agent:
+                #     if block in standing_section:
+                #         standing_section.remove(block)
+                #         # logging.warning("Collision while standing")
                 paths_for_agent += (standing_section,)
             res_paths.append(paths_for_agent)
         assert len(res_paths) == len(_paths), "Not all paths processed"
