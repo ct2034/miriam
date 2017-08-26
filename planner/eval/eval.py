@@ -66,8 +66,6 @@ def mr_t():
     jobs = [((4, 3), (4, 1), 0),
             ((3, 1), (3, 3), 0)]
     eval(_map, agents, jobs, 'mr_t.pkl')
-
-
 # Results with finished agents as obstacle:
 # CBS EXT
 # agent_job: ((0, 1), ())
