@@ -638,7 +638,7 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
         for ia, paths_for_agent in enumerate(_paths):
             blocks_for_agent = map(
                 lambda x: x[1], filter(
-                    lambda x: x[0] == 'vertex', blocks[ia]
+                    lambda x: x[0] == VERTEX, blocks[ia]
                 )
             ) if ia in blocks else []
             if paths_for_agent:
