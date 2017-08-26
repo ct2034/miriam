@@ -116,5 +116,18 @@ def h():
     eval(_map, agents, jobs, 'h.pkl')
 
 
+# -------
+def i():
+    _map = load_map('I.png')
+    agents = [(0, 2),
+              (4, 1)]
+    jobs = [((0, 0), (0, 3), 0),
+            ((1, 3), (1, 0), 0),
+            ((3, 0), (3, 3), 0),
+            ((4, 3), (4, 0), 0),
+            ]
+    eval(_map, agents, jobs, 'I.pkl')
+
+
 if __name__ == "__main__":
-    c()
+    i()
