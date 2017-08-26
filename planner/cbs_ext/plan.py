@@ -638,7 +638,7 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
         for ia, paths_for_agent in enumerate(_paths):
             blocks_for_agent = map(
                 lambda x: x[1], filter(
-                    lambda x: x[0] == 'vertex', blocks[ia]
+                    lambda x: x[0] == VERTEX, blocks[ia]
                 )
             ) if ia in blocks else []
             if paths_for_agent:
@@ -652,8 +652,7 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
                 for block in blocks_for_agent:
                     if block in standing_section:
                         standing_section.remove(block)
-                        # logging.warning("Collision while standing")
-                paths_for_agent += (standing_section,)
+            paths_for_agent += (standing_section,)
             res_paths.append(paths_for_agent)
         assert len(res_paths) == len(_paths), "Not all paths processed"
         return res_paths
