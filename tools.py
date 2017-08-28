@@ -35,12 +35,60 @@ def benchmark(fun, vals):
         fun(val)
         return (datetime.now() - start).total_seconds()
 
-    ts = map(benchmark_fun, vals)
+    ts = list(map(benchmark_fun, vals))
     print("Values:")
     print(vals)
-    print("Times: [s]")
-    print(list(ts))
+    print("Durations: [s]")
+    print(ts)
     return ts
+
+
+def get_git_sha():
+    from git import Repo
+    import os
+    repo = Repo(os.getcwd(), search_parent_directories=True)
+    return repo.head.commit.hexsha
+
+
+def get_git_message():
+    from git import Repo
+    import os
+    repo = Repo(os.getcwd(), search_parent_directories=True)
+    return repo.head.commit.message
+
+
+def mongodb_save(name, data):
+    import pymongo
+    import datetime
+
+    key = get_git_sha()
+
+    client = pymongo.MongoClient(
+        "mongodb://testing:6R8IimXpg0TqVDwm" +
+        "@ds033607.mlab.com:33607/smartleitstand-results"
+    )
+    db = client["smartleitstand-results"]
+    collection = db.test_collection
+    cursor = collection.find({'_id': key})
+    print("Saving to MongoBD")
+    if cursor.count():  # exists
+        print("exists")
+        entry = cursor[0]
+    else:  # create
+        print("creating")
+        entry = {'_id': key,
+                 'time': datetime.datetime.now(),
+                 'git_message': get_git_message()
+                 }
+        id = collection.insert_one(entry).inserted_id
+        assert id == key, "Inserted ID does not match"
+    entry.update(
+        {name: data}
+    )
+    collection.find_one_and_replace(
+        filter={'_id': key},
+        replacement=entry
+    )
 
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
