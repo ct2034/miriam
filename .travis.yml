@@ -8,6 +8,7 @@ services:
 before_install:
   - docker build -t miriam .
   - docker run miriam
+  - export PYTHONPATH=/home/travis/build/ct2034/miriam
 
 python:
   - "3.6"
