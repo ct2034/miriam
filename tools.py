@@ -5,6 +5,8 @@ import logging
 import png
 import psutil
 import numpy as np
+from datetime import datetime
+
 
 def get_system_parameters():
     user = getpass.getuser()
@@ -25,6 +27,20 @@ def load_map(fname='cbs_ext/map.png'):
     m = np.vstack(map(np.sign, iter))
     m = np.array(m, dtype=np.int8) - 1
     return m
+
+
+def benchmark(fun, vals):
+    def benchmark_fun(val):
+        start = datetime.now()
+        fun(val)
+        return (datetime.now() - start).total_seconds()
+
+    ts = map(benchmark_fun, vals)
+    print("Values:")
+    print(vals)
+    print("Times: [s]")
+    print(list(ts))
+    return ts
 
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
