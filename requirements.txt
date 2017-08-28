@@ -3,6 +3,7 @@ APScheduler
 numpy
 scipy
 matplotlib
+munkres
 iso8601
 ws4py
 pymongo
