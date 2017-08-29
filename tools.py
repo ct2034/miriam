@@ -70,7 +70,7 @@ def mongodb_save(name, data):
     db = client["smartleitstand-results"]
     collection = db.test_collection
     cursor = collection.find({'_id': key})
-    print("Saving to MongoBD")
+    print("Saving to MongoDB")
     if cursor.count():  # exists
         print("exists")
         entry = cursor[0]
