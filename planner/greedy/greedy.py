@@ -3,7 +3,8 @@ import numpy as np
 
 from pyflann import FLANN
 
-from planner.cbs_ext.plan import plan as plan_cbsext, path, load_paths, save_paths
+from planner.cbs_ext.plan import plan as plan_cbsext, load_paths, save_paths
+from planner.common import path
 
 logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
 
