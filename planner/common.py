@@ -8,7 +8,6 @@ EDGE = 'edge'
 
 path_save = {}
 
-
 def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_process: dict = {}, calc: bool = True):
     """
     Calculate or return pre-calculated path from start to goal
@@ -44,6 +43,7 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
     blocked.sort()
     startgoal = [start, goal]
     index = tuple(startgoal) + tuple(blocked)
+    global path_save
     if index not in path_save.keys():
         if calc:  # if we want to calc (i.e. find the cost)
             assert len(start) == 2, "Should be called with only spatial coords"
