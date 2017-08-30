@@ -3,28 +3,62 @@ import numpy as np
 
 from pyflann import FLANN
 
-from planner.cbs_ext.plan import plan as plan_cbsext
+from planner.cbs_ext.plan import plan as plan_cbsext, path, load_paths, save_paths
 
 logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
 
 t = tuple
-
 
 def manhattan_dist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def plan_sc(agent_pos, jobs, grid, filename=None):
-    res_agent_job = strictly_consec(agent_pos, jobs)
-
+    load_paths(filename)
+    res_agent_job = strictly_consec(agent_pos, jobs, grid)
+    save_paths(filename)
     _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
                                   plot=False,
-                                  filename='pathplanning_only.pkl',
+                                  filename=filename,
                                   pathplanning_only_assignment=res_agent_job)
     return res_agent_job, res_paths
 
 
-def strictly_consec(agents_list, tasks):
+def get_closest(possible_starts, free_tasks_starts, grid, n):
+    flann = FLANN()
+    result, dists = flann.nn(
+        possible_starts,
+        free_tasks_starts,
+        n,
+        algorithm="kmeans",
+        branching=32,
+        iterations=7,
+        checks=16)
+    lengths = []
+    nearestss = []
+    paths = []
+    INF = 2 * np.max(np.max(dists))
+    for i in range(n):
+        temp_nearest = np.unravel_index(np.argmin(dists), [len(possible_starts), n])
+        dists[temp_nearest] = INF
+        nearestss.append(temp_nearest)
+
+        temp_i_possible_starts = result[temp_nearest]
+        temp_i_free_tasks_start = temp_nearest[0]
+        p, _ = path(tuple(possible_starts[temp_i_possible_starts]),
+                    tuple(free_tasks_starts[temp_i_free_tasks_start]),
+                    grid,
+                    [])
+        lengths.append(len(p))
+        paths.append(p)
+    best_path = np.argmin(lengths)
+    nearest = nearestss[best_path]
+    i_free_tasks_start = nearest[0]
+    i_possible_starts = result[nearest]
+    return i_free_tasks_start, i_possible_starts, paths[best_path]
+
+
+def strictly_consec(agents_list, tasks, grid):
     N_CLOSEST = 2
     TYPE = "float64"
     agents = np.array(agents_list, dtype=TYPE)
@@ -43,18 +77,8 @@ def strictly_consec(agents_list, tasks):
         else:
             possible_starts = free_agents
         if len(possible_starts) > 1:
-            flann = FLANN()
-            result, dists = flann.nn(
-                possible_starts,
-                free_tasks_starts,
-                N_CLOSEST,
-                algorithm="kmeans",
-                branching=32,
-                iterations=7,
-                checks=16)
-            nearest = np.unravel_index(np.argmin(dists), [len(possible_starts), N_CLOSEST])
-            i_free_tasks_start = nearest[0]
-            i_possible_starts = result[nearest]
+            i_free_tasks_start, i_possible_starts, p = get_closest(
+                possible_starts, free_tasks_starts, grid, N_CLOSEST)
         else:  # only one start left
             i_free_tasks_start = 0
             i_possible_starts = 0
