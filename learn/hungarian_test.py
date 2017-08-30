@@ -9,7 +9,7 @@ m = munkres.Munkres()
 def test_munkres_benchmark():
     user, _, _ = get_system_parameters()
     if user == 'travis':
-        vals = [10, 30, 70, 100, 300, 500]
+        vals = [10, 30, 70, 100, 300]
     else:
         vals = [10, 30, 70]
     ts = benchmark(
