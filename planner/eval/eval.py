@@ -57,7 +57,6 @@ def corridor():
             ]
     eval(_map, agents, jobs, 'corridor.pkl')
 
-
 # -------
 def mr_t():
     _map = load_map('mr_t.png')
@@ -83,6 +82,15 @@ def mr_t():
 # [  6.  20.]
 # (total:)
 # 26.0
+
+# -------
+def mr_t():
+    _map = load_map('mr_t.png')
+    agents = [(5, 3),
+              (2, 1)]
+    jobs = [((4, 3), (4, 1), 0),
+            ((3, 1), (3, 3), 0)]
+    eval(_map, agents, jobs, 'mr_t.pkl')
 
 # -------
 def c():
@@ -130,4 +138,4 @@ def i():
 
 
 if __name__ == "__main__":
-    i()
+    mr_t()

@@ -6,7 +6,7 @@ from itertools import *
 import numpy as np
 
 from planner.cbs_ext.plan import pre_calc_paths, plan
-from planner.planner_test import get_data_random
+from planner.cbs_ext_test import get_data_random
 
 agent_n_s = [2, 4, 6]
 map_res_s = [10, 14]

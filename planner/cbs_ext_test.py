@@ -156,7 +156,7 @@ def test_file():
         os.remove(fname)
     assert not os.path.exists(fname), "File exists already"
 
-    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(2)
+    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(3)
     start_time = datetime.datetime.now()
     plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
     time1 = (datetime.datetime.now() - start_time).total_seconds()
