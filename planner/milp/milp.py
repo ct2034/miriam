@@ -16,12 +16,11 @@ def manhattan_dist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def plan_milp(agent_pos, jobs, grid, filename=None):
+def plan_milp(agent_pos, jobs, grid, config):
     res_agent_job = optimize(agent_pos, jobs)
 
-    _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
+    _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid, config,
                                   plot=False,
-                                  filename=filename,
                                   pathplanning_only_assignment=res_agent_job)
     return res_agent_job, res_paths
 

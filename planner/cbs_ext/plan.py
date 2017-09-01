@@ -17,6 +17,7 @@ logging.setLoggerClass(ColoredLogger)
 
 plt.style.use('bmh')
 
+_config = {}
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array,
          config: dict = {}, plot: bool = False, pathplanning_only_assignment=False):
@@ -49,6 +50,8 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     if not config:
         config = generate_config()  # default config
     filename = config['filename_pathsave']
+    global _config
+    _config = config
 
     # load path_save
     if filename:  # TODO: check if file was created on same map
@@ -57,7 +60,6 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     global pool
     n = multiprocessing.cpu_count()
     pool = multiprocessing.Pool(processes=n)
-
     agent_job = []
     _agent_idle = []
 
@@ -568,6 +570,7 @@ def get_paths(_condition: dict, _state: tuple):
 
 
 def fill_up_paths(longest, _paths, agent_pos, blocks):
+    global config
     if longest > 0:
         res_paths = []
         for ia, paths_for_agent in enumerate(_paths):
@@ -584,9 +587,10 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
             ts = range(last[2] + 1, longest)
             if ts:
                 standing_section = list(map(lambda x: last[0:2] + (x,), ts))
-                for block in blocks_for_agent:
-                    if block in standing_section:
-                        standing_section.remove(block)
+                if not _config['finished_agents_block']:
+                    for block in blocks_for_agent:
+                        if block in standing_section:
+                            standing_section.remove(block)
                 paths_for_agent += (standing_section,)
             res_paths.append(paths_for_agent)
         assert len(res_paths) == len(_paths), "Not all paths processed"

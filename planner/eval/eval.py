@@ -1,16 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from planner.cbs_ext.plan import plan, plot_results
+from planner.cbs_ext.plan import plan, plot_results, generate_config
 from planner.milp.milp import plan_milp
 from tools import load_map
 
 
-def eval(_map, agents, jobs, fname, display=True):
+def eval(_map, agents, jobs, fname, display=True, finished_blocking=False):
     grid = np.repeat(_map[:, ::2, np.newaxis], 100, axis=2)
-    res_agent_job, res_agent_idle, res_paths = plan(agents, jobs, [], [], grid, plot=display, filename=fname)
 
-    milp_res_agent_job, milp_res_paths = plan_milp(agents, jobs, grid, filename=fname)
+    config = generate_config()
+    config['filename_pathsave'] = fname
+    config['finished_agents_block'] = finished_blocking
+    res_agent_job, res_agent_idle, res_paths = plan(agents, jobs, [], [], grid, config, plot=display)
+
+    milp_res_agent_job, milp_res_paths = plan_milp(agents, jobs, grid, config)
 
     print("CBS EXT")
     print("agent_job: " + str(res_agent_job))
@@ -64,7 +68,7 @@ def mr_t():
               (2, 1)]
     jobs = [((4, 3), (4, 1), 0),
             ((3, 1), (3, 3), 0)]
-    eval(_map, agents, jobs, 'mr_t.pkl')
+    eval(_map, agents, jobs, 'mr_t.pkl', finished_blocking=True)
 # Results with finished agents as obstacle:
 # CBS EXT
 # agent_job: ((0, 1), ())
@@ -82,15 +86,6 @@ def mr_t():
 # [  6.  20.]
 # (total:)
 # 26.0
-
-# -------
-def mr_t():
-    _map = load_map('mr_t.png')
-    agents = [(5, 3),
-              (2, 1)]
-    jobs = [((4, 3), (4, 1), 0),
-            ((3, 1), (3, 3), 0)]
-    eval(_map, agents, jobs, 'mr_t.pkl')
 
 # -------
 def c():
