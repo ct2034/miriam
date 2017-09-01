@@ -7,8 +7,7 @@ from functools import reduce
 import numpy as np
 
 from planner.cbs_ext import plan
-from planner.cbs_ext.plan import plan as plan_cbsext
-from tools import get_system_parameters
+from planner.cbs_ext.plan import plan as plan_cbsext, generate_config
 
 
 def has_edge_collision(paths):
@@ -124,7 +123,10 @@ def test_basic():
 
     start_time = datetime.datetime.now()
 
-    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename='')
+    config = generate_config()
+    config['filename_pathsave'] = ''
+
+    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, config)
 
     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
 
@@ -139,7 +141,10 @@ def test_rand():
 
         start_time = datetime.datetime.now()
 
-        res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename='')
+        config = generate_config()
+        config['filename_pathsave'] = ''
+
+        res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], idle_goals, grid, config)
 
         print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
         print("RESULTS:\nres_agent_job", res_agent_job)
@@ -152,18 +157,21 @@ def test_rand():
 
 def test_file():
     fname = "/tmp/test.pkl"
+    config = generate_config()
+    config['filename_pathsave'] = fname
+
     if os.path.exists(fname):
         os.remove(fname)
     assert not os.path.exists(fname), "File exists already"
 
     agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_labyrinthian(3)
     start_time = datetime.datetime.now()
-    plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+    plan_cbsext(agent_pos, jobs, [], idle_goals, grid, config)
     time1 = (datetime.datetime.now() - start_time).total_seconds()
     assert os.path.isfile(fname), "Algorithm has not created a file"
 
     start_time = datetime.datetime.now()
-    plan_cbsext(agent_pos, jobs, [], idle_goals, grid, filename=fname)
+    plan_cbsext(agent_pos, jobs, [], idle_goals, grid, config)
     time2 = (datetime.datetime.now() - start_time).total_seconds()
     try:
         assert time2 < time1, "It was not faster to work with saved data"
@@ -180,7 +188,9 @@ def test_collision():
     agent_pos = [(3, 1), (5, 1)]
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
 
-    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, [], [], idle_goals, grid, filename='',
+    config = generate_config()
+    config['filename_pathsave'] = ''
+    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, [], [], idle_goals, grid, config,
                                                            plot=False)
     assert np.array(map(lambda x: len(x) == 0, res_agent_job)).all(), "We don't have to assign jobs"
 
@@ -194,12 +204,14 @@ def test_consecutive_jobs():
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
     jobs = [((2, 0), (2, 9), -6), ((7, 3), (3, 3), -1.5), ((3, 4), (5, 1), 0)]
 
+    config = generate_config()
+    config['filename_pathsave'] = ''
     res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos=agent_pos,
                                                            jobs=jobs,
                                                            alloc_jobs=[],
                                                            idle_goals=idle_goals,
                                                            grid=grid,
-                                                           filename='',
+                                                           config=config,
                                                            plot=False)
 
     assert len(res_agent_idle[0]) == 0, "We don't have to assign idle goals"
@@ -215,12 +227,14 @@ def test_same_jobs(plot=False):
     idle_goals = [((3, 9), (8, .1)), ((5, 9), (8, .1))]
     jobs = [((0, 0), (9, 9), 0.358605), ((0, 0), (9, 9), 0.002422)]
 
+    config = generate_config()
+    config['filename_pathsave'] = ''
     res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos=agent_pos,
                                                            jobs=jobs,
                                                            alloc_jobs=[],
                                                            idle_goals=idle_goals,
                                                            grid=grid,
-                                                           filename='',
+                                                           config=config,
                                                            plot=plot)
 
     assert len(res_agent_idle[0]) == 0, "We don't have to assign idle goals"
@@ -237,12 +251,14 @@ def test_idle_goals(plot=False):
     idle_goals = [((3, 9), (2, 4)), ]
     jobs = [((0, 0), (9, 9), 1), ]
 
+    config = generate_config()
+    config['filename_pathsave'] = ''
     res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos=agent_pos,
                                                            jobs=jobs,
                                                            alloc_jobs=[],
                                                            idle_goals=idle_goals,
                                                            grid=grid,
-                                                           filename='',
+                                                           config=config,
                                                            plot=plot)
 
     assert res_agent_job == ((), (0,))
@@ -253,6 +269,8 @@ def test_vertexswap():
     from planner.planner_demo_vertexswap import values_vertexswap
     grid, agent_pos, jobs, _, alloc_jobs, start_time = values_vertexswap()
 
+    config = generate_config()
+    config['filename_pathsave'] = ''
     (_,
      _,
      res_paths) = plan_cbsext(agent_pos,
@@ -261,7 +279,7 @@ def test_vertexswap():
                               [],
                               grid,
                               plot=False,
-                              filename='')
+                              config=config)
 
     assert not has_vortex_collision(res_paths), "There are collisions in vortexes!"
     assert not has_edge_collision(res_paths), "There are collisions in edges!"

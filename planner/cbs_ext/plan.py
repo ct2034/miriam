@@ -19,7 +19,7 @@ plt.style.use('bmh')
 
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array,
-         plot: bool = False, filename: str = 'path_save.pkl', pathplanning_only_assignment=False):
+         config: dict = {}, plot: bool = False, pathplanning_only_assignment=False):
     """
     Main entry point for planner
 
@@ -45,6 +45,10 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
       : tuple of tuples of agent -> job allocations, agent -> idle goal allocations and blocked map areas
 
     """
+
+    if not config:
+        config = generate_config()  # default config
+    filename = config['filename_pathsave']
 
     # load path_save
     if filename:  # TODO: check if file was created on same map
@@ -871,6 +875,14 @@ def comp2state(agent_job: tuple,
       the state tuple
     """
     return agent_job, _agent_idle, blocked
+
+
+def generate_config():
+    return {
+        'filename_pathsave': 'path_save.pkl',  # filename to save path cache
+        'finished_agents_block': False,  # weather finished agents stand around and block others
+        'number_nearest': 0,  # 0 means all, otherwise only n nearest possible agents are checked
+    }
 
 
 def save_paths(filename):
