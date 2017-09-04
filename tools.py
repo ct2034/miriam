@@ -2,6 +2,8 @@ import getpass
 import multiprocessing
 
 import logging
+import os
+
 import png
 import psutil
 import numpy as np
@@ -60,6 +62,10 @@ def get_git_message():
 def mongodb_save(name, data):
     import pymongo
     import datetime
+
+    if 0 != os.system('ping -c 4 8.8.8.8'):
+        logging.warning("No Internet connection -> not saving to mongodb")
+        return
 
     key = get_git_sha()
 
