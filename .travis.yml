@@ -9,6 +9,13 @@ before_install:
   - docker build -t miriam .
   - docker run miriam
   - export PYTHONPATH=/home/travis/build/ct2034/miriam
+  # bonmin
+  - apt-get update
+  - apt-get install -y libblas3 liblapack3 wget
+  - wget https://www.coin-or.org/download/binary/CoinAll/CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz
+  - tar -xzf CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz
+  - ln -s /usr/lib/liblapack.so.3 /lib/liblapack.so.3gf
+  - ln -s /usr/lib/libblas.so.3 /lib/libblas.so.3gf
 
 python:
   - "3.6"
