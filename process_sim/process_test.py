@@ -11,7 +11,7 @@ from simple_simulation.mod_nearest import Nearest
 
 from simple_simulation.mod_random import Random
 from simple_simulation.simulation import SimpSim
-from tools import get_system_parameters
+from tools import is_travis
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
@@ -19,8 +19,7 @@ logging.getLogger("apscheduler.scheduler").setLevel(logging.WARN)
 
 t_step = .1
 
-user, _, _ = get_system_parameters()
-if user == 'travis':
+if is_travis():
     flow_lenght = 7  # full
     products_todo = random.randint(10, 20)
 else:

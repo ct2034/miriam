@@ -1,14 +1,13 @@
 import munkres
 import numpy as np
 
-from tools import benchmark, mongodb_save, get_system_parameters
+from tools import benchmark, mongodb_save, is_travis
 
 m = munkres.Munkres()
 
 
 def test_munkres_benchmark():
-    user, _, _ = get_system_parameters()
-    if user == 'travis':
+    if is_travis():
         vals = [10, 30, 70, 100, 300]
     else:
         vals = [10, 30, 70]

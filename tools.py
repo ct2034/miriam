@@ -7,16 +7,22 @@ import numpy as np
 from datetime import datetime
 
 
-def get_system_parameters():
+def get_system_parameters(disp=True):
     import psutil
     user = getpass.getuser()
-    print("\n-----\nUser:", user)
     cores = multiprocessing.cpu_count()
-    print("CPUs:", cores)
     memory = psutil.virtual_memory().total
-    print("Total Memory: %e" % memory)
-    print("-----\n")
+    if disp:
+        print("\n-----\nUser:", user)
+        print("CPUs:", cores)
+        print("Total Memory: %e" % memory)
+        print("-----\n")
     return user, cores, memory
+
+
+def is_travis():
+    _, _, u = get_system_parameters(False)
+    return u == 'travis'
 
 
 def load_map(fname='cbs_ext/map.png'):

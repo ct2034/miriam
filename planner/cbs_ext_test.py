@@ -8,6 +8,7 @@ import numpy as np
 
 from planner.cbs_ext import plan
 from planner.cbs_ext.plan import plan as plan_cbsext, generate_config
+from tools import is_travis
 
 
 def has_edge_collision(paths):
@@ -75,10 +76,14 @@ def get_data_colission(n=1):
     grid[4 * n, 0 * n:7 * n, :] = -1
     # input
     agent_pos = [(1 * n, 1 * n), (9 * n, 1 * n), (3 * n, 1 * n)]  # three agents
-    jobs = [((1 * n, 8 * n), (8 * n, 8 * n), 0),
-            ((8 * n, 7 * n), (1 * n, 7 * n), 0),
-            ((3 * n, 6 * n), (3 * n, 5 * n), 0),
-            ((2 * n, 6 * n), (5 * n, 9 * n), 0)]
+    if is_travis():
+        jobs = [((1 * n, 8 * n), (8 * n, 8 * n), 0),
+                ((8 * n, 7 * n), (1 * n, 7 * n), 0),
+                ((3 * n, 6 * n), (3 * n, 5 * n), 0),
+                ((2 * n, 6 * n), (5 * n, 9 * n), 0)]
+    else:
+        jobs = [((1 * n, 8 * n), (8 * n, 8 * n), 0),
+                ((8 * n, 7 * n), (1 * n, 7 * n), 0)]
     idle_goals = []
     # expected results TODO:?!?
     agent_job = ((0,), (), (1,))

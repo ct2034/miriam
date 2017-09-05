@@ -309,15 +309,16 @@ def cost(_condition: dict, _state: tuple):
             _cost += prob * path_len
 
     # finding collisions in paths
-    collision = find_collision(_paths)
-    if collision != ():
-        block_state += (collision,)
-        _state = comp2state(agent_job, agent_idle, block_state)
-    for b in block_state:
-        if not is_conflict_not_block(b):  # a collision
-            _cost += 1  # a little more expensive when there is a collision
-        else:
-            _cost += .1  # a little when there is a block
+    collisions = find_collision(_paths, _config['all_collisions'])
+    for collision in collisions:
+        if collision != ():
+            block_state += (collision,)
+        for b in block_state:
+            if not is_conflict_not_block(b):  # a collision
+                _cost += 1  # a little more expensive when there is a collision
+            else:
+                _cost += .1  # a little when there is a block
+    _state = comp2state(agent_job, agent_idle, block_state)
     return _cost, _state
 
 
@@ -698,7 +699,7 @@ def get_nearest(points, coord):
     return nearest[1]
 
 
-def find_collision(_paths: list) -> tuple:
+def find_collision(_paths: list, all_collisions=False) -> tuple:
     """
     Find collisions in a set of paths. Will return vortex or edge
 
@@ -711,6 +712,7 @@ def find_collision(_paths: list) -> tuple:
     vortexes = {}
     edges = {}
     agent = 0
+    collisions = []
     for agent_paths in _paths:
         if all(map(lambda x: len(x) == 0, agent_paths)):
             return ()  # no paths -> no collision
@@ -727,7 +729,11 @@ def find_collision(_paths: list) -> tuple:
             t = path[i][2]
             if t in vortexes.keys():
                 if vortex in vortexes[t].keys():  # it is already someone there
-                    return VERTEX, vortex + (t,), (agent, vortexes[t][vortex])
+                    col = VERTEX, vortex + (t,), (agent, vortexes[t][vortex])
+                    if not all_collisions:
+                        return [col, ]
+                    else:
+                        collisions.append(col)
                 else:
                     vortexes[t][vortex] = agent
             else:
@@ -736,14 +742,21 @@ def find_collision(_paths: list) -> tuple:
             if edge:
                 if t in edges.keys():
                     if edge in edges[t].keys():
-                        return EDGE, edge + (t,), (agent, edges[t][edge])
+                        col = EDGE, edge + (t,), (agent, edges[t][edge])
+                        if not all_collisions:
+                            return [col, ]
+                        else:
+                            collisions.append(col)
                     else:
                         edges[t][edge] = agent
                 else:
                     edges[t] = {}
                     edges[t][edge] = agent
         agent += 1
-    return ()
+    if not all_collisions:
+        return ()
+    else:
+        return collisions
 
 
 def is_conflict_not_block(blocked_i):
@@ -960,6 +973,8 @@ def generate_config():
         'filename_pathsave': 'path_save.pkl',  # filename to save path cache
         'finished_agents_block': False,  # weather finished agents stand around and block others
         'number_nearest': 0,  # 0 means all, otherwise only n nearest possible agents are checked
+        'all_collisions': False,  # whether to insert all collisions as block (suboptimal)
+        'heuristic_colission': False,  # whether to use heuristic collisions resolution (suboptimal)
     }
 
 
