@@ -77,7 +77,8 @@ def get_data_colission(n=1):
     agent_pos = [(1 * n, 1 * n), (9 * n, 1 * n), (3 * n, 1 * n)]  # three agents
     jobs = [((1 * n, 8 * n), (8 * n, 8 * n), 0),
             ((8 * n, 7 * n), (1 * n, 7 * n), 0),
-            ((3 * n, 6 * n), (3 * n, 5 * n), 0)]
+            ((3 * n, 6 * n), (3 * n, 5 * n), 0),
+            ((2 * n, 6 * n), (5 * n, 9 * n), 0)]
     idle_goals = []
     # expected results TODO:?!?
     agent_job = ((0,), (), (1,))
