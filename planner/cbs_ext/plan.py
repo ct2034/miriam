@@ -7,7 +7,6 @@ from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pyflann import FLANN
 from scipy.stats import norm
 
 from planner.astar.astar_grid48con import distance_manhattan
@@ -229,6 +228,7 @@ def assign_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs):
 
 
 def assign_nearest_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs, n):
+    from pyflann import FLANN
     children = []
     starts = []
     ends = []
