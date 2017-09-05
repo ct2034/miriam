@@ -21,7 +21,8 @@ def get_system_parameters(disp=True):
 
 
 def is_travis():
-    _, _, u = get_system_parameters(False)
+    u, _, _ = get_system_parameters(False)
+    print("User: >" + str(u) + "<")
     return u == 'travis'
 
 
