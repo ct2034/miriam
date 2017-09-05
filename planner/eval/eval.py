@@ -132,5 +132,17 @@ def i():
     eval(_map, agents, jobs, 'I.pkl')
 
 
+# -------
+def s():
+    _map = load_map('S.png')
+    agents = [(2, 4),
+              (7, 0)]
+    jobs = [((0, 4), (0, 0), 0),
+            ((2, 4), (8, 0), 0),
+            ((7, 0), (3, 4), 0),
+            ]
+    eval(_map, agents, jobs, 'S.pkl')
+
+
 if __name__ == "__main__":
-    mr_t()
+    s()
