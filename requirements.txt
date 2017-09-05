@@ -7,7 +7,7 @@ matplotlib
 munkres
 numpy
 psutil
-git+git://github.com/mariusmuja/flann.git
+git+https://github.com/primetang/pyflann.git
 pymongo
 pyomo
 pypng
