@@ -76,7 +76,7 @@ def get_data_colission(n=1):
     grid[4 * n, 0 * n:7 * n, :] = -1
     # input
     agent_pos = [(1 * n, 1 * n), (9 * n, 1 * n), (3 * n, 1 * n)]  # three agents
-    if not is_travis():
+    if is_travis():
         jobs = [((1 * n, 8 * n), (8 * n, 8 * n), 0),
                 ((8 * n, 7 * n), (1 * n, 7 * n), 0),
                 ((3 * n, 6 * n), (3 * n, 5 * n), 0),
