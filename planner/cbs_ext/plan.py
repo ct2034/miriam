@@ -3,9 +3,11 @@ import multiprocessing
 import pickle
 import uuid
 from functools import reduce
+from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
+from pyflann import FLANN
 from scipy.stats import norm
 
 from planner.astar.astar_grid48con import distance_manhattan
@@ -18,6 +20,7 @@ logging.setLoggerClass(ColoredLogger)
 plt.style.use('bmh')
 
 _config = {}
+_distances = None
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array,
          config: dict = {}, plot: bool = False, pathplanning_only_assignment=False):
@@ -57,11 +60,15 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     if filename:  # TODO: check if file was created on same map
         load_paths(filename)
 
-    global pool
-    n = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(processes=n)
+    pool = alloc_threads()
+    alloc_threads()
     agent_job = []
     _agent_idle = []
+
+    if _config['number_nearest'] != 0:
+        global _distances
+        filename = pre_calc_paths(jobs, idle_goals, grid, filename)
+        _distances = pre_calc_distances(agent_pos, jobs, idle_goals, grid, filename)
 
     agent_pos_test = set()
     for a in agent_pos:
@@ -130,6 +137,13 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     return agent_job, _agent_idle, _paths
 
 
+def alloc_threads():
+    global pool
+    n = multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(processes=n)
+    return pool
+
+
 # Main methods
 
 def get_children(_condition: dict, _state: tuple) -> list:
@@ -169,21 +183,25 @@ def get_children(_condition: dict, _state: tuple) -> list:
         return [comp2state(agent_job, agent_idle, tuple(blocked1)),
                 comp2state(agent_job, agent_idle, tuple(blocked2))]
     else:
-        children = []
         agent_pos = list(agent_pos)
         agent_job = list(agent_job)
         jobs = list(jobs)
         idle_goals = list(idle_goals)
         if len(left_jobs) > 0:  # still jobs to assign - try with all left agents
-            return assign_jobs(agent_idle, agent_job, agent_pos, blocked, children, jobs, left_jobs)
+            if _config['number_nearest'] != 0:
+                n = _config['number_nearest']
+                return assign_nearest_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs, n)
+            else:
+                return assign_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs)
         elif (len(left_idle_goals) > 0) & (len(left_jobs) == 0):  # only idle goals if more agents than jobs
-            return assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, children, idle_goals, left_agent_pos,
+            return assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, idle_goals, left_agent_pos,
                                      left_idle_goals)
         else:  # all assigned
             return []
 
 
-def assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, children, idle_goals, left_agent_pos, left_idle_goals):
+def assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, idle_goals, left_agent_pos, left_idle_goals):
+    children = []
     agent_idle = list(agent_idle)
     for i_la in range(len(left_agent_pos)):
         i_a = agent_pos.index(left_agent_pos[i_la])  # which agent is it actually?
@@ -197,12 +215,49 @@ def assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, children, idle_
     return children
 
 
-def assign_jobs(agent_idle, agent_job, agent_pos, blocked, children, jobs, left_jobs):
+def assign_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs):
+    children = []
     for left_job in left_jobs:  # this makes many children ...
         job_to_assign = jobs.index(left_job)
         for i_a in range(len(agent_pos)):
             agent_job_new = agent_job.copy()
             agent_job_new[i_a] += (job_to_assign,)
+            children.append(comp2state(tuple(agent_job_new),
+                                       agent_idle,
+                                       blocked))
+    return children
+
+
+def assign_nearest_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs, n):
+    children = []
+    starts = []
+    ends = []
+    ends_job = []
+    for left_job in left_jobs:  # this makes many children ...
+        ends.append(left_job[0])
+        ends_job.append(jobs.index(left_job))
+    for i_a in range(len(agent_pos)):
+        if agent_job[i_a]:  # has assignment
+            i_j = agent_job[i_a][-1]
+            starts.append(jobs[i_j][0])
+        else:
+            starts.append(agent_pos[i_a])
+    flann = FLANN()
+    result, dists = flann.nn(
+        np.array(ends, dtype=float),
+        np.array(starts, dtype=float),
+        (n if len(ends) >= n else len(ends)),
+        algorithm="kmeans",
+        branching=32,
+        iterations=7,
+        checks=16)
+    assert len(agent_pos) == len(result), "Not the right amount of results"
+    for i_a in range(len(agent_pos)):
+        if len(result.shape) == 1:
+            result = np.array(list(map(lambda x: [x, ], result)))
+        for res in result[i_a]:
+            agent_job_new = agent_job.copy()
+            agent_job_new[i_a] += (ends_job[res],)
             children.append(comp2state(tuple(agent_job_new),
                                        agent_idle,
                                        blocked))
@@ -473,6 +528,25 @@ def pre_calc_paths(jobs, idle_goals, grid, fname=None):
     save_paths(fname)
     return fname
 
+
+def pre_calc_distances(agents, tasks, idle_goals, grid, fname=None):
+    dist_at = np.zeros([len(agents), len(tasks)])
+    for ia, it in product(range(len(agents)), range(len(tasks))):
+        dist_at[ia, it] = distance_no_calc(agents[ia], tasks[it][0])
+    # tasks
+    dist_t = np.zeros([len(tasks)])
+    for it in range(len(tasks)):
+        dist_t[it] = distance_no_calc(tasks[it][0], tasks[it][1])
+    # tasks-tasks
+    dist_tt = np.zeros([len(tasks), len(tasks)])
+    for it1, it2 in product(range(len(tasks)), range(len(tasks))):
+        dist_tt[it1, it2] = distance_no_calc(tasks[it1][1], tasks[it2][0])
+
+    return {
+        'at': dist_at,
+        't': dist_t,
+        'tt': dist_tt
+    }
 
 # Collision Helpers
 
