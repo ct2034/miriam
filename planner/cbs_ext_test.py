@@ -70,6 +70,21 @@ def get_data_labyrinthian(n=1):
     return agent_idle, agent_job, agent_pos, grid, idle_goals, jobs
 
 
+def get_data_colission(n=1):
+    grid = np.zeros([10 * n, 10 * n, 51 * n])
+    grid[4 * n, 0 * n:7 * n, :] = -1
+    # input
+    agent_pos = [(1 * n, 1 * n), (9 * n, 1 * n), (3 * n, 1 * n)]  # three agents
+    jobs = [((1 * n, 8 * n), (8 * n, 8 * n), 0),
+            ((8 * n, 7 * n), (1 * n, 7 * n), 0),
+            ((3 * n, 6 * n), (3 * n, 5 * n), 0)]
+    idle_goals = []
+    # expected results TODO:?!?
+    agent_job = ((0,), (), (1,))
+    agent_idle = ((), (0,), ())
+    return agent_idle, agent_job, agent_pos, grid, idle_goals, jobs
+
+
 def get_unique_coords(max_x, max_y, reset=False):
     global used_coords
     if reset:

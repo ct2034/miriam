@@ -2,15 +2,13 @@ import getpass
 import multiprocessing
 
 import logging
-import os
 
-import png
-import psutil
 import numpy as np
 from datetime import datetime
 
 
 def get_system_parameters():
+    import psutil
     user = getpass.getuser()
     print("\n-----\nUser:", user)
     cores = multiprocessing.cpu_count()
@@ -22,6 +20,7 @@ def get_system_parameters():
 
 
 def load_map(fname='cbs_ext/map.png'):
+    import png
     r = png.Reader(filename=fname)
 
     x, y, iter, color = r.read()
@@ -45,21 +44,22 @@ def benchmark(fun, vals):
     return ts
 
 
-def get_git_sha():
+def get_git():
     from git import Repo
     import os
-    repo = Repo(os.getcwd(), search_parent_directories=True)
-    return repo.head.commit.hexsha
+    return Repo(os.getcwd(), search_parent_directories=True)
+
+
+def get_git_sha():
+    return get_git().head.commit.hexsha
 
 
 def get_git_message():
-    from git import Repo
-    import os
-    repo = Repo(os.getcwd(), search_parent_directories=True)
-    return repo.head.commit.message
+    return get_git().head.commit.message
 
 
 def mongodb_save(name, data):
+    import os
     import pymongo
     import datetime
 

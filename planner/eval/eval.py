@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from planner.cbs_ext.plan import plan, plot_results, generate_config
-from planner.milp.milp import plan_milp
 from tools import load_map
 
 
 def eval(_map, agents, jobs, fname, display=True, finished_blocking=False):
+    from planner.milp.milp import plan_milp
     grid = np.repeat(_map[:, ::2, np.newaxis], 100, axis=2)
 
     config = generate_config()
