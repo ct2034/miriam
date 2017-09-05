@@ -7,7 +7,7 @@ from pyomo.environ import *
 from pyomo.core import *
 from pyomo.opt import SolverFactory
 
-from planner.cbs_ext.plan import plan as plan_cbsext
+from planner.cbs_ext.plan import plan as plan_cbsext, generate_config
 
 logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
 
@@ -128,9 +128,15 @@ def optimize(agents, tasks):
 
     m.consec = Constraint(m.agents, m.cons_a_first, rule=consecutive)
 
+    # def integer(m, a, c, t):
+    #     assignm = m.assignments[a, c, t]
+    #     return (assignm^2 - assignm + 0.25) > .2  # (x-.5)^2 -> to be 0 or 1
+    #
+    # m.consec = Constraint(m.all, rule=integer)
+
     # Solve
     prob = m.create_instance()
-    optim = SolverFactory('cplex')
+    optim = SolverFactory('bonmin')
     result = optim.solve(prob, tee=True)
 
     # Solution
@@ -148,6 +154,8 @@ def optimize(agents, tasks):
 
 
 if __name__ == "__main__":
+    config = generate_config()
+    config['filename_pathsave'] = ''
     agent_pos = [(1, 1), (9, 1), (3, 1)]  # three agents
     jobs = [((1, 6), (9, 6), 0),
             ((1, 3), (7, 3), 0),
@@ -155,7 +163,7 @@ if __name__ == "__main__":
             ((4, 8), (7, 1), 10),
             ((3, 4), (1, 5), 10)]
     grid = np.zeros([10, 10, 51])
-    plan_milp(agent_pos, jobs, grid)
+    plan_milp(agent_pos, jobs, grid, config)
 
 """
 /usr/bin/python3.6 /home/cch/src/smartleitstand/planner/planner_milp_vs_cbsext.py
