@@ -666,7 +666,8 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
                     for block in blocks_for_agent:
                         if block in standing_section:
                             standing_section.remove(block)
-                paths_for_agent += (standing_section,)
+                if standing_section:
+                    paths_for_agent += (standing_section,)
             res_paths.append(paths_for_agent)
         assert len(res_paths) == len(_paths), "Not all paths processed"
         return res_paths

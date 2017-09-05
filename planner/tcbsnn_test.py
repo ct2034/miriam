@@ -14,7 +14,7 @@ def tcbsnn_for_comparison(config):
     start_time = datetime.datetime.now()
     if 'milp' in config:
         from planner.milp.milp import plan_milp
-        res_agent_job, res_agent_idle, res_paths = plan_milp(agent_pos, jobs, grid, config)
+        res_agent_job, res_paths = plan_milp(agent_pos, jobs, grid, config)
     else:
         res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, config)
     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
@@ -34,7 +34,7 @@ def test_tcbsnn_comparison():
 
     config_milp = config_opt.copy()
     config_milp['milp'] = 1
-    benchmark(tcbsnn_for_comparison, [config_col, config_nn, config_opt])
+    benchmark(tcbsnn_for_comparison, [config_col, config_nn, config_opt, config_milp])
 
 
 if __name__ == "__main__":
