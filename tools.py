@@ -70,7 +70,7 @@ def mongodb_save(name, data):
     import pymongo
     import datetime
 
-    if 0 != os.system('ping -c 4 8.8.8.8'):
+    if 0 != os.system('ping -c2 -W1 8.8.8.8'):
         logging.warning("No Internet connection -> not saving to mongodb")
         return
 
