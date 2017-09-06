@@ -1,6 +1,15 @@
 from __future__ import division
 
 import logging
+
+logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
+logging.getLogger('pyutilib.component.core.pyomo').setLevel(logging.INFO)
+logging.getLogger('pyutilib.component.core.pyutilib.autotest').setLevel(logging.INFO)
+logging.getLogger('pyutilib.component.core.pyutilib.workflow').setLevel(logging.INFO)
+logging.getLogger('pyutilib.component.core.pyutilib').setLevel(logging.INFO)
+logging.getLogger('pyutilib.component.core').setLevel(logging.INFO)
+logging.getLogger('Pyro4.core').setLevel(logging.INFO)
+
 import numpy as np
 from itertools import *
 from pyomo.environ import *
@@ -9,7 +18,6 @@ from pyomo.opt import SolverFactory
 
 from planner.cbs_ext.plan import plan as plan_cbsext, generate_config
 
-logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
 
 
 def manhattan_dist(a, b):
