@@ -12,8 +12,7 @@ before_install:
   # bonmin
   - sudo apt-get update
   - sudo apt-get install -y libblas3 liblapack3 wget
-  - wget https://www.coin-or.org/download/binary/CoinAll/CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz
-  - bash -c "cd /; sudo tar -xzf $HOME/CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz"
+  - bash -c "cd /; wget https://www.coin-or.org/download/binary/CoinAll/CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz; sudo tar -xzf $HOME/CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz"
   - sudo ln -s /usr/lib/liblapack.so.3 /lib/liblapack.so.3gf
   - sudo ln -s /usr/lib/libblas.so.3 /lib/libblas.so.3gf
 
