@@ -26,15 +26,16 @@ def test_tcbsnn_comparison():
     config_opt = generate_config()
     config_opt['filename_pathsave'] = 'colission.pkl'
 
+    config_milp = config_opt.copy()
+    config_milp['milp'] = 1
+
     config_nn = config_opt.copy()
     config_nn['number_nearest'] = 2
 
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
-    config_milp = config_opt.copy()
-    config_milp['milp'] = 1
-    benchmark(tcbsnn_for_comparison, [config_col, config_nn, config_opt, config_milp])
+    benchmark(tcbsnn_for_comparison, [config_milp, config_col, config_nn, config_opt])
 
 
 if __name__ == "__main__":
