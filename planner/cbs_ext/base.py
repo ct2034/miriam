@@ -42,7 +42,7 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
 
             append = True
             if not is_in(open_tree, neighbor, g_score, f_score):  # Discover a new node
-                add(open_tree, neighbor, g_score, f_score)
+                add(open_tree, neighbor, g_score, {})
             elif tentative_g_score >= g_score[neighbor]:
                 continue  # This is not a better path.
             else:
@@ -51,6 +51,7 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             f_score[neighbor] = g_score[neighbor]
             f_score[neighbor] += heuristic(condition, neighbor)
             if append:
+                remove(open_tree, current, g_score, {})
                 add(open_tree, neighbor, {}, f_score)
 
     raise RuntimeError("Can not find a solution")
@@ -76,6 +77,7 @@ def add(open_tree, node, f_score, g_score):
     for score in [f_score, g_score]:
         if node in score:
             open_tree[score[node]] = node
+            break
 
 
 def is_in(open_tree, node, f_score, g_score):

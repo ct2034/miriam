@@ -19,7 +19,6 @@ from pyomo.opt import SolverFactory
 from planner.cbs_ext.plan import plan as plan_cbsext, generate_config
 
 
-
 def manhattan_dist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
