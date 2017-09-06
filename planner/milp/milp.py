@@ -27,7 +27,7 @@ def plan_milp(agent_pos, jobs, grid, config):
 
 def optimize(agents, tasks):
     # how long can consecutive tasks be at max?
-    consec_len = 1 + len(tasks) - len(agents)  # TODO: use this
+    consec_len = len(tasks)
     # Precalculate distances
     # agents-tasks
     dist_at = np.zeros([len(agents), len(tasks)])
@@ -85,22 +85,24 @@ def optimize(agents, tasks):
         :return: The objective
         """
         obj = 0
-        for ia in range(len(agents)):  # for all agents
-            # path to first task
-            obj_agent = 0
-            for it in m.tasks:
-                obj_agent += m.assignments[ia, 0, it] * dist_at[ia][it]
-                obj_agent += m.assignments[ia, 0, it] * dist_t[it]
-            for ic in range(1, len(tasks)):  # for all consecutive assignments
-                obj_agent += m.assignments[ia, ic, it] * obj_agent  # how did we get here?
-                for it in m.tasks:
-                    for it_prev in m.tasks:  # for all possible previous tasks
-                        # from previous task end to this start
-                        obj_agent += m.assignments[ia, ic, it] * \
-                                     m.assignments[ia, ic - 1, it_prev] * \
-                                     dist_tt[it_prev][it]
-                    obj_agent += m.assignments[ia, ic, it] * dist_t[it]
-            obj += obj_agent
+        for it in m.tasks:  # task we care about
+            obj_task = 0
+            for ia in range(len(agents)):  # for all agents
+                path = 0
+                path += m.assignments[ia, 0, it] * dist_at[ia][it]
+                path += m.assignments[ia, 0, it] * dist_t[it]
+                obj_task += path * m.assignments[ia, 0, it]  # we care for this path
+                for ic in range(1, len(tasks)):  # for all consecutive assignments
+                    path += m.assignments[ia, ic, it] * path  # how did we get here?
+                    for it2 in m.tasks:
+                        for it2_prev in m.tasks:  # for all possible previous tasks
+                            # from previous task end to this start
+                            path += m.assignments[ia, ic, it2] * \
+                                    m.assignments[ia, ic - 1, it2_prev] * \
+                                    dist_tt[it2_prev][it2]
+                        path += m.assignments[ia, ic, it] * dist_t[it]
+                        obj_task += path * m.assignments[ia, ic, it]  # we care for this path
+            obj += obj_task
         for it in m.tasks:
             obj += tasks[it][2]  # all tasks arrival time, TODO: whats the difference then?
         return obj
