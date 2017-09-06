@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+from bintrees import rbtree
 
 from tools import ColoredLogger
 
@@ -9,25 +10,22 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     _, start = cost(condition, start)  # it may have collisions
 
     closed = []
-    open = [start]
+    open_tree = rbtree.RBTree()
     g_score = {}
     g_score[start] = 0
     f_score = {}
     f_score[start] = heuristic(condition, start)
 
-    f_score_open = np.array([])
-    f_score_open = np.append(f_score_open, f_score[start])
+    open_tree[f_score[start]] = start
 
-    while len(open) > 0:
+    while len(open_tree) > 0:
         # the node in openSet having the lowest fScore[] value
-        current = argmin_f_open(open, f_score_open)
+        current = get_best(open_tree)
 
         if goal_test(condition, current):
             return current
 
-        i_rm = open.index(current)
-        open.remove(current)
-        f_score_open = np.delete(f_score_open, i_rm)
+        remove(open_tree, current, {}, f_score)
 
         closed.append(current)
         children = get_children(condition, current)
@@ -43,8 +41,8 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             tentative_g_score = c
 
             append = True
-            if neighbor not in open:  # Discover a new node
-                open.append(neighbor)
+            if not is_in(open_tree, neighbor, g_score, f_score):  # Discover a new node
+                add(open_tree, neighbor, g_score, f_score)
             elif tentative_g_score >= g_score[neighbor]:
                 continue  # This is not a better path.
             else:
@@ -53,11 +51,35 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             f_score[neighbor] = g_score[neighbor]
             f_score[neighbor] += heuristic(condition, neighbor)
             if append:
-                f_score_open = np.append(f_score_open, f_score[neighbor])
+                add(open_tree, neighbor, {}, f_score)
 
     raise RuntimeError("Can not find a solution")
 
 
-def argmin_f_open(open_list, f_score_open):
-    assert len(open_list) == len(f_score_open), "Lengths must be equal"
-    return open_list[np.argmin(f_score_open)]
+def get_best(open_tree):
+    for k in open_tree:
+        n = open_tree[k]
+        break
+    return n
+
+
+def remove(open_tree, node, f_score, g_score):
+    for score in [f_score, g_score]:
+        if node in score:
+            try:
+                open_tree.remove(score[node])
+            except KeyError:
+                pass
+
+
+def add(open_tree, node, f_score, g_score):
+    for score in [f_score, g_score]:
+        if node in score:
+            open_tree[score[node]] = node
+
+
+def is_in(open_tree, node, f_score, g_score):
+    for score in [f_score, g_score]:
+        if node in score and score[node] in open_tree:
+            return True
+    return False
