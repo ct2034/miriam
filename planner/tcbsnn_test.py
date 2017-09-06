@@ -13,8 +13,13 @@ def tcbsnn_for_comparison(config):
     agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_colission()
     start_time = datetime.datetime.now()
     if 'milp' in config:
+        print("milp")
         from planner.milp.milp import plan_milp
         res_agent_job, res_paths = plan_milp(agent_pos, jobs, grid, config)
+    elif 'greedy' in config:
+        print("greedy")
+        from planner.greedy.greedy import plan_sc
+        res_agent_job, res_paths = plan_sc(agent_pos, jobs, grid, config)
     else:
         res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, config)
     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
@@ -29,13 +34,16 @@ def test_tcbsnn_comparison():
     config_milp = config_opt.copy()
     config_milp['milp'] = 1
 
+    config_greedy = config_opt.copy()
+    config_greedy['greedy'] = 1
+
     config_nn = config_opt.copy()
     config_nn['number_nearest'] = 2
 
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
-    benchmark(tcbsnn_for_comparison, [config_milp, config_col, config_nn, config_opt])
+    benchmark(tcbsnn_for_comparison, [config_greedy, config_milp, config_col, config_nn, config_opt])
 
 
 if __name__ == "__main__":

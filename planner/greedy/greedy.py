@@ -14,13 +14,14 @@ def manhattan_dist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def plan_sc(agent_pos, jobs, grid, filename=None):
+def plan_sc(agent_pos, jobs, grid, config):
+    filename = config['filename_pathsave']
     load_paths(filename)
     res_agent_job = strictly_consec(agent_pos, jobs, grid)
     save_paths(filename)
     _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
                                   plot=False,
-                                  filename=filename,
+                                  config=config,
                                   pathplanning_only_assignment=res_agent_job)
     return res_agent_job, res_paths
 
