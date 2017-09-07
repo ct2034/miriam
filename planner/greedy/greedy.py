@@ -3,7 +3,7 @@ import numpy as np
 
 from pyflann import FLANN
 
-from planner.cbs_ext.plan import plan as plan_cbsext, load_paths, save_paths
+from planner.cbs_ext.plan import plan as plan_cbsext, load_paths, save_paths, make_unique
 from planner.common import path
 
 logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
@@ -19,6 +19,7 @@ def plan_sc(agent_pos, jobs, grid, config):
     load_paths(filename)
     res_agent_job = strictly_consec(agent_pos, jobs, grid)
     save_paths(filename)
+    print(res_agent_job)
     _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
                                   plot=False,
                                   config=config,
@@ -64,6 +65,7 @@ def strictly_consec(agents_list, tasks, grid):
     N_CLOSEST = 2
     TYPE = "float64"
     agents = np.array(agents_list, dtype=TYPE)
+    tasks = make_unique(tasks)
 
     free_agents = agents.copy()
     free_tasks = tasks.copy()

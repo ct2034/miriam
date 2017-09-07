@@ -31,7 +31,7 @@ def eval(_map, agents, jobs, fname, display=True, finished_blocking=False):
 
 def get_costs(paths, jobs, agent_job, display=True):
     if not paths:
-        return np.inf
+        return np.infoct
     costs = np.zeros(len(jobs))
     for ia, paths_for_agent in enumerate(paths):
         ip = 0

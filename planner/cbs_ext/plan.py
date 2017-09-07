@@ -98,14 +98,7 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     _agent_idle = tuple(_agent_idle)
 
     # making jobs unique
-    jobs_copy = jobs.copy()
-    jobs = []
-    jobs_set = set()
-    for j in jobs_copy:
-        while j in jobs_set:
-            j = (j[0], j[1], j[2] + .0001)
-        jobs.append(j)
-        jobs_set.add(j)
+    jobs = make_unique(jobs)
 
     blocked = ()
     condition = comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid)
@@ -775,7 +768,6 @@ def get_blocks_dict(blocked):
                 block_dict[agent] = list(b[:1], )
     return block_dict
 
-
 # Data Helpers
 
 def clear_set(_agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals: list, jobs: list) -> tuple:
@@ -806,6 +798,17 @@ def clear_set(_agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals:
             cp_idle_goals.remove(idle_goals[_agent_idle[i_a][0]])
     return cp_agent_pos, cp_idle_goals, cp_jobs
 
+
+def make_unique(jobs):
+    jobs_copy = jobs.copy()
+    jobs = []
+    jobs_set = set()
+    for j in jobs_copy:
+        while j in jobs_set:
+            j = (j[0], j[1], j[2] + .0001)
+        jobs.append(j)
+        jobs_set.add(j)
+    return jobs
 
 def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
     plt.style.use('bmh')
