@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from planner.cbs_ext.plan import plot_results
-from planner.cobra_interface.read_paths import read_file
+from planner.cobra_interface.funwithsnakes import read_file
 
 
 def test_read_file():
