@@ -2,7 +2,8 @@ import os
 import numpy as np
 
 
-def read_file(fname):
+def read_file(fname, grid):
+    height = grid.shape[1]
     path = os.getenv("COBRA_PATH")
     if path:
         fname = path + "/" + fname
@@ -20,8 +21,10 @@ def read_file(fname):
                     t = 0
             else:  # a new point
                 agent_path.append(
-                    tuple(map(int, nums)) +
-                    (t,))
+                    (int(nums[0]),
+                     height - int(nums[1]),
+                     t)
+                )
                 t += 1
         paths.append((agent_path,))
     return paths
