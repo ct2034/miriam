@@ -2,10 +2,10 @@ import os
 
 import numpy as np
 
-from planner.cobra_interface.funwithsnakes import read_file
+from planner.cobra.funwithsnakes import read_file
 
 
-def test_read_file(fname='planner/cobra_interface/test.path', plot=False):
+def test_read_file(fname='planner/cobra/test.path', plot=False):
     print("cwd: " + str(os.getcwd()))
     grid = np.zeros([10, 10, 100])
     paths = read_file(fname, grid)
