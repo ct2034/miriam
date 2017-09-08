@@ -1,11 +1,15 @@
 import getpass
-import multiprocessing
-
 import logging
-
-import numpy as np
+import multiprocessing
+import signal
+from contextlib import contextmanager
 from datetime import datetime
 
+import numpy as np
+
+
+class TimeoutException(Exception):
+    pass
 
 def get_system_parameters(disp=True):
     import psutil
@@ -37,10 +41,28 @@ def load_map(fname='cbs_ext/map.png'):
     return m
 
 
-def benchmark(fun, vals, disp=True):
+@contextmanager
+def time_limit(seconds):
+    def signal_handler(signum, frame):
+        raise TimeoutException("Timed out!")
+
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+
+
+def benchmark(fun, vals, disp=True, timeout=60):
     def benchmark_fun(val):
+        res = False
         start = datetime.now()
-        res = fun(val)
+        try:
+            with time_limit(timeout):
+                res = fun(val)
+        except TimeoutException:
+            print("Timed out!")
         t = (datetime.now() - start).total_seconds()
         if not res:
             res = None

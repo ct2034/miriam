@@ -1,7 +1,4 @@
 import datetime
-import time
-
-from sphinx.jinja2glue import idgen
 
 from planner.cbs_ext.plan import generate_config, plan, alloc_threads
 from planner.cbs_ext_test import get_data_colission, get_data_random
@@ -17,7 +14,6 @@ def tcbsnn_for_comparison(config):
                                                         agent_n=3,
                                                         job_n=3,
                                                         idle_goals_n=0)
-    start_time = datetime.datetime.now()
     if 'milp' in config:
         print("milp")
         from planner.milp.milp import plan_milp
@@ -28,7 +24,6 @@ def tcbsnn_for_comparison(config):
         res_agent_job, res_paths = plan_sc(agent_pos, jobs, grid, config)
     else:
         res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, config)
-    print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
     print(res_agent_job)
     return get_costs(res_paths, jobs, res_agent_job, True)
 
