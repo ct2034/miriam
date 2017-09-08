@@ -15,7 +15,7 @@ def manhattan_dist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def plan_sc(agent_pos, jobs, grid, config):
+def plan_greedy(agent_pos, jobs, grid, config):
     filename = config['filename_pathsave']
     load_paths(filename)
     res_agent_job = strictly_consec(agent_pos, jobs, grid)
@@ -112,9 +112,3 @@ def strictly_consec(agents_list, tasks, grid):
 
 
 if __name__ == "__main__":
-    res_agent_job, res_paths = plan_sc(
-        [(1, 1), (2, 2)],
-        [((3, 3), (1, 4), 0), ((4, 1), (0, 0), 0)],
-        np.zeros([5, 5, 100]),
-        generate_config()
-    )

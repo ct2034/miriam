@@ -6,7 +6,7 @@ from planner.eval.eval import get_costs
 from tools import benchmark
 
 
-def tcbsnn_for_comparison(config):
+def one_planner(config):
     print("Testing with number_nearest=" + str(config['number_nearest']))
     print("Testing with all_collisions=" + str(config['all_collisions']))
     agent_pos, grid, idle_goals, jobs = config['params']
@@ -16,15 +16,15 @@ def tcbsnn_for_comparison(config):
         res_agent_job, res_paths = plan_milp(agent_pos, jobs, grid, config)
     elif 'greedy' in config:
         print("greedy")
-        from planner.greedy.greedy import plan_sc
-        res_agent_job, res_paths = plan_sc(agent_pos, jobs, grid, config)
+        from planner.greedy.greedy import plan_greedy
+        res_agent_job, res_paths = plan_greedy(agent_pos, jobs, grid, config)
     else:
         res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, config)
     print(res_agent_job)
     return get_costs(res_paths, jobs, res_agent_job, True)
 
 
-def test_tcbsnn_comparison():
+def test_planner_comparison():
     fname = '/tmp/random.pkl'
     try:
         os.remove(fname)  # cleaning from maybe last run
@@ -57,7 +57,7 @@ def test_tcbsnn_comparison():
     config_col['all_collisions'] = True
 
     configs = [config_milp, config_greedy, config_col, config_nn, config_opt]
-    ts, ress = benchmark(tcbsnn_for_comparison, configs)
+    ts, ress = benchmark(one_planner, configs)
 
     for conf in configs:
         if ress[configs.index(conf)]:
@@ -68,4 +68,4 @@ def test_tcbsnn_comparison():
     os.remove(fname)
 
 if __name__ == "__main__":
-    test_tcbsnn_comparison()
+    test_planner_comparison()
