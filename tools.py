@@ -82,7 +82,7 @@ def benchmark(fun, vals, disp=True, timeout=60):
         print(ts)
         print("Results")
         print(ress)
-    return vals, ts, ress
+    return ts, ress
 
 
 def get_git():

@@ -1,3 +1,5 @@
+import os
+
 from planner.cbs_ext.plan import generate_config, plan, alloc_threads
 from planner.cbs_ext_test import get_data_colission, get_data_random
 from planner.eval.eval import get_costs
@@ -23,13 +25,19 @@ def tcbsnn_for_comparison(config):
 
 
 def test_tcbsnn_comparison():
+    fname = '/tmp/random.pkl'
+    try:
+        os.remove(fname)  # cleaning from maybe last run
+    except FileNotFoundError:
+        pass
+
     config_opt = generate_config()
     config_opt['params'] = get_data_random(map_res=8,
                                            map_fill_perc=20,
                                            agent_n=3,
                                            job_n=4,
                                            idle_goals_n=0)
-    config_opt['filename_pathsave'] = 'random.pkl'
+    config_opt['filename_pathsave'] = fname
 
     config_milp = config_opt.copy()
     config_milp['milp'] = 1
@@ -43,8 +51,16 @@ def test_tcbsnn_comparison():
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
-    benchmark(tcbsnn_for_comparison, [config_milp, config_greedy, config_col, config_nn, config_opt])
+    configs = [config_milp, config_greedy, config_col, config_nn, config_opt]
+    ts, ress = benchmark(tcbsnn_for_comparison, configs)
 
+    for conf in configs:
+        if ress[configs.index(conf)]:
+            assert ress[configs.index(config_opt)] <= \
+                   ress[configs.index(conf)], \
+                "optimal planner should be better then:\n------\n" + str(conf)
+
+    os.remove(fname)
 
 if __name__ == "__main__":
     test_tcbsnn_comparison()
