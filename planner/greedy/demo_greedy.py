@@ -2,7 +2,7 @@ import numpy as np
 
 from tools import load_map
 
-from planner.greedy.greedy import plan_sc
+from planner.greedy.greedy import plan_greedy
 from planner.cbs_ext.plan import plot_inputs, plot_results
 
 _map = load_map('../map2.png')
@@ -21,6 +21,6 @@ idle_goals = []
 
 fig = plot_inputs(agent_pos, idle_goals, jobs, grid, show=False)
 
-(res_agent_job, res_paths) = plan_sc(agent_pos, jobs, grid, 'greedy.pkl')
+(res_agent_job, res_paths) = plan_greedy(agent_pos, jobs, grid, 'greedy.pkl')
 
 plot_results([], res_paths, res_agent_job, agent_pos, fig, grid, idle_goals, jobs)
