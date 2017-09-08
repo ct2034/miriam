@@ -1,5 +1,3 @@
-import datetime
-
 from planner.cbs_ext.plan import generate_config, plan, alloc_threads
 from planner.cbs_ext_test import get_data_colission, get_data_random
 from planner.eval.eval import get_costs
@@ -9,11 +7,7 @@ from tools import benchmark
 def tcbsnn_for_comparison(config):
     print("Testing with number_nearest=" + str(config['number_nearest']))
     print("Testing with all_collisions=" + str(config['all_collisions']))
-    agent_pos, grid, idle_goals, jobs = get_data_random(map_res=8,
-                                                        map_fill_perc=10,
-                                                        agent_n=3,
-                                                        job_n=3,
-                                                        idle_goals_n=0)
+    agent_pos, grid, idle_goals, jobs = config['params']
     if 'milp' in config:
         print("milp")
         from planner.milp.milp import plan_milp
@@ -30,6 +24,11 @@ def tcbsnn_for_comparison(config):
 
 def test_tcbsnn_comparison():
     config_opt = generate_config()
+    config_opt['params'] = get_data_random(map_res=8,
+                                           map_fill_perc=20,
+                                           agent_n=3,
+                                           job_n=4,
+                                           idle_goals_n=0)
     config_opt['filename_pathsave'] = 'random.pkl'
 
     config_milp = config_opt.copy()
