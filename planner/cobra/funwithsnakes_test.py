@@ -18,7 +18,7 @@ def test_read_map(fname='planner/cobra/test.path', plot=False):
     assert len(paths[0][0]) == 30, "No full paths"
 
 
-def test_cobra_simple():
+def test_cobra_simple(plot=False):
     grid = np.zeros([5, 5, 30])
     res_agent_job, res_paths = plan_cobra(
         [(1, 1), (2, 2)],
@@ -26,7 +26,8 @@ def test_cobra_simple():
         grid,
         generate_config()
     )
-    plot_results([], res_paths, [], [], plt.figure(), grid, [], [])
+    if plot:
+        plot_results([], res_paths, [], [], plt.figure(), grid, [], [])
     # assert res_agent_job, "No result" TODO: check!
     assert res_paths, "No result"
 

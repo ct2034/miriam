@@ -6,7 +6,6 @@ from pyflann import FLANN
 
 from planner.cbs_ext.plan import plan as plan_cbsext, load_paths, save_paths, make_unique, generate_config
 from planner.common import path
-from planner.greedy.greedy_test import test_greedy_simple
 
 logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
 
@@ -110,7 +109,3 @@ def strictly_consec(agents_list, tasks, grid):
             t_to_check = consec_t
 
     return agent_task
-
-
-if __name__ == "__main__":
-    test_greedy_simple()
