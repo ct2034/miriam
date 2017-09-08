@@ -63,6 +63,9 @@ def benchmark(fun, vals, disp=True, timeout=60):
                 res = fun(val)
         except TimeoutException:
             print("Timed out!")
+        except Exception as e:
+            print("Benchmark stopped for exception:")
+            print(e)
         t = (datetime.now() - start).total_seconds()
         if not res:
             res = None

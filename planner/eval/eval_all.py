@@ -1,6 +1,6 @@
 import os
 
-from planner.cbs_ext.plan import generate_config, plan, alloc_threads
+from planner.cbs_ext.plan import generate_config, plan, alloc_threads, pre_calc_paths
 from planner.cbs_ext_test import get_data_colission, get_data_random
 from planner.eval.eval import get_costs
 from tools import benchmark
@@ -31,12 +31,17 @@ def test_tcbsnn_comparison():
     except FileNotFoundError:
         pass
 
+    params = get_data_random(map_res=8,
+                             map_fill_perc=20,
+                             agent_n=3,
+                             job_n=4,
+                             idle_goals_n=0)
+
+    agent_pos, grid, idle_goals, jobs = params
+    pre_calc_paths(jobs, idle_goals, grid, fname)
+
     config_opt = generate_config()
-    config_opt['params'] = get_data_random(map_res=8,
-                                           map_fill_perc=20,
-                                           agent_n=3,
-                                           job_n=4,
-                                           idle_goals_n=0)
+    config_opt['params'] = params
     config_opt['filename_pathsave'] = fname
 
     config_milp = config_opt.copy()

@@ -1,9 +1,10 @@
 import logging
 import numpy as np
+from functools import reduce
 
 from pyflann import FLANN
 
-from planner.cbs_ext.plan import plan as plan_cbsext, load_paths, save_paths, make_unique
+from planner.cbs_ext.plan import plan as plan_cbsext, load_paths, save_paths, make_unique, generate_config
 from planner.common import path
 
 logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
@@ -18,6 +19,9 @@ def plan_sc(agent_pos, jobs, grid, config):
     filename = config['filename_pathsave']
     load_paths(filename)
     res_agent_job = strictly_consec(agent_pos, jobs, grid)
+    assertjobs = reduce(lambda a, b: a + b, res_agent_job, tuple())
+    for ij in range(len(jobs)):
+        assert ij in assertjobs
     save_paths(filename)
     print(res_agent_job)
     _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
@@ -105,3 +109,12 @@ def strictly_consec(agents_list, tasks, grid):
             t_to_check = consec_t
 
     return agent_task
+
+
+if __name__ == "__main__":
+    res_agent_job, res_paths = plan_sc(
+        [(1, 1), (2, 2)],
+        [((3, 3), (1, 4), 0), ((4, 1), (0, 0), 0)],
+        np.zeros([5, 5, 100]),
+        generate_config()
+    )
