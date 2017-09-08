@@ -37,18 +37,30 @@ def load_map(fname='cbs_ext/map.png'):
     return m
 
 
-def benchmark(fun, vals):
+def benchmark(fun, vals, disp=True):
     def benchmark_fun(val):
         start = datetime.now()
-        fun(val)
-        return (datetime.now() - start).total_seconds()
+        res = fun(val)
+        t = (datetime.now() - start).total_seconds()
+        if not res:
+            res = None
+        return t, res
 
-    ts = list(map(benchmark_fun, vals))
-    print("Values:")
-    print(vals)
-    print("Durations: [s]")
-    print(ts)
-    return ts
+    ts = []
+    ress = []
+    for val in vals:
+        t, res = benchmark_fun(val)
+        ts.append(t)
+        ress.append(res)
+
+    if disp:
+        print("Inputs:")
+        print(vals)
+        print("Durations: [s]")
+        print(ts)
+        print("Results")
+        print(ress)
+    return vals, ts, ress
 
 
 def get_git():

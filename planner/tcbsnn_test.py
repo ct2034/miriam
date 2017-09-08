@@ -1,8 +1,10 @@
 import datetime
 import time
 
+from sphinx.jinja2glue import idgen
+
 from planner.cbs_ext.plan import generate_config, plan, alloc_threads
-from planner.cbs_ext_test import get_data_colission
+from planner.cbs_ext_test import get_data_colission, get_data_random
 from planner.eval.eval import get_costs
 from tools import benchmark
 
@@ -10,7 +12,11 @@ from tools import benchmark
 def tcbsnn_for_comparison(config):
     print("Testing with number_nearest=" + str(config['number_nearest']))
     print("Testing with all_collisions=" + str(config['all_collisions']))
-    agent_idle, agent_job, agent_pos, grid, idle_goals, jobs = get_data_colission()
+    agent_pos, grid, idle_goals, jobs = get_data_random(map_res=8,
+                                                        map_fill_perc=10,
+                                                        agent_n=3,
+                                                        job_n=3,
+                                                        idle_goals_n=0)
     start_time = datetime.datetime.now()
     if 'milp' in config:
         print("milp")
@@ -24,12 +30,12 @@ def tcbsnn_for_comparison(config):
         res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, config)
     print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
     print(res_agent_job)
-    get_costs(res_paths, jobs, res_agent_job, True)
+    return get_costs(res_paths, jobs, res_agent_job, True)
 
 
 def test_tcbsnn_comparison():
     config_opt = generate_config()
-    config_opt['filename_pathsave'] = 'colission.pkl'
+    config_opt['filename_pathsave'] = 'random.pkl'
 
     config_milp = config_opt.copy()
     config_milp['milp'] = 1
@@ -43,7 +49,7 @@ def test_tcbsnn_comparison():
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
-    benchmark(tcbsnn_for_comparison, [config_greedy, config_milp, config_col, config_nn, config_opt])
+    benchmark(tcbsnn_for_comparison, [config_milp, config_greedy, config_col, config_nn, config_opt])
 
 
 if __name__ == "__main__":
