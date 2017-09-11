@@ -24,6 +24,19 @@ def one_planner(config):
     return get_costs(res_paths, jobs, res_agent_job, True)
 
 
+def print_map(grid):
+    grid = grid[:, :, 0]
+    map_str = ""
+    for y in range(grid.shape[1]):
+        for x in range(grid.shape[0]):
+            if grid[x, y] == 0:
+                map_str += '.'
+            else:
+                map_str += '@'
+        map_str += '\n'
+    print(map_str)
+
+
 def test_planner_comparison():
     fname = '/tmp/random.pkl'
     try:
@@ -56,16 +69,30 @@ def test_planner_comparison():
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
+    print_map(config_opt['params'][1])
+
     configs = [config_milp, config_greedy, config_col, config_nn, config_opt]
-    ts, ress = benchmark(one_planner, configs)
+    ts, ress = benchmark(one_planner, configs, timeout=300)
 
     for conf in configs:
         if ress[configs.index(conf)]:
             assert ress[configs.index(config_opt)] <= \
                    ress[configs.index(conf)], \
-                "optimal planner should be better then:\n------\n" + str(conf)
+                "optimal planner should be better then:\n------\n" + str(conf) + "\nMAP:"
+            if ress[configs.index(config_opt)] > \
+                    ress[configs.index(conf)]:
+                print_map(conf['params'][1])
 
     os.remove(fname)
 
 if __name__ == "__main__":
-    test_planner_comparison()
+    n = 10
+    success = n
+    for i in range(n):
+        print("=" * 60)
+        print("%d/%d" % (i, n))
+        try:
+            test_planner_comparison()
+        except AssertionError:
+            success -= 1
+    print("success: %d\%" % (success / n * 100))
