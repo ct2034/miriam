@@ -1,7 +1,7 @@
 import os
+import unittest
 
 import numpy as np
-from _pytest import unittest
 
 from planner.cbs_ext.plan import plot_results
 import matplotlib.pyplot as plt
