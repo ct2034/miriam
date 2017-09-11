@@ -5,28 +5,32 @@ from planner.cbs_ext.plan import plan, plot_results, generate_config
 from tools import load_map
 
 
-def eval(_map, agents, jobs, fname, display=True, finished_blocking=False):
+def eval(_map, agents, jobs, fname, display=False, finished_blocking=True):
     from planner.milp.milp import plan_milp
     grid = np.repeat(_map[:, ::2, np.newaxis], 100, axis=2)
 
     config = generate_config()
     config['filename_pathsave'] = fname
     config['finished_agents_block'] = finished_blocking
+
+    print("plan")
     res_agent_job, res_agent_idle, res_paths = plan(agents, jobs, [], [], grid, config, plot=display)
 
-    milp_res_agent_job, milp_res_paths = plan_milp(agents, jobs, grid, config)
+    print("minlp")
+    minlp_res_agent_job, minlp_res_paths = plan_milp(agents, jobs, grid, config)
 
-    print("CBS EXT")
+    print("TCBS")
     print("agent_job: " + str(res_agent_job))
     print("paths: " + str(res_paths))
-    get_costs(res_paths, jobs, res_agent_job, display)
+    costs_tcbs = get_costs(res_paths, jobs, res_agent_job, display)
 
-    print("MILP")
-    print("agent_job: " + str(milp_res_agent_job))
-    print("paths: " + str(milp_res_paths))
+    print("MINLP")
+    print("agent_job: " + str(minlp_res_agent_job))
+    print("paths: " + str(minlp_res_paths))
     if display:
-        plot_results([], milp_res_paths, agents, milp_res_agent_job, plt.figure(), grid, [], jobs)
-    get_costs(milp_res_paths, jobs, milp_res_agent_job, display)
+        plot_results([], minlp_res_paths, agents, minlp_res_agent_job, plt.figure(), grid, [], jobs)
+    costs_minlp = get_costs(minlp_res_paths, jobs, minlp_res_agent_job, display)
+    return costs_tcbs, costs_minlp
 
 
 def get_costs(paths, jobs, agent_job, display=True):
@@ -51,6 +55,26 @@ def get_costs(paths, jobs, agent_job, display=True):
         print(sum(costs))
     return sum(costs)
 
+
+def random_landmark(landmarks, taken):
+    assert len(taken) < len(landmarks), "All are taken"
+    i_lm = np.random.choice(range(len(landmarks)))
+    while (i_lm in taken):
+        i_lm = np.random.choice(range(len(landmarks)))
+    taken.add(i_lm)
+    return landmarks[i_lm]
+
+
+def random_jobs(n, landmarks):
+    taken = set()
+    jobs = []
+    for i in range(n):
+        jobs.append(
+            (random_landmark(landmarks, taken),
+             random_landmark(landmarks, taken),
+             0)
+        )
+    return jobs
 
 # -------
 def corridor():
@@ -147,5 +171,21 @@ def s():
     eval(_map, agents, jobs, 'S.pkl')
 
 
+# -------
+def ff():
+    jobs = random_jobs(3, [(0, 0), (2, 0), (2, 6), (4, 6), (6, 2), (7, 7)])
+    _map = load_map('ff.png')
+    agents = [(4, 1),
+              (0, 5),
+              (7, 4)]
+    return eval(_map, agents, jobs, 'ff.pkl')
+
+
 if __name__ == "__main__":
-    s()
+    n = 10
+    res = np.zeros([n, 2])
+    for i in range(n):
+        print("#" * 80)
+        print("%d / %d" % (i, n))
+        res[i, :] = ff()
+    print(res)
