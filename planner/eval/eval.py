@@ -173,19 +173,19 @@ def s():
 
 # -------
 def ff():
-    jobs = random_jobs(3, [(0, 0), (2, 0), (2, 6), (4, 6), (6, 2), (7, 7)])
+    jobs = random_jobs(2, [(0, 0), (2, 0), (2, 6), (4, 6), (6, 2), (7, 7)])
     _map = load_map('ff.png')
-    agents = [(4, 1),
-              (0, 5),
-              (7, 4)]
-    return eval(_map, agents, jobs, 'ff.pkl')
+    agents = [(0, 0),
+              (2, 6),
+              (7, 7)]
+    return eval(_map, agents, jobs, 'ff.pkl', finished_blocking=False, display=False)
 
 
 if __name__ == "__main__":
-    n = 10
-    res = np.zeros([n, 2])
-    for i in range(n):
+    n_samples = 10
+    res = np.zeros([n_samples, 2])
+    for i_sample in range(n_samples):
         print("#" * 80)
-        print("%d / %d" % (i, n))
-        res[i, :] = ff()
+        print("%d / %d" % (i_sample, n_samples))
+        res[i_sample, :] = ff()
     print(res)
