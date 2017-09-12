@@ -13,6 +13,10 @@ def eval(_map, agents, jobs, fname, display=False, finished_blocking=True):
     config['filename_pathsave'] = fname
     config['finished_agents_block'] = finished_blocking
 
+    print("Problem:")
+    print(str(jobs))
+    print(str(agents))
+
     print("plan")
     res_agent_job, res_agent_idle, res_paths = plan(agents, jobs, [], [], grid, config, plot=display)
 
@@ -48,11 +52,10 @@ def get_costs(paths, jobs, agent_job, display=True):
             else:
                 assert False, "Problem in assignment"
             ip += 2
-    if display:
-        print("Costs:\n(per job:)")
-        print(costs)
-        print("(total:)")
-        print(sum(costs))
+    print("Costs:\n(per job:)")
+    print(costs)
+    print("(total:)")
+    print(sum(costs))
     return sum(costs)
 
 
