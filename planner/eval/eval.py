@@ -189,3 +189,4 @@ if __name__ == "__main__":
         print("%d / %d" % (i_sample, n_samples))
         res[i_sample, :] = ff()
     print(res)
+    print(res[:, 1] - res[:, 0])
