@@ -3,8 +3,8 @@ import numpy as np
 from planner.astar.astar_grid48con import astar_grid4con
 from planner.astar.base import NoPathException
 
-VERTEX = 'vertex'
-EDGE = 'edge'
+VERTEX = 0
+EDGE = 1
 
 path_save = {}
 
