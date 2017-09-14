@@ -2,8 +2,8 @@ import os
 
 from planner.cbs_ext.plan import generate_config, plan, alloc_threads, pre_calc_paths
 from planner.cbs_ext_test import get_data_colission, get_data_random
-from planner.eval.eval import get_costs
-from tools import benchmark
+from planner.eval.eval_scenarios import get_costs
+from tools import benchmark, mongodb_save
 
 
 def one_planner(config, size):
@@ -78,16 +78,15 @@ def test_planner_comparison():
     print(ts)
     print(ress)
 
+    mongodb_save(
+        'test_planner_comparison', {
+            'values': [configs, sizes],
+            'durations': ts.tolist(),
+            'results': ress.tolist()
+        }
+    )
+
     os.remove(fname)
 
 if __name__ == "__main__":
-    n = 10
-    success = n
-    for i in range(n):
-        print("=" * 60)
-        print("%d/%d" % (i, n))
-        try:
-            test_planner_comparison()
-        except AssertionError:
-            success -= 1
-    print("success: %d\%" % (success / n * 100))
+    test_planner_comparison()
