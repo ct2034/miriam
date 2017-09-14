@@ -10,7 +10,6 @@ from planner.cbs_ext.plan import generate_config
 from planner.cobra.funwithsnakes import read_path_file, plan_cobra
 
 
-@unittest.skipIf(True, 'Make cobra install first')
 def test_read_map(fname='planner/cobra/test.path', plot=False):
     print("cwd: " + str(os.getcwd()))
     grid = np.zeros([10, 10, 100])
@@ -21,7 +20,6 @@ def test_read_map(fname='planner/cobra/test.path', plot=False):
     assert len(paths[0][0]) == 30, "No full paths"
 
 
-@unittest.skipIf(True, 'Make cobra install first')
 def test_cobra_simple(plot=False):
     grid = np.zeros([5, 5, 30])
     res_agent_job, res_paths = plan_cobra(
