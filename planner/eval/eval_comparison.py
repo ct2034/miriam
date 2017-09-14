@@ -80,7 +80,6 @@ def test_planner_comparison():
 
     mongodb_save(
         'test_planner_comparison', {
-            'values': [configs, sizes],
             'durations': ts.tolist(),
             'results': ress.tolist()
         }

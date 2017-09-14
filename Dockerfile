@@ -1,8 +1,8 @@
 FROM python:3
 
+# environment
 COPY requirements.txt /
-
-# python
+RUN mkdir /miriam/
 RUN pip install -r requirements.txt
 
 # bonmin
@@ -15,12 +15,12 @@ RUN ln -s /usr/lib/libblas.so.3 /lib/libblas.so.3gf
 ###
 
 # cobra
+COPY planner/cobra/cobra /miriam/
 RUN chmod +x /miriam/cobra
 COPY planner/cobra/libboost_graph.so.1.64.0 /usr/lib/
 COPY planner/cobra/libboost_regex.so.1.64.0 /usr/lib/
 ###
 
-RUN mkdir /miriam/
 COPY . /miriam/
 WORKDIR /miriam
 ENV PYTHONPATH /miriam
