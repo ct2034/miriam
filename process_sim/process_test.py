@@ -76,6 +76,7 @@ def test_process_cbsext():
     return t
 
 
+@unittest.skipIf(True, 'Currently not in focus')
 def test_process_random():
     mod = Random(_map)
     t = run_with_sim(SimpSim(False, mod),
@@ -85,6 +86,7 @@ def test_process_random():
     return t
 
 
+@unittest.skipIf(True, 'Currently not in focus')
 def test_process_nearest():
     mod = Nearest(_map)
     t = run_with_sim(SimpSim(False, mod),

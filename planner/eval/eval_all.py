@@ -73,7 +73,7 @@ def test_planner_comparison():
 
     configs = [config_milp, config_opt]
     sizes = [2, 4]
-    ts, ress = benchmark(one_planner, [configs, sizes], timeout=600)
+    ts, ress = benchmark(one_planner, [configs, sizes], samples=2, timeout=600)
 
     print(ts)
     print(ress)

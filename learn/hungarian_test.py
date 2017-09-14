@@ -13,7 +13,7 @@ def test_munkres_benchmark():
         vals = [10, 30, 70]
     ts = benchmark(
         lambda x: m.compute(np.random.rand(x, x)),
-        vals
+        [vals]
     )
     print(ts)
     mongodb_save(
