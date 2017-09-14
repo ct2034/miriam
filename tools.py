@@ -4,7 +4,7 @@ import multiprocessing
 import signal
 from contextlib import contextmanager
 from datetime import datetime
-
+from itertools import product
 import numpy as np
 
 
@@ -54,13 +54,13 @@ def time_limit(seconds):
         signal.alarm(0)
 
 
-def benchmark(fun, vals, disp=True, timeout=60):
-    def benchmark_fun(val):
+def benchmark(fun, vals, samples=10, disp=True, timeout=60):
+    def benchmark_fun(args):
         res = False
         start = datetime.now()
         try:
             with time_limit(timeout):
-                res = fun(val)
+                res = fun(*args)
         except TimeoutException:
             print("Timed out!")
         except Exception as e:
@@ -71,12 +71,20 @@ def benchmark(fun, vals, disp=True, timeout=60):
             res = None
         return t, res
 
-    ts = []
-    ress = []
-    for val in vals:
-        t, res = benchmark_fun(val)
-        ts.append(t)
-        ress.append(res)
+    assert vals.__class__ == list and vals[0].__class__ == list, "Please provide list of lists per argument"
+
+    lens = list(map(len, vals))
+    ts = np.zeros(lens + [samples])
+    ress = np.zeros(lens + [samples])
+
+    for i in product(*tuple(map(range, lens))):
+        args = tuple()
+        ind = tuple()
+        for i_v in range(len(i)):
+            args += (vals[i_v][i[i_v]],)
+            ind += (i[i_v],)
+        for i_s in range(samples):
+            ts[ind + (i_s,)], ress[ind + (i_s,)] = benchmark_fun(args)
 
     if disp:
         print("Inputs:")

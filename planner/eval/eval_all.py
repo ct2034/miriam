@@ -6,7 +6,7 @@ from planner.eval.eval import get_costs
 from tools import benchmark
 
 
-def one_planner(config):
+def one_planner(config, size):
     print("Testing with number_nearest=" + str(config['number_nearest']))
     print("Testing with all_collisions=" + str(config['all_collisions']))
     agent_pos, grid, idle_goals, jobs = config['params']
@@ -69,19 +69,14 @@ def test_planner_comparison():
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
-    print_map(config_opt['params'][1])
+    print_map(params[1])
 
-    configs = [config_milp, config_greedy, config_col, config_nn, config_opt]
-    ts, ress = benchmark(one_planner, configs, timeout=300)
+    configs = [config_milp, config_opt]
+    sizes = [2, 4]
+    ts, ress = benchmark(one_planner, [configs, sizes], timeout=600)
 
-    for conf in configs:
-        if ress[configs.index(conf)]:
-            assert ress[configs.index(config_opt)] <= \
-                   ress[configs.index(conf)], \
-                "optimal planner should be better then:\n------\n" + str(conf) + "\nMAP:"
-            if ress[configs.index(config_opt)] > \
-                    ress[configs.index(conf)]:
-                print_map(conf['params'][1])
+    print(ts)
+    print(ress)
 
     os.remove(fname)
 
