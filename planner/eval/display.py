@@ -76,6 +76,6 @@ def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals
                      color=colors[i])
             legend_str.append("Agent " + str(i))
         i += 1
-    plt.legend(legend_str)
+    plt.legend(legend_str, loc=4)
     plt.title("Solution " + title)
     plt.tight_layout()
