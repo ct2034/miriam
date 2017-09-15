@@ -7,19 +7,28 @@ from tools import benchmark, mongodb_save
 
 
 def one_planner(config, size):
+    print("size=" + str(size))
     print("Testing with number_nearest=" + str(config['number_nearest']))
     print("Testing with all_collisions=" + str(config['all_collisions']))
     agent_pos, grid, idle_goals, jobs = config['params']
+    agent_pos = agent_pos[0:size]
+    jobs = jobs[0:size]
     if 'milp' in config:
         print("milp")
         from planner.milp.milp import plan_milp
         res_agent_job, res_paths = plan_milp(agent_pos, jobs, grid, config)
+    elif 'cobra' in config:
+        print("cobra")
+        from planner.cobra.funwithsnakes import plan_cobra
+        res_agent_job, res_paths = plan_cobra(agent_pos, jobs, grid, config)
     elif 'greedy' in config:
         print("greedy")
         from planner.greedy.greedy import plan_greedy
         res_agent_job, res_paths = plan_greedy(agent_pos, jobs, grid, config)
     else:
-        res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, config)
+        res_agent_job, res_agent_idle, res_paths = plan(
+            agent_pos, jobs, [], idle_goals, grid, config, plot=True
+        )
     print(res_agent_job)
     return get_costs(res_paths, jobs, res_agent_job, True)
 
@@ -46,8 +55,8 @@ def test_planner_comparison():
 
     params = get_data_random(map_res=8,
                              map_fill_perc=20,
-                             agent_n=3,
-                             job_n=4,
+                             agent_n=5,
+                             job_n=5,
                              idle_goals_n=0)
 
     agent_pos, grid, idle_goals, jobs = params
@@ -60,6 +69,9 @@ def test_planner_comparison():
     config_milp = config_opt.copy()
     config_milp['milp'] = 1
 
+    config_cobra = config_opt.copy()
+    config_cobra['cobra'] = 1
+
     config_greedy = config_opt.copy()
     config_greedy['greedy'] = 1
 
@@ -71,19 +83,20 @@ def test_planner_comparison():
 
     print_map(params[1])
 
-    configs = [config_milp, config_opt]
-    sizes = [2, 4]
-    ts, ress = benchmark(one_planner, [configs, sizes], samples=2, timeout=600)
+    # configs = [config_milp, config_cobra, config_greedy, config_col, config_opt]
+    configs = [config_cobra, config_opt]
+    sizes = [2]
+    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=600)
 
     print(ts)
     print(ress)
 
-    mongodb_save(
-        'test_planner_comparison', {
-            'durations': ts.tolist(),
-            'results': ress.tolist()
-        }
-    )
+    # mongodb_save(
+    #     'test_planner_comparison', {
+    #         'durations': ts.tolist(),
+    #         'results': ress.tolist()
+    #     }
+    # )
 
     os.remove(fname)
 

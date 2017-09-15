@@ -147,6 +147,9 @@ def mongodb_save(name, data):
         filter={'_id': key},
         replacement=entry
     )
+    print("Saved in mongodb as _id:" + str(key))
+    print("name:" + str(name))
+    print("data:" + str(data))
 
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)

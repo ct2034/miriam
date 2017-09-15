@@ -17,8 +17,7 @@ RUN ln -s /usr/lib/libblas.so.3 /lib/libblas.so.3gf
 # cobra
 COPY planner/cobra/cobra /miriam/
 RUN chmod +x /miriam/cobra
-COPY planner/cobra/libboost_graph.so.1.64.0 /usr/lib/
-COPY planner/cobra/libboost_regex.so.1.64.0 /usr/lib/
+COPY planner/cobra/lib* /usr/lib/
 ###
 
 COPY . /miriam/

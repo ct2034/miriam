@@ -20,20 +20,31 @@ def plan_cobra(agent_pos, jobs, grid, config):
     job_endpoints_i, agent_points_i = write_map_file(agent_pos, jobs, grid, cobra_filename_base)
     write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base)
 
-    os.system("pwd")
-    res = os.system(" ".join([
+    time.sleep(1)
+
+    pwd = os.getcwd()
+    cmd = " ".join([
         cobra_bin,
         cobra_filename_base + MAP_EXT,
         cobra_filename_base + TASK_EXT
-    ]))
-    assert res == 0, "Error when calling cobra"
-    paths = read_path_file(cobra_filename_base + PATH_EXT, grid)
-    clean_up(cobra_filename_base)
-    return agent_job, paths
+    ])
+    res = os.system(cmd)
+
+    time.sleep(.2)
+
+    try:
+        assert res == 0, "Error when calling cobra: " + cmd + "\nin: " + pwd
+        paths = read_path_file(cobra_filename_base + PATH_EXT, grid)
+        # agent_job = allocation_from_paths(paths, agent_pos, jobs)
+        return agent_job, paths
+    finally:
+        clean_up(cobra_filename_base)
+        pass
 
 
 def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
     fname = cobra_filename_base + MAP_EXT
+    grid = np.swapaxes(grid, 0, 1)
 
     job_endpoints = set()
     for j in jobs:
@@ -121,6 +132,27 @@ def read_path_file(fname, grid):
         paths.append((agent_path,))
     f.close()
     return paths
+
+
+def allocation_from_paths(paths, agent_pos, jobs):
+    starts = {}
+    goals = {}
+    for i_j, job in enumerate(jobs):
+        start = job[0]
+        goal = job[1]
+        if start in starts:
+            starts[start].append(i_j)
+        else:
+            starts[start] = [i_j]
+        if goal in goals:
+            goals[goal].append(i_j)
+        else:
+            goals[goal] = [i_j]
+    for i_a, agent in enumerate(agent_pos):
+        path = paths[i_a][0]
+        assert path[0][:2] == agent, "Path must start at agent pos"
+        for pose in path:
+            pass
 
 
 def sort_by_lines(l):
