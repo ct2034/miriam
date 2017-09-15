@@ -56,7 +56,7 @@ def plot_inputs(ax, agent_pos, idle_goals, jobs, grid):
     plt.title("State Variables")
 
 
-def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals, jobs):
+def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals, jobs, title=''):
     from mpl_toolkits.mplot3d import Axes3D
     _ = Axes3D
     ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
@@ -77,5 +77,5 @@ def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals
             legend_str.append("Agent " + str(i))
         i += 1
     plt.legend(legend_str)
-    plt.title("Solution")
+    plt.title("Solution " + title)
     plt.tight_layout()

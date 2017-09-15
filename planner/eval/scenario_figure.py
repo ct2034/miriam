@@ -38,13 +38,13 @@ tcbs_agent_job, tcbs_agent_idle, tcbs_paths = plan(
 )
 ax2 = f.add_subplot(132, projection='3d')
 plot_results(
-    ax2, [], tcbs_paths, tcbs_agent_job, agent_pos, grid, [], jobs
+    ax2, [], tcbs_paths, tcbs_agent_job, agent_pos, grid, [], jobs, 'TCBS'
 )
 
 minlp_agent_job, minlp_paths = plan_milp(agent_pos, jobs, grid, config)
 ax3 = f.add_subplot(133, projection='3d')
 plot_results(
-    ax3, [], minlp_paths, minlp_agent_job, agent_pos, grid, [], jobs
+    ax3, [], minlp_paths, minlp_agent_job, agent_pos, grid, [], jobs, 'MINLP'
 )
 
 f.savefig('scenario.png')
