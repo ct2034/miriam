@@ -15,9 +15,9 @@ RUN ln -s /usr/lib/libblas.so.3 /lib/libblas.so.3gf
 ###
 
 # cobra
-COPY planner/cobra/cobra /miriam/
-RUN chmod +x /miriam/cobra
-COPY planner/cobra/lib* /usr/lib/
+#COPY planner/cobra/cobra /miriam/
+#RUN chmod +x /miriam/cobra
+#COPY planner/cobra/lib* /usr/lib/
 ###
 
 COPY . /miriam/
