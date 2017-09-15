@@ -30,7 +30,7 @@ grid = np.repeat(grid[:, ::2, np.newaxis], 100, axis=2)
 
 f = plt.figure()
 ax1 = f.add_subplot(131)
-f.set_size_inches(8, 4)
+f.set_size_inches(9, 3.5)
 plot_inputs(ax1, agent_pos, [], jobs, grid)
 
 tcbs_agent_job, tcbs_agent_idle, tcbs_paths = plan(
