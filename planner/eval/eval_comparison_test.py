@@ -1,5 +1,3 @@
-import os
-import random
 import hashlib
 
 from planner.cbs_ext.plan import generate_config, plan, pre_calc_paths
@@ -61,7 +59,7 @@ def planner_comparison(seed):
     maphash = str(hashlib.md5(mapstr.encode('utf-8')).hexdigest())[:8]
     print(maphash)
 
-    fname = "planner/eval/" + str(maphash) + '.pkl'  # unique filename based on map
+    fname = "planner/eval/cache/" + str(maphash) + '.pkl'  # unique filename based on map
     pre_calc_paths(jobs, idle_goals, grid, fname)
 
     config_opt = generate_config()
