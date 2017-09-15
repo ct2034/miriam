@@ -53,7 +53,7 @@ def plot_inputs(ax, agent_pos, idle_goals, jobs, grid):
         plt.legend(["Transport Task", "Agent", "Idle Task"])
     else:
         plt.legend(["Transport Task", "Agent"])
-    plt.title("State Variables")
+    plt.title("Problem Configuration")
 
 
 def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals, jobs, title=''):

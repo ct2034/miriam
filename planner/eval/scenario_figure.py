@@ -28,6 +28,9 @@ else:
 
 grid = np.repeat(grid[:, ::2, np.newaxis], 100, axis=2)
 
+params = {'legend.fontsize': 'small'}
+plt.rcParams.update(params)
+
 f = plt.figure()
 ax1 = f.add_subplot(131)
 f.set_size_inches(9, 3.5)
