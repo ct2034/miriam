@@ -10,6 +10,7 @@ from planner.cbs_ext import plan
 from planner.cbs_ext.plan import plan as plan_cbsext, generate_config
 from tools import is_travis
 
+rand = None
 
 def has_edge_collision(paths):
     edges = {}
@@ -94,18 +95,19 @@ def get_data_colission(n=1):
 
 def get_unique_coords(max_x, max_y, reset=False, seed=None):
     global used_coords
+    global rand
+    if seed:
+        rand = random.Random(seed)
     if reset:
         used_coords = set()
-    if seed:
-        random.seed(seed)
     else:
         max_x -= 1
         max_y -= 1
-        c = (random.randint(0, max_x),
-             random.randint(0, max_y))
+        c = (rand.randint(0, max_x),
+             rand.randint(0, max_y))
         while c in used_coords:
-            c = (random.randint(0, max_x),
-                 random.randint(0, max_y))
+            c = (rand.randint(0, max_x),
+                 rand.randint(0, max_y))
         assert c not in used_coords
         used_coords.add(c)
         return c

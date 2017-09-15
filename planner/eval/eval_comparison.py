@@ -1,5 +1,6 @@
 import os
 import random
+import hashlib
 
 from planner.cbs_ext.plan import generate_config, plan, pre_calc_paths
 from planner.cbs_ext_test import get_data_random
@@ -34,7 +35,7 @@ def one_planner(config, size):
     return get_costs(res_paths, jobs, res_agent_job, True)
 
 
-def print_map(grid):
+def get_map_str(grid):
     grid = grid[:, :, 0]
     map_str = ""
     for y in range(grid.shape[1]):
@@ -44,18 +45,23 @@ def print_map(grid):
             else:
                 map_str += '@'
         map_str += '\n'
-    print(map_str)
+    return map_str
 
 
 def planner_comparison(seed):
-    params = get_data_random(seed,
+    params = get_data_random(seed+1,
                              map_res=8,
                              map_fill_perc=20,
                              agent_n=5,
                              job_n=5,
                              idle_goals_n=0)
     agent_pos, grid, idle_goals, jobs = params
-    fname = str(abs(hash(grid.tostring()))) + '.pkl'  # unique filename based on map
+    mapstr=get_map_str(grid)
+    print(mapstr)
+    maphash = str(hashlib.md5(mapstr.encode('utf-8')).hexdigest())[:8]
+    print(maphash)
+
+    fname = "planner/eval/" + str(maphash) + '.pkl'  # unique filename based on map
     pre_calc_paths(jobs, idle_goals, grid, fname)
 
     config_opt = generate_config()
@@ -77,8 +83,6 @@ def planner_comparison(seed):
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
-    print_map(params[1])
-
     if is_cch():
         configs = [config_greedy, config_cobra]
     else:
@@ -99,7 +103,7 @@ def test_planner_comparison():
         else:
             cobra = "nocobra"
         mongodb_save(
-            'test_planner_comparison' + cobra + str(i_s),
+            'test_planner_comparison_' + cobra + "_" + str(i_s),
             {
                 'durations': ts.tolist(),
                 'results': ress.tolist()
