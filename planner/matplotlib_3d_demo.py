@@ -15,13 +15,14 @@ grid = np.swapaxes(grid, 0, 1)
 
 f = plt.figure()
 ax = f.add_subplot(111, projection='3d')
+ax.set_facecolor('white')
 ax.set_xlim3d(0, grid.shape[0])
 ax.set_ylim3d(0, grid.shape[1])
 ax.set_zlim3d(0, grid.shape[2])
 
 xx, yy = np.meshgrid(
-    np.linspace(-.5, grid.shape[0] + .5, grid.shape[0] * 100),
-    np.linspace(-.5, grid.shape[1] + .5, grid.shape[1] * 100))
+    np.linspace(.5, grid.shape[0] + .5, grid.shape[0] * 50),
+    np.linspace(.5, grid.shape[1] + .5, grid.shape[1] * 50))
 
 img = np.zeros([xx.shape[0], yy.shape[1]])
 
@@ -34,6 +35,10 @@ for x, y in product(range(len(xx[0, :])), range(len(yy[:, 0]))):
     except IndexError:
         pass
 
-plt.contourf(xx, yy, img, origin=None, antialiased=False, nchunks=0, cmap=cm.Greys)
+xx -= .5
+yy -= .5
+
+plt.contourf(xx, yy, img, z=-.2,
+             antialiased=True, cmap=cm.Greys, alpha=0.8)
 
 plt.show()
