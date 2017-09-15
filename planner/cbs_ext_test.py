@@ -163,7 +163,9 @@ def test_basic():
 def test_rand():
     for i in range(5):
         print("\nTEST", i)
-        agent_pos, grid, idle_goals, jobs = get_data_random(10, 5, 3, i, 5)
+        r = random.SystemRandom()
+        seed = r.randint(0, 1024)
+        agent_pos, grid, idle_goals, jobs = get_data_random(seed, 10, 5, 3, i, 5)
 
         start_time = datetime.datetime.now()
 
