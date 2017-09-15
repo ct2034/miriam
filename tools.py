@@ -1,10 +1,12 @@
 import getpass
 import logging
 import multiprocessing
+import os
 import signal
 from contextlib import contextmanager
 from datetime import datetime
 from itertools import product
+
 import numpy as np
 
 
@@ -28,6 +30,16 @@ def is_travis():
     u, _, _ = get_system_parameters(False)
     print("User: >" + str(u) + "<")
     return u == 'travis'
+
+
+def is_cch():
+    u, _, _ = get_system_parameters(False)
+    print("User: >" + str(u) + "<")
+    return u == 'cch'
+
+
+def is_in_docker():
+    return 0 == os.system("bash -f /.dockerenv")
 
 
 def load_map(fname='cbs_ext/map.png'):

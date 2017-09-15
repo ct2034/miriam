@@ -8,7 +8,7 @@ import time
 MAP_EXT = ".map"
 TASK_EXT = ".task"
 PATH_EXT = ".task_tp_path"
-
+OTHER_PATH_EXT = ".task_tptr_path"
 
 def plan_cobra(agent_pos, jobs, grid, config):
     agent_job = []
@@ -194,5 +194,6 @@ def clean_up(cobra_filename_base):
         os.remove(cobra_filename_base + MAP_EXT)
         os.remove(cobra_filename_base + TASK_EXT)
         os.remove(cobra_filename_base + PATH_EXT)
+        os.remove(cobra_filename_base + OTHER_PATH_EXT)
     except FileNotFoundError:
         pass

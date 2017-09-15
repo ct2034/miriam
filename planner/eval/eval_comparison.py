@@ -1,9 +1,10 @@
 import os
+import random
 
 from planner.cbs_ext.plan import generate_config, plan, pre_calc_paths
 from planner.cbs_ext_test import get_data_random
 from planner.eval.eval_scenarios import get_costs
-from tools import benchmark
+from tools import benchmark, mongodb_save, is_in_docker, is_cch
 
 
 def one_planner(config, size):
@@ -46,20 +47,14 @@ def print_map(grid):
     print(map_str)
 
 
-def test_planner_comparison():
-    fname = '/tmp/random.pkl'
-    try:
-        os.remove(fname)  # cleaning from maybe last run
-    except FileNotFoundError:
-        pass
-
+def planner_comparison():
     params = get_data_random(map_res=8,
                              map_fill_perc=20,
                              agent_n=5,
                              job_n=5,
                              idle_goals_n=0)
-
     agent_pos, grid, idle_goals, jobs = params
+    fname = str(abs(hash(grid.tostring()))) + '.pkl'  # unique filename based on map
     pre_calc_paths(jobs, idle_goals, grid, fname)
 
     config_opt = generate_config()
@@ -83,21 +78,29 @@ def test_planner_comparison():
 
     print_map(params[1])
 
-    configs = [config_milp, config_cobra, config_greedy, config_col, config_opt]
+    if is_cch():
+        configs = [config_greedy, config_cobra]
+    else:
+        configs = [config_milp, config_greedy, config_col, config_opt]
     sizes = [2, 3, 4]
     ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=600)
 
-    print(ts)
-    print(ress)
+    return ts, ress
 
-    # mongodb_save(
-    #     'test_planner_comparison', {
-    #         'durations': ts.tolist(),
-    #         'results': ress.tolist()
-    #     }
-    # )
 
-    os.remove(fname)
+def test_planner_comparison():
+    n_samples = 20
+    random.seed(0)
+
+    for i_s in range(n_samples):
+        ts, ress = planner_comparison()
+        mongodb_save(
+            'test_planner_comparison' + str(i_s),
+            {
+                'durations': ts.tolist(),
+                'results': ress.tolist()
+            }
+        )
 
 if __name__ == "__main__":
     test_planner_comparison()
