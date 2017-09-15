@@ -10,10 +10,10 @@ config['finished_agents_block'] = True
 
 if True:
     grid = load_map('mr_t.png')
-    agent_pos = [(5, 3),
-                 (2, 1)]
-    jobs = [((4, 3), (4, 1), 0),
-            ((3, 1), (3, 3), 0)]
+    agent_pos = [(6, 3),
+                 (3, 1)]
+    jobs = [((5, 3), (5, 1), 0),
+            ((4, 1), (4, 3), 0)]
     config['filename_pathsave'] = 'mr_t.pkl'
 else:
     jobs = [((0, 0), (2, 6), 0),
@@ -48,4 +48,3 @@ plot_results(
 )
 
 f.savefig('scenario.png')
-plt.show()
