@@ -35,11 +35,10 @@ def plan_cobra(agent_pos, jobs, grid, config):
     try:
         assert res == 0, "Error when calling cobra: " + cmd + "\nin: " + pwd
         paths = read_path_file(cobra_filename_base + PATH_EXT, grid)
-        # agent_job = allocation_from_paths(paths, agent_pos, jobs)
+        agent_job, paths = allocation_from_paths(paths, agent_pos, jobs)
         return agent_job, paths
     finally:
         clean_up(cobra_filename_base)
-        pass
 
 
 def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
@@ -51,13 +50,8 @@ def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
         job_endpoints.add(j[0])
         job_endpoints.add(j[1])
     job_endpoints = list(job_endpoints)
-    sort_by_lines(job_endpoints)
-    job_endpoints_i = []
-    for j in jobs:
-        job_endpoints_i.append(
-            (job_endpoints.index(j[0]),
-             job_endpoints.index(j[1]))
-        )
+
+    job_endpoints_sorted = []
 
     agent_points = set()
     for a in agent_pos:
@@ -80,12 +74,21 @@ def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
                     line += "@"
                 elif (x, y) in job_endpoints:
                     line += "e"
+                    job_endpoints_sorted.append((x, y))
                 elif (x, y) in agent_points:
                     line += "r"
                 else:
                     line += "."
             f.write(line + "\n")
     f.close()
+
+    job_endpoints_i = []
+    for j in jobs:
+        job_endpoints_i.append(
+            (job_endpoints_sorted.index(j[0]),
+             job_endpoints_sorted.index(j[1]))
+        )
+
     return job_endpoints_i, agent_points_i
 
 
@@ -95,6 +98,7 @@ def write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base):
     with open(fname, 'w') as f:
         f.write(str(len(job_endpoints_i)) + "\n")
         for jei in job_endpoints_i:
+            # jei = job_endpoints_i[0]
             f.write("\t".join([
                 "0",
                 str(jei[0]),
@@ -106,7 +110,6 @@ def write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base):
 
 
 def read_path_file(fname, grid):
-    height = grid.shape[1]
     paths = []
     agent_path = []
     t = 0
@@ -135,8 +138,10 @@ def read_path_file(fname, grid):
 
 
 def allocation_from_paths(paths, agent_pos, jobs):
+    agent_job = []
     starts = {}
     goals = {}
+    free_jobs = list(range(len(jobs)))
     for i_j, job in enumerate(jobs):
         start = job[0]
         goal = job[1]
@@ -148,11 +153,33 @@ def allocation_from_paths(paths, agent_pos, jobs):
             goals[goal].append(i_j)
         else:
             goals[goal] = [i_j]
+    new_paths = []
     for i_a, agent in enumerate(agent_pos):
+        for path in paths:
+            if path[0][0][:2] == agent:
+                new_paths.append(path)
+    assert len(new_paths) == len(paths), "Got not all paths back"
+    paths = new_paths
+    for i_a, agent in enumerate(agent_pos):
+        agent_starts = []
+        agent_goals = []
+        agent_alloc = tuple()
         path = paths[i_a][0]
         assert path[0][:2] == agent, "Path must start at agent pos"
         for pose in path:
-            pass
+            pose = pose[:2]
+            if pose in starts:
+                agent_starts.append(pose)
+            if pose in goals:
+                agent_goals.append(pose)
+        for s, g in product(agent_starts, agent_goals):
+            for i_j in starts[s]:
+                if i_j in goals[g] and i_j in free_jobs:
+                    agent_alloc += (i_j,)
+                    free_jobs.remove(i_j)
+        agent_job.append(agent_alloc)
+    return agent_job, paths
+
 
 
 def sort_by_lines(l):
