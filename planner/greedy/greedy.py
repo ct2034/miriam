@@ -56,7 +56,8 @@ def get_closest(possible_starts, free_tasks_starts, grid, n):
                     tuple(free_tasks_starts[temp_i_free_tasks_start]),
                     grid,
                     [])
-        lengths.append(len(p))
+        if p:
+            lengths.append(len(p))
         paths.append(p)
     best_path = np.argmin(lengths)
     nearest = nearestss[best_path]
