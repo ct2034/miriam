@@ -38,7 +38,7 @@ for x, y in product(range(len(xx[0, :])), range(len(yy[:, 0]))):
 xx -= .5
 yy -= .5
 
-plt.contourf(xx, yy, img, z=-.2,
-             antialiased=True, cmap=cm.Greys, alpha=0.8)
+ax.contourf(xx, yy, img, z=-.2,
+            antialiased=True, cmap=cm.Greys, alpha=0.8)
 
 plt.show()
