@@ -94,8 +94,12 @@ def test_planner_comparison():
 
     for i_s in range(n_samples):
         ts, ress = planner_comparison()
+        if is_cch():
+            cobra = "cobra"
+        else:
+            cobra = "nocobra"
         mongodb_save(
-            'test_planner_comparison' + str(i_s),
+            'test_planner_comparison' + cobra + str(i_s),
             {
                 'durations': ts.tolist(),
                 'results': ress.tolist()
