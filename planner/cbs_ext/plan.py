@@ -6,12 +6,12 @@ from functools import reduce
 from itertools import product
 
 import matplotlib.pyplot as plt
-import numpy as np
 from scipy.stats import norm
 
 from planner.astar.astar_grid48con import distance_manhattan
 from planner.cbs_ext.base import astar_base
 from planner.common import *
+from planner.eval.display import plot_inputs, plot_results
 from tools import ColoredLogger
 
 logging.setLoggerClass(ColoredLogger)
@@ -120,8 +120,6 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
 
     if plot:
         fig = plot_inputs(agent_pos, idle_goals, jobs, grid)
-
-        # plt.show()
         plot_results(_agent_idle, _paths, agent_job, agent_pos, fig, grid, idle_goals, jobs)
 
     pool.close()
@@ -309,8 +307,8 @@ def cost(_condition: dict, _state: tuple):
         for b in block_state:
             if not is_conflict_not_block(b):  # a collision
                 _cost += 1  # a little more expensive when there is a collision
-            else:
-                _cost += .1  # a little when there is a block
+            # else:
+            #     _cost += .01  # a little when there is a block
     _state = comp2state(agent_job, agent_idle, block_state)
     return _cost, _state
 
@@ -809,91 +807,6 @@ def make_unique(jobs):
         jobs.append(j)
         jobs_set.add(j)
     return jobs
-
-def plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121):
-    plt.style.use('bmh')
-    fig = plt.figure()
-    ax = fig.add_subplot(subplot)
-    ax.set_aspect('equal')
-    # Set grid lines to between the cells
-    major_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 2)
-    minor_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 1) + .5
-    ax.set_xticks(major_ticks)
-    ax.set_xticks(minor_ticks, minor=True)
-    ax.set_yticks(major_ticks)
-    ax.set_yticks(minor_ticks, minor=True)
-    ax.grid(which='minor', alpha=0.5)
-    ax.grid(which='major', alpha=0.2)
-    # Make positive y pointing up
-    ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
-    # Show map
-    plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
-    # Agents
-    agents = np.array(agent_pos)
-    plt.scatter(agents[:, 0],
-                agents[:, 1],
-                s=np.full(agents.shape[0], 100),
-                color='blue',
-                alpha=.9)
-    # Jobs
-    for j in jobs:
-        plt.arrow(x=j[0][0],
-                  y=j[0][1],
-                  dx=j[1][0] - j[0][0],
-                  dy=j[1][1] - j[0][1],
-                  head_width=.3, head_length=.7,
-                  length_includes_head=True,
-                  ec='r',
-                  fill=False)
-    # Fake for legend...
-    plt.plot((0, 0), (.1, .1), 'r')
-
-    # Idle Goals
-    igs = []
-    for ai in idle_goals:
-        igs.append(ai[0])
-    if igs:
-        igs_array = np.array(igs)
-        plt.scatter(igs_array[:, 0],
-                    igs_array[:, 1],
-                    s=np.full(igs_array.shape[0], 100),
-                    color='g',
-                    alpha=.9)
-        # Legendary!
-        plt.legend(["Transport Task", "Agent", "Idle Task"])
-    else:
-        plt.legend(["Transport Task", "Agent"])
-    plt.title("State Variables")
-    if show:
-        plt.show()
-    return fig
-
-
-def plot_results(_agent_idle, _paths, agent_job, agent_pos, fig, grid, idle_goals, jobs):
-    from mpl_toolkits.mplot3d import Axes3D
-    _ = Axes3D
-    ax3 = fig.add_subplot(122, projection='3d')
-    ax3.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
-
-    # Paths
-    legend_str = []
-    i = 0
-    prop_cycle = plt.rcParams['axes.prop_cycle']
-    colors = prop_cycle.by_key()['color']
-    assert _paths, "Paths have not been set"
-    for _pathset in _paths:  # pathset per agent
-        for p in _pathset:
-            pa = np.array(p)
-            ax3.plot(xs=pa[:, 0],
-                     ys=pa[:, 1],
-                     zs=pa[:, 2],
-                     color=colors[i])
-            legend_str.append("Agent " + str(i))
-        i += 1
-    plt.legend(legend_str)
-    plt.title("Solution")
-    plt.tight_layout()
-    plt.show()
 
 
 def condition2comp(_condition: dict):

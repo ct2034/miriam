@@ -4,7 +4,7 @@ from functools import reduce
 
 import numpy as np
 
-from planner.cbs_ext.plan import plot_results, plot_inputs
+from planner.eval.display import plot_inputs, plot_results
 import matplotlib.pyplot as plt
 
 from planner.cbs_ext.plan import generate_config
@@ -36,7 +36,7 @@ def test_cobra_simple(plot=False):
     assert res_paths, "No result"
 
 
-def test_cobra_random():
+def test_cobra_random(plot=False):
     agent_pos, grid, idle_goals, jobs = get_data_random(map_res=8,
                                                         map_fill_perc=20,
                                                         agent_n=5,
@@ -53,12 +53,13 @@ def test_cobra_random():
     jobs_is = list(range(len(jobs)))
     for i_j in all_alloc:
         jobs_is.remove(i_j)
-    # assert not jobs_is, "Not all joby allocated"
-    fig = plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121)
-    plot_results([], res_paths, [], [], fig, grid, [], jobs)
-    plt.show()
+    assert not jobs_is, "Not all joby allocated"
+    if plot:
+        fig = plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121)
+        plot_results([], res_paths, [], [], fig, grid, [], jobs)
+        plt.show()
 
 
 
 if __name__ == "__main__":
-    test_cobra_random()
+    test_cobra_random(True)

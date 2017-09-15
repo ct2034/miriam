@@ -3,7 +3,7 @@ import numpy as np
 from tools import load_map
 
 from planner.greedy.greedy import plan_greedy
-from planner.cbs_ext.plan import plot_inputs, plot_results
+from planner.eval.display import plot_inputs, plot_results
 
 _map = load_map('../map2.png')
 _map = _map[:, ::2]

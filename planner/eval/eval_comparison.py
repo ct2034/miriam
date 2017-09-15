@@ -1,9 +1,9 @@
 import os
 
-from planner.cbs_ext.plan import generate_config, plan, alloc_threads, pre_calc_paths
-from planner.cbs_ext_test import get_data_colission, get_data_random
+from planner.cbs_ext.plan import generate_config, plan, pre_calc_paths
+from planner.cbs_ext_test import get_data_random
 from planner.eval.eval_scenarios import get_costs
-from tools import benchmark, mongodb_save
+from tools import benchmark
 
 
 def one_planner(config, size):
@@ -27,7 +27,7 @@ def one_planner(config, size):
         res_agent_job, res_paths = plan_greedy(agent_pos, jobs, grid, config)
     else:
         res_agent_job, res_agent_idle, res_paths = plan(
-            agent_pos, jobs, [], idle_goals, grid, config, plot=True
+            agent_pos, jobs, [], idle_goals, grid, config, plot=False
         )
     print(res_agent_job)
     return get_costs(res_paths, jobs, res_agent_job, True)
@@ -83,9 +83,8 @@ def test_planner_comparison():
 
     print_map(params[1])
 
-    # configs = [config_milp, config_cobra, config_greedy, config_col, config_opt]
-    configs = [config_cobra, config_opt]
-    sizes = [2]
+    configs = [config_milp, config_cobra, config_greedy, config_col, config_opt]
+    sizes = [2, 3, 4]
     ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=600)
 
     print(ts)

@@ -5,7 +5,8 @@ from itertools import *
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan, plot_inputs
+from planner.cbs_ext.plan import plan
+from planner.eval.display import plot_inputs
 from tools import load_map
 
 _map = load_map('map.png')

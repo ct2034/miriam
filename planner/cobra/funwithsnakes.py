@@ -178,6 +178,7 @@ def allocation_from_paths(paths, agent_pos, jobs):
                     agent_alloc += (i_j,)
                     free_jobs.remove(i_j)
         agent_job.append(agent_alloc)
+        new_paths = []
     return agent_job, paths
 
 

@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from planner.cbs_ext.plan import plan, plot_results, generate_config
+from planner.cbs_ext.plan import plan, generate_config
+from planner.eval.display import plot_results
 from tools import load_map
 
 
-def eval(_map, agents, jobs, fname, display=False, finished_blocking=True):
+def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
     from planner.milp.milp import plan_milp
     grid = np.repeat(_map[:, ::2, np.newaxis], 100, axis=2)
 
@@ -15,13 +16,13 @@ def eval(_map, agents, jobs, fname, display=False, finished_blocking=True):
 
     print("Problem:")
     print(str(jobs))
-    print(str(agents))
+    print(str(agent_pos))
 
     print("plan")
-    res_agent_job, res_agent_idle, res_paths = plan(agents, jobs, [], [], grid, config, plot=display)
+    res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], [], grid, config, plot=display)
 
     print("minlp")
-    minlp_res_agent_job, minlp_res_paths = plan_milp(agents, jobs, grid, config)
+    minlp_res_agent_job, minlp_res_paths = plan_milp(agent_pos, jobs, grid, config)
 
     print("TCBS")
     print("agent_job: " + str(res_agent_job))
@@ -32,7 +33,7 @@ def eval(_map, agents, jobs, fname, display=False, finished_blocking=True):
     print("agent_job: " + str(minlp_res_agent_job))
     print("paths: " + str(minlp_res_paths))
     if display:
-        plot_results([], minlp_res_paths, agents, minlp_res_agent_job, plt.figure(), grid, [], jobs)
+        plot_results([], minlp_res_paths, agent_pos, minlp_res_agent_job, plt.figure(), grid, [], jobs)
     costs_minlp = get_costs(minlp_res_paths, jobs, minlp_res_agent_job, display)
     return costs_tcbs, costs_minlp
 
@@ -82,23 +83,23 @@ def random_jobs(n, landmarks):
 # -------
 def corridor():
     _map = load_map('corridor.png')
-    agents = [(0, 0),
+    agent_pos = [(0, 0),
               (0, 1)]
     jobs = [((5, 0), (5, 2), 0),
             ((4, 2), (4, 0), 0),
             ((3, 0), (3, 2), 0),
             ]
-    eval(_map, agents, jobs, 'corridor.pkl')
+    eval(_map, agent_pos, jobs, 'corridor.pkl')
 
 # -------
 def mr_t():
     _map = load_map('mr_t.png')
-    agents = [(5, 3),
+    agent_pos = [(5, 3),
               (2, 1)]
     jobs = [((4, 3), (4, 1), 0),
             ((3, 1), (3, 3), 0)]
-    eval(_map, agents, jobs, 'mr_t.pkl', finished_blocking=True)
-# Results with finished agents as obstacle:
+    eval(_map, agent_pos, jobs, 'mr_t.pkl', finished_blocking=True)
+# Results with finished agent_pos as obstacle:
 # CBS EXT
 # agent_job: ((0, 1), ())
 # paths: [([(5, 3, 0), (4, 3, 1)], [(4, 3, 2), (5, 3, 3), (5, 2, 4), (5, 1, 5), (4, 1, 6)], [(4, 1, 7), (3, 1, 8)], [(3, 1, 9), (4, 1, 10), (5, 1, 11), (5, 2, 12), (5, 3, 13), (4, 3, 14), (3, 3, 15)]), ([(2, 1, 0), (2, 1, 1), (2, 1, 2), (2, 1, 3), (2, 1, 4), (2, 1, 5), (2, 1, 6), (2, 1, 7), (2, 1, 8), (2, 1, 9), (2, 1, 10), (2, 1, 11), (2, 1, 12), (2, 1, 13), (2, 1, 14), (2, 1, 15)],)]
@@ -119,77 +120,78 @@ def mr_t():
 # -------
 def c():
     _map = load_map('c.png')
-    agents = [(3, 3),
+    agent_pos = [(3, 3),
               (6, 5)]
     jobs = [((4, 3), (4, 5), 0),
             ((5, 5), (5, 3), 0)]
-    eval(_map, agents, jobs, 'c.pkl')
+    eval(_map, agent_pos, jobs, 'c.pkl')
 
 
 # -------
 def line():
     _map = load_map('line.png')
-    agents = [(0, 0),
+    agent_pos = [(0, 0),
               (6, 0)]
     jobs = [((1, 0), (6, 0), 0),
             ((5, 0), (1, 0), 0),
             ]
-    eval(_map, agents, jobs, 'line.pkl')
+    eval(_map, agent_pos, jobs, 'line.pkl')
 
 
 # -------
 def h():
     _map = load_map('h.png')
-    agents = [(0, 0),
+    agent_pos = [(0, 0),
               (2, 2)]
     jobs = [((0, 1), (2, 0), 0),
             ((2, 1), (0, 2), 0),
             ]
-    eval(_map, agents, jobs, 'h.pkl')
+    eval(_map, agent_pos, jobs, 'h.pkl')
 
 
 # -------
 def i():
     _map = load_map('I.png')
-    agents = [(0, 2),
+    agent_pos = [(0, 2),
               (4, 1)]
     jobs = [((0, 0), (0, 3), 0),
             ((1, 3), (1, 0), 0),
             ((3, 0), (3, 3), 0),
             ((4, 3), (4, 0), 0),
             ]
-    eval(_map, agents, jobs, 'I.pkl')
+    eval(_map, agent_pos, jobs, 'I.pkl')
 
 
 # -------
 def s():
     _map = load_map('S.png')
-    agents = [(3, 4),
+    agent_pos = [(3, 4),
               (6, 0),
               (2, 0)]
     jobs = [((0, 4), (0, 0), 0),
             ((2, 4), (8, 0), 0),
             ((7, 0), (3, 4), 0),
             ]
-    eval(_map, agents, jobs, 'S.pkl')
+    eval(_map, agent_pos, jobs, 'S.pkl')
 
 
 # -------
 def ff():
     jobs = random_jobs(2, [(0, 0), (2, 0), (2, 6), (4, 6), (6, 2), (7, 7)])
     _map = load_map('ff.png')
-    agents = [(0, 0),
+    agent_pos = [(0, 0),
               (2, 6),
               (7, 7)]
-    return eval(_map, agents, jobs, 'ff.pkl', finished_blocking=False, display=False)
+    return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=False)
 
 
 if __name__ == "__main__":
-    n_samples = 10
-    res = np.zeros([n_samples, 2])
-    for i_sample in range(n_samples):
-        print("#" * 80)
-        print("%d / %d" % (i_sample, n_samples))
-        res[i_sample, :] = ff()
-    print(res)
-    print(res[:, 1] - res[:, 0])
+    c()
+    # n_samples = 10
+    # res = np.zeros([n_samples, 2])
+    # for i_sample in range(n_samples):
+    #     print("#" * 80)
+    #     print("%d / %d" % (i_sample, n_samples))
+    #     res[i_sample, :] = ff()
+    # print(res)
+    # print(res[:, 1] - res[:, 0])
