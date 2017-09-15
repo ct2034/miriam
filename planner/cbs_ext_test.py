@@ -92,10 +92,12 @@ def get_data_colission(n=1):
     return agent_idle, agent_job, agent_pos, grid, idle_goals, jobs
 
 
-def get_unique_coords(max_x, max_y, reset=False):
+def get_unique_coords(max_x, max_y, reset=False, seed=None):
     global used_coords
     if reset:
         used_coords = set()
+    if seed:
+        random.seed(seed)
     else:
         max_x -= 1
         max_y -= 1
@@ -109,8 +111,8 @@ def get_unique_coords(max_x, max_y, reset=False):
         return c
 
 
-def get_data_random(map_res=10, map_fill_perc=20, agent_n=4, job_n=4, idle_goals_n=2):
-    get_unique_coords(None, None, True)  # just to reset ..
+def get_data_random(seed, map_res=10, map_fill_perc=20, agent_n=4, job_n=4, idle_goals_n=2):
+    get_unique_coords(None, None, True, seed=seed)  # just to reset ..
     grid = np.zeros([map_res, map_res, map_res ** 2])
 
     # Fill the map

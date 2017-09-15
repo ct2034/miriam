@@ -47,8 +47,9 @@ def print_map(grid):
     print(map_str)
 
 
-def planner_comparison():
-    params = get_data_random(map_res=8,
+def planner_comparison(seed):
+    params = get_data_random(seed,
+                             map_res=8,
                              map_fill_perc=20,
                              agent_n=5,
                              job_n=5,
@@ -90,10 +91,9 @@ def planner_comparison():
 
 def test_planner_comparison():
     n_samples = 20
-    random.seed(0)
 
     for i_s in range(n_samples):
-        ts, ress = planner_comparison()
+        ts, ress = planner_comparison(i_s)
         if is_cch():
             cobra = "cobra"
         else:
