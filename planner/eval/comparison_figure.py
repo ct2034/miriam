@@ -4,6 +4,7 @@ from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
 import pymongo
+import pickle
 
 plt.style.use('bmh')
 
@@ -55,6 +56,12 @@ for k in keys:
             durations[0:2,:,i_sample:i_sample+1] = np.array(duration)
             results[0:2,:,i_sample:i_sample+1] = np.array(result)
 
+try:
+    with open("comparison_data.pkl", 'wb') as f:
+        pickle.dump([durations, results], f, pickle.HIGHEST_PROTOCOL)
+except Exception as e:
+    print(e)
+
 for i in product(*tuple(map(range, durations.shape))):
     if durations[i] > 599:
         durations[i] = 0
@@ -63,7 +70,6 @@ for i in product(*tuple(map(range, durations.shape))):
         results[i] = 0
     if results[i] == np.inf:
         results[i] = 0
-
 
 labels = ["TCBS-NN2",   # 4
           "MINLP",      # 2
