@@ -133,8 +133,21 @@ def read_path_file(fname, grid):
                 )
                 t += 1
         paths.append((agent_path,))
+    new_paths = []
+    for pathset in paths:
+        path = pathset[0]
+        prev = (-1,-1)
+        n_same = 0
+        for pose in path:
+            if prev == pose[:2]:
+                n_same += 1
+            else:
+                n_same = 0
+            prev = pose[:2]
+        pathset = (path[0:-n_same], path[-n_same:-1])
+        new_paths.append(pathset)    
     f.close()
-    return paths
+    return new_paths
 
 
 def allocation_from_paths(paths, agent_pos, jobs):
