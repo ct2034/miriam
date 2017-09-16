@@ -89,6 +89,7 @@ f = plt.figure()
 f.set_size_inches(5, 4)
 ax = f.add_subplot(111)
 ax.violinplot(solution_quality, showmeans=True)
+ax.set_yscale('log')
 ax.set_xticks([y+1 for y in range(len(labels))])
 plt.setp(ax, xticks=[y+1 for y in range(len(labels))],
          xticklabels=labels)
