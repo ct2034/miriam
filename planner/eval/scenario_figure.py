@@ -1,4 +1,5 @@
 from planner.cbs_ext.plan import plan, generate_config
+from planner.eval.eval_scenarios import get_costs
 from planner.milp.milp import plan_milp
 from tools import load_map
 from planner.eval.display import *
@@ -44,10 +45,14 @@ plot_results(
     ax2, [], tcbs_paths, tcbs_agent_job, agent_pos, grid, [], jobs, 'TCBS'
 )
 
+
 minlp_agent_job, minlp_paths = plan_milp(agent_pos, jobs, grid, config)
 ax3 = f.add_subplot(133, projection='3d')
 plot_results(
     ax3, [], minlp_paths, minlp_agent_job, agent_pos, grid, [], jobs, 'MINLP'
 )
+
+get_costs(tcbs_paths, jobs, tcbs_agent_job, True)
+get_costs(minlp_paths, jobs, minlp_agent_job, True)
 
 f.savefig('scenario.png')

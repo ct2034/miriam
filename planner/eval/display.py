@@ -1,10 +1,14 @@
+from functools import reduce
+from itertools import product
+
 import numpy as np
+from matplotlib import cm
 from matplotlib import pyplot as plt
 
 plt.style.use('bmh')
 
 
-def plot_inputs(ax, agent_pos, idle_goals, jobs, grid):
+def plot_inputs(ax, agent_pos, idle_goals, jobs, grid, title="Problem Configuration"):
     # Set grid lines to between the cells
     major_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 2)
     minor_ticks = np.arange(0, len(grid[:, 0, 0]) + 1, 1) + .5
@@ -53,13 +57,14 @@ def plot_inputs(ax, agent_pos, idle_goals, jobs, grid):
         plt.legend(["Transport Task", "Agent", "Idle Task"])
     else:
         plt.legend(["Transport Task", "Agent"])
-    plt.title("Problem Configuration")
+    plt.title(title)
 
 
 def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals, jobs, title=''):
     from mpl_toolkits.mplot3d import Axes3D
     _ = Axes3D
     ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
+    ax.set_facecolor('white')
 
     # Paths
     legend_str = []
@@ -68,14 +73,40 @@ def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals
     colors = prop_cycle.by_key()['color']
     assert _paths, "Paths have not been set"
     for _pathset in _paths:  # pathset per agent
-        for p in _pathset:
-            pa = np.array(p)
-            ax.plot(xs=pa[:, 0],
-                     ys=pa[:, 1],
-                     zs=pa[:, 2],
-                     color=colors[i])
-            legend_str.append("Agent " + str(i))
+        p = reduce(lambda a,b:a+b, _pathset, list())
+        pa = np.array(p)
+        ax.plot(xs=pa[:, 0],
+                 ys=pa[:, 1],
+                 zs=pa[:, 2],
+                 color=colors[i])
+        legend_str.append("Agent " + str(i))
         i += 1
-    plt.legend(legend_str, loc=4)
+
+    # ax.set_xlim3d(0, grid.shape[0])
+    # ax.set_ylim3d(0, grid.shape[1])
+    # ax.set_zlim3d(0, grid.shape[2])
+
+    xx, yy = np.meshgrid(
+        np.linspace(- .5, grid.shape[0] + .5, grid.shape[0] * 50),
+        np.linspace(- .5, grid.shape[1] + .5, grid.shape[1] * 50))
+
+    img = np.zeros([xx.shape[0], yy.shape[1]])
+
+    for x, y in product(range(len(xx[0, :])), range(len(yy[:, 0]))):
+        try:
+            img[x, y] = grid[
+                            int(round(xx[0, x] - 1)),
+                            int(round(yy[y, 0] - 1)),
+                            0] * -.001
+        except IndexError:
+            pass
+
+    xx -= .5
+    yy -= .5
+
+    ax.contourf(xx, yy, img, z=-.2,
+                antialiased=True, cmap=cm.Greys, alpha=0.8)
+
+    plt.legend(legend_str)
     plt.title("Solution " + title)
     plt.tight_layout()
