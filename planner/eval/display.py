@@ -122,11 +122,16 @@ def update_lines(num, data, lines):
 
 
 def animate_results(fig, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals, jobs, title=''):
+    ax = fig.add_subplot(111)
+    ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
+
     # Prepare Data
     n_a = len(agent_pos)
     pa = []
     for _pathset in _paths:  # pathset per agent
         p = reduce(lambda a, b: a + b, _pathset, list())
+        if len(p) == 15:
+            p.pop()
         pa.append(np.array(p))
     data = np.zeros([n_a, pa[0].shape[0], 2])
     for i in range(n_a):
@@ -134,11 +139,11 @@ def animate_results(fig, _agent_idle, _paths, agent_job, agent_pos, grid, idle_g
     data = np.swapaxes(data, 1, 2)
 
     # Plot
-    plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
+    ax.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
 
     ls = [None] * n_a
     for i in range(n_a):
-        ls[i], = plt.plot([], [], 'r:o')
+        ls[i], = ax.plot([], [], 'r:o')
         ls[i].set_markerfacecolor('b')
         ls[i].set_markeredgecolor('b')
         ls[i].set_markersize(20)
@@ -146,5 +151,5 @@ def animate_results(fig, _agent_idle, _paths, agent_job, agent_pos, grid, idle_g
     plt.tight_layout()
 
     line_ani = animation.FuncAnimation(fig, update_lines, frames=data.shape[2] + 1, fargs=(data, ls),
-                                       interval=200, blit=True)
+                                       interval=300, blit=True)
     return line_ani
