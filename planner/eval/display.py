@@ -4,6 +4,7 @@ from itertools import product
 import numpy as np
 from matplotlib import cm
 from matplotlib import pyplot as plt
+import matplotlib.animation as animation
 
 plt.style.use('bmh')
 
@@ -110,3 +111,32 @@ def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals
     plt.legend(legend_str)
     plt.title("Solution " + title)
     plt.tight_layout()
+
+
+def update_line(num, data, line):
+    print("Num: " + str(num))
+    line.set_data(data[..., :num])
+    line.set_markevery([num - 1])
+    return line,
+
+
+def animate_results(fig, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals, jobs, title=''):
+    # Paths
+    plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
+
+    for _pathset in _paths:  # pathset per agent
+        p = reduce(lambda a, b: a + b, _pathset, list())
+        pa = np.array(p)
+        break
+
+    data = np.swapaxes(pa[:, :2], 0, 1)
+    l, = plt.plot([], [], 'r:o')
+    l.set_markerfacecolor('b')
+    l.set_markeredgecolor('b')
+    l.set_markersize(20)
+    plt.title("Solution " + title)
+    plt.tight_layout()
+
+    line_ani = animation.FuncAnimation(fig, update_line, data.shape[1], fargs=(data, l),
+                                       interval=200, blit=True)
+    return line_ani
