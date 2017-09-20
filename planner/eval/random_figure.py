@@ -22,3 +22,5 @@ f.set_size_inches(4, 4)
 plot_inputs(ax1, agent_pos, [], jobs, grid, title='')
 
 f.savefig('random.png')
+f.set_size_inches(8, 4.5)
+f.savefig('random_bw.png')
