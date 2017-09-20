@@ -113,30 +113,38 @@ def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals
     plt.tight_layout()
 
 
-def update_line(num, data, line):
+def update_lines(num, data, lines):
     print("Num: " + str(num))
-    line.set_data(data[..., :num])
-    line.set_markevery([num - 1])
-    return line,
+    for i in range(data.shape[0]):
+        lines[i].set_data(data[i, ..., :num])
+        lines[i].set_markevery([num - 1])
+    return lines
 
 
 def animate_results(fig, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals, jobs, title=''):
-    # Paths
-    plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
-
+    # Prepare Data
+    n_a = len(agent_pos)
+    pa = []
     for _pathset in _paths:  # pathset per agent
         p = reduce(lambda a, b: a + b, _pathset, list())
-        pa = np.array(p)
-        break
+        pa.append(np.array(p))
+    data = np.zeros([n_a, pa[0].shape[0], 2])
+    for i in range(n_a):
+        data[i, :, :] = pa[i][:, :2]
+    data = np.swapaxes(data, 1, 2)
 
-    data = np.swapaxes(pa[:, :2], 0, 1)
-    l, = plt.plot([], [], 'r:o')
-    l.set_markerfacecolor('b')
-    l.set_markeredgecolor('b')
-    l.set_markersize(20)
+    # Plot
+    plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
+
+    ls = [None] * n_a
+    for i in range(n_a):
+        ls[i], = plt.plot([], [], 'r:o')
+        ls[i].set_markerfacecolor('b')
+        ls[i].set_markeredgecolor('b')
+        ls[i].set_markersize(20)
     plt.title("Solution " + title)
     plt.tight_layout()
 
-    line_ani = animation.FuncAnimation(fig, update_line, data.shape[1], fargs=(data, l),
+    line_ani = animation.FuncAnimation(fig, update_lines, frames=data.shape[2] + 1, fargs=(data, ls),
                                        interval=200, blit=True)
     return line_ani
