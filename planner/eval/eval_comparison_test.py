@@ -1,9 +1,23 @@
+import datetime
 import hashlib
+import json
+import math
+import random
+from threading import Thread, Event
 
-from planner.cbs_ext.plan import generate_config, plan, pre_calc_paths
 from planner.cbs_ext_test import get_data_random
 from planner.eval.eval_scenarios import get_costs
-from tools import benchmark, mongodb_save, is_in_docker, is_cch
+from planner.tcbs.plan import generate_config, plan, pre_calc_paths
+from tools import benchmark, mongodb_save, is_cch, get_map_str
+
+class MyThread(Thread):
+    def __init__(self, event):
+        Thread.__init__(self)
+        self.stopped = event
+
+    def run(self):
+        while not self.stopped.wait(300):
+            print("alive ...")
 
 
 def one_planner(config, size):
@@ -33,28 +47,15 @@ def one_planner(config, size):
     return get_costs(res_paths, jobs, res_agent_job, True)
 
 
-def get_map_str(grid):
-    grid = grid[:, :, 0]
-    map_str = ""
-    for y in range(grid.shape[1]):
-        for x in range(grid.shape[0]):
-            if grid[x, y] == 0:
-                map_str += '.'
-            else:
-                map_str += '@'
-        map_str += '\n'
-    return map_str
-
-
 def planner_comparison(seed):
     params = get_data_random(seed+1,
                              map_res=8,
-                             map_fill_perc=20,
+                             map_fill_perc=30,
                              agent_n=5,
                              job_n=5,
                              idle_goals_n=0)
     agent_pos, grid, idle_goals, jobs = params
-    mapstr=get_map_str(grid)
+    mapstr= get_map_str(grid)
     print(mapstr)
     maphash = str(hashlib.md5(mapstr.encode('utf-8')).hexdigest())[:8]
     print(maphash)
@@ -82,31 +83,62 @@ def planner_comparison(seed):
     config_col['all_collisions'] = True
 
     if is_cch():
-        configs = [config_greedy, config_cobra]
+        print("Configs: [config_opt, config_nn, config_milp]")
+        configs = [config_opt, config_nn, config_milp] #, config_cobra, config_greedy, config_col]
+        sizes = [1, 2]
     else:
-        configs = [config_milp, config_greedy, config_col, config_opt]
-    sizes = [2, 3, 4]
-    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=600)
+        print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
+        configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
+        sizes = [2, 3, 4]
+    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=1000)
 
     return ts, ress
 
 
 def test_planner_comparison():
-    n_samples = 20
+    stopFlag = Event()
+    thread = MyThread(stopFlag)
+    thread.start()
+
+    if is_cch():
+        n_samples = 4
+    else:
+        n_samples = 30
+
+    all_results = []
+    all_times = []
+
+    random.seed(datetime.datetime.now())
 
     for i_s in range(n_samples):
-        ts, ress = planner_comparison(i_s)
+        print("######\nSample Nr: " + str(i_s) + ".\n######")
         if is_cch():
-            cobra = "cobra"
+            seed = i_s
         else:
-            cobra = "nocobra"
-        mongodb_save(
-            'test_planner_comparison_' + cobra + "_" + str(i_s),
-            {
-                'durations': ts.tolist(),
-                'results': ress.tolist()
-            }
-        )
+            seed = random.randint(0, 1000)
+        ts, ress = planner_comparison(seed)
+        if not is_cch():
+            mongodb_save(
+                'test_planner_comparison_' + str(i_s),
+                {
+                    'durations': ts.tolist(),
+                    'results': ress.tolist()
+                }
+            )
+        for i_size in range(ress.shape[1]):
+            if bool(ress[0][i_size][0]) & (not math.isnan(ress[0][i_size][0])):
+                for i_comp in range(1, len(ress)):
+                    if bool(ress[i_comp][i_size][0]) & (not math.isnan(ress[i_comp][i_size][0])):
+                        assert ress[0][i_size][0] <= ress[i_comp][i_size][0], "Optimal Planner not optimal? " + str(i_comp)
+                all_results.append(ress.tolist())
+                all_times.append(ts.tolist())
+
+    print("all_results:", json.dumps(all_results))
+    print("all_times:", json.dumps(all_times))
+
+    # this will stop the timer
+    stopFlag.set()
+
 
 if __name__ == "__main__":
     test_planner_comparison()

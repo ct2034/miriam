@@ -1,0 +1,10 @@
+# my track_list
+file 'intro.mp4'
+file 'scenario.mp4'
+file 'scenario_problem.mp4'
+file 'scenario_minlp_sl.mp4'
+file 'scenario_tcbs_sl.mp4'
+file 'random.mp4'
+file 'random_problem.mp4'
+file 'random_minlp_sl.mp4'
+file 'random_tcbs_sl.mp4'

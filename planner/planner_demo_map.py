@@ -5,7 +5,7 @@ from itertools import *
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan
+from planner.tcbs.plan import plan
 from planner.eval.display import plot_inputs
 from tools import load_map
 

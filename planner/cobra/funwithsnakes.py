@@ -36,6 +36,7 @@ def plan_cobra(agent_pos, jobs, grid, config):
         assert res == 0, "Error when calling cobra: " + cmd + "\nin: " + pwd
         paths = read_path_file(cobra_filename_base + PATH_EXT, grid)
         agent_job, paths = allocation_from_paths(paths, agent_pos, jobs)
+        paths = make_paths_comparable(paths, agent_job, agent_pos, jobs)
         return agent_job, paths
     finally:
         clean_up(cobra_filename_base)
@@ -193,6 +194,31 @@ def allocation_from_paths(paths, agent_pos, jobs):
         agent_job.append(agent_alloc)
         new_paths = []
     return agent_job, paths
+
+
+def make_paths_comparable(paths, agent_job, agent_pos, jobs):
+    paths_out = []
+    for i_a in range(len(agent_pos)):
+        paths_agent = paths[i_a]
+        if len(paths_agent) == 2:
+            paths_agent_out = []
+            path = paths_agent[0]
+            assert path[0][:2] == agent_pos[i_a]
+            temp_p = (-1, -1)
+            i_p = 0
+            while temp_p != jobs[agent_job[i_a][0]][0]:  # start
+                temp_p = path[i_p][:2]
+                i_p += 1
+            paths_agent_out.append(path[0:i_p])
+            path_out = []
+            for p in path[i_p - 1:]:
+                path_out.append(tuple([p[0], p[1], p[2] + 1]))
+            paths_agent_out.append(path_out)
+            paths_out.append(tuple(paths_agent_out))
+        else:
+            assert False
+    return paths_out
+
 
 
 

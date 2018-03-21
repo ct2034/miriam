@@ -7,12 +7,12 @@ import numpy as np
 from planner.eval.display import plot_inputs, plot_results
 import matplotlib.pyplot as plt
 
-from planner.cbs_ext.plan import generate_config
+from planner.tcbs.plan import generate_config
 from planner.cbs_ext_test import get_data_random
 from planner.cobra.funwithsnakes import read_path_file, plan_cobra
 
 
-@unittest.skip('Cobra not running in docker')
+@unittest.skip("They are hard to compare, then")
 def test_read_map(fname='planner/cobra/test.path', plot=False):
     print("cwd: " + str(os.getcwd()))
     grid = np.zeros([10, 10, 100])
@@ -23,7 +23,6 @@ def test_read_map(fname='planner/cobra/test.path', plot=False):
     assert len(paths[0][0]) == 30, "No full paths"
 
 
-@unittest.skip('Cobra not running in docker')
 def test_cobra_simple(plot=False):
     grid = np.zeros([5, 5, 30])
     res_agent_job, res_paths = plan_cobra(
@@ -38,12 +37,12 @@ def test_cobra_simple(plot=False):
     assert res_paths, "No result"
 
 
-@unittest.skip('Cobra not running in docker')
 def test_cobra_random(plot=False):
-    agent_pos, grid, idle_goals, jobs = get_data_random(map_res=8,
+    agent_pos, grid, idle_goals, jobs = get_data_random(seed=1,
+                                                        map_res=8,
                                                         map_fill_perc=20,
-                                                        agent_n=5,
-                                                        job_n=5,
+                                                        agent_n=3,
+                                                        job_n=3,
                                                         idle_goals_n=0)
     res_agent_job, res_paths = plan_cobra(
         agent_pos,
@@ -56,12 +55,14 @@ def test_cobra_random(plot=False):
     jobs_is = list(range(len(jobs)))
     for i_j in all_alloc:
         jobs_is.remove(i_j)
-    assert not jobs_is, "Not all joby allocated"
+    assert not jobs_is, "Not all jobs allocated"
     if plot:
-        fig = plot_inputs(agent_pos, idle_goals, jobs, grid, show=False, subplot=121)
-        plot_results([], res_paths, [], [], fig, grid, [], jobs)
+        fig = plt.figure()
+        ax = fig.add_subplot(121)
+        plot_inputs(ax, agent_pos, idle_goals, jobs, grid)
+        ax2 = fig.add_subplot(122, projection='3d')
+        plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
         plt.show()
-
 
 
 if __name__ == "__main__":

@@ -1,27 +1,8 @@
-language: python
-#cache:
-#  - pip
-
 services:
   - docker
 
-before_install:
-  - docker pull ct2034/miriam
-  - docker build -t ct2034/miriam .
-#  - export PYTHONPATH=/home/travis/build/ct2034/miriam
-#  # bonmin
-#  - sudo apt-get update
-#  - sudo apt-get install -y libblas3 liblapack3 wget
-#  - bash -c "cd /; sudo wget https://www.coin-or.org/download/binary/CoinAll/CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz; sudo tar -xzf /CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz"
-#  - sudo ln -s /usr/lib/liblapack.so.3 /lib/liblapack.so.3gf
-#  - sudo ln -s /usr/lib/libblas.so.3 /lib/libblas.so.3gf
-
-#python:
-#  - "3.6"
-
-#install:
-# - pip install -r requirements.txt
+before_script:
+  - docker build -t miriam .
 
 script:
-#  - py.test -vs
-  - docker run ct2034/miriam
+  - docker run miriam

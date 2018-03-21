@@ -6,8 +6,8 @@ from functools import reduce
 
 import numpy as np
 
-from planner.cbs_ext import plan
-from planner.cbs_ext.plan import plan as plan_cbsext, generate_config
+from planner.tcbs import plan
+from planner.tcbs.plan import plan as plan_cbsext, generate_config
 from tools import is_travis
 
 rand = None

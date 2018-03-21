@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from planner.cbs_ext.plan import plan, generate_config
+from planner.tcbs.plan import plan, generate_config
 from planner.eval.display import plot_results
-from tools import load_map
+from tools import load_map, get_map_str
 
 
 def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
@@ -17,24 +17,35 @@ def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
     print("Problem:")
     print(str(jobs))
     print(str(agent_pos))
+    mapstr = get_map_str(grid)
+    print(mapstr)
 
-    print("plan")
-    res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], [], grid, config, plot=display)
+    print("PLAN")
+    res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], [], grid, config, plot=False)
+    print("agent_job: " + str(res_agent_job))
+    print("paths: " + str(res_paths))
+    costs_opt = get_costs(res_paths, jobs, res_agent_job, display)
 
-    print("minlp")
-    minlp_res_agent_job, minlp_res_paths = plan_milp(agent_pos, jobs, grid, config)
+    print("MINLP")
+    minlp_res_agent_job, minlp_res_paths = plan_milp(agent_pos, jobs, grid, config, plot=False)
+    print("agent_job: " + str(minlp_res_agent_job))
+    print("paths: " + str(minlp_res_paths))
+    costs_minlp = get_costs(minlp_res_paths, jobs, minlp_res_agent_job, display)
+
+    # MINLP VS PLAN
+    if display:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(121, projection='3d')
+        ax2 = fig.add_subplot(122, projection='3d')
+        plot_results(ax1, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
+        plot_results(ax2, [], minlp_res_paths, minlp_res_agent_job, agent_pos, grid, [], jobs)
+        plt.show()
 
     print("TCBS")
     print("agent_job: " + str(res_agent_job))
     print("paths: " + str(res_paths))
     costs_tcbs = get_costs(res_paths, jobs, res_agent_job, display)
 
-    print("MINLP")
-    print("agent_job: " + str(minlp_res_agent_job))
-    print("paths: " + str(minlp_res_paths))
-    if display:
-        plot_results([], minlp_res_paths, agent_pos, minlp_res_agent_job, plt.figure(), grid, [], jobs)
-    costs_minlp = get_costs(minlp_res_paths, jobs, minlp_res_agent_job, display)
     return costs_tcbs, costs_minlp
 
 
@@ -185,8 +196,23 @@ def ff():
     return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=False)
 
 
+# -------
+def o():
+    _map = load_map('o.png')
+    agent_pos = [(1, 3),
+                 (6, 1),
+                 (2, 2),
+                 (1, 1)]
+    jobs = [((7, 4), (0, 4), 4),
+            ((2, 0), (3, 7), 3),
+            ((4, 5), (7, 5), 0),
+            ((4, 4), (6, 5), 1)]
+    eval(_map, agent_pos, jobs, 'o.pkl', finished_blocking=False, display=True)
+
+
+
 if __name__ == "__main__":
-    c()
+    o()
     # n_samples = 10
     # res = np.zeros([n_samples, 2])
     # for i_sample in range(n_samples):
