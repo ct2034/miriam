@@ -48,7 +48,9 @@ def one_planner(config, size):
 
 
 def planner_comparison(seed):
-    params = get_data_random(seed+1,
+    the_seed = seed+5
+    print("seed: " + str(the_seed))
+    params = get_data_random(the_seed,
                              map_res=8,
                              map_fill_perc=30,
                              agent_n=5,
@@ -66,6 +68,8 @@ def planner_comparison(seed):
     config_opt = generate_config()
     config_opt['params'] = params
     config_opt['filename_pathsave'] = fname
+    config_opt['all_collisions'] = True
+    config_opt['finished_agents_block'] = True
 
     config_milp = config_opt.copy()
     config_milp['milp'] = 1
@@ -85,12 +89,12 @@ def planner_comparison(seed):
     if is_cch():
         print("Configs: [config_opt, config_nn, config_milp]")
         configs = [config_opt, config_nn, config_milp] #, config_cobra, config_greedy, config_col]
-        sizes = [1, 2]
+        sizes = [4]
     else:
         print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
         configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
         sizes = [2, 3, 4]
-    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=1000)
+    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=180)
 
     return ts, ress
 
@@ -101,7 +105,7 @@ def test_planner_comparison():
     thread.start()
 
     if is_cch():
-        n_samples = 4
+        n_samples = 5
     else:
         n_samples = 30
 

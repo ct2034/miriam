@@ -69,15 +69,15 @@ get_costs(tcbs_paths, jobs, tcbs_agent_job, True)
 get_costs(minlp_paths, jobs, minlp_agent_job, True)
 
 f = plt.figure()
-f.set_size_inches(8, 4.5)
+f.set_size_inches(19.20, 10.80)
 ani = animate_results(
     f, [], tcbs_paths, tcbs_agent_job, agent_pos, grid, [], jobs, 'TCBS'
 )
-ani.save("video/random_tcbs.mp4", writer="ffmpeg", fps=10)
+ani.save("video/random_tcbs.mp4", writer="ffmpeg", fps=20)
 
 f = plt.figure()
-f.set_size_inches(8, 4.5)
+f.set_size_inches(19.20, 10.80)
 ani = animate_results(
     f, [], minlp_paths, minlp_agent_job, agent_pos, grid, [], jobs, 'MINLP'
 )
-ani.save("video/random_minlp.mp4", writer="ffmpeg", fps=10)
+ani.save("video/random_minlp.mp4", writer="ffmpeg", fps=20)
