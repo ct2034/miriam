@@ -42,7 +42,7 @@ def is_in_docker():
     return 0 == os.system("bash -f /.dockerenv")
 
 
-def load_map(fname='cbs_ext/map.png'):
+def load_map(fname='tcbs/map.png'):
     import png
     r = png.Reader(filename=fname)
 
@@ -76,8 +76,11 @@ def benchmark(fun, vals, samples=10, disp=True, timeout=60):
         except TimeoutException:
             print("Timed out!")
         except Exception as e:
-            print("Benchmark stopped for exception:")
+            print("#"*10)
+            print("Benchmark stopped for EXCEPTION:")
             print(e)
+            print("#"*10)
+            # raise e
         t = (datetime.now() - start).total_seconds()
         if not res:
             res = None
@@ -111,6 +114,7 @@ def benchmark(fun, vals, samples=10, disp=True, timeout=60):
 def get_git():
     from git import Repo
     import os
+    # TODO: Set log level for git.cmd to info
     return Repo(os.getcwd(), search_parent_directories=True)
 
 
@@ -219,3 +223,16 @@ class ColoredLogger(logging.Logger):
 
         self.addHandler(console)
         return
+
+
+def get_map_str(grid):
+    grid = grid[:, :, 0]
+    map_str = ""
+    for y in range(grid.shape[1]):
+        for x in range(grid.shape[0]):
+            if grid[x, y] == 0:
+                map_str += '.'
+            else:
+                map_str += '@'
+        map_str += '\n'
+    return map_str

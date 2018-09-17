@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from planner.tcbs.plan import plan, generate_config
 from planner.eval.display import plot_results
-from tools import load_map, get_map_str
+from tools import load_map
 
 
 def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
