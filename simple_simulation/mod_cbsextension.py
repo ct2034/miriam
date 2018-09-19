@@ -7,7 +7,7 @@ from threading import Lock
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan, get_paths, comp2condition, comp2state
+from planner.tcbs.plan import plan, get_paths, comp2condition, comp2state
 from simple_simulation.mod import Module
 from simple_simulation.route import Route, Car
 from simple_simulation.simulation import list_hash

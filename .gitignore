@@ -19,3 +19,4 @@ __pycache__
 *.orig
 planner/eval/cache/
 roadmaps/
+.pytest_cache/
