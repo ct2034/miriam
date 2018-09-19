@@ -119,7 +119,7 @@ def test_planner_comparison():
         if is_cch():
             seed = i_s
         else:
-            seed = random.randint(0, 1000)
+            seed = i_s # random.randint(0, 1000)
         ts, ress = planner_comparison(seed)
         if not is_cch():
             mongodb_save(
