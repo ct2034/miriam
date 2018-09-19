@@ -48,7 +48,7 @@ def one_planner(config, size):
 
 
 def planner_comparison(seed):
-    the_seed = seed+10
+    the_seed = seed+330
     print("seed: " + str(the_seed))
     params = get_data_random(the_seed,
                              map_res=8,
@@ -94,7 +94,7 @@ def planner_comparison(seed):
         print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
         configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
         sizes = [2, 3, 4]
-    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=240)
+    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=600)
 
     return ts, ress
 
@@ -105,7 +105,7 @@ def test_planner_comparison():
     thread.start()
 
     if is_cch():
-        n_samples = 5
+        n_samples = 1
     else:
         n_samples = 30
 
