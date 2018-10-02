@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from planner.tcbs.plan import plan, generate_config
-from planner.eval.display import plot_results
-from tools import load_map
+from planner.eval.display import plot_results, plot_inputs
+from tools import load_map, get_map_str
 
 
 def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
@@ -185,6 +185,24 @@ def s():
             ]
     eval(_map, agent_pos, jobs, 'S.pkl')
 
+# -------
+def u():
+    _map = load_map('u.png')
+    agent_pos = [(3, 1),
+                 (4, 1),
+                 (5, 1)]
+    jobs = [((3, 4), (3, 1), 0),
+            ((4, 4), (4, 1), 0),
+            ((5, 4), (5, 1), 0),
+            ]
+
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    # grid = np.repeat(_map[:, ::2, np.newaxis], 100, axis=2)
+    # plot_inputs(ax, agent_pos, [], jobs, grid)
+    # fig.show()
+
+    eval(_map, agent_pos, jobs, 'u.pkl', finished_blocking=False, display=True)
 
 # -------
 def ff():
@@ -212,7 +230,7 @@ def o():
 
 
 if __name__ == "__main__":
-    o()
+    u()
     # n_samples = 10
     # res = np.zeros([n_samples, 2])
     # for i_sample in range(n_samples):
