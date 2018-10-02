@@ -90,11 +90,11 @@ def planner_comparison(seed):
         print("Configs: [config_opt, config_nn, config_milp]")
         configs = [config_opt, config_nn, config_milp] #, config_cobra, config_greedy, config_col]
         sizes = [4]
-    else:
+    else: # travis
         print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
         configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
         sizes = [2, 3, 4]
-    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=600)
+    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=500)
 
     return ts, ress
 
