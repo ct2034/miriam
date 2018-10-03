@@ -211,7 +211,7 @@ def ff():
     agent_pos = [(0, 0),
               (2, 6),
               (7, 7)]
-    return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=False)
+    return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=True)
 
 
 # -------
@@ -230,7 +230,7 @@ def o():
 
 
 if __name__ == "__main__":
-    u()
+    ff()
     # n_samples = 10
     # res = np.zeros([n_samples, 2])
     # for i_sample in range(n_samples):
