@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import datetime
 
 from tools import ColoredLogger
 
@@ -7,6 +8,9 @@ logging.setLoggerClass(ColoredLogger)
 
 def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     _, start = cost(condition, start)  # it may have collisions
+
+    collect_stats = False
+    stats = {}
 
     closed = []
     open = [start]
@@ -32,10 +36,20 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
         closed.append(current)
         children = get_children(condition, current)
         for neighbor in children:
+
             if neighbor in closed:
                 continue  # Ignore the neighbor which is already evaluated.
             # The distance from start to a neighbor
             c, neighbor = cost(condition, neighbor)
+
+            if collect_stats:
+                stats[datetime.datetime.now().microsecond] = {
+                    "closed.__len__()": closed.__len__(),
+                    "open.__len__()": open.__len__(),
+                    "neighbor[2].__len__() (blocks)": neighbor[2].__len__(),
+                    "c": c
+                }
+
             if c >= 99999:
                 closed.append(neighbor)
                 continue  # This is not part of a plan
@@ -50,10 +64,10 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             else:
                 append = False
             g_score[neighbor] = tentative_g_score
-            f_score[neighbor] = g_score[neighbor]
-            f_score[neighbor] += heuristic(condition, neighbor)
+            the_f_score = tentative_g_score + heuristic(condition, neighbor)
+            f_score[neighbor] = the_f_score
             if append:
-                f_score_open = np.append(f_score_open, f_score[neighbor])
+                f_score_open = np.append(f_score_open, the_f_score)
 
     raise RuntimeError("Can not find a solution")
 

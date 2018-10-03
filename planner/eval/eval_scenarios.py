@@ -188,12 +188,12 @@ def s():
 # -------
 def u():
     _map = load_map('u.png')
-    agent_pos = [(3, 1),
-                 (4, 1),
-                 (5, 1)]
-    jobs = [((3, 4), (3, 1), 0),
-            ((4, 4), (4, 1), 0),
-            ((5, 4), (5, 1), 0),
+    agent_pos = [(2, 1),
+                 (3, 1),
+                 (4, 1)]
+    jobs = [((1, 4), (3, 1), 0),
+            ((2, 4), (4, 1), 0),
+            ((3, 4), (5, 1), 0),
             ]
 
     # fig = plt.figure()
@@ -230,7 +230,7 @@ def o():
 
 
 if __name__ == "__main__":
-    ff()
+    u()
     # n_samples = 10
     # res = np.zeros([n_samples, 2])
     # for i_sample in range(n_samples):
