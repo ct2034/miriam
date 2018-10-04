@@ -25,7 +25,6 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
       or [] if no path found
       or False if path shouldn't have been calculated but was not saved either
     """
-    seen = set()
     _map = _map.copy()
     for b in blocked:
         if b[0] == VERTEX:
