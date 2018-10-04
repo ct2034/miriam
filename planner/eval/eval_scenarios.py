@@ -20,7 +20,7 @@ def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
     mapstr = get_map_str(grid)
     print(mapstr)
 
-    print("PLAN")
+    print("TCBS")
     res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], [], grid, config, plot=False)
     print("agent_job: " + str(res_agent_job))
     print("paths: " + str(res_paths))
@@ -41,7 +41,7 @@ def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
         plot_results(ax2, [], minlp_res_paths, minlp_res_agent_job, agent_pos, grid, [], jobs)
         plt.show()
 
-    print("TCBS")
+    print("TCBS (results again for comparison)")
     print("agent_job: " + str(res_agent_job))
     print("paths: " + str(res_paths))
     costs_tcbs = get_costs(res_paths, jobs, res_agent_job, display)
@@ -202,7 +202,7 @@ def u():
     # plot_inputs(ax, agent_pos, [], jobs, grid)
     # fig.show()
 
-    eval(_map, agent_pos, jobs, 'u.pkl', finished_blocking=False, display=True)
+    eval(_map, agent_pos, jobs, 'u.pkl', finished_blocking=True, display=True)
 
 # -------
 def ff():

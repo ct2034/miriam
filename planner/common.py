@@ -63,7 +63,11 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
     for b in blocked:
         if b[0] == VERTEX and b[1] in _path:
             return False, {}
-            # TODO (maybe): test for edges?
+        if b[0] == EDGE and (
+                (b[1][0] + (b[1][2],) in _path) or
+                (b[1][1] + (b[1][2],) in _path)
+        ):
+            return False, {}
 
     if not _path:
         return False, {}
