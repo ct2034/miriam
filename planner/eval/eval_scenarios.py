@@ -188,12 +188,12 @@ def s():
 # -------
 def u():
     _map = load_map('u.png')
-    agent_pos = [(1, 1),
-                 (2, 1),
-                 (3, 1)]
-    jobs = [((2, 4), (3, 1), 0),
-            ((3, 4), (4, 1), 0),
-            ((4, 4), (5, 1), 0),
+    agent_pos = [(2, 1),
+                 (3, 1),
+                 (4, 1)]
+    jobs = [((1, 4), (3, 1), 0),
+            ((2, 4), (4, 1), 0),
+            ((3, 4), (5, 1), 0),
             ]
 
     # fig = plt.figure()
@@ -211,7 +211,7 @@ def ff():
     agent_pos = [(0, 0),
               (2, 6),
               (7, 7)]
-    return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=False)
+    return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=True)
 
 
 # -------

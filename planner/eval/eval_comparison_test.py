@@ -10,14 +10,14 @@ from planner.eval.eval_scenarios import get_costs
 from planner.tcbs.plan import generate_config, plan, pre_calc_paths
 from tools import benchmark, mongodb_save, is_cch, get_map_str
 
-class MyThread(Thread):
+class AlivePrinter(Thread):
     def __init__(self, event):
         Thread.__init__(self)
         self.stopped = event
 
     def run(self):
         while not self.stopped.wait(300):
-            print("alive ...")
+            print("I feel so alive!")
 
 
 def one_planner(config, size):
@@ -90,18 +90,18 @@ def planner_comparison(seed):
         print("Configs: [config_opt, config_nn, config_milp]")
         configs = [config_opt, config_nn, config_milp] #, config_cobra, config_greedy, config_col]
         sizes = [4]
-    else:
+    else: # travis
         print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
         configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
         sizes = [2, 3, 4]
-    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=600)
+    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=500)
 
     return ts, ress
 
 
 def test_planner_comparison():
     stopFlag = Event()
-    thread = MyThread(stopFlag)
+    thread = AlivePrinter(stopFlag)
     thread.start()
 
     if is_cch():
