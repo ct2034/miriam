@@ -9,7 +9,7 @@ logging.setLoggerClass(ColoredLogger)
 def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     _, start = cost(condition, start)  # it may have collisions
 
-    collect_stats = False
+    collect_stats = True
     stats = {}
 
     closed = []

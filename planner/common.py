@@ -25,7 +25,6 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
       or [] if no path found
       or False if path shouldn't have been calculated but was not saved either
     """
-    seen = set()
     _map = _map.copy()
     for b in blocked:
         if b[0] == VERTEX:
@@ -44,6 +43,7 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
     startgoal = [start, goal]
     index = tuple(startgoal) + tuple(blocked)
     global path_save
+
     if index not in path_save.keys():
         if calc:  # if we want to calc (i.e. find the cost)
             assert len(start) == 2, "Should be called with only spatial coords"
@@ -51,6 +51,18 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
                 _path = astar_grid4con(start + (0,),
                                        goal + (_map.shape[2] - 1,),
                                        _map.swapaxes(0, 1))
+
+                for b in blocked:
+                    if b[0] == VERTEX and b[1] in _path:
+                        _path = []
+                    elif b[0] == EDGE:
+                        for i in range(_path.__len__() - 1):
+                            if (
+                                    (_path[i] == b[1][0] + (b[1][2],)) &
+                                    (_path[i+1] == b[1][1] + (b[1][2],))
+                            ):
+                                _path = []
+
             except NoPathException:
                 _path = []
 
@@ -59,11 +71,6 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
             return False, {}
     else:  # exists in the path_save
         _path = path_save[index]
-
-    for b in blocked:
-        if b[0] == VERTEX and b[1] in _path:
-            return False, {}
-            # TODO (maybe): test for edges?
 
     if not _path:
         return False, {}
