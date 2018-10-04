@@ -33,11 +33,15 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
             _map[(v[1],
                   v[0],
                   v[2])] = -1
+            if v[:2] == start or v[:2] == goal:
+                return False, {}
         elif b[0] == EDGE:
             for v in b[1][0:2]:
                 _map[(v[1],
                       v[0],
                       b[1][2])] = -1
+                if v[:2] == start or v[:2] == goal:
+                    return False, {}
                 # TODO: actually block edge!
 
     blocked.sort()
@@ -63,11 +67,11 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
     for b in blocked:
         if b[0] == VERTEX and b[1] in _path:
             return False, {}
-        if b[0] == EDGE and (
-                (b[1][0] + (b[1][2],) in _path) or
-                (b[1][1] + (b[1][2],) in _path)
-        ):
-            return False, {}
+        # if b[0] == EDGE and (
+        #         (b[1][0] + (b[1][2],) in _path) or
+        #         (b[1][1] + (b[1][2],) in _path)
+        # ):
+        #     return False, {}
 
     if not _path:
         return False, {}

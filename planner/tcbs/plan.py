@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 from planner.astar.astar_grid48con import distance_manhattan
-from planner.tcbs.base import astar_base
+from planner.tcbs.base import astar_base, MAX_COST
 from planner.common import *
 from planner.eval.display import plot_inputs, plot_results
 from tools import ColoredLogger
@@ -20,6 +20,8 @@ plt.style.use('bmh')
 
 _config = {}
 _distances = None
+
+EXPECTED_MAX_N_BLOCKS = 1000
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array,
          config: dict = {}, plot: bool = False, pathplanning_only_assignment=False):
@@ -278,7 +280,7 @@ def cost(_condition: dict, _state: tuple):
 
     _paths = get_paths(_condition, _state)
     if _paths == False:  # one path was not viable
-        return 99999, _state
+        return MAX_COST, _state
     for i_a in range(len(_paths)):
         pathset = list(_paths[i_a])
         assigned_jobs = agent_job[i_a]
@@ -311,6 +313,15 @@ def cost(_condition: dict, _state: tuple):
         if collision != ():
             block_state += (collision,)
 
+    seen = set()
+    for b in block_state:
+        if b in seen:
+            return MAX_COST, _state
+        seen.add(b)
+
+    _cost += block_state.__len__() / EXPECTED_MAX_N_BLOCKS
+    assert block_state.__len__() < EXPECTED_MAX_N_BLOCKS, "more blocks than we expected"
+
     _state = comp2state(agent_job, agent_idle, block_state)
     return _cost, _state
 
@@ -335,7 +346,7 @@ def heuristic(_condition: dict, _state: tuple) -> float:
 
     paths = get_paths(_condition, _state)
     if paths is False:
-        return 99999  # no feasible path set
+        return MAX_COST  # no feasible path set
 
     agentposes = []
     assert len(paths) == len(agent_pos), "All agents should have paths"
@@ -638,7 +649,10 @@ def get_paths(_condition: dict, _state: tuple):
         path_save.update(r[1])
     longest = max(map(lambda p: len(reduce(lambda a, b: a + b, p, [])), _paths))
     if _config['finished_agents_block']:
-        _paths = fill_up_paths(longest, _paths, agent_pos, blocks)
+        (left_agent_pos, left_idle_goals, left_jobs
+         ) = clear_set(_agent_idle, agent_job, agent_pos, idle_goals, jobs)
+        if left_jobs.__len__() > 0:
+            _paths = fill_up_paths(longest, _paths, agent_pos, blocks)
 
     # debug_time_jump_in_paths(_paths)
 
@@ -647,7 +661,6 @@ def get_paths(_condition: dict, _state: tuple):
 
 
 def fill_up_paths(longest, _paths, agent_pos, blocks):
-    global config
     if longest > 0:
         res_paths = []
         for ia, paths_for_agent in enumerate(_paths):

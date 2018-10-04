@@ -1,15 +1,18 @@
 import logging
 import numpy as np
-import datetime
+import time
+import matplotlib.pyplot as plt
 
 from tools import ColoredLogger
 
 logging.setLoggerClass(ColoredLogger)
 
+MAX_COST = 99999
+
 def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     _, start = cost(condition, start)  # it may have collisions
 
-    collect_stats = False
+    collect_stats = True
     stats = {}
 
     closed = []
@@ -43,14 +46,16 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
             c, neighbor = cost(condition, neighbor)
 
             if collect_stats:
-                stats[datetime.datetime.now().microsecond] = {
+                stats[time.time()] = {
                     "closed.__len__()": closed.__len__(),
                     "open.__len__()": open.__len__(),
                     "neighbor[2].__len__() (blocks)": neighbor[2].__len__(),
-                    "c": c
+                    "c": c if c < MAX_COST else 0
                 }
+                if stats.__len__() == 30000:
+                    display_stats(stats)
 
-            if c >= 99999:
+            if c >= MAX_COST:
                 closed.append(neighbor)
                 continue  # This is not part of a plan
 
@@ -75,3 +80,13 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
 def argmin_f_open(open_list, f_score_open):
     assert len(open_list) == len(f_score_open), "Lengths must be equal"
     return open_list[np.argmin(f_score_open)]
+
+
+def display_stats(stats):
+    f = plt.figure()
+    x = stats.keys()
+    for i, k in enumerate(list(stats[list(x)[0]].keys())):
+        ax = f.add_subplot(221 + i)
+        ax.plot(x, list(map(lambda x_: stats[x_][k], x)))
+        ax.set_title(k)
+    plt.show()
