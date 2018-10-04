@@ -202,7 +202,7 @@ def u():
     # plot_inputs(ax, agent_pos, [], jobs, grid)
     # fig.show()
 
-    eval(_map, agent_pos, jobs, 'u.pkl', finished_blocking=False, display=True)
+    eval(_map, agent_pos, jobs, 'u.pkl', finished_blocking=True , display=True)
 
 # -------
 def ff():
