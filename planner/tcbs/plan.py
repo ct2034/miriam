@@ -630,10 +630,18 @@ def get_paths(_condition: dict, _state: tuple):
     for r in res:
         if not r:
             return False
+
+	# TODO: check at runtime if debugging
+        # debug_time_jump_in_paths([r[0]])
+
         _paths.append(r[0])
         path_save.update(r[1])
     longest = max(map(lambda p: len(reduce(lambda a, b: a + b, p, [])), _paths))
-    _paths = fill_up_paths(longest, _paths, agent_pos, blocks)
+    if _config['finished_agents_block']:
+        _paths = fill_up_paths(longest, _paths, agent_pos, blocks)
+
+    # debug_time_jump_in_paths(_paths)
+
     assert len(_paths) == len(agent_pos), "More or less paths than agents"
     return _paths
 
@@ -656,14 +664,12 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
             ts = range(last[2] + 1, longest)
             if ts:
                 standing_section = list(map(lambda x: last[0:2] + (x,), ts))
-                if not _config['finished_agents_block']:
-                    for block in blocks_for_agent:
-                        if block in standing_section:
-                            standing_section.remove(block)
                 if standing_section:
                     paths_for_agent += (standing_section,)
             res_paths.append(paths_for_agent)
         assert len(res_paths) == len(_paths), "Not all paths processed"
+
+        # debug_time_jump_in_paths(res_paths)
         return res_paths
     else:
         return _paths
@@ -722,6 +728,9 @@ def find_collision(_paths: list, all_collisions=False) -> tuple:
                 a, b = path[i][:2], path[i + 1][:2]
                 edge = (a, b) if a > b else (b, a)
             t = path[i][2]
+            #DEBUG: check if jump in timeline
+            #if i > 0:
+            #    assert path[i][2] - path[i-1][2] == 1
             if t in vortexes.keys():
                 if vortex in vortexes[t].keys():  # it is already someone there
                     col = VERTEX, vortex + (t,), (agent, vortexes[t][vortex])
@@ -913,3 +922,11 @@ def load_paths(filename):
             path_save = pickle.load(f)
     except FileNotFoundError:
         logging.warning("WARN: File %s does not exist", filename)
+
+def debug_time_jump_in_paths(paths):
+    for agent_paths in paths:
+        t = -1
+        for a_path in agent_paths:
+            for pose in a_path:
+                assert pose[2] - t == 1
+                t = pose[2]
