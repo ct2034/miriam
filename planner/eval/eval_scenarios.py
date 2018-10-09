@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 from planner.tcbs.plan import plan, generate_config
 from planner.eval.display import plot_results, plot_inputs
@@ -36,9 +37,10 @@ def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
     if display:
         fig = plt.figure()
         ax1 = fig.add_subplot(121, projection='3d')
+        ax1.set_title("Solution Optimal")
         ax2 = fig.add_subplot(122, projection='3d')
-        plot_results(ax1, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
-        plot_results(ax2, [], minlp_res_paths, minlp_res_agent_job, agent_pos, grid, [], jobs)
+        plot_results(ax1, [], res_paths, res_agent_job, agent_pos, grid, [], jobs, "Optimal")
+        plot_results(ax2, [], minlp_res_paths, minlp_res_agent_job, agent_pos, grid, [], jobs, "Separate")
         plt.show()
 
     print("TCBS (results again for comparison)")
@@ -202,15 +204,37 @@ def u():
     # plot_inputs(ax, agent_pos, [], jobs, grid)
     # fig.show()
 
-    eval(_map, agent_pos, jobs, 'u.pkl', finished_blocking=True, display=True)
+    eval(_map, agent_pos, jobs, 'u.pkl', finished_blocking=False, display=True)
 
 # -------
 def ff():
-    jobs = random_jobs(2, [(0, 0), (2, 0), (2, 6), (4, 6), (6, 2), (7, 7)])
+    jobs = random_jobs(3, [(0, 0), (2, 0), (2, 6), (4, 6), (6, 2), (7, 7)])
     _map = load_map('ff.png')
-    agent_pos = [(0, 0),
-              (2, 6),
-              (7, 7)]
+    agent_pos = [(0, 1),
+                 (2, 7),
+                 (7, 4)]
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    grid = np.repeat(_map[:, ::2, np.newaxis], 100, axis=2)
+    plot_inputs(ax, agent_pos, [], jobs, grid)
+    plt.show()
+
+    return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=True)
+
+
+# -------
+def iros18_workshop():
+    _map = load_map('ff.png')
+    jobs = [((2, 0), (6, 2), 0), ((0, 0), (2, 6), 0), ((7, 7), (4, 6), 0)]
+    agent_pos = [(0, 1), (2, 7), (7, 4)]
+
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    # grid = np.repeat(_map[:, ::2, np.newaxis], 100, axis=2)
+    # plot_inputs(ax, agent_pos, [], jobs, grid)
+    # plt.show()
+
     return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=True)
 
 
@@ -230,7 +254,7 @@ def o():
 
 
 if __name__ == "__main__":
-    u()
+    iros18_workshop()
     # n_samples = 10
     # res = np.zeros([n_samples, 2])
     # for i_sample in range(n_samples):
