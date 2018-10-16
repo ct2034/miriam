@@ -1,4 +1,4 @@
-from process_sim.process_test import run_with_sim
+from sim_process.process_test import run_with_sim
 from simple_simulation.mod_cbsextension import Cbsext
 from simple_simulation.simulation import SimpSim
 

@@ -135,6 +135,10 @@ def mongodb_save(name, data):
         logging.warning("No Internet connection -> not saving to mongodb")
         return
 
+    if 0 != os.system('ping -c2 -W1 ds033607.mlab.com'):
+        logging.warning("can not reach mlab -> not saving to mongodb")
+        return
+
     key = get_git_sha()
 
     client = pymongo.MongoClient(
