@@ -107,7 +107,7 @@ def test_planner_comparison():
     if is_cch():
         n_samples = 1
     else:
-        n_samples = 30
+        n_samples = 10
 
     all_results = []
     all_times = []
@@ -119,7 +119,7 @@ def test_planner_comparison():
         if is_cch():
             seed = i_s
         else:
-            seed = i_s # random.randint(0, 1000)
+            seed = random.randint(0, 1000)
         ts, ress = planner_comparison(seed)
         if not is_cch():
             mongodb_save(
