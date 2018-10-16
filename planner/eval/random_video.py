@@ -1,7 +1,7 @@
 import hashlib
 
 from planner.tcbs.plan import plan, generate_config
-from planner.cbs_ext_test import get_data_random
+from planner.tcbs_test import get_data_random
 from planner.eval.eval_scenarios import get_costs
 from planner.milp.milp import plan_milp
 from tools import load_map, get_map_str

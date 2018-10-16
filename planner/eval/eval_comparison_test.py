@@ -5,7 +5,7 @@ import math
 import random
 from threading import Thread, Event
 
-from planner.cbs_ext_test import get_data_random
+from planner.tcbs_test import get_data_random
 from planner.eval.eval_scenarios import get_costs
 from planner.tcbs.plan import generate_config, plan, pre_calc_paths
 from tools import benchmark, mongodb_save, is_cch, get_map_str

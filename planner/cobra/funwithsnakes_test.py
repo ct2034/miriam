@@ -8,7 +8,7 @@ from planner.eval.display import plot_inputs, plot_results
 import matplotlib.pyplot as plt
 
 from planner.tcbs.plan import generate_config
-from planner.cbs_ext_test import get_data_random
+from planner.tcbs_test import get_data_random
 from planner.cobra.funwithsnakes import read_path_file, plan_cobra
 
 

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from planner.tcbs.plan import plan_cbsext
-from planner.cbs_ext_test import get_data_random
+from planner.tcbs_test import get_data_random
 
 plt.style.use('bmh')
 fname = "/tmp/test.pkl"

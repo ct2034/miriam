@@ -1,6 +1,6 @@
 import hashlib
 
-from planner.cbs_ext_test import get_data_random
+from planner.tcbs_test import get_data_random
 from planner.eval.display import plot_inputs, plot_results
 from planner.tcbs.plan import plan, generate_config
 from planner.milp.milp import plan_milp
