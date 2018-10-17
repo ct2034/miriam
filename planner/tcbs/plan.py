@@ -925,7 +925,7 @@ def save_paths(filename):
         with open(filename, 'wb') as f:
             pickle.dump(path_save, f, pickle.HIGHEST_PROTOCOL)
     except Exception as e:
-        print(e)
+        logging.error("Error saving paths: " + str(e))
 
 
 def load_paths(filename):
@@ -934,7 +934,8 @@ def load_paths(filename):
         with open(filename, 'rb') as f:
             path_save = pickle.load(f)
     except FileNotFoundError:
-        logging.warning("WARN: File %s does not exist", filename)
+        logging.warning("File %s does not exist", filename)
+
 
 def debug_time_jump_in_paths(paths):
     for agent_paths in paths:
