@@ -48,7 +48,7 @@ def one_planner(config, size):
 
 
 def planner_comparison(seed):
-    the_seed = seed+330
+    the_seed = seed
     print("seed: " + str(the_seed))
     params = get_data_random(the_seed,
                              map_res=8,
@@ -87,7 +87,7 @@ def planner_comparison(seed):
     config_col['all_collisions'] = True
 
     if is_cch():
-        print("Configs: [config_opt, config_nn, config_milp]")
+        print("Configs: [config_opt, config_nn, config_milp, config_greedy]")
         configs = [config_opt, config_nn, config_milp] #, config_cobra, config_greedy, config_col]
         sizes = [4]
     else: # travis
@@ -100,10 +100,6 @@ def planner_comparison(seed):
 
 
 def test_planner_comparison():
-    stopFlag = Event()
-    thread = AlivePrinter(stopFlag)
-    thread.start()
-
     if is_cch():
         n_samples = 1
     else:
@@ -117,7 +113,7 @@ def test_planner_comparison():
     for i_s in range(n_samples):
         print("######\nSample Nr: " + str(i_s) + ".\n######")
         if is_cch():
-            seed = i_s
+            seed = 1138
         else:
             seed = random.randint(0, 1000)
         ts, ress = planner_comparison(seed)
@@ -139,9 +135,6 @@ def test_planner_comparison():
 
     print("all_results:", json.dumps(all_results))
     print("all_times:", json.dumps(all_times))
-
-    # this will stop the timer
-    stopFlag.set()
 
 
 if __name__ == "__main__":
