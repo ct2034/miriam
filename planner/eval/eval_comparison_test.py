@@ -86,14 +86,9 @@ def planner_comparison(seed):
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
-    if is_cch():
-        print("Configs: [config_opt, config_nn, config_milp, config_greedy]")
-        configs = [config_opt, config_nn, config_milp] #, config_cobra, config_greedy, config_col]
-        sizes = [4]
-    else: # travis
-        print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
-        configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
-        sizes = [2, 3, 4]
+    print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
+    configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
+    sizes = [2, 3, 4]
     ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=500)
 
     return ts, ress
@@ -103,7 +98,7 @@ def test_planner_comparison():
     if is_cch():
         n_samples = 1
     else:
-        n_samples = 10
+        n_samples = 5
 
     all_results = []
     all_times = []
@@ -129,6 +124,28 @@ def test_planner_comparison():
             if bool(ress[0][i_size][0]) & (not math.isnan(ress[0][i_size][0])):
                 for i_comp in range(1, len(ress)):
                     if bool(ress[i_comp][i_size][0]) & (not math.isnan(ress[i_comp][i_size][0])):
+                        assert ress[0][i_size][0] <= ress[i_comp][i_size][0], (
+                                "Optimal Planner not optimal?\n" +
+                                "comparison index:" + str(i_comp) + "\n"+
+                                "seed:" + str(seed)
+                        )
+                all_results.append(ress.tolist())
+                all_times.append(ts.tolist())
+
+    print("all_results:", json.dumps(all_results))
+    print("all_times:", json.dumps(all_times))
+
+
+def test_planner_interesting_seeds():
+    all_results = []
+    all_times = []
+
+    for seed in [1138]:
+        ts, ress = planner_comparison(seed)
+        for i_size in range(ress.shape[1]):
+            if bool(ress[0][i_size][0]) & (not math.isnan(ress[0][i_size][0])):
+                for i_comp in range(1, len(ress)):
+                    if bool(ress[i_comp][i_size][0]) & (not math.isnan(ress[i_comp][i_size][0])):
                         assert ress[0][i_size][0] <= ress[i_comp][i_size][0], "Optimal Planner not optimal? " + str(i_comp)
                 all_results.append(ress.tolist())
                 all_times.append(ts.tolist())
@@ -138,4 +155,4 @@ def test_planner_comparison():
 
 
 if __name__ == "__main__":
-    test_planner_comparison()
+    test_planner_interesting_seeds()
