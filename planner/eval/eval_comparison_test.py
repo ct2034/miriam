@@ -3,27 +3,17 @@ import hashlib
 import json
 import math
 import random
-from threading import Thread, Event
+import matplotlib.pyplot as plt
 
 from planner.tcbs_test import get_data_random
 from planner.eval.eval_scenarios import get_costs
+from planner.eval.display import plot_results, plot_inputs
 from planner.tcbs.plan import generate_config, plan, pre_calc_paths
 from tools import benchmark, mongodb_save, is_cch, get_map_str
-
-class AlivePrinter(Thread):
-    def __init__(self, event):
-        Thread.__init__(self)
-        self.stopped = event
-
-    def run(self):
-        while not self.stopped.wait(300):
-            print("I feel so alive!")
 
 
 def one_planner(config, size):
     print("size=" + str(size))
-    print("Testing with number_nearest=" + str(config['number_nearest']))
-    print("Testing with all_collisions=" + str(config['all_collisions']))
     agent_pos, grid, idle_goals, jobs = config['params']
     agent_pos = agent_pos[0:size]
     jobs = jobs[0:size]
@@ -41,9 +31,18 @@ def one_planner(config, size):
         res_agent_job, res_paths = plan_greedy(agent_pos, jobs, grid, config)
     else:
         res_agent_job, res_agent_idle, res_paths = plan(
-            agent_pos, jobs, [], idle_goals, grid, config, plot=False
+            agent_pos, jobs, [], idle_goals, grid, config
         )
     print(res_agent_job)
+
+    if is_cch():
+        fig = plt.figure()
+        ax1 = fig.add_subplot(121)
+        ax2 = fig.add_subplot(122, projection='3d')
+        plot_inputs(ax1, agent_pos, [], jobs, grid)
+        plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
+        plt.show()
+
     return get_costs(res_paths, jobs, res_agent_job, True)
 
 
@@ -68,7 +67,6 @@ def planner_comparison(seed):
     config_opt = generate_config()
     config_opt['params'] = params
     config_opt['filename_pathsave'] = fname
-    config_opt['all_collisions'] = True
     config_opt['finished_agents_block'] = True
 
     config_milp = config_opt.copy()
@@ -86,10 +84,18 @@ def planner_comparison(seed):
     config_col = config_nn.copy()
     config_col['all_collisions'] = True
 
-    print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
-    configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
-    sizes = [2, 3, 4]
-    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=500)
+    if is_cch():
+        print("Configs: [config_opt, config_greedy]")
+        configs = [config_opt, config_greedy]
+        sizes = [4]
+        timeout = 10000
+    else:
+        print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
+        configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
+        sizes = [2, 3, 4]
+        timeout = 500
+
+    ts, ress = benchmark(one_planner, [configs, sizes], samples=1, timeout=timeout)
 
     return ts, ress
 

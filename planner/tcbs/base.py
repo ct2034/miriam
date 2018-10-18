@@ -52,7 +52,7 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
                     "neighbor[2].__len__() (blocks)": neighbor[2].__len__(),
                     "c": c if c < MAX_COST else 0
                 }
-                if stats.__len__() == 30000:
+                if stats.__len__() == 300000:
                     display_stats(stats)
 
             if c >= MAX_COST:

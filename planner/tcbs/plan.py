@@ -163,12 +163,11 @@ def get_children(_condition: dict, _state: tuple) -> list:
      ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
 
     eval_blocked = False
-    for i in range(len(blocked)):
-        if is_conflict_not_block(blocked[i]):  # two agents blocked
+    if blocked:
+        if max(map(is_conflict_not_block, blocked)):
             eval_blocked = True
-            break
 
-    if eval_blocked:
+    if eval_blocked:  # a block to expand
         blocked1 = []
         blocked2 = []
         for i in range(len(blocked)):
@@ -289,13 +288,11 @@ def cost(_condition: dict, _state: tuple):
                 i = 1
                 for p in pathset[2::2]:
                     _cost += p[-1][2]
-                    _cost += jobs[assigned_jobs[i]][2] * -1  # waiting time before job was touched
                     i += 1
             else:
                 i = 0
                 for p in pathset[1::2]:
                     _cost += p[-1][2]  # each arrival time
-                    _cost += jobs[assigned_jobs[i]][2] * -1  # waiting time before job was touched
                     i += 1
             assert i == len(assigned_jobs), "Not handled all assigned jobs"
         idle_assignment = agent_idle[i_a]
@@ -338,7 +335,7 @@ def heuristic(_condition: dict, _state: tuple) -> float:
       cost heuristic for the given state
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
-    (agent_job, _agent_idle, _) = state2comp(_state)
+    (agent_job, _agent_idle, block_state) = state2comp(_state)
     _cost = 0.
 
     (left_agent_pos, left_idle_goals, left_jobs
@@ -372,6 +369,9 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     job_costs = list(map(heuristic_per_job, valss))
     _cost += reduce(lambda a, b: a + b, job_costs, 0)
 
+    _cost += block_state.__len__() / EXPECTED_MAX_N_BLOCKS
+    assert block_state.__len__() < EXPECTED_MAX_N_BLOCKS, "more blocks than we expected"
+
     return _cost
 
 
@@ -394,7 +394,7 @@ def heuristic_per_job(vals):
         prob = norm.cdf(path_len, loc=idle_goal[1][0], scale=idle_goal[1][1])
         _cost += prob * path_len
     else:
-        raise AssertionError("The call dictionary was built wrongly")
+        raise AssertionError("The call dictionary was built wrong")
     return _cost
 
 
