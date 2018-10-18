@@ -75,6 +75,9 @@ def benchmark(fun, vals, samples=10, disp=True, timeout=60):
                 res = fun(*args)
         except TimeoutException:
             print("Timed out!")
+        except AssertionError as e:
+            print("Benchmark stopped for AssertionError:")
+            raise e
         except Exception as e:
             print("#"*10)
             print("Benchmark stopped for EXCEPTION:")

@@ -12,7 +12,7 @@ MAX_COST = 99999
 def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     _, start = cost(condition, start)  # it may have collisions
 
-    collect_stats = True
+    collect_stats = False
     stats = {}
 
     closed = []

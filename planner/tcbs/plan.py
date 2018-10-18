@@ -164,7 +164,7 @@ def get_children(_condition: dict, _state: tuple) -> list:
 
     eval_blocked = False
     if blocked:
-        if max(map(is_conflict_not_block, blocked)):
+        if max(map(is_conflict_not_block, blocked)) & len(left_jobs) == 0:
             eval_blocked = True
 
     if eval_blocked:  # a block to expand

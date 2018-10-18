@@ -35,13 +35,13 @@ def one_planner(config, size):
         )
     print(res_agent_job)
 
-    if is_cch():
-        fig = plt.figure()
-        ax1 = fig.add_subplot(121)
-        ax2 = fig.add_subplot(122, projection='3d')
-        plot_inputs(ax1, agent_pos, [], jobs, grid)
-        plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
-        plt.show()
+    # if is_cch():
+    #     fig = plt.figure()
+    #     ax1 = fig.add_subplot(121)
+    #     ax2 = fig.add_subplot(122, projection='3d')
+    #     plot_inputs(ax1, agent_pos, [], jobs, grid)
+    #     plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
+    #     plt.show()
 
     return get_costs(res_paths, jobs, res_agent_job, True)
 
@@ -85,9 +85,9 @@ def planner_comparison(seed):
     config_col['all_collisions'] = True
 
     if is_cch():
-        print("Configs: [config_opt, config_greedy]")
-        configs = [config_opt, config_greedy]
-        sizes = [4]
+        print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
+        configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
+        sizes = [2, 3, 4]
         timeout = 10000
     else:
         print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
@@ -102,7 +102,7 @@ def planner_comparison(seed):
 
 def test_planner_comparison():
     if is_cch():
-        n_samples = 1
+        n_samples = 3
     else:
         n_samples = 5
 
@@ -114,7 +114,7 @@ def test_planner_comparison():
     for i_s in range(n_samples):
         print("######\nSample Nr: " + str(i_s) + ".\n######")
         if is_cch():
-            seed = 1138
+            seed = random.randint(0, 1000)
         else:
             seed = random.randint(0, 1000)
         ts, ress = planner_comparison(seed)
