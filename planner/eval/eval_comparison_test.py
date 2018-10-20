@@ -35,13 +35,13 @@ def one_planner(config, size):
         )
     print(res_agent_job)
 
-    # if is_cch():
-    #     fig = plt.figure()
-    #     ax1 = fig.add_subplot(121)
-    #     plot_inputs(ax1, agent_pos, [], jobs, grid)
-    #     ax2 = fig.add_subplot(122, projection='3d')
-    #     plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
-    #     plt.show()
+    if is_cch():
+        fig = plt.figure()
+        ax1 = fig.add_subplot(121)
+        plot_inputs(ax1, agent_pos, [], jobs, grid)
+        ax2 = fig.add_subplot(122, projection='3d')
+        plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
+        plt.show()
 
     return get_costs(res_paths, jobs, res_agent_job, True)
 
@@ -89,9 +89,9 @@ def planner_comparison(seed):
         configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
         sizes = [2, 3, 4]
         timeout = 10000
-    else:
-        print("Configs: [config_opt, config_nn, config_milp, config_cobra, config_greedy]")
-        configs = [config_opt, config_nn, config_milp, config_cobra, config_greedy]
+    else:  # travis
+        print("Configs: [config_opt, config_nn, config_milp, config_greedy]")
+        configs = [config_opt, config_nn, config_milp, config_greedy]
         sizes = [2, 3, 4]
         timeout = 500
 
@@ -113,10 +113,7 @@ def test_planner_comparison():
 
     for i_s in range(n_samples):
         print("######\nSample Nr: " + str(i_s) + ".\n######")
-        if is_cch():
-            seed = random.randint(0, 1000)
-        else:
-            seed = random.randint(0, 1000)
+        seed = random.randint(0, 1000)
         ts, ress = planner_comparison(seed)
         if not is_cch():
             mongodb_save(
