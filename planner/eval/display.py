@@ -55,15 +55,15 @@ def plot_inputs(ax, agent_pos, idle_goals, jobs, grid, title="Problem Configurat
         igs.append(ai[0])
     if igs:
         igs_array = np.array(igs)
-        plt.scatter(igs_array[:, 0],
+        ax.scatter(igs_array[:, 0],
                     igs_array[:, 1],
                     s=np.full(igs_array.shape[0], 100),
                     color='g',
                     alpha=.9)
         # Legendary!
-        plt.legend(["Transport Task", "Agent", "Idle Task"])
+        ax.legend(["Transport Task", "Agent", "Idle Task"])
     else:
-        plt.legend(["Transport Task", "Agent"])
+        ax.legend(["Transport Task", "Agent"])
     plt.title(title)
 
 
@@ -90,12 +90,12 @@ def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals
         i += 1
 
     xx, yy = np.meshgrid(
-        np.linspace(- .5, grid.shape[0] + .5, grid.shape[0] * 50),
-        np.linspace(- .5, grid.shape[1] + .5, grid.shape[1] * 50))
+        np.linspace(.5, grid.shape[0] + .5, grid.shape[0] * 50),
+        np.linspace(.5, grid.shape[1] + .5, grid.shape[1] * 50))
 
     img = np.zeros([xx.shape[0], yy.shape[1]])
 
-    for x, y in product(range(len(xx[0, :])), range(len(yy[:, 0]))):
+    for x, y in product(range(len(xx[1, :])), range(len(yy[:, 1]))):
         try:
             img[x, y] = grid[
                             int(round(xx[0, x] - 1)),
@@ -107,7 +107,7 @@ def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals
     xx -= 1
     yy -= 1
 
-    ax.contourf(xx, yy, img, z=-.2,
+    ax.contourf(xx, yy, img,
                 antialiased=True, cmap=cm.Greys, alpha=0.8)
 
     plt.legend(legend_str, bbox_to_anchor=(1, .95))
