@@ -668,7 +668,7 @@ def fill_up_paths(longest: int, _paths: list, agent_pos: list, blocks: list) -> 
     if longest > 0:
         res_paths = []
         for ia, paths_for_agent in enumerate(_paths):
-            blocks_for_agent: list = map(
+            blocks_for_agent = map(
                 lambda x: x[1], filter(
                     lambda x: x[0] == VERTEX, blocks[ia]
                 )
@@ -677,7 +677,7 @@ def fill_up_paths(longest: int, _paths: list, agent_pos: list, blocks: list) -> 
                 last = paths_for_agent[-1][-1]
             else:
                 last = agent_pos[ia] + (-1,)
-            length: int = len(reduce(lambda a, b: a + b, paths_for_agent, []))
+            length = len(reduce(lambda a, b: a + b, paths_for_agent, []))
             ts = range(last[2] + 1, longest)
             if ts:
                 standing_section = list(map(lambda x: last[0:2] + (x,), ts))
