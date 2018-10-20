@@ -35,13 +35,13 @@ def one_planner(config, size):
         )
     print(res_agent_job)
 
-    if is_cch():
-        fig = plt.figure()
-        ax1 = fig.add_subplot(121)
-        plot_inputs(ax1, agent_pos, [], jobs, grid)
-        ax2 = fig.add_subplot(122, projection='3d')
-        plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
-        plt.show()
+    # if is_cch():
+    #     fig = plt.figure()
+    #     ax1 = fig.add_subplot(121)
+    #     plot_inputs(ax1, agent_pos, [], jobs, grid)
+    #     ax2 = fig.add_subplot(122, projection='3d')
+    #     plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
+    #     plt.show()
 
     return get_costs(res_paths, jobs, res_agent_job, True)
 

@@ -7,7 +7,6 @@ from itertools import product
 from typing import List, Any, Union, Iterator
 
 import matplotlib.pyplot as plt
-from numpy.core.multiarray import ndarray
 from scipy.stats import norm
 
 from planner.astar.astar_grid48con import distance_manhattan
@@ -627,7 +626,7 @@ def get_paths(_condition: dict, _state: tuple):
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, _agent_idle, blocked) = state2comp(_state)
-    _agent_idle: ndarray = np.array(_agent_idle)
+    _agent_idle = np.array(_agent_idle)
     _paths = []
     blocks = get_blocks_dict(blocked)
     valss = []
