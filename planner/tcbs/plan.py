@@ -4,8 +4,10 @@ import pickle
 import uuid
 from functools import reduce
 from itertools import product
+from typing import List, Any, Union, Iterator
 
 import matplotlib.pyplot as plt
+from numpy.core.multiarray import ndarray
 from scipy.stats import norm
 
 from planner.astar.astar_grid48con import distance_manhattan
@@ -22,6 +24,7 @@ _config = {}
 _distances = None
 
 EXPECTED_MAX_N_BLOCKS = 1000
+
 
 def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array,
          config: dict = {}, plot: bool = False, pathplanning_only_assignment=False):
@@ -162,12 +165,12 @@ def get_children(_condition: dict, _state: tuple) -> list:
     (left_agent_pos, left_idle_goals, left_jobs
      ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
 
-    eval_blocked = False
+    eval_confilct_to_block = False
     if blocked:
         if max(map(is_conflict_not_block, blocked)) & len(left_jobs) == 0:
-            eval_blocked = True
+            eval_confilct_to_block = True
 
-    if eval_blocked:  # a block to expand
+    if eval_confilct_to_block:  # a block to expand
         blocked1 = []
         blocked2 = []
         for i in range(len(blocked)):
@@ -516,6 +519,7 @@ def reverse_path(path: list) -> list:
         i += 1
     return out
 
+
 def pre_calc_paths(jobs, idle_goals, grid, fname=None):
     for job in jobs:
         # job distance itself
@@ -553,6 +557,7 @@ def pre_calc_distances(agents, tasks, idle_goals, grid, fname=None):
         't': dist_t,
         'tt': dist_tt
     }
+
 
 # Collision Helpers
 
@@ -622,7 +627,7 @@ def get_paths(_condition: dict, _state: tuple):
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, _agent_idle, blocked) = state2comp(_state)
-    _agent_idle = np.array(_agent_idle)
+    _agent_idle: ndarray = np.array(_agent_idle)
     _paths = []
     blocks = get_blocks_dict(blocked)
     valss = []
@@ -642,7 +647,7 @@ def get_paths(_condition: dict, _state: tuple):
         if not r:
             return False
 
-	# TODO: check at runtime if debugging
+        # TODO: check at runtime if debugging
         # debug_time_jump_in_paths([r[0]])
 
         _paths.append(r[0])
@@ -651,7 +656,7 @@ def get_paths(_condition: dict, _state: tuple):
     if _config['finished_agents_block']:
         (left_agent_pos, left_idle_goals, left_jobs
          ) = clear_set(_agent_idle, agent_job, agent_pos, idle_goals, jobs)
-        if left_jobs.__len__() > 0:
+        if left_jobs.__len__() == 0:  # Only fill up if all jobs are assigned.
             _paths = fill_up_paths(longest, _paths, agent_pos, blocks)
 
     # debug_time_jump_in_paths(_paths)
@@ -660,11 +665,11 @@ def get_paths(_condition: dict, _state: tuple):
     return _paths
 
 
-def fill_up_paths(longest, _paths, agent_pos, blocks):
+def fill_up_paths(longest: int, _paths: list, agent_pos: list, blocks: list) -> list:
     if longest > 0:
         res_paths = []
         for ia, paths_for_agent in enumerate(_paths):
-            blocks_for_agent = map(
+            blocks_for_agent: list = map(
                 lambda x: x[1], filter(
                     lambda x: x[0] == VERTEX, blocks[ia]
                 )
@@ -673,7 +678,7 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
                 last = paths_for_agent[-1][-1]
             else:
                 last = agent_pos[ia] + (-1,)
-            length = len(reduce(lambda a, b: a + b, paths_for_agent, []))
+            length: int = len(reduce(lambda a, b: a + b, paths_for_agent, []))
             ts = range(last[2] + 1, longest)
             if ts:
                 standing_section = list(map(lambda x: last[0:2] + (x,), ts))
@@ -686,6 +691,7 @@ def fill_up_paths(longest, _paths, agent_pos, blocks):
         return res_paths
     else:
         return _paths
+
 
 def time_shift_blocks(blocks, t):
     blocks_for_this_agent = []
@@ -741,8 +747,8 @@ def find_collision(_paths: list, all_collisions=False) -> tuple:
                 a, b = path[i][:2], path[i + 1][:2]
                 edge = (a, b) if a > b else (b, a)
             t = path[i][2]
-            #DEBUG: check if jump in timeline
-            #if i > 0:
+            # DEBUG: check if jump in timeline
+            # if i > 0:
             #    assert path[i][2] - path[i-1][2] == 1
             if t in vortexes.keys():
                 if vortex in vortexes[t].keys():  # it is already someone there
@@ -790,6 +796,7 @@ def get_blocks_dict(blocked):
             else:
                 block_dict[agent] = list(b[:1], )
     return block_dict
+
 
 # Data Helpers
 

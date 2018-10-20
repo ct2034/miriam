@@ -26,17 +26,17 @@ def plot_inputs(ax, agent_pos, idle_goals, jobs, grid, title="Problem Configurat
     # Make positive y pointing up
     ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
     # Show map
-    plt.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
+    ax.imshow(grid[:, :, 0] * -1, cmap="Greys", interpolation='nearest')
     # Agents
     agents = np.array(agent_pos)
-    plt.scatter(agents[:, 0],
+    ax.scatter(agents[:, 0],
                 agents[:, 1],
                 s=np.full(agents.shape[0], 100),
                 color='C0',
                 alpha=.9)
     # Jobs
     for j in jobs:
-        plt.arrow(x=j[0][0],
+        ax.arrow(x=j[0][0],
                   y=j[0][1],
                   dx=j[1][0] - j[0][0],
                   dy=j[1][1] - j[0][1],
@@ -47,7 +47,7 @@ def plot_inputs(ax, agent_pos, idle_goals, jobs, grid, title="Problem Configurat
                   fc='C1',
                   fill=True)
     # Fake for legend...
-    plt.plot((0, 0), (.1, .1), 'C1')
+    ax.plot((0, 0), (.1, .1), 'C1')
 
     # Idle Goals
     igs = []
@@ -104,8 +104,8 @@ def plot_results(ax, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals
         except IndexError:
             pass
 
-    xx -= .5
-    yy -= .5
+    xx -= 1
+    yy -= 1
 
     ax.contourf(xx, yy, img, z=-.2,
                 antialiased=True, cmap=cm.Greys, alpha=0.8)
