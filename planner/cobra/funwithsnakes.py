@@ -33,7 +33,8 @@ def plan_cobra(agent_pos, jobs, grid, config):
     time.sleep(.2)
 
     try:
-        assert res == 0, "Error when calling cobra: " + cmd + "\nin: " + pwd
+        if res != 0:
+            raise RuntimeError("Error when calling cobra: " + cmd + "\nin: " + pwd)
         paths = read_path_file(cobra_filename_base + PATH_EXT, grid)
         agent_job, paths = allocation_from_paths(paths, agent_pos, jobs)
         paths = make_paths_comparable(paths, agent_job, agent_pos, jobs)
