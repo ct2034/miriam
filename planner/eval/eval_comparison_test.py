@@ -104,7 +104,7 @@ def test_planner_comparison():
     if is_cch():
         n_samples = 3
     else: # travis
-        n_samples = 10
+        n_samples = 5
 
     all_results = []
     all_times = []
