@@ -1,3 +1,7 @@
+cache:
+  directories:
+  - /var/lib/docker
+
 services:
   - docker
 
