@@ -2,6 +2,7 @@ import getpass
 import logging
 import multiprocessing
 import os
+import subprocess
 import signal
 from contextlib import contextmanager
 from datetime import datetime
@@ -39,7 +40,7 @@ def is_cch():
 
 
 def is_in_docker():
-    return 0 == os.system("bash -f /.dockerenv")
+    return 0 == run_command("bash -f /.dockerenv")
 
 
 def load_map(fname='tcbs/map.png'):
@@ -116,7 +117,6 @@ def benchmark(fun, vals, samples=10, disp=True, timeout=60):
 
 def get_git():
     from git import Repo
-    import os
     # TODO: Set log level for git.cmd to info
     return Repo(os.getcwd(), search_parent_directories=True)
 
@@ -130,15 +130,15 @@ def get_git_message():
 
 
 def mongodb_save(name, data):
-    import os
     import pymongo
     import datetime
 
-    if 0 != os.system('ping -c2 -W1 8.8.8.8'):
+    if 0 != run_command('ping -c2 -W1 8.8.8.8'):
         logging.warning("No Internet connection -> not saving to mongodb")
         return
 
-    if 0 != os.system('ping -c2 -W1 ds033607.mlab.com'):
+
+    if 0 != run_command('ping -c2 -W1 ds033607.mlab.com'):
         logging.warning("can not reach mlab -> not saving to mongodb")
         return
 
@@ -243,3 +243,8 @@ def get_map_str(grid):
                 map_str += '@'
         map_str += '\n'
     return map_str
+
+def run_command(bashCommand):
+    process = subprocess.Popen(bashCommand.split(), shell=True,
+          stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+    return process.communicate()[0].decode()

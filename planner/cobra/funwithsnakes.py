@@ -5,6 +5,8 @@ from itertools import product
 import numpy as np
 import time
 
+import tools
+
 MAP_EXT = ".map"
 TASK_EXT = ".task"
 PATH_EXT = ".task_tp_path"
@@ -28,7 +30,7 @@ def plan_cobra(agent_pos, jobs, grid, config):
         cobra_filename_base + MAP_EXT,
         cobra_filename_base + TASK_EXT
     ])
-    res = os.system(cmd)
+    res = tools.run_command(cmd)
 
     time.sleep(.2)
 
