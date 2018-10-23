@@ -2,7 +2,8 @@ services:
   - docker
 
 before_script:
-  - docker build -t miriam .
+  - docker pull ct2034/miriam
+  - docker build -t ct2034/miriam .
 
 script:
-  - docker run -m 4G --memory-swap=4G  miriam
+  - docker run -m 4G --memory-swap=4G  ct2034/miriam
