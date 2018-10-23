@@ -9,4 +9,4 @@ before_script:
   - docker build -t miriam .
 
 script:
-  - docker run miriam
+  - docker run -m 4G --memory-swap=4G  miriam
