@@ -4,6 +4,7 @@ from itertools import product
 
 import numpy as np
 import time
+import logging
 
 import tools
 
@@ -36,7 +37,7 @@ def plan_cobra(agent_pos, jobs, grid, config):
 
     try:
         if res != 0:
-            raise RuntimeError("Error when calling cobra: " + cmd + "\nin: " + pwd)
+            logging.warn("Error when calling cobra: " + cmd + "\nin: " + pwd)
         paths = read_path_file(cobra_filename_base + PATH_EXT, grid)
         agent_job, paths = allocation_from_paths(paths, agent_pos, jobs)
         paths = make_paths_comparable(paths, agent_job, agent_pos, jobs)
