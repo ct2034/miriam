@@ -2,13 +2,18 @@ from __future__ import division
 
 import logging
 
-logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
-logging.getLogger('pyutilib.component.core.pyomo').setLevel(logging.INFO)
-logging.getLogger('pyutilib.component.core.pyutilib.autotest').setLevel(logging.INFO)
-logging.getLogger('pyutilib.component.core.pyutilib.workflow').setLevel(logging.INFO)
-logging.getLogger('pyutilib.component.core.pyutilib').setLevel(logging.INFO)
-logging.getLogger('pyutilib.component.core').setLevel(logging.INFO)
-logging.getLogger('Pyro4.core').setLevel(logging.INFO)
+
+logging.getLogger('pyomo.core').setLevel(logging.ERROR)
+logging.getLogger('pyomo.util').setLevel(logging.ERROR)
+logging.getLogger('pyomo.util.timing.construction').setLevel(logging.ERROR)
+logging.getLogger('git.cmd').setLevel(logging.ERROR)
+logging.getLogger('pyutilib.component.core.pyutilib.autotest').setLevel(logging.ERROR)
+logging.getLogger('pyutilib.component.core.pyutilib.workflow').setLevel(logging.ERROR)
+logging.getLogger('pyutilib.component.core.pyutilib').setLevel(logging.ERROR)
+logging.getLogger('pyutilib.component.core').setLevel(logging.ERROR)
+logging.getLogger('pyutilib.component.core.pyomo').setLevel(logging.ERROR)
+logging.getLogger('pyutilib.component.core.pca').setLevel(logging.ERROR)
+logging.getLogger('Pyro4.core').setLevel(logging.ERROR)
 
 import numpy as np
 from itertools import *
@@ -16,18 +21,18 @@ from pyomo.environ import *
 from pyomo.core import *
 from pyomo.opt import SolverFactory
 
-from planner.cbs_ext.plan import plan as plan_cbsext, generate_config
+from planner.tcbs.plan import plan as plan_cbsext, generate_config
 
 
 def manhattan_dist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def plan_milp(agent_pos, jobs, grid, config):
+def plan_milp(agent_pos, jobs, grid, config, plot=False):
     res_agent_job = optimize(agent_pos, jobs)
 
     _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid, config,
-                                  plot=False,
+                                  plot=plot,
                                   pathplanning_only_assignment=res_agent_job)
     return res_agent_job, res_paths
 
@@ -149,8 +154,8 @@ def optimize(agents, tasks):
     result = optim.solve(prob, tee=True)
 
     # Solution
-    prob.load(result)
-    prob.display()
+
+    # prob.display()
 
     agent_job = [tuple() for _ in m.agents]
     act = list(m.all)

@@ -2,7 +2,7 @@ import png
 import numpy as np
 from itertools import *
 
-r = png.Reader(filename='planner/cbs_ext/map.png')
+r = png.Reader(filename='planner/tcbs/map.png')
 
 x, y, iter, color = r.read()
 

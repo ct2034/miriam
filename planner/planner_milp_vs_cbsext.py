@@ -3,7 +3,7 @@ import datetime
 import logging
 import numpy as np
 
-from planner.cbs_ext.plan import plan as plan_cbsext
+from planner.tcbs.plan import plan as plan_cbsext
 # from planner.milp.milp import plan_milp
 from tools import load_map
 

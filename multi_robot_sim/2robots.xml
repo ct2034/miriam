@@ -40,8 +40,8 @@
 		<!--  Dynamical model -->
 		<dynamics class="differential">
 			<!-- Params -->
-			<l_wheel pos="0.0  0.5" mass="4.0" width="0.20" diameter="0.40" />
-			<r_wheel pos="0.0 -0.5" mass="4.0" width="0.20" diameter="0.40" />
+			<l_wheel pos="0.0  0.4" mass="4.0" width="0.20" diameter="0.40" />
+			<r_wheel pos="0.0 -0.4" mass="4.0" width="0.20" diameter="0.40" />
 			<chassis mass="15.0" zmin="0.05" zmax="0.6">
 			</chassis>
 			
@@ -57,7 +57,7 @@
 				
 		<!-- Friction force simulation -->
 		<friction class="default">
-			<mu>0.7</mu>
+			<mu>1.7</mu>
 			<C_damping>0.4</C_damping>
 		</friction>
 				
@@ -66,8 +66,8 @@
 			<pose> 0.3  0.0  0.0 </pose>
 			<fov_degrees>180</fov_degrees>
 			<nrays>181</nrays>
-			<range_std_noise>0.02</range_std_noise>
-			<angle_std_noise_deg>0.01</angle_std_noise_deg>
+			<range_std_noise>0.0</range_std_noise>
+			<angle_std_noise_deg>0.0</angle_std_noise_deg>
 		</sensor>
 	</vehicle:class>
 	

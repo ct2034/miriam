@@ -1,4 +1,4 @@
-from planner.cbs_ext.plan import plan, generate_config
+from planner.tcbs.plan import plan, generate_config
 from planner.eval.eval_scenarios import get_costs
 from planner.milp.milp import plan_milp
 from tools import load_map
@@ -97,8 +97,8 @@ plot_results(
 get_costs(tcbs_paths, jobs, tcbs_agent_job, True)
 get_costs(minlp_paths, jobs, minlp_agent_job, True)
 
-# f.savefig('scenario.png')
-plt.show()
+f.savefig('scenario.png')
+# plt.show()
 
 # print([
 #     tcbs_paths, tcbs_agent_job,
@@ -113,5 +113,7 @@ plt.show()
 f = plt.figure()
 ax = f.add_subplot(111)
 f.set_size_inches(8, 4.5)
+plt.title("Problem Configuration")
 plot_inputs(ax, agent_pos, [], jobs, grid)
-f.savefig('scenario_inp_bw.png')
+plt.tight_layout()
+f.savefig('video/scenario_problem.png')

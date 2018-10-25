@@ -7,7 +7,7 @@ from threading import Lock
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan, get_paths, comp2condition, comp2state
+from planner.tcbs.plan import plan, get_paths, comp2condition, comp2state, generate_config
 from simple_simulation.mod import Module
 from simple_simulation.route import Route, Car
 from simple_simulation.simulation import list_hash
@@ -24,6 +24,8 @@ def get_car_i(cars: list, car: Car):
 
 
 def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
+    config = generate_config()
+    config['filename_pathsave'] = fname
     try:
         (agent_job,
          agent_idle,
@@ -32,8 +34,7 @@ def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
                        alloc_jobs,
                        idle_goals,
                        grid,
-                       False,
-                       fname)
+                       config)
     except Exception as e:
         # Could not find a solution, returning just anything .. TODO: something better?
         logging.warning("Could not find a solution, returning just anything \n", str(e))

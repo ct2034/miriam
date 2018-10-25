@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-from planner.cbs_ext.plan import plan as plan_cbsext
+from planner.tcbs.plan import plan as plan_cbsext
 from planner.eval.display import plot_results
 
 grid = np.zeros([10, 10, 51])
