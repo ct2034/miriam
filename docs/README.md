@@ -8,5 +8,3 @@ The platform will be developed open source and integrated with ROS.
 
 ## Publications
 Christian Henkel **The combined task allocation and path finding problem** ([slides](iros2018_ws/slides.pdf)) @ [IROS2018 workshop](http://prisma.dieti.unina.it/index.php/news-archive/552-robotics-for-logistics-in-warehouses-and-environments-shared-with-humans)
-
-## [simulation](../sim_anylogic)
