@@ -4,6 +4,7 @@ from itertools import product
 
 import numpy as np
 import time
+import logging
 
 import tools
 
@@ -12,7 +13,8 @@ TASK_EXT = ".task"
 PATH_EXT = ".task_tp_path"
 OTHER_PATH_EXT = ".task_tptr_path"
 
-def plan_cobra(agent_pos, jobs, grid, config):
+
+def plan_cobra(agent_pos, jobs, grid, config) -> ([], []):
     agent_job = []
     cobra_filename_base = str(uuid.uuid1())
     cobra_bin = os.getenv("COBRA_BIN")
@@ -36,7 +38,8 @@ def plan_cobra(agent_pos, jobs, grid, config):
 
     try:
         if res != 0:
-            raise RuntimeError("Error when calling cobra: " + cmd + "\nin: " + pwd)
+            logging.warn("Error when calling cobra: " + cmd + "\nin: " + pwd)
+            return [], []
         paths = read_path_file(cobra_filename_base + PATH_EXT, grid)
         agent_job, paths = allocation_from_paths(paths, agent_pos, jobs)
         paths = make_paths_comparable(paths, agent_job, agent_pos, jobs)
@@ -102,7 +105,6 @@ def write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base):
     with open(fname, 'w') as f:
         f.write(str(len(job_endpoints_i)) + "\n")
         for jei in job_endpoints_i:
-            # jei = job_endpoints_i[0]
             f.write("\t".join([
                 "0",
                 str(jei[0]),

@@ -149,9 +149,8 @@ def optimize(agents, tasks):
     # m.consec = Constraint(m.all, rule=integer)
 
     # Solve
-    prob = m.create_instance()
     optim = SolverFactory('bonmin')
-    result = optim.solve(prob, tee=True)
+    result = optim.solve(m)
 
     # Solution
 
@@ -161,7 +160,7 @@ def optimize(agents, tasks):
     act = list(m.all)
     act.sort()
     for a, c, t in act:
-        if prob.assignments[(a, c, t)].value:
+        if m.assignments[(a, c, t)].value:
             agent_job[a] += (t,)
 
     return agent_job
@@ -173,11 +172,12 @@ if __name__ == "__main__":
     agent_pos = [(1, 1), (9, 1), (3, 1)]  # three agents
     jobs = [((1, 6), (9, 6), 0),
             ((1, 3), (7, 3), 0),
-            ((6, 6), (3, 8), 10),
-            ((4, 8), (7, 1), 10),
+            # ((6, 6), (3, 8), 10),
+            # ((4, 8), (7, 1), 10),
             ((3, 4), (1, 5), 10)]
     grid = np.zeros([10, 10, 51])
-    plan_milp(agent_pos, jobs, grid, config)
+    res = plan_milp(agent_pos, jobs, grid, config)
+    print(res)
 
 """
 /usr/bin/python3.6 /home/cch/src/smartleitstand/planner/planner_milp_vs_cbsext.py
