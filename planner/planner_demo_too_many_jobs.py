@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 
-from planner.cbs_ext.plan import plan as plan_cbsext
+from planner.tcbs.plan import plan as plan_cbsext
 
 grid = np.zeros([10, 10, 101])
 grid[4, 0:6, :] = -1

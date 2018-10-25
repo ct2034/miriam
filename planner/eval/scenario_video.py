@@ -51,12 +51,12 @@ f.set_size_inches(8, 4.5)
 ani = animate_results(
     f, [], tcbs_paths, tcbs_agent_job, agent_pos, grid, [], jobs, 'TCBS'
 )
-ani.save("scenario_tcbs.mp4", writer="ffmpeg", fps=10)
+ani.save("video/scenario_tcbs.mp4", writer="ffmpeg", fps=20)
 
 f = plt.figure()
 f.set_size_inches(8, 4.5)
 ani = animate_results(
     f, [], minlp_paths, minlp_agent_job, agent_pos, grid, [], jobs, 'MINLP'
 )
-ani.save("scenario_minlp.mp4", writer="ffmpeg", fps=10)
+ani.save("video/scenario_minlp.mp4", writer="ffmpeg", fps=20)
 # plt.show()

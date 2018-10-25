@@ -17,3 +17,6 @@ __pycache__
 *.sublime*
 *.pyc
 *.orig
+planner/eval/cache/
+roadmaps/
+.pytest_cache/
