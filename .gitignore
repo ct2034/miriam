@@ -20,3 +20,4 @@ __pycache__
 planner/eval/cache/
 roadmaps/
 .pytest_cache/
+venv/
