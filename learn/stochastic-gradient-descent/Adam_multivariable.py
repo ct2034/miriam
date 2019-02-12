@@ -10,6 +10,7 @@ epsilon = 1
 
 def func(x):
 	return np.sqrt(np.sum(np.square(x)))
+	
 def grad_func(x):					#calculates the gradient
 	root = np.sqrt(np.sum(np.square(x)))
 	return x / root + 5 * (np.random.rand(2) - np.array([.5, .5]))
