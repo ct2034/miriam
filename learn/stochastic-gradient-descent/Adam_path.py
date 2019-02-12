@@ -67,7 +67,7 @@ while (t < tmax):					#till it gets converged
 		n = 10
 	if t % n == 0:
 		p = path(start, goal, theta_0)
-		plt.plot(p[:, 0], p[:, 1], 'b', alpha=float(t)/tmax/2+.5, lw=.2)
+		plt.plot(p[:, 0], p[:, 1], 'r', alpha=float(t)/tmax/2+.5, lw=1)
 if not art:
 	plt.plot(start[0], start[1], 'xr')
 	plt.plot(goal[0], goal[1], 'xg')
