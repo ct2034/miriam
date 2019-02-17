@@ -17,8 +17,8 @@ nn = 2
 MAX_COST = 100000
 
 # Training
-ntb = 10  # batch size
-nts = 100  # number of batches
+ntb = 100  # batch size
+nts = 300  # number of batches
 
 # Evaluation
 ne = 50  # evaluation set size
@@ -140,7 +140,7 @@ def eval(plot=False):
     if plot:
         ax = plot_path(evalset[i, 0], evalset[i, 1], p)
         plot_graph(pos, ax)
-    return cost / (ne-unsuccesful)
+    return cost / (ne-unsuccesful), unsuccesful
 
 
 def grad_func(x, batch):
@@ -175,8 +175,9 @@ def fix(posar_prev, posar):
 evalset = np.array([
     [get_random_pos(), get_random_pos()] for _ in range(ne)])
 evalcosts = []
+evalunsucc = []
 
-alpha = 0.1
+alpha = 0.01
 beta_1 = 0.9
 beta_2 = 0.9
 epsilon = 1
@@ -189,9 +190,11 @@ for t in range(nts):
         posar = init_graph_posar()
     g, pos = graph_from_posar(posar)
     make_edges()
-    e_cost = eval()
+    e_cost, unsuccesful = eval()
     print(e_cost)
+    print(unsuccesful)
     evalcosts.append(e_cost)
+    evalunsucc.append(unsuccesful)
 
     batch = np.array([
         [get_random_pos(), get_random_pos()] for _ in range(ntb)])
@@ -208,5 +211,7 @@ for t in range(nts):
 
 fig = plt.figure()
 plt.plot(evalcosts)
+fig = plt.figure()
+plt.plot(evalunsucc)
 fig = plt.figure(figsize=[8, 8])
 eval(plot=True)
