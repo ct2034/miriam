@@ -17,13 +17,13 @@ nn = 2
 MAX_COST = 100000
 
 # Training
-ntb = 20  # batch size
-nts = 200  # number of batches
+ntb = 10  # batch size
+nts = 100  # number of batches
 
 # Evaluation
-ne = 5  # evaluation set size
+ne = 50  # evaluation set size
 
-im = imageio.imread('fake.png')
+im = imageio.imread('simple.png')
 im_shape = im.shape
 
 
@@ -31,7 +31,7 @@ def is_pixel_free(p):
     return min(im[
         int(p[1]),
         int(p[0])
-        ]) > 205
+    ]) > 205
 
 
 def get_random_pos():
@@ -70,13 +70,13 @@ def make_edges():
                     int(posar[i][1]),
                     int(posar[n][0]),
                     int(posar[n][1])
-                    )
+                )
                 # print(list(line))
                 if all([is_pixel_free(x) for x in line]):
                     g.add_edge(i, n, distance=dist(
                         sx=posar[i][0], sy=posar[i][1],
                         gx=posar[n][0], gy=posar[n][1]
-                        ))
+                    ))
 
 
 def plot_graph(pos, ax):
@@ -144,39 +144,41 @@ def eval(plot=False):
 
 
 def grad_func(x, batch):
-    out = np.zeros(shape=[x.shape[0], x.shape[1]])
+    out = np.zeros(shape=x.shape)
     for i_b in range(batch.shape[0]):
         (c, p) = path(batch[i_b, 0], batch[i_b, 1])
         if c != MAX_COST:
             coord_p = np.zeros([len(p) + 2, 2])
-            coord_p[0,:] = batch[i_b, 0]
-            coord_p[1:(1+len(p)),:] = np.array([posar[i_p] for i_p in p])
-            coord_p[(1+len(p)),:] = batch[i_b, 1]
+            coord_p[0, :] = batch[i_b, 0]
+            coord_p[1:(1+len(p)), :] = np.array([x[i_p] for i_p in p])
+            coord_p[(1+len(p)), :] = batch[i_b, 1]
             for i_p in range(len(p)):
                 i_cp = i_p + 1
                 for j in [0, 1]:
                     out[p[i_p]] += (
-                        (coord_p[i_cp, j] - coord_p[i_cp-1, j]) /
-                        math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0])**2 +
-                                  (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2) +
-                        (coord_p[i_cp, j] - coord_p[i_cp+1, j]) /
-                        math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0])**2 +
-                                  (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
+                        (coord_p[i_cp, j] - coord_p[i_cp-1, j])
+                        / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0])**2
+                                  + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2)
+                        + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
+                        / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0])**2
+                                  + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
                     )
     return out
+
 
 def fix(posar_prev, posar):
     for i in range(posar.shape[0]):
         if(not is_pixel_free(posar[i])):
             posar[i] = posar_prev[i]
 
-evalset = np.array( [
-    [get_random_pos(), get_random_pos()] for _ in range(ne) ])
+
+evalset = np.array([
+    [get_random_pos(), get_random_pos()] for _ in range(ne)])
 evalcosts = []
 
-alpha = 0.01
-beta_1 = 0.8
-beta_2 = 0.8
+alpha = 0.1
+beta_1 = 0.9
+beta_2 = 0.9
 epsilon = 1
 
 m_t = np.zeros([N, 2])
@@ -191,8 +193,8 @@ for t in range(nts):
     print(e_cost)
     evalcosts.append(e_cost)
 
-    batch = np.array( [
-        [get_random_pos(), get_random_pos()] for _ in range(ntb) ])
+    batch = np.array([
+        [get_random_pos(), get_random_pos()] for _ in range(ntb)])
     # Adam
     # ~~~~
     g_t = grad_func(posar, batch)
@@ -206,5 +208,5 @@ for t in range(nts):
 
 fig = plt.figure()
 plt.plot(evalcosts)
-fig = plt.figure(figsize=[8,8])
+fig = plt.figure(figsize=[8, 8])
 eval(plot=True)
