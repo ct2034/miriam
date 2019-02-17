@@ -17,8 +17,8 @@ nn = 2
 MAX_COST = 100000
 
 # Training
-ntb = 50  # batch size
-nts = 100  # number of batches
+ntb = 20  # batch size
+nts = 200  # number of batches
 
 # Evaluation
 ne = 5  # evaluation set size
@@ -156,10 +156,10 @@ def grad_func(x, batch):
                 i_cp = i_p + 1
                 for j in [0, 1]:
                     out[p[i_p]] += (
-                        (coord_p[i_p, j] - coord_p[i_cp-1, j]) /
+                        (coord_p[i_cp, j] - coord_p[i_cp-1, j]) /
                         math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0])**2 +
                                   (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2) +
-                        (coord_p[i_p, j] - coord_p[i_cp+1, j]) /
+                        (coord_p[i_cp, j] - coord_p[i_cp+1, j]) /
                         math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0])**2 +
                                   (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
                     )
