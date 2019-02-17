@@ -9,22 +9,23 @@ import numpy as np
 from scipy.spatial import Delaunay
 from pyflann import *
 
-#Graph
-N = 2000
+# Graph
+N = 1000
 
-#Paths
+# Paths
 nn = 2
-MAX_COST = 1000
+MAX_COST = 100000
 
-#Training
-ntb = 100 #number of batches
-nts = 100 #batch size
+# Training
+ntb = 50  # batch size
+nts = 100  # number of batches
 
-#Evaluation
-ne = 5 #evaluation set size
+# Evaluation
+ne = 5  # evaluation set size
 
 im = imageio.imread('fake.png')
 im_shape = im.shape
+
 
 def is_pixel_free(p):
     return min(im[
@@ -32,17 +33,21 @@ def is_pixel_free(p):
         int(p[0])
         ]) > 205
 
+
 def get_random_pos():
     p = np.random.rand(2) * im_shape[0]
     while (not is_pixel_free(p)):
         p = np.random.rand(2) * im_shape[0]
     return p
 
+
 def dist(sx, sy, gx, gy):
     return math.sqrt((sx-gx)**2+(sy-gy)**2)
 
+
 def init_graph_posar():
     return np.array([get_random_pos() for _ in range(N)])
+
 
 def graph_from_posar(posar):
     g = nx.Graph()
@@ -51,6 +56,7 @@ def graph_from_posar(posar):
     for i in range(N):
         pos[i] = posar[i]
     return g, pos
+
 
 def make_edges():
     tri = Delaunay(posar)
@@ -72,6 +78,7 @@ def make_edges():
                         gx=posar[n][0], gy=posar[n][1]
                         ))
 
+
 def plot_graph(pos, ax):
     nx.draw_networkx_nodes(g, pos, ax=ax, node_size=20)
     nx.draw_networkx_edges(g, pos, ax=ax, width=0.5, alpha=0.6)
@@ -79,6 +86,7 @@ def plot_graph(pos, ax):
     ax.axis('off')
     fig.add_axes(ax)
     plt.show()
+
 
 def path(start, goal):
     flann = FLANN()
@@ -88,11 +96,14 @@ def path(start, goal):
     min_c = MAX_COST
     min_p = None
     for (i_s, i_g) in product(range(nn), range(nn)):
-        c = nx.shortest_path_length(g,
-                                    result[0][i_s],
-                                    result[1][i_g],
-                                    weight='distance'
-                                    )
+        try:
+            c = nx.shortest_path_length(g,
+                                        result[0][i_s],
+                                        result[1][i_g],
+                                        weight='distance'
+                                        )
+        except nx.exception.NetworkXNoPath:
+            c = MAX_COST
         if c < min_c:
             min_p = nx.shortest_path(g,
                                      result[0][i_s],
@@ -102,6 +113,7 @@ def path(start, goal):
             min_c = c + dists[0][i_s] + dists[1][i_g]
     # assert min_c != MAX_COST, "no path"
     return min_c, min_p
+
 
 def plot_path(start, goal, path):
     xs = [start[0]]
@@ -115,7 +127,8 @@ def plot_path(start, goal, path):
     ax.plot(xs, ys, 'b')
     return ax
 
-def eval(plot):
+
+def eval(plot=False):
     cost = 0
     unsuccesful = 0
     for i in range(ne):
@@ -129,21 +142,69 @@ def eval(plot):
         plot_graph(pos, ax)
     return cost / (ne-unsuccesful)
 
+
+def grad_func(x, batch):
+    out = np.zeros(shape=[x.shape[0], x.shape[1]])
+    for i_b in range(batch.shape[0]):
+        (c, p) = path(batch[i_b, 0], batch[i_b, 1])
+        if c != MAX_COST:
+            coord_p = np.zeros([len(p) + 2, 2])
+            coord_p[0,:] = batch[i_b, 0]
+            coord_p[1:(1+len(p)),:] = np.array([posar[i_p] for i_p in p])
+            coord_p[(1+len(p)),:] = batch[i_b, 1]
+            for i_p in range(len(p)):
+                i_cp = i_p + 1
+                for j in [0, 1]:
+                    out[p[i_p]] += (
+                        (coord_p[i_p, j] - coord_p[i_cp-1, j]) /
+                        math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0])**2 +
+                                  (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2) +
+                        (coord_p[i_p, j] - coord_p[i_cp+1, j]) /
+                        math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0])**2 +
+                                  (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
+                    )
+    return out
+
+def fix(posar_prev, posar):
+    for i in range(posar.shape[0]):
+        if(not is_pixel_free(posar[i])):
+            posar[i] = posar_prev[i]
+
 evalset = np.array( [
     [get_random_pos(), get_random_pos()] for _ in range(ne) ])
 evalcosts = []
 
-for i_t in range(nts):
-    if i_t = 0:
+alpha = 0.01
+beta_1 = 0.8
+beta_2 = 0.8
+epsilon = 1
+
+m_t = np.zeros([N, 2])
+v_t = np.zeros([N, 2])
+
+for t in range(nts):
+    if t == 0:
         posar = init_graph_posar()
-    else:
-        pass #TODO
     g, pos = graph_from_posar(posar)
     make_edges()
-    evalcosts.append(eval())
+    e_cost = eval()
+    print(e_cost)
+    evalcosts.append(e_cost)
 
     batch = np.array( [
         [get_random_pos(), get_random_pos()] for _ in range(ntb) ])
-    
+    # Adam
+    # ~~~~
+    g_t = grad_func(posar, batch)
+    m_t = beta_1*m_t + (1-beta_1)*g_t
+    v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)
+    m_cap = m_t / (1-(beta_1**(t+1)))
+    v_cap = v_t / (1-(beta_2**(t+1)))
+    posar_prev = np.copy(posar)
+    posar = posar - np.divide((alpha * m_cap), (np.sqrt(v_cap) + epsilon))
 
+
+fig = plt.figure()
+plt.plot(evalcosts)
+fig = plt.figure(figsize=[8,8])
 eval(plot=True)
