@@ -1,3 +1,4 @@
+bresenham
 imageio
 matplotlib
 networkx
