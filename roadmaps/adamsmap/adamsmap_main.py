@@ -69,8 +69,8 @@ if __name__ == "__main__":
         m_cap = m_t / (1-(beta_1**(t+1)))
         v_cap = v_t / (1-(beta_2**(t+1)))
         posar_prev = np.copy(posar)
-        fix(posar_prev, posar, im)
         posar = posar - np.divide((alpha * m_cap), (np.sqrt(v_cap) + epsilon))
+        fix(posar_prev, posar, im)
 
     fig = plt.figure()
     plt.plot(evalcosts)
