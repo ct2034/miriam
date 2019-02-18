@@ -16,15 +16,15 @@ from adamsmap import (
 
 if __name__ == "__main__":
     # Graph
-    N = 2000
+    N = 1000
 
     # Paths
     nn = 2
     MAX_COST = 100000
 
     # Training
-    ntb = 50  # batch size
-    nts = 200  # number of batches
+    ntb = 100  # batch size
+    nts = 100  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -39,10 +39,10 @@ if __name__ == "__main__":
     evalcosts = []
     evalunsucc = []
 
-    alpha = 0.01
+    alpha = 0.1
     beta_1 = 0.99
     beta_2 = 0.999
-    epsilon = 1
+    epsilon = 10E-8
 
     m_t = np.zeros([N, 2])
     v_t = np.zeros([N, 2])
