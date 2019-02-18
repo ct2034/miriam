@@ -1,19 +1,13 @@
 
-from bresenham import bresenham
 import imageio
-from itertools import product
-import math
 import matplotlib.pyplot as plt
-import networkx as nx
 import numpy as np
-from scipy.spatial import Delaunay
 import sys
 from adamsmap import (
     get_random_pos,
     init_graph_posar,
     graph_from_posar,
     make_edges,
-    plot_graph,
     eval,
     grad_func,
     fix

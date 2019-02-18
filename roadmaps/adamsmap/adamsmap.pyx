@@ -148,10 +148,10 @@ def grad_func(x, batch, nn, g, posar):
                     out[p[i_p]] += (
                         (coord_p[i_cp, j] - coord_p[i_cp-1, j])
                         / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0])**2
-                                    + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2)
+                                  + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2)
                         + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
                         / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0])**2
-                                    + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
+                                  + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
                     )
     return out
 
