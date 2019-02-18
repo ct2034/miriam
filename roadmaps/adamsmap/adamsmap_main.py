@@ -23,8 +23,8 @@ if __name__ == "__main__":
     MAX_COST = 100000
 
     # Training
-    ntb = 100  # batch size
-    nts = 50  # number of batches
+    ntb = 50  # batch size
+    nts = 200  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size

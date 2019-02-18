@@ -74,6 +74,7 @@ def plot_graph(fig, ax, g, pos, im, fname=''):
         fig.savefig(fname)
     else:
         plt.show()
+    plt.close(fig)
 
 
 def path(start, goal, nn, g, posar):
@@ -129,7 +130,7 @@ def eval(t, evalset, nn, g, pos, posar, im):
     if t > -1:
         fig = plt.figure(figsize=[8, 8])
         ax = plot_path(fig, evalset[i, 0], evalset[i, 1], p, posar)
-        plot_graph(fig, ax, g, pos, im, fname='frame'+str(t)+'.png')
+        plot_graph(fig, ax, g, pos, im, fname='anim/frame'+str(t)+'.png')
     return cost / (ne-unsuccesful), unsuccesful
 
 
