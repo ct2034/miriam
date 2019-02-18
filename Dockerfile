@@ -1,7 +1,7 @@
 FROM ubuntu:bionic
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y python3 python3-pip python3-tk git iputils-ping
+RUN apt-get install -y python3 python3-pip python3-tk cython3
 
 COPY roadmaps/adamsmap/requirements.txt /roadmaps/adamsmap/
 WORKDIR /roadmaps/adamsmap
