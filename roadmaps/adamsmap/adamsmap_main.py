@@ -40,7 +40,7 @@ if __name__ == "__main__":
     evalunsucc = []
 
     alpha = 0.1
-    beta_1 = 0.99
+    beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 10E-8
 

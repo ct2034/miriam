@@ -12,6 +12,7 @@ from pyflann import FLANN
 MAX_COST = 100000
 pool = Pool()
 
+
 def is_pixel_free(im, p):
     return min(im[
         int(p[1]),
@@ -75,7 +76,7 @@ def plot_graph(fig, ax, g, pos, im, fname=''):
         fig.savefig(fname)
     else:
         plt.show()
-    plt.close(fig)
+    plt.close('all')
 
 
 def path(start, goal, nn, g, posar):
@@ -149,11 +150,15 @@ def grad_func(x, batch, nn, g, posar):
                 for j in [0, 1]:
                     out[p[i_p]] += (
                         (coord_p[i_cp, j] - coord_p[i_cp-1, j])
-                        / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0])**2
-                                  + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2)
+                        / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0]
+                                     )**2
+                                    + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1]
+                                       )**2)
                         + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
-                        / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0])**2
-                                  + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
+                        / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0]
+                                     )**2
+                                    + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
+                                       )**2)
                     )
     return out
 
