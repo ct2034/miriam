@@ -7,24 +7,8 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from scipy.spatial import Delaunay
-from pyflann import *
-
-# Graph
-N = 1000
-
-# Paths
-nn = 2
-MAX_COST = 100000
-
-# Training
-ntb = 100  # batch size
-nts = 300  # number of batches
-
-# Evaluation
-ne = 50  # evaluation set size
-
-im = imageio.imread('simple.png')
-im_shape = im.shape
+import sys
+from pyflann import FLANN
 
 
 def is_pixel_free(p):
@@ -79,13 +63,16 @@ def make_edges():
                     ))
 
 
-def plot_graph(pos, ax):
+def plot_graph(pos, ax, fname=''):
     nx.draw_networkx_nodes(g, pos, ax=ax, node_size=20)
     nx.draw_networkx_edges(g, pos, ax=ax, width=0.5, alpha=0.6)
     ax.imshow(im)
     ax.axis('off')
     fig.add_axes(ax)
-    plt.show()
+    if(fname):
+        fig.savefig(fname)
+    else:
+        plt.show()
 
 
 def path(start, goal):
@@ -128,7 +115,7 @@ def plot_path(start, goal, path):
     return ax
 
 
-def eval(plot=False):
+def eval(t):
     cost = 0
     unsuccesful = 0
     for i in range(ne):
@@ -137,9 +124,9 @@ def eval(plot=False):
             unsuccesful += 1
         else:
             cost += c
-    if plot:
+    if t > -1:
         ax = plot_path(evalset[i, 0], evalset[i, 1], p)
-        plot_graph(pos, ax)
+        plot_graph(pos, ax, fname='anim/frame'+str(t)+'.png')
     return cost / (ne-unsuccesful), unsuccesful
 
 
@@ -158,10 +145,10 @@ def grad_func(x, batch):
                     out[p[i_p]] += (
                         (coord_p[i_cp, j] - coord_p[i_cp-1, j])
                         / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0])**2
-                                  + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2)
+                                    + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1])**2)
                         + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
                         / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0])**2
-                                  + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
+                                    + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1])**2)
                     )
     return out
 
@@ -172,46 +159,64 @@ def fix(posar_prev, posar):
             posar[i] = posar_prev[i]
 
 
-evalset = np.array([
-    [get_random_pos(), get_random_pos()] for _ in range(ne)])
-evalcosts = []
-evalunsucc = []
+if __name__ == "__main__":
+    # Graph
+    N = 2000
 
-alpha = 0.01
-beta_1 = 0.9
-beta_2 = 0.9
-epsilon = 1
+    # Paths
+    nn = 2
+    MAX_COST = 100000
 
-m_t = np.zeros([N, 2])
-v_t = np.zeros([N, 2])
+    # Training
+    ntb = 100  # batch size
+    nts = 50  # number of batches
 
-for t in range(nts):
-    if t == 0:
-        posar = init_graph_posar()
-    g, pos = graph_from_posar(posar)
-    make_edges()
-    e_cost, unsuccesful = eval()
-    print(e_cost)
-    print(unsuccesful)
-    evalcosts.append(e_cost)
-    evalunsucc.append(unsuccesful)
+    # Evaluation
+    ne = 50  # evaluation set size
 
-    batch = np.array([
-        [get_random_pos(), get_random_pos()] for _ in range(ntb)])
-    # Adam
-    # ~~~~
-    g_t = grad_func(posar, batch)
-    m_t = beta_1*m_t + (1-beta_1)*g_t
-    v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)
-    m_cap = m_t / (1-(beta_1**(t+1)))
-    v_cap = v_t / (1-(beta_2**(t+1)))
-    posar_prev = np.copy(posar)
-    posar = posar - np.divide((alpha * m_cap), (np.sqrt(v_cap) + epsilon))
+    im = imageio.imread(sys.argv[1])
+    im_shape = im.shape
 
+    evalset = np.array([
+        [get_random_pos(), get_random_pos()] for _ in range(ne)])
+    evalcosts = []
+    evalunsucc = []
 
-fig = plt.figure()
-plt.plot(evalcosts)
-fig = plt.figure()
-plt.plot(evalunsucc)
-fig = plt.figure(figsize=[8, 8])
-eval(plot=True)
+    alpha = 0.01
+    beta_1 = 0.99
+    beta_2 = 0.999
+    epsilon = 1
+
+    m_t = np.zeros([N, 2])
+    v_t = np.zeros([N, 2])
+
+    for t in range(nts):
+        if t == 0:
+            posar = init_graph_posar()
+        g, pos = graph_from_posar(posar)
+        make_edges()
+        fig = plt.figure(figsize=[8, 8])
+        e_cost, unsuccesful = eval(t)
+        print(e_cost)
+        print(unsuccesful)
+        evalcosts.append(e_cost)
+        evalunsucc.append(unsuccesful)
+
+        batch = np.array([
+            [get_random_pos(), get_random_pos()] for _ in range(ntb)])
+        # Adam
+        # ~~~~
+        g_t = grad_func(posar, batch)
+        m_t = beta_1*m_t + (1-beta_1)*g_t
+        v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)
+        m_cap = m_t / (1-(beta_1**(t+1)))
+        v_cap = v_t / (1-(beta_2**(t+1)))
+        posar_prev = np.copy(posar)
+        posar = posar - np.divide((alpha * m_cap), (np.sqrt(v_cap) + epsilon))
+
+    fig = plt.figure()
+    plt.plot(evalcosts)
+    fig = plt.figure()
+    plt.plot(evalunsucc)
+    fig = plt.figure(figsize=[8, 8])
+    eval(-1)
