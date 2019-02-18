@@ -6,6 +6,7 @@ RUN apt-get install -y python3 python3-pip python3-tk git iputils-ping
 COPY roadmaps/adamsmap/requirements.txt /roadmaps/adamsmap/
 WORKDIR /roadmaps/adamsmap
 RUN pip3 install -r /roadmaps/adamsmap/requirements.txt
+RUN build.sh
 
 COPY roadmaps/adamsmap/* /roadmaps/adamsmap/
-CMD ["python3", "adamsmap.py"]
+CMD ["python3", "adamsmap_main.py", "dual.py"]

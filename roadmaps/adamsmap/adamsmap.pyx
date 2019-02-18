@@ -3,13 +3,14 @@ from bresenham import bresenham
 from itertools import product
 import math
 import matplotlib.pyplot as plt
+from multiprocessing import Pool
 import networkx as nx
 import numpy as np
 from scipy.spatial import Delaunay
 from pyflann import FLANN
 
 MAX_COST = 100000
-
+pool = Pool()
 
 def is_pixel_free(im, p):
     return min(im[
@@ -129,7 +130,7 @@ def eval(t, evalset, nn, g, pos, posar, im):
             cost += c
     if t > -1:
         fig = plt.figure(figsize=[8, 8])
-        ax = plot_path(fig, evalset[i, 0], evalset[i, 1], p, posar)
+        ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar)
         plot_graph(fig, ax, g, pos, im, fname='anim/frame'+str(t)+'.png')
     return cost / (ne-unsuccesful), unsuccesful
 
