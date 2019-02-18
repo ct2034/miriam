@@ -1,26 +1,27 @@
 
 from bresenham import bresenham
-import imageio
 from itertools import product
 import math
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from scipy.spatial import Delaunay
-import sys
 from pyflann import FLANN
 
+MAX_COST = 100000
 
-def is_pixel_free(p):
+
+def is_pixel_free(im, p):
     return min(im[
         int(p[1]),
         int(p[0])
     ]) > 205
 
 
-def get_random_pos():
+def get_random_pos(im):
+    im_shape = im.shape
     p = np.random.rand(2) * im_shape[0]
-    while (not is_pixel_free(p)):
+    while (not is_pixel_free(im, p)):
         p = np.random.rand(2) * im_shape[0]
     return p
 
@@ -29,11 +30,11 @@ def dist(sx, sy, gx, gy):
     return math.sqrt((sx-gx)**2+(sy-gy)**2)
 
 
-def init_graph_posar():
-    return np.array([get_random_pos() for _ in range(N)])
+def init_graph_posar(im, N):
+    return np.array([get_random_pos(im) for _ in range(N)])
 
 
-def graph_from_posar(posar):
+def graph_from_posar(N, posar):
     g = nx.Graph()
     g.add_nodes_from(range(N))
     pos = nx.get_node_attributes(g, 'pos')
@@ -42,7 +43,7 @@ def graph_from_posar(posar):
     return g, pos
 
 
-def make_edges():
+def make_edges(N, g, posar, im):
     tri = Delaunay(posar)
     (indptr, indices) = tri.vertex_neighbor_vertices
     for i in range(N):
@@ -56,14 +57,14 @@ def make_edges():
                     int(posar[n][1])
                 )
                 # print(list(line))
-                if all([is_pixel_free(x) for x in line]):
+                if all([is_pixel_free(im, x) for x in line]):
                     g.add_edge(i, n, distance=dist(
                         sx=posar[i][0], sy=posar[i][1],
                         gx=posar[n][0], gy=posar[n][1]
                     ))
 
 
-def plot_graph(pos, ax, fname=''):
+def plot_graph(fig, ax, g, pos, im, fname=''):
     nx.draw_networkx_nodes(g, pos, ax=ax, node_size=20)
     nx.draw_networkx_edges(g, pos, ax=ax, width=0.5, alpha=0.6)
     ax.imshow(im)
@@ -75,7 +76,7 @@ def plot_graph(pos, ax, fname=''):
         plt.show()
 
 
-def path(start, goal):
+def path(start, goal, nn, g, posar):
     flann = FLANN()
     result, dists = flann.nn(
         posar, np.array([start, goal]), nn,
@@ -102,12 +103,12 @@ def path(start, goal):
     return min_c, min_p
 
 
-def plot_path(start, goal, path):
+def plot_path(fig, start, goal, path, posar):
     xs = [start[0]]
     ys = [start[1]]
     for v in path:
-        xs.append(pos[v][0])
-        ys.append(pos[v][1])
+        xs.append(posar[v][0])
+        ys.append(posar[v][1])
     xs.append(goal[0])
     ys.append(goal[1])
     ax = plt.Axes(fig, [0., 0., 1., 1.])
@@ -115,25 +116,27 @@ def plot_path(start, goal, path):
     return ax
 
 
-def eval(t):
+def eval(t, evalset, nn, g, pos, posar, im):
     cost = 0
     unsuccesful = 0
+    ne = evalset.shape[0]
     for i in range(ne):
-        (c, p) = path(evalset[i, 0], evalset[i, 1])
+        (c, p) = path(evalset[i, 0], evalset[i, 1], nn, g, posar)
         if c == MAX_COST:
             unsuccesful += 1
         else:
             cost += c
     if t > -1:
-        ax = plot_path(evalset[i, 0], evalset[i, 1], p)
-        plot_graph(pos, ax, fname='anim/frame'+str(t)+'.png')
+        fig = plt.figure(figsize=[8, 8])
+        ax = plot_path(fig, evalset[i, 0], evalset[i, 1], p, posar)
+        plot_graph(fig, ax, g, pos, im, fname='frame'+str(t)+'.png')
     return cost / (ne-unsuccesful), unsuccesful
 
 
-def grad_func(x, batch):
+def grad_func(x, batch, nn, g, posar):
     out = np.zeros(shape=x.shape)
     for i_b in range(batch.shape[0]):
-        (c, p) = path(batch[i_b, 0], batch[i_b, 1])
+        (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar)
         if c != MAX_COST:
             coord_p = np.zeros([len(p) + 2, 2])
             coord_p[0, :] = batch[i_b, 0]
@@ -153,70 +156,7 @@ def grad_func(x, batch):
     return out
 
 
-def fix(posar_prev, posar):
+def fix(posar_prev, posar, im):
     for i in range(posar.shape[0]):
-        if(not is_pixel_free(posar[i])):
+        if(not is_pixel_free(im, posar[i])):
             posar[i] = posar_prev[i]
-
-
-if __name__ == "__main__":
-    # Graph
-    N = 2000
-
-    # Paths
-    nn = 2
-    MAX_COST = 100000
-
-    # Training
-    ntb = 100  # batch size
-    nts = 50  # number of batches
-
-    # Evaluation
-    ne = 50  # evaluation set size
-
-    im = imageio.imread(sys.argv[1])
-    im_shape = im.shape
-
-    evalset = np.array([
-        [get_random_pos(), get_random_pos()] for _ in range(ne)])
-    evalcosts = []
-    evalunsucc = []
-
-    alpha = 0.01
-    beta_1 = 0.99
-    beta_2 = 0.999
-    epsilon = 1
-
-    m_t = np.zeros([N, 2])
-    v_t = np.zeros([N, 2])
-
-    for t in range(nts):
-        if t == 0:
-            posar = init_graph_posar()
-        g, pos = graph_from_posar(posar)
-        make_edges()
-        fig = plt.figure(figsize=[8, 8])
-        e_cost, unsuccesful = eval(t)
-        print(e_cost)
-        print(unsuccesful)
-        evalcosts.append(e_cost)
-        evalunsucc.append(unsuccesful)
-
-        batch = np.array([
-            [get_random_pos(), get_random_pos()] for _ in range(ntb)])
-        # Adam
-        # ~~~~
-        g_t = grad_func(posar, batch)
-        m_t = beta_1*m_t + (1-beta_1)*g_t
-        v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)
-        m_cap = m_t / (1-(beta_1**(t+1)))
-        v_cap = v_t / (1-(beta_2**(t+1)))
-        posar_prev = np.copy(posar)
-        posar = posar - np.divide((alpha * m_cap), (np.sqrt(v_cap) + epsilon))
-
-    fig = plt.figure()
-    plt.plot(evalcosts)
-    fig = plt.figure()
-    plt.plot(evalunsucc)
-    fig = plt.figure(figsize=[8, 8])
-    eval(-1)
