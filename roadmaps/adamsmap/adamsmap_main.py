@@ -21,7 +21,7 @@ if __name__ == "__main__":
     N = 1000
 
     # Paths
-    nn = 2
+    nn = 3
     MAX_COST = 100000
 
     # Training

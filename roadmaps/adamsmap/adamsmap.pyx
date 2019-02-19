@@ -1,5 +1,6 @@
 
 from bresenham import bresenham
+from functools import reduce
 from itertools import permutations, product
 import math
 import matplotlib.pyplot as plt
@@ -29,15 +30,30 @@ def get_random_pos(im):
     return p
 
 
-def dist(sx, sy, gx, gy):
-    return math.sqrt((sx-gx)**2+(sy-gy)**2)
+def dist(a, b):
+    return math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2)
+
+
+def dist_posar(an, bn):
+    global posar
+    return dist(posar[an], posar[bn])
+
+
+def path_cost(p, posar):
+    return reduce(lambda x, y: x+y,
+                  [dist(posar[p[i]], posar[p[i+1]]) for i in range(len(p)-1)],
+                  0.)
 
 
 def init_graph_posar(im, N):
-    return np.array([get_random_pos(im) for _ in range(N)])
+    global posar
+    posar = np.array([get_random_pos(im) for _ in range(N)])
+    return posar
 
 
-def graph_from_posar(N, posar):
+def graph_from_posar(N, _posar):
+    global posar
+    posar = _posar
     g = nx.Graph()
     g.add_nodes_from(range(N))
     pos = nx.get_node_attributes(g, 'pos')
@@ -68,10 +84,7 @@ def make_edges(N, g, posar, im):
                 )
                 # print(list(line))
                 if all([is_pixel_free(im, x) for x in line]):
-                    g.add_edge(i, n, distance=dist(
-                        sx=posar[i][0], sy=posar[i][1],
-                        gx=posar[n][0], gy=posar[n][1]
-                    ))
+                    g.add_edge(i, n, distance=dist(posar[i], posar[n]))
 
 
 def plot_graph(fig, ax, g, pos, im, fname=''):
@@ -96,20 +109,18 @@ def path(start, goal, nn, g, posar):
     min_p = None
     for (i_s, i_g) in product(range(nn), range(nn)):
         try:
-            c = nx.shortest_path_length(g,
-                                        result[0][i_s],
-                                        result[1][i_g],
-                                        weight='distance'
-                                        )
+            p = nx.astar_path(g,
+                              result[0][i_s],
+                              result[1][i_g],
+                              heuristic=dist_posar,
+                              weight='distance'
+                              )
+            c = path_cost(p, posar) + dists[0][i_s] + dists[1][i_g]
         except nx.exception.NetworkXNoPath:
             c = MAX_COST
         if c < min_c:
-            min_p = nx.shortest_path(g,
-                                     result[0][i_s],
-                                     result[1][i_g],
-                                     weight='distance'
-                                     )
-            min_c = c + dists[0][i_s] + dists[1][i_g]
+            min_c = c
+            min_p = p
     # assert min_c != MAX_COST, "no path"
     return min_c, min_p
 
