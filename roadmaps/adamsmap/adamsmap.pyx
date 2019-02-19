@@ -128,9 +128,10 @@ def path(start, goal, nn, g, posar):
 def plot_path(fig, start, goal, path, posar):
     xs = [start[0]]
     ys = [start[1]]
-    for v in path:
-        xs.append(posar[v][0])
-        ys.append(posar[v][1])
+    if path:
+        for v in path:
+            xs.append(posar[v][0])
+            ys.append(posar[v][1])
     xs.append(goal[0])
     ys.append(goal[1])
     ax = plt.Axes(fig, [0., 0., 1., 1.])

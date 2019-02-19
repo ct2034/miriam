@@ -18,7 +18,7 @@ from adamsmap import (
 
 if __name__ == "__main__":
     # Graph
-    N = 1000
+    N = 800
 
     # Paths
     nn = 3
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # Training
     ntb = 100  # batch size
-    nts = 100  # number of batches
+    nts = 500  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
