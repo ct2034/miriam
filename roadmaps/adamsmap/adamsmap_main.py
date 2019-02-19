@@ -99,4 +99,4 @@ if __name__ == "__main__":
     plt.plot(evalunsucc)
     fig.savefig("unsuccesful.png")
     fig = plt.figure(figsize=[8, 8])
-    eval(-1, evalset, nn, g, pos, posar, edgew, im)
+    eval(-1, evalset, nn, g, ge, pos, posar, edgew, im)

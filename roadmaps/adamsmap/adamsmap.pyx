@@ -115,7 +115,8 @@ def make_edges(N, g, ge, posar, edgew, im):
 def plot_graph(fig, ax, g, pos, edgew, im, fname=''):
     nx.draw_networkx_nodes(g, pos, ax=ax, node_size=20)
     edge_colors = [cm.RdYlGn(.5 * val + .5) for val in
-                   map(lambda x: edgew[x[0], x[1]], g.edges())]
+                   map(lambda x: edgew[x[0], x[1]] if x[0] < x[1]
+                       else edgew[x[1], x[0]], g.edges())]
     nx.draw_networkx_edges(g, pos, ax=ax,
                            width=0.8, edge_color=edge_colors)
     ax.imshow(im)
