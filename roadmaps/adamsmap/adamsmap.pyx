@@ -159,7 +159,7 @@ def grad_func(x, batch, nn, g, posar):
                                      )**2
                                     + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
                                        )**2)
-                    )
+                    ) * 2 if i_p == 0 or i_p == len(p)-1 else 1
     return out
 
 
