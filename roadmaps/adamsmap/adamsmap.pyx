@@ -1,8 +1,9 @@
 
 from bresenham import bresenham
 from functools import reduce
-from itertools import permutations, product
+from itertools import product
 import math
+from matplotlib import cm
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
 import networkx as nx
@@ -11,7 +12,7 @@ from scipy.spatial import Delaunay
 from pyflann import FLANN
 
 MAX_COST = 100000
-END_BOOST = 1.5
+END_BOOST = 5.0
 pool = Pool()
 
 
@@ -39,30 +40,47 @@ def dist_posar(an, bn):
     return dist(posar[an], posar[bn])
 
 
-def path_cost(p, posar):
-    return reduce(lambda x, y: x+y,
-                  [dist(posar[p[i]], posar[p[i+1]]) for i in range(len(p)-1)],
-                  0.)
+def edge_cost_factor(a, b, edgew):
+    if a < b:
+        return (edgew[a, b] - 1)**2 + 1
+    else:  # b < a
+        return (1 - edgew[b, a])**2 + 1
 
 
-def init_graph_posar(im, N):
+def path_cost(p, posar, edgew):
+    if edgew is not None:
+        return reduce(lambda x, y: x+y,
+                      [dist(posar[p[i]], posar[p[i+1]])
+                       * edge_cost_factor(p[i], p[i+1], edgew)
+                       for i in range(len(p)-1)], 0.)
+    else:
+        return reduce(lambda x, y: x+y,
+                      [dist(posar[p[i]], posar[p[i+1]])
+                       for i in range(len(p)-1)], 0.)
+    # TODO: use graph weight
+
+
+def init_graph_posar_edgew(im, N):
     global posar
     posar = np.array([get_random_pos(im) for _ in range(N)])
-    return posar
+    edgew = np.random.normal(loc=0, scale=0.3, size=(N, N))
+    return posar, edgew
 
 
-def graph_from_posar(N, _posar):
+def graphs_from_posar(N, _posar):
     global posar
     posar = _posar
-    g = nx.Graph()
+    g = nx.DiGraph()
     g.add_nodes_from(range(N))
+    ge = nx.Graph()
+    ge.add_nodes_from(range(N))
     pos = nx.get_node_attributes(g, 'pos')
     for i in range(N):
         pos[i] = posar[i]
-    return g, pos
+    return g, ge, pos
 
 
-def make_edges(N, g, posar, im):
+def make_edges(N, g, ge, posar, edgew, im):
     b = im.shape[0]
     fakenodes1 = np.array(np.array(list(
         product([0, b], np.linspace(0, b, 11)))))
@@ -84,12 +102,22 @@ def make_edges(N, g, posar, im):
                 )
                 # print(list(line))
                 if all([is_pixel_free(im, x) for x in line]):
-                    g.add_edge(i, n, distance=dist(posar[i], posar[n]))
+                    g.add_edge(i, n,
+                               distance=dist(posar[i], posar[n])
+                               * edge_cost_factor(i, n, edgew))
+                    g.add_edge(n, i,
+                               distance=dist(posar[i], posar[n])
+                               * edge_cost_factor(n, i, edgew))
+                    ge.add_edge(i, n,
+                                distance=dist(posar[i], posar[n]))
 
 
-def plot_graph(fig, ax, g, pos, im, fname=''):
+def plot_graph(fig, ax, g, pos, edgew, im, fname=''):
     nx.draw_networkx_nodes(g, pos, ax=ax, node_size=20)
-    nx.draw_networkx_edges(g, pos, ax=ax, width=0.5, alpha=0.6)
+    edge_colors = [cm.RdYlGn(.5 * val + .5) for val in
+                   map(lambda x: edgew[x[0], x[1]], g.edges())]
+    nx.draw_networkx_edges(g, pos, ax=ax,
+                           width=0.8, edge_color=edge_colors)
     ax.imshow(im)
     ax.axis('off')
     fig.add_axes(ax)
@@ -100,7 +128,7 @@ def plot_graph(fig, ax, g, pos, im, fname=''):
     plt.close('all')
 
 
-def path(start, goal, nn, g, posar):
+def path(start, goal, nn, g, posar, edgew):
     flann = FLANN()
     result, dists = flann.nn(
         posar, np.array([start, goal]), nn,
@@ -115,7 +143,7 @@ def path(start, goal, nn, g, posar):
                               heuristic=dist_posar,
                               weight='distance'
                               )
-            c = path_cost(p, posar) + dists[0][i_s] + dists[1][i_g]
+            c = path_cost(p, posar, edgew) + dists[0][i_s] + dists[1][i_g]
         except nx.exception.NetworkXNoPath:
             c = MAX_COST
         if c < min_c:
@@ -135,16 +163,16 @@ def plot_path(fig, start, goal, path, posar):
     xs.append(goal[0])
     ys.append(goal[1])
     ax = plt.Axes(fig, [0., 0., 1., 1.])
-    ax.plot(xs, ys, 'b')
+    ax.plot(xs, ys, 'k--', linewidth=2, alpha=.6)
     return ax
 
 
-def eval(t, evalset, nn, g, pos, posar, im):
+def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
     cost = 0
     unsuccesful = 0
     ne = evalset.shape[0]
     for i in range(ne):
-        (c, p) = path(evalset[i, 0], evalset[i, 1], nn, g, posar)
+        (c, p) = path(evalset[i, 0], evalset[i, 1], nn, g, posar, edgew)
         if c == MAX_COST:
             unsuccesful += 1
         else:
@@ -152,14 +180,15 @@ def eval(t, evalset, nn, g, pos, posar, im):
     if t > -1 & t % 10 == 0:
         fig = plt.figure(figsize=[8, 8])
         ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar)
-        plot_graph(fig, ax, g, pos, im, fname="anim/frame%04d.png" % t)
+        plot_graph(fig, ax, g, pos, edgew, im, fname="anim/frame%04d.png" % t)
     return cost / (ne-unsuccesful), unsuccesful
 
 
-def grad_func(x, batch, nn, g, posar):
-    out = np.zeros(shape=x.shape)
+def grad_func(x, batch, nn, g, ge, posar, edgew):
+    out_pos = np.zeros(shape=x.shape)
+    out_edgew = np.zeros(shape=edgew.shape)
     for i_b in range(batch.shape[0]):
-        (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar)
+        (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, ge, posar, None)
         if c != MAX_COST:
             coord_p = np.zeros([len(p) + 2, 2])
             coord_p[0, :] = batch[i_b, 0]
@@ -168,23 +197,36 @@ def grad_func(x, batch, nn, g, posar):
             # print(coord_p)
             for i_p in range(len(p)):
                 i_cp = i_p + 1
+                len_prev = math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0]
+                             )**2
+                            + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1]
+                               )**2)
+                len_next = math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0]
+                             )**2
+                            + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
+                               )**2)
                 for j in [0, 1]:
-                    out[p[i_p], j] += (
+                    out_pos[p[i_p], j] += (
                         (coord_p[i_cp, j] - coord_p[i_cp-1, j])
-                        / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0]
-                                     )**2
-                                    + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1]
-                                       )**2) *
-                        (END_BOOST if i_p == 0 else 1.)
+                        / len_prev
+                        * (END_BOOST if i_p == 0
+                           else edge_cost_factor(p[i_p-1], p[i_p], edgew))
                         + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
-                        / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0]
-                                     )**2
-                                    + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
-                                       )**2) *
-                        (END_BOOST if i_p == len(p)-1 else 1.)
+                        / len_next
+                        * (END_BOOST if i_p == len(p)-1
+                           else edge_cost_factor(p[i_p], p[i_p+1], edgew))
                     )
-                # print(out[p[i_p]])
-    return out
+                if(i_p > 0):
+                    if p[i_p-1] < p[i_p]:
+                        out_edgew[p[i_p-1], p[i_p]] += (
+                            2 * (edgew[p[i_p-1], p[i_p]] - 1) * len_prev
+                        )
+                    else:
+                        out_edgew[p[i_p], p[i_p-1]] -= (
+                            2 * (edgew[p[i_p-1], p[i_p]] - 1) * len_prev
+                        )
+                # print(out_pos[p[i_p]])
+    return out_pos, out_edgew
 
 
 def fix(posar_prev, posar, im):

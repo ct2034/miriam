@@ -7,8 +7,8 @@ import time
 
 from adamsmap import (
     get_random_pos,
-    init_graph_posar,
-    graph_from_posar,
+    init_graph_posar_edgew,
+    graphs_from_posar,
     make_edges,
     eval,
     grad_func,
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # Training
     ntb = 100  # batch size
-    nts = 500  # number of batches
+    nts = 100  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -46,16 +46,18 @@ if __name__ == "__main__":
     beta_2 = 0.999
     epsilon = 10E-8
 
-    m_t = np.zeros([N, 2])
-    v_t = np.zeros([N, 2])
+    m_t_p = np.zeros([N, 2])
+    v_t_p = np.zeros([N, 2])
+    m_t_e = np.zeros([N, N])
+    v_t_e = np.zeros([N, N])
 
     start = time.time()
     for t in range(nts):
         if t == 0:
-            posar = init_graph_posar(im, N)
-        g, pos = graph_from_posar(N, posar)
-        make_edges(N, g, posar, im)
-        e_cost, unsuccesful = eval(t, evalset, nn, g, pos, posar, im)
+            posar, edgew = init_graph_posar_edgew(im, N)
+        g, ge, pos = graphs_from_posar(N, posar)
+        make_edges(N, g, ge, posar, edgew, im)
+        e_cost, unsuccesful = eval(t, evalset, nn, g, ge, pos, posar, edgew, im)
         if t == 0:
             e_cost_initial = e_cost
         print("---")
@@ -74,14 +76,21 @@ if __name__ == "__main__":
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
         # Adam
         # ~~~~
-        g_t = grad_func(posar, batch, nn, g, posar)
-        m_t = beta_1*m_t + (1-beta_1)*g_t
-        v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)
-        m_cap = m_t / (1-(beta_1**(t+1)))
-        v_cap = v_t / (1-(beta_2**(t+1)))
+        g_t_p, g_t_e = grad_func(posar, batch, nn, g, ge, posar, edgew)
+
+        m_t_p = beta_1*m_t_p + (1-beta_1)*g_t_p
+        v_t_p = beta_2*v_t_p + (1-beta_2)*(g_t_p*g_t_p)
+        m_cap_p = m_t_p / (1-(beta_1**(t+1)))
+        v_cap_p = v_t_p / (1-(beta_2**(t+1)))
         posar_prev = np.copy(posar)
-        posar = posar - np.divide((alpha * m_cap), (np.sqrt(v_cap) + epsilon))
+        posar = posar - np.divide((alpha * m_cap_p), (np.sqrt(v_cap_p) + epsilon))
         fix(posar_prev, posar, im)
+
+        m_t_e = beta_1*m_t_e + (1-beta_1)*g_t_e
+        v_t_e = beta_2*v_t_e + (1-beta_2)*(g_t_e*g_t_e)
+        m_cap_e = m_t_e / (1-(beta_1**(t+1)))
+        v_cap_e = v_t_e / (1-(beta_2**(t+1)))
+        edgew = edgew - np.divide((alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
 
     fig = plt.figure()
     plt.plot(evalcosts)
@@ -90,4 +99,4 @@ if __name__ == "__main__":
     plt.plot(evalunsucc)
     fig.savefig("unsuccesful.png")
     fig = plt.figure(figsize=[8, 8])
-    eval(-1, evalset, nn, g, pos, posar, im)
+    eval(-1, evalset, nn, g, pos, posar, edgew, im)
