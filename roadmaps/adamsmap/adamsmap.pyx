@@ -1,6 +1,6 @@
 
 from bresenham import bresenham
-from itertools import product
+from itertools import permutations, product
 import math
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
@@ -46,12 +46,18 @@ def graph_from_posar(N, posar):
 
 
 def make_edges(N, g, posar, im):
-    tri = Delaunay(posar)
+    fakenodes1 = np.array(np.array(list(
+        product([0, 1], np.linspace(0, 1, 11)))))
+    fakenodes2 = np.array(np.array(list(
+        product(np.linspace(0, 1, 11), [0, 1]))))
+    tri = Delaunay(np.append(posar, np.append(
+        fakenodes1, fakenodes2, axis=0), axis=0
+    ))
     (indptr, indices) = tri.vertex_neighbor_vertices
     for i in range(N):
         neigbours = indices[indptr[i]:indptr[i+1]]
         for n in neigbours:
-            if i < n:
+            if i < n & n < N:
                 line = bresenham(
                     int(posar[i][0]),
                     int(posar[i][1]),
@@ -159,7 +165,7 @@ def grad_func(x, batch, nn, g, posar):
                                      )**2
                                     + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
                                        )**2)
-                    ) * 2 if i_p == 0 or i_p == len(p)-1 else 1
+                    ) * 1.5 if i_p == 0 or i_p == len(p)-1 else 1
     return out
 
 

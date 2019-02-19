@@ -3,6 +3,8 @@ import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import time
+
 from adamsmap import (
     get_random_pos,
     init_graph_posar,
@@ -47,6 +49,7 @@ if __name__ == "__main__":
     m_t = np.zeros([N, 2])
     v_t = np.zeros([N, 2])
 
+    start = time.time()
     for t in range(nts):
         if t == 0:
             posar = init_graph_posar(im, N)
@@ -54,9 +57,13 @@ if __name__ == "__main__":
         make_edges(N, g, posar, im)
         e_cost, unsuccesful = eval(t, evalset, nn, g, pos, posar, im)
         print("---")
-        print("%d/%d (%.1f%%)" % (t, nts, float(100. * t / nts)))
+        ratio = float(t / nts)
+        print("%d/%d (%.1f%%)" % (t, nts, 100. * ratio))
         print("Eval cost: " + str(e_cost))
         print("N unsuccesful: " + str(unsuccesful))
+        elapsed = time.time() - start
+        print("T elapsed: %.1fs / remaining: %.1fs" %
+              (elapsed, elapsed/ratio-elapsed if ratio > 0 else np.inf))
         evalcosts.append(e_cost)
         evalunsucc.append(unsuccesful)
 
