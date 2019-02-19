@@ -56,10 +56,13 @@ if __name__ == "__main__":
         g, pos = graph_from_posar(N, posar)
         make_edges(N, g, posar, im)
         e_cost, unsuccesful = eval(t, evalset, nn, g, pos, posar, im)
+        if t == 0:
+            e_cost_initial = e_cost
         print("---")
         ratio = float(t / nts)
         print("%d/%d (%.1f%%)" % (t, nts, 100. * ratio))
-        print("Eval cost: " + str(e_cost))
+        print("Eval cost: %.1f (%-.1f%%)" %
+              (e_cost, 100. * (e_cost - e_cost_initial) / e_cost_initial))
         print("N unsuccesful: " + str(unsuccesful))
         elapsed = time.time() - start
         print("T elapsed: %.1fs / remaining: %.1fs" %
