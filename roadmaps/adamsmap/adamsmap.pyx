@@ -17,7 +17,7 @@ def is_pixel_free(im, p):
     return min(im[
         int(p[1]),
         int(p[0])
-    ]) > 205
+    ]) > 250
 
 
 def get_random_pos(im):
@@ -129,7 +129,7 @@ def eval(t, evalset, nn, g, pos, posar, im):
             unsuccesful += 1
         else:
             cost += c
-    if t > -1:
+    if t > -1 & t % 10 == 0:
         fig = plt.figure(figsize=[8, 8])
         ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar)
         plot_graph(fig, ax, g, pos, im, fname='anim/frame'+str(t)+'.png')

@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Training
     ntb = 100  # batch size
-    nts = 100  # number of batches
+    nts = 1000  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -52,7 +52,6 @@ if __name__ == "__main__":
             posar = init_graph_posar(im, N)
         g, pos = graph_from_posar(N, posar)
         make_edges(N, g, posar, im)
-        fig = plt.figure(figsize=[8, 8])
         e_cost, unsuccesful = eval(t, evalset, nn, g, pos, posar, im)
         print(e_cost)
         print(unsuccesful)
@@ -74,7 +73,9 @@ if __name__ == "__main__":
 
     fig = plt.figure()
     plt.plot(evalcosts)
+    fig.savefig("costs.png")
     fig = plt.figure()
     plt.plot(evalunsucc)
+    fig.savefig("unsuccesful.png")
     fig = plt.figure(figsize=[8, 8])
     eval(-1, evalset, nn, g, pos, posar, im)
