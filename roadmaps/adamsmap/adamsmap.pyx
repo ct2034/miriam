@@ -46,10 +46,11 @@ def graph_from_posar(N, posar):
 
 
 def make_edges(N, g, posar, im):
+    b = im.shape[0]
     fakenodes1 = np.array(np.array(list(
-        product([0, 1], np.linspace(0, 1, 11)))))
+        product([0, b], np.linspace(0, b, 11)))))
     fakenodes2 = np.array(np.array(list(
-        product(np.linspace(0, 1, 11), [0, 1]))))
+        product(np.linspace(0, b, 11), [0, b]))))
     tri = Delaunay(np.append(posar, np.append(
         fakenodes1, fakenodes2, axis=0), axis=0
     ))
@@ -138,7 +139,7 @@ def eval(t, evalset, nn, g, pos, posar, im):
     if t > -1 & t % 10 == 0:
         fig = plt.figure(figsize=[8, 8])
         ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar)
-        plot_graph(fig, ax, g, pos, im, fname="anim/frame%04d.png"%t)
+        plot_graph(fig, ax, g, pos, im, fname="anim/frame%04d.png" % t)
     return cost / (ne-unsuccesful), unsuccesful
 
 
@@ -151,6 +152,7 @@ def grad_func(x, batch, nn, g, posar):
             coord_p[0, :] = batch[i_b, 0]
             coord_p[1:(1+len(p)), :] = np.array([x[i_p] for i_p in p])
             coord_p[(1+len(p)), :] = batch[i_b, 1]
+            # print(coord_p)
             for i_p in range(len(p)):
                 i_cp = i_p + 1
                 for j in [0, 1]:
@@ -165,7 +167,8 @@ def grad_func(x, batch, nn, g, posar):
                                      )**2
                                     + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
                                        )**2)
-                    ) * 1.5 if i_p == 0 or i_p == len(p)-1 else 1
+                    ) * (1.5 if i_p == 0 or i_p == len(p)-1 else 1.)
+                # print(out[p[i_p]])
     return out
 
 
