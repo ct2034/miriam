@@ -10,6 +10,7 @@ from scipy.spatial import Delaunay
 from pyflann import FLANN
 
 MAX_COST = 100000
+END_BOOST = 1.5
 pool = Pool()
 
 
@@ -161,13 +162,15 @@ def grad_func(x, batch, nn, g, posar):
                         / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0]
                                      )**2
                                     + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1]
-                                       )**2)
+                                       )**2) *
+                        (END_BOOST if i_p == 0 else 1.)
                         + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
                         / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0]
                                      )**2
                                     + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
-                                       )**2)
-                    ) * (1.5 if i_p == 0 or i_p == len(p)-1 else 1.)
+                                       )**2) *
+                        (END_BOOST if i_p == len(p)-1 else 1.)
+                    )
                 # print(out[p[i_p]])
     return out
 
