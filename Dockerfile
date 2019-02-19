@@ -10,4 +10,5 @@ RUN pip3 install -r requirements.txt
 COPY roadmaps/adamsmap/* /roadmaps/adamsmap/
 WORKDIR /roadmaps/adamsmap
 RUN sh build.sh
+RUN mkdir anim
 CMD ["python3", "adamsmap_main.py", "dual.png"]
