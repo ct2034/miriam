@@ -132,7 +132,7 @@ def eval(t, evalset, nn, g, pos, posar, im):
     if t > -1 & t % 10 == 0:
         fig = plt.figure(figsize=[8, 8])
         ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar)
-        plot_graph(fig, ax, g, pos, im, fname='anim/frame'+str(t)+'.png')
+        plot_graph(fig, ax, g, pos, im, fname="anim/frame%04d.png"%t)
     return cost / (ne-unsuccesful), unsuccesful
 
 
@@ -148,7 +148,7 @@ def grad_func(x, batch, nn, g, posar):
             for i_p in range(len(p)):
                 i_cp = i_p + 1
                 for j in [0, 1]:
-                    out[p[i_p]] += (
+                    out[p[i_p], j] += (
                         (coord_p[i_cp, j] - coord_p[i_cp-1, j])
                         / math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0]
                                      )**2

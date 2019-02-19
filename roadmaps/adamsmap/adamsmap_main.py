@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Training
     ntb = 100  # batch size
-    nts = 1000  # number of batches
+    nts = 100  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -53,8 +53,10 @@ if __name__ == "__main__":
         g, pos = graph_from_posar(N, posar)
         make_edges(N, g, posar, im)
         e_cost, unsuccesful = eval(t, evalset, nn, g, pos, posar, im)
-        print(e_cost)
-        print(unsuccesful)
+        print("---")
+        print("%d/%d (%.1f%%)" % (t, nts, float(100. * t / nts)))
+        print("Eval cost: " + str(e_cost))
+        print("N unsuccesful: " + str(unsuccesful))
         evalcosts.append(e_cost)
         evalunsucc.append(unsuccesful)
 
