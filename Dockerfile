@@ -8,5 +8,6 @@ WORKDIR /roadmaps/adamsmap
 RUN pip3 install -r requirements.txt
 
 COPY roadmaps/adamsmap/* /roadmaps/adamsmap/
-RUN build.sh
+WORKDIR /roadmaps/adamsmap
+RUN sh build.sh
 CMD ["python3", "adamsmap_main.py", "dual.png"]
