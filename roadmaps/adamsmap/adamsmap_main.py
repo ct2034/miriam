@@ -1,5 +1,6 @@
 
 import imageio
+from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -12,21 +13,22 @@ from adamsmap import (
     make_edges,
     eval,
     grad_func,
-    fix
+    fix,
+    sigmoid
     )
 
 
 if __name__ == "__main__":
     # Graph
-    N = 1800
+    N = 800
 
     # Paths
     nn = 3
     MAX_COST = 100000
 
     # Training
-    ntb = 150  # batch size
-    nts = 500  # number of batches
+    ntb = 100  # batch size
+    nts = 100  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -41,8 +43,8 @@ if __name__ == "__main__":
     evalcosts = []
     evalunsucc = []
 
-    alpha = 0.1
-    beta_1 = 0.9
+    alpha = 0.05
+    beta_1 = 0.99
     beta_2 = 0.999
     epsilon = 10E-8
 
@@ -69,13 +71,15 @@ if __name__ == "__main__":
         elapsed = time.time() - start
         print("T elapsed: %.1fs / remaining: %.1fs" %
               (elapsed, elapsed/ratio-elapsed if ratio > 0 else np.inf))
+        print("edgew min: %.3f / max: %.3f / std: %.3f" %
+              (np.min(edgew), np.max(edgew), np.std(edgew)))
         evalcosts.append(e_cost)
         evalunsucc.append(unsuccesful)
 
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
         # Adam
-        # ~~~~
+        # ~~~~for(i, j) in product(range(N), repeat=2):
         g_t_p, g_t_e = grad_func(posar, batch, nn, g, ge, posar, edgew)
 
         m_t_p = beta_1*m_t_p + (1-beta_1)*g_t_p
@@ -90,7 +94,13 @@ if __name__ == "__main__":
         v_t_e = beta_2*v_t_e + (1-beta_2)*(g_t_e*g_t_e)
         m_cap_e = m_t_e / (1-(beta_1**(t+1)))
         v_cap_e = v_t_e / (1-(beta_2**(t+1)))
-        edgew = edgew - np.divide((alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
+        update = np.divide((alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
+        edgew = edgew - update
+        for(i, j) in product(range(N), repeat=2):
+            if i < j:
+                pass # edgew[i, j] = sigmoid(edgew[i, j])
+            else:
+                edgew[i, j] = 0
 
     fig = plt.figure()
     plt.plot(evalcosts)
