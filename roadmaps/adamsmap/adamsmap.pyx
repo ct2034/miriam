@@ -15,6 +15,9 @@ MAX_COST = 100000
 END_BOOST = 5.0
 pool = Pool()
 
+def sigmoid(x):
+    return 2 / (1 + math.exp(-x)) - 1
+
 
 def is_pixel_free(im, p):
     return min(im[
