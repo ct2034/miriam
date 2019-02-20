@@ -18,15 +18,15 @@ from adamsmap import (
 
 if __name__ == "__main__":
     # Graph
-    N = 800
+    N = 1800
 
     # Paths
     nn = 3
     MAX_COST = 100000
 
     # Training
-    ntb = 100  # batch size
-    nts = 100  # number of batches
+    ntb = 150  # batch size
+    nts = 500  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
