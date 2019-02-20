@@ -68,7 +68,7 @@ def path_cost(p, posar, edgew):
 def init_graph_posar_edgew(im, N):
     global posar
     posar = np.array([get_random_pos(im) for _ in range(N)])
-    edgew = np.random.normal(loc=0, scale=0.3, size=(N, N))
+    edgew = np.triu(np.random.normal(loc=0, scale=0.3, size=(N, N)), 1)
     return posar, edgew
 
 
