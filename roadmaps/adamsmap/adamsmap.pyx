@@ -72,7 +72,7 @@ def graphs_from_posar(N, _posar):
     posar = _posar
     g = nx.DiGraph()
     g.add_nodes_from(range(N))
-    ge = nx.Graph()
+    ge = nx.DiGraph()
     ge.add_nodes_from(range(N))
     pos = nx.get_node_attributes(g, 'pos')
     for i in range(N):
@@ -108,16 +108,28 @@ def make_edges(N, g, ge, posar, edgew, im):
                     g.add_edge(n, i,
                                distance=dist(posar[i], posar[n])
                                * edge_cost_factor(n, i, edgew))
-                    ge.add_edge(i, n,
-                                distance=dist(posar[i], posar[n]))
+                    if edgew[i, n] > 0:
+                        ge.add_edge(i, n,
+                                    distance=dist(posar[i], posar[n]))
+                    else:
+                        ge.add_edge(n, i,
+                                    distance=dist(posar[i], posar[n]))
 
 
 def plot_graph(fig, ax, g, pos, edgew, im, fname=''):
-    nx.draw_networkx_nodes(g, pos, ax=ax, node_size=20)
-    edge_colors = [cm.RdYlGn(.5 * val + .5) for val in
+    nx.draw_networkx_nodes(g, pos, ax=ax, node_size=20, node_color='k')
+
+    def show_edge(e):
+        if e[0] < e[1]:
+            return edgew[e[0], e[1]] > 0
+        else:  # e[1] < e[0]
+            return edgew[e[1], e[0]] < 0
+
+    edges = list(filter(show_edge, g.edges()))
+    edge_colors = [cm.brg(.5 * abs(val) + .5) for val in
                    map(lambda x: edgew[x[0], x[1]] if x[0] < x[1]
-                       else edgew[x[1], x[0]], g.edges())]
-    nx.draw_networkx_edges(g, pos, ax=ax,
+                       else edgew[x[1], x[0]], edges)]
+    nx.draw_networkx_edges(g, pos, ax=ax, edgelist=edges,
                            width=0.8, edge_color=edge_colors)
     ax.imshow(im)
     ax.axis('off')
@@ -165,6 +177,8 @@ def plot_path(fig, start, goal, path, posar):
     ys.append(goal[1])
     ax = plt.Axes(fig, [0., 0., 1., 1.])
     ax.plot(xs, ys, 'k--', linewidth=2, alpha=.6)
+    ax.plot([start[0]], [start[1]], 'gx', linewidth=3)
+    ax.plot([goal[0]], [goal[1]], 'rx', linewidth=3)
     return ax
 
 
@@ -173,7 +187,7 @@ def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
     unsuccesful = 0
     ne = evalset.shape[0]
     for i in range(ne):
-        (c, p) = path(evalset[i, 0], evalset[i, 1], nn, g, posar, edgew)
+        (c, p) = path(evalset[i, 0], evalset[i, 1], nn, ge, posar, edgew)
         if c == MAX_COST:
             unsuccesful += 1
         else:
@@ -189,7 +203,7 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
     out_pos = np.zeros(shape=x.shape)
     out_edgew = np.zeros(shape=edgew.shape)
     for i_b in range(batch.shape[0]):
-        (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, ge, posar, None)
+        (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar, None)
         if c != MAX_COST:
             coord_p = np.zeros([len(p) + 2, 2])
             coord_p[0, :] = batch[i_b, 0]
