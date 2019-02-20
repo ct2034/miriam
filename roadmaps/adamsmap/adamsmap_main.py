@@ -20,15 +20,15 @@ from adamsmap import (
 
 if __name__ == "__main__":
     # Graph
-    N = 800
+    N = 600
 
     # Paths
     nn = 3
     MAX_COST = 100000
 
     # Training
-    ntb = 100  # batch size
-    nts = 100  # number of batches
+    ntb = 80  # batch size
+    nts = 200  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -43,8 +43,8 @@ if __name__ == "__main__":
     evalcosts = []
     evalunsucc = []
 
-    alpha = 0.05
-    beta_1 = 0.99
+    alpha = 0.1
+    beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 10E-8
 
@@ -87,20 +87,16 @@ if __name__ == "__main__":
         m_cap_p = m_t_p / (1-(beta_1**(t+1)))
         v_cap_p = v_t_p / (1-(beta_2**(t+1)))
         posar_prev = np.copy(posar)
-        posar = posar - np.divide((alpha * m_cap_p), (np.sqrt(v_cap_p) + epsilon))
+        posar = posar - np.divide(
+            (alpha * m_cap_p), (np.sqrt(v_cap_p) + epsilon))
         fix(posar_prev, posar, im)
 
         m_t_e = beta_1*m_t_e + (1-beta_1)*g_t_e
         v_t_e = beta_2*v_t_e + (1-beta_2)*(g_t_e*g_t_e)
         m_cap_e = m_t_e / (1-(beta_1**(t+1)))
         v_cap_e = v_t_e / (1-(beta_2**(t+1)))
-        update = np.divide((alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
-        edgew = edgew - update
-        for(i, j) in product(range(N), repeat=2):
-            if i < j:
-                pass # edgew[i, j] = sigmoid(edgew[i, j])
-            else:
-                edgew[i, j] = 0
+        edgew = edgew - np.divide(
+            (alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
 
     fig = plt.figure()
     plt.plot(evalcosts)

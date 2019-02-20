@@ -15,8 +15,9 @@ MAX_COST = 100000
 END_BOOST = 5.0
 pool = Pool()
 
+
 def sigmoid(x):
-    return 2 / (1 + math.exp(-x)) - 1
+    return 2. / (1. + math.exp(-x)) - 1
 
 
 def is_pixel_free(im, p):
@@ -45,13 +46,14 @@ def dist_posar(an, bn):
 
 def edge_cost_factor(a, b, edgew):
     if a < b:
-        return (edgew[a, b] - 1)**2 + 1
+        c = (edgew[a, b] - 1)**2 + 1
     else:  # b < a
-        return (1 - edgew[b, a])**2 + 1
+        c = (1 - edgew[b, a])**2 + 1
+    return sigmoid(c)
 
 
 def path_cost(p, posar, edgew):
-    if edgew is not None:
+    if edgew is not None:  # ge
         return reduce(lambda x, y: x+y,
                       [dist(posar[p[i]], posar[p[i+1]])
                        * edge_cost_factor(p[i], p[i+1], edgew)
@@ -236,13 +238,15 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
                     )
                 if(i_p > 0):
                     if p[i_p-1] < p[i_p]:
+                        et = math.exp(edgew[p[i_p-1], p[i_p]])
                         out_edgew[p[i_p-1], p[i_p]] += (
-                            2 * (edgew[p[i_p-1], p[i_p]] - 1) * len_prev
-                        )
+                            -8. * et / (et + 1) ** 3
+                        ) * len_prev
                     else:
+                        et = math.exp(-edgew[p[i_p], p[i_p-1]])
                         out_edgew[p[i_p], p[i_p-1]] -= (
-                            2 * (edgew[p[i_p-1], p[i_p]] - 1) * len_prev
-                        )
+                            -8. * et / (et + 1) ** 3
+                        ) * len_prev
                 # print(out_pos[p[i_p]])
     return out_pos, out_edgew
 
