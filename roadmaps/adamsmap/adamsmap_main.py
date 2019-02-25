@@ -27,7 +27,7 @@ if __name__ == "__main__":
     MAX_COST = 100000
 
     # Training
-    ntb = 80  # batch size
+    ntb = 100  # batch size
     nts = 200  # number of batches
 
     # Evaluation
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     evalcosts = []
     evalunsucc = []
 
-    alpha = 0.1
+    alpha = 0.07
     beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 10E-8
