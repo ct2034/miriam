@@ -20,7 +20,7 @@ from adamsmap import (
 
 if __name__ == "__main__":
     # Graph
-    N = 600
+    N = 200
 
     # Paths
     nn = 3
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     # Training
     ntb = 100  # batch size
-    nts = 200  # number of batches
+    nts = 500  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     evalcosts = []
     evalunsucc = []
 
-    alpha = 0.07
+    alpha = 0.01
     beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 10E-8
