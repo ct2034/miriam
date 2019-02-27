@@ -12,7 +12,7 @@ from scipy.spatial import Delaunay
 from pyflann import FLANN
 
 MAX_COST = 100000
-END_BOOST = 5.0
+END_BOOST = 3.
 pool = Pool()
 
 
@@ -42,14 +42,16 @@ def dist_posar(an, bn):
 
 def edge_cost_factor(a, b, edgew):
     def sigmoid(x):
-        return 1. / (1. + math.exp(-x))
+        return 2. / (1. + math.exp(-x)) + 1
     if a < b:
-        return (sigmoid(edgew[a, b]) - 1)**2 + 1
+        c = (edgew[a, b] - 1)**2 + 1
     else:  # b < a
-        return (sigmoid(-edgew[b, a]) - 1)**2 + 1
+        c = (1 - edgew[b, a])**2 + 1
+    # print(c)
+    return sigmoid(c)
 
 
-def path_cost(p, posar, edgew):
+def path_cost(p, posar, edgew, prin=False):
     if edgew is not None:  # ge
         return reduce(lambda x, y: x+y,
                       [dist(posar[p[i]], posar[p[i+1]])
@@ -65,7 +67,7 @@ def path_cost(p, posar, edgew):
 def init_graph_posar_edgew(im, N):
     global posar
     posar = np.array([get_random_pos(im) for _ in range(N)])
-    edgew = np.triu(np.random.normal(loc=0, scale=0.3, size=(N, N)), 1)
+    edgew = np.triu(np.random.normal(loc=0, scale=0.5, size=(N, N)), 1)
     return posar, edgew
 
 
@@ -159,6 +161,15 @@ def path(start, goal, nn, g, posar, edgew):
                               weight='distance'
                               )
             c = path_cost(p, posar, edgew) + dists[0][i_s] + dists[1][i_g]
+            # print("path_cost: %.2f, nx.astar_path_length: %.2f" % (
+            #     path_cost(p, posar, edgew),
+            #     nx.astar_path_length(g,
+            #                       result[0][i_s],
+            #                       result[1][i_g],
+            #                       heuristic=dist_posar,
+            #                       weight='distance'
+            #                       )
+            # ))
         except nx.exception.NetworkXNoPath:
             c = MAX_COST
         if c < min_c:
@@ -168,13 +179,14 @@ def path(start, goal, nn, g, posar, edgew):
     return min_c, min_p
 
 
-def plot_path(fig, start, goal, path, posar):
+def plot_path(fig, start, goal, path, posar, edgew):
     xs = [start[0]]
     ys = [start[1]]
     if path:
         for v in path:
             xs.append(posar[v][0])
             ys.append(posar[v][1])
+        print("Path cost: %.2f" % path_cost(path, posar, edgew, True))
     xs.append(goal[0])
     ys.append(goal[1])
     ax = plt.Axes(fig, [0., 0., 1., 1.])
@@ -189,14 +201,14 @@ def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
     unsuccesful = 0
     ne = evalset.shape[0]
     for i in range(ne):
-        (c, p) = path(evalset[i, 0], evalset[i, 1], nn, ge, posar, edgew)
+        (c, p) = path(evalset[i, 0], evalset[i, 1], nn, ge, posar, None)
         if c == MAX_COST:
             unsuccesful += 1
         else:
             cost += c
     if t > -1 & t % 10 == 0:
         fig = plt.figure(figsize=[8, 8])
-        ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar)
+        ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar, edgew)
         plot_graph(fig, ax, g, pos, edgew, im, fname="anim/frame%04d.png" % t)
     return cost / (ne-unsuccesful), unsuccesful
 
@@ -206,7 +218,7 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
     out_edgew = np.zeros(shape=edgew.shape)
     succesful = 0
     for i_b in range(batch.shape[0]):
-        (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar, None)
+        (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar, edgew)
         if c != MAX_COST:
             succesful += 1
             coord_p = np.zeros([len(p) + 2, 2])
@@ -237,17 +249,17 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
                     )
                 if(i_p > 0):
                     if p[i_p-1] < p[i_p]:
-                        et = math.exp(edgew[p[i_p-1], p[i_p]])
+                        et = math.exp(-edgew[p[i_p-1], p[i_p]])
                         out_edgew[p[i_p-1], p[i_p]] += (
-                            1 - (2. * et / (et + 1) ** 3)
+                            (2. * et / (et + 1) ** 2)
                         ) * len_prev
                     else:
-                        et = math.exp(-edgew[p[i_p], p[i_p-1]])
+                        et = math.exp(edgew[p[i_p], p[i_p-1]])
                         out_edgew[p[i_p], p[i_p-1]] -= (
-                            1 - (2. * et / (et + 1) ** 3)
+                            (2. * et / (et + 1) ** 2)
                         ) * len_prev
                 # print(out_pos[p[i_p]])
-    succ_ratio = succesful / batch.shape[0]
+    succ_ratio = 1  # succesful / batch.shape[0]
     return succ_ratio * out_pos, succ_ratio * out_edgew
 
 
