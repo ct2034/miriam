@@ -26,8 +26,8 @@ if __name__ == "__main__":
     MAX_COST = 100000
 
     # Training
-    ntb = 100  # batch size
-    nts = 500  # number of batches
+    ntb = 256  # batch size
+    nts = 256  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -41,6 +41,7 @@ if __name__ == "__main__":
         for _ in range(ne)])
     evalcosts = []
     evalunsucc = []
+    evalbc = []
 
     alpha = 0.1
     beta_1 = 0.9
@@ -79,7 +80,9 @@ if __name__ == "__main__":
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
         # Adam
         # ~~~~for(i, j) in product(range(N), repeat=2):
-        g_t_p, g_t_e = grad_func(posar, batch, nn, g, ge, posar, edgew)
+        g_t_p, g_t_e, bc = grad_func(posar, batch, nn, g, ge, posar, edgew)
+        print("Batch cost: %.2f" % bc)
+        evalbc.append(bc)
 
         m_t_p = beta_1*m_t_p + (1-beta_1)*g_t_p
         v_t_p = beta_2*v_t_p + (1-beta_2)*(g_t_p*g_t_p)
@@ -103,5 +106,8 @@ if __name__ == "__main__":
     fig = plt.figure()
     plt.plot(evalunsucc)
     fig.savefig("unsuccesful.png")
+    fig = plt.figure()
+    plt.plot(evalbc)
+    fig.savefig("batchcost.png")
     fig = plt.figure(figsize=[8, 8])
     eval(-1, evalset, nn, g, ge, pos, posar, edgew, im)

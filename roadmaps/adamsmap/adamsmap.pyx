@@ -160,7 +160,9 @@ def path(start, goal, nn, g, posar, edgew):
                               heuristic=dist_posar,
                               weight='distance'
                               )
-            c = path_cost(p, posar, edgew) + dists[0][i_s] + dists[1][i_g]
+            c = (path_cost(p, posar, edgew)
+            + END_BOOST * dists[0][i_s]**2
+            + END_BOOST * dists[1][i_g]**2)
             # print("path_cost: %.2f, nx.astar_path_length: %.2f" % (
             #     path_cost(p, posar, edgew),
             #     nx.astar_path_length(g,
@@ -217,8 +219,10 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
     out_pos = np.zeros(shape=x.shape)
     out_edgew = np.zeros(shape=edgew.shape)
     succesful = 0
+    batch_cost = 0
     for i_b in range(batch.shape[0]):
         (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar, edgew)
+        batch_cost += c
         if c != MAX_COST:
             succesful += 1
             coord_p = np.zeros([len(p) + 2, 2])
@@ -240,11 +244,13 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
                     out_pos[p[i_p], j] += (
                         (coord_p[i_cp, j] - coord_p[i_cp-1, j])
                         / len_prev
-                        * (END_BOOST if i_p == 0
+                        * (END_BOOST * (coord_p[i_cp, j] - coord_p[i_cp-1, j])
+                           / len_prev if i_p == 0
                            else edge_cost_factor(p[i_p-1], p[i_p], edgew))
                         + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
                         / len_next
-                        * (END_BOOST if i_p == len(p)-1
+                        * (END_BOOST * (coord_p[i_cp, j] - coord_p[i_cp+1, j])
+                           / len_next if i_p == len(p)-1
                            else edge_cost_factor(p[i_p], p[i_p+1], edgew))
                     )
                 if(i_p > 0):
@@ -260,7 +266,7 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
                         ) * len_prev
                 # print(out_pos[p[i_p]])
     succ_ratio = 1  # succesful / batch.shape[0]
-    return succ_ratio * out_pos, succ_ratio * out_edgew
+    return succ_ratio * out_pos, succ_ratio * out_edgew, batch_cost / batch.shape[0]
 
 
 def fix(posar_prev, posar, im):
