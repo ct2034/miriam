@@ -13,8 +13,7 @@ from adamsmap import (
     make_edges,
     eval,
     grad_func,
-    fix,
-    sigmoid
+    fix
     )
 
 
@@ -43,7 +42,7 @@ if __name__ == "__main__":
     evalcosts = []
     evalunsucc = []
 
-    alpha = 0.01
+    alpha = 0.1
     beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 10E-8
@@ -67,7 +66,7 @@ if __name__ == "__main__":
         print("%d/%d (%.1f%%)" % (t, nts, 100. * ratio))
         print("Eval cost: %.1f (%-.1f%%)" %
               (e_cost, 100. * (e_cost - e_cost_initial) / e_cost_initial))
-        print("N unsuccesful: " + str(unsuccesful))
+        print("N unsuccesful: %d / %d" % (unsuccesful, ne))
         elapsed = time.time() - start
         print("T elapsed: %.1fs / remaining: %.1fs" %
               (elapsed, elapsed/ratio-elapsed if ratio > 0 else np.inf))

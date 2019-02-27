@@ -16,10 +16,6 @@ END_BOOST = 5.0
 pool = Pool()
 
 
-def sigmoid(x):
-    return 2. / (1. + math.exp(-x)) - 1
-
-
 def is_pixel_free(im, p):
     return min(im[
         int(p[1]),
@@ -45,11 +41,12 @@ def dist_posar(an, bn):
 
 
 def edge_cost_factor(a, b, edgew):
+    def sigmoid(x):
+        return 1. / (1. + math.exp(-x))
     if a < b:
-        c = (edgew[a, b] - 1)**2 + 1
+        return (sigmoid(edgew[a, b]) - 1)**2 + 1
     else:  # b < a
-        c = (1 - edgew[b, a])**2 + 1
-    return sigmoid(c)
+        return (sigmoid(-edgew[b, a]) - 1)**2 + 1
 
 
 def path_cost(p, posar, edgew):
@@ -88,9 +85,9 @@ def graphs_from_posar(N, _posar):
 def make_edges(N, g, ge, posar, edgew, im):
     b = im.shape[0]
     fakenodes1 = np.array(np.array(list(
-        product([0, b], np.linspace(0, b, 11)))))
+        product([0, b], np.linspace(0, b, 6)))))
     fakenodes2 = np.array(np.array(list(
-        product(np.linspace(0, b, 11), [0, b]))))
+        product(np.linspace(0, b, 6), [0, b]))))
     tri = Delaunay(np.append(posar, np.append(
         fakenodes1, fakenodes2, axis=0), axis=0
     ))
@@ -207,9 +204,11 @@ def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
 def grad_func(x, batch, nn, g, ge, posar, edgew):
     out_pos = np.zeros(shape=x.shape)
     out_edgew = np.zeros(shape=edgew.shape)
+    succesful = 0
     for i_b in range(batch.shape[0]):
         (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar, None)
         if c != MAX_COST:
+            succesful += 1
             coord_p = np.zeros([len(p) + 2, 2])
             coord_p[0, :] = batch[i_b, 0]
             coord_p[1:(1+len(p)), :] = np.array([x[i_p] for i_p in p])
@@ -240,15 +239,16 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
                     if p[i_p-1] < p[i_p]:
                         et = math.exp(edgew[p[i_p-1], p[i_p]])
                         out_edgew[p[i_p-1], p[i_p]] += (
-                            -8. * et / (et + 1) ** 3
+                            1 - (2. * et / (et + 1) ** 3)
                         ) * len_prev
                     else:
                         et = math.exp(-edgew[p[i_p], p[i_p-1]])
                         out_edgew[p[i_p], p[i_p-1]] -= (
-                            -8. * et / (et + 1) ** 3
+                            1 - (2. * et / (et + 1) ** 3)
                         ) * len_prev
                 # print(out_pos[p[i_p]])
-    return out_pos, out_edgew
+    succ_ratio = succesful / batch.shape[0]
+    return succ_ratio * out_pos, succ_ratio * out_edgew
 
 
 def fix(posar_prev, posar, im):
