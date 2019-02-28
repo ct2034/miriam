@@ -1,4 +1,4 @@
-
+#!python3
 import imageio
 from itertools import product
 import matplotlib.pyplot as plt
@@ -79,8 +79,7 @@ if __name__ == "__main__":
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
         # Adam
-        # ~~~~for(i, j) in product(range(N), repeat=2):
-        g_t_p, g_t_e, bc = grad_func(posar, batch, nn, g, ge, posar, edgew)
+        g_t_p, g_t_e, bc = grad_func(batch, nn, g, ge, posar, edgew)
         print("Batch cost: %.2f" % bc)
         evalbc.append(bc)
 

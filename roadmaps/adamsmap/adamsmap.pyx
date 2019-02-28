@@ -1,4 +1,4 @@
-
+#!python3
 from bresenham import bresenham
 from functools import reduce
 from itertools import product
@@ -215,8 +215,8 @@ def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
     return cost / (ne-unsuccesful), unsuccesful
 
 
-def grad_func(x, batch, nn, g, ge, posar, edgew):
-    out_pos = np.zeros(shape=x.shape)
+def grad_func(batch, nn, g, ge, posar, edgew):
+    out_pos = np.zeros(shape=posar.shape)
     out_edgew = np.zeros(shape=edgew.shape)
     succesful = 0
     batch_cost = 0
@@ -227,7 +227,7 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
             succesful += 1
             coord_p = np.zeros([len(p) + 2, 2])
             coord_p[0, :] = batch[i_b, 0]
-            coord_p[1:(1+len(p)), :] = np.array([x[i_p] for i_p in p])
+            coord_p[1:(1+len(p)), :] = np.array([posar[i_p] for i_p in p])
             coord_p[(1+len(p)), :] = batch[i_b, 1]
             # print(coord_p)
             for i_p in range(len(p)):
@@ -265,8 +265,7 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
                             (2. * et / (et + 1) ** 2)
                         ) * len_prev
                 # print(out_pos[p[i_p]])
-    succ_ratio = 1  # succesful / batch.shape[0]
-    return succ_ratio * out_pos, succ_ratio * out_edgew, batch_cost / batch.shape[0]
+    return out_pos, out_edgew, batch_cost / batch.shape[0]
 
 
 def fix(posar_prev, posar, im):
