@@ -41,14 +41,11 @@ def dist_posar(an, bn):
 
 
 def edge_cost_factor(a, b, edgew):
-    def sigmoid(x):
-        return 2. / (1. + math.exp(-x)) + 1
     if a < b:
-        c = (edgew[a, b] - 1)**2 + 1
+        c = edgew[a, b]
     else:  # b < a
-        c = (1 - edgew[b, a])**2 + 1
-    # print(c)
-    return sigmoid(c)
+        c = - edgew[b, a]
+    return 2 / (1+math.exp(-c)) + 1
 
 
 def path_cost(p, posar, edgew, prin=False):
@@ -160,18 +157,11 @@ def path(start, goal, nn, g, posar, edgew):
                               heuristic=dist_posar,
                               weight='distance'
                               )
+            ds = dist_posar(result[0][i_s], p[0])
+            dg = dist_posar(result[1][i_g], p[-1])
             c = (path_cost(p, posar, edgew)
-            + END_BOOST * dists[0][i_s]**2
-            + END_BOOST * dists[1][i_g]**2)
-            # print("path_cost: %.2f, nx.astar_path_length: %.2f" % (
-            #     path_cost(p, posar, edgew),
-            #     nx.astar_path_length(g,
-            #                       result[0][i_s],
-            #                       result[1][i_g],
-            #                       heuristic=dist_posar,
-            #                       weight='distance'
-            #                       )
-            # ))
+                 + END_BOOST * (ds**2 + ds)
+                 + END_BOOST * (dg**2 + dg))
         except nx.exception.NetworkXNoPath:
             c = MAX_COST
         if c < min_c:
@@ -215,16 +205,18 @@ def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
     return cost / (ne-unsuccesful), unsuccesful
 
 
-def grad_func(batch, nn, g, ge, posar, edgew):
+def grad_func(batch, nn, g, ge, posar_, edgew):
+    global posar
+    posar = posar_
     out_pos = np.zeros(shape=posar.shape)
     out_edgew = np.zeros(shape=edgew.shape)
     succesful = 0
     batch_cost = 0
     for i_b in range(batch.shape[0]):
         (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar, edgew)
-        batch_cost += c
         if c != MAX_COST:
             succesful += 1
+            batch_cost += c
             coord_p = np.zeros([len(p) + 2, 2])
             coord_p[0, :] = batch[i_b, 0]
             coord_p[1:(1+len(p)), :] = np.array([posar[i_p] for i_p in p])
@@ -232,27 +224,31 @@ def grad_func(batch, nn, g, ge, posar, edgew):
             # print(coord_p)
             for i_p in range(len(p)):
                 i_cp = i_p + 1
-                len_prev = math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0]
-                             )**2
-                            + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1]
-                               )**2)
-                len_next = math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0]
-                             )**2
-                            + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
-                               )**2)
+                len_prev = dist(coord_p[i_cp], coord_p[i_cp-1])
+                len_next = dist(coord_p[i_cp], coord_p[i_cp+1])
                 for j in [0, 1]:
                     out_pos[p[i_p], j] += (
-                        (coord_p[i_cp, j] - coord_p[i_cp-1, j])
-                        / len_prev
-                        * (END_BOOST * (coord_p[i_cp, j] - coord_p[i_cp-1, j])
-                           / len_prev if i_p == 0
+                          (0. if i_p == 0
                            else edge_cost_factor(p[i_p-1], p[i_p], edgew))
-                        + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
-                        / len_next
-                        * (END_BOOST * (coord_p[i_cp, j] - coord_p[i_cp+1, j])
-                           / len_next if i_p == len(p)-1
+                        * (coord_p[i_cp, j] - coord_p[i_cp-1, j])
+                        / len_prev
+                        + (0. if i_p == len(p)-1
                            else edge_cost_factor(p[i_p], p[i_p+1], edgew))
+                        * (coord_p[i_cp, j] - coord_p[i_cp+1, j])
+                        / len_next
                     )
+                    if i_p == 0:  # tail costs start
+                        out_pos[p[i_p], j] += (
+                            END_BOOST
+                            * (coord_p[i_cp, j] - coord_p[i_cp-1, j])
+                            * (1. / len_prev + 2)
+                        )
+                    if i_p == len(p)-1:  # tail costs goal
+                        out_pos[p[i_p], j] += (
+                            END_BOOST
+                            * (coord_p[i_cp, j] - coord_p[i_cp+1, j])
+                            * (1. / len_next + 2)
+                        )
                 if(i_p > 0):
                     if p[i_p-1] < p[i_p]:
                         et = math.exp(-edgew[p[i_p-1], p[i_p]])
@@ -264,8 +260,7 @@ def grad_func(batch, nn, g, ge, posar, edgew):
                         out_edgew[p[i_p], p[i_p-1]] -= (
                             (2. * et / (et + 1) ** 2)
                         ) * len_prev
-                # print(out_pos[p[i_p]])
-    return out_pos, out_edgew, batch_cost / batch.shape[0]
+    return out_pos, out_edgew, batch_cost / succesful
 
 
 def fix(posar_prev, posar, im):

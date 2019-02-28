@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # Training
     ntb = 256  # batch size
-    nts = 256  # number of batches
+    nts = 1024  # number of batches
 
     # Evaluation
     ne = 50  # evaluation set size
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     evalunsucc = []
     evalbc = []
 
-    alpha = 0.1
+    alpha = 0.01
     beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 10E-8
@@ -80,7 +80,10 @@ if __name__ == "__main__":
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
         # Adam
         g_t_p, g_t_e, bc = grad_func(batch, nn, g, ge, posar, edgew)
-        print("Batch cost: %.2f" % bc)
+        if t == 0:
+            b_cost_initial = bc
+        print("Batch cost: %.2f (%-.1f%%)" %
+              (bc, 100. * (bc - b_cost_initial) / b_cost_initial))
         evalbc.append(bc)
 
         m_t_p = beta_1*m_t_p + (1-beta_1)*g_t_p
@@ -101,7 +104,7 @@ if __name__ == "__main__":
 
     fig = plt.figure()
     plt.plot(evalcosts)
-    fig.savefig("costs.png")
+    fig.savefig("evalcosts.png")
     fig = plt.figure()
     plt.plot(evalunsucc)
     fig.savefig("unsuccesful.png")
