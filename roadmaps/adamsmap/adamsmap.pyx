@@ -260,7 +260,7 @@ def grad_func(batch, nn, g, ge, posar_, edgew):
                         out_edgew[p[i_p], p[i_p-1]] -= (
                             (2. * et / (et + 1) ** 2)
                         ) * len_prev
-    return out_pos, out_edgew, batch_cost / succesful
+    return out_pos, out_edgew, batch_cost
 
 
 def fix(posar_prev, posar, im):

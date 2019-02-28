@@ -79,7 +79,8 @@ if __name__ == "__main__":
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
         # Adam
-        g_t_p, g_t_e, bc = grad_func(batch, nn, g, ge, posar, edgew)
+        g_t_p, g_t_e, bc_tot = grad_func(batch, nn, g, ge, posar, edgew)
+        bc = bc_tot / batch.shape[0]
         if t == 0:
             b_cost_initial = bc
         print("Batch cost: %.2f (%-.1f%%)" %

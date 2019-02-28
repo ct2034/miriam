@@ -22,22 +22,22 @@ def test_grad_func():
     posar = np.zeros([N, 2])
     for i in range(N):
         d = float(i%sqrt(N))
-        posar[i, :] = [d + .1 * random(),
-                       (i-d)/sqrt(N) + .1 * random()]
+        posar[i, :] = [d + .5 * random(),
+                       (i-d)/sqrt(N) + .5 * random()]
     edgew = np.triu(np.random.normal(loc=0, scale=0.5, size=(N, N)), 1)
     g, ge, pos = graphs_from_posar(N, posar)
     im = np.ones([800,800,4]) * 255
     make_edges(N, g, ge, posar, edgew, im)
     batch = np.array(
-        [[posar[i]+.2,
-          posar[j]+.2]
-          for (i, j) in [(0, N-1)]]#combinations(range(1), 2)]
+        [[posar[i] + .5 * random(),
+          posar[j] + .5 * random()]
+          for (i, j) in combinations([0, 2, 6, 8], 2)]
         )
     dp, de, c = grad_func(batch, nn, g, ge, posar, edgew)
     assert c > 0
     assert(np.all(de == np.triu(de, 1)))
     np.set_printoptions(precision=3, suppress=True, linewidth=120)
-    epsilon = 1E-6
+    epsilon = 1E-9
     # EDGE WEIGTHS
     comp_e = np.zeros(shape=edgew.shape)
     for i in range(N):
