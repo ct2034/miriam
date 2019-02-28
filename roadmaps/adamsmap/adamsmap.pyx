@@ -157,8 +157,8 @@ def path(start, goal, nn, g, posar, edgew):
                               heuristic=dist_posar,
                               weight='distance'
                               )
-            ds = dist_posar(result[0][i_s], p[0])
-            dg = dist_posar(result[1][i_g], p[-1])
+            ds = dist(start, posar[p[0]])
+            dg = dist(goal, posar[p[-1]])
             c = (path_cost(p, posar, edgew)
                  + END_BOOST * (ds**2 + ds)
                  + END_BOOST * (dg**2 + dg))
