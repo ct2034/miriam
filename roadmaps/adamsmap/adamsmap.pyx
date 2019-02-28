@@ -11,7 +11,7 @@ import numpy as np
 from scipy.spatial import Delaunay
 from pyflann import FLANN
 
-MAX_COST = 100000.
+MAX_COST = 100000
 END_BOOST = 3.0
 pool = Pool()
 
