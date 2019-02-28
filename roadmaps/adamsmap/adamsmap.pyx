@@ -11,8 +11,8 @@ import numpy as np
 from scipy.spatial import Delaunay
 from pyflann import FLANN
 
-MAX_COST = 100000
-END_BOOST = 3.
+MAX_COST = 100000.
+END_BOOST = 3.0
 pool = Pool()
 
 
@@ -157,18 +157,11 @@ def path(start, goal, nn, g, posar, edgew):
                               heuristic=dist_posar,
                               weight='distance'
                               )
-            c = path_cost(p, posar, edgew)
-            + END_BOOST * (dists[0][i_s]**2 + dists[0][i_s])
-            + END_BOOST * (dists[1][i_g]**2 + dists[1][i_g])
-            # print("path_cost: %.2f, nx.astar_path_length: %.2f" % (
-            #     path_cost(p, posar, edgew),
-            #     nx.astar_path_length(g,
-            #                       result[0][i_s],
-            #                       result[1][i_g],
-            #                       heuristic=dist_posar,
-            #                       weight='distance'
-            #                       )
-            # ))
+            ds = dist_posar(result[0][i_s], p[0])
+            dg = dist_posar(result[1][i_g], p[-1])
+            c = (path_cost(p, posar, edgew)
+                 + END_BOOST * (ds**2 + ds)
+                 + END_BOOST * (dg**2 + dg))
         except nx.exception.NetworkXNoPath:
             c = MAX_COST
         if c < min_c:
@@ -212,7 +205,9 @@ def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
     return cost / (ne-unsuccesful), unsuccesful
 
 
-def grad_func(batch, nn, g, ge, posar, edgew):
+def grad_func(batch, nn, g, ge, posar_, edgew):
+    global posar
+    posar = posar_
     out_pos = np.zeros(shape=posar.shape)
     out_edgew = np.zeros(shape=edgew.shape)
     succesful = 0
@@ -233,28 +228,26 @@ def grad_func(batch, nn, g, ge, posar, edgew):
                 len_next = dist(coord_p[i_cp], coord_p[i_cp+1])
                 for j in [0, 1]:
                     out_pos[p[i_p], j] += (
-                        (coord_p[i_cp, j] - coord_p[i_cp-1, j])
-                        / len_prev
-                        * (0 if i_p == 0
+                          (0. if i_p == 0
                            else edge_cost_factor(p[i_p-1], p[i_p], edgew))
-                        + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
-                        / len_next
-                        * (0 if i_p == len(p)-1
+                        * (coord_p[i_cp, j] - coord_p[i_cp-1, j])
+                        / len_prev
+                        + (0. if i_p == len(p)-1
                            else edge_cost_factor(p[i_p], p[i_p+1], edgew))
+                        * (coord_p[i_cp, j] - coord_p[i_cp+1, j])
+                        / len_next
                     )
                     if i_p == 0:  # tail costs start
                         out_pos[p[i_p], j] += (
-                            END_BOOST * (
-                                (coord_p[i_cp, j] - coord_p[i_cp-1, j])
-                                * (1 / len_prev + 2)
-                            )
+                            END_BOOST
+                            * (coord_p[i_cp, j] - coord_p[i_cp-1, j])
+                            * (1. / len_prev + 2)
                         )
                     if i_p == len(p)-1:  # tail costs goal
                         out_pos[p[i_p], j] += (
-                            END_BOOST * (
-                                (coord_p[i_cp, j] - coord_p[i_cp+1, j])
-                                * (1 / len_next + 2)
-                            )
+                            END_BOOST
+                            * (coord_p[i_cp, j] - coord_p[i_cp+1, j])
+                            * (1. / len_next + 2)
                         )
                 if(i_p > 0):
                     if p[i_p-1] < p[i_p]:

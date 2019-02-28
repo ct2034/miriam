@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     fig = plt.figure()
     plt.plot(evalcosts)
-    fig.savefig("costs.png")
+    fig.savefig("evalcosts.png")
     fig = plt.figure()
     plt.plot(evalunsucc)
     fig.savefig("unsuccesful.png")

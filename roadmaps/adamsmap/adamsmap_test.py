@@ -15,7 +15,7 @@ from adamsmap import (
 def test_grad_func():
     # finite-difference (FD) approximation
     # https://timvieira.github.io/blog/post/2017/04/21/how-to-test-gradient-implementations/
-    N = 9
+    N = 25
     nn = 3
     g = nx.DiGraph()
     g.add_nodes_from(range(N))
@@ -29,9 +29,9 @@ def test_grad_func():
     im = np.ones([800,800,4]) * 255
     make_edges(N, g, ge, posar, edgew, im)
     batch = np.array(
-        [[posar[i],
-          posar[j]]
-          for (i, j) in [(0, N-1)]]#combinations(range(1), 2)]
+        [[posar[i]+.5,
+          posar[j]+.5]
+          for (i, j) in [(0, 18)]]#combinations(range(1), 2)]
         )
     dp, de, c = grad_func(batch, nn, g, ge, posar, edgew)
     assert c > 0
@@ -57,7 +57,8 @@ def test_grad_func():
             dpp, dep, cp = grad_func(batch, nn, g, ge, posar + d * epsilon, edgew)
             dpm, dem, cm = grad_func(batch, nn, g, ge, posar - d * epsilon, edgew)
             comp_p[i, j] = (cp - cm) / 2 / epsilon
-    print(dp - comp_p)
+    print(dp)
+    print(comp_p)
     assert(np.max(np.abs(dp - comp_p)) < 1E-4)
 
 if __name__ == '__main__':
