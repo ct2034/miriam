@@ -3,6 +3,7 @@ import imageio
 from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 import sys
 import time
 
@@ -17,22 +18,15 @@ from adamsmap import (
     )
 
 
-if __name__ == "__main__":
-    # Graph
-    N = 200
-
+def optimize(N, ntb, nts, image_fname):
     # Paths
     nn = 3
     MAX_COST = 100000
 
-    # Training
-    ntb = 256  # batch size
-    nts = 1024  # number of batches
-
     # Evaluation
     ne = 50  # evaluation set size
 
-    im = imageio.imread(sys.argv[1])
+    im = imageio.imread(image_fname)
     im_shape = im.shape
 
     evalset = np.array([
@@ -114,3 +108,29 @@ if __name__ == "__main__":
     fig.savefig("batchcost.png")
     fig = plt.figure(figsize=[8, 8])
     eval(-1, evalset, nn, g, ge, pos, posar, edgew, im)
+
+    store = {
+        "evalcosts": evalcosts,
+        "batchcost": evalbc,
+        "unsuccesful": evalunsucc
+        }
+
+    with open("%s_%d_%d.pkl" % (
+        image_fname.split(".")[0],
+        N,
+        nts
+    ), "wb") as f:
+        pickle.dump(store, f)
+
+
+
+if __name__ == "__main__":
+    # Training
+    ntb = 256  # batch size
+
+    for (image_fname, N, nts) in product(
+        [sys.argv[1]],
+        [200, 500, 1000],
+        [2048]
+    ):
+        optimize(N, ntb, nts, image_fname)
