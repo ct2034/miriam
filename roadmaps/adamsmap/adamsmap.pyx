@@ -157,7 +157,9 @@ def path(start, goal, nn, g, posar, edgew):
                               heuristic=dist_posar,
                               weight='distance'
                               )
-            c = path_cost(p, posar, edgew) + dists[0][i_s] + dists[1][i_g]
+            c = path_cost(p, posar, edgew)
+            + END_BOOST * (dists[0][i_s]**2 + dists[0][i_s])
+            + END_BOOST * (dists[1][i_g]**2 + dists[1][i_g])
             # print("path_cost: %.2f, nx.astar_path_length: %.2f" % (
             #     path_cost(p, posar, edgew),
             #     nx.astar_path_length(g,
@@ -227,25 +229,33 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
             # print(coord_p)
             for i_p in range(len(p)):
                 i_cp = i_p + 1
-                len_prev = math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp-1, 0]
-                             )**2
-                            + (coord_p[i_cp, 1] - coord_p[i_cp-1, 1]
-                               )**2)
-                len_next = math.sqrt((coord_p[i_cp, 0] - coord_p[i_cp+1, 0]
-                             )**2
-                            + (coord_p[i_cp, 1] - coord_p[i_cp+1, 1]
-                               )**2)
+                len_prev = dist(coord_p[i_cp], coord_p[i_cp-1])
+                len_next = dist(coord_p[i_cp], coord_p[i_cp+1])
                 for j in [0, 1]:
                     out_pos[p[i_p], j] += (
                         (coord_p[i_cp, j] - coord_p[i_cp-1, j])
                         / len_prev
-                        * (END_BOOST if i_p == 0
+                        * (0 if i_p == 0
                            else edge_cost_factor(p[i_p-1], p[i_p], edgew))
                         + (coord_p[i_cp, j] - coord_p[i_cp+1, j])
                         / len_next
-                        * (END_BOOST if i_p == len(p)-1
+                        * (0 if i_p == len(p)-1
                            else edge_cost_factor(p[i_p], p[i_p+1], edgew))
                     )
+                    if i_p == 0:  # tail costs start
+                        out_pos[p[i_p], j] += (
+                            END_BOOST * (
+                                (coord_p[i_cp, j] - coord_p[i_cp-1, j])
+                                * (1 / len_prev + 2)
+                            )
+                        )
+                    if i_p == len(p)-1:  # tail costs goal
+                        out_pos[p[i_p], j] += (
+                            END_BOOST * (
+                                (coord_p[i_cp, j] - coord_p[i_cp+1, j])
+                                * (1 / len_next + 2)
+                            )
+                        )
                 if(i_p > 0):
                     if p[i_p-1] < p[i_p]:
                         et = math.exp(-edgew[p[i_p-1], p[i_p]])
