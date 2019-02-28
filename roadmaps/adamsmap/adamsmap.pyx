@@ -41,14 +41,11 @@ def dist_posar(an, bn):
 
 
 def edge_cost_factor(a, b, edgew):
-    def sigmoid(x):
-        return 2. / (1. + math.exp(-x)) + 1
     if a < b:
-        c = (edgew[a, b] - 1)**2 + 1
+        c = edgew[a, b]
     else:  # b < a
-        c = (1 - edgew[b, a])**2 + 1
-    # print(c)
-    return sigmoid(c)
+        c = - edgew[b, a]
+    return 2 / (1+math.exp(-c)) + 1
 
 
 def path_cost(p, posar, edgew, prin=False):
@@ -217,10 +214,12 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
     out_pos = np.zeros(shape=x.shape)
     out_edgew = np.zeros(shape=edgew.shape)
     succesful = 0
+    batch_cost = 0
     for i_b in range(batch.shape[0]):
         (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar, edgew)
         if c != MAX_COST:
             succesful += 1
+            batch_cost += c
             coord_p = np.zeros([len(p) + 2, 2])
             coord_p[0, :] = batch[i_b, 0]
             coord_p[1:(1+len(p)), :] = np.array([x[i_p] for i_p in p])
@@ -260,7 +259,7 @@ def grad_func(x, batch, nn, g, ge, posar, edgew):
                         ) * len_prev
                 # print(out_pos[p[i_p]])
     succ_ratio = 1  # succesful / batch.shape[0]
-    return succ_ratio * out_pos, succ_ratio * out_edgew
+    return succ_ratio * out_pos, succ_ratio * out_edgew, batch_cost
 
 
 def fix(posar_prev, posar, im):
