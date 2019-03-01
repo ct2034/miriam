@@ -1,4 +1,4 @@
-#!python3
+#!/usr/bin/env python3
 from bresenham import bresenham
 from functools import reduce
 from itertools import product

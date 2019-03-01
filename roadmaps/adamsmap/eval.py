@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+from bresenham import bresenham
 import imageio
-from itertools import combinations
+from itertools import combinations, product
 from math import sqrt
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+from scipy.spatial import Delaunay
 import pickle
 from random import random
 import sys
@@ -15,6 +17,7 @@ from adamsmap import (
     grad_func,
     graphs_from_posar,
     init_graph_posar_edgew,
+    is_pixel_free,
     make_edges,
     MAX_COST,
     path
@@ -101,25 +104,77 @@ if __name__ == '__main__':
     with open(fname, "rb") as f:
         store = pickle.load(f)
 
-    agents = 20
-    agent_d = 60  # disk diameter
-    v = 1
-    nn = 1
-    posar = store['posar']
-    edgew = store['edgew']
-    N = posar.shape[0]
-    im = imageio.imread(fname.split("_")[0]+".png")
-    g, ge, pos = graphs_from_posar(N, posar)
-    make_edges(N, g, ge, posar, edgew, im)
-    batch = np.array([
-        [get_random_pos(im), get_random_pos(im)] for _ in range(agents)])
+    agent_ns = [10, 20, 40]
+    res = {}
+    for ans in agent_ns:
+        res[ans] = {}
+        res[ans]["undir"] = []
+        res[ans]["rand"] = []
 
-    print(eval(batch, nn, ge, posar, edgew))
-    edgew_compare = np.ones([N, N])
-    g_compare = nx.Graph()
-    g_compare.add_nodes_from(range(N))
-    for e in nx.edges(ge):
-        g_compare.add_edge(e[0],
-                           e[1],
-                           distance=dist(posar[e[0]], posar[e[1]]))
-    print(eval(batch, nn, g_compare, posar, edgew_compare))
+    for agents, agent_d, i in product(
+        agent_ns, [20], range(10)):
+        print("agents: " + str(agents))
+        print("agent_d: " + str(agent_d))
+        v = 1
+        nn = 1
+        posar = store['posar']
+        edgew = store['edgew']
+        N = posar.shape[0]
+        im = imageio.imread(fname.split("_")[0]+".png")
+        g, ge, pos = graphs_from_posar(N, posar)
+        make_edges(N, g, ge, posar, edgew, im)
+        batch = np.array([
+            [get_random_pos(im), get_random_pos(im)] for _ in range(agents)])
+        cost_ev = (eval(batch, nn, ge, posar, edgew))
+
+        edgew_undirected = np.ones([N, N])
+        g_undirected = nx.Graph()
+        g_undirected.add_nodes_from(range(N))
+        for e in nx.edges(ge):
+            g_undirected.add_edge(e[0],
+                               e[1],
+                               distance=dist(posar[e[0]], posar[e[1]]))
+        cost_undirected = (eval(batch, nn, g_undirected, posar, edgew_undirected))
+
+        g_random = nx.Graph()
+        g_random.add_nodes_from(range(N))
+        posar_random = np.array([get_random_pos(im) for _ in range(N)])
+        b = im.shape[0]
+        fakenodes1 = np.array(np.array(list(
+            product([0, b], np.linspace(0, b, 6)))))
+        fakenodes2 = np.array(np.array(list(
+            product(np.linspace(0, b, 6), [0, b]))))
+        tri = Delaunay(np.append(posar_random, np.append(
+            fakenodes1, fakenodes2, axis=0), axis=0
+        ))
+        (indptr, indices) = tri.vertex_neighbor_vertices
+        for i in range(N):
+            neigbours = indices[indptr[i]:indptr[i+1]]
+            for n in neigbours:
+                if i < n & n < N:
+                    line = bresenham(
+                        int(posar_random[i][0]),
+                        int(posar_random[i][1]),
+                        int(posar_random[n][0]),
+                        int(posar_random[n][1])
+                    )
+                    # print(list(line))
+                    if all([is_pixel_free(im, x) for x in line]):
+                        g_random.add_edge(i, n,
+                                   distance=dist(posar_random[i], posar_random[n]))
+                        g_random.add_edge(n, i,
+                                   distance=dist(posar_random[i], posar_random[n]))
+        cost_random = eval(batch, nn, g_random, posar_random, edgew_undirected)
+
+        print("our: %d, undir: %d, (our-undir)/our: %.3f%%" %
+              (cost_ev, cost_undirected,
+               100.*float(cost_ev-cost_undirected)/cost_ev))
+        print("our: %d, rand: %d, (our-rand)/our: %.3f%%\n-----" %
+              (cost_ev, cost_random,
+               100.*float(cost_ev-cost_random)/cost_ev))
+
+        res[agents]["undir"].append(100.*float(cost_ev-cost_undirected)/cost_ev)
+        res[agents]["rand"].append(100.*float(cost_ev-cost_random)/cost_ev)
+
+    with open(sys.argv[1] + ".eval", "wb") as f:
+        pickle.dump(res, f)
