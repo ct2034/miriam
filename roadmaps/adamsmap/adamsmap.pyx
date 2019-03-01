@@ -5,7 +5,6 @@ from itertools import product
 import math
 from matplotlib import cm
 import matplotlib.pyplot as plt
-from multiprocessing import Pool
 import networkx as nx
 import numpy as np
 from scipy.spatial import Delaunay
@@ -13,7 +12,6 @@ from pyflann import FLANN
 
 MAX_COST = 100000
 END_BOOST = 3.
-pool = Pool()
 
 
 def is_pixel_free(im, p):
@@ -150,10 +148,16 @@ def path(start, goal, nn, g, posar, edgew):
     min_c = MAX_COST
     min_p = None
     for (i_s, i_g) in product(range(nn), range(nn)):
+        if nn == 1:
+            start_v = result[0]
+            goal_v = result[1]
+        else:
+            start_v = result[0][i_s]
+            goal_v = result[1][i_g]
         try:
             p = nx.astar_path(g,
-                              result[0][i_s],
-                              result[1][i_g],
+                              start_v,
+                              goal_v,
                               heuristic=dist_posar,
                               weight='distance'
                               )

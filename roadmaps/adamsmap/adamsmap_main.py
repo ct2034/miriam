@@ -20,7 +20,7 @@ from adamsmap import (
 
 def optimize(N, ntb, nts, image_fname):
     # Paths
-    nn = 3
+    nn = 1
     MAX_COST = 100000
 
     # Evaluation
@@ -37,7 +37,7 @@ def optimize(N, ntb, nts, image_fname):
     evalunsucc = []
     evalbc = []
 
-    alpha = 0.01
+    alpha = 0.1
     beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 10E-8
@@ -112,7 +112,9 @@ def optimize(N, ntb, nts, image_fname):
     store = {
         "evalcosts": evalcosts,
         "batchcost": evalbc,
-        "unsuccesful": evalunsucc
+        "unsuccesful": evalunsucc,
+        "posar": posar,
+        "edgew": edgew
         }
 
     with open("%s_%d_%d.pkl" % (
@@ -130,7 +132,7 @@ if __name__ == "__main__":
 
     for (image_fname, N, nts) in product(
         [sys.argv[1]],
-        [200, 500, 1000],
+        [200],
         [2*2048]
     ):
         optimize(N, ntb, nts, image_fname)
