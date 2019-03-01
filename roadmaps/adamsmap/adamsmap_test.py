@@ -1,9 +1,10 @@
-#!python3
+#!/usr/bin/env python3
 from itertools import combinations
 from math import sqrt
 import networkx as nx
 import numpy as np
 from random import random
+import sys
 
 from adamsmap import (
     grad_func,

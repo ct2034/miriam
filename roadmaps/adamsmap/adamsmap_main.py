@@ -1,4 +1,4 @@
-#!python3
+#!/usr/bin/env python3
 import imageio
 from itertools import product
 import matplotlib.pyplot as plt
@@ -133,6 +133,6 @@ if __name__ == "__main__":
     for (image_fname, N, nts) in product(
         [sys.argv[1]],
         [200],
-        [2*2048]
+        [256]
     ):
         optimize(N, ntb, nts, image_fname)
