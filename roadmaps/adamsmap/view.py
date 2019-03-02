@@ -9,14 +9,18 @@ plt.rcParams["font.family"] = "serif"
 plt.rcParams["savefig.dpi"] = 500
 
 if __name__ == '__main__':
-    res = np.zeros([3, 4096])
+    l = 512
+    res = np.zeros([3, l])
     i = 0
     for fname in ["z_200_4096.pkl",
-                  "z_500_4096.pkl",
+                  "z_500_2048.pkl",
                   "z_1000_4096.pkl"]:
         with open(fname, "rb") as f:
             store = pickle.load(f)
-        res[i, :] = store['batchcost']
+        if fname == "z_500_2048.pkl":
+            res[i, :] = np.array(store['batchcost'])[0:l*4:4]
+        else:
+            res[i, :] = np.array(store['batchcost'])[0:l]
         i += 1
 
     f, ax = plt.subplots()
