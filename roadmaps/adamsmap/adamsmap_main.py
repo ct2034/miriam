@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     for (image_fname, N, nts) in product(
         [sys.argv[1]],
-        [200],
-        [1024]
+        [1000],
+        [4096]
     ):
         optimize(N, ntb, nts, image_fname)
