@@ -65,6 +65,7 @@ def eval(batch, nn, g, posar, edgew):
     i_per_agent = [0 for _ in range(agents)]
     t_end = [0 for _ in range(agents)]
     timeslice = np.zeros([agents, 2])
+    paths = []
     while not all(ended):
         ended = [sim_paths[i].shape[0] - 1 == i_per_agent[i]
                  for i in range(agents)]
@@ -96,7 +97,7 @@ def eval(batch, nn, g, posar, edgew):
     #             sim_paths_coll[:,i,1],
     #             range(sim_paths_coll.shape[0]))
     # plt.show()
-    return sum(t_end)
+    return sum(t_end), sim_paths_coll
 
 
 if __name__ == '__main__':
@@ -110,9 +111,12 @@ if __name__ == '__main__':
         res[ans] = {}
         res[ans]["undir"] = []
         res[ans]["rand"] = []
+        res[ans]["paths_ev"] = []
+        res[ans]["paths_undirected"] = []
+        res[ans]["paths_random"] = []
 
     for agents, agent_d, i in product(
-        agent_ns, [20], range(10)):
+        [20], [20], range(2)):
         print("agents: " + str(agents))
         print("agent_d: " + str(agent_d))
         v = 1
@@ -120,12 +124,12 @@ if __name__ == '__main__':
         posar = store['posar']
         edgew = store['edgew']
         N = posar.shape[0]
-        im = imageio.imread(fname.split("_")[0]+".png")
+        im = imageio.imread("maps/"+fname.split("_")[0].split("/")[-1]+".png")
         g, ge, pos = graphs_from_posar(N, posar)
         make_edges(N, g, ge, posar, edgew, im)
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(agents)])
-        cost_ev = (eval(batch, nn, ge, posar, edgew))
+        cost_ev, paths_ev = eval(batch, nn, ge, posar, edgew)
 
         edgew_undirected = np.ones([N, N])
         g_undirected = nx.Graph()
@@ -134,7 +138,7 @@ if __name__ == '__main__':
             g_undirected.add_edge(e[0],
                                e[1],
                                distance=dist(posar[e[0]], posar[e[1]]))
-        cost_undirected = (eval(batch, nn, g_undirected, posar, edgew_undirected))
+        cost_undirected, paths_undirected = (eval(batch, nn, g_undirected, posar, edgew_undirected))
 
         g_random = nx.Graph()
         g_random.add_nodes_from(range(N))
@@ -164,7 +168,7 @@ if __name__ == '__main__':
                                    distance=dist(posar_random[i], posar_random[n]))
                         g_random.add_edge(n, i,
                                    distance=dist(posar_random[i], posar_random[n]))
-        cost_random = eval(batch, nn, g_random, posar_random, edgew_undirected)
+        cost_random, paths_random = eval(batch, nn, g_random, posar_random, edgew_undirected)
 
         print("our: %d, undir: %d, (our-undir)/our: %.3f%%" %
               (cost_ev, cost_undirected,
@@ -175,6 +179,9 @@ if __name__ == '__main__':
 
         res[agents]["undir"].append(100.*float(cost_ev-cost_undirected)/cost_ev)
         res[agents]["rand"].append(100.*float(cost_ev-cost_random)/cost_ev)
+        res[agents]["paths_ev"].append(paths_ev)
+        res[agents]["paths_undirected"].append(paths_undirected)
+        res[agents]["paths_random"].append(paths_random)
 
     with open(sys.argv[1] + ".eval", "wb") as f:
         pickle.dump(res, f)
