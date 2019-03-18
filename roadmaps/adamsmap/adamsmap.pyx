@@ -50,7 +50,7 @@ def path_cost(p, posar, edgew, prin=False):
     if edgew is not None:  # ge
         return reduce(lambda x, y: x+y,
                       [dist(posar[p[i]], posar[p[i+1]])
-                       * edge_cost_factor(p[i], p[i+1], edgew)
+                       + edge_cost_factor(p[i], p[i+1], edgew)
                        for i in range(len(p)-1)], 0.)
     else:
         return reduce(lambda x, y: x+y,
@@ -62,7 +62,7 @@ def path_cost(p, posar, edgew, prin=False):
 def init_graph_posar_edgew(im, N):
     global posar
     posar = np.array([get_random_pos(im) for _ in range(N)])
-    edgew = np.triu(np.random.normal(loc=0, scale=0.5, size=(N, N)), 1)
+    edgew = np.triu(np.random.normal(loc=0, scale=0.1, size=(N, N)), 1)
     return posar, edgew
 
 
@@ -232,12 +232,10 @@ def grad_func(batch, nn, g, ge, posar_, edgew):
                 len_next = dist(coord_p[i_cp], coord_p[i_cp+1])
                 for j in [0, 1]:
                     out_pos[p[i_p], j] += (
-                          (0. if i_p == 0
-                           else edge_cost_factor(p[i_p-1], p[i_p], edgew))
+                          (0 if i_p == 0 else 1)
                         * (coord_p[i_cp, j] - coord_p[i_cp-1, j])
                         / len_prev
-                        + (0. if i_p == len(p)-1
-                           else edge_cost_factor(p[i_p], p[i_p+1], edgew))
+                        + (0 if i_p == len(p)-1 else 1)
                         * (coord_p[i_cp, j] - coord_p[i_cp+1, j])
                         / len_next
                     )
@@ -258,12 +256,12 @@ def grad_func(batch, nn, g, ge, posar_, edgew):
                         et = math.exp(-edgew[p[i_p-1], p[i_p]])
                         out_edgew[p[i_p-1], p[i_p]] += (
                             (2. * et / (et + 1) ** 2)
-                        ) * len_prev
+                        )
                     else:
                         et = math.exp(edgew[p[i_p], p[i_p-1]])
                         out_edgew[p[i_p], p[i_p-1]] -= (
                             (2. * et / (et + 1) ** 2)
-                        ) * len_prev
+                        )
     return out_pos, out_edgew, batch_cost
 
 

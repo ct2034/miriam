@@ -37,7 +37,7 @@ def optimize(N, ntb, nts, image_fname):
     evalunsucc = []
     evalbc = []
 
-    alpha = 0.1
+    alpha = 0.01
     beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 10E-8
@@ -99,13 +99,13 @@ def optimize(N, ntb, nts, image_fname):
 
     fig = plt.figure()
     plt.plot(evalcosts)
-    fig.savefig("evalcosts.png")
+    fig.savefig("res/evalcosts.png")
     fig = plt.figure()
     plt.plot(evalunsucc)
-    fig.savefig("unsuccesful.png")
+    fig.savefig("res/unsuccesful.png")
     fig = plt.figure()
     plt.plot(evalbc)
-    fig.savefig("batchcost.png")
+    fig.savefig("res/batchcost.png")
     fig = plt.figure(figsize=[8, 8])
     eval(-1, evalset, nn, g, ge, pos, posar, edgew, im)
 
@@ -117,8 +117,8 @@ def optimize(N, ntb, nts, image_fname):
         "edgew": edgew
         }
 
-    with open("%s_%d_%d.pkl" % (
-        image_fname.split(".")[0],
+    with open("res/%s_%d_%d.pkl" % (
+        image_fname.split(".")[0].split("/")[-1],
         N,
         nts
     ), "wb") as f:
@@ -133,6 +133,6 @@ if __name__ == "__main__":
     for (image_fname, N, nts) in product(
         [sys.argv[1]],
         [200, 500],
-        [4096]
+        [1024]
     ):
         optimize(N, ntb, nts, image_fname)
