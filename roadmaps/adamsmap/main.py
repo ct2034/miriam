@@ -20,7 +20,7 @@ from adamsmap import (
 
 def optimize(N, ntb, nts, image_fname):
     # Paths
-    nn = 1
+    nn = 2
     MAX_COST = 100000
 
     # Evaluation
@@ -37,6 +37,7 @@ def optimize(N, ntb, nts, image_fname):
     evalunsucc = []
     evalbc = []
 
+    pos_boost = 10
     alpha = 0.01
     beta_1 = 0.9
     beta_2 = 0.999
@@ -74,6 +75,7 @@ def optimize(N, ntb, nts, image_fname):
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
         # Adam
         g_t_p, g_t_e, bc_tot = grad_func(batch, nn, g, ge, posar, edgew)
+        g_t_p *= pos_boost
         bc = bc_tot / batch.shape[0]
         if t == 0:
             b_cost_initial = bc
@@ -132,7 +134,7 @@ if __name__ == "__main__":
 
     for (image_fname, N, nts) in product(
         [sys.argv[1]],
-        [200, 500],
-        [1024]
+        [200],
+        [2048]
     ):
         optimize(N, ntb, nts, image_fname)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from adamsmap import graphs_from_posar, make_edges, plot_graph
 import imageio
 from matplotlib import animation
 import matplotlib.pyplot as plt
@@ -8,24 +9,45 @@ import sys
 
 plt.style.use('bmh')
 plt.rcParams["font.family"] = "sans-serif"
-plt.rcParams["savefig.dpi"] = 500
+plt.rcParams["savefig.dpi"] = 120
+figsize = [16, 9]
+n_agents = 20
 
 if __name__ == '__main__':
-    with open(sys.argv[1], "rb") as f:
+    fname = sys.argv[1]
+    with open(fname, "rb") as f:
         res = pickle.load(f)
-    im = imageio.imread("maps/"+sys.argv[1].split("_")[0].split("/")[-1]+".png")
-    paths_ev = res[20]["paths_ev"][0]
+    paths_ev = res[n_agents]["paths_ev"][0]
     print(paths_ev.shape)
     print(np.max(paths_ev))
-    T = 1000  # int(paths_ev.shape[0] * .1)
+    T = int(paths_ev.shape[0] * .1)
     agents = paths_ev.shape[1]
 
+    # get out the graph
+    with open(fname.replace(".eval", ""), "rb") as f:
+        res_w_graph = pickle.load(f)
+    posar = res_w_graph['posar']
+    edgew = res_w_graph['edgew']
+    graph_fig = plt.figure(figsize=figsize)
+    ax = graph_fig.add_subplot(111)
+    map_im = imageio.imread("maps/"+fname.split("_")[0].split("/")[-1]+".png")
+    N = posar.shape[0]
+    g, _, pos = graphs_from_posar(posar.shape[0], posar)
+    make_edges(N, g, _, posar, edgew, map_im)
+    plot_graph(graph_fig, ax, g, pos, edgew, map_im, fname=fname+"_final.png")
+
     # First set up the figure, the axis, and the plot element we want to animate
-    fig = plt.figure(figsize=[3.84, 2.16])
+    fig = plt.figure(figsize=figsize)
+    ax_graph = plt.axes([0, 0, 1, 1])
+    fig.add_axes(ax_graph)
+    graph_im = imageio.imread(fname+"_final.png")
+    ax_graph.imshow(graph_im, origin='lower')
     ax = plt.axes(xlim=(0, 1000), ylim=(0, 1000),
                   xticks=[], yticks=[],
-                  aspect='equal')
-    ax.imshow(im)
+                  aspect='equal',
+                  alpha = .5)
+    fig.add_axes(ax)
+    ax.patch.set_visible(False)
     lines = []
     for _ in range(agents):
         line, = ax.plot([], [], 'o')
