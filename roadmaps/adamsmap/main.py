@@ -8,6 +8,7 @@ import sys
 import time
 
 from adamsmap import (
+    get_random_edgews,
     get_random_pos,
     init_graph_posar_edgew,
     graphs_from_posar,
@@ -37,7 +38,6 @@ def optimize(N, ntb, nts, image_fname):
     evalunsucc = []
     evalbc = []
 
-    pos_boost = 10
     alpha = 0.01
     beta_1 = 0.9
     beta_2 = 0.999
@@ -52,6 +52,11 @@ def optimize(N, ntb, nts, image_fname):
     for t in range(nts):
         if t == 0:
             posar, edgew = init_graph_posar_edgew(im, N)
+
+        # randomize edge directions every 100 optimizations:
+        if t % 50 == 0 & t < nts / 2:
+            edgew = get_random_edgews(N)
+
         g, ge, pos = graphs_from_posar(N, posar)
         make_edges(N, g, ge, posar, edgew, im)
         e_cost, unsuccesful = eval(t, evalset, nn, g, ge, pos, posar, edgew, im)
@@ -75,7 +80,6 @@ def optimize(N, ntb, nts, image_fname):
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
         # Adam
         g_t_p, g_t_e, bc_tot = grad_func(batch, nn, g, ge, posar, edgew)
-        g_t_p *= pos_boost
         bc = bc_tot / batch.shape[0]
         if t == 0:
             b_cost_initial = bc
@@ -130,11 +134,11 @@ def optimize(N, ntb, nts, image_fname):
 
 if __name__ == "__main__":
     # Training
-    ntb = 256  # batch size
+    ntb = 128  # batch size
 
     for (image_fname, N, nts) in product(
         [sys.argv[1]],
-        [200],
-        [2048]
+        [100],
+        [1024]
     ):
         optimize(N, ntb, nts, image_fname)
