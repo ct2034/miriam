@@ -2,6 +2,7 @@
 import imageio
 from itertools import product
 import matplotlib.pyplot as plt
+from multiprocessing import Pool
 import numpy as np
 import pickle
 import sys
@@ -10,8 +11,8 @@ import time
 from adamsmap import (
     get_random_edgews,
     get_random_pos,
-    init_graph_posar_edgew,
     graphs_from_posar,
+    init_graph_posar_edgew,
     make_edges,
     eval,
     grad_func,
@@ -19,16 +20,19 @@ from adamsmap import (
     )
 
 
-def optimize(N, ntb, nts, image_fname):
+def optimize(n, ntb, nts, image_fname):
     # Paths
     nn = 2
-    MAX_COST = 100000
 
     # Evaluation
     ne = 50  # evaluation set size
 
+    # The map
     im = imageio.imread(image_fname)
-    im_shape = im.shape
+
+    # Multiprocessing
+    processes = 8 # Number of processes
+    pool = Pool(processes)
 
     evalset = np.array([
         [get_random_pos(im),
@@ -43,22 +47,18 @@ def optimize(N, ntb, nts, image_fname):
     beta_2 = 0.999
     epsilon = 10E-8
 
-    m_t_p = np.zeros([N, 2])
-    v_t_p = np.zeros([N, 2])
-    m_t_e = np.zeros([N, N])
-    v_t_e = np.zeros([N, N])
+    m_t_p = np.zeros([n, 2])
+    v_t_p = np.zeros([n, 2])
+    m_t_e = np.zeros([n, n])
+    v_t_e = np.zeros([n, n])
 
     start = time.time()
     for t in range(nts):
         if t == 0:
-            posar, edgew = init_graph_posar_edgew(im, N)
+            posar, edgew = init_graph_posar_edgew(im, n)
 
-        # randomize edge directions every 100 optimizations:
-        if t % 50 == 0 & t < nts / 2:
-            edgew = get_random_edgews(N)
-
-        g, ge, pos = graphs_from_posar(N, posar)
-        make_edges(N, g, ge, posar, edgew, im)
+        g, ge, pos = graphs_from_posar(n, posar)
+        make_edges(n, g, ge, posar, edgew, im)
         e_cost, unsuccesful = eval(t, evalset, nn, g, ge, pos, posar, edgew, im)
         if t == 0:
             e_cost_initial = e_cost
@@ -78,8 +78,24 @@ def optimize(N, ntb, nts, image_fname):
 
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
+        assert ntb % processes == 0, "batch size no divisible by process number"
+        batch_per_process = int(ntb / processes)
+        argss = []
+
         # Adam
-        g_t_p, g_t_e, bc_tot = grad_func(batch, nn, g, ge, posar, edgew)
+        for ip in range(processes):
+            bstart = ip * batch_per_process
+            argss.append((batch[bstart:(bstart+batch_per_process-1), :], nn, g, ge, posar, edgew))
+        ress = pool.starmap(grad_func, argss)
+        g_t_p = np.zeros(shape=posar.shape)
+        g_t_e = np.zeros(shape=edgew.shape)
+        bc_tot = 0
+        for res in ress:
+            g_t_p_, g_t_e_, bc_tot_ = res
+            g_t_p += g_t_p_
+            g_t_e += g_t_e_
+            bc_tot += bc_tot_
+
         bc = bc_tot / batch.shape[0]
         if t == 0:
             b_cost_initial = bc
@@ -124,9 +140,9 @@ def optimize(N, ntb, nts, image_fname):
         }
 
     with open("res/%s_%d_%d.pkl" % (
-        image_fname.split(".")[0].split("/")[-1],
-        N,
-        nts
+            image_fname.split(".")[0].split("/")[-1],
+            n,
+            nts
     ), "wb") as f:
         pickle.dump(store, f)
 
