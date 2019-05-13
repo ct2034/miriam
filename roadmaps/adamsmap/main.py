@@ -9,7 +9,6 @@ import sys
 import time
 
 from adamsmap import (
-    get_random_edgews,
     get_random_pos,
     graphs_from_posar,
     init_graph_posar_edgew,
@@ -155,6 +154,6 @@ if __name__ == "__main__":
     for (image_fname, N, nts) in product(
         [sys.argv[1]],
         [100],
-        [1024]
+        [4096]
     ):
         optimize(N, ntb, nts, image_fname)

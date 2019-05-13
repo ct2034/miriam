@@ -59,14 +59,10 @@ def path_cost(p, posar, edgew, prin=False):
     # TODO: use graph weight
 
 
-def get_random_edgews(N):
-    return np.triu(np.random.normal(loc=0, scale=0.1, size=(N, N)), 1)
-
-
 def init_graph_posar_edgew(im, N):
     global posar
     posar = np.array([get_random_pos(im) for _ in range(N)])
-    edgew = get_random_edgews(N)
+    edgew = np.triu(np.random.normal(loc=0, scale=0.1, size=(N, N)), 1)
     return posar, edgew
 
 
@@ -175,7 +171,6 @@ def path(start, goal, nn, g, posar, edgew):
         if c < min_c:
             min_c = c
             min_p = p
-    # assert min_c != MAX_COST, "no path"
     return min_c, min_p
 
 
