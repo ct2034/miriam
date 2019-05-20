@@ -22,6 +22,10 @@ from adamsmap import (
     MAX_COST,
     path
 )
+from adamsmap_filename_verification import (
+    is_result_file,
+    is_eval_file
+)
 
 
 def eval(batch, nn, g, posar, edgew):
@@ -103,6 +107,7 @@ def eval(batch, nn, g, posar, edgew):
 if __name__ == '__main__':
     fname = sys.argv[1]
     with open(fname, "rb") as f:
+        assert is_result_file(fname), "Please call with result file"
         store = pickle.load(f)
 
     agent_ns = [10, 20, 40]
@@ -183,5 +188,7 @@ if __name__ == '__main__':
         res[agents]["paths_undirected"].append(paths_undirected)
         res[agents]["paths_random"].append(paths_random)
 
-    with open(sys.argv[1] + ".eval", "wb") as f:
+    fname_write = sys.argv[1] + ".eval"
+    assert is_eval_file(fname_write), "Please write results to eval file (ending with pkl.eval)"
+    with open(fname_write, "wb") as f:
         pickle.dump(res, f)
