@@ -59,10 +59,14 @@ def path_cost(p, posar, edgew, prin=False):
     # TODO: use graph weight
 
 
+def init_random_edgew(N):
+    return np.triu(np.random.normal(loc=0, scale=0.1, size=(N, N)), 1)
+
+
 def init_graph_posar_edgew(im, N):
     global posar
     posar = np.array([get_random_pos(im) for _ in range(N)])
-    edgew = np.triu(np.random.normal(loc=0, scale=0.1, size=(N, N)), 1)
+    edgew = init_random_edgew(N)
     return posar, edgew
 
 
@@ -115,7 +119,7 @@ def make_edges(N, g, ge, posar, edgew, im):
                                     distance=dist(posar[i], posar[n]))
 
 
-def plot_graph(fig, ax, g, pos, edgew, im, fname=''):
+def plot_graph(fig, ax, g, pos, edgew, im, fname='', edgecol=True):
     nx.draw_networkx_nodes(g, pos, ax=ax, node_size=15, node_color='k')
 
     def show_edge(e):
@@ -125,9 +129,14 @@ def plot_graph(fig, ax, g, pos, edgew, im, fname=''):
             return edgew[e[1], e[0]] < 0
 
     edges = list(filter(show_edge, g.edges()))
-    edge_colors = [cm.brg(.5 * abs(val) + .5) for val in
+    if edgecol:
+        colperval = lambda val: cm.brg(.5 * abs(val) + .5)
+    else:
+        colperval = lambda val: cm.binary(abs(val))
+    edge_colors = [colperval(val) for val in
                    map(lambda x: edgew[x[0], x[1]] if x[0] < x[1]
                        else edgew[x[1], x[0]], edges)]
+
     nx.draw_networkx_edges(g, pos, ax=ax, edgelist=edges,
                            width=0.7, edge_color=edge_colors)
     ax.imshow(im)

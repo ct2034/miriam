@@ -15,7 +15,7 @@ def is_eval_file(fname):
 
 
 def resolve(fname):
-    return fname.split("/")[-1].split["."][0].split("_")
+    return fname.split("/")[-1].split(".")[0].split("_")
 
 
 def resolve_mapname(fname):
