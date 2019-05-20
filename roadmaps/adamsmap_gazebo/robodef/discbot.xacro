@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<robot name="discbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Constants for robot dimensions -->
+  <xacro:property name="PI" value="3.1415926535897931"/>
+  <xacro:property name="base_width" value=".89" />
+  <xacro:property name="base_length" value="1.20" />
+  <xacro:property name="base_height" value=".39" />
+
+  <xacro:property name="base_ground_clearance" value=".003" />
+
+  <xacro:property name="camera_link" value="0.05" /> <!-- Size of square 'camera' box -->
+  <xacro:property name="axel_offset" value="0.05" /> <!-- Space btw top of beam and the each joint -->
+
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  <xacro:include filename="$(find auckbot_description)/urdf/discbot.gazebo" />
+  <!-- Import Rviz colors -->
+  <xacro:include filename="$(find auckbot_description)/urdf/materials.xacro" />
+
+  <!-- Base ....................................................................... -->
+  <link name="base_link">
+    <collision>
+      <origin xyz="0 0 ${base_height/2-base_ground_clearance}" rpy="0 0 0"/>
+      <geometry type="cylinder" radius="${base_width}" length="${base_height}" />
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 ${base_height/2-base_ground_clearance}" rpy="0 0 0"/>
+      <geometry type="cylinder" radius="${base_width}" length="${base_height}" />
+      <material name="grey"/>
+    </visual>
+
+    <inertial>
+      <origin xyz="0 0 ${base_height/2-base_ground_clearance}" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia
+	      ixx="1.0" ixy="0.0" ixz="0.0"
+	      iyy="1.0" iyz="0.0"
+	      izz="1.0"/>
+    </inertial>
+  </link>
+
+  <gazebo>
+    <plugin name="object_controller" filename="libgazebo_ros_planar_move.so">
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <odometryRate>25.0</odometryRate>
+      <robotBaseFrame>base_link</robotBaseFrame>
+    </plugin>
+  </gazebo>
+
+
+  <!-- Kinect ....................................................................... -->
+  <link name="kinect_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	    <box size=".2 .2 .2"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	    <box size=".2 .2 .2"/>
+        <!--mesh>
+          <include>
+            <uri>model://kinect/meshes/kinect.dae</uri>
+          </include>
+        </mesh-->
+      </geometry>
+      <material name="green"/>
+    </visual>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0"/>
+      <inertia
+	      ixx="0" ixy="0.0" ixz="0.0"
+	      iyy="0" iyz="0.0"
+	      izz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="kinect_joint" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz="${base_length/2} 0 ${base_height}" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="kinect_link"/>
+  </joint>
+
+  <gazebo reference="kinect_link">
+    <sensor name="kinect" type="depth">
+    <always_on>true</always_on>
+    <update_rate>10.0</update_rate>
+    <camera>
+      <horizontal_fov>${62.0*PI/180.0}</horizontal_fov>
+      <image>
+        <format>R8G8B8</format>
+        <width>640</width>
+        <height>480</height>
+      </image>
+      <clip>
+        <near>0.1</near>
+        <far>100</far>
+      </clip>
+    </camera>
+    <plugin name="kinect_controller" filename="libgazebo_ros_openni_kinect.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>20.0</updateRate>
+      <cameraName>kinect</cameraName>
+      <frameName>kinect_link</frameName>
+      <imageTopicName>/kinect/rgb/image_raw</imageTopicName>
+      <depthImageTopicName>/kinect/depth/image_raw</depthImageTopicName>
+      <pointCloudTopicName>/kinect/depth/points</pointCloudTopicName>
+      <cameraInfoTopicName>/kinect/rgb/camera_info</cameraInfoTopicName>
+      <depthImageCameraInfoTopicName>/kinect/depth/camera_info</depthImageCameraInfoTopicName>
+      <pointCloudCutoff>0.5</pointCloudCutoff>
+      <baseline>0.2</baseline>
+      <hackBaseline>0.0</hackBaseline>
+      <distortionK1>0.0</distortionK1>
+      <distortionK2>0.0</distortionK2>
+      <distortionK3>0.0</distortionK3>
+      <distortionT1>0.0</distortionT1>
+      <distortionT2>0.0</distortionT2>
+      <CxPrime>0.0</CxPrime>
+      <Cx>0.0</Cx>
+      <Cy>0.0</Cy>
+      <focalLength>0.0</focalLength>
+    </plugin>
+  </sensor>
+  </gazebo>
+
+
+</robot>

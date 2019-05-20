@@ -1,0 +1,23 @@
+<robot name="simple_disc">
+  <link name="chassis">
+    <inertial>
+      <origin xyz="2 0 0" />
+      <mass value="0.0" />
+      <inertia  ixx="0.0" ixy="0.0"  ixz="0.0"  iyy="0.0"  iyz="0.0"  izz="0.0" />
+    </inertial>
+    <visual>
+      <origin xyz="2 0 1"/>
+      <geometry>
+        <cylinder radius="1" length="1.5">
+        </cylinder>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="2 0 1"/>
+      <geometry>
+        <cylinder radius="1" length="1.5">
+        </cylinder>
+      </geometry>
+    </collision>
+  </link>
+</robot>
