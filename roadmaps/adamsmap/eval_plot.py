@@ -4,19 +4,23 @@ import numpy as np
 import pickle
 import sys
 
+from adamsmap_filename_verification import is_result_file
+
 plt.style.use('bmh')
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["savefig.dpi"] = 500
 
 if __name__ == '__main__':
-    with open(sys.argv[1], "rb") as f:
+    fname = sys.argv[1]
+    with open(fname, "rb") as f:
+        assert is_result_file(fname), "Call this on a *.pkl.eval file."
         res = pickle.load(f)
 
     data = []
     i = 0
-    for k, v in res.items():
-        for k2, v2 in res[k].items():
-            data.append(np.array(v2))
+    for k_agents in res.keys():
+        for k_diff in ['undir', 'rand']:
+            data.append(np.array(res[k_agents][k_diff]))
             i += 1
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 4))
@@ -29,5 +33,5 @@ if __name__ == '__main__':
     ax.set_ylabel("Cost difference [%]")
     plt.tight_layout()
     fig.savefig('eval_quality-'
-                + sys.argv[1].replace('.','_')
+                + fname.replace('.','_')
                 + '.png')

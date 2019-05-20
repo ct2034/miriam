@@ -148,9 +148,9 @@ if __name__ == '__main__':
         res[ans]["paths_random"] = []
 
     for agents, agent_size, _ in product(
-        agent_ns, [40], range(2)):
+        agent_ns, [20], range(2)):
         print("agents: " + str(agents))
-        v = 1
+        v = .2
         nn = 1
         posar = store['posar']
         edgew = store['edgew']
