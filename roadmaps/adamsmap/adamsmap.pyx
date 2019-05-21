@@ -119,7 +119,7 @@ def make_edges(N, g, ge, posar, edgew, im):
                                     distance=dist(posar[i], posar[n]))
 
 
-def plot_graph(fig, ax, g, pos, edgew, im, fname='', edgecol=True):
+def plot_graph(fig, ax, g, pos, edgew, im, fname='', edgecol=True, show=True):
     nx.draw_networkx_nodes(g, pos, ax=ax, node_size=15, node_color='k')
 
     def show_edge(e):
@@ -142,11 +142,12 @@ def plot_graph(fig, ax, g, pos, edgew, im, fname='', edgecol=True):
     ax.imshow(im)
     ax.axis('off')
     fig.add_axes(ax)
-    if(fname):
-        fig.savefig(fname)
-    else:
-        plt.show()
-    plt.close('all')
+    if(show):
+        if(fname):
+            fig.savefig(fname)
+        else:
+            plt.show()
+        plt.close('all')
 
 
 def path(start, goal, nn, g, posar, edgew):

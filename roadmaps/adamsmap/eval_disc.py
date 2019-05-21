@@ -128,22 +128,23 @@ def simulate_one_path(goal, coord_p, v):
     """
     sim_path = []
     i = 0
-    current = coord_p[0]
+    current = coord_p[0].copy()
     while dist(current, goal) > v:
         sim_path.append(current)
         next_p = coord_p[i + 1]
         d_next_p = dist(current, next_p)
         if d_next_p > v:
             delta = v * (next_p - current) / d_next_p
-            current += delta
+            current = (current + delta).copy()
         else:  # d_next_p < v
             rest = v - d_next_p
             assert (rest < v)
             next_node_p = coord_p[i + 2]
             d_next_node_p = dist(next_node_p, next_p)
             delta = rest * (next_node_p - next_p) / d_next_node_p
-            current = next_p + delta
+            current = (next_p + delta).copy()
             i += 1
+    sim_path.append(goal)
     return sim_path
 
 
