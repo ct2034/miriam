@@ -25,7 +25,7 @@ from adamsmap_filename_verification import (
 )
 
 
-def eval_disc(batch, nn, g, posar, edgew, agent_size):
+def eval_disc(batch, nn, g, posar, edgew, agent_size, v):
     """
     Evaluating a given graph by simulating disc-shaped robots to travel through it. The robots move to their individual
         goals and whenever they would collide, they stop based on an arbitrary priority.
@@ -36,9 +36,10 @@ def eval_disc(batch, nn, g, posar, edgew, agent_size):
     :param posar: poses of the graph nodes
     :param edgew: edge weights of the agents (determining the direction of the edges)
     :param agent_size: how big is the agents disc
+    :param v: speed of travel
     :return: sum of costs, paths
     """
-    sim_paths = simulate_paths_indep(batch, edgew, g, nn, posar)
+    sim_paths = simulate_paths_indep(batch, edgew, g, nn, posar, v)
     t_end, sim_paths_coll = simulate_paths_and_waiting(sim_paths, agent_size)
     return sum(t_end), sim_paths_coll
 
@@ -177,7 +178,7 @@ if __name__ == '__main__':
         make_edges(N, g, ge, posar, edgew, im)
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(agents)])
-        cost_ev, paths_ev = eval_disc(batch, nn, ge, posar, edgew, agent_size)
+        cost_ev, paths_ev = eval_disc(batch, nn, ge, posar, edgew, agent_size, v)
 
         edgew_undirected = np.ones([N, N])
         g_undirected = nx.Graph()
@@ -186,7 +187,7 @@ if __name__ == '__main__':
             g_undirected.add_edge(e[0],
                                   e[1],
                                   distance=dist(posar[e[0]], posar[e[1]]))
-        cost_undirected, paths_undirected = (eval_disc(batch, nn, g_undirected, posar, edgew_undirected, agent_size))
+        cost_undirected, paths_undirected = (eval_disc(batch, nn, g_undirected, posar, edgew_undirected, agent_size, v))
 
         g_random = nx.Graph()
         g_random.add_nodes_from(range(N))
@@ -216,7 +217,7 @@ if __name__ == '__main__':
                                           distance=dist(posar_random[i_n], posar_random[n]))
                         g_random.add_edge(n, i_n,
                                           distance=dist(posar_random[i_n], posar_random[n]))
-        cost_random, paths_random = eval_disc(batch, nn, g_random, posar_random, edgew_undirected, agent_size)
+        cost_random, paths_random = eval_disc(batch, nn, g_random, posar_random, edgew_undirected, agent_size, v)
 
         print("our: %d, undir: %d, (our-undir)/our: %.3f%%" %
               (cost_ev, cost_undirected,
