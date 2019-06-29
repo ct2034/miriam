@@ -87,6 +87,7 @@ def coord_path(g, batchpart, posar, v):
     try:
         p = path(g, batchpart)
     except nx.exception.NetworkXNoPath:
+        print(batchpart)
         return []
     if p is None:
         return []
@@ -99,6 +100,50 @@ def coord_path(g, batchpart, posar, v):
     assert (sim_path[0,:] == batchpart[0]).all()
     assert (sim_path[-1,:] == batchpart[1]).all()
     return sim_path
+
+
+def get_dead_ends(g):
+    N = nx.number_of_nodes(g)
+    inedges = np.zeros(N)
+    outedges = np.zeros(N)
+    for n in nx.nodes(g):
+        outedges[n] = 1
+        for ne in nx.neighbors(g, n):
+            inedges[ne] = 1
+    noinedges = list(filter(lambda i: inedges[i] == 0, range(N)))
+    nooutedges = list(filter(lambda i: outedges[i] == 0, range(N)))
+    assert len(set(noinedges).intersection(nooutedges)) == 0, "a node with no edge ?!"
+    return noinedges, nooutedges
+
+
+def fix_dead_ends(g):
+    for i in range(100):
+        dei, deo = get_dead_ends(g)
+        nde = len(dei + deo)
+        if nde == 0:
+            return
+        fix = random.choice(dei + deo)
+        g_old = g.copy()
+        if fix in dei: # we have no in edges
+            fix2 = random.choice(list(nx.neighbors(g, fix)))
+            g.remove_edge(fix, fix2)
+            g.add_edge(fix2, fix)
+        else:  # no out edges
+            assert fix in deo, "must have no out edge, then"
+            candidates_fix2 = []
+            for n in nx.nodes(g):
+                for ne in nx.neighbors(g, n):
+                    if ne == fix:
+                        candidates_fix2.append(n)
+            fix2 = random.choice(candidates_fix2)
+            g.remove_edge(fix2, fix)
+            g.add_edge(fix, fix2)
+
+        dei2, deo2 = get_dead_ends(g)
+        nde2 = len(dei2 + deo2)
+        print(nde2)
+        if nde2 >= nde:  # if it didn't help
+            g = g_old  # reset to old graph
 
 
 def directional_consensus(g_undir, batch):
@@ -123,6 +168,7 @@ def directional_consensus(g_undir, batch):
             g_dir_again.add_edge(e[0], e[1])
         elif dir < 0:
             g_dir_again.add_edge(e[1], e[0])
+    fix_dead_ends(g_dir_again)
     return g_dir_again
 
 
@@ -170,6 +216,8 @@ if __name__ == '__main__':
     make_edges(_N, _, _g_dir, _posar, _edgew, im)
 
     for agents in [10, 30, 100, 300, 1000]:
+        print("%d agents"%agents)
+
         random.seed(0)
         _batch = []
         for i_a in range(agents):
@@ -196,6 +244,7 @@ if __name__ == '__main__':
             p = coord_path(g_dir_again, _batch[i_a], _posar, _v)
             if len(p) == 0:
                 unsucc_undir += 1
+                unsucc_i_a = i_a
             else:
                 paths_undir.append(p)
         t_undir = sum(map(lambda p: len(p) * _v, paths_undir))
@@ -218,9 +267,9 @@ if __name__ == '__main__':
         # plot
         fig2 = plt.figure(figsize=[10, 10])
         ax2 = plt.Axes(fig2, [0., 0., 1., 1.])
-        fig1.suptitle('undirected', fontsize=20)
-        ax2.plot(_batch[:, 0, 0], _batch[:, 0, 1], 'og')  # start -> o green      o--> ---> \
-        ax2.plot(_batch[:, 1, 0], _batch[:, 1, 1], 'xr')  # goal  -> x red                   \-> x
+        fig2.suptitle('undirected', fontsize=20)
+        ax2.plot(_batch[unsucc_i_a, 0, 0], _batch[unsucc_i_a, 0, 1], 'og')  # start -> o green      o--> ---> \
+        ax2.plot(_batch[unsucc_i_a, 1, 0], _batch[unsucc_i_a, 1, 1], 'xr')  # goal  -> x red                   \-> x
 
         for p in paths_undir:
             ax2.plot(p[:, 0], p[:, 1], alpha=.8)
