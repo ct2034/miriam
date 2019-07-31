@@ -2,8 +2,8 @@
 import re
 
 BASE_NAME = ".*\/[a-z]_[0-9]+_[0-9]+\."
-RESULT_FILE = re.compile(BASE_NAME + "pkl")
-EVAL_FILE = re.compile(BASE_NAME + "pkl.eval")
+RESULT_FILE = re.compile(BASE_NAME + "pkl$")
+EVAL_FILE = re.compile(BASE_NAME + "pkl.eval$")
 
 
 def is_result_file(fname):
@@ -11,7 +11,7 @@ def is_result_file(fname):
 
 
 def is_eval_file(fname):
-    return bool(RESULT_FILE.match(fname))
+    return bool(EVAL_FILE.match(fname))
 
 
 def resolve(fname):

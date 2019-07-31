@@ -6,16 +6,8 @@ import sys
 
 from adamsmap_filename_verification import is_result_file
 
-plt.style.use('bmh')
-plt.rcParams["font.family"] = "serif"
-plt.rcParams["savefig.dpi"] = 500
 
-if __name__ == '__main__':
-    fname = sys.argv[1]
-    with open(fname, "rb") as f:
-        assert is_result_file(fname), "Call this on a *.pkl.eval file."
-        res = pickle.load(f)
-
+def save_violin_plot(res):
     data = []
     i = 0
     for k_agents in res.keys():
@@ -35,3 +27,16 @@ if __name__ == '__main__':
     fig.savefig('eval_quality-'
                 + fname.replace('.', '_')
                 + '.png')
+
+
+
+if __name__ == '__main__':
+    plt.style.use('bmh')
+    plt.rcParams["font.family"] = "serif"
+    plt.rcParams["savefig.dpi"] = 500
+    fname = sys.argv[1]
+    with open(fname, "rb") as f:
+        assert is_result_file(fname), "Call this on a *.pkl.eval file."
+        res = pickle.load(f)
+    print(res)
+    save_violin_plot(res)
