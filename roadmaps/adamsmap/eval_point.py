@@ -8,23 +8,16 @@ import random
 import sys
 
 from adamsmap import (
-    get_random_pos,
     graphs_from_posar,
-    init_graph_posar_edgew,
-    init_random_edgew,
     make_edges,
-    plot_graph,
-    eval,
-    grad_func,
-    fix
+    plot_graph
     )
 from adamsmap_filename_verification import (
     is_eval_file,
     resolve_mapname
     )
 from eval_disc import (
-    simulate_one_path,
-    simulate_paths_indep
+    simulate_one_path
     )
 
 
@@ -65,7 +58,8 @@ def path(g, batchpart):
     """
     plan a path
     :param g: the graph
-    :param batchpart: the part of the batch, containing start / goal coordinates + next and prev node numbers
+    :param batchpart: the part of the batch, containing start / goal coordinats
+        + next and prev node numbers
     :return: a path in node numbers
     """
     p = nx.shortest_path(
@@ -79,7 +73,8 @@ def coord_path(g, batchpart, posar, v):
     """
     plan a path in coordinates
     :param g: the graph
-    :param batchpart: the part of the batch, containing start / goal coordinates + next and prev node numbers
+    :param batchpart: the part of the batch, containing start / goal coordinats
+        + next and prev node numbers
     :param posar: position array
     :param v: velocity to travel in
     :return: a path in coordinates
@@ -97,8 +92,8 @@ def coord_path(g, batchpart, posar, v):
     coord_p[(1 + len(p)), :] = batchpart[1]
     goal = batchpart[1].copy()
     sim_path = np.array(simulate_one_path(goal, coord_p, v))
-    assert (sim_path[0,:] == batchpart[0]).all()
-    assert (sim_path[-1,:] == batchpart[1]).all()
+    assert (sim_path[0, :] == batchpart[0]).all()
+    assert (sim_path[-1, :] == batchpart[1]).all()
     return sim_path
 
 
@@ -112,7 +107,8 @@ def get_dead_ends(g):
             inedges[ne] = 1
     noinedges = list(filter(lambda i: inedges[i] == 0, range(N)))
     nooutedges = list(filter(lambda i: outedges[i] == 0, range(N)))
-    assert len(set(noinedges).intersection(nooutedges)) == 0, "a node with no edge ?!"
+    assert (len(set(noinedges).intersection(nooutedges))
+            == 0), "a node with no edge ?!"
     return noinedges, nooutedges
 
 
@@ -124,7 +120,7 @@ def fix_dead_ends(g):
             return
         fix = random.choice(dei + deo)
         g_old = g.copy()
-        if fix in dei: # we have no in edges
+        if fix in dei:  # we have no in edges
             fix2 = random.choice(list(nx.neighbors(g, fix)))
             g.remove_edge(fix, fix2)
             g.add_edge(fix2, fix)
@@ -148,7 +144,8 @@ def fix_dead_ends(g):
 
 def directional_consensus(g_undir, batch):
     """
-    rebuild a directed graph based on the directional preference from a set of paths
+    rebuild a directed graph based on the directional preference from a set of
+    paths
     :param g_undir: base graph, undirected
     :param batch: path start and goal poses
     :return: the newly directional graph
@@ -214,9 +211,10 @@ if __name__ == '__main__':
     assert isinstance(_g_dir, nx.DiGraph)
     assert isinstance(_g_undir, nx.Graph)
     make_edges(_N, _, _g_dir, _posar, _edgew, im)
+    nx.write_adjlist(_g_dir, "test.csv")
 
     for agents in [10, 30, 100, 300, 1000]:
-        print("%d agents"%agents)
+        print("%d agents" % agents)
 
         random.seed(0)
         _batch = []
@@ -256,8 +254,10 @@ if __name__ == '__main__':
         fig1 = plt.figure(figsize=[10, 10])
         ax1 = plt.Axes(fig1, [0., 0., 1., 1.])
         fig1.suptitle('directed', fontsize=20)
-        ax1.plot(_batch[:, 0, 0], _batch[:, 0, 1], 'og')  # start -> o green      o--> ---> \
-        ax1.plot(_batch[:, 1, 0], _batch[:, 1, 1], 'xr')  # goal  -> x red                   \-> x
+        ax1.plot(_batch[:, 0, 0], _batch[:, 0, 1], 'og')  # start: o green
+        ax1.plot(_batch[:, 1, 0], _batch[:, 1, 1], 'xr')  # goal: x red
+        #      o--> ---> \
+        #                \-> x
 
         for p in paths_dir:
             ax1.plot(p[:, 0], p[:, 1], alpha=.8)
@@ -268,8 +268,8 @@ if __name__ == '__main__':
         fig2 = plt.figure(figsize=[10, 10])
         ax2 = plt.Axes(fig2, [0., 0., 1., 1.])
         fig2.suptitle('undirected', fontsize=20)
-        ax2.plot(_batch[unsucc_i_a, 0, 0], _batch[unsucc_i_a, 0, 1], 'og')  # start -> o green      o--> ---> \
-        ax2.plot(_batch[unsucc_i_a, 1, 0], _batch[unsucc_i_a, 1, 1], 'xr')  # goal  -> x red                   \-> x
+        ax2.plot(_batch[unsucc_i_a, 0, 0], _batch[unsucc_i_a, 0, 1], 'og')
+        ax2.plot(_batch[unsucc_i_a, 1, 0], _batch[unsucc_i_a, 1, 1], 'xr')
 
         for p in paths_undir:
             ax2.plot(p[:, 0], p[:, 1], alpha=.8)
