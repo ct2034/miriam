@@ -8,7 +8,8 @@ from gazebo_msgs.srv import SpawnModel, SpawnModelRequest
 
 SET_MODEL_TOPIC_NAME = '/gazebo/set_model_state'
 SPAWN_SERVICE_NAME = '/gazebo/spawn_urdf_model'
-D = .1
+SIZE = 45
+D = 2
 
 
 def publish_pose(pub, name, pos):
@@ -17,6 +18,7 @@ def publish_pose(pub, name, pos):
     ms.model_name = name
     ms.pose.position.x = x
     ms.pose.position.y = y
+    ms.pose.position.z = -1
     pub.publish(ms)
 
 
@@ -33,8 +35,8 @@ if __name__ == '__main__':
         for i in range(n_agents):
             name = "robot{}".format(i, "%02d")
             if not initialized:
-                poses[i, :] = [20 * random.random() - 10,
-                               20 * random.random() - 10]
+                poses[i, :] = [2 * SIZE * random.random() - SIZE,
+                               2 * SIZE * random.random() - SIZE]
                 req = SpawnModelRequest()
                 req.model_name = name
                 req.model_xml = model_str

@@ -2,9 +2,8 @@
 <robot name="discbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Constants for robot dimensions -->
-  <xacro:property name="PI" value="3.1415926535897931"/>
-  <xacro:property name="base_radius" value=".15" />
-  <xacro:property name="base_height" value=".2" />
+  <xacro:property name="base_radius" value="1.5" />
+  <xacro:property name="base_height" value="2" />
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
   <xacro:include filename="$(find adamsmap_gazebo)/gazebo/discbot.gazebo" />
@@ -12,7 +11,7 @@
   <!-- Base ....................................................................... -->
   <link name="base_link">
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 ${base_height}/2" rpy="0 0 0"/>
       <geometry>
         <cylinder radius="${base_radius}" length="${base_height}">
         </cylinder>
@@ -20,7 +19,7 @@
     </collision>
 
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 ${base_height}/2" rpy="0 0 0"/>
       <geometry>
         <cylinder radius="${base_radius}" length="${base_height}">
         </cylinder>
@@ -29,7 +28,7 @@
     </visual>
 
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 ${base_height}/2" rpy="0 0 0"/>
       <mass value="1"/>
       <inertia
 	      ixx="1.0" ixy="0.0" ixz="0.0"
