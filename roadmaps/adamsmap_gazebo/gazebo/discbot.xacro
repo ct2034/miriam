@@ -2,8 +2,8 @@
 <robot name="discbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Constants for robot dimensions -->
-  <xacro:property name="base_radius" value="1.5" />
-  <xacro:property name="base_height" value="2" />
+  <xacro:property name="base_radius" value="1" />
+  <xacro:property name="base_height" value="1" />
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
   <xacro:include filename="$(find adamsmap_gazebo)/gazebo/discbot.gazebo" />
