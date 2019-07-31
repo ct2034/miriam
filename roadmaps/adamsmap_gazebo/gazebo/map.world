@@ -20,7 +20,7 @@
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>100 100</size>
+              <size>96 96</size> <!-- our map is 960 x 960 pixels ...-->
             </plane>
           </geometry>
           <surface>
@@ -46,12 +46,12 @@
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>100 100</size>
+              <size>96 96</size> <!-- our map is 960 x 960 pixels ...-->
             </plane>
           </geometry>
           <material>
             <script>
-              <uri>file://home/ch/ros/miriam_ws/src/adamsmap_gazebo/gazebo/my_ground_plane_c.material</uri>
+              <uri>file://my_ground_plane_c.material</uri>
               <name>MyGroundPlane/Image</name>
             </script>
           </material>

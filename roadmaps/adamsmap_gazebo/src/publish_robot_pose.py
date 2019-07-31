@@ -10,6 +10,7 @@ SET_MODEL_TOPIC_NAME = '/gazebo/set_model_state'
 SPAWN_SERVICE_NAME = '/gazebo/spawn_urdf_model'
 D = .1
 
+
 def publish_pose(pub, name, pos):
     [x, y] = pos
     ms = ModelState()
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     poses = np.zeros([n_agents, 2])
     while(True):
         for i in range(n_agents):
-            name = "robot{}".format(i, "%2d")
+            name = "robot{}".format(i, "%02d")
             if not initialized:
                 poses[i, :] = [20 * random.random() - 10,
                                20 * random.random() - 10]
