@@ -9,7 +9,7 @@ from gazebo_msgs.srv import SpawnModel, SpawnModelRequest
 SET_MODEL_TOPIC_NAME = '/gazebo/set_model_state'
 SPAWN_SERVICE_NAME = '/gazebo/spawn_urdf_model'
 SIZE = 45
-D = 2
+D = .05
 
 
 def publish_pose(pub, name, pos):
@@ -47,4 +47,4 @@ if __name__ == '__main__':
                            + poses[i, :])
             publish_pose(pub, name, poses[i, :])
         initialized = True
-        rospy.sleep(.1)
+        rospy.sleep(.01)
