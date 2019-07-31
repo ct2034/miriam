@@ -36,7 +36,7 @@ if __name__ == '__main__':
     make_edges(N, g, _, posar, edgew, map_im)
     plot_graph(graph_fig, ax, g, pos, edgew, map_im, fname=fname+"_final.png")
 
-    # First set up the figure, the axis, and the plot element we want to animate
+    # First set up the figure, the axis, and the plot element we want to anim
     fig = plt.figure(figsize=figsize)
     ax_graph = plt.axes([0, 0, 1, 1])
     fig.add_axes(ax_graph)
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     ax = plt.axes(xlim=(0, 1000), ylim=(0, 1000),
                   xticks=[], yticks=[],
                   aspect='equal',
-                  alpha = .5)
+                  alpha=.5)
     fig.add_axes(ax)
     ax.patch.set_visible(False)
     lines = []
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     # initialization function: plot the background of each frame
     def init():
         for line in lines:
-            line.set_data([],[])
+            line.set_data([], [])
         return lines
 
     # animation function.  This is called sequentially

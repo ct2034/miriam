@@ -11,9 +11,7 @@ import sys
 from adamsmap import (
     dist,
     get_random_pos,
-    grad_func,
     graphs_from_posar,
-    init_graph_posar_edgew,
     is_pixel_free,
     make_edges,
     MAX_COST,
@@ -27,14 +25,16 @@ from adamsmap_filename_verification import (
 
 def eval_disc(batch, nn, g, posar, edgew, agent_size, v):
     """
-    Evaluating a given graph by simulating disc-shaped robots to travel through it. The robots move to their individual
-        goals and whenever they would collide, they stop based on an arbitrary priority.
+    Evaluating a given graph by simulating disc-shaped robots to travel through
+    it. The robots move to their individual goals and whenever they would
+    collide, they stop based on an arbitrary priority.
 
     :param batch: a batch of start / goal pairs for agents
     :param nn: how many nearest neighbours to consider when path-planning
     :param g: the graph to plan on (undirected)
     :param posar: poses of the graph nodes
-    :param edgew: edge weights of the agents (determining the direction of the edges)
+    :param edgew: edge weights of the agents (determining the direction of the
+        edges)
     :param agent_size: how big is the agents disc
     :param v: speed of travel
     :return: sum of costs, paths
@@ -48,7 +48,8 @@ def simulate_paths_indep(batch, edgew, g, nn, posar, v):
     """
 
     :param batch: a batch of start / goal pairs for agents
-    :param edgew: edge weights of the agents (determining the direction of the edges)
+    :param edgew: edge weights of the agents (determining the direction of the
+        edges)
     :param g: the graph to plan on (undirected)
     :param nn: how many nearest neighbours to consider when path-planning
     :param posar: poses of the graph nodes
@@ -92,7 +93,8 @@ def simulate_paths_and_waiting(sim_paths, agent_size):
     return t_end, sim_paths_coll
 
 
-def iterate_sim(t_end, waiting, i_per_agent, sim_paths, sim_paths_coll, agent_size):
+def iterate_sim(t_end, waiting, i_per_agent, sim_paths, sim_paths_coll,
+                agent_size):
     ended = [sim_paths[i].shape[0] - 1 == i_per_agent[i]
              for i in range(agents)]
     time_slice = np.zeros([agents, 2])
@@ -166,7 +168,7 @@ if __name__ == '__main__':
         res[ans]["paths_random"] = []
 
     for agents, agent_size, _ in product(
-        agent_ns, [20], range(2)):
+            agent_ns, [20], range(2)):
         print("agents: " + str(agents))
         v = .2
         nn = 1
@@ -178,7 +180,8 @@ if __name__ == '__main__':
         make_edges(N, g, ge, posar, edgew, im)
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(agents)])
-        cost_ev, paths_ev = eval_disc(batch, nn, ge, posar, edgew, agent_size, v)
+        cost_ev, paths_ev = eval_disc(batch, nn, ge,
+                                      posar, edgew, agent_size, v)
 
         edgew_undirected = np.ones([N, N])
         g_undirected = nx.Graph()
@@ -187,7 +190,9 @@ if __name__ == '__main__':
             g_undirected.add_edge(e[0],
                                   e[1],
                                   distance=dist(posar[e[0]], posar[e[1]]))
-        cost_undirected, paths_undirected = (eval_disc(batch, nn, g_undirected, posar, edgew_undirected, agent_size, v))
+        cost_undirected, paths_undirected = (eval_disc(batch, nn, g_undirected,
+                                                       posar, edgew_undirected,
+                                                       agent_size, v))
 
         g_random = nx.Graph()
         g_random.add_nodes_from(range(N))
@@ -214,10 +219,14 @@ if __name__ == '__main__':
                     # print(list(line))
                     if all([is_pixel_free(im, x) for x in line]):
                         g_random.add_edge(i_n, n,
-                                          distance=dist(posar_random[i_n], posar_random[n]))
+                                          distance=dist(posar_random[i_n],
+                                                        posar_random[n]))
                         g_random.add_edge(n, i_n,
-                                          distance=dist(posar_random[i_n], posar_random[n]))
-        cost_random, paths_random = eval_disc(batch, nn, g_random, posar_random, edgew_undirected, agent_size, v)
+                                          distance=dist(posar_random[i_n],
+                                                        posar_random[n]))
+        cost_random, paths_random = eval_disc(batch, nn, g_random,
+                                              posar_random, edgew_undirected,
+                                              agent_size, v)
 
         print("our: %d, undir: %d, (our-undir)/our: %.3f%%" %
               (cost_ev, cost_undirected,
@@ -226,13 +235,16 @@ if __name__ == '__main__':
               (cost_ev, cost_random,
                100.*float(cost_ev-cost_random)/cost_ev))
 
-        res[agents]["undir"].append(100.*float(cost_ev-cost_undirected)/cost_ev)
-        res[agents]["rand"].append(100.*float(cost_ev-cost_random)/cost_ev)
+        res[agents]["undir"].append(100.*float(
+            cost_ev-cost_undirected)/cost_ev)
+        res[agents]["rand"].append(100.*float(
+            cost_ev-cost_random)/cost_ev)
         res[agents]["paths_ev"].append(paths_ev)
         res[agents]["paths_undirected"].append(paths_undirected)
         res[agents]["paths_random"].append(paths_random)
 
     fname_write = sys.argv[1] + ".eval"
-    assert is_eval_file(fname_write), "Please write results to eval file (ending with pkl.eval)"
+    assert is_eval_file(fname_write), "Please write "\
+        "results to eval file (ending with pkl.eval)"
     with open(fname_write, "wb") as f:
         pickle.dump(res, f)

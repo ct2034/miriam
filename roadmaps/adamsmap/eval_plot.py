@@ -33,5 +33,5 @@ if __name__ == '__main__':
     ax.set_ylabel("Cost difference [%]")
     plt.tight_layout()
     fig.savefig('eval_quality-'
-                + fname.replace('.','_')
+                + fname.replace('.', '_')
                 + '.png')

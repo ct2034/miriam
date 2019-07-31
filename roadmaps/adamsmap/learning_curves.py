@@ -2,15 +2,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-import sys
 
 plt.style.use('bmh')
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["savefig.dpi"] = 500
 
 if __name__ == '__main__':
-    l = 512
-    res = np.zeros([3, l])
+    lenght = 512
+    res = np.zeros([3, lenght])
     i = 0
     for fname in ["z_200_4096.pkl",
                   "z_500_2048.pkl",
@@ -18,9 +17,9 @@ if __name__ == '__main__':
         with open(fname, "rb") as f:
             store = pickle.load(f)
         if fname == "z_500_2048.pkl":
-            res[i, :] = np.array(store['batchcost'])[0:l*4:4]
+            res[i, :] = np.array(store['batchcost'])[0:lenght*4:4]
         else:
-            res[i, :] = np.array(store['batchcost'])[0:l]
+            res[i, :] = np.array(store['batchcost'])[0:lenght]
         i += 1
 
     f, ax = plt.subplots()

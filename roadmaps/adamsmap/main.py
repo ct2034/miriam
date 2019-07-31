@@ -30,7 +30,7 @@ def optimize(n, ntb, nts, image_fname):
     im = imageio.imread(image_fname)
 
     # Multiprocessing
-    processes = 8 # Number of processes
+    processes = 8  # Number of processes
     pool = Pool(processes)
 
     evalset = np.array([
@@ -58,7 +58,8 @@ def optimize(n, ntb, nts, image_fname):
 
         g, ge, pos = graphs_from_posar(n, posar)
         make_edges(n, g, ge, posar, edgew, im)
-        e_cost, unsuccesful = eval(t, evalset, nn, g, ge, pos, posar, edgew, im)
+        e_cost, unsuccesful = eval(t, evalset, nn, g, ge,
+                                   pos, posar, edgew, im)
         if t == 0:
             e_cost_initial = e_cost
         print("---")
@@ -77,14 +78,16 @@ def optimize(n, ntb, nts, image_fname):
 
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
-        assert ntb % processes == 0, "batch size no divisible by process number"
+        assert ntb % processes == 0, "batch size no divisible "\
+                                     "by process number"
         batch_per_process = int(ntb / processes)
         argss = []
 
         # Adam
         for ip in range(processes):
             bstart = ip * batch_per_process
-            argss.append((batch[bstart:(bstart+batch_per_process-1), :], nn, g, ge, posar, edgew))
+            argss.append((batch[bstart:(bstart+batch_per_process-1), :], nn,
+                          g, ge, posar, edgew))
         ress = pool.starmap(grad_func, argss)
         g_t_p = np.zeros(shape=posar.shape)
         g_t_e = np.zeros(shape=edgew.shape)
@@ -144,7 +147,6 @@ def optimize(n, ntb, nts, image_fname):
             nts
     ), "wb") as f:
         pickle.dump(store, f)
-
 
 
 if __name__ == "__main__":
