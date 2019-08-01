@@ -12,8 +12,8 @@
     <arg name="world_name" value="$(find adamsmap_gazebo)/gazebo/map.world"/>
   </include>
 
-  <!-- <node name="publish_robot_pose" type="publish_robot_pose.py" pkg="adamsmap_gazebo"
-    args="$(find adamsmap_gazebo)/data/z_200_4096n_agents10_paths_typepaths_ev_n_trial0.csv"/> -->
+  <node name="publish_robot_pose" type="publish_robot_pose.py" pkg="adamsmap_gazebo"
+    args="$(find adamsmap_gazebo)/data/z_200_4096n_agents40_paths_typepaths_ev_n_trial0.csv"/>
 
   <param name="robot_description"
 	 command="$(find xacro)/xacro.py $(find adamsmap_gazebo)/gazebo/discbot.xacro" />

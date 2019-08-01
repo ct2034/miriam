@@ -6,21 +6,26 @@ import networkx as nx
 import numpy as np
 from scipy.spatial import Delaunay
 import pickle
+import random
 import sys
 
 from adamsmap import (
     dist,
+    get_edge_statistics,
     get_random_pos,
     graphs_from_posar,
     is_pixel_free,
     make_edges,
-    MAX_COST,
-    path
+    vertex_path
 )
 from adamsmap_filename_verification import (
     is_result_file,
-    is_eval_file
+    is_eval_file,
+    resolve_mapname
 )
+
+# how bigger than its size should the robot sense?
+SENSE_FACTOR = 1.2
 
 
 def eval_disc(batch, nn, g, posar, edgew, agent_size, v):
@@ -41,7 +46,7 @@ def eval_disc(batch, nn, g, posar, edgew, agent_size, v):
     """
     sim_paths = simulate_paths_indep(batch, edgew, g, nn, posar, v)
     t_end, sim_paths_coll = simulate_paths_and_waiting(sim_paths, agent_size)
-    return sum(t_end), sim_paths_coll
+    return float(sum(t_end)) / batch.shape[0], sim_paths_coll
 
 
 def simulate_paths_indep(batch, edgew, g, nn, posar, v):
@@ -58,14 +63,12 @@ def simulate_paths_indep(batch, edgew, g, nn, posar, v):
     """
     sim_paths = []
     for i_b in range(batch.shape[0]):
-        (c, p) = path(batch[i_b, 0], batch[i_b, 1], nn, g, posar, edgew)
-        if c < MAX_COST:
-            coord_p = np.zeros([len(p) + 2, 2])
-            coord_p[0, :] = batch[i_b, 0]
-            coord_p[1:(1 + len(p)), :] = np.array([posar[i_p] for i_p in p])
-            coord_p[(1 + len(p)), :] = batch[i_b, 1]
+        p = vertex_path(g, batch[i_b, 0], batch[i_b, 1], posar)
+        if p is not None:
+            coord_p = np.array([posar[i_p] for i_p in p])
             goal = batch[i_b, 1]
-            sim_path = simulate_one_path(goal, coord_p, v)
+            assert goal == p[-1], str(p) + str(batch[i_b])
+            sim_path = simulate_one_path(coord_p, v)
             sim_paths.append(np.array(sim_path))
         else:
             print("Path failed !!")
@@ -84,12 +87,21 @@ def simulate_paths_and_waiting(sim_paths, agent_size):
     sim_paths_coll = None
     ended = [False for _ in range(agents)]
     waiting = [False for _ in range(agents)]
-    i_per_agent = [0 for _ in range(agents)]
+    i_per_agent = [-1 for _ in range(agents)]
     t_end = [0 for _ in range(agents)]
+    prev_i_per_agent = [0 for _ in range(agents)]
     while not all(ended):
+        if prev_i_per_agent == i_per_agent:
+            print("e:" + str(ended))
+            print("ipa:" + str(i_per_agent))
+            print("pipa:" + str(prev_i_per_agent))
+            print("w:" + str(waiting))
+            raise Exception("deadlock")
+        prev_i_per_agent = i_per_agent.copy()
         sim_paths_coll, ended, t_end, waiting, i_per_agent = iterate_sim(
             t_end, waiting, i_per_agent, sim_paths, sim_paths_coll, agent_size
         )
+        # print(i_per_agent)
     return t_end, sim_paths_coll
 
 
@@ -108,19 +120,21 @@ def iterate_sim(t_end, waiting, i_per_agent, sim_paths, sim_paths_coll,
         sim_paths_coll = np.append(sim_paths_coll,
                                    np.array([time_slice, ]),
                                    axis=0)
+    waiting = [False for _ in range(agents)]
     for (a, b) in combinations(range(agents), r=2):
-        waiting = [False for _ in range(agents)]
         if dist(sim_paths[a][i_per_agent[a]],
-                sim_paths[b][i_per_agent[b]]) < agent_size:
-            waiting[min(a, b)] = True
-    i_per_agent = [i_per_agent[i] + (1 if not waiting[i]
-                                     and not ended[i]
-                                     else 0)
-                   for i in range(agents)]
+                sim_paths[b][i_per_agent[b]]) < SENSE_FACTOR * agent_size:
+            if(not ended[a] and not ended[b]):
+                waiting[min(a, b)] = True  # if one ended, no one has to wait
+    # print("w:" + str(waiting))
+    i_per_agent = [i_per_agent[i_a] + (1 if (not waiting[i_a]
+                                             and not ended[i_a])
+                                       else 0)
+                   for i_a in range(agents)]
     return sim_paths_coll, ended, t_end, waiting, i_per_agent
 
 
-def simulate_one_path(goal, coord_p, v):
+def simulate_one_path(coord_p, v):
     """
     Simulate one agent path through coordinates.
 
@@ -130,11 +144,12 @@ def simulate_one_path(goal, coord_p, v):
     :return: the path in coordinates
     """
     sim_path = []
-    i = 0
+    i = 1
     current = coord_p[0].copy()
+    goal = coord_p[-1].copy()
     while dist(current, goal) > v:
         sim_path.append(current)
-        next_p = coord_p[i + 1]
+        next_p = coord_p[i]
         d_next_p = dist(current, next_p)
         if d_next_p > v:
             delta = v * (next_p - current) / d_next_p
@@ -142,9 +157,15 @@ def simulate_one_path(goal, coord_p, v):
         else:  # d_next_p < v
             rest = v - d_next_p
             assert (rest < v)
-            next_node_p = coord_p[i + 2]
-            d_next_node_p = dist(next_node_p, next_p)
-            delta = rest * (next_node_p - next_p) / d_next_node_p
+            assert (rest > 0)
+            if (i + 1 < len(coord_p)):
+                after_next_p = coord_p[i + 1]
+                d_after_next_p = dist(after_next_p, next_p)
+            else:
+                rest = 0
+                after_next_p = coord_p[i]
+                d_after_next_p = 1
+            delta = rest * (after_next_p - next_p) / d_after_next_p
             current = (next_p + delta).copy()
             i += 1
     sim_path.append(goal)
@@ -167,19 +188,23 @@ if __name__ == '__main__':
         res[ans]["paths_undirected"] = []
         res[ans]["paths_random"] = []
 
+    posar = store['posar']
+    N = posar.shape[0]
+    edgew = store['edgew']
+    im = imageio.imread(resolve_mapname(fname))
+    __, ge, pos = graphs_from_posar(N, posar)
+    make_edges(N, __, ge, posar, edgew, im)
+    print(get_edge_statistics(ge, posar))
+
     for agents, agent_size, _ in product(
-            agent_ns, [20], range(2)):
+            agent_ns, [5], range(1)):
         print("agents: " + str(agents))
+        print("agent_size: " + str(agent_size))
         v = .2
         nn = 1
-        posar = store['posar']
-        edgew = store['edgew']
-        N = posar.shape[0]
-        im = imageio.imread("maps/"+fname.split("_")[0].split("/")[-1]+".png")
-        g, ge, pos = graphs_from_posar(N, posar)
-        make_edges(N, g, ge, posar, edgew, im)
         batch = np.array([
-            [get_random_pos(im), get_random_pos(im)] for _ in range(agents)])
+            [random.choice(range(N)),
+             random.choice(range(N))] for _ in range(agents)])
         cost_ev, paths_ev = eval_disc(batch, nn, ge,
                                       posar, edgew, agent_size, v)
 

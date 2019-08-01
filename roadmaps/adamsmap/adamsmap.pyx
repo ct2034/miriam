@@ -33,11 +33,6 @@ def dist(a, b):
     return math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2)
 
 
-def dist_posar(an, bn):
-    global posar
-    return dist(posar[an], posar[bn])
-
-
 def edge_cost_factor(a, b, edgew):
     if a < b:
         c = edgew[a, b]
@@ -119,6 +114,14 @@ def make_edges(N, g, ge, posar, edgew, im):
                                     distance=dist(posar[i], posar[n]))
 
 
+def get_edge_statistics(g, posar):
+    edge_lengths = []
+    for e in g.edges:
+        edge_lengths.append(dist(posar[e[0]],
+                                 posar[e[1]]))
+    return np.mean(edge_lengths), np.std(edge_lengths)
+
+
 def plot_graph(fig, ax, g, pos, edgew, im, fname='', edgecol=True, show=True):
     nx.draw_networkx_nodes(g, pos, ax=ax, node_size=15, node_color='k')
 
@@ -164,24 +167,32 @@ def path(start, goal, nn, g, posar, edgew):
         else:
             start_v = result[0][i_s]
             goal_v = result[1][i_g]
-        try:
-            p = nx.astar_path(g,
-                              start_v,
-                              goal_v,
-                              heuristic=dist_posar,
-                              weight='distance'
-                              )
+        p = vertex_path(g, start_v, goal_v, posar)
+        if p is None:
+            c = MAX_COST
+        else:
             ds = dist(start, posar[p[0]])
             dg = dist(goal, posar[p[-1]])
             c = (path_cost(p, posar, edgew)
                  + END_BOOST * (ds**2 + ds)
                  + END_BOOST * (dg**2 + dg))
-        except nx.exception.NetworkXNoPath:
-            c = MAX_COST
         if c < min_c:
             min_c = c
             min_p = p
     return min_c, min_p
+
+
+def vertex_path(g, start_v, goal_v, posar):
+    def dist_posar(an, bn):
+        return dist(posar[an], posar[bn])
+    try:
+        return nx.astar_path(g,
+                             start_v,
+                             goal_v,
+                             heuristic=dist_posar,
+                             weight='distance')
+    except nx.exception.NetworkXNoPath:
+        return None
 
 
 def plot_path(fig, start, goal, path, posar, edgew):
