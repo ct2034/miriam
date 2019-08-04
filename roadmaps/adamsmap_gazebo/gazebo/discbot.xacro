@@ -2,7 +2,7 @@
 <robot name="discbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Constants for robot dimensions -->
-  <xacro:property name="base_radius" value=".5" />
+  <xacro:property name="base_diameter" value="1" />
   <xacro:property name="base_height" value="1" />
 
   <!-- Import all Gazebo-customization elements, including Gazebo colors -->
@@ -13,7 +13,7 @@
     <collision>
       <origin xyz="0 0 ${base_height}/2" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="${base_radius}" length="${base_height}">
+        <cylinder radius="${base_diameter}/2" length="${base_height}">
         </cylinder>
       </geometry>
     </collision>
@@ -21,7 +21,7 @@
     <visual>
       <origin xyz="0 0 ${base_height}/2" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="${base_radius}" length="${base_height}">
+        <cylinder radius="${base_diameter}/2" length="${base_height}">
         </cylinder>
       </geometry>
       <material name="red"/>

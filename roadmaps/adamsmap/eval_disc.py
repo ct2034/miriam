@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from bresenham import bresenham
+import csv
 import imageio
 from itertools import combinations, product
 import networkx as nx
@@ -21,14 +22,15 @@ from adamsmap import (
 from adamsmap_filename_verification import (
     is_result_file,
     is_eval_file,
-    resolve_mapname
+    resolve_mapname,
+    resolve
 )
 
 # how bigger than its size should the robot sense?
 SENSE_FACTOR = 1.2
 
 
-def eval_disc(batch, nn, g, posar, edgew, agent_size, v):
+def eval_disc(batch, nn, g, posar, edgew, agent_diameter, v):
     """
     Evaluating a given graph by simulating disc-shaped robots to travel through
     it. The robots move to their individual goals and whenever they would
@@ -40,12 +42,12 @@ def eval_disc(batch, nn, g, posar, edgew, agent_size, v):
     :param posar: poses of the graph nodes
     :param edgew: edge weights of the agents (determining the direction of the
         edges)
-    :param agent_size: how big is the agents disc
+    :param agent_diameter: how big is the agents disc
     :param v: speed of travel
     :return: sum of costs, paths
     """
     sim_paths = simulate_paths_indep(batch, edgew, g, nn, posar, v)
-    t_end, sim_paths_coll = simulate_paths_and_waiting(sim_paths, agent_size)
+    t_end, sim_paths_coll = simulate_paths_and_waiting(sim_paths, agent_diameter)
     return float(sum(t_end)) / batch.shape[0], sim_paths_coll
 
 
@@ -62,26 +64,26 @@ def simulate_paths_indep(batch, edgew, g, nn, posar, v):
     :return: simulated paths
     """
     sim_paths = []
-    for i_b in range(batch.shape[0]):
-        p = vertex_path(g, batch[i_b, 0], batch[i_b, 1], posar)
+    for i_a in range(batch.shape[0]):
+        p = vertex_path(g, batch[i_a, 0], batch[i_a, 1], posar)
         if p is not None:
             coord_p = np.array([posar[i_p] for i_p in p])
-            goal = batch[i_b, 1]
-            assert goal == p[-1], str(p) + str(batch[i_b])
+            goal = batch[i_a, 1]
+            assert goal == p[-1], str(p) + str(batch[i_a])
             sim_path = simulate_one_path(coord_p, v)
             sim_paths.append(np.array(sim_path))
         else:
             print("Path failed !!")
-            sim_paths.append(np.array([batch[i_b, 0]]))
+            sim_paths.append(np.array([batch[i_a, 0]]))
     return sim_paths
 
 
-def simulate_paths_and_waiting(sim_paths, agent_size):
+def simulate_paths_and_waiting(sim_paths, agent_diameter):
     """
     Simulate paths over time and let robots stop if required.
 
     :param sim_paths: the coordinate based paths
-    :param agent_size: how big is the agents disc
+    :param agent_diameter: how big is the agents disc
     :return: times when agents finished, actual paths
     """
     sim_paths_coll = None
@@ -99,14 +101,15 @@ def simulate_paths_and_waiting(sim_paths, agent_size):
             raise Exception("deadlock")
         prev_i_per_agent = i_per_agent.copy()
         sim_paths_coll, ended, t_end, waiting, i_per_agent = iterate_sim(
-            t_end, waiting, i_per_agent, sim_paths, sim_paths_coll, agent_size
+            t_end, waiting, i_per_agent, sim_paths, sim_paths_coll, agent_diameter
         )
         # print(i_per_agent)
     return t_end, sim_paths_coll
 
 
 def iterate_sim(t_end, waiting, i_per_agent, sim_paths, sim_paths_coll,
-                agent_size):
+                agent_diameter):
+    # print(sim_paths)
     ended = [sim_paths[i].shape[0] - 1 == i_per_agent[i]
              for i in range(agents)]
     time_slice = np.zeros([agents, 2])
@@ -122,8 +125,8 @@ def iterate_sim(t_end, waiting, i_per_agent, sim_paths, sim_paths_coll,
                                    axis=0)
     waiting = [False for _ in range(agents)]
     for (a, b) in combinations(range(agents), r=2):
-        if dist(sim_paths[a][i_per_agent[a]],
-                sim_paths[b][i_per_agent[b]]) < SENSE_FACTOR * agent_size:
+        if dist(time_slice[a, :],
+                time_slice[b, :]) < SENSE_FACTOR * agent_diameter:
             if(not ended[a] and not ended[b]):
                 waiting[min(a, b)] = True  # if one ended, no one has to wait
     # print("w:" + str(waiting))
@@ -132,6 +135,34 @@ def iterate_sim(t_end, waiting, i_per_agent, sim_paths, sim_paths_coll,
                                        else 0)
                    for i_a in range(agents)]
     return sim_paths_coll, ended, t_end, waiting, i_per_agent
+
+
+def write_csv(n_agents, paths, paths_type, n_trial, fname):
+    """
+    Write one set of paths as csv file to be read in ROS
+
+    :param n_agents: How many agents are simulated
+    :param paths: The simulated paths
+    :param paths_type: The type of algorithm {ev, random, undirected}
+    :param n_trial: number of the trial {0 ...}
+    :param fname: filename of the underlying result file
+    """
+    # print(paths.shape)
+    assert is_result_file(fname)
+    fname_csv = ("res/"
+                 + "_".join(resolve(fname))
+                 + "n_agents" + str(n_agents)
+                 + "_paths_type" + str(paths_type)
+                 + "_n_trial" + str(n_trial)
+                 + ".csv")
+    with open(fname_csv, 'w') as f:
+        writer = csv.writer(f, delimiter=' ')
+        for t in range(paths.shape[0]):
+            line = []
+            for agent in range(paths.shape[1]):
+                for i in [0, 1]:
+                    line.append(paths[t, agent, i])
+            writer.writerow(line)
 
 
 def simulate_one_path(coord_p, v):
@@ -196,17 +227,18 @@ if __name__ == '__main__':
     make_edges(N, __, ge, posar, edgew, im)
     print(get_edge_statistics(ge, posar))
 
-    for agents, agent_size, _ in product(
-            agent_ns, [5], range(1)):
+    for agents, agent_diameter, i_trial in product(
+            agent_ns, [10], range(1)):
         print("agents: " + str(agents))
-        print("agent_size: " + str(agent_size))
+        print("agent_diameter: " + str(agent_diameter))
         v = .2
         nn = 1
         batch = np.array([
             [random.choice(range(N)),
              random.choice(range(N))] for _ in range(agents)])
         cost_ev, paths_ev = eval_disc(batch, nn, ge,
-                                      posar, edgew, agent_size, v)
+                                      posar, edgew, agent_diameter, v)
+        write_csv(agents, paths_ev, "ev-our", i_trial, fname)
 
         edgew_undirected = np.ones([N, N])
         g_undirected = nx.Graph()
@@ -217,7 +249,8 @@ if __name__ == '__main__':
                                   distance=dist(posar[e[0]], posar[e[1]]))
         cost_undirected, paths_undirected = (eval_disc(batch, nn, g_undirected,
                                                        posar, edgew_undirected,
-                                                       agent_size, v))
+                                                       agent_diameter, v))
+        write_csv(agents, paths_undirected, "undirected", i_trial, fname)
 
         g_random = nx.Graph()
         g_random.add_nodes_from(range(N))
@@ -251,7 +284,8 @@ if __name__ == '__main__':
                                                         posar_random[n]))
         cost_random, paths_random = eval_disc(batch, nn, g_random,
                                               posar_random, edgew_undirected,
-                                              agent_size, v)
+                                              agent_diameter, v)
+        write_csv(agents, paths_random, "random", i_trial, fname)
 
         print("our: %d, undir: %d, (our-undir)/our: %.3f%%" %
               (cost_ev, cost_undirected,
