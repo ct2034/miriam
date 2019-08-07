@@ -86,11 +86,7 @@ def synchronize_paths(vertex_paths):
     prev_i_per_agent = [-2 for _ in range(n_agents)]
     while not all(finished):
         current_poss = [-1 for _ in range(n_agents)]
-        for i_a in range(n_agents):
-            if i_per_agent[i_a] >= len(vertex_paths[i_a]):
-                finished[i_a] = True
-            else:
-                current_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
+        iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths)
         print("current_poss:" + str(current_poss))
         assert len(get_collisions(current_poss)) == 0, str(current_poss)
         for i_a in range(n_agents):
@@ -103,36 +99,12 @@ def synchronize_paths(vertex_paths):
         print("next_poss:" + str(next_poss))
         next_coll = {1: [0]}
         blocked = [False for _ in range(n_agents)]
-        prev_blocked = blocked.copy()
         i = 0
         while len(next_coll) and not all(blocked):
             i += 1
             assert i < 100
-            for i_a in range(n_agents):
-                if i_per_agent[i_a]+1 < len(vertex_paths[i_a]) and not blocked[i_a]:
-                    next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]+1]
-                elif blocked[i_a]:
-                    next_poss[i_a] = current_poss[i_a]
-                elif i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
-                    next_poss[i_a] = -1
-                else:
-                    assert False
-            print("next_poss:" + str(next_poss))
-            next_coll = get_collisions(next_poss)
-            print("next_coll:" + str(next_coll))
-            all_coll = list(reduce(lambda a, b: a + b, next_coll.values(), []))
-            all_coll = sorted(all_coll)
-            print("all_coll:" + str(all_coll))
-            for c in all_coll:
-                if not blocked[c] and next_poss[c] != current_poss[c]:
-                    blocked[c] = True
-                    break
-            print("i_per_agent:" + str(i_per_agent))
-            print("blocked:" + str(blocked))
-            if all(blocked):
-                unblock = random.randint(0, n_agents-1)
-                blocked[unblock] = False
-            print("-"*10)
+            next_coll = solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_coll, next_poss,
+                                              vertex_paths)
         for i_a in range(n_agents):
             if not blocked[i_a]:
                 i_per_agent[i_a] += 1
@@ -140,6 +112,43 @@ def synchronize_paths(vertex_paths):
         print("finished:" + str(finished))
         print("="*10)
     return out_paths
+
+
+def iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths):
+    for i_a in range(n_agents):
+        if i_per_agent[i_a] >= len(vertex_paths[i_a]):
+            finished[i_a] = True
+        else:
+            current_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
+
+
+def solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_coll, next_poss, vertex_paths):
+    for i_a in range(n_agents):
+        if i_per_agent[i_a] + 1 < len(vertex_paths[i_a]) and not blocked[i_a]:
+            next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a] + 1]
+        elif blocked[i_a]:
+            next_poss[i_a] = current_poss[i_a]
+        elif i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
+            next_poss[i_a] = -1
+        else:
+            assert False
+    print("next_poss:" + str(next_poss))
+    next_coll = get_collisions(next_poss)
+    print("next_coll:" + str(next_coll))
+    all_coll = list(reduce(lambda a, b: a + b, next_coll.values(), []))
+    all_coll = sorted(all_coll)
+    print("all_coll:" + str(all_coll))
+    for c in all_coll:
+        if not blocked[c] and next_poss[c] != current_poss[c]:
+            blocked[c] = True
+            break
+    print("i_per_agent:" + str(i_per_agent))
+    print("blocked:" + str(blocked))
+    if all(blocked):
+        unblock = random.randint(0, n_agents - 1)
+        blocked[unblock] = False
+    print("-" * 10)
+    return next_coll
 
 
 def simulate_paths_indep(batch, edgew, g, nn, posar, v):
@@ -159,7 +168,7 @@ def simulate_paths_indep(batch, edgew, g, nn, posar, v):
     for i_a in range(batch.shape[0]):
         p = vertex_path(g, batch[i_a, 0], batch[i_a, 1], posar)
         vertex_paths.append(p)
-    for p in vertex_paths:
+    for i_a, p in enumerate(vertex_paths):
         if p is not None:
             coord_p = np.array([posar[i_p] for i_p in p])
             goal = batch[i_a, 1]
@@ -219,10 +228,11 @@ def iterate_sim(t_end, waiting, i_per_agent, sim_paths, sim_paths_coll,
                                    axis=0)
     waiting = [False for _ in range(agents)]
     for (a, b) in combinations(range(agents), r=2):
-        if dist(time_slice[a, :],
-                time_slice[b, :]) < SENSE_FACTOR * agent_diameter:
-            if(not ended[a] and not ended[b]):
-                waiting[min(a, b)] = True  # if one ended, no one has to wait
+        if (
+                dist(time_slice[a, :], time_slice[b, :]) < SENSE_FACTOR * agent_diameter and
+                not ended[a] and
+                not ended[b]):
+            waiting[min(a, b)] = True  # if one ended, no one has to wait
     # print("w:" + str(waiting))
     i_per_agent = [i_per_agent[i_a] + (1 if (not waiting[i_a]
                                              and not ended[i_a])
