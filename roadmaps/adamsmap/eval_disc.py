@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from bresenham import bresenham
 import csv
+from functools import reduce
 import imageio
 from itertools import combinations, product
 import networkx as nx
@@ -51,6 +52,96 @@ def eval_disc(batch, nn, g, posar, edgew, agent_diameter, v):
     return float(sum(t_end)) / batch.shape[0], sim_paths_coll
 
 
+def get_collisions(positions):
+    """
+    find agents that are colliding
+
+    :param positions: the positions per agent
+    :return: a dict with agents per colliding vertex
+    """
+    colls = {}
+    for i_a, v in enumerate(positions):
+        if v != -1:  # -1 if there is no position for some reason
+            if v in colls.keys():
+                colls[v].append(i_a)
+            else:
+                colls[v] = [i_a]
+    to_delete = list(filter(lambda k: len(colls[k]) == 1, colls.keys()))
+    for k in to_delete:
+        colls.pop(k)
+    return colls
+
+
+def synchronize_paths(vertex_paths):
+    """
+    make sure no two agents are at the same vertex at the same time by making them waiting
+
+    :param vertex_paths: the paths to check
+    :return: the paths with waiting
+    """
+    n_agents = len(vertex_paths)
+    i_per_agent = [0 for _ in range(n_agents)]
+    finished = [False for _ in range(n_agents)]
+    out_paths = [[] for _ in range(n_agents)]
+    prev_i_per_agent = [-2 for _ in range(n_agents)]
+    while not all(finished):
+        current_poss = [-1 for _ in range(n_agents)]
+        for i_a in range(n_agents):
+            if i_per_agent[i_a] >= len(vertex_paths[i_a]):
+                finished[i_a] = True
+            else:
+                current_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
+        print("current_poss:" + str(current_poss))
+        assert len(get_collisions(current_poss)) == 0, str(current_poss)
+        for i_a in range(n_agents):
+            if not finished[i_a]:
+                out_paths[i_a].append(current_poss[i_a])
+        assert prev_i_per_agent != i_per_agent
+        prev_i_per_agent = i_per_agent.copy()
+
+        next_poss = [-1 for _ in range(n_agents)]
+        print("next_poss:" + str(next_poss))
+        next_coll = {1: [0]}
+        blocked = [False for _ in range(n_agents)]
+        prev_blocked = blocked.copy()
+        i = 0
+        while len(next_coll) and not all(blocked):
+            i += 1
+            assert i < 100
+            for i_a in range(n_agents):
+                if i_per_agent[i_a]+1 < len(vertex_paths[i_a]) and not blocked[i_a]:
+                    next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]+1]
+                elif blocked[i_a]:
+                    next_poss[i_a] = current_poss[i_a]
+                elif i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
+                    next_poss[i_a] = -1
+                else:
+                    assert False
+            print("next_poss:" + str(next_poss))
+            next_coll = get_collisions(next_poss)
+            print("next_coll:" + str(next_coll))
+            all_coll = list(reduce(lambda a, b: a + b, next_coll.values(), []))
+            all_coll = sorted(all_coll)
+            print("all_coll:" + str(all_coll))
+            for c in all_coll:
+                if not blocked[c] and next_poss[c] != current_poss[c]:
+                    blocked[c] = True
+                    break
+            print("i_per_agent:" + str(i_per_agent))
+            print("blocked:" + str(blocked))
+            if all(blocked):
+                unblock = random.randint(0, n_agents-1)
+                blocked[unblock] = False
+            print("-"*10)
+        for i_a in range(n_agents):
+            if not blocked[i_a]:
+                i_per_agent[i_a] += 1
+        print("i_per_agent:" + str(i_per_agent))
+        print("finished:" + str(finished))
+        print("="*10)
+    return out_paths
+
+
 def simulate_paths_indep(batch, edgew, g, nn, posar, v):
     """
 
@@ -64,8 +155,11 @@ def simulate_paths_indep(batch, edgew, g, nn, posar, v):
     :return: simulated paths
     """
     sim_paths = []
+    vertex_paths = []
     for i_a in range(batch.shape[0]):
         p = vertex_path(g, batch[i_a, 0], batch[i_a, 1], posar)
+        vertex_paths.append(p)
+    for p in vertex_paths:
         if p is not None:
             coord_p = np.array([posar[i_p] for i_p in p])
             goal = batch[i_a, 1]
@@ -169,7 +263,6 @@ def simulate_one_path(coord_p, v):
     """
     Simulate one agent path through coordinates.
 
-    :param goal: goal coordinates for this agent
     :param coord_p: the coordinates for the path to be followed
     :param v: speed of travel
     :return: the path in coordinates
