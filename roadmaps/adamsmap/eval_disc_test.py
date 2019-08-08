@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-from eval_disc import synchronize_paths
 import random
+
+from eval_disc import synchronize_paths
 
 
 def test_synchronize_paths_basic():
@@ -14,7 +15,28 @@ def test_synchronize_paths_basic():
 def test_synchronize_paths_empty():
     # test if empty paths are handled correctly
     in_paths = [[1, 2, 3], [], [4, 5, 6]]
-    expected = [[1, 2, 3], [], [4, 5, 6]]
+    expected = in_paths.copy()
+    out_paths = synchronize_paths(in_paths)
+    assert expected == out_paths
+
+
+def test_synchronize_paths_independent():
+    # test if independent paths are handled correctly
+    def rotate(l, n):
+        l = list(l)
+        return l[-n:] + l[:-n]
+
+    length = 10
+    in_paths = [
+        list(range(length)),
+        rotate(range(length), 1),
+        rotate(range(length), 2),
+        rotate(range(length), 3),
+        rotate(range(length), -3),
+        rotate(range(length), -2),
+        rotate(range(length), -1)
+    ]
+    expected = in_paths.copy()
     out_paths = synchronize_paths(in_paths)
     assert expected == out_paths
 
