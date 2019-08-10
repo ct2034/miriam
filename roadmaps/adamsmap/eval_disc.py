@@ -38,7 +38,6 @@ def eval_disc(batch_, g, posar_, agent_diameter_, v_):
     Evaluating a given graph by simulating disc-shaped robots to travel through
     it. The robots move to their individual goals and whenever they would
     collide, they stop based on an arbitrary priority.
-
     :param batch_: a batch of start / goal pairs for agents
     :param g: the graph to plan on (undirected)
     :param posar_: poses of the graph nodes
@@ -54,7 +53,6 @@ def eval_disc(batch_, g, posar_, agent_diameter_, v_):
 def get_collisions(positions):
     """
     find agents that are colliding
-
     :param positions: the positions per agent
     :return: a dict with agents per colliding vertex
     """
@@ -74,7 +72,6 @@ def get_collisions(positions):
 def synchronize_paths(vertex_paths):
     """
     make sure no two agents are at the same vertex at the same time by making them waiting
-
     :param vertex_paths: the paths to check
     :return: the paths with waiting
     """
@@ -114,6 +111,14 @@ def synchronize_paths(vertex_paths):
 
 
 def iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths):
+    """
+    Check if agents ar finished or assign position based on paths and indices
+    :param current_poss: the current pos to be set
+    :param finished: to set which one is finished
+    :param i_per_agent: index per agent in the paths
+    :param n_agents: how many agents are there?
+    :param vertex_paths: the independent paths
+    """
     for i_a in range(n_agents):
         if i_per_agent[i_a] >= len(vertex_paths[i_a]):
             finished[i_a] = True
@@ -122,6 +127,16 @@ def iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths):
 
 
 def solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_poss, vertex_paths):
+    """
+    See how this currently next positions can be done without collisions by blocking some agents
+    :param blocked: true if an agent would be blocked in this iteration
+    :param current_poss: the current pos to be set
+    :param i_per_agent: index per agent in the paths
+    :param n_agents: how many agents are there?
+    :param next_poss: where would the agents be next?
+    :param vertex_paths: the independent paths
+    :return: the next collisions
+    """
     for i_a in range(n_agents):
         if i_per_agent[i_a] + 1 < len(vertex_paths[i_a]) and not blocked[i_a]:
             next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a] + 1]
@@ -152,7 +167,7 @@ def solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_pos
 
 def simulate_paths_indep(batch_, g, posar_, v_):
     """
-
+    simulate the paths with agents independent of each other
     :param batch_: a batch of start / goal pairs for agents
     :param g: the graph to plan on (undirected)
     :param posar_: poses of the graph nodes
@@ -180,7 +195,6 @@ def simulate_paths_indep(batch_, g, posar_, v_):
 def simulate_paths_and_waiting(sim_paths, agent_diameter_):
     """
     Simulate paths over time and let robots stop if required.
-
     :param sim_paths: the coordinate based paths
     :param agent_diameter_: how big is the agents disc
     :return: times when agents finished, actual paths
@@ -206,8 +220,16 @@ def simulate_paths_and_waiting(sim_paths, agent_diameter_):
     return t_end, sim_paths_coll
 
 
-def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll,
-                agent_diameter_):
+def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll, agent_diameter_):
+    """
+    iterate a cycle of the simulation
+    :param t_end: save time when agents ended
+    :param i_per_agent: index per agent in the paths
+    :param sim_paths: the coordinate based paths
+    :param sim_paths_coll: the paths considering collisions
+    :param agent_diameter_: how big should the agents be?
+    :return: sim_paths_coll, ended, t_end, waiting, i_per_agent
+    """
     logging.debug(sim_paths)
     ended = [sim_paths[i].shape[0] - 1 == i_per_agent[i]
              for i in range(agents)]
@@ -240,7 +262,6 @@ def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll,
 def write_csv(n_agents, paths, paths_type, n_trial, fname_):
     """
     Write one set of paths as csv file to be read in ROS
-
     :param n_agents: How many agents are simulated
     :param paths: The simulated paths
     :param paths_type: The type of algorithm {ev, random, undirected}
@@ -268,7 +289,6 @@ def write_csv(n_agents, paths, paths_type, n_trial, fname_):
 def simulate_one_path(coord_p, v_):
     """
     Simulate one agent path through coordinates.
-
     :param coord_p: the coordinates for the path to be followed
     :param v_: speed of travel
     :return: the path in coordinates
