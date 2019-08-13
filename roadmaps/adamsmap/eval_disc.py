@@ -181,16 +181,17 @@ def simulate_paths_indep(batch_, g, posar_, v_):
     for i_a in range(batch_.shape[0]):
         p = vertex_path(g, batch_[i_a, 0], batch_[i_a, 1], posar_)
         vertex_paths.append(p)
+        vertex_paths = synchronize_paths(vertex_paths)
     for i_a, p in enumerate(vertex_paths):
         if p is not None:
             coord_p = np.array([posar_[i_p] for i_p in p])
             goal = batch_[i_a, 1]
             assert goal == p[-1], str(p) + str(batch_[i_a])
             sim_path = simulate_one_path(coord_p, v_)
-            sim_paths.append(np.array(sim_path))
+            sim_paths.append(sim_path)
         else:
-            logging.debug("Path failed !!")
-            sim_paths.append(np.array([batch_[i_a, 0]]))
+            logging.warn("Path failed !!")
+            sim_paths.append([batch_[i_a, 0]])
     return sim_paths
 
 
@@ -213,6 +214,7 @@ def simulate_paths_and_waiting(sim_paths, agent_diameter_):
             logging.debug("ipa:" + str(i_per_agent))
             logging.debug("pipa:" + str(prev_i_per_agent))
             logging.debug("w:" + str(waiting))
+            logging.error("deadlock")
             raise Exception("deadlock")
         prev_i_per_agent = i_per_agent.copy()
         sim_paths_coll, ended, t_end, waiting, i_per_agent = iterate_sim(
