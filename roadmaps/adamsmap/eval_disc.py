@@ -29,6 +29,8 @@ from adamsmap_filename_verification import (
     resolve
 )
 
+logging.basicConfig(level=logging.INFO)
+
 # how bigger than its size should the robot sense?
 SENSE_FACTOR = 1.2
 
@@ -230,7 +232,6 @@ def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll, agent_diameter_):
     :param agent_diameter_: how big should the agents be?
     :return: sim_paths_coll, ended, t_end, waiting, i_per_agent
     """
-    logging.debug(sim_paths)
     ended = [sim_paths[i].shape[0] - 1 == i_per_agent[i]
              for i in range(agents)]
     time_slice = np.zeros([agents, 2])
@@ -344,12 +345,12 @@ if __name__ == '__main__':
     im = imageio.imread(resolve_mapname(fname))
     __, ge, pos = graphs_from_posar(N, posar)
     make_edges(N, __, ge, posar, edgew, im)
-    logging.debug(get_edge_statistics(ge, posar))
+    logging.info(get_edge_statistics(ge, posar))
 
     for agents, agent_diameter, i_trial in product(
             agent_ns, [10], range(1)):
-        logging.debug("agents: " + str(agents))
-        logging.debug("agent_diameter: " + str(agent_diameter))
+        logging.info("agents: " + str(agents))
+        logging.info("agent_diameter: " + str(agent_diameter))
         v = .2
         nn = 1
         batch = np.array([
@@ -403,10 +404,10 @@ if __name__ == '__main__':
                                               posar_random, agent_diameter, v)
         write_csv(agents, paths_random, "random", i_trial, fname)
 
-        logging.debug("our: %d, undir: %d, (our-undir)/our: %.3f%%" %
+        logging.info("our: %d, undir: %d, (our-undir)/our: %.3f%%" %
                       (cost_ev, cost_undirected,
                        100. * float(cost_ev - cost_undirected) / cost_ev))
-        logging.debug("our: %d, rand: %d, (our-rand)/our: %.3f%%\n-----" %
+        logging.info("our: %d, rand: %d, (our-rand)/our: %.3f%%\n-----" %
                       (cost_ev, cost_random,
                        100. * float(cost_ev - cost_random) / cost_ev))
 
