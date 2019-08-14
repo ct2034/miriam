@@ -187,7 +187,8 @@ def simulate_paths_indep(batch_, g, posar_, v_):
             coord_p = np.array([posar_[i_p] for i_p in p])
             goal = batch_[i_a, 1]
             assert goal == p[-1], str(p) + str(batch_[i_a])
-            sim_path = simulate_one_path(coord_p, v_)
+            mean_edge_length, _ = get_edge_statistics(g, posar_)
+            sim_path = simulate_one_path(coord_p, v_, mean_edge_length)
             sim_paths.append(sim_path)
         else:
             logging.warn("Path failed !!")
@@ -289,7 +290,7 @@ def write_csv(n_agents, paths, paths_type, n_trial, fname_):
             writer.writerow(line_)
 
 
-def simulate_one_path(coord_p, v_):
+def simulate_one_path(coord_p, v_, mean_edge_length):
     """
     Simulate one agent path through coordinates.
     :param coord_p: the coordinates for the path to be followed
@@ -300,6 +301,7 @@ def simulate_one_path(coord_p, v_):
     i = 1
     current = coord_p[0].copy()
     goal = coord_p[-1].copy()
+    n_per_edge = round(mean_edge_length / v_ + .5)
     while dist(current, goal) > v_:
         sim_path.append(current)
         next_p = coord_p[i]
