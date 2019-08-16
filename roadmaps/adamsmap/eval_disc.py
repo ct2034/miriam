@@ -98,7 +98,7 @@ def synchronize_paths(vertex_paths):
         next_coll = {1: [0]}
         blocked = [False for _ in range(n_agents)]
         i = 0
-        while len(next_coll) and not all(blocked):
+        while len(next_coll) or all(blocked):
             i += 1
             assert i < 100
             next_coll = solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_poss,
@@ -181,8 +181,8 @@ def simulate_paths_indep(batch_, g, posar_, v_):
     for i_a in range(batch_.shape[0]):
         p = vertex_path(g, batch_[i_a, 0], batch_[i_a, 1], posar_)
         vertex_paths.append(p)
-        vertex_paths = synchronize_paths(vertex_paths)
-    for i_a, p in enumerate(vertex_paths):
+    vertex_paths_synced = synchronize_paths(vertex_paths)
+    for i_a, p in enumerate(vertex_paths_synced):
         if p is not None:
             coord_p = np.array([posar_[i_p] for i_p in p])
             goal = batch_[i_a, 1]
@@ -298,33 +298,36 @@ def simulate_one_path(coord_p, v_, mean_edge_length):
     :return: the path in coordinates
     """
     sim_path = []
-    i = 1
-    current = coord_p[0].copy()
     goal = coord_p[-1].copy()
-    n_per_edge = round(mean_edge_length / v_ + .5)
-    while dist(current, goal) > v_:
-        sim_path.append(current)
-        next_p = coord_p[i]
-        d_next_p = dist(current, next_p)
-        if d_next_p > v_:
-            delta = v_ * (next_p - current) / d_next_p
-            current = (current + delta).copy()
-        else:  # d_next_p < v
-            rest = v_ - d_next_p
-            assert (rest < v_)
-            assert (rest > 0)
-            if i + 1 < len(coord_p):
-                after_next_p = coord_p[i + 1]
-                d_after_next_p = dist(after_next_p, next_p)
-            else:
-                rest = 0
-                after_next_p = coord_p[i]
-                d_after_next_p = 1
-            delta = rest * (after_next_p - next_p) / d_after_next_p
-            current = (next_p + delta).copy()
-            i += 1
+    n_per_edge = int(mean_edge_length / v_)
+    for i_v in range(len(coord_p)-1):
+        last = coord_p[i_v]
+        delta = coord_p[i_v + 1] - last
+        for i_step in range(n_per_edge):
+            sim_path.append(last + delta * float(i_step) / n_per_edge)
     sim_path.append(goal)
-    return sim_path
+    assert len(sim_path) == n_per_edge * (len(coord_p) - 1) + 1
+    for i in range(len(sim_path)-1):
+        assert np.linalg.norm(sim_path[i] - sim_path[i+1]) < 10 * v_
+    return np.array(sim_path)
+
+
+def get_unique_batch(N, n_agents):
+    assert n_agents <= N, "Can only have as much agents as vertices"
+    used_starts = set([-1])
+    used_goals = set([-1])
+    batch = []
+    s = -1
+    g = -1
+    for i_a in range(n_agents):
+        while s in used_starts:
+            s = random.randint(0, N-1)
+        used_starts.add(s)
+        while g in used_goals:
+            g = random.randint(0, N-1)
+        used_goals.add(g)
+        batch.append([s, g])
+    return np.array(batch)
 
 
 if __name__ == '__main__':
@@ -357,9 +360,7 @@ if __name__ == '__main__':
         logging.info("agent_diameter: " + str(agent_diameter))
         v = .2
         nn = 1
-        batch = np.array([
-            [random.choice(range(N)),
-             random.choice(range(N))] for _ in range(agents)])
+        batch = get_unique_batch(N, agents)
         cost_ev, paths_ev = eval_disc(batch, ge,
                                       posar, agent_diameter, v)
         write_csv(agents, paths_ev, "ev-our", i_trial, fname)
