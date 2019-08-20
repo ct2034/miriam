@@ -84,3 +84,7 @@ if __name__ == '__main__':
         rospy.sleep(.01)
         if(t % 100 == 0):
             rospy.loginfo("{:.1%}".format(float(t) / T))
+    for i_a in range(n_agents):
+        name = "robot{}".format(i_a, "%02d")
+        unspawn_robot(delete_client, name, pub)
+    rospy.loginfo("the end")
