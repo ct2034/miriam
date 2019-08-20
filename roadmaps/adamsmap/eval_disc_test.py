@@ -7,7 +7,7 @@ from eval_disc import synchronize_paths
 def test_synchronize_paths_basic():
     # basic example
     in_paths = [[1, 2, 3], [3, 2, 1]]
-    expected = [[1, 1, 2, 3], [3, 2, 1]]
+    expected = [[1, 1, 2, 3], [3, 2, 1]] # agent 1 has prio over 0
     out_paths = synchronize_paths(in_paths)
     assert expected == out_paths
 

@@ -60,7 +60,7 @@ def get_collisions(positions):
     """
     colls = {}
     for i_a, vertex in enumerate(positions):
-        if vertex != -1:  # -1 if there is no position for some reason
+        if vertex != -1:  # -1 if there is no position for different reasons
             if vertex in colls.keys():
                 colls[vertex].append(i_a)
             else:
@@ -92,19 +92,31 @@ def synchronize_paths(vertex_paths):
                 out_paths[i_a].append(current_poss[i_a])
         assert prev_i_per_agent != i_per_agent
         prev_i_per_agent = i_per_agent.copy()
-
         next_poss = [-1 for _ in range(n_agents)]
         logging.debug("next_poss:" + str(next_poss))
         next_coll = {1: [0]}
-        blocked = [False for _ in range(n_agents)]
         i = 0
-        while len(next_coll) or all(blocked):
+        while len(next_coll):
+            formatstr = '{0:0'+str(n_agents)+'b}'
+            blocked = list(reversed(
+                list(map(lambda c: c == '1', formatstr.format(i)))
+            ))
+            assert not all(blocked)
+            for i_a in range(n_agents):
+                if i_per_agent[i_a] + 1 < len(vertex_paths[i_a]) and not blocked[i_a]:
+                    next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a] + 1]
+                elif blocked[i_a]:
+                    next_poss[i_a] = current_poss[i_a]
+                elif i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
+                    next_poss[i_a] = -1
+                else:
+                    assert False
+            next_coll = get_collisions(next_poss)
             i += 1
-            assert i < 100
-            next_coll = solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_poss,
-                                              vertex_paths)
+            # next_coll = solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_poss,
+            #                                   vertex_paths)
         for i_a in range(n_agents):
-            if not blocked[i_a]:
+            if not blocked[i_a] and not finished[i_a]:
                 i_per_agent[i_a] += 1
         logging.debug("i_per_agent:" + str(i_per_agent))
         logging.debug("finished:" + str(finished))
@@ -150,20 +162,21 @@ def solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_pos
             assert False
     logging.debug("next_poss:" + str(next_poss))
     next_coll = get_collisions(next_poss)
+    all_coll = sorted(list(reduce(lambda x, y: x + y, next_coll.values(), [])))
     logging.debug("next_coll:" + str(next_coll))
-    all_coll = list(reduce(lambda x, y: x + y, next_coll.values(), []))
-    all_coll = sorted(all_coll)
     logging.debug("all_coll:" + str(all_coll))
-    for c in all_coll:
-        if not blocked[c] and next_poss[c] != current_poss[c]:
-            blocked[c] = True
-            break
-    logging.debug("i_per_agent:" + str(i_per_agent))
-    logging.debug("blocked:" + str(blocked))
-    if all(blocked):
-        unblock = random.randint(0, n_agents - 1)
-        blocked[unblock] = False
-    logging.debug("-" * 10)
+    # evaluated what currently would be. now trying to solve it
+    if len(all_coll):
+        for coll_v in next_coll:
+            agents = sorted(next_coll[coll_v])
+            for i_a in agents[1:]:
+                blocked[i_a] = True
+        logging.debug("i_per_agent:" + str(i_per_agent))
+        logging.debug("blocked:" + str(blocked))
+        if all(blocked):
+            unblock = random.randint(0, n_agents - 1)
+            blocked[unblock] = False
+        logging.debug("-" * 10)
     return next_coll
 
 
