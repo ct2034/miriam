@@ -349,7 +349,8 @@ if __name__ == '__main__':
         assert is_result_file(fname), "Please call with result file"
         store = pickle.load(f)
 
-    agent_ns = [10, 20, 40]
+    agent_ns = range(10, 200, 30)
+    # agent_ns = [10, 20, 40]
     res = {}
     for ans in agent_ns:
         res[ans] = {}
