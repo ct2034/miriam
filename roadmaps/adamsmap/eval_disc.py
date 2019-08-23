@@ -32,7 +32,7 @@ from adamsmap_filename_verification import (
 logging.basicConfig(level=logging.INFO)
 
 # how bigger than its size should the robot sense?
-SENSE_FACTOR = 1.2
+SENSE_FACTOR = 0
 
 
 def eval_disc(batch_, g, posar_, agent_diameter_, v_):
@@ -68,7 +68,8 @@ def get_collisions(positions):
     to_delete = list(filter(lambda x: len(colls[x]) == 1, colls.keys()))
     for k in to_delete:
         colls.pop(k)
-    return colls
+    all_colls = sorted(list(reduce(lambda x, y: x + y, colls.values(), [])))
+    return colls, all_colls
 
 
 def synchronize_paths(vertex_paths):
@@ -78,43 +79,37 @@ def synchronize_paths(vertex_paths):
     :return: the paths with waiting
     """
     n_agents = len(vertex_paths)
-    i_per_agent = [0 for _ in range(n_agents)]
-    finished = [False for _ in range(n_agents)]
+    i_per_agent = [0] * n_agents
+    finished = [False] * n_agents
     out_paths = [[] for _ in range(n_agents)]
-    prev_i_per_agent = [-2 for _ in range(n_agents)]
+    prev_i_per_agent = [-2] * n_agents
+    for i_a in range(n_agents):
+        if vertex_paths[i_a] is None:
+            finished[i_a] = True
+            out_paths[i_a] = None
     while not all(finished):
-        current_poss = [-1 for _ in range(n_agents)]
+        current_poss = [-1] * n_agents
         iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths)
         logging.debug("current_poss:" + str(current_poss))
-        assert len(get_collisions(current_poss)) == 0, str(current_poss)
+        assert len(get_collisions(current_poss)[1]) == 0, str(current_poss)
         for i_a in range(n_agents):
             if not finished[i_a]:
                 out_paths[i_a].append(current_poss[i_a])
         assert prev_i_per_agent != i_per_agent
         prev_i_per_agent = i_per_agent.copy()
-        next_poss = [-1 for _ in range(n_agents)]
-        logging.debug("next_poss:" + str(next_poss))
-        next_coll = {1: [0]}
-        i = 0
-        while len(next_coll):
-            formatstr = '{0:0'+str(n_agents)+'b}'
-            blocked = list(reversed(
-                list(map(lambda c: c == '1', formatstr.format(i)))
-            ))
-            assert not all(blocked)
-            for i_a in range(n_agents):
-                if i_per_agent[i_a] + 1 < len(vertex_paths[i_a]) and not blocked[i_a]:
-                    next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a] + 1]
-                elif blocked[i_a]:
-                    next_poss[i_a] = current_poss[i_a]
-                elif i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
-                    next_poss[i_a] = -1
-                else:
-                    assert False
-            next_coll = get_collisions(next_poss)
+        blocked = [False] * n_agents
+        prev_blocked = [False] * n_agents
+        next_poss = make_next_poss(current_poss, i_per_agent, blocked, vertex_paths)
+        next_coll, all_coll = get_collisions(next_poss)
+        i = 1
+        while len(next_coll) or all(np.logical_or(blocked, finished)):
+            blocked = to_block(n_agents, next_coll, all_coll)
+            if not all(np.logical_or(blocked, finished)):
+                blocked = list(np.logical_or(blocked, prev_blocked))
+            prev_blocked = blocked.copy()
+            next_poss = make_next_poss(current_poss, i_per_agent, blocked, vertex_paths)
+            next_coll, all_coll = get_collisions(next_poss)
             i += 1
-            # next_coll = solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_poss,
-            #                                   vertex_paths)
         for i_a in range(n_agents):
             if not blocked[i_a] and not finished[i_a]:
                 i_per_agent[i_a] += 1
@@ -122,6 +117,31 @@ def synchronize_paths(vertex_paths):
         logging.debug("finished:" + str(finished))
         logging.debug("=" * 10)
     return out_paths
+
+
+def to_block(n_agents, next_coll, all_coll):
+    n_to_block = len(all_coll) - len(next_coll)
+    to_block_of_all_coll = [True] * n_to_block + [False] * (len(all_coll) - n_to_block)
+    random.shuffle(to_block_of_all_coll)
+    blocked = [False] * n_agents
+    for i_b, i_a in enumerate(all_coll):
+        blocked[i_a] = to_block_of_all_coll[i_b]
+    return blocked
+
+def make_next_poss(current_poss, i_per_agent, blocked, vertex_paths):
+    n_agents = len(i_per_agent)
+    next_poss = [-1] * n_agents
+    for i_a in range(n_agents):
+        if vertex_paths[i_a] is not None:
+            if i_per_agent[i_a] + 1 < len(vertex_paths[i_a]) and not blocked[i_a]:
+                next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a] + 1]
+            elif blocked[i_a]:
+                next_poss[i_a] = current_poss[i_a]
+            elif i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
+                next_poss[i_a] = -1
+            else:
+                assert False
+    return next_poss
 
 
 def iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths):
@@ -134,50 +154,11 @@ def iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths):
     :param vertex_paths: the independent paths
     """
     for i_a in range(n_agents):
-        if i_per_agent[i_a] >= len(vertex_paths[i_a]):
-            finished[i_a] = True
-        else:
-            current_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
-
-
-def solve_block_iteration(blocked, current_poss, i_per_agent, n_agents, next_poss, vertex_paths):
-    """
-    See how this currently next positions can be done without collisions by blocking some agents
-    :param blocked: true if an agent would be blocked in this iteration
-    :param current_poss: the current pos to be set
-    :param i_per_agent: index per agent in the paths
-    :param n_agents: how many agents are there?
-    :param next_poss: where would the agents be next?
-    :param vertex_paths: the independent paths
-    :return: the next collisions
-    """
-    for i_a in range(n_agents):
-        if i_per_agent[i_a] + 1 < len(vertex_paths[i_a]) and not blocked[i_a]:
-            next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a] + 1]
-        elif blocked[i_a]:
-            next_poss[i_a] = current_poss[i_a]
-        elif i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
-            next_poss[i_a] = -1
-        else:
-            assert False
-    logging.debug("next_poss:" + str(next_poss))
-    next_coll = get_collisions(next_poss)
-    all_coll = sorted(list(reduce(lambda x, y: x + y, next_coll.values(), [])))
-    logging.debug("next_coll:" + str(next_coll))
-    logging.debug("all_coll:" + str(all_coll))
-    # evaluated what currently would be. now trying to solve it
-    if len(all_coll):
-        for coll_v in next_coll:
-            agents = sorted(next_coll[coll_v])
-            for i_a in agents[1:]:
-                blocked[i_a] = True
-        logging.debug("i_per_agent:" + str(i_per_agent))
-        logging.debug("blocked:" + str(blocked))
-        if all(blocked):
-            unblock = random.randint(0, n_agents - 1)
-            blocked[unblock] = False
-        logging.debug("-" * 10)
-    return next_coll
+        if vertex_paths[i_a] is not None:
+            if i_per_agent[i_a] >= len(vertex_paths[i_a]):
+                finished[i_a] = True
+            else:
+                current_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
 
 
 def simulate_paths_indep(batch_, g, posar_, v_):
@@ -366,7 +347,7 @@ if __name__ == '__main__':
     im = imageio.imread(resolve_mapname(fname))
     __, ge, pos = graphs_from_posar(N, posar)
     make_edges(N, __, ge, posar, edgew, im)
-    logging.info(get_edge_statistics(ge, posar))
+    logging.info("edge stats: " + str(get_edge_statistics(ge, posar)))
 
     for agents, agent_diameter, i_trial in product(
             agent_ns, [10], range(1)):

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import csv
+
 import imageio
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -13,7 +15,7 @@ from adamsmap import (
     plot_graph
     )
 from adamsmap_filename_verification import (
-    is_eval_file,
+    is_result_file,
     resolve_mapname
     )
 from eval_disc import (
@@ -199,7 +201,7 @@ if __name__ == '__main__':
 
     _fname = sys.argv[1]
     with open(_fname, "rb") as f:
-        assert is_eval_file(_fname), "Please call with eval file"
+        assert is_result_file(_fname), "Please call with result file"
         store = pickle.load(f)
     im = imageio.imread(resolve_mapname(_fname))
 
@@ -211,7 +213,14 @@ if __name__ == '__main__':
     assert isinstance(_g_dir, nx.DiGraph)
     assert isinstance(_g_undir, nx.Graph)
     make_edges(_N, _, _g_dir, _posar, _edgew, im)
-    nx.write_adjlist(_g_dir, "test.csv")
+
+    # write graph to csv ############################################
+    nx.write_adjlist(_g_dir, "graph_adjlist.csv")                   #
+    with open("graph_pos.csv", 'w') as f_csv:                       #
+        writer = csv.writer(f_csv, delimiter=' ')                   #
+        for i_a in range(_N):                                       #
+            writer.writerow(_posar[i_a])                            #
+    #################################################################
 
     for agents in [10, 30, 100, 300, 1000]:
         print("%d agents" % agents)
