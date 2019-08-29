@@ -47,7 +47,7 @@ def eval_disc(batch_, g, posar_, agent_diameter_, v_):
     :param v_: speed of travel
     :return: sum of costs, paths
     """
-    sim_paths = simulate_paths_indep(batch_, g, posar_, v_)
+    sim_paths = simulate_paths_synch(batch_, g, posar_, v_)
     t_end, sim_paths_coll = simulate_paths_and_waiting(sim_paths, agent_diameter_)
     return float(sum(t_end)) / batch_.shape[0], sim_paths_coll
 
@@ -170,9 +170,9 @@ def iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths):
                 current_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
 
 
-def simulate_paths_indep(batch_, g, posar_, v_):
+def simulate_paths_synch(batch_, g, posar_, v_):
     """
-    simulate the paths with agents independent of each other
+    simulate the paths
     :param batch_: a batch of start / goal pairs for agents
     :param g: the graph to plan on (undirected)
     :param posar_: poses of the graph nodes
