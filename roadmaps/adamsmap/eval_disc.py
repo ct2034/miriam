@@ -74,7 +74,7 @@ def get_collisions(positions):
 
 def synchronize_paths(vertex_paths):
     """
-    make sure no two agents are at the same vertex at the same time by making them waiting
+    make sure no two agents are at the same vertex at the same time by making them wait
     :param vertex_paths: the paths to check
     :return: the paths with waiting
     """
@@ -127,6 +127,7 @@ def to_block(n_agents, next_coll, all_coll):
     for i_b, i_a in enumerate(all_coll):
         blocked[i_a] = to_block_of_all_coll[i_b]
     return blocked
+
 
 def make_next_poss(current_poss, i_per_agent, blocked, vertex_paths):
     n_agents = len(i_per_agent)
