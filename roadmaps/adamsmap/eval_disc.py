@@ -79,43 +79,43 @@ def synchronize_paths(vertex_paths):
     :return: the paths with waiting
     """
     n_agents = len(vertex_paths)
-    i_per_agent = [0] * n_agents
+    i_per_agent = [-1] * n_agents
     finished = [False] * n_agents
     out_paths = [[] for _ in range(n_agents)]
     prev_i_per_agent = [-2] * n_agents
+    next_poss = [-1] * n_agents
     for i_a in range(n_agents):
         if vertex_paths[i_a] is None:
             finished[i_a] = True
             out_paths[i_a] = None
     while not all(finished):
-        current_poss = [-1] * n_agents
-        iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths)
-        logging.debug("current_poss:" + str(current_poss))
-        assert len(get_collisions(current_poss)[1]) == 0, str(current_poss)
-        for i_a in range(n_agents):
-            if not finished[i_a]:
-                out_paths[i_a].append(current_poss[i_a])
+        assert len(get_collisions(next_poss)[1]) == 0, str(next_poss)
         assert prev_i_per_agent != i_per_agent
         prev_i_per_agent = i_per_agent.copy()
+        # trying to just increment
         blocked = [False] * n_agents
         prev_blocked = [False] * n_agents
-        next_poss = make_next_poss(current_poss, i_per_agent, blocked, vertex_paths)
+        next_poss, i_per_agent, finished = make_next_poss(prev_i_per_agent, blocked, vertex_paths)
         next_coll, all_coll = get_collisions(next_poss)
         i = 1
-        while len(next_coll) or all(np.logical_or(blocked, finished)):
+        while len(next_coll) or all(np.logical_or(blocked, finished)) and not all(finished):
+            # okay, solve the collisions
             blocked = to_block(n_agents, next_coll, all_coll)
             if not all(np.logical_or(blocked, finished)):
                 blocked = list(np.logical_or(blocked, prev_blocked))
             prev_blocked = blocked.copy()
-            next_poss = make_next_poss(current_poss, i_per_agent, blocked, vertex_paths)
+            next_poss, i_per_agent, finished = make_next_poss(prev_i_per_agent, blocked, vertex_paths)
             next_coll, all_coll = get_collisions(next_poss)
             i += 1
+        # collisions are ok
         for i_a in range(n_agents):
-            if not blocked[i_a] and not finished[i_a]:
-                i_per_agent[i_a] += 1
+            if not finished[i_a]:
+                out_paths[i_a].append(next_poss[i_a])
         logging.debug("i_per_agent:" + str(i_per_agent))
         logging.debug("finished:" + str(finished))
         logging.debug("=" * 10)
+    for i_a in range(n_agents):
+        assert len(out_paths[i_a]) >= len(vertex_paths[i_a])
     return out_paths
 
 
@@ -129,20 +129,26 @@ def to_block(n_agents, next_coll, all_coll):
     return blocked
 
 
-def make_next_poss(current_poss, i_per_agent, blocked, vertex_paths):
-    n_agents = len(i_per_agent)
+def make_next_poss(prev_i_per_agent, blocked, vertex_paths):
+    n_agents = len(prev_i_per_agent)
     next_poss = [-1] * n_agents
+    i_per_agent = [-1] * n_agents
+    finished = [False] * n_agents
     for i_a in range(n_agents):
         if vertex_paths[i_a] is not None:
-            if i_per_agent[i_a] + 1 < len(vertex_paths[i_a]) and not blocked[i_a]:
-                next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a] + 1]
-            elif blocked[i_a]:
-                next_poss[i_a] = current_poss[i_a]
-            elif i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
+            if prev_i_per_agent[i_a] + 1 < len(vertex_paths[i_a]) and not blocked[i_a]:
+                i_per_agent[i_a] = prev_i_per_agent[i_a] + 1
+                next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
+            elif prev_i_per_agent[i_a] + 1 >= len(vertex_paths[i_a]):
+                i_per_agent[i_a] = prev_i_per_agent[i_a]
                 next_poss[i_a] = -1
+                finished[i_a] = True
+            elif blocked[i_a]:
+                i_per_agent[i_a] = prev_i_per_agent[i_a]
+                next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
             else:
                 assert False
-    return next_poss
+    return next_poss, i_per_agent, finished
 
 
 def iterate_poss(current_poss, finished, i_per_agent, n_agents, vertex_paths):
@@ -326,6 +332,7 @@ def get_unique_batch(N, n_agents):
 
 
 if __name__ == '__main__':
+    random.seed(0)
     fname = sys.argv[1]
     with open(fname, "rb") as f:
         assert is_result_file(fname), "Please call with result file"
