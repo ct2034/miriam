@@ -100,8 +100,10 @@ def synchronize_paths(vertex_paths):
         i = 1
         while len(next_coll) or all(np.logical_or(blocked, finished)) and not all(finished):
             # okay, solve the collisions
-            blocked = to_block(n_agents, next_coll, all_coll)
-            if not all(np.logical_or(blocked, finished)):
+            if all(np.logical_or(blocked, finished)):
+                blocked = to_block(n_agents, next_coll, all_coll)
+            else:
+                blocked = to_block(n_agents, next_coll, all_coll)
                 blocked = list(np.logical_or(blocked, prev_blocked))
             prev_blocked = blocked.copy()
             next_poss, i_per_agent, finished = make_next_poss(prev_i_per_agent, blocked, vertex_paths)
