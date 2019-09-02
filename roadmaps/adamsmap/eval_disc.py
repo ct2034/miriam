@@ -150,6 +150,8 @@ def make_next_poss(prev_i_per_agent, blocked, vertex_paths):
                 next_poss[i_a] = vertex_paths[i_a][i_per_agent[i_a]]
             else:
                 assert False
+        else:  # vertex_paths[i_a] is None:
+            finished[i_a] = True
     return next_poss, i_per_agent, finished
 
 
