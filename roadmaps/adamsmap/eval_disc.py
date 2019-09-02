@@ -32,7 +32,7 @@ from adamsmap_filename_verification import (
 logging.basicConfig(level=logging.INFO)
 
 # how bigger than its size should the robot sense?
-SENSE_FACTOR = 0
+SENSE_FACTOR = 0.
 
 
 def eval_disc(batch_, g, posar_, agent_diameter_, v_):
@@ -254,13 +254,13 @@ def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll, agent_diameter_):
                                    np.array([time_slice, ]),
                                    axis=0)
     waiting = [False for _ in range(agents)]
-    for (a1, a2) in combinations(range(agents), r=2):
-        if (
-                dist(time_slice[a1, :], time_slice[a2, :]) < SENSE_FACTOR * agent_diameter_ and
-                not ended[a1] and
-                not ended[a2]):
-            waiting[min(a1, a2)] = True  # if one ended, no one has to wait
-    logging.debug("w:" + str(waiting))
+    # for (a1, a2) in combinations(range(agents), r=2):
+    #     if (
+    #             dist(time_slice[a1, :], time_slice[a2, :]) < SENSE_FACTOR * agent_diameter_ and
+    #             not ended[a1] and
+    #             not ended[a2]):
+    #         waiting[min(a1, a2)] = True  # if one ended, no one has to wait
+    # logging.debug("w:" + str(waiting))
     i_per_agent = [i_per_agent[i_a] + (1 if (not waiting[i_a]
                                              and not ended[i_a])
                                        else 0)
