@@ -116,8 +116,12 @@ def synchronize_paths(vertex_paths):
         logging.debug("i_per_agent:" + str(i_per_agent))
         logging.debug("finished:" + str(finished))
         logging.debug("=" * 10)
-    for i_a in range(n_agents):
-        assert len(out_paths[i_a]) >= len(vertex_paths[i_a])
+    for i_a in range(n_agents): 
+        if out_paths[i_a] is not None and vertex_paths[i_a] is not None:
+            assert len(out_paths[i_a]) >= len(vertex_paths[i_a])  # after sync it may be longer but not shorter
+        else:  # either none or both ar None
+            assert out_paths[i_a] is None
+            assert vertex_paths[i_a] is None
     return out_paths
 
 
