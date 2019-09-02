@@ -1,7 +1,35 @@
 #!/usr/bin/env python3
 import random
+import networkx as nx
+import numpy as np
 
-from eval_disc import synchronize_paths
+from eval_disc import synchronize_paths, eval_disc
+
+
+def test_eval_disc_basic():
+    g = nx.DiGraph()
+    g.add_nodes_from(range(5))
+    g.add_edge(0, 1)
+    g.add_edge(0, 2)
+    g.add_edge(1, 2)
+    g.add_edge(1, 4)
+    g.add_edge(2, 3)
+    g.add_edge(2, 4)
+    g.add_edge(3, 0)
+    g.add_edge(4, 3)
+    posar = [
+        [1, 3],
+        [3, 3],
+        [2, 2],
+        [1, 1],
+        [3, 1]
+    ]
+    batch = np.array(
+        [[0, 1], [3, 4]]
+    )
+    agent_diameter = 1
+    v = .1
+    eval_disc(batch, g, posar, agent_diameter, v)
 
 
 def test_synchronize_paths_basic():
@@ -16,6 +44,14 @@ def test_synchronize_paths_basic():
 def test_synchronize_paths_empty():
     # test if empty paths are handled correctly
     in_paths = [[1, 2, 3], [], [4, 5, 6]]
+    expected = in_paths.copy()
+    out_paths = synchronize_paths(in_paths)
+    assert expected == out_paths
+
+
+def test_synchronize_paths_none():
+    # test if None paths are handled correctly
+    in_paths = [[1, 2, 3], None, [4, 5, 6], None]
     expected = in_paths.copy()
     out_paths = synchronize_paths(in_paths)
     assert expected == out_paths

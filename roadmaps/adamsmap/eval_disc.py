@@ -116,7 +116,7 @@ def synchronize_paths(vertex_paths):
         logging.debug("i_per_agent:" + str(i_per_agent))
         logging.debug("finished:" + str(finished))
         logging.debug("=" * 10)
-    for i_a in range(n_agents): 
+    for i_a in range(n_agents):
         if out_paths[i_a] is not None and vertex_paths[i_a] is not None:
             assert len(out_paths[i_a]) >= len(vertex_paths[i_a])  # after sync it may be longer but not shorter
         else:  # either none or both ar None
@@ -212,12 +212,13 @@ def simulate_paths_and_waiting(sim_paths, agent_diameter_):
     :param agent_diameter_: how big is the agents disc
     :return: times when agents finished, actual paths
     """
+    n_agents_ = len(sim_paths)
     sim_paths_coll = None
-    ended = [False for _ in range(agents)]
-    waiting = [False for _ in range(agents)]
-    i_per_agent = [-1 for _ in range(agents)]
-    t_end = [0 for _ in range(agents)]
-    prev_i_per_agent = [0 for _ in range(agents)]
+    ended = [False for _ in range(n_agents_)]
+    waiting = [False for _ in range(n_agents_)]
+    i_per_agent = [-1 for _ in range(n_agents_)]
+    t_end = [0 for _ in range(n_agents_)]
+    prev_i_per_agent = [0 for _ in range(n_agents_)]
     while not all(ended):
         if prev_i_per_agent == i_per_agent:
             logging.debug("e:" + str(ended))
@@ -244,10 +245,11 @@ def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll, agent_diameter_):
     :param agent_diameter_: how big should the agents be?
     :return: sim_paths_coll, ended, t_end, waiting, i_per_agent
     """
+    n_agents_ = len(sim_paths)
     ended = [sim_paths[i].shape[0] - 1 == i_per_agent[i]
-             for i in range(agents)]
-    time_slice = np.zeros([agents, 2])
-    for i_a in range(agents):
+             for i in range(n_agents_)]
+    time_slice = np.zeros([n_agents_, 2])
+    for i_a in range(n_agents_):
         time_slice[i_a, :] = sim_paths[i_a][i_per_agent[i_a]]
         if ended[i_a]:
             t_end[i_a] = i_per_agent[i_a]
@@ -257,7 +259,7 @@ def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll, agent_diameter_):
         sim_paths_coll = np.append(sim_paths_coll,
                                    np.array([time_slice, ]),
                                    axis=0)
-    waiting = [False for _ in range(agents)]
+    waiting = [False for _ in range(n_agents_)]
     # for (a1, a2) in combinations(range(agents), r=2):
     #     if (
     #             dist(time_slice[a1, :], time_slice[a2, :]) < SENSE_FACTOR * agent_diameter_ and
@@ -268,7 +270,7 @@ def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll, agent_diameter_):
     i_per_agent = [i_per_agent[i_a] + (1 if (not waiting[i_a]
                                              and not ended[i_a])
                                        else 0)
-                   for i_a in range(agents)]
+                   for i_a in range(n_agents_)]
     return sim_paths_coll, ended, t_end, waiting, i_per_agent
 
 
