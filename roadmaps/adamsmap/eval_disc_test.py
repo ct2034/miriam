@@ -7,6 +7,7 @@ from eval_disc import synchronize_paths, eval_disc
 
 
 def test_eval_disc_basic():
+    # basic example
     g = nx.DiGraph()
     g.add_nodes_from(range(5))
     g.add_edge(0, 1)
@@ -30,6 +31,27 @@ def test_eval_disc_basic():
     agent_diameter = 1
     v = .1
     eval_disc(batch, g, posar, agent_diameter, v)
+
+
+def test_eval_disc_no_path():
+    # a test where one job has definitely no path
+    g = nx.DiGraph()
+    g.add_nodes_from(range(3))
+    g.add_edge(0, 1)
+    g.add_edge(1, 0)
+    posar = [
+        [1, 3],
+        [3, 3],
+        [2, 2],
+    ]
+    batch = np.array(
+        [[0, 1], [1, 2]]
+    )
+    agent_diameter = 1
+    v = .1
+    t, paths = eval_disc(batch, g, posar, agent_diameter, v)
+    print(t)
+    print(paths)
 
 
 def test_synchronize_paths_basic():

@@ -201,7 +201,7 @@ def simulate_paths_synch(batch_, g, posar_, v_):
             sim_paths.append(sim_path)
         else:
             logging.warn("Path failed !!")
-            sim_paths.append([batch_[i_a, 0]])
+            sim_paths.append(np.array([]))
     return sim_paths
 
 
@@ -250,8 +250,9 @@ def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll, agent_diameter_):
              for i in range(n_agents_)]
     time_slice = np.zeros([n_agents_, 2])
     for i_a in range(n_agents_):
-        time_slice[i_a, :] = sim_paths[i_a][i_per_agent[i_a]]
-        if ended[i_a]:
+        if not ended[i_a]:
+            time_slice[i_a, :] = sim_paths[i_a][i_per_agent[i_a]]
+        else:
             t_end[i_a] = i_per_agent[i_a]
     if sim_paths_coll is None:
         sim_paths_coll = np.array([time_slice, ])
@@ -260,13 +261,6 @@ def iterate_sim(t_end, i_per_agent, sim_paths, sim_paths_coll, agent_diameter_):
                                    np.array([time_slice, ]),
                                    axis=0)
     waiting = [False for _ in range(n_agents_)]
-    # for (a1, a2) in combinations(range(agents), r=2):
-    #     if (
-    #             dist(time_slice[a1, :], time_slice[a2, :]) < SENSE_FACTOR * agent_diameter_ and
-    #             not ended[a1] and
-    #             not ended[a2]):
-    #         waiting[min(a1, a2)] = True  # if one ended, no one has to wait
-    # logging.debug("w:" + str(waiting))
     i_per_agent = [i_per_agent[i_a] + (1 if (not waiting[i_a]
                                              and not ended[i_a])
                                        else 0)
