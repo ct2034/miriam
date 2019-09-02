@@ -1,0 +1,14 @@
+<launch>
+	<arg name="map_file" default="$(find adamsmap_graph)/maps/z.yaml"/>
+
+	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+
+	<node name="tf_world_map" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 1 world map 100" />
+	<node name="tf_map_base_link" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 1 map base_link 100" />
+	<node name="costmap_2d_node" pkg="costmap_2d" type="costmap_2d_node" />
+	<rosparam file="$(find adamsmap_graph)/config/costmap_common_params.yaml" command="load" ns="costmap_2d_node/costmap" />
+    <rosparam file="$(find adamsmap_graph)/config/global_costmap_params.yaml" command="load" ns="costmap_2d_node/costmap" />
+	<node name="pub_footprint" pkg="adamsmap_graph" type="pub_footprint.py" output="screen" />
+
+	<node name="roadmap_server" pkg="adamsmap_graph" type="roadmap_server.py" output="screen" />
+</launch>
