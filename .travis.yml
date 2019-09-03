@@ -1,10 +1,11 @@
-language: minimal
+sudo: required
+dist: trusty
+language: generic
 
-services:
-  - docker
-
-before_script:
-  - docker build -t ct2034/miriam .
-
+env:
+  global:
+    - ROS_DISTRO="melodic"
+install:
+  - git clone --depth=1 -b master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
-  - docker run -m 8G --memory-swap=8G ct2034/miriam
+  - .industrial_ci/travis.sh
