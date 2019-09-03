@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+!/usr/bin/env python2
 import csv
 import logging
 import pickle
@@ -10,7 +10,7 @@ from itertools import combinations, product
 import imageio
 import networkx as nx
 import numpy as np
-from adamsmap import (
+from adamsmap.adamsmap import (
     dist,
     get_edge_statistics,
     get_random_pos,

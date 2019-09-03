@@ -5,7 +5,7 @@ import networkx as nx
 import numpy as np
 from random import random
 
-from adamsmap import (
+from adamsmap.adamsmap import (
     grad_func,
     graphs_from_posar,
     make_edges

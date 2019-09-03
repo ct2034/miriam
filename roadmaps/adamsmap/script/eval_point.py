@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 import csv
 
 import imageio
@@ -9,7 +9,7 @@ import pickle
 import random
 import sys
 
-from adamsmap import (
+from adamsmap.adamsmap import (
     graphs_from_posar,
     make_edges,
     plot_graph

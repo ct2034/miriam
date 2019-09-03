@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 import imageio
 from itertools import product
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ import pickle
 import sys
 import time
 
-from adamsmap import (
+from adamsmap.adamsmap import (
     get_random_pos,
     graphs_from_posar,
     init_graph_posar_edgew,
@@ -17,6 +17,7 @@ from adamsmap import (
     grad_func,
     fix
     )
+# import adamsmap
 
 
 def optimize(n, ntb, nts, image_fname):

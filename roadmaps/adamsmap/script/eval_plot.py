@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle

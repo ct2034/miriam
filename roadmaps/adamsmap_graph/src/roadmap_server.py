@@ -7,7 +7,15 @@ from graph_msgs.msg import GeometryGraph
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
 
-
+from adamsmap.adamsmap import (
+    get_random_pos,
+    graphs_from_posar,
+    init_graph_posar_edgew,
+    make_edges,
+    eval,
+    grad_func,
+    fix
+    )
 
 class RoadmapServer:
     info = None

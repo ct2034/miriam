@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 import re
 
 BASE_NAME = ".*\/[a-z]_[0-9]+_[0-9]+\."

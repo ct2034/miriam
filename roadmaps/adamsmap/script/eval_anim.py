@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-from adamsmap import graphs_from_posar, make_edges, plot_graph
+#!/usr/bin/env python2
+from adamsmap.adamsmap import graphs_from_posar, make_edges, plot_graph
 import imageio
 from matplotlib import animation
 import matplotlib.pyplot as plt
