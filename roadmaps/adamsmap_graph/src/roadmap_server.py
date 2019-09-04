@@ -1,4 +1,6 @@
 #!/usr/bin/env python2
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 import rospy
@@ -19,7 +21,8 @@ from adamsmap.adamsmap import (
     eval,
     grad_func,
     fix
-    )
+)
+
 
 class RoadmapServer:
     info = None
@@ -29,6 +32,8 @@ class RoadmapServer:
         self.pub_rm = rospy.Publisher("roadmap", GeometryGraph)
         self.pub_rmv = rospy.Publisher("roadmap_viz", MarkerArray)
         self.sub_cm = rospy.Subscriber("/costmap_2d_node/costmap/costmap", OccupancyGrid, self.map_cb)
+        self.cache_dir = rospy.get_param("~cache_dir")
+        rospy.logdebug("cache_dir: " + self.cache_dir)
 
         self.ps = [
             Point(0, 0, 0),
@@ -51,20 +56,28 @@ class RoadmapServer:
         rospy.logdebug("got a costmap")
         self.info = map_msg.info
         rospy.logdebug(self.info)
-        assert self.info.width == self.info.height
+        assert self.info.width == self.info.height, "currently we need a square map"
         size = self.info.height
         rospy.loginfo(np.histogram(map_msg.data))
         map = np.reshape(map_msg.data, (size, size))
 
-        rospy.logdebug("occupied: " + str(map[0, 0]))
-        rospy.logdebug("free: " + str(map[int(size / 2), int(size / 2)]))
-
-        gg = GeometryGraph()
-        gg.nodes = self.ps
-        gg.edges = self.edges
-        self.pub_rm.publish(gg)
-
-        self.optimize(50, 128, 1024, map, hash(map_msg))
+        n = 100
+        nts = 1024
+        h = hash(map_msg.data)
+        fname = self.fname(h, n, nts)
+        if os.path.exists(fname):
+            rospy.logdebug("found cache file: " + fname)
+            with open(fname, "rb") as f:
+                store = pickle.load(f)
+            posar = store["posar"]
+            edgew = store["edgew"]
+            im = (map.reshape(map.shape + (1,)) - 100) * (-2.6)
+            __, ge, pos = graphs_from_posar(n, posar)
+            make_edges(n, __, ge, posar, edgew, im)
+            self.store_graph_and_pub(n, ge, posar, edgew)
+        else:
+            rospy.logdebug("no cache found: " + fname + "\noptimizing....")
+            self.optimize(n, 128, nts, map, h)
 
     def optimize(self, n, ntb, nts, map, hash):
         # Paths
@@ -110,7 +123,7 @@ class RoadmapServer:
             if t == 0:
                 e_cost_initial = e_cost
             print("---")
-            ratio = float(t / nts)
+            ratio = float(t) / nts
             print("%d/%d (%.1f%%)" % (t, nts, 100. * ratio))
             print("Eval cost: %.1f (%-.1f%%)" %
                   (e_cost, 100. * (e_cost - e_cost_initial) / e_cost_initial))
@@ -152,18 +165,7 @@ class RoadmapServer:
             edgew = edgew - np.divide(
                 (alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
 
-            self.ps = []
-            for i_p in range(posar.shape[0]):
-                self.ps.append(Point(posar[i_p, 0] * .1 - 48,
-                                     posar[i_p, 1] * .1 - 48,
-                                     0))
-            self.edges[0] = []
-            for _ in range(n):
-                self.edges[0].append([])
-            for e in ge.edges:
-                self.edges[0][e[0]].append(e[1])
-
-            self.publish_viz()
+            self.store_graph_and_pub(n, ge, posar, edgew)
 
         store = {
             "evalcosts": evalcosts,
@@ -173,14 +175,33 @@ class RoadmapServer:
             "edgew": edgew
         }
 
-        # with open("cache/%s_%d_%d.pkl" % (
-        #         hash,
-        #         n,
-        #         nts
-        # ), "wb") as f:
-        #     pickle.dump(store, f)
+        with open(self.fname(hash, n, nts), "wb") as f:
+            pickle.dump(store, f)
 
+    def store_graph_and_pub(self, n, ge, posar, edgew):
+        self.ps = []
+        for i_p in range(posar.shape[0]):
+            self.ps.append(Point(posar[i_p, 0] * .1 - 48,
+                                 posar[i_p, 1] * .1 - 48,
+                                 0))
+        self.edges[0] = []
+        self.edges[1] = []
+        for _ in range(n):
+            self.edges[0].append([])
+            self.edges[1].append([])
+        for e in ge.edges:
+            self.edges[0][e[0]].append(e[1])
+            self.edges[1][e[0]].append(edgew[e[0], e[1]])
+        self.publish_viz()
+        self.publish_graph()
 
+    def fname(self, hash, n, nts):
+        return (self.cache_dir +
+        "/%s_%d_%d.pkl" % (
+            hash,
+            n,
+            nts
+        ))
 
     def publish_viz(self):
         while self.pub_rmv is None:
@@ -222,6 +243,12 @@ class RoadmapServer:
             ma.markers.append(point)
 
         self.pub_rmv.publish(ma)
+
+    def publish_graph(self):
+        gg = GeometryGraph()
+        gg.nodes = self.ps
+        gg.edges = self.edges
+        self.pub_rm.publish(gg)
 
 
 if __name__ == '__main__':

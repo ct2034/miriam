@@ -12,5 +12,7 @@
 			<param name="radius" value="2.0" />
 	</node>
 
-	<node name="roadmap_server" pkg="adamsmap_graph" type="roadmap_server.py" output="screen" />
+	<node name="roadmap_server" pkg="adamsmap_graph" type="roadmap_server.py" output="screen">
+		<param name="cache_dir" value="$(find adamsmap_graph)/cache" />
+	</node>
 </launch>
