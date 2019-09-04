@@ -2,6 +2,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import rospy
+from multiprocessing import Pool
+import pickle
+import time
+
 from nav_msgs.msg import OccupancyGrid
 from graph_msgs.msg import GeometryGraph
 from geometry_msgs.msg import Point
@@ -59,6 +63,124 @@ class RoadmapServer:
         gg.nodes = self.ps
         gg.edges = self.edges
         self.pub_rm.publish(gg)
+
+        self.optimize(50, 128, 1024, map, hash(map_msg))
+
+    def optimize(self, n, ntb, nts, map, hash):
+        # Paths
+        nn = 1
+
+        # Evaluation
+        ne = 128  # evaluation set size
+
+        # The map
+        im = (map.reshape(map.shape + (1,)) - 100) * (-2.6)
+
+        # Multiprocessing
+        processes = 2  # Number of processes
+        # pool = Pool(processes)
+
+        evalset = np.array([
+            [get_random_pos(im),
+             get_random_pos(im)]
+            for _ in range(ne)])
+        evalcosts = []
+        evalunsucc = []
+        evalbc = []
+
+        alpha = 0.01
+        beta_1 = 0.9
+        beta_2 = 0.999
+        epsilon = 10E-8
+
+        m_t_p = np.zeros([n, 2])
+        v_t_p = np.zeros([n, 2])
+        m_t_e = np.zeros([n, n])
+        v_t_e = np.zeros([n, n])
+
+        start = time.time()
+        for t in range(nts):
+            if t == 0:
+                posar, edgew = init_graph_posar_edgew(im, n)
+
+            g, ge, pos = graphs_from_posar(n, posar)
+            make_edges(n, g, ge, posar, edgew, im)
+            e_cost, unsuccesful = eval(t, evalset, nn, g, ge,
+                                       pos, posar, edgew, im, plot=False)
+            if t == 0:
+                e_cost_initial = e_cost
+            print("---")
+            ratio = float(t / nts)
+            print("%d/%d (%.1f%%)" % (t, nts, 100. * ratio))
+            print("Eval cost: %.1f (%-.1f%%)" %
+                  (e_cost, 100. * (e_cost - e_cost_initial) / e_cost_initial))
+            print("N unsuccesful: %d / %d" % (unsuccesful, ne))
+            elapsed = time.time() - start
+            print("T elapsed: %.1fs / remaining: %.1fs" %
+                  (elapsed, elapsed / ratio - elapsed if ratio > 0 else np.inf))
+            print("edgew min: %.3f / max: %.3f / std: %.3f" %
+                  (np.min(edgew), np.max(edgew), np.std(edgew)))
+            evalcosts.append(e_cost)
+            evalunsucc.append(unsuccesful)
+
+            batch = np.array([
+                [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
+
+            # Adam
+            g_t_p, g_t_e, bc_tot = grad_func(batch, nn, g, ge, posar, edgew)
+
+            bc = bc_tot / batch.shape[0]
+            if t == 0:
+                b_cost_initial = bc
+            print("Batch cost: %.2f (%-.1f%%)" %
+                  (bc, 100. * (bc - b_cost_initial) / b_cost_initial))
+            evalbc.append(bc)
+
+            m_t_p = beta_1 * m_t_p + (1 - beta_1) * g_t_p
+            v_t_p = beta_2 * v_t_p + (1 - beta_2) * (g_t_p * g_t_p)
+            m_cap_p = m_t_p / (1 - (beta_1 ** (t + 1)))
+            v_cap_p = v_t_p / (1 - (beta_2 ** (t + 1)))
+            posar_prev = np.copy(posar)
+            posar = posar - np.divide(
+                (alpha * m_cap_p), (np.sqrt(v_cap_p) + epsilon))
+            fix(posar_prev, posar, im)
+
+            m_t_e = beta_1 * m_t_e + (1 - beta_1) * g_t_e
+            v_t_e = beta_2 * v_t_e + (1 - beta_2) * (g_t_e * g_t_e)
+            m_cap_e = m_t_e / (1 - (beta_1 ** (t + 1)))
+            v_cap_e = v_t_e / (1 - (beta_2 ** (t + 1)))
+            edgew = edgew - np.divide(
+                (alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
+
+            self.ps = []
+            for i_p in range(posar.shape[0]):
+                self.ps.append(Point(posar[i_p, 0] * .1 - 48,
+                                     posar[i_p, 1] * .1 - 48,
+                                     0))
+            self.edges[0] = []
+            for _ in range(n):
+                self.edges[0].append([])
+            for e in ge.edges:
+                self.edges[0][e[0]].append(e[1])
+
+            self.publish_viz()
+
+        store = {
+            "evalcosts": evalcosts,
+            "batchcost": evalbc,
+            "unsuccesful": evalunsucc,
+            "posar": posar,
+            "edgew": edgew
+        }
+
+        # with open("cache/%s_%d_%d.pkl" % (
+        #         hash,
+        #         n,
+        #         nts
+        # ), "wb") as f:
+        #     pickle.dump(store, f)
+
+
 
     def publish_viz(self):
         while self.pub_rmv is None:

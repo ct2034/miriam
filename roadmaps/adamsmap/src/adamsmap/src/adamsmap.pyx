@@ -216,7 +216,7 @@ def plot_path(fig, start, goal, path, posar, edgew):
     return ax
 
 
-def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
+def eval(t, evalset, nn, g, ge, pos, posar, edgew, im, plot=True):
     cost = 0
     unsuccesful = 0
     ne = evalset.shape[0]
@@ -226,7 +226,7 @@ def eval(t, evalset, nn, g, ge, pos, posar, edgew, im):
             unsuccesful += 1
         else:
             cost += c
-    if t > -1 & t % 10 == 0:
+    if plot & t > -1 & t % 10 == 0:
         fig = plt.figure(figsize=[8, 8])
         ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar, edgew)
         plot_graph(fig, ax, g, pos, edgew, im, fname="anim/frame%04d.png" % t)

@@ -8,7 +8,9 @@
 	<node name="costmap_2d_node" pkg="costmap_2d" type="costmap_2d_node" />
 	<rosparam file="$(find adamsmap_graph)/config/costmap_common_params.yaml" command="load" ns="costmap_2d_node/costmap" />
     <rosparam file="$(find adamsmap_graph)/config/global_costmap_params.yaml" command="load" ns="costmap_2d_node/costmap" />
-	<node name="pub_footprint" pkg="adamsmap_graph" type="pub_footprint.py" output="screen" />
+	<node name="pub_footprint" pkg="adamsmap_graph" type="pub_footprint.py" output="screen">
+			<param name="radius" value="2.0" />
+	</node>
 
 	<node name="roadmap_server" pkg="adamsmap_graph" type="roadmap_server.py" output="screen" />
 </launch>
