@@ -2,4 +2,8 @@
   <arg name="headless" default="false" />
   <node name="stageros" pkg="stage_ros" type="stageros" args="-g $(find adamsmap_stage)/world/demo.world" if="$(arg headless)"/>
   <node name="stageros" pkg="stage_ros" type="stageros" args="$(find adamsmap_stage)/world/demo.world" unless="$(arg headless)"/>
+
+  <node name="tf_publisher" pkg="adamsmap_stage" type="tf_publisher.py">
+    <param name="n_agents" value="10" />
+  </node>
 </launch>

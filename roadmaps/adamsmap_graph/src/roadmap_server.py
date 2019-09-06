@@ -29,8 +29,8 @@ class RoadmapServer:
 
     def __init__(self):
         self.pub_rmv = None
-        self.pub_rm = rospy.Publisher("roadmap", GeometryGraph)
-        self.pub_rmv = rospy.Publisher("roadmap_viz", MarkerArray)
+        self.pub_rm = rospy.Publisher("roadmap", GeometryGraph, queue_size=1)
+        self.pub_rmv = rospy.Publisher("roadmap_viz", MarkerArray, queue_size=1)
         self.sub_cm = rospy.Subscriber("/costmap_2d_node/costmap/costmap", OccupancyGrid, self.map_cb)
         self.cache_dir = rospy.get_param("~cache_dir")
         rospy.logdebug("cache_dir: " + self.cache_dir)
@@ -58,7 +58,7 @@ class RoadmapServer:
         rospy.logdebug(self.info)
         assert self.info.width == self.info.height, "currently we need a square map"
         size = self.info.height
-        rospy.loginfo(np.histogram(map_msg.data))
+        rospy.logdebug(np.histogram(map_msg.data))
         map = np.reshape(map_msg.data, (size, size))
 
         n = 100
@@ -66,7 +66,7 @@ class RoadmapServer:
         h = hash(map_msg.data)
         fname = self.fname(h, n, nts)
         if os.path.exists(fname):
-            rospy.logdebug("found cache file: " + fname)
+            rospy.loginfo("found cache file: " + fname)
             with open(fname, "rb") as f:
                 store = pickle.load(f)
             posar = store["posar"]
@@ -76,7 +76,7 @@ class RoadmapServer:
             make_edges(n, __, ge, posar, edgew, im)
             self.store_graph_and_pub(n, ge, posar, edgew)
         else:
-            rospy.logdebug("no cache found: " + fname + "\noptimizing....")
+            rospy.loginfo("no cache found: " + fname + "\noptimizing....")
             self.optimize(n, 128, nts, map, h)
 
     def optimize(self, n, ntb, nts, map, hash):
@@ -252,7 +252,7 @@ class RoadmapServer:
 
 
 if __name__ == '__main__':
-    rospy.init_node('roadmap_server', log_level=rospy.DEBUG)
+    rospy.init_node('roadmap_server')
     rospy.logdebug("init")
 
     rs = RoadmapServer()

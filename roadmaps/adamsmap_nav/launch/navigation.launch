@@ -1,0 +1,7 @@
+<launch>
+	<include file="$(find adamsmap_graph)/launch/roadmap_server.launch" />
+
+	<!--- Run move base -->
+	<include file="$(find adamsmap_nav)/launch/move_base.xml" />
+</launch>
+

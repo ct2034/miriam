@@ -31,10 +31,10 @@ window
 # load an environment bitmap
 floorplan
 (
-  name "c"
-  size [10 10 0.800]
+  name "z"
+  size [96 96 0.800]
   pose [0 0 0 0]
-  bitmap "c.png"
+  bitmap "z.png"
 )
 
 
