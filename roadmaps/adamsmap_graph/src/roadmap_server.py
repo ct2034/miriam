@@ -28,9 +28,8 @@ class RoadmapServer:
     info = None
 
     def __init__(self):
-        self.pub_rmv = None
-        self.pub_rm = rospy.Publisher("roadmap", GeometryGraph, queue_size=1)
-        self.pub_rmv = rospy.Publisher("roadmap_viz", MarkerArray, queue_size=1)
+        self.pub_rm = rospy.Publisher("roadmap", GeometryGraph, latch=True, queue_size=1)
+        self.pub_rmv = rospy.Publisher("roadmap_viz", MarkerArray, latch=True, queue_size=1)
         self.sub_cm = rospy.Subscriber("/costmap_2d_node/costmap/costmap", OccupancyGrid, self.map_cb)
         self.cache_dir = rospy.get_param("~cache_dir")
         rospy.logdebug("cache_dir: " + self.cache_dir)
@@ -204,9 +203,6 @@ class RoadmapServer:
         ))
 
     def publish_viz(self):
-        while self.pub_rmv is None:
-            rospy.sleep(1)
-
         ma = MarkerArray()
         id = 0
         for v, edges in enumerate(self.edges[0]):

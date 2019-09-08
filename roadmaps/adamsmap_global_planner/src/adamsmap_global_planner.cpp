@@ -28,6 +28,9 @@ namespace adamsmap_global_planner {
       private_nh.param("min_dist_from_robot", min_dist_from_robot_, 0.10);
       world_model_ = new base_local_planner::CostmapModel(*costmap_);
 
+      ros::NodeHandle nh;
+      roadmap_sub_ = nh.subscribe("roadmap", 1, &AdamsmapGlobalPlanner::roadmapCb, this);
+
       initialized_ = true;
     }
     else
@@ -60,6 +63,12 @@ namespace adamsmap_global_planner {
       ROS_ERROR("The planner has not been initialized, please call initialize() to use the planner");
       return false;
     }
+
+    if(!graph_received_){
+      ROS_ERROR("We have not yet received a roadmap graph!");
+      return false;
+    }
+    std::lock_guard<std::mutex> guard(graph_guard_);
 
     ROS_DEBUG("Got a start: %.2f, %.2f, and a goal: %.2f, %.2f", start.pose.position.x, start.pose.position.y, goal.pose.position.x, goal.pose.position.y);
 
@@ -132,4 +141,10 @@ namespace adamsmap_global_planner {
     return (done);
   }
 
+  void AdamsmapGlobalPlanner::roadmapCb(const graph_msgs::GeometryGraph &gg){
+    ROS_DEBUG("received a roadmap");
+    std::lock_guard<std::mutex> guard(graph_guard_);
+    graph_ = gg;
+    graph_received_ = true;
+  }
 };
