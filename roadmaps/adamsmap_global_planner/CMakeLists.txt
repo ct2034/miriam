@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(adamsmap_global_planner)
 
 find_package(catkin REQUIRED COMPONENTS
-  base_local_planner
-  costmap_2d
-  geometry_msgs
-  graph_msgs
-  nav_core
+    base_local_planner
+    costmap_2d
+    geometry_msgs
+    graph_msgs
+    nav_core
     pluginlib
     roscpp
     tf2
@@ -14,9 +14,13 @@ find_package(catkin REQUIRED COMPONENTS
     tf2_ros
 )
 
+# sys deps
+find_package( OpenCV REQUIRED )
+
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 add_definitions(${EIGEN3_DEFINITIONS})
 
@@ -39,6 +43,7 @@ add_library(adamsmap_global_planner src/adamsmap_global_planner.cpp)
 add_dependencies(adamsmap_global_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(adamsmap_global_planner
     ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     )
 
 install(TARGETS adamsmap_global_planner

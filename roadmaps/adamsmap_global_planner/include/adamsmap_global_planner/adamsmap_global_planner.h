@@ -15,8 +15,14 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 
+//#include <opencv2/flann.hpp>
+#include <flann/flann.hpp>
+
 namespace adamsmap_global_planner{
-  /**
+
+static const int MAX_N{1024};
+
+/**
    * @class AdamsmapGlobalPlanner
    * @brief Provides a simple global planner that will compute a valid goal point for the local planner by walking back along the vector between the robot and the user-specified goal point until a valid cost is found.
    */
@@ -61,6 +67,15 @@ namespace adamsmap_global_planner{
       bool graph_received_{false};
       graph_msgs::GeometryGraph graph_;
       std::mutex graph_guard_;
+
+      // flann
+      flann::Matrix<float> dataset = flann::Matrix<float>(new float[MAX_N*2], MAX_N, 2);
+      flann::Index<flann::L2<float>> flann_index;
+//      cv::flann::SavedIndexParams index_params("/home/ch/index.fln");
+//      cv::flann::GenericIndex<cv::flann::L2<float>> flann_index(dataset, index_params);
+//      cv::flann::Matrix<float> dataset;
+//      cv::flann::Index<cv::flann::L2<float>> flann_index;
+//      flann::Index<flann::L2<float>> build_index(flann::Matrix<float> dataset);
 
       /**
        * @brief  Checks the legality of the robot footprint at a position and orientation using the world model

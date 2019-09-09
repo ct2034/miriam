@@ -10,10 +10,10 @@ PLUGINLIB_EXPORT_CLASS(adamsmap_global_planner::AdamsmapGlobalPlanner, nav_core:
 namespace adamsmap_global_planner {
 
   AdamsmapGlobalPlanner::AdamsmapGlobalPlanner()
-  : costmap_ros_(NULL), initialized_(false){}
+  : costmap_ros_(NULL), initialized_(false), flann_index(flann::LinearIndexParams()){}
 
   AdamsmapGlobalPlanner::AdamsmapGlobalPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
-  : costmap_ros_(NULL), initialized_(false){
+  : costmap_ros_(NULL), initialized_(false), flann_index(flann::LinearIndexParams()){
     initialize(name, costmap_ros);
   }
 
@@ -35,6 +35,8 @@ namespace adamsmap_global_planner {
     }
     else
       ROS_WARN("This planner has already been initialized... doing nothing");
+//    cv::vector<cv::Point2f> scheme_pts;
+//    cv::flann::Index tree= cv::flann::Index(cv::Mat(scheme_pts).reshape(1),cv::flann::LinearIndexParams());
   }
 
   //we need to take the footprint of the robot into account when we calculate cost to obstacles
@@ -146,5 +148,6 @@ namespace adamsmap_global_planner {
     std::lock_guard<std::mutex> guard(graph_guard_);
     graph_ = gg;
     graph_received_ = true;
+//    flann_index = cv::flann::Index();
   }
 };
