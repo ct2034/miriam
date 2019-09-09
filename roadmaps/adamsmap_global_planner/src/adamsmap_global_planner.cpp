@@ -94,64 +94,27 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
     return false;
   }
 
-  const double start_yaw = tf2::getYaw(start.pose.orientation);
-  const double goal_yaw = tf2::getYaw(goal.pose.orientation);
+  size_t nn = 1;
+  size_t n_query = 2;
+  flann::Matrix<float> query(new float[n_query * dimensions], n_query, dimensions);
+  query[0][0] = start.pose.position.x;
+  query[0][1] = start.pose.position.y;
+  query[1][0] = goal.pose.position.x;
+  query[1][1] = goal.pose.position.y;
+  flann::Matrix<int> indices(new int[n_query * nn], n_query, nn);
+  flann::Matrix<float> dists(new float[n_query * nn], n_query, nn);
 
-  // we want to step back along the vector created by the robot's position and the goal pose until we find a legal cell
-  double goal_x = goal.pose.position.x;
-  double goal_y = goal.pose.position.y;
-  double start_x = start.pose.position.x;
-  double start_y = start.pose.position.y;
+  // Search
+  flann::Logger::setLevel(flann::FLANN_LOG_INFO);  // fix  https://github.com/mariusmuja/flann/issues/198
+  flann_index.knnSearch(query, indices, dists, nn, flann::SearchParams(64));
 
-  double diff_x = goal_x - start_x;
-  double diff_y = goal_y - start_y;
-  double diff_yaw = angles::normalize_angle(goal_yaw - start_yaw);
+  int start_idx = indices[0][0];
+  int goal_idx = indices[0][1];
 
-  double target_x = goal_x;
-  double target_y = goal_y;
-  double target_yaw = goal_yaw;
+  ROS_DEBUG_STREAM("start_idx " << start_idx);
+  ROS_DEBUG_STREAM("goal_idx  " << goal_idx);
 
-  bool done = false;
-  double scale = 1.0;
-  double dScale = 0.01;
-
-  while (!done)
-  {
-    if (scale < 0)
-    {
-      target_x = start_x;
-      target_y = start_y;
-      target_yaw = start_yaw;
-      ROS_WARN("The carrot planner could not find a valid plan for this goal");
-      break;
-    }
-    target_x = start_x + scale * diff_x;
-    target_y = start_y + scale * diff_y;
-    target_yaw = angles::normalize_angle(start_yaw + scale * diff_yaw);
-
-    double footprint_cost = footprintCost(target_x, target_y, target_yaw);
-    if (footprint_cost >= 0)
-    {
-      done = true;
-    }
-    scale -= dScale;
-  }
-
-  plan.push_back(start);
-  geometry_msgs::PoseStamped new_goal = goal;
-  tf2::Quaternion goal_quat;
-  goal_quat.setRPY(0, 0, target_yaw);
-
-  new_goal.pose.position.x = target_x;
-  new_goal.pose.position.y = target_y;
-
-  new_goal.pose.orientation.x = goal_quat.x();
-  new_goal.pose.orientation.y = goal_quat.y();
-  new_goal.pose.orientation.z = goal_quat.z();
-  new_goal.pose.orientation.w = goal_quat.w();
-
-  plan.push_back(new_goal);
-  return (done);
+  return true;
 }
 
 void AdamsmapGlobalPlanner::roadmapCb(const graph_msgs::GeometryGraph& gg)
@@ -160,6 +123,15 @@ void AdamsmapGlobalPlanner::roadmapCb(const graph_msgs::GeometryGraph& gg)
   std::lock_guard<std::mutex> guard(graph_guard_);
   graph_ = gg;
   graph_received_ = true;
-  //    flann_index = cv::flann::Index();
+
+  int n = gg.nodes.size();
+  dataset = flann::Matrix<float>(new float[n * dimensions], n, dimensions);
+  for (int row = 0; row < n; row++)
+  {
+    dataset[row][0] = gg.nodes[row].x;
+    dataset[row][1] = gg.nodes[row].y;
+  }
+  flann_index.buildIndex(dataset);
+  ROS_DEBUG("flann index built");
 }
 };  // namespace adamsmap_global_planner

@@ -71,13 +71,9 @@ private:
   std::mutex graph_guard_;
 
   // flann
-  flann::Matrix<float> dataset = flann::Matrix<float>(new float[MAX_N * 2], MAX_N, 2);
+  int dimensions{ 2 };
+  flann::Matrix<float> dataset = flann::Matrix<float>(new float[MAX_N * dimensions], MAX_N, dimensions);
   flann::Index<flann::L2<float>> flann_index;
-  //      cv::flann::SavedIndexParams index_params("/home/ch/index.fln");
-  //      cv::flann::GenericIndex<cv::flann::L2<float>> flann_index(dataset, index_params);
-  //      cv::flann::Matrix<float> dataset;
-  //      cv::flann::Index<cv::flann::L2<float>> flann_index;
-  //      flann::Index<flann::L2<float>> build_index(flann::Matrix<float> dataset);
 
   /**
    * @brief  Checks the legality of the robot footprint at a position and orientation using the world model
