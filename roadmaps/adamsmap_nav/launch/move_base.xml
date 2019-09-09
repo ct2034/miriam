@@ -1,6 +1,7 @@
 <launch>
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" ns="$(env ROBOT)">
-    <remap from="/$(env ROBOT)/map" to="/map"/>
+    <remap from="/roadmap" to="/$(env ROBOT)/roadmap"/>
+
     <param name="base_global_planner" value="adamsmap_global_planner/AdamsmapGlobalPlanner" />
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
     
