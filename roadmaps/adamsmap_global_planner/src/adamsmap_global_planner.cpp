@@ -3,9 +3,12 @@
 #include <tf2/convert.h>
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <nav_msgs/Path.h>
 
 // register this planner as a BaseGlobalPlanner plugin
 PLUGINLIB_EXPORT_CLASS(adamsmap_global_planner::AdamsmapGlobalPlanner, nav_core::BaseGlobalPlanner)
+
+using namespace boost;
 
 namespace adamsmap_global_planner
 {
@@ -32,6 +35,7 @@ void AdamsmapGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DRO
     private_nh.param("step_size", step_size_, costmap_->getResolution());
     private_nh.param("min_dist_from_robot", min_dist_from_robot_, 0.10);
     world_model_ = new base_local_planner::CostmapModel(*costmap_);
+    path_pub_ = private_nh.advertise<nav_msgs::Path>("path", 1);
 
     ros::NodeHandle nh;
     roadmap_sub_ = nh.subscribe("roadmap", 1, &AdamsmapGlobalPlanner::roadmapCb, this);
@@ -40,8 +44,6 @@ void AdamsmapGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DRO
   }
   else
     ROS_WARN("This planner has already been initialized... doing nothing");
-  //    cv::vector<cv::Point2f> scheme_pts;
-  //    cv::flann::Index tree= cv::flann::Index(cv::Mat(scheme_pts).reshape(1),cv::flann::LinearIndexParams());
 }
 
 // we need to take the footprint of the robot into account when we calculate cost to obstacles
@@ -62,6 +64,60 @@ double AdamsmapGlobalPlanner::footprintCost(double x_i, double y_i, double theta
   double footprint_cost = world_model_->footprintCost(x_i, y_i, theta_i, footprint);
   return footprint_cost;
 }
+
+// distance heuristic
+template <class Graph, class CostType, class LocMap>
+class distance_heuristic : public astar_heuristic<Graph, CostType>
+{
+public:
+  typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
+
+  distance_heuristic(LocMap l, Vertex goal) : m_location(l), m_goal(goal)
+  {
+  }
+
+  CostType operator()(Vertex u)
+  {
+    CostType dx = m_location[m_goal].x - m_location[u].x;
+    CostType dy = m_location[m_goal].y - m_location[u].y;
+    return ::sqrt(dx * dx + dy * dy);
+  }
+
+private:
+  LocMap m_location;
+  Vertex m_goal;
+};
+
+class found_goal
+{
+public:
+  explicit found_goal(int goal)
+  {
+    actual_goal = goal;
+  }
+  int actual_goal;
+};  // exception for termination
+
+// visitor that terminates when we find the goal
+template <class Vertex>
+class astar_goal_visitor : public boost::default_astar_visitor
+{
+public:
+  astar_goal_visitor(int goal)
+  {
+    _goal = goal;
+  }
+
+  template <class Graph>
+  void examine_vertex(Vertex u, Graph& g)
+  {
+    if (u == _goal)
+      throw found_goal((int)u);
+  }
+
+private:
+  int _goal;
+};
 
 bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
                                      std::vector<geometry_msgs::PoseStamped>& plan)
@@ -96,7 +152,7 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
 
   size_t nn = 1;
   size_t n_query = 2;
-  flann::Matrix<float> query(new float[n_query * dimensions], n_query, dimensions);
+  flann::Matrix<float> query(new float[n_query * DIMENSIONS], n_query, DIMENSIONS);
   query[0][0] = start.pose.position.x;
   query[0][1] = start.pose.position.y;
   query[1][0] = goal.pose.position.x;
@@ -113,8 +169,67 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
 
   ROS_DEBUG_STREAM("start_idx " << start_idx);
   ROS_DEBUG_STREAM("goal_idx  " << goal_idx);
+  ROS_DEBUG_STREAM("locations.size()    " << locations.size());
+  ROS_DEBUG_STREAM("g.m_edges.size()    " << g.m_edges.size());
+  ROS_DEBUG_STREAM("g.m_vertices.size() " << g.m_vertices.size());
+
+  // Boost
+  std::vector<mygraph_t::vertex_descriptor> p(num_vertices(g));
+  std::vector<float> d(num_vertices(g));
+  try
+  {
+    ROS_DEBUG("astar_search ...");
+    // call astar named parameter interface
+    astar_search(g, start_idx, distance_heuristic<mygraph_t, float, LocMap>(locations, goal_idx),
+                 predecessor_map(&p[0]).distance_map(&d[0]).visitor(astar_goal_visitor<vertex>((int)goal_idx)));
+  }
+  catch (found_goal& fg)
+  {  // found a path to the goal
+    ROS_DEBUG_STREAM("Path found");
+    std::vector<geometry_msgs::PoseStamped> backwards_plan;
+    plan.push_back(poseStampedFromXY(goal.pose.position.x, goal.pose.position.y));
+    for (vertex v = (vertex)fg.actual_goal;; v = p[v])
+    {
+      plan.push_back(poseStampedFromPoint(locations[v]));
+      if (p[v] == v)
+        break;
+    }
+    plan.push_back(poseStampedFromXY(start.pose.position.x, start.pose.position.y));
+    std::reverse(std::begin(plan), std::end(plan));
+    ROS_DEBUG_STREAM("plan.size() " << plan.size());
+
+    //viz
+    nav_msgs::Path path_viz;
+    path_viz.header.frame_id = "map";
+    path_viz.header.stamp = ros::Time::now();
+    std::copy(std::begin(plan), std::end(plan), std::back_inserter(path_viz.poses));
+    path_pub_.publish(path_viz);
+  }
+  catch (exception& e)
+  {
+    ROS_ERROR("Exception");
+    return false;
+  }
 
   return true;
+}
+
+geometry_msgs::PoseStamped AdamsmapGlobalPlanner::poseStampedFromPoint(geometry_msgs::Point& p)
+{
+  geometry_msgs::PoseStamped ps;
+  ps.header.frame_id = "map";
+  ps.pose.position.x = p.x;
+  ps.pose.position.y = p.y;
+  ps.pose.orientation.w = 1;
+  return ps;
+}
+
+geometry_msgs::PoseStamped AdamsmapGlobalPlanner::poseStampedFromXY(float x, float y)
+{
+  geometry_msgs::Point p;
+  p.x = x;
+  p.y = y;
+  return poseStampedFromPoint(p);
 }
 
 void AdamsmapGlobalPlanner::roadmapCb(const graph_msgs::GeometryGraph& gg)
@@ -125,7 +240,7 @@ void AdamsmapGlobalPlanner::roadmapCb(const graph_msgs::GeometryGraph& gg)
   graph_received_ = true;
 
   int n = gg.nodes.size();
-  dataset = flann::Matrix<float>(new float[n * dimensions], n, dimensions);
+  dataset = flann::Matrix<float>(new float[n * DIMENSIONS], n, DIMENSIONS);
   for (int row = 0; row < n; row++)
   {
     dataset[row][0] = gg.nodes[row].x;
@@ -133,5 +248,25 @@ void AdamsmapGlobalPlanner::roadmapCb(const graph_msgs::GeometryGraph& gg)
   }
   flann_index.buildIndex(dataset);
   ROS_DEBUG("flann index built");
+
+  g = mygraph_t(n);
+  weightmap = get(edge_weight, g);
+  locations = gg.nodes;
+
+  for (std::size_t i = 0; i < n; i++)
+  {
+    graph_msgs::Edges es = gg.edges[i];
+    for (std::size_t j = 0; j < es.weights.size(); j++)
+    {
+      edge_descriptor e;
+      bool inserted;
+      tie(e, inserted) = add_edge(i, es.node_ids[j], g);
+      weightmap[e] = es.weights[j];
+    }
+  }
+  ROS_DEBUG("planning graph saved ...");
+
+  ROS_DEBUG_STREAM("g.m_edges.size()    " << g.m_edges.size());
+  ROS_DEBUG_STREAM("g.m_vertices.size() " << g.m_vertices.size());
 }
 };  // namespace adamsmap_global_planner

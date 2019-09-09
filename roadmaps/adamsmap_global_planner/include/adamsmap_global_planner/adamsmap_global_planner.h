@@ -8,6 +8,7 @@
 #include <costmap_2d/costmap_2d.h>
 #include <nav_core/base_global_planner.h>
 
+#include <graph_msgs/Edges.h>
 #include <graph_msgs/GeometryGraph.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <angles/angles.h>
@@ -15,12 +16,16 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 
-//#include <opencv2/flann.hpp>
 #include <flann/flann.hpp>
+#include <boost/graph/astar_search.hpp>
+#include <boost/graph/adjacency_list.hpp>
+
+using namespace boost;
 
 namespace adamsmap_global_planner
 {
 static const int MAX_N{ 1024 };
+static const int DIMENSIONS{ 2 };
 
 /**
  * @class AdamsmapGlobalPlanner
@@ -60,20 +65,35 @@ public:
 
   void roadmapCb(const graph_msgs::GeometryGraph& gg);
 
+  geometry_msgs::PoseStamped poseStampedFromPoint(geometry_msgs::Point& p);
+  geometry_msgs::PoseStamped poseStampedFromXY(float x, float y);
+
 private:
   costmap_2d::Costmap2DROS* costmap_ros_;
   double step_size_, min_dist_from_robot_;
   costmap_2d::Costmap2D* costmap_;
   base_local_planner::WorldModel* world_model_;  ///< @brief The world model that the controller will use
   ros::Subscriber roadmap_sub_;
+  ros::Publisher path_pub_;
   bool graph_received_{ false };
   graph_msgs::GeometryGraph graph_;
   std::mutex graph_guard_;
 
   // flann
-  int dimensions{ 2 };
-  flann::Matrix<float> dataset = flann::Matrix<float>(new float[MAX_N * dimensions], MAX_N, dimensions);
+  flann::Matrix<float> dataset = flann::Matrix<float>(new float[MAX_N * DIMENSIONS], MAX_N, DIMENSIONS);
   flann::Index<flann::L2<float>> flann_index;
+
+  // boost graph
+  typedef adjacency_list<listS, vecS, directedS, no_property, property<edge_weight_t, float>> mygraph_t;
+  typedef property_map<mygraph_t, edge_weight_t>::type WeightMap;
+  typedef std::vector<geometry_msgs::Point> LocMap;
+  typedef mygraph_t::vertex_descriptor vertex;
+  typedef mygraph_t::edge_descriptor edge_descriptor;
+  typedef mygraph_t::vertex_iterator vertex_iterator;
+
+  mygraph_t g;
+  WeightMap weightmap;
+  LocMap locations;
 
   /**
    * @brief  Checks the legality of the robot footprint at a position and orientation using the world model
