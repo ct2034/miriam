@@ -4,6 +4,7 @@ from itertools import product
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
 import numpy as np
+import os
 import pickle
 import sys
 import time
@@ -123,21 +124,26 @@ def optimize(n, ntb, nts, image_fname):
         "edgew": edgew
         }
 
-    with open("res/%s_%d_%d.pkl" % (
-            image_fname.split(".")[0].split("/")[-1],
-            n,
-            nts
-    ), "wb") as f:
+    with open(fname(image_fname, n, nts), "wb") as f:
         pickle.dump(store, f)
 
+def fname(image_fname, n, nts):
+    return "res/%s_%d_%d.pkl" % (
+        image_fname.split(".")[0].split("/")[-1],
+        n,
+        nts
+    )
 
 if __name__ == "__main__":
     # Training
     ntb = 128  # batch size
 
     for (image_fname, N, nts) in product(
-        [sys.argv[1]],
+        ['maps/c.png', 'maps/o.png', 'maps/x.png', 'maps/z.png'],
         [100, 200, 500],
         [4096]
     ):
-        optimize(N, ntb, nts, image_fname)
+        if os.path.exists(fname(image_fname, N, nts)):
+            print("exists")
+        else:
+            optimize(N, ntb, nts, image_fname)
