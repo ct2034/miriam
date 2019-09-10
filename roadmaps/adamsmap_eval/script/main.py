@@ -30,10 +30,6 @@ def optimize(n, ntb, nts, image_fname):
     # The map
     im = imageio.imread(image_fname)
 
-    # Multiprocessing
-    processes = 8  # Number of processes
-    pool = Pool(processes)
-
     evalset = np.array([
         [get_random_pos(im),
          get_random_pos(im)]
@@ -64,7 +60,7 @@ def optimize(n, ntb, nts, image_fname):
         if t == 0:
             e_cost_initial = e_cost
         print("---")
-        ratio = float(t / nts)
+        ratio = float(t) / nts
         print("%d/%d (%.1f%%)" % (t, nts, 100. * ratio))
         print("Eval cost: %.1f (%-.1f%%)" %
               (e_cost, 100. * (e_cost - e_cost_initial) / e_cost_initial))
@@ -79,27 +75,12 @@ def optimize(n, ntb, nts, image_fname):
 
         batch = np.array([
             [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
-        assert ntb % processes == 0, "batch size no divisible "\
-                                     "by process number"
-        batch_per_process = int(ntb / processes)
-        argss = []
 
         # Adam
-        for ip in range(processes):
-            bstart = ip * batch_per_process
-            argss.append((batch[bstart:(bstart+batch_per_process-1), :], nn,
-                          g, ge, posar, edgew))
-        ress = pool.starmap(grad_func, argss)
-        g_t_p = np.zeros(shape=posar.shape)
-        g_t_e = np.zeros(shape=edgew.shape)
-        bc_tot = 0
-        for res in ress:
-            g_t_p_, g_t_e_, bc_tot_ = res
-            g_t_p += g_t_p_
-            g_t_e += g_t_e_
-            bc_tot += bc_tot_
-
-        bc = bc_tot / batch.shape[0]
+        g_t_p, g_t_e, bc_tot = grad_func(
+            batch, nn, g, ge, posar, edgew
+        )
+        bc = float(bc_tot) / batch.shape[0]
         if t == 0:
             b_cost_initial = bc
         print("Batch cost: %.2f (%-.1f%%)" %
@@ -156,7 +137,7 @@ if __name__ == "__main__":
 
     for (image_fname, N, nts) in product(
         [sys.argv[1]],
-        [100],
+        [100, 200, 500],
         [4096]
     ):
         optimize(N, ntb, nts, image_fname)

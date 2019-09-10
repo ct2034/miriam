@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import sys
 
-from adamsmap_filename_verification import is_result_file
+from adamsmap_eval.filename_verification import is_result_file
 
 
 def save_violin_plot(res):

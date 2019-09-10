@@ -6,10 +6,12 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
 )
 
-
-catkin_package()
 catkin_python_setup()
 
+catkin_package(
+    DEPENDS ${SYS_DEPS}
+    CATKIN_DEPENDS ${CATKIN_DEPS}
+)
 
 catkin_install_python(PROGRAMS
    script/eval_disc_main.py
