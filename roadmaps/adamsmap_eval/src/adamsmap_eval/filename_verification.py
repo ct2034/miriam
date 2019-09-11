@@ -14,8 +14,12 @@ def is_eval_file(fname):
     return bool(EVAL_FILE.match(fname))
 
 
+def get_basename_wo_extension(fname):
+    return fname.split("/")[-1].split(".")[0]
+
+
 def resolve(fname):
-    return fname.split("/")[-1].split(".")[0].split("_")
+    return get_basename_wo_extension(fname).split("_")
 
 
 def resolve_mapname(fname):
@@ -28,3 +32,10 @@ def resolve_number_of_nodes(fname):
 
 def resolve_number_of_iterations(fname):
     return int(resolve(fname)[2])
+
+
+def get_graph_csvs(fname):
+    return (
+         "res/" + get_basename_wo_extension(fname) + ".graph_adjlist.csv",
+         "res/" + get_basename_wo_extension(fname) + ".graph_pos.csv"
+    )

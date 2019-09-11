@@ -214,14 +214,6 @@ if __name__ == '__main__':
     assert isinstance(_g_undir, nx.Graph)
     make_edges(_N, _, _g_dir, _posar, _edgew, im)
 
-    # write graph to csv ############################################
-    nx.write_adjlist(_g_dir, "graph_adjlist.csv")                   #
-    with open("graph_pos.csv", 'w') as f_csv:                       #
-        writer = csv.writer(f_csv, delimiter=' ')                   #
-        for i_a in range(_N):                                       #
-            writer.writerow(_posar[i_a])                            #
-    #################################################################
-
     for agents in [10, 30, 100, 300, 1000]:
         print("%d agents" % agents)
 
