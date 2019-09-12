@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import sys
 import pickle
 import argparse
@@ -15,18 +16,29 @@ parser.add_argument('-o', dest='outfile', type=str,
                     help='which file to write to')
 
 args = parser.parse_args()
+read_fname = args.fname
+write_tmp_file = args.fname + ".proto2"
+write_orig_file = args.fname + ".orig"
 
-if args.verb == "list":
-    with open(args.fname, 'rb') as f:
-        u = pickle._Unpickler(f)
-        u.encoding = 'latin1'
-        p = u.load()
-        print(p.keys())
+with open(read_fname, 'rb') as f_in:
+    unpickler = pickle._Unpickler(f_in)
+    unpickler.encoding = 'latin1'
+    data = unpickler.load()
 
-elif args.verb == "transform":
-    print("transform")
-    assert args.version
-    print(args.fname)
-    print(args.version)
-else:
-    assert False
+    if args.verb == "list":
+        print(data.keys())
+        print("proto: " + str(unpickler.proto))
+
+    elif args.verb == "transform":
+        if unpickler.proto >= 3:
+            print("proto: " + str(unpickler.proto) + ">= 3")
+            print("-> transforming to 2")
+        with open(write_tmp_file, 'wb') as f_out:
+            pickler = pickle.Pickler(f_out, protocol=2)
+            pickler.dump(data)
+        f_in.close()
+        os.rename(read_fname, write_orig_file)
+        os.rename(write_tmp_file, read_fname)
+
+    else:
+        assert False
