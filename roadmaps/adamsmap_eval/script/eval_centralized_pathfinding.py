@@ -15,6 +15,7 @@ from math import sqrt
 from typing import Dict
 
 import benchmark_ecbs
+import benchmark_ilp
 import coloredlogs
 import imageio
 import networkx as nx
@@ -35,7 +36,7 @@ from adamsmap_eval.filename_verification import (
 )
 from bresenham import bresenham
 
-debug = True
+debug = False
 coloredlogs.install(level=logging.INFO)
 
 if debug:
@@ -45,7 +46,7 @@ if debug:
     MAX_AGENTS = 6
 else:
     TRIALS = 10
-    TIMEOUT_S = 600  # 10 min
+    TIMEOUT_S = 60  # 10 min
     MAX_AGENTS = 200
 
 SUCCESSFUL = "successful"
@@ -57,9 +58,9 @@ WIDTH = 10000
 
 @unique
 class Planner(Enum):
-    ECBS = 0
-    RCBS = 1
-    ILP = 2
+    ILP = 0
+    ECBS = 1
+    RCBS = 2
 
 
 @unique
@@ -110,7 +111,7 @@ def evaluate(fname):
     eval_results = {SUCCESSFUL: {}, COMPUTATION_TIME: {}, COST: {}}  # type: Dict[str, Dict[str, Dict[str, list]]]
 
     # the evaluation per combination
-    n_agentss = range(5, MAX_AGENTS, 25)
+    n_agentss = range(25, MAX_AGENTS, 25)
     time_estimate = len(Planner) * len(Graph) * len(n_agentss) * TRIALS * TIMEOUT_S
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
         str(datetime.timedelta(seconds=time_estimate))
@@ -188,10 +189,29 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
         if cost == benchmark_ecbs.MAX_COST:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ILP:
-        logging.warn("to be implemented")
-        cost = 89
+        paths, _ = benchmark_ilp.plan(
+            starts=batch[:, 0],
+            goals=batch[:, 1],
+            N=n,
+            graph_fname="/home/ch/ros/miriam_ws/src/miriam/roadmaps/adamsmap_eval/" + fname_adjlist,
+            timeout=TIMEOUT_S
+        )
+        cost = cost_from_paths(paths, posar) / n_agents
+        if len(paths) < n_agents:
+            return False, float(TIMEOUT_S), 0
     t = time.time() - start_time
     return True, t, cost
+
+
+def cost_from_paths(paths, posar):
+    cost = 0
+    for path in paths:
+        prev = None
+        for [_, v] in path:
+            if prev:
+                cost += dist(posar[prev], posar[v])
+            prev = v
+    return cost
 
 
 def make_gridmap(N, im, fname):
@@ -278,6 +298,13 @@ def remove_comment_lines(fname):
                 if not line.startswith("#"):
                     f.write(line)
     os.remove(tmp_fname)
+
+
+def dist(a, b):
+    return sqrt(
+        pow(a[0] - b[0], 2)
+        + pow(a[1] - b[1], 2)
+    )
 
 
 if __name__ == '__main__':
