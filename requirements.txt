@@ -1,6 +1,7 @@
 APScheduler
 bintrees
 cherrypy
+coloredlogs
 flask
 gitpython
 iso8601

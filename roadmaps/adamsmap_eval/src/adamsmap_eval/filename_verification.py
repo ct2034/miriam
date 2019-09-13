@@ -39,3 +39,9 @@ def get_graph_csvs(fname):
          "res/" + get_basename_wo_extension(fname) + ".graph_adjlist.csv",
          "res/" + get_basename_wo_extension(fname) + ".graph_pos.csv"
     )
+
+
+def get_graph_undir_csv(fname):
+    return (
+         "res/" + get_basename_wo_extension(fname) + ".graph_undir_adjlist.csv"
+    )
