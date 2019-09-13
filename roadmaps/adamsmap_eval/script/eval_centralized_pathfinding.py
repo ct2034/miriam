@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+import csv
 import itertools
 import logging
 import numpy as np
@@ -25,10 +26,12 @@ from adamsmap_eval.filename_verification import (
     get_graph_csvs,
     get_graph_undir_csv,
     is_result_file,
+    is_eval_cen_file,
     resolve_mapname,
     get_basename_wo_extension
 )
 from bresenham import bresenham
+from typing import Dict, Any
 
 debug = True
 coloredlogs.install(level=logging.INFO)
@@ -81,10 +84,12 @@ def evaluate(fname):
     fname_graph_adjlist, fname_graph_pos = get_graph_csvs(fname)
     assert os.path.exists(fname_graph_adjlist) and os.path.exists(
         fname_graph_pos), "Please make csv files first `script/write_graph.py csv res/...pkl`"
-    fname_graph_undir_adjlist = 
-    assert os.path.exists()
+    fname_graph_undir_adjlist = get_graph_undir_csv(fname)
+    assert os.path.exists(
+        fname_graph_undir_adjlist), "Please make csv files first `script/write_graph.py csv res/...pkl`"
     fname_map = resolve_mapname(fname)
-    fname_results = get_basename_wo_extension(fname) + ".eval_cen.pkl"
+    fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen.pkl"
+    assert is_eval_cen_file(fname_eval_results)
 
     # read file
     with open(fname, "rb") as f:
@@ -99,50 +104,59 @@ def evaluate(fname):
     graph_undir = graph.to_undirected(as_view=True)
 
     # grid map
-    g_grid, posar_grid = make_gridmap(N, im)
+    g_grid, posar_grid, fname_grid_adjlist, fname_grid_posar = make_gridmap(N, im, fname)
 
-    results = {}
-    results[SUCCESSFUL] = {}
-    results[COMPUTATION_TIME] = {}
-    results[COST] = {}
+    # results
+    eval_results = {SUCCESSFUL: {}, COMPUTATION_TIME: {}, COST: {}}  # type: Dict[str, Dict[str, Dict[str, list]]]
 
+    # the evaluation per combination
     for i_c, (planner_type, graph_type) in enumerate(itertools.product(Planner, Graph)):
         combination_name = "{}-{}".format(planner_type.name, graph_type.name)
         logging.info("- Combination {}/{}: {}".format(i_c + 1, len(Planner) * len(Graph),
                                                       combination_name))
-        results[SUCCESSFUL][combination_name] = {}
-        results[COMPUTATION_TIME][combination_name] = {}
-        results[COST][combination_name] = {}
+        eval_results[SUCCESSFUL][combination_name] = {}
+        eval_results[COMPUTATION_TIME][combination_name] = {}
+        eval_results[COST][combination_name] = {}
         for n_agents in range(25, MAX_AGENTS, 25):
             logging.info("-- n_agents: " + str(n_agents))
-            results[SUCCESSFUL][combination_name][str(n_agents)] = []
-            results[COMPUTATION_TIME][combination_name][str(n_agents)] = []
-            results[COST][combination_name][str(n_agents)] = []
+            eval_results[SUCCESSFUL][combination_name][str(n_agents)] = []
+            eval_results[COMPUTATION_TIME][combination_name][str(n_agents)] = []
+            eval_results[COST][combination_name][str(n_agents)] = []
             for i_trial in range(TRIALS):
                 logging.info("--= trial {}/{}".format(i_trial + 1, TRIALS))
                 if graph_type is Graph.ODRM:
                     g = graph
                     p = posar
+                    fname_adjlist = fname_graph_adjlist
+                    fname_posar = fname_graph_pos
+                    n = N
                 elif graph_type is Graph.UDRM:
                     g = graph_undir
                     p = posar
+                    fname_adjlist = fname_graph_undir_adjlist
+                    fname_posar = fname_graph_pos
+                    n = N
                 elif graph_type is Graph.GRID:
                     g = g_grid
                     p = posar_grid
+                    fname_adjlist = fname_grid_adjlist
+                    fname_posar = fname_grid_posar
+                    n = len(posar_grid)
                 random.seed(i_trial)
-                succesful, comp_time, cost = plan(N, planner_type, graph_type, n_agents, g, p)
-                results[SUCCESSFUL][combination_name][str(n_agents)].append(succesful)
-                results[COMPUTATION_TIME][combination_name][str(n_agents)].append(comp_time)
-                results[COST][combination_name][str(n_agents)].append(cost)
+                succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist, fname_posar)
+                eval_results[SUCCESSFUL][combination_name][str(n_agents)].append(succesful)
+                eval_results[COMPUTATION_TIME][combination_name][str(n_agents)].append(comp_time)
+                eval_results[COST][combination_name][str(n_agents)].append(cost)
 
-    logging.info(pretty(results))
-    with open(fname_results, 'wb') as f_res:
-        pickle.dump(results, f_res)
-        logging.info("Written results to: " + fname_results)
+    # saving / presenting results
+    logging.info(pretty(eval_results))
+    with open(fname_eval_results, 'wb') as f_res:
+        pickle.dump(eval_results, f_res)
+        logging.info("Written results to: " + fname_eval_results)
 
 
-def plan(N, planner_type, graph_type, n_agents, g, posar):
-    batch = get_unique_batch(N, n_agents)
+def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_posar):
+    batch = get_unique_batch(n, n_agents)
     start_time = time.time()
     if planner_type is Planner.RCBS:
         signal.signal(signal.SIGALRM, timeout_handler)
@@ -162,7 +176,7 @@ def plan(N, planner_type, graph_type, n_agents, g, posar):
     return True, t, cost
 
 
-def make_gridmap(N, im):
+def make_gridmap(N, im, fname):
     N_grid = 0
     side_len = im.shape[0]
     edge_len = int(side_len / sqrt(N))
@@ -176,8 +190,8 @@ def make_gridmap(N, im):
                 if is_pixel_free(im, pos):
                     g_grid.add_node(len(posar_grid))
                     posar_grid.append(pos)
-        for i_a, i_b in itertools.product(range(len(posar_grid)), repeat=2):
-            a = posar_grid[i_a]
+        for i_n, i_b in itertools.product(range(len(posar_grid)), repeat=2):
+            a = posar_grid[i_n]
             b = posar_grid[i_b]
             if (a[0] == b[0] and isclose(a[1] - b[1], edge_len) or  # up
                     isclose(a[0] - b[0], edge_len) and a[1] == b[1]):  # right
@@ -188,14 +202,27 @@ def make_gridmap(N, im):
                     int(b[1])
                 )
                 if all([is_pixel_free(im, x) for x in line]):
-                    g_grid.add_edge(i_a, i_b)
+                    g_grid.add_edge(i_n, i_b)
         for n in g_grid.nodes:
             if 0 == nx.degree(g_grid, n):
                 g_grid.remove_node(n)
         N_grid = len(g_grid.nodes)
         logging.debug(edge_len)
         logging.debug(N_grid)
-    return g_grid, posar_grid
+
+        grid_adjlist_fname = get_basename_wo_extension(fname)+".grid_adjlist.csv"
+        grid_posar_fname = get_basename_wo_extension(fname)+".grid_pos.csv"
+        g_undir = g_grid.copy()
+        for e in g_grid.edges:
+            g_undir.add_edge(e[1], e[0])
+        nx.write_adjlist(g_undir, grid_adjlist_fname)
+        remove_comment_lines(grid_adjlist_fname)
+        with open(grid_posar_fname, 'w') as f_csv:
+            writer = csv.writer(f_csv, delimiter=' ')
+            for pos in posar_grid:
+                writer.writerow(pos)
+
+    return g_grid, posar_grid, grid_adjlist_fname, grid_posar_fname
 
 
 def n_to_xy(n):
@@ -222,6 +249,17 @@ def pretty(d, indent=0):
         else:
             str_out += ('\t' * (indent + 1) + str(value) + '\n')
     return str_out
+
+
+def remove_comment_lines(fname):
+    tmp_fname = fname + "TMP"
+    os.rename(fname, tmp_fname)
+    with open(tmp_fname, 'r') as f_tmp:
+        with open(fname, 'w') as f:
+            for line in f_tmp.readlines():
+                if not line.startswith("#"):
+                    f.write(line)
+    os.remove(tmp_fname)
 
 
 if __name__ == '__main__':

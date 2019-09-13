@@ -1,4 +1,12 @@
 #!/usr/bin/env python2
+import csv
+import matplotlib.pyplot as plt
+import os
+import pickle
+import sys
+
+import imageio
+import networkx as nx
 from adamsmap.adamsmap import graphs_from_posar, make_edges, plot_graph
 from adamsmap_eval.filename_verification import (
     get_graph_csvs,
@@ -7,19 +15,23 @@ from adamsmap_eval.filename_verification import (
     resolve_mapname,
     get_basename_wo_extension
 )
-import csv
-import imageio
-from matplotlib import animation
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
-import pickle
-import sys
 
 plt.style.use('bmh')
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["savefig.dpi"] = 120
 figsize = [8, 8]  # = 960px / 120dpi
+
+
+def remove_comment_lines(fname):
+    tmp_fname = fname + "TMP"
+    os.rename(fname, tmp_fname)
+    with open(tmp_fname, 'r') as f_tmp:
+        with open(fname, 'w') as f:
+            for line in f_tmp.readlines():
+                if not line.startswith("#"):
+                    f.write(line)
+    os.remove(tmp_fname)
+
 
 if __name__ == '__main__':
     fname = sys.argv[2]
@@ -44,10 +56,12 @@ if __name__ == '__main__':
         fname_adjlist, fname_pos = get_graph_csvs(fname)
         fname_adjlist_undir = get_graph_undir_csv(fname)
         nx.write_adjlist(g, fname_adjlist)
+        remove_comment_lines(fname_adjlist)
         g_undir = g.copy()
         for e in g.edges:
             g_undir.add_edge(e[1], e[0])
         nx.write_adjlist(g_undir, fname_adjlist_undir)
+        remove_comment_lines(fname_adjlist_undir)
         with open(fname_pos, 'w') as f_csv:
             writer = csv.writer(f_csv, delimiter=' ')
             for i_a in range(N):
