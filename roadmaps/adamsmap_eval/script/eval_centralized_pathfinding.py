@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 import csv
+import datetime
 import itertools
 import logging
 import numpy as np
@@ -11,7 +12,9 @@ import sys
 import time
 from enum import Enum, unique
 from math import sqrt
+from typing import Dict
 
+import benchmark_ecbs
 import coloredlogs
 import imageio
 import networkx as nx
@@ -31,16 +34,15 @@ from adamsmap_eval.filename_verification import (
     get_basename_wo_extension
 )
 from bresenham import bresenham
-from typing import Dict, Any
 
 debug = True
 coloredlogs.install(level=logging.INFO)
 
 if debug:
     logging.debug(">> Debug params active")
-    TRIALS = 2
-    TIMEOUT_S = 60
-    MAX_AGENTS = 51
+    TRIALS = 1
+    TIMEOUT_S = 20
+    MAX_AGENTS = 6
 else:
     TRIALS = 10
     TIMEOUT_S = 600  # 10 min
@@ -51,14 +53,12 @@ COMPUTATION_TIME = "computation_time"
 COST = "cost"
 
 WIDTH = 10000
-PATH_ILP = "~/src/optimal-mrppg-journal"  # github.com/ct2034/optimal-mrppg-journal
-PATH_ECBS = "~/src/libMultiRobotPlanning"  # github.com/ct2034/libMultiRobotPlanning
 
 
 @unique
 class Planner(Enum):
-    RCBS = 0
-    ECBS = 1
+    ECBS = 0
+    RCBS = 1
     ILP = 2
 
 
@@ -110,6 +110,11 @@ def evaluate(fname):
     eval_results = {SUCCESSFUL: {}, COMPUTATION_TIME: {}, COST: {}}  # type: Dict[str, Dict[str, Dict[str, list]]]
 
     # the evaluation per combination
+    n_agentss = range(5, MAX_AGENTS, 25)
+    time_estimate = len(Planner) * len(Graph) * len(n_agentss) * TRIALS * TIMEOUT_S
+    logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
+        str(datetime.timedelta(seconds=time_estimate))
+    ))
     for i_c, (planner_type, graph_type) in enumerate(itertools.product(Planner, Graph)):
         combination_name = "{}-{}".format(planner_type.name, graph_type.name)
         logging.info("- Combination {}/{}: {}".format(i_c + 1, len(Planner) * len(Graph),
@@ -117,7 +122,7 @@ def evaluate(fname):
         eval_results[SUCCESSFUL][combination_name] = {}
         eval_results[COMPUTATION_TIME][combination_name] = {}
         eval_results[COST][combination_name] = {}
-        for n_agents in range(25, MAX_AGENTS, 25):
+        for n_agents in n_agentss:
             logging.info("-- n_agents: " + str(n_agents))
             eval_results[SUCCESSFUL][combination_name][str(n_agents)] = []
             eval_results[COMPUTATION_TIME][combination_name][str(n_agents)] = []
@@ -143,7 +148,8 @@ def evaluate(fname):
                     fname_posar = fname_grid_posar
                     n = len(posar_grid)
                 random.seed(i_trial)
-                succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist, fname_posar)
+                succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist,
+                                                  fname_posar)
                 eval_results[SUCCESSFUL][combination_name][str(n_agents)].append(succesful)
                 eval_results[COMPUTATION_TIME][combination_name][str(n_agents)].append(comp_time)
                 eval_results[COST][combination_name][str(n_agents)].append(cost)
@@ -167,8 +173,20 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
         except TimeoutException:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ECBS:
-        logging.warn("to be implemented")
-        cost = 99
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(TIMEOUT_S)
+        try:
+            cost, _ = benchmark_ecbs.plan(
+                starts=batch[:, 0],
+                goals=batch[:, 1],
+                graph_adjlist_fname=fname_adjlist,
+                graph_pos_fname=fname_adjlist,
+                timeout=TIMEOUT_S + 1
+            )
+        except TimeoutException:
+            return False, float(TIMEOUT_S), 0
+        if cost == benchmark_ecbs.MAX_COST:
+            return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ILP:
         logging.warn("to be implemented")
         cost = 89
@@ -210,8 +228,8 @@ def make_gridmap(N, im, fname):
         logging.debug(edge_len)
         logging.debug(N_grid)
 
-        grid_adjlist_fname = get_basename_wo_extension(fname)+".grid_adjlist.csv"
-        grid_posar_fname = get_basename_wo_extension(fname)+".grid_pos.csv"
+        grid_adjlist_fname = get_basename_wo_extension(fname) + ".grid_adjlist.csv"
+        grid_posar_fname = get_basename_wo_extension(fname) + ".grid_pos.csv"
         g_undir = g_grid.copy()
         for e in g_grid.edges:
             g_undir.add_edge(e[1], e[0])
