@@ -167,7 +167,7 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
     batch = get_unique_batch(n, n_agents)
     start_time = time.time()
     if planner_type is Planner.RCBS:
-        assert count_processes_with_name("java") < 5
+        assert count_processes_with_name("java") < 6
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(TIMEOUT_S)
         try:
@@ -183,7 +183,7 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
             graph_pos_fname=fname_adjlist,
             timeout=TIMEOUT_S
         )
-        assert count_processes_with_name("ecbs") < 2
+        assert count_processes_with_name("ecbs") < 3
         if cost == benchmark_ecbs.MAX_COST:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ILP:
@@ -309,7 +309,7 @@ def count_processes_with_name(process_name):
     count = 0
     for proc in psutil.process_iter():
         try:
-            if str(proc.name()).contains(process_name):
+            if process_name in proc.name():
                 count += 1
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
