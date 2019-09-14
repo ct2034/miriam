@@ -103,5 +103,6 @@ if __name__ == "__main__":
             ax.set_ylabel("Average Agent Path Length [m]")
         plt.tight_layout()
         fig.savefig(fname=fname + "." + fig_title + ".png")
+        fig.savefig(fname=fname + "." + fig_title + ".ps")
 
     # plt.show()
