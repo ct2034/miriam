@@ -6,6 +6,7 @@ import logging
 import numpy as np
 import os
 import pickle
+import psutil
 import random
 import signal
 import sys
@@ -166,6 +167,7 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
     batch = get_unique_batch(n, n_agents)
     start_time = time.time()
     if planner_type is Planner.RCBS:
+        assert count_processes_with_name("java") < 5
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(TIMEOUT_S)
         try:
@@ -174,18 +176,14 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
         except TimeoutException:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ECBS:
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(TIMEOUT_S)
-        try:
-            cost, _ = benchmark_ecbs.plan(
-                starts=batch[:, 0],
-                goals=batch[:, 1],
-                graph_adjlist_fname=fname_adjlist,
-                graph_pos_fname=fname_adjlist,
-                timeout=TIMEOUT_S + 1
-            )
-        except TimeoutException:
-            return False, float(TIMEOUT_S), 0
+        cost, _ = benchmark_ecbs.plan(
+            starts=batch[:, 0],
+            goals=batch[:, 1],
+            graph_adjlist_fname=fname_adjlist,
+            graph_pos_fname=fname_adjlist,
+            timeout=TIMEOUT_S
+        )
+        assert count_processes_with_name("ecbs") < 2
         if cost == benchmark_ecbs.MAX_COST:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ILP:
@@ -193,7 +191,7 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
             starts=batch[:, 0],
             goals=batch[:, 1],
             N=n,
-            graph_fname="/home/ch/ros/miriam_ws/src/miriam/roadmaps/adamsmap_eval/" + fname_adjlist,
+            graph_fname=os.path.abspath(os.path.dirname(__file__)) + "/../" + fname_adjlist,
             timeout=TIMEOUT_S
         )
         cost = cost_from_paths(paths, posar) / n_agents
@@ -305,6 +303,18 @@ def dist(a, b):
         pow(a[0] - b[0], 2)
         + pow(a[1] - b[1], 2)
     )
+
+
+def count_processes_with_name(process_name):
+    count = 0
+    for proc in psutil.process_iter():
+        try:
+            print(proc.name())
+            if process_name == proc.name():
+                count += 1
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return count
 
 
 if __name__ == '__main__':
