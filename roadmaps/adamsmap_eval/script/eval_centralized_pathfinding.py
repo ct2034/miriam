@@ -46,8 +46,8 @@ if debug:
     TIMEOUT_S = 20
     MAX_AGENTS = 6
 else:
-    TRIALS = 10
-    TIMEOUT_S = 60  # 10 min
+    TRIALS = 5
+    TIMEOUT_S = 300  # 5 min
     MAX_AGENTS = 200
 
 SUCCESSFUL = "successful"
