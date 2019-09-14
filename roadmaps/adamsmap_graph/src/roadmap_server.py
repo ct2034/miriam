@@ -9,7 +9,7 @@ import pickle
 import time
 
 from nav_msgs.msg import OccupancyGrid
-from graph_msgs.msg import GeometryGraph
+from graph_msgs.msg import GeometryGraph, Edges
 from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker, MarkerArray
 
@@ -34,22 +34,26 @@ class RoadmapServer:
         self.cache_dir = rospy.get_param("~cache_dir")
         rospy.logdebug("cache_dir: " + self.cache_dir)
 
-        self.ps = [
-            Point(0, 0, 0),
-            Point(1, 0, 0),
-            Point(1, 1, 0),
-            Point(0, 1, 0)
-        ]
-        self.edges = [
-            [[1],
-             [3],
-             [0],
-             [2]],
-            [[1., 1.],
-             [1., 1., 1.],
-             [1., 1., 1.],
-             [1., 1.]]
-        ]
+        self.ps = None
+        self.edges = []
+        # self.ps = [
+        #     Point(0, 0, 0),
+        #     Point(1, 0, 0),
+        #     Point(1, 1, 0),
+        #     Point(0, 1, 0)
+        # ]
+        # self.edges = Edges()
+        # self.edges.node_ids =
+        #     [
+        #     [[1],
+        #      [3],
+        #      [0],
+        #      [2]],
+        #     [[1., 1.],
+        #      [1., 1., 1.],
+        #      [1., 1., 1.],
+        #      [1., 1.]]
+        # ]
 
     def map_cb(self, map_msg):
         rospy.logdebug("got a costmap")
@@ -183,14 +187,13 @@ class RoadmapServer:
             self.ps.append(Point(posar[i_p, 0] * .1 - 48,
                                  posar[i_p, 1] * .1 - 48,
                                  0))
-        self.edges[0] = []
-        self.edges[1] = []
+
+        self.edges = []
         for _ in range(n):
-            self.edges[0].append([])
-            self.edges[1].append([])
+            self.edges.append(Edges() )
         for e in ge.edges:
-            self.edges[0][e[0]].append(e[1])
-            self.edges[1][e[0]].append(edgew[e[0], e[1]])
+            self.edges[e[0]].node_ids.append(e[1])
+            self.edges[e[0]].weights.append(edgew[e[0], e[1]])
         self.publish_viz()
         self.publish_graph()
 
@@ -205,8 +208,8 @@ class RoadmapServer:
     def publish_viz(self):
         ma = MarkerArray()
         id = 0
-        for v, edges in enumerate(self.edges[0]):
-            for to in edges:
+        for v, edges in enumerate(self.edges):
+            for to in edges.node_ids:
                 arrow = Marker()
                 arrow.id = id
                 id += 1
@@ -258,7 +261,8 @@ if __name__ == '__main__':
     rospy.logdebug("got the first map")
 
     while not rospy.is_shutdown():
-        rs.publish_viz()
+        if rs.ps is not None:
+            rs.publish_viz()
         rospy.sleep(1)
 
     rospy.spin()
