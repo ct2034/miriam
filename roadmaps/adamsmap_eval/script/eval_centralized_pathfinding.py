@@ -309,8 +309,7 @@ def count_processes_with_name(process_name):
     count = 0
     for proc in psutil.process_iter():
         try:
-            print(proc.name())
-            if process_name == proc.name():
+            if str(proc.name()).contains(process_name):
                 count += 1
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
