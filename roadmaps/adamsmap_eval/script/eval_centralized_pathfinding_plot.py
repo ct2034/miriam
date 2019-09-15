@@ -55,6 +55,7 @@ if __name__ == "__main__":
 
     assert eval_results is not None
 
+    successful_fig_data = eval_results['successful']
     for fig_title in eval_results.keys():
         fig, ax = plt.subplots()
         fig_data = eval_results[fig_title]
@@ -65,18 +66,33 @@ if __name__ == "__main__":
             i_p = Planner[combination_name.split("-")[0]].value
             combination_data = fig_data[combination_name]
             agents_ns_strs = combination_data.keys()
-            agents_ns_strs = sorted(agents_ns_strs, key=int)
+            agents_ns_strs = sorted(agents_ns_strs, key=int)[:-1]
             if fig_title == 'successful':
                 to_plot = map(
                     lambda k: 100. * np.count_nonzero(np.array(combination_data[k]))
                               / len(combination_data[k]),
                     agents_ns_strs
                 )
-            else:
-                to_plot = map(
-                    lambda k: np.mean(np.array(combination_data[k])),
-                    agents_ns_strs
-                )
+            else:  # computation time, cost
+                # successful = map(
+                #     lambda k: np.array(successful_fig_data[combination_name][k]),
+                #     agents_ns_strs
+                # )
+                # to_plot_unfiltered = map(
+                #     lambda k: np.array(combination_data[k]),
+                #     agents_ns_strs
+                # )
+                to_plot = []
+                for agents_ns_str in agents_ns_strs:
+                    tmp_plot = []
+                    for i_trial, dat_p in enumerate(combination_data[agents_ns_str]):
+                        if successful_fig_data[combination_name][agents_ns_str][i_trial]:
+                            tmp_plot.append(combination_data[agents_ns_str][i_trial])
+                    if len(tmp_plot):
+                        to_plot.append(np.mean(np.array(tmp_plot)))
+                    else:
+                        to_plot.append(0)
+
             # to_plot[0] = to_plot[0] + random.random() * 30
             # to_plot[1] = random.random() * to_plot[1] + random.random() * 30
             # to_plot[2] = to_plot[2] + random.random() * 30
@@ -84,7 +100,7 @@ if __name__ == "__main__":
                 to_plot,
                 label=combination_name,
                 color=colors[i_p],
-                marker=markers[i_g],
+                marker=markers[i_p],
                 linestyle=linestyles[i_g],
                 linewidth=1)
             lines.append(line)
@@ -101,9 +117,8 @@ if __name__ == "__main__":
         elif fig_title == "computation_time":
             ax.set_ylabel("Computation Time [s]")
         elif fig_title == "cost":
-            ax.set_ylabel("Average Agent Path Length [m]")
+            ax.set_ylabel("Average Agent Path Duration [steps]")
         plt.tight_layout()
         fig.savefig(fname=fname + "." + fig_title + ".png")
-        fig.savefig(fname=fname + "." + fig_title + ".ps")
 
     # plt.show()
