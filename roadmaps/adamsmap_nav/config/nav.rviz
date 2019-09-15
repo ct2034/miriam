@@ -7,7 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /Grid1
-        - /TF1/Frames1
         - /Path1
       Splitter Ratio: 0.5
     Tree Height: 696
@@ -65,7 +64,7 @@ Visualization Manager:
         map:
           Value: true
         robot_0/base_footprint:
-          Value: true
+          Value: false
         robot_0/base_link:
           Value: true
         robot_0/base_link_tf2:
@@ -146,7 +145,7 @@ Visualization Manager:
           Value: false
         world:
           Value: false
-      Marker Scale: 5
+      Marker Scale: 2
       Name: TF
       Show Arrows: true
       Show Axes: true
@@ -228,7 +227,7 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
-    - Alpha: 0.699999988079071
+    - Alpha: 0.5
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
@@ -306,11 +305,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 14.728060722351074
+      Scale: 80.61502075195312
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: -7.1740522384643555
-      Y: -18.669981002807617
+      X: -0.17122800648212433
+      Y: -0.034847378730773926
     Saved: ~
 Window Geometry:
   Displays:
