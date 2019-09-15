@@ -15,7 +15,7 @@ from enum import Enum, unique
 from math import sqrt
 from typing import Dict
 
-# import benchmark_ecbs
+import benchmark_ecbs
 # import benchmark_ilp
 import coloredlogs
 import imageio
@@ -46,7 +46,7 @@ if debug:
     TIMEOUT_S = 20
     MAX_AGENTS = 26
 else:
-    TRIALS = 5
+    TRIALS = 4
     TIMEOUT_S = 300  # 5 min
     MAX_AGENTS = 200
 
@@ -90,7 +90,7 @@ def evaluate(fname):
     assert os.path.exists(
         fname_graph_undir_adjlist), "Please make csv files first `script/write_graph.py csv res/...pkl`"
     fname_map = resolve_mapname(fname)
-    fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen.pkl"
+    fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen.ECBS_ONLY.pkl"
     assert is_eval_cen_file(fname_eval_results)
 
     # read file
@@ -114,7 +114,7 @@ def evaluate(fname):
     # the evaluation per combination
     n_agentss = range(25, MAX_AGENTS, 25)
     # planner_iter = Planner
-    planner_iter = [Planner.RCBS]
+    planner_iter = [Planner.ECBS]
 
     time_estimate = len(planner_iter) * len(Graph) * len(n_agentss) * TRIALS * TIMEOUT_S
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
@@ -183,18 +183,18 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
             cost, paths = eval_graph(batch, g, posar)
         except TimeoutException:
             return False, float(TIMEOUT_S), 0
-    # elif planner_type is Planner.ECBS:
-    #     assert count_processes_with_name("ecbs") < 3
-    #     cost, _ = benchmark_ecbs.plan(
-    #         starts=batch[:, 0],
-    #         goals=batch[:, 1],
-    #         graph_adjlist_fname=fname_adjlist,
-    #         graph_pos_fname=fname_adjlist,
-    #         timeout=TIMEOUT_S,
-    #         cwd=os.path.dirname(__file__) + "/../"
-    #     )
-    #     if cost == benchmark_ecbs.MAX_COST:
-    #         return False, float(TIMEOUT_S), 0
+    elif planner_type is Planner.ECBS:
+        assert count_processes_with_name("ecbs") < 3
+        cost, _ = benchmark_ecbs.plan(
+            starts=batch[:, 0],
+            goals=batch[:, 1],
+            graph_adjlist_fname=fname_adjlist,
+            graph_pos_fname=fname_adjlist,
+            timeout=TIMEOUT_S,
+            cwd=os.path.dirname(__file__) + "/../"
+        )
+        if cost == benchmark_ecbs.MAX_COST:
+            return False, float(TIMEOUT_S), 0
     # elif planner_type is Planner.ILP:
     #     assert count_processes_with_name("java") < 6
     #     paths, _ = benchmark_ilp.plan(
