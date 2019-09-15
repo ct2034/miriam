@@ -91,7 +91,7 @@ def evaluate(fname):
         fname_graph_undir_adjlist), "Please make csv files first `script/write_graph.py csv res/...pkl`"
     fname_map = resolve_mapname(fname)
     fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen.ECBS_ONLY.pkl"
-    assert is_eval_cen_file(fname_eval_results)
+    #assert is_eval_cen_file(fname_eval_results)
 
     # read file
     with open(fname, "rb") as f:
@@ -156,7 +156,13 @@ def evaluate(fname):
                 random.seed(i_trial)
                 done_agent_nrs = eval_results[SUCCESSFUL][combination_name].keys()
                 done_agent_nrs = sorted(done_agent_nrs, key=int)
-                if eval_results[SUCCESSFUL][combination_name][done_agent_nrs[-1]]:  # previous run was succesful
+                run_it = True
+                try:
+                    if eval_results[SUCCESSFUL][combination_name][done_agent_nrs[-1]][i_trial]:  # previous run was succesful
+                        run_it = False
+                except Exception:
+                    pass
+                if run_it:
                     succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist,
                                                       fname_posar)
                 else:
@@ -189,7 +195,7 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
             starts=batch[:, 0],
             goals=batch[:, 1],
             graph_adjlist_fname=fname_adjlist,
-            graph_pos_fname=fname_adjlist,
+            graph_pos_fname=fname_posar,
             timeout=TIMEOUT_S,
             cwd=os.path.dirname(__file__) + "/../"
         )
