@@ -21,7 +21,7 @@ import coloredlogs
 import imageio
 import networkx as nx
 from adamsmap.adamsmap import is_pixel_free
-from adamsmap_eval.eval_disc import (
+from adamsmap.eval_disc import (
     get_unique_batch,
     eval_disc,
     graphs_from_posar,
@@ -37,12 +37,12 @@ from adamsmap_eval.filename_verification import (
 )
 from bresenham import bresenham
 
-debug = False
+debug = True
 coloredlogs.install(level=logging.INFO)
 
 if debug:
     logging.debug(">> Debug params active")
-    TRIALS = 1
+    TRIALS = 2
     TIMEOUT_S = 20
     MAX_AGENTS = 6
 else:
@@ -117,7 +117,7 @@ def evaluate(fname):
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
         str(datetime.timedelta(seconds=time_estimate))
     ))
-    for i_c, (planner_type, graph_type) in enumerate(itertools.product([Planner.ECBS], Graph)):
+    for i_c, (planner_type, graph_type) in enumerate(itertools.product(Planner, Graph)):
         combination_name = "{}-{}".format(planner_type.name, graph_type.name)
         logging.info("- Combination {}/{}: {}".format(i_c + 1, len(Planner) * len(Graph),
                                                       combination_name))

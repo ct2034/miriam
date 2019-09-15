@@ -10,7 +10,7 @@ from itertools import combinations, product
 import imageio
 import networkx as nx
 import numpy as np
-from adamsmap.adamsmap import (
+from adamsmap import (
     dist,
     get_edge_statistics,
     get_random_pos,

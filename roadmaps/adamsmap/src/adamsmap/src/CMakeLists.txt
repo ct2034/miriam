@@ -7,10 +7,12 @@ endif(APPLE)
 
 # Multi-file cython modules do not appear to be working at the moment.
 cython_add_module(adamsmap adamsmap.pyx)
+cython_add_module(eval_disc eval_disc.pyx)
 
 if(${adamsmap_ROS})
 	set_target_properties(adamsmap PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION})
-	install(TARGETS adamsmap
+	set_target_properties(eval_disc PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION})
+	install(TARGETS adamsmap eval_disc
 	  ARCHIVE DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}
 	  LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}
 	)
