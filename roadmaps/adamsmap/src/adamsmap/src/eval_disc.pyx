@@ -52,6 +52,26 @@ def eval_disc(batch_, g, posar_, agent_diameter_, v_):
     return float(sum(t_end)) / batch_.shape[0], sim_paths_coll
 
 
+def eval_graph(batch_, g, posar_):
+    """
+    Evaluating a given graph by planning graph based motions
+    :param batch_: a batch of start / goal pairs for agents
+    :param g: the graph to plan on (undirected)
+    :param posar_: poses of the graph nodes
+    :return: sum of costs, paths
+    """
+    vertex_paths = []
+    n_agents = batch_.shape[0]
+    for i_a in range(batch_.shape[0]):
+        p = vertex_path(g, batch_[i_a, 0], batch_[i_a, 1], posar_)
+        vertex_paths.append(p)
+    vertex_paths_synced = synchronize_paths(vertex_paths)
+    for i_a, p in enumerate(vertex_paths_synced):
+        if p is None:
+            vertex_paths_synced[i_a] = []
+    return sum(map(len, vertex_paths_synced)) / n_agents, vertex_paths_synced
+
+
 def get_collisions(positions):
     """
     find agents that are colliding

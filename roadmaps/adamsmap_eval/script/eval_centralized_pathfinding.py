@@ -23,7 +23,7 @@ import networkx as nx
 from adamsmap.adamsmap import is_pixel_free
 from adamsmap.eval_disc import (
     get_unique_batch,
-    eval_disc,
+    eval_graph,
     graphs_from_posar,
     make_edges
 )
@@ -37,16 +37,16 @@ from adamsmap_eval.filename_verification import (
 )
 from bresenham import bresenham
 
-debug = True
+debug = False
 coloredlogs.install(level=logging.INFO)
 
 if debug:
     logging.debug(">> Debug params active")
-    TRIALS = 2
+    TRIALS = 1
     TIMEOUT_S = 20
-    MAX_AGENTS = 6
+    MAX_AGENTS = 26
 else:
-    TRIALS = 5
+    TRIALS = 3
     TIMEOUT_S = 300  # 5 min
     MAX_AGENTS = 200
 
@@ -59,9 +59,9 @@ WIDTH = 10000
 
 @unique
 class Planner(Enum):
-    ILP = 0
-    ECBS = 1
-    RCBS = 2
+    RCBS = 0
+    ILP = 1
+    ECBS = 2
 
 
 @unique
@@ -113,11 +113,15 @@ def evaluate(fname):
 
     # the evaluation per combination
     n_agentss = range(25, MAX_AGENTS, 25)
-    time_estimate = len(Planner) * len(Graph) * len(n_agentss) * TRIALS * TIMEOUT_S
+    # planner_iter = Planner
+    planner_iter = [Planner.RCBS]
+
+    time_estimate = len(planner_iter) * len(Graph) * len(n_agentss) * TRIALS * TIMEOUT_S
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
         str(datetime.timedelta(seconds=time_estimate))
     ))
-    for i_c, (planner_type, graph_type) in enumerate(itertools.product(Planner, Graph)):
+
+    for i_c, (planner_type, graph_type) in enumerate(itertools.product(planner_iter, Graph)):
         combination_name = "{}-{}".format(planner_type.name, graph_type.name)
         logging.info("- Combination {}/{}: {}".format(i_c + 1, len(Planner) * len(Graph),
                                                       combination_name))
@@ -170,8 +174,7 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(TIMEOUT_S)
         try:
-            cost, paths = eval_disc(batch, g,
-                                    posar, 0, .1)
+            cost, paths = eval_graph(batch, g, posar)
         except TimeoutException:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ECBS:

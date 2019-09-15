@@ -28,7 +28,7 @@ from adamsmap_eval.filename_verification import (
     resolve_mapname,
     resolve
 )
-from adamsmap_eval.eval_disc import (
+from adamsmap.eval_disc import (
     get_unique_batch,
     eval_disc,
     write_csv

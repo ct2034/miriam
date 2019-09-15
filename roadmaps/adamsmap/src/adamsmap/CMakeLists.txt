@@ -8,6 +8,8 @@ project(adamsmap)
 # 'include()' command, 'find_package()' command.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Ofast")
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include(UseCython)
@@ -21,7 +23,7 @@ add_custom_target(ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ReplicatePythonSourceTree.cmake
   ${CMAKE_CURRENT_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-  
+
 find_package(PCL 1.3 REQUIRED COMPONENTS common io filters surface kdtree visualization features)
 
 include_directories(${adamsmap_SOURCE_DIR}/include ${PCL_INCLUDE_DIRS})
