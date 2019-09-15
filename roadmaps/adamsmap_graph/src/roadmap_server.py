@@ -184,8 +184,8 @@ class RoadmapServer:
     def store_graph_and_pub(self, n, ge, posar, edgew):
         self.ps = []
         for i_p in range(posar.shape[0]):
-            self.ps.append(Point(posar[i_p, 0] * .1 - 48,
-                                 posar[i_p, 1] * .1 - 48,
+            self.ps.append(Point(posar[i_p, 0] * .01 - 4.8,
+                                 posar[i_p, 1] * .01 - 4.8,
                                  0))
 
         self.edges = []

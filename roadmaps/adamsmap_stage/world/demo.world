@@ -21,9 +21,9 @@ speedup 1.000
 window
 (
   size [ 1600 846 ] # in pixels
-  scale 28.967 	# pixels per meter
-  center [ 5.404  -22.321 ]
-  rotate [ 0  0 ]
+  scale 110.002 	# pixels per meter
+  center [ 0.543  -0.027 ]
+  rotate [ 53.000  -15.000 ]
 
   show_data 1              # 1=on 0=off
 )
@@ -32,7 +32,7 @@ window
 floorplan
 (
   name "z"
-  size [96 96 0.800]
+  size [9.6 9.6 0.2]
   pose [0 0 0 0]
   bitmap "z.png"
 )
@@ -42,7 +42,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r0"
-  pose [ 4 -24 0 -121 ]
+  pose [ 2 3.5 0 175 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -56,7 +56,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r1"
-  pose [ 10 -18 0 175 ]
+  pose [ 0 4 0 175 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -67,7 +67,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r2"
-  pose [ 15 -20 0 175 ]
+  pose [ -4 4 0 -121 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -78,7 +78,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r3"
-  pose [ -4 -16 0 -90 ]
+  pose [ 0 1 0 -90 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -90,7 +90,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r4"
-  pose [ 0 -25 0 175 ]
+  pose [ -2 -2.5 0 175 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -103,7 +103,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r5"
-  pose [ 2 -25 0 0.0 ]
+  pose [ -1 -4 0 0.0 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -114,7 +114,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r6"
-  pose [ -4 -25 0 0.0 ]
+  pose [ 0 -2.5 0 0.0 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -125,7 +125,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r7"
-  pose [ -3 -19 0 0.0 ]
+  pose [ 2 -1.9 0 0.0 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -136,7 +136,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r8"
-  pose [ 2 -20 0 0.0 ]
+  pose [ 3.5 1 0 0.0 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -147,7 +147,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r9"
-  pose [ -4 -18 0 0.0 ]
+  pose [ 4 -4 0 0.0 ]
 
   # report error-free position in world coordinates
   localization "gps"
