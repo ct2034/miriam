@@ -17,4 +17,4 @@ observation_sources: scan # bump
 
 # robot data
 footprint: [[0.5, 0.5], [-0.5, 0.5], [-0.5, -0.5], [0.5, -0.5]]
-inflation_radius: 0.8
+inflation_radius: 0.3

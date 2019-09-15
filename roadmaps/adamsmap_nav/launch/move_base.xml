@@ -7,7 +7,7 @@
     <remap from="/$(env ROBOT)/roadmap" to="/roadmap"/>
 
     <param name="base_global_planner" value="adamsmap_global_planner/AdamsmapGlobalPlanner" />
-    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
     
     <rosparam file="$(find adamsmap_nav)/config/base_local_planner_params.yaml" command="load" />
     

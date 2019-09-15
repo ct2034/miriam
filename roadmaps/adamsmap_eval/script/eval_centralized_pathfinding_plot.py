@@ -65,6 +65,7 @@ if __name__ == "__main__":
             i_p = Planner[combination_name.split("-")[0]].value
             combination_data = fig_data[combination_name]
             agents_ns_strs = combination_data.keys()
+            agents_ns_strs = sorted(agents_ns_strs, key=int)
             if fig_title == 'successful':
                 to_plot = map(
                     lambda k: 100. * np.count_nonzero(np.array(combination_data[k]))

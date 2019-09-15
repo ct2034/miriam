@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /Grid1
+        - /Map2
         - /Path1
       Splitter Ratio: 0.5
     Tree Height: 696
@@ -233,7 +234,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /costmap_2d_node/costmap/costmap
+      Topic: /robot_0/move_base/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
       Value: true
