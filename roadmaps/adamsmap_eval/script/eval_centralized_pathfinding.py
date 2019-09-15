@@ -117,7 +117,7 @@ def evaluate(fname):
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
         str(datetime.timedelta(seconds=time_estimate))
     ))
-    for i_c, (planner_type, graph_type) in enumerate(itertools.product(Planner, Graph)):
+    for i_c, (planner_type, graph_type) in enumerate(itertools.product([Planner.ECBS], Graph)):
         combination_name = "{}-{}".format(planner_type.name, graph_type.name)
         logging.info("- Combination {}/{}: {}".format(i_c + 1, len(Planner) * len(Graph),
                                                       combination_name))
@@ -167,7 +167,6 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
     batch = get_unique_batch(n, n_agents)
     start_time = time.time()
     if planner_type is Planner.RCBS:
-        assert count_processes_with_name("java") < 6
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(TIMEOUT_S)
         try:
@@ -176,17 +175,19 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
         except TimeoutException:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ECBS:
+        assert count_processes_with_name("ecbs") < 3
         cost, _ = benchmark_ecbs.plan(
             starts=batch[:, 0],
             goals=batch[:, 1],
             graph_adjlist_fname=fname_adjlist,
             graph_pos_fname=fname_adjlist,
-            timeout=TIMEOUT_S
+            timeout=TIMEOUT_S,
+            cwd=os.path.dirname(__file__) + "/../"
         )
-        assert count_processes_with_name("ecbs") < 3
         if cost == benchmark_ecbs.MAX_COST:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ILP:
+        assert count_processes_with_name("java") < 6
         paths, _ = benchmark_ilp.plan(
             starts=batch[:, 0],
             goals=batch[:, 1],
@@ -207,7 +208,7 @@ def cost_from_paths(paths, posar):
         prev = None
         for [_, v] in path:
             if prev:
-                cost += dist(posar[prev], posar[v])
+                cost += 1  # dist(posar[prev], posar[v])
             prev = v
     return cost
 
