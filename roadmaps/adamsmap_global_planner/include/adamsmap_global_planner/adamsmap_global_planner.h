@@ -2,6 +2,7 @@
 #define ADAMSMAP_GLOBAL_PLANNER_CPP
 
 #include <mutex>
+#include <cmath>
 
 #include <ros/ros.h>
 #include <costmap_2d/costmap_2d_ros.h>
@@ -26,6 +27,28 @@ namespace adamsmap_global_planner
 {
 static const int MAX_N{ 1024 };
 static const int DIMENSIONS{ 2 };
+static const float EPSILON{ 1E-3 };
+
+inline bool operator==(const geometry_msgs::PoseStamped& a, const geometry_msgs::Point& b)
+{
+  return (std::fabs(a.pose.position.x - b.x) < EPSILON) && (std::fabs(a.pose.position.y - b.y) < EPSILON);
+}
+
+inline bool operator==(const geometry_msgs::PoseStamped& a, const geometry_msgs::PoseStamped& b)
+{
+  return (std::fabs(a.pose.position.x - b.pose.position.x) < EPSILON) &&
+         (std::fabs(a.pose.position.y - b.pose.position.y) < EPSILON);
+}
+
+inline bool operator!=(const geometry_msgs::PoseStamped& a, const geometry_msgs::PoseStamped& b)
+{
+  return !(a == b);
+}
+
+inline float operator-(const geometry_msgs::PoseStamped& a, const geometry_msgs::PoseStamped& b)
+{
+  return sqrt(pow(a.pose.position.x - b.pose.position.x, 2) + pow(a.pose.position.y - b.pose.position.y, 2));
+}
 
 /**
  * @class AdamsmapGlobalPlanner
@@ -67,6 +90,12 @@ public:
 
   geometry_msgs::PoseStamped poseStampedFromPoint(geometry_msgs::Point& p);
   geometry_msgs::PoseStamped poseStampedFromXY(float x, float y);
+
+  int findIndexOnPrevTrack(flann::Matrix<int>& indices);
+
+  float plan_boost(std::vector<geometry_msgs::PoseStamped>& plan, int start_idx, int goal_idx,
+                   const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal);
+  double get_angle(const geometry_msgs::PoseStamped& a, geometry_msgs::PoseStamped& b, geometry_msgs::PoseStamped& o);
 
 private:
   costmap_2d::Costmap2DROS* costmap_ros_;

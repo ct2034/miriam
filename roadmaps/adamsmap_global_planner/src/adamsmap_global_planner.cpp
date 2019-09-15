@@ -119,6 +119,69 @@ private:
   int _goal;
 };
 
+float AdamsmapGlobalPlanner::plan_boost(std::vector<geometry_msgs::PoseStamped>& plan, int start_idx, int goal_idx,
+                                        const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal)
+{
+  std::vector<mygraph_t::vertex_descriptor> p(num_vertices(g));
+  std::vector<float> d(num_vertices(g));
+
+  try
+  {
+    ROS_DEBUG("astar_search ...");
+    // call astar named parameter interface
+    astar_search(g, start_idx, distance_heuristic<mygraph_t, float, LocMap>(locations, goal_idx),
+                 predecessor_map(&p[0]).distance_map(&d[0]).visitor(astar_goal_visitor<vertex>((int)goal_idx)));
+  }
+  catch (found_goal& fg)
+  {  // found a path to the goal
+    ROS_DEBUG_STREAM("Path found");
+    plan.clear();
+    plan.push_back(poseStampedFromXY(goal.pose.position.x, goal.pose.position.y));
+    vertex v;
+    for (v = (vertex)fg.actual_goal;; v = p[v])
+    {
+      plan.push_back(poseStampedFromPoint(locations[v]));
+      if (p[v] == v)
+        break;
+    }
+
+    while (plan.size() >= 2 ? M_PI_2 > get_angle(start, *(plan.end() - 1), *(plan.end())) : false)
+      plan.pop_back();
+    if (plan.size() == 2)  // if only goal and one point is in there, go directly
+      plan.pop_back();
+    plan.push_back(start);
+  }
+  catch (exception& e)
+  {
+    ROS_ERROR("Exception");
+  }
+  bool first = true;
+  double len = 0;
+  geometry_msgs::PoseStamped previous;
+  for (auto& p : plan)
+  {
+    if (!first)
+    {
+      len += p - previous;
+    }
+    previous = geometry_msgs::PoseStamped(p);
+    first = false;
+  }
+  return len;
+}
+
+double AdamsmapGlobalPlanner::get_angle(const geometry_msgs::PoseStamped& a, geometry_msgs::PoseStamped& b,
+                                        geometry_msgs::PoseStamped& o)
+{
+  double la = a - o;
+  double lb = b - o;
+  double dot = ((a.pose.position.x - o.pose.position.x) / la * (b.pose.position.x - o.pose.position.x) / lb +
+                (a.pose.position.y - o.pose.position.y) / la * (b.pose.position.y - o.pose.position.y) / lb);
+
+  dot = (dot < -1.0 ? -1.0 : (dot > 1.0 ? 1.0 : dot));
+  return acos(dot);
+}
+
 bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
                                      std::vector<geometry_msgs::PoseStamped>& plan)
 {
@@ -150,7 +213,7 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
     return false;
   }
 
-  size_t nn = 1;
+  size_t nn = 2;
   size_t n_query = 2;
   flann::Matrix<float> query(new float[n_query * DIMENSIONS], n_query, DIMENSIONS);
   query[0][0] = start.pose.position.x;
@@ -164,52 +227,39 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
   flann::Logger::setLevel(flann::FLANN_LOG_INFO);  // fix  https://github.com/mariusmuja/flann/issues/198
   flann_index.knnSearch(query, indices, dists, nn, flann::SearchParams(64));
 
-  int start_idx = indices[0][0];
-  int goal_idx = indices[0][1];
-
-  ROS_DEBUG_STREAM("start_idx " << start_idx);
-  ROS_DEBUG_STREAM("goal_idx  " << goal_idx);
   ROS_DEBUG_STREAM("locations.size()    " << locations.size());
   ROS_DEBUG_STREAM("g.m_edges.size()    " << g.m_edges.size());
   ROS_DEBUG_STREAM("g.m_vertices.size() " << g.m_vertices.size());
 
   // Boost
-  std::vector<mygraph_t::vertex_descriptor> p(num_vertices(g));
-  std::vector<float> d(num_vertices(g));
-  try
+  float min_cost = std::numeric_limits<float>::max();
+  for (int i_c = 0; i_c < pow(nn, 2); i_c++)
   {
-    ROS_DEBUG("astar_search ...");
-    // call astar named parameter interface
-    astar_search(g, start_idx, distance_heuristic<mygraph_t, float, LocMap>(locations, goal_idx),
-                 predecessor_map(&p[0]).distance_map(&d[0]).visitor(astar_goal_visitor<vertex>((int)goal_idx)));
-  }
-  catch (found_goal& fg)
-  {  // found a path to the goal
-    ROS_DEBUG_STREAM("Path found");
-    std::vector<geometry_msgs::PoseStamped> backwards_plan;
-    plan.push_back(poseStampedFromXY(goal.pose.position.x, goal.pose.position.y));
-    for (vertex v = (vertex)fg.actual_goal;; v = p[v])
+    std::vector<geometry_msgs::PoseStamped> tmp_plan = std::vector<geometry_msgs::PoseStamped>(0);
+    size_t s = i_c % nn;
+    size_t g = (i_c - s) / nn;
+    float cost = plan_boost(tmp_plan, indices[0][s], indices[1][g], start, goal);
+    if (tmp_plan.size() == 0)
+      cost = std::numeric_limits<float>::max();
+    ROS_DEBUG_STREAM("cost " << cost);
+    if (cost < min_cost)
     {
-      plan.push_back(poseStampedFromPoint(locations[v]));
-      if (p[v] == v)
-        break;
+      min_cost = cost;
+      plan.clear();
+      std::copy(std::begin(tmp_plan), std::end(tmp_plan), std::back_inserter(plan));
     }
-    plan.push_back(poseStampedFromXY(start.pose.position.x, start.pose.position.y));
-    std::reverse(std::begin(plan), std::end(plan));
-    ROS_DEBUG_STREAM("plan.size() " << plan.size());
+  }
+  ROS_DEBUG_STREAM("min_cost " << min_cost);
 
-    //viz
-    nav_msgs::Path path_viz;
-    path_viz.header.frame_id = "map";
-    path_viz.header.stamp = ros::Time::now();
-    std::copy(std::begin(plan), std::end(plan), std::back_inserter(path_viz.poses));
-    path_pub_.publish(path_viz);
-  }
-  catch (exception& e)
-  {
-    ROS_ERROR("Exception");
-    return false;
-  }
+  std::reverse(std::begin(plan), std::end(plan));
+  ROS_DEBUG_STREAM("plan.size() " << plan.size());
+
+  // viz
+  nav_msgs::Path path_viz;
+  path_viz.header.frame_id = "map";
+  path_viz.header.stamp = ros::Time::now();
+  std::copy(std::begin(plan), std::end(plan), std::back_inserter(path_viz.poses));
+  path_pub_.publish(path_viz);
 
   return true;
 }

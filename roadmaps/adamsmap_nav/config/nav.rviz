@@ -260,7 +260,7 @@ Visualization Manager:
       Offset:
         X: 0
         Y: 0
-        Z: 0
+        Z: 0.20000000298023224
       Pose Color: 255; 85; 255
       Pose Style: None
       Radius: 0.029999999329447746
@@ -306,11 +306,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 21.670753479003906
+      Scale: 14.728060722351074
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 2.6155405044555664
-      Y: -18.776897430419922
+      X: -7.1740522384643555
+      Y: -18.669981002807617
     Saved: ~
 Window Geometry:
   Displays:
