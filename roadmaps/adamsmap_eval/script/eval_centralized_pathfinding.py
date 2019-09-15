@@ -154,8 +154,14 @@ def evaluate(fname):
                     fname_posar = fname_grid_posar
                     n = len(posar_grid)
                 random.seed(i_trial)
-                succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist,
-                                                  fname_posar)
+                done_agent_nrs = eval_results[SUCCESSFUL][combination_name].keys()
+                done_agent_nrs = sorted(done_agent_nrs, key=int)
+                if eval_results[SUCCESSFUL][combination_name][done_agent_nrs[-1]]:  # previous run was succesful
+                    succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist,
+                                                      fname_posar)
+                else:
+                    logging.warn("skipping because last agent number timed out, too")
+                    succesful, comp_time, cost = False, TIMEOUT_S, 0
                 eval_results[SUCCESSFUL][combination_name][str(n_agents)].append(succesful)
                 eval_results[COMPUTATION_TIME][combination_name][str(n_agents)].append(comp_time)
                 eval_results[COST][combination_name][str(n_agents)].append(cost)
