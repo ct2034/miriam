@@ -15,8 +15,8 @@ from enum import Enum, unique
 from math import sqrt
 from typing import Dict
 
-import benchmark_ecbs
-import benchmark_ilp
+# import benchmark_ecbs
+# import benchmark_ilp
 import coloredlogs
 import imageio
 import networkx as nx
@@ -46,7 +46,7 @@ if debug:
     TIMEOUT_S = 20
     MAX_AGENTS = 26
 else:
-    TRIALS = 3
+    TRIALS = 5
     TIMEOUT_S = 300  # 5 min
     MAX_AGENTS = 200
 
@@ -177,30 +177,30 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
             cost, paths = eval_graph(batch, g, posar)
         except TimeoutException:
             return False, float(TIMEOUT_S), 0
-    elif planner_type is Planner.ECBS:
-        assert count_processes_with_name("ecbs") < 3
-        cost, _ = benchmark_ecbs.plan(
-            starts=batch[:, 0],
-            goals=batch[:, 1],
-            graph_adjlist_fname=fname_adjlist,
-            graph_pos_fname=fname_adjlist,
-            timeout=TIMEOUT_S,
-            cwd=os.path.dirname(__file__) + "/../"
-        )
-        if cost == benchmark_ecbs.MAX_COST:
-            return False, float(TIMEOUT_S), 0
-    elif planner_type is Planner.ILP:
-        assert count_processes_with_name("java") < 6
-        paths, _ = benchmark_ilp.plan(
-            starts=batch[:, 0],
-            goals=batch[:, 1],
-            N=n,
-            graph_fname=os.path.abspath(os.path.dirname(__file__)) + "/../" + fname_adjlist,
-            timeout=TIMEOUT_S
-        )
-        cost = cost_from_paths(paths, posar) / n_agents
-        if len(paths) < n_agents:
-            return False, float(TIMEOUT_S), 0
+    # elif planner_type is Planner.ECBS:
+    #     assert count_processes_with_name("ecbs") < 3
+    #     cost, _ = benchmark_ecbs.plan(
+    #         starts=batch[:, 0],
+    #         goals=batch[:, 1],
+    #         graph_adjlist_fname=fname_adjlist,
+    #         graph_pos_fname=fname_adjlist,
+    #         timeout=TIMEOUT_S,
+    #         cwd=os.path.dirname(__file__) + "/../"
+    #     )
+    #     if cost == benchmark_ecbs.MAX_COST:
+    #         return False, float(TIMEOUT_S), 0
+    # elif planner_type is Planner.ILP:
+    #     assert count_processes_with_name("java") < 6
+    #     paths, _ = benchmark_ilp.plan(
+    #         starts=batch[:, 0],
+    #         goals=batch[:, 1],
+    #         N=n,
+    #         graph_fname=os.path.abspath(os.path.dirname(__file__)) + "/../" + fname_adjlist,
+    #         timeout=TIMEOUT_S
+    #     )
+    #     cost = cost_from_paths(paths, posar) / n_agents
+    #     if len(paths) < n_agents:
+    #         return False, float(TIMEOUT_S), 0
     t = time.time() - start_time
     return True, t, cost
 
