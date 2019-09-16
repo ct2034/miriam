@@ -16,7 +16,7 @@ from math import sqrt
 from typing import Dict
 
 import benchmark_ecbs
-# import benchmark_ilp
+import benchmark_ilp
 import coloredlogs
 import imageio
 import networkx as nx
@@ -90,8 +90,8 @@ def evaluate(fname):
     assert os.path.exists(
         fname_graph_undir_adjlist), "Please make csv files first `script/write_graph.py csv res/...pkl`"
     fname_map = resolve_mapname(fname)
-    fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen.ECBS_ONLY.pkl"
-    #assert is_eval_cen_file(fname_eval_results)
+    fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen.pkl"
+    assert is_eval_cen_file(fname_eval_results)
 
     # read file
     with open(fname, "rb") as f:
@@ -114,7 +114,7 @@ def evaluate(fname):
     # the evaluation per combination
     n_agentss = range(25, MAX_AGENTS, 25)
     # planner_iter = Planner
-    planner_iter = [Planner.ECBS]
+    planner_iter = [Planner.ILP]
 
     time_estimate = len(planner_iter) * len(Graph) * len(n_agentss) * TRIALS * TIMEOUT_S
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
@@ -201,18 +201,18 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
         )
         if cost == benchmark_ecbs.MAX_COST:
             return False, float(TIMEOUT_S), 0
-    # elif planner_type is Planner.ILP:
-    #     assert count_processes_with_name("java") < 6
-    #     paths, _ = benchmark_ilp.plan(
-    #         starts=batch[:, 0],
-    #         goals=batch[:, 1],
-    #         N=n,
-    #         graph_fname=os.path.abspath(os.path.dirname(__file__)) + "/../" + fname_adjlist,
-    #         timeout=TIMEOUT_S
-    #     )
-    #     cost = cost_from_paths(paths, posar) / n_agents
-    #     if len(paths) < n_agents:
-    #         return False, float(TIMEOUT_S), 0
+    elif planner_type is Planner.ILP:
+        assert count_processes_with_name("java") < 6
+        paths, _ = benchmark_ilp.plan(
+            starts=batch[:, 0],
+            goals=batch[:, 1],
+            N=n,
+            graph_fname=os.path.abspath(os.path.dirname(__file__)) + "/../" + fname_adjlist,
+            timeout=TIMEOUT_S
+        )
+        cost = cost_from_paths(paths, posar) / n_agents
+        if len(paths) < n_agents:
+            return False, float(TIMEOUT_S), 0
     t = time.time() - start_time
     return True, t, cost
 
