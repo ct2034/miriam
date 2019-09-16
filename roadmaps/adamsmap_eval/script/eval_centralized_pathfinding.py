@@ -107,6 +107,10 @@ def evaluate(fname):
 
     # grid map
     g_grid, posar_grid, fname_grid_adjlist, fname_grid_posar = make_gridmap(N, im, fname)
+    logging.info("fname_grid_adjlist: " + fname_grid_adjlist)
+    logging.info("fname_grid_posar: " + fname_grid_posar)
+    logging.info("fname_graph_adjlist: " + fname_graph_adjlist)
+
 
     # results
     eval_results = {SUCCESSFUL: {}, COMPUTATION_TIME: {}, COST: {}}  # type: Dict[str, Dict[str, Dict[str, list]]]
@@ -121,7 +125,7 @@ def evaluate(fname):
         str(datetime.timedelta(seconds=time_estimate))
     ))
 
-    for i_c, (planner_type, graph_type) in enumerate(itertools.product(planner_iter, Graph)):
+    for i_c, (planner_type, graph_type) in enumerate(itertools.product(planner_iter, [Graph.GRID])):
         combination_name = "{}-{}".format(planner_type.name, graph_type.name)
         logging.info("- Combination {}/{}: {}".format(i_c + 1, len(Planner) * len(Graph),
                                                       combination_name))
@@ -262,10 +266,11 @@ def make_gridmap(N, im, fname):
         logging.debug(edge_len)
         logging.debug(N_grid)
 
-        grid_adjlist_fname = get_basename_wo_extension(fname) + ".grid_adjlist.csv"
-        grid_posar_fname = get_basename_wo_extension(fname) + ".grid_pos.csv"
-        g_undir = g_grid.copy()
+        grid_adjlist_fname = "res/" + get_basename_wo_extension(fname) + ".grid_adjlist.csv"
+        grid_posar_fname = "res/" + get_basename_wo_extension(fname) + ".grid_pos.csv"
+        g_undir = nx.DiGraph()
         for e in g_grid.edges:
+            g_undir.add_edge(e[0], e[1])
             g_undir.add_edge(e[1], e[0])
         nx.write_adjlist(g_undir, grid_adjlist_fname)
         remove_comment_lines(grid_adjlist_fname)
