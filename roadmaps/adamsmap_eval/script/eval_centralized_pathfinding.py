@@ -46,9 +46,9 @@ if debug:
     TIMEOUT_S = 20
     MAX_AGENTS = 26
 else:
-    TRIALS = 4
-    TIMEOUT_S = 300  # 5 min
-    MAX_AGENTS = 200
+    TRIALS = 3
+    TIMEOUT_S = 120  # 2 min
+    MAX_AGENTS = 151
 
 SUCCESSFUL = "successful"
 COMPUTATION_TIME = "computation_time"
@@ -153,7 +153,7 @@ def evaluate(fname):
                     fname_adjlist = fname_grid_adjlist
                     fname_posar = fname_grid_posar
                     n = len(posar_grid)
-                random.seed(i_trial)
+                random.seed(3-i_trial)
                 done_agent_nrs = eval_results[SUCCESSFUL][combination_name].keys()
                 done_agent_nrs = sorted(done_agent_nrs, key=int)
                 run_it = True
