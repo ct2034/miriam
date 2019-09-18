@@ -7,8 +7,8 @@ rostopic pub -1 /robot_0/move_base_simple/goal geometry_msgs/PoseStamped "header
   frame_id: 'map'
 pose:
   position:
-    x: -1.0
-    y: -3.0
+    x: 1.0
+    y: 3.0
     z: 0.0
   orientation:
     x: 0.0
@@ -24,8 +24,8 @@ rostopic pub -1 /robot_4/move_base_simple/goal geometry_msgs/PoseStamped "header
   frame_id: 'map'
 pose:
   position:
-    x: 1.0
-    y: 3.0
+    x: -1.0
+    y: -3.0
     z: 0.0
   orientation:
     x: 0.0

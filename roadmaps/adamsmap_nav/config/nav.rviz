@@ -3,10 +3,7 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Global Options1
-        - /Status1
-        - /Grid1
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 696
   - Class: rviz/Selection
@@ -54,168 +51,19 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        base_link:
-          Value: false
-        map:
-          Value: true
-        robot_0/base_footprint:
-          Value: false
-        robot_0/base_link:
-          Value: true
-        robot_0/base_link_tf2:
-          Value: false
-        robot_0/odom:
-          Value: false
-        robot_1/base_footprint:
-          Value: false
-        robot_1/base_link:
-          Value: false
-        robot_1/base_link_tf2:
-          Value: false
-        robot_1/odom:
-          Value: false
-        robot_2/base_footprint:
-          Value: false
-        robot_2/base_link:
-          Value: false
-        robot_2/base_link_tf2:
-          Value: false
-        robot_2/odom:
-          Value: false
-        robot_3/base_footprint:
-          Value: false
-        robot_3/base_link:
-          Value: false
-        robot_3/base_link_tf2:
-          Value: false
-        robot_3/odom:
-          Value: false
-        robot_4/base_footprint:
-          Value: false
-        robot_4/base_link:
-          Value: false
-        robot_4/base_link_tf2:
-          Value: false
-        robot_4/odom:
-          Value: false
-        robot_5/base_footprint:
-          Value: false
-        robot_5/base_link:
-          Value: false
-        robot_5/base_link_tf2:
-          Value: false
-        robot_5/odom:
-          Value: false
-        robot_6/base_footprint:
-          Value: false
-        robot_6/base_link:
-          Value: false
-        robot_6/base_link_tf2:
-          Value: false
-        robot_6/odom:
-          Value: false
-        robot_7/base_footprint:
-          Value: false
-        robot_7/base_link:
-          Value: false
-        robot_7/base_link_tf2:
-          Value: false
-        robot_7/odom:
-          Value: false
-        robot_8/base_footprint:
-          Value: false
-        robot_8/base_link:
-          Value: false
-        robot_8/base_link_tf2:
-          Value: false
-        robot_8/odom:
-          Value: false
-        robot_9/base_footprint:
-          Value: false
-        robot_9/base_link:
-          Value: false
-        robot_9/base_link_tf2:
-          Value: false
-        robot_9/odom:
-          Value: false
-        world:
-          Value: false
       Marker Scale: 2
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          map:
-            base_link:
-              {}
-            robot_0/base_link:
-              robot_0/base_link_tf2:
-                {}
-            robot_0/odom:
-              robot_0/base_footprint:
-                {}
-            robot_1/base_link:
-              robot_1/base_link_tf2:
-                {}
-            robot_1/odom:
-              robot_1/base_footprint:
-                {}
-            robot_2/base_link:
-              robot_2/base_link_tf2:
-                {}
-            robot_2/odom:
-              robot_2/base_footprint:
-                {}
-            robot_3/base_link:
-              robot_3/base_link_tf2:
-                {}
-            robot_3/odom:
-              robot_3/base_footprint:
-                {}
-            robot_4/base_link:
-              robot_4/base_link_tf2:
-                {}
-            robot_4/odom:
-              robot_4/base_footprint:
-                {}
-            robot_5/base_link:
-              robot_5/base_link_tf2:
-                {}
-            robot_5/odom:
-              robot_5/base_footprint:
-                {}
-            robot_6/base_link:
-              robot_6/base_link_tf2:
-                {}
-            robot_6/odom:
-              robot_6/base_footprint:
-                {}
-            robot_7/base_link:
-              robot_7/base_link_tf2:
-                {}
-            robot_7/odom:
-              robot_7/base_footprint:
-                {}
-            robot_8/base_link:
-              robot_8/base_link_tf2:
-                {}
-            robot_8/odom:
-              robot_8/base_footprint:
-                {}
-            robot_9/base_link:
-              robot_9/base_link_tf2:
-                {}
-            robot_9/odom:
-              robot_9/base_footprint:
-                {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -299,6 +147,278 @@ Visualization Manager:
         TebContainer: true
       Queue Size: 100
       Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 2
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /robot_0/base_pose_ground_truth
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 2
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /robot_1/base_pose_ground_truth
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 2
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /robot_2/base_pose_ground_truth
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 2
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /robot_3/base_pose_ground_truth
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 2
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /robot_4/base_pose_ground_truth
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 2
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /robot_5/base_pose_ground_truth
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 2
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /robot_6/base_pose_ground_truth
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 2
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 0.30000001192092896
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic: /robot_7/base_pose_ground_truth
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -319,7 +439,7 @@ Visualization Manager:
       X std deviation: 0.5
       Y std deviation: 0.5
     - Class: rviz/SetGoal
-      Topic: /robot_0/move_base_simple/goal
+      Topic: /robot_4/move_base_simple/goal
     - Class: rviz/PublishPoint
       Single click: true
       Topic: /clicked_point
@@ -348,7 +468,7 @@ Window Geometry:
   Height: 1007
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000016b0000034bfc0200000007fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006300fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003f0000034b000000db00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c0000026100000001000001a40000034bfc0200000004fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000003f0000018d0000006300fffffffb0000000a0056006900650077007301000001d2000001b8000000b300fffffffb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000027c000001330000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003ffc0100000002fb0000000800540069006d00650100000000000007800000031700fffffffb0000000800540069006d00650100000000000004500000000000000000000004650000034b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001e30000034bfc0200000007fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006300fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003f0000034b000000db00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c0000026100000001000001a40000034bfc0200000004fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000003f0000018d0000006300fffffffb0000000a0056006900650077007301000001d2000001b8000000b300fffffffb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000027c000001330000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003ffc0100000002fb0000000800540069006d00650100000000000007800000031700fffffffb0000000800540069006d00650100000000000004500000000000000000000003ed0000034b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:

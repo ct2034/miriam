@@ -34,7 +34,6 @@ class ObstaclePublisher:
         self.received[i_a] = True
 
     def publish_obstacles(self):
-        rospy.loginfo("publish ..")
         for i_a_pub in range(self.n_agents):
             msg = ObstacleArrayMsg()
             msg.header.frame_id = "map"
