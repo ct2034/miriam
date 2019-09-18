@@ -215,9 +215,9 @@ class RoadmapServer:
                 id += 1
                 arrow.header.frame_id = "map"
                 arrow.pose.orientation.w = 1
-                arrow.scale.x = .05
-                arrow.scale.y = .15
-                arrow.color.a = .7
+                arrow.scale.x = .03
+                arrow.scale.y = .10
+                arrow.color.a = .4
                 arrow.color.b = 1
                 arrow.type = Marker.ARROW
                 arrow.points = [
@@ -231,10 +231,10 @@ class RoadmapServer:
             id += 1
             point.header.frame_id = "map"
             point.pose.orientation.w = 1
-            point.scale.x = .3
-            point.scale.y = .3
-            point.scale.z = .3
-            point.color.a = .7
+            point.scale.x = .2
+            point.scale.y = .2
+            point.scale.z = .2
+            point.color.a = .4
             point.color.r = 1
             point.type = Marker.SPHERE
             point.pose.position.x = p.x

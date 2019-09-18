@@ -42,7 +42,7 @@ roomba
 (
   # can refer to the robot by this name
   name "r0"
-  pose [ 2 3.5 0 175 ]
+  pose [ 3 -1 0 180 ]
 
   # report error-free position in world coordinates
   localization "gps"
