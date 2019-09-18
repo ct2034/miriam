@@ -1,6 +1,10 @@
 <launch>
 	<include file="$(find adamsmap_graph)/launch/roadmap_server.launch" />
 
+	<node pkg="adamsmap_nav" type="obstacle_publisher.py" name="obstacle_publisher" output="screen">
+			<param name="n_agents" value="8" />
+	</node>
+
 	<!--- Run move base -->
 	<include file="$(find adamsmap_nav)/launch/move_base.xml" />
 

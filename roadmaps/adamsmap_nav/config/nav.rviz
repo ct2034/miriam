@@ -7,8 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /Grid1
-        - /MarkerArray1
-        - /Path2
       Splitter Ratio: 0.5
     Tree Height: 696
   - Class: rviz/Selection
@@ -239,13 +237,13 @@ Visualization Manager:
       Use Timestamp: false
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /roadmap_viz
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -292,6 +290,15 @@ Visualization Manager:
       Topic: /robot_0/move_base/TebLocalPlannerROS/local_plan
       Unreliable: false
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /robot_0/move_base/TebLocalPlannerROS/teb_markers
+      Name: Marker
+      Namespaces:
+        PointObstacles: true
+        TebContainer: true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -329,11 +336,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 68.36226654052734
+      Scale: 80.91989135742188
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 1.5060585737228394
-      Y: -0.3606753647327423
+      X: 0.39311978220939636
+      Y: -0.2179434597492218
     Saved: ~
 Window Geometry:
   Displays:

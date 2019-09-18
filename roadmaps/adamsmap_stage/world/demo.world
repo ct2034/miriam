@@ -31,18 +31,18 @@ window
 # load an environment bitmap
 floorplan
 (
-  name "z"
-  size [9.6 9.6 0.2]
+  name "x"
+  size [8.5 8.5 0.2]
   pose [0 0 0 0]
-  bitmap "z.png"
+  bitmap "x.png"
 )
 
-
+# top right
 roomba
 (
   # can refer to the robot by this name
   name "r0"
-  pose [ 3 -1 0 180 ]
+  pose [ 1 3 0 -90 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -52,102 +52,84 @@ roomba
 
 )
 
+# top left
 roomba
 (
   # can refer to the robot by this name
   name "r1"
-  pose [ 0 4 0 175 ]
+  pose [ -1 3 0 -90 ]
 
   # report error-free position in world coordinates
   localization "gps"
   localization_origin [ 0 0 0 0 ]
 )
 
+# left top
 roomba
 (
   # can refer to the robot by this name
   name "r2"
-  pose [ -4 4 0 -121 ]
+  pose [ -3 1 0 0 ]
 
   # report error-free position in world coordinates
   localization "gps"
   localization_origin [ 0 0 0 0 ]
 )
 
+# left bottom
 roomba
 (
   # can refer to the robot by this name
   name "r3"
-  pose [ 0 1 0 -90 ]
+  pose [ -3 -1 0 0 ]
 
   # report error-free position in world coordinates
   localization "gps"
   localization_origin [ 0 0 0 0 ]
 )
 
-
+# bottom left
 roomba
 (
   # can refer to the robot by this name
   name "r4"
-  pose [ -2 -2.5 0 175 ]
+  pose [ -1 -3 0 90 ]
 
   # report error-free position in world coordinates
   localization "gps"
   localization_origin [ 0 0 0 0 ]
 )
 
-
-
+# bottom right
 roomba
 (
   # can refer to the robot by this name
   name "r5"
-  pose [ -1 -4 0 0.0 ]
+  pose [ 1 -3 0 90 ]
 
   # report error-free position in world coordinates
   localization "gps"
   localization_origin [ 0 0 0 0 ]
 )
 
+# right bottom
 roomba
 (
   # can refer to the robot by this name
   name "r6"
-  pose [ 0 -2.5 0 0.0 ]
+  pose [ 3 -1 0 180 ]
 
   # report error-free position in world coordinates
   localization "gps"
   localization_origin [ 0 0 0 0 ]
 )
 
+# right top
 roomba
 (
   # can refer to the robot by this name
   name "r7"
-  pose [ 2 -1.9 0 0.0 ]
-
-  # report error-free position in world coordinates
-  localization "gps"
-  localization_origin [ 0 0 0 0 ]
-)
-
-roomba
-(
-  # can refer to the robot by this name
-  name "r8"
-  pose [ 3.5 1 0 0.0 ]
-
-  # report error-free position in world coordinates
-  localization "gps"
-  localization_origin [ 0 0 0 0 ]
-)
-
-roomba
-(
-  # can refer to the robot by this name
-  name "r9"
-  pose [ 4 -4 0 0.0 ]
+  pose [ 3 1 0 180 ]
 
   # report error-free position in world coordinates
   localization "gps"

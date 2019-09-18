@@ -22,9 +22,9 @@ TebLocalPlannerROS:
  max_vel_x: 0.4
  max_vel_x_backwards: 0.2
  max_vel_y: 0.0
- max_vel_theta: 0.3
+ max_vel_theta: 0.5
  acc_lim_x: 0.5
- acc_lim_theta: 0.5
+ acc_lim_theta: 0.8
  min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
 
  footprint_model:
@@ -73,7 +73,7 @@ TebLocalPlannerROS:
  weight_inflation: 0.2
  weight_dynamic_obstacle: 10
  weight_dynamic_obstacle_inflation: 0.2
- weight_viapoint: 1
+ weight_viapoint: 500
  weight_adapt_factor: 2
 
  # Homotopy Class Planner
