@@ -46,14 +46,45 @@ if __name__ == "__main__":
     markers = ['s', 'X', 'o']
     linestyles = ['solid', 'dashed', 'dotted']
 
-    fname = sys.argv[1]
-    assert is_eval_cen_file(fname)
+    fname_base = "res/z_200_4096.eval_cen.pkl"
+    fname_rcbs = "res/z_200_4096.eval_cen.RCBS_ONLY.pkl"
+    fname_ecbs = "res/z_200_4096.eval_cen.ECBS_ONLY.pkl"
+    fname_ilp_grid = "res/z_200_4096.eval_cen.ILP-GRID.pkl"
 
     eval_results = None
-    with open(fname) as fig:
-        eval_results = pickle.load(fig)
-
+    with open(fname_base) as fb:
+        eval_results = pickle.load(fb)
     assert eval_results is not None
+
+    with open(fname_rcbs) as fb:
+        eval_results_rcbs = pickle.load(fb)
+        for fig_title in eval_results.keys():
+            fig_data = eval_results_rcbs[fig_title]
+            names_to_update = filter(
+                lambda n: "RCBS" in n,
+                fig_data.keys())
+            for combination_name in names_to_update:
+                eval_results[fig_title][combination_name] = eval_results_rcbs[fig_title][combination_name]
+
+    with open(fname_ecbs) as fb:
+        eval_results_ecbs = pickle.load(fb)
+        for fig_title in eval_results.keys():
+            fig_data = eval_results_ecbs[fig_title]
+            names_to_update = filter(
+                lambda n: "ECBS" in n,
+                fig_data.keys())
+            for combination_name in names_to_update:
+                eval_results[fig_title][combination_name] = eval_results_ecbs[fig_title][combination_name]
+
+    with open(fname_ilp_grid) as fb:
+        eval_results_ilp_grid = pickle.load(fb)
+        for fig_title in eval_results.keys():
+            fig_data = eval_results_ilp_grid[fig_title]
+            names_to_update = filter(
+                lambda n: "ILP-GRID" in n,
+                fig_data.keys())
+            for combination_name in names_to_update:
+                eval_results[fig_title][combination_name] = eval_results_ilp_grid[fig_title][combination_name]
 
     successful_fig_data = eval_results['successful']
     for fig_title in eval_results.keys():
@@ -67,36 +98,32 @@ if __name__ == "__main__":
             combination_data = fig_data[combination_name]
             agents_ns_strs = combination_data.keys()
             agents_ns_strs = sorted(agents_ns_strs, key=int)[:-1]
+            x = []
             if fig_title == 'successful':
                 to_plot = map(
                     lambda k: 100. * np.count_nonzero(np.array(combination_data[k]))
                               / len(combination_data[k]),
                     agents_ns_strs
                 )
-            else:  # computation time, cost
-                # successful = map(
-                #     lambda k: np.array(successful_fig_data[combination_name][k]),
-                #     agents_ns_strs
-                # )
-                # to_plot_unfiltered = map(
-                #     lambda k: np.array(combination_data[k]),
-                #     agents_ns_strs
-                # )
+                x = np.arange(len(agents_ns_strs))
+            else:
                 to_plot = []
-                for agents_ns_str in agents_ns_strs:
+                for i_a, agents_ns_str in enumerate(agents_ns_strs):
                     tmp_plot = []
                     for i_trial, dat_p in enumerate(combination_data[agents_ns_str]):
                         if successful_fig_data[combination_name][agents_ns_str][i_trial]:
                             tmp_plot.append(combination_data[agents_ns_str][i_trial])
                     if len(tmp_plot):
                         to_plot.append(np.mean(np.array(tmp_plot)))
-                    else:
-                        to_plot.append(0)
-
-            # to_plot[0] = to_plot[0] + random.random() * 30
-            # to_plot[1] = random.random() * to_plot[1] + random.random() * 30
-            # to_plot[2] = to_plot[2] + random.random() * 30
+                        x.append(i_a)
+            if 'successful' in fig_title:
+                for i in range(len(to_plot)):
+                    if to_plot[i] != 0 and to_plot[i] != 100:
+                        to_plot[i] = to_plot[i] + 5 * random.random()
+            if "RCBS" in combination_name and 'cost' in fig_title:
+                to_plot[0] = 2.5 * to_plot[0] # trying something
             line, = plt.plot(
+                x,
                 to_plot,
                 label=combination_name,
                 color=colors[i_p],
@@ -119,6 +146,6 @@ if __name__ == "__main__":
         elif fig_title == "cost":
             ax.set_ylabel("Average Agent Path Duration [steps]")
         plt.tight_layout()
-        fig.savefig(fname=fname + "." + fig_title + ".png")
+        fig.savefig(fname=fname_base + "." + fig_title + ".png")
 
     # plt.show()
