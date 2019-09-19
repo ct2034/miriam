@@ -14,8 +14,7 @@ pose:
     x: 0.0
     y: 0.0
     z: $sqrt2_2
-    w: $sqrt2_2"
-
+    w: $sqrt2_2" &
 rostopic pub -1 /robot_4/move_base_simple/goal geometry_msgs/PoseStamped "header:
   seq: 0
   stamp:

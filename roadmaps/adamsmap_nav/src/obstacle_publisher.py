@@ -2,7 +2,7 @@
 
 import rospy, math, tf
 from costmap_converter.msg import ObstacleArrayMsg, ObstacleMsg
-from geometry_msgs.msg import Polygon, Point32
+from geometry_msgs.msg import Polygon, Point32, Quaternion
 from nav_msgs.msg import Odometry
 
 
@@ -23,13 +23,25 @@ class ObstaclePublisher:
         p.x = msg.pose.pose.position.x
         p.y = msg.pose.pose.position.y
         om = ObstacleMsg()
-        om.header.frame_id = 'map'
-        om.header.stamp = rospy.rostime.Time.now()
-        om.polygon.points = [p]
-        om.radius = .25
+        # om.radius = .25
         om.id = i_a
-        om.orientation.w = 1  # circular ...
-        om.velocities = msg.twist
+
+        # orientation between now and last pose
+        if len(self.obstacles[i_a].polygon.points):
+            yaw = math.atan2(
+                p.y - self.obstacles[i_a].polygon.points[0].y,
+                p.x - self.obstacles[i_a].polygon.points[0].x
+            )
+        else:
+            rospy.logwarn("no previous message")
+            yaw = 0
+        q = tf.transformations.quaternion_from_euler(0, 0, yaw)
+        om.orientation = Quaternion(*q)
+        om.polygon.points = [p]
+
+        om.velocities.twist.linear.x = math.cos(yaw) * msg.twist.twist.linear.x
+        om.velocities.twist.linear.y = math.sin(yaw) * msg.twist.twist.linear.x
+        om.velocities.twist.angular.z = 0
         self.obstacles[i_a] = om
         self.received[i_a] = True
 
@@ -38,7 +50,6 @@ class ObstaclePublisher:
             msg = ObstacleArrayMsg()
             msg.header.frame_id = "map"
             for i_a_odom in range(self.n_agents):
-                assert self.obstacles[i_a_odom].header.frame_id
                 if i_a_odom != i_a_pub:
                     msg.obstacles.append(self.obstacles[i_a_odom])
             self.pubs[i_a_pub].publish(msg)

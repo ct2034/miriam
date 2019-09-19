@@ -3,7 +3,10 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Map2
+        - /Path2
+        - /Marker1
       Splitter Ratio: 0.5
     Tree Height: 696
   - Class: rviz/Selection
@@ -80,7 +83,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /robot_0/move_base/local_costmap/costmap
+      Topic: /robot_4/move_base/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -135,12 +138,12 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /robot_0/move_base/TebLocalPlannerROS/local_plan
+      Topic: /robot_4/move_base/TebLocalPlannerROS/local_plan
       Unreliable: false
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /robot_0/move_base/TebLocalPlannerROS/teb_markers
+      Marker Topic: /robot_4/move_base/TebLocalPlannerROS/teb_markers
       Name: Marker
       Namespaces:
         PointObstacles: true
@@ -446,21 +449,26 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0.005000007338821888
-      Class: rviz/TopDownOrtho
+      Class: rviz/Orbit
+      Distance: 12.667628288269043
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
+      Focal Point:
+        X: 1.1773847341537476
+        Y: -0.20550759136676788
+        Z: -0.0009978897869586945
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 80.91989135742188
+      Pitch: 1.3547965288162231
       Target Frame: <Fixed Frame>
-      Value: TopDownOrtho (rviz)
-      X: 0.39311978220939636
-      Y: -0.2179434597492218
+      Value: Orbit (rviz)
+      Yaw: 4.86817741394043
     Saved: ~
 Window Geometry:
   Displays:
