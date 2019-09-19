@@ -63,7 +63,7 @@ class ObstaclePublisher:
 
 
 if __name__ == '__main__':
-    rospy.init_node('obstacle_publisher', log_level=rospy.DEBUG)
+    rospy.init_node('obstacle_publisher')
     rospy.logdebug("init")
 
     n_agents = rospy.get_param("~n_agents")

@@ -55,6 +55,9 @@
   <build_export_depend>move_base</build_export_depend>
   <exec_depend>adamsmap_global_planner</exec_depend>
   <exec_depend>move_base</exec_depend>
+  <exec_depend>map_server</exec_depend>
+  <exec_depend>costmap_converter</exec_depend>
+  <exec_depend>teb_local_planner</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
