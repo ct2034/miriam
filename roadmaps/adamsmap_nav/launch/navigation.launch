@@ -10,7 +10,25 @@
 			<arg name="robot_name" value="robot_0" />
 	</include>
 	<include file="$(find adamsmap_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_1" />
+	</include>
+	<include file="$(find adamsmap_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_2" />
+	</include>
+	<include file="$(find adamsmap_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_3" />
+	</include>
+	<include file="$(find adamsmap_nav)/launch/move_base.xml">
 			<arg name="robot_name" value="robot_4" />
+	</include>
+	<include file="$(find adamsmap_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_5" />
+	</include>
+	<include file="$(find adamsmap_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_6" />
+	</include>
+	<include file="$(find adamsmap_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_7" />
 	</include>
 
 	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find adamsmap_nav)/config/nav.rviz" />
