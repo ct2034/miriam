@@ -5,7 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Map2
-        - /Path2
+        - /Path1
         - /Marker1
       Splitter Ratio: 0.5
     Tree Height: 696
@@ -100,8 +100,8 @@ Visualization Manager:
       Class: rviz/Path
       Color: 25; 255; 0
       Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
+      Head Diameter: 0.20000000298023224
+      Head Length: 0.10000000149011612
       Length: 0.30000001192092896
       Line Style: Lines
       Line Width: 0.029999999329447746
@@ -110,12 +110,12 @@ Visualization Manager:
         X: 0
         Y: 0
         Z: 0.20000000298023224
-      Pose Color: 255; 85; 255
-      Pose Style: None
+      Pose Color: 0; 128; 0
+      Pose Style: Arrows
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /robot_0/move_base/TebLocalPlannerROS/global_plan
+      Topic: /robot_4/move_base/AdamsmapGlobalPlanner/path
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -146,8 +146,7 @@ Visualization Manager:
       Marker Topic: /robot_4/move_base/TebLocalPlannerROS/teb_markers
       Name: Marker
       Namespaces:
-        PointObstacles: true
-        TebContainer: true
+        {}
       Queue Size: 100
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -450,25 +449,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 12.667628288269043
+      Distance: 5.505308628082275
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.1773847341537476
-        Y: -0.20550759136676788
-        Z: -0.0009978897869586945
+        X: 1.1189969778060913
+        Y: -1.9650553464889526
+        Z: -0.5752516984939575
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3547965288162231
+      Pitch: 1.0497969388961792
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.86817741394043
+      Yaw: 4.143173694610596
     Saved: ~
 Window Geometry:
   Displays:

@@ -61,7 +61,7 @@ def publish_static_transform(i_a, tb, time):
 
 
 if __name__ == '__main__':
-    rospy.init_node('tf_publisher', log_level=rospy.DEBUG)
+    rospy.init_node('tf_publisher')
     rospy.logdebug("init")
 
     n_agents = rospy.get_param("~n_agents")

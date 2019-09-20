@@ -32,8 +32,11 @@ void AdamsmapGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DRO
     costmap_ = costmap_ros_->getCostmap();
 
     ros::NodeHandle private_nh("~/" + name);
-    private_nh.param("step_size", step_size_, costmap_->getResolution());
-    private_nh.param("min_dist_from_robot", min_dist_from_robot_, 0.10);
+    if (!ros::param::get("poses_per_meter", poses_per_meter_))
+    {
+      poses_per_meter_ = DEFAULT_POSES_PER_METER;
+      ROS_WARN("Param ~poses_per_meter not found using default value %d", poses_per_meter_);
+    }
     world_model_ = new base_local_planner::CostmapModel(*costmap_);
     path_pub_ = private_nh.advertise<nav_msgs::Path>("path", 1);
 
@@ -200,8 +203,8 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
   }
   std::lock_guard<std::mutex> guard(graph_guard_);
 
-  ROS_DEBUG("Got a start: %.2f, %.2f, and a goal: %.2f, %.2f", start.pose.position.x, start.pose.position.y,
-            goal.pose.position.x, goal.pose.position.y);
+  ROS_DEBUG("Got a start: %.2f, %.2f, %.2f, and a goal: %.2f, %.2f, %.2f", start.pose.position.x, start.pose.position.y,
+            toYaw(start.pose.orientation), goal.pose.position.x, goal.pose.position.y, toYaw(goal.pose.orientation));
 
   plan.clear();
   costmap_ = costmap_ros_->getCostmap();
@@ -232,6 +235,7 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
   ROS_DEBUG_STREAM("g.m_vertices.size() " << g.m_vertices.size());
 
   // Boost
+  std::vector<geometry_msgs::PoseStamped> vertex_plan = std::vector<geometry_msgs::PoseStamped>(0);
   float min_cost = std::numeric_limits<float>::max();
   for (int i_c = 0; i_c < pow(nn, 2); i_c++)
   {
@@ -245,13 +249,17 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
     if (cost < min_cost)
     {
       min_cost = cost;
-      plan.clear();
-      std::copy(std::begin(tmp_plan), std::end(tmp_plan), std::back_inserter(plan));
+      vertex_plan.clear();
+      std::copy(std::begin(tmp_plan), std::end(tmp_plan), std::back_inserter(vertex_plan));
     }
   }
   ROS_DEBUG_STREAM("min_cost " << min_cost);
 
-  std::reverse(std::begin(plan), std::end(plan));
+  std::reverse(std::begin(vertex_plan), std::end(vertex_plan));
+  ROS_DEBUG_STREAM("vertex_plan.size() " << vertex_plan.size());
+
+  plan.clear();
+  make_poses_along_plan(vertex_plan, plan);
   ROS_DEBUG_STREAM("plan.size() " << plan.size());
 
   // viz
@@ -262,6 +270,38 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
   path_pub_.publish(path_viz);
 
   return true;
+}
+
+void AdamsmapGlobalPlanner::make_poses_along_plan(std::vector<geometry_msgs::PoseStamped>& in,
+                                                  std::vector<geometry_msgs::PoseStamped>& out)
+{
+  for (auto planit = in.begin(); planit != in.end(); ++planit)
+  {
+    if (planit == in.begin())
+    {
+      out.push_back(*planit);
+    }
+    else  // everything after begin
+    {
+      auto prev = planit - 1;
+      double dx = planit->pose.position.x - prev->pose.position.x;
+      double dy = planit->pose.position.y - prev->pose.position.y;
+      double d = std::sqrt(pow(dx, 2) + pow(dy, 2));
+      double yaw = std::atan2(dy, dx);
+      int n = std::ceil(poses_per_meter_ / d);
+      for (int i = 0; i < n; i++)
+      {
+        geometry_msgs::PoseStamped p;
+        p.pose.position.x = prev->pose.position.x + float(i + 1) / n * dx;
+        p.pose.position.y = prev->pose.position.y + float(i + 1) / n * dy;
+        p.pose.orientation = yawToQuaternion(yaw);
+        out.push_back(p);
+      }
+    }
+  }
+  // add actual goal pose;
+  //  out.pop_back();
+  //  out.push_back(*in.end());
 }
 
 geometry_msgs::PoseStamped AdamsmapGlobalPlanner::poseStampedFromPoint(geometry_msgs::Point& p)

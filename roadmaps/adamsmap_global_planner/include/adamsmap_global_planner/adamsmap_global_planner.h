@@ -28,6 +28,7 @@ namespace adamsmap_global_planner
 static const int MAX_N{ 1024 };
 static const int DIMENSIONS{ 2 };
 static const float EPSILON{ 1E-3 };
+static const uint DEFAULT_POSES_PER_METER{ 3 };
 
 inline bool operator==(const geometry_msgs::PoseStamped& a, const geometry_msgs::Point& b)
 {
@@ -48,6 +49,27 @@ inline bool operator!=(const geometry_msgs::PoseStamped& a, const geometry_msgs:
 inline float operator-(const geometry_msgs::PoseStamped& a, const geometry_msgs::PoseStamped& b)
 {
   return sqrt(pow(a.pose.position.x - b.pose.position.x, 2) + pow(a.pose.position.y - b.pose.position.y, 2));
+}
+
+inline double toYaw(const geometry_msgs::Quaternion& q)
+{
+  tf2::Quaternion tq;
+  tf2::convert(q, tq);
+  return (std::fmod(tq.getAngle() + M_PI, 2 * M_PI)) - M_PI;
+}
+
+inline double toYaw(const geometry_msgs::PoseStamped& a)
+{
+  return toYaw(a.pose.orientation);
+}
+
+inline geometry_msgs::Quaternion yawToQuaternion(double yaw)
+{
+  tf2::Quaternion tq;
+  tq.setRPY(0, 0, yaw);
+  geometry_msgs::Quaternion q;
+  tf2::convert(tq, q);
+  return q;
 }
 
 /**
@@ -96,10 +118,10 @@ public:
   float plan_boost(std::vector<geometry_msgs::PoseStamped>& plan, int start_idx, int goal_idx,
                    const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal);
   double get_angle(const geometry_msgs::PoseStamped& a, geometry_msgs::PoseStamped& b, geometry_msgs::PoseStamped& o);
+  void make_poses_along_plan(std::vector<geometry_msgs::PoseStamped>& in, std::vector<geometry_msgs::PoseStamped>& out);
 
 private:
   costmap_2d::Costmap2DROS* costmap_ros_;
-  double step_size_, min_dist_from_robot_;
   costmap_2d::Costmap2D* costmap_;
   base_local_planner::WorldModel* world_model_;  ///< @brief The world model that the controller will use
   ros::Subscriber roadmap_sub_;
@@ -107,6 +129,7 @@ private:
   bool graph_received_{ false };
   graph_msgs::GeometryGraph graph_;
   std::mutex graph_guard_;
+  int poses_per_meter_;
 
   // flann
   flann::Matrix<float> dataset = flann::Matrix<float>(new float[MAX_N * DIMENSIONS], MAX_N, DIMENSIONS);
