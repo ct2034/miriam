@@ -260,6 +260,7 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
 
   plan.clear();
   make_poses_along_plan(vertex_plan, plan);
+  plan.push_back(goal);
   ROS_DEBUG_STREAM("plan.size() " << plan.size());
 
   // viz
@@ -299,9 +300,6 @@ void AdamsmapGlobalPlanner::make_poses_along_plan(std::vector<geometry_msgs::Pos
       }
     }
   }
-  // add actual goal pose;
-  //  out.pop_back();
-  //  out.push_back(*in.end());
 }
 
 geometry_msgs::PoseStamped AdamsmapGlobalPlanner::poseStampedFromPoint(geometry_msgs::Point& p)

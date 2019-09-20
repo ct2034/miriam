@@ -146,7 +146,8 @@ Visualization Manager:
       Marker Topic: /robot_4/move_base/TebLocalPlannerROS/teb_markers
       Name: Marker
       Namespaces:
-        {}
+        PointObstacles: true
+        TebContainer: true
       Queue Size: 100
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -449,7 +450,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.505308628082275
+      Distance: 15.240034103393555
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -464,10 +465,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.0497969388961792
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.143173694610596
+      Yaw: 4.673181533813477
     Saved: ~
 Window Geometry:
   Displays:
