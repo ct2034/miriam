@@ -32,6 +32,7 @@ class RoadmapServer:
         self.pub_rmv = rospy.Publisher("roadmap_viz", MarkerArray, latch=True, queue_size=1)
         self.sub_cm = rospy.Subscriber("/costmap_2d_node/costmap/costmap", OccupancyGrid, self.map_cb)
         self.cache_dir = rospy.get_param("~cache_dir")
+        self.graph_pkl = rospy.get_param("~graph_pkl", default=None)
         rospy.logdebug("cache_dir: " + self.cache_dir)
 
         self.ps = None
@@ -68,7 +69,17 @@ class RoadmapServer:
         nts = 1024
         h = hash(map_msg.data)
         fname = self.fname(h, n, nts)
-        if os.path.exists(fname):
+        if self.graph_pkl is not None:
+            rospy.loginfo("using graph_pkl file: " + self.graph_pkl)
+            with open(self.graph_pkl, "rb") as f:
+                store = pickle.load(f)
+            posar = store["posar"]
+            edgew = store["edgew"]
+            im = (map.reshape(map.shape + (1,)) - 100) * (-2.6)
+            __, ge, pos = graphs_from_posar(n, posar)
+            make_edges(n, __, ge, posar, edgew, im)
+            self.store_graph_and_pub(n, ge, posar, edgew)
+        elif os.path.exists(fname):
             rospy.loginfo("found cache file: " + fname)
             with open(fname, "rb") as f:
                 store = pickle.load(f)
