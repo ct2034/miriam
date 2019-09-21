@@ -35,7 +35,7 @@ void AdamsmapGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DRO
     if (!ros::param::get("poses_per_meter", poses_per_meter_))
     {
       poses_per_meter_ = DEFAULT_POSES_PER_METER;
-      ROS_WARN("Param ~poses_per_meter not found using default value %d", poses_per_meter_);
+      ROS_DEBUG("Param ~poses_per_meter not found using default value %d", poses_per_meter_);
     }
     world_model_ = new base_local_planner::CostmapModel(*costmap_);
     path_pub_ = private_nh.advertise<nav_msgs::Path>("path", 1);

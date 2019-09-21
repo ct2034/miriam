@@ -1,0 +1,10 @@
+<launch>
+    <arg name="n_agents" />
+    <rosparam file="$(find adamsmap_nav)/config/poses.yaml" command="load" ns="poses" />
+
+    <node pkg="adamsmap_nav" type="goal_manager_benchmark.py" name="goal_manager_benchmark" output="screen">
+			<param name="n_agents" value="$(arg n_agents)" />
+			<param name="benchmark_data_folder" value="$(find adamsmap_nav)/res/" />
+    </node>
+
+</launch>

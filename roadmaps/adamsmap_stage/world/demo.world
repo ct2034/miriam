@@ -37,12 +37,12 @@ floorplan
   bitmap "x.png"
 )
 
-# top right
+# top left
 roomba
 (
   # can refer to the robot by this name
   name "r0"
-  pose [ 1 3.5 0 -90 ]
+  pose [ -1 3.5 0 -90 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -52,72 +52,12 @@ roomba
 
 )
 
-# top left
+# top right
 roomba
 (
   # can refer to the robot by this name
   name "r1"
-  pose [ -1 3.5 0 -90 ]
-
-  # report error-free position in world coordinates
-  localization "gps"
-  localization_origin [ 0 0 0 0 ]
-)
-
-# left top
-roomba
-(
-  # can refer to the robot by this name
-  name "r2"
-  pose [ -3.5 1 0 0 ]
-
-  # report error-free position in world coordinates
-  localization "gps"
-  localization_origin [ 0 0 0 0 ]
-)
-
-# left bottom
-roomba
-(
-  # can refer to the robot by this name
-  name "r3"
-  pose [ -3.5 -1 0 0 ]
-
-  # report error-free position in world coordinates
-  localization "gps"
-  localization_origin [ 0 0 0 0 ]
-)
-
-# bottom left
-roomba
-(
-  # can refer to the robot by this name
-  name "r4"
-  pose [ -1 -3.5 0 90 ]
-
-  # report error-free position in world coordinates
-  localization "gps"
-  localization_origin [ 0 0 0 0 ]
-)
-
-# bottom right
-roomba
-(
-  # can refer to the robot by this name
-  name "r5"
-  pose [ 1 -3.5 0 90 ]
-
-  # report error-free position in world coordinates
-  localization "gps"
-  localization_origin [ 0 0 0 0 ]
-)
-
-# right bottom
-roomba
-(
-  # can refer to the robot by this name
-  name "r6"
-  pose [ 3.5 -1 0 180 ]
+  pose [ 1 3.5 0 -90 ]
 
   # report error-free position in world coordinates
   localization "gps"
@@ -128,8 +68,68 @@ roomba
 roomba
 (
   # can refer to the robot by this name
-  name "r7"
+  name "r2"
   pose [ 3.5 1 0 180 ]
+
+  # report error-free position in world coordinates
+  localization "gps"
+  localization_origin [ 0 0 0 0 ]
+)
+
+# right bottom
+roomba
+(
+  # can refer to the robot by this name
+  name "r3"
+  pose [ 3.5 -1 0 180 ]
+
+  # report error-free position in world coordinates
+  localization "gps"
+  localization_origin [ 0 0 0 0 ]
+)
+
+# bottom right
+roomba
+(
+  # can refer to the robot by this name
+  name "r4"
+  pose [ 1 -3.5 0 90 ]
+
+  # report error-free position in world coordinates
+  localization "gps"
+  localization_origin [ 0 0 0 0 ]
+)
+
+# bottom left
+roomba
+(
+  # can refer to the robot by this name
+  name "r5"
+  pose [ -1 -3.5 0 90 ]
+
+  # report error-free position in world coordinates
+  localization "gps"
+  localization_origin [ 0 0 0 0 ]
+)
+
+# left bottom
+roomba
+(
+  # can refer to the robot by this name
+  name "r6"
+  pose [ -3.5 -1 0 0 ]
+
+  # report error-free position in world coordinates
+  localization "gps"
+  localization_origin [ 0 0 0 0 ]
+)
+
+# left top
+roomba
+(
+  # can refer to the robot by this name
+  name "r7"
+  pose [ -3.5 1 0 0 ]
 
   # report error-free position in world coordinates
   localization "gps"

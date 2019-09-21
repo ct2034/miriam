@@ -65,7 +65,7 @@ if __name__ == '__main__':
     rospy.logdebug("init")
 
     n_agents = rospy.get_param("~n_agents")
-    rospy.loginfo("n_agents: {}".format(n_agents))
+    rospy.logdebug("n_agents: {}".format(n_agents))
     tb = tf.TransformBroadcaster()
 
     for i_a in range(n_agents):

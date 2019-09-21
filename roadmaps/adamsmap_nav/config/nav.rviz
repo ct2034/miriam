@@ -3,10 +3,7 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Map2
-        - /Path1
-        - /Marker1
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 696
   - Class: rviz/Selection
@@ -81,25 +78,25 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: /robot_4/move_base/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /roadmap_viz
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
       Color: 25; 255; 0
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.20000000298023224
       Head Length: 0.10000000149011612
       Length: 0.30000001192092896
@@ -117,12 +114,12 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /robot_4/move_base/AdamsmapGlobalPlanner/path
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
       Color: 254; 0; 255
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -140,16 +137,15 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /robot_4/move_base/TebLocalPlannerROS/local_plan
       Unreliable: false
-      Value: true
+      Value: false
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /robot_4/move_base/TebLocalPlannerROS/teb_markers
       Name: Marker
       Namespaces:
-        PointObstacles: true
-        TebContainer: true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -450,25 +446,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 15.240034103393555
+      Distance: 12.189118385314941
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.1189969778060913
-        Y: -1.9650553464889526
-        Z: -0.5752516984939575
+        X: 0.02465890347957611
+        Y: -0.09285908937454224
+        Z: -1.0336189270019531
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 1.5297963619232178
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.673181533813477
+      Yaw: 4.663183689117432
     Saved: ~
 Window Geometry:
   Displays:

@@ -33,7 +33,6 @@ class ObstaclePublisher:
                 p.x - self.obstacles[i_a].polygon.points[0].x
             )
         else:
-            rospy.logwarn("no previous message")
             yaw = 0
         q = tf.transformations.quaternion_from_euler(0, 0, yaw)
         om.orientation = Quaternion(*q)
@@ -67,7 +66,7 @@ if __name__ == '__main__':
     rospy.logdebug("init")
 
     n_agents = rospy.get_param("~n_agents")
-    rospy.loginfo("n_agents: {}".format(n_agents))
+    rospy.logdebug("n_agents: {}".format(n_agents))
 
     op = ObstaclePublisher(n_agents)
     op.cycle()
