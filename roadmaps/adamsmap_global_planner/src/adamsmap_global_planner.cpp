@@ -26,6 +26,7 @@ AdamsmapGlobalPlanner::AdamsmapGlobalPlanner(std::string name, costmap_2d::Costm
 void AdamsmapGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
 {
   ROS_INFO("intialize");
+  ROS_DEBUG_STREAM("name: " << name);
   if (!initialized_)
   {
     costmap_ros_ = costmap_ros;
@@ -139,7 +140,7 @@ float AdamsmapGlobalPlanner::plan_boost(std::vector<geometry_msgs::PoseStamped>&
   {  // found a path to the goal
     ROS_DEBUG_STREAM("Path found");
     plan.clear();
-    plan.push_back(poseStampedFromXY(goal.pose.position.x, goal.pose.position.y));
+    plan.push_back(goal);
     vertex v;
     for (v = (vertex)fg.actual_goal;; v = p[v])
     {
@@ -270,12 +271,25 @@ bool AdamsmapGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, co
   std::copy(std::begin(plan), std::end(plan), std::back_inserter(path_viz.poses));
   path_pub_.publish(path_viz);
 
+  for (auto it = plan.begin(); it != plan.end(); ++it)
+  {
+    if (it != plan.begin())
+    {
+      if (*it - *(it - 1) > 2.0 / poses_per_meter_)
+      {
+        ROS_DEBUG_STREAM("d: " << *it - *(it - 1) << " between " << *it << " and " << *(it - 1));
+      }
+      //      ROS_ASSERT(*it - *(it - 1) <= 2.0 / poses_per_meter_);
+    }
+  }
+
   return true;
 }
 
 void AdamsmapGlobalPlanner::make_poses_along_plan(std::vector<geometry_msgs::PoseStamped>& in,
                                                   std::vector<geometry_msgs::PoseStamped>& out)
 {
+  //  ROS_ASSERT(in.size() >= 2);
   for (auto planit = in.begin(); planit != in.end(); ++planit)
   {
     if (planit == in.begin())
@@ -289,17 +303,27 @@ void AdamsmapGlobalPlanner::make_poses_along_plan(std::vector<geometry_msgs::Pos
       double dy = planit->pose.position.y - prev->pose.position.y;
       double d = std::sqrt(pow(dx, 2) + pow(dy, 2));
       double yaw = std::atan2(dy, dx);
-      int n = std::ceil(poses_per_meter_ / d);
-      for (int i = 0; i < n; i++)
+      int n = std::ceil(float(poses_per_meter_) / d);
+      ROS_DEBUG_STREAM("dx: " << dx << " d: " << d << " yaw: " << yaw << " n: " << n);
+      if (d == 0)
       {
-        geometry_msgs::PoseStamped p;
-        p.pose.position.x = prev->pose.position.x + float(i + 1) / n * dx;
-        p.pose.position.y = prev->pose.position.y + float(i + 1) / n * dy;
-        p.pose.orientation = yawToQuaternion(yaw);
-        out.push_back(p);
+        out.push_back(*planit);
+      }
+      else
+      {
+        for (int i = 0; i < n; i++)
+        {
+          geometry_msgs::PoseStamped p;
+          p.pose.position.x = prev->pose.position.x + float(i + 1) / n * dx;
+          p.pose.position.y = prev->pose.position.y + float(i + 1) / n * dy;
+          p.pose.orientation = yawToQuaternion(yaw);
+          out.push_back(p);
+        }
       }
     }
   }
+  ROS_DEBUG_STREAM("out.size(): " << out.size() << " in.size(): " << in.size());
+  //  ROS_ASSERT(out.size() >= in.size());
 }
 
 geometry_msgs::PoseStamped AdamsmapGlobalPlanner::poseStampedFromPoint(geometry_msgs::Point& p)

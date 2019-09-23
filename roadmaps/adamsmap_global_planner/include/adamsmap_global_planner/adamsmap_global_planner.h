@@ -28,7 +28,7 @@ namespace adamsmap_global_planner
 static const int MAX_N{ 1024 };
 static const int DIMENSIONS{ 2 };
 static const float EPSILON{ 1E-3 };
-static const uint DEFAULT_POSES_PER_METER{ 3 };
+static const uint DEFAULT_POSES_PER_METER{ 50 };
 
 inline bool operator==(const geometry_msgs::PoseStamped& a, const geometry_msgs::Point& b)
 {
@@ -56,6 +56,13 @@ inline double toYaw(const geometry_msgs::Quaternion& q)
   tf2::Quaternion tq;
   tf2::convert(q, tq);
   return (std::fmod(tq.getAngle() + M_PI, 2 * M_PI)) - M_PI;
+}
+
+inline std::ostream& operator<<(std::ostream& output, const geometry_msgs::PoseStamped& x)
+{
+  output << "(x: " << x.pose.position.x << ", y: " << x.pose.position.y << ", yaw: " << toYaw(x.pose.orientation)
+         << ")";
+  return output;
 }
 
 inline double toYaw(const geometry_msgs::PoseStamped& a)

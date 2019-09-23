@@ -14,7 +14,7 @@ TebLocalPlannerROS:
  global_plan_viapoint_sep: -1
  global_plan_prune_distance: 1
  exact_arc_length: False
- feasibility_check_no_poses: 5
+ feasibility_check_no_poses: 1
  publish_feedback: False
     
  # Robot
@@ -23,8 +23,8 @@ TebLocalPlannerROS:
  max_vel_x_backwards: 0.1
  max_vel_y: 0.0
  max_vel_theta: 0.5
- acc_lim_x: 0.5
- acc_lim_theta: 0.8
+ acc_lim_x: 1.0
+ acc_lim_theta: 1.0
  min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
 
  footprint_model:
@@ -39,11 +39,11 @@ TebLocalPlannerROS:
     
  # Obstacles
     
- min_obstacle_dist: 0.4 # This value must also include our robot radius, since footprint_model is set to "point".
- inflation_dist: 0.6
+ min_obstacle_dist: 0.45  # This value must also include our robot radius, since footprint_model is set to "point".
+ inflation_dist: 0.3
  include_costmap_obstacles: True
  costmap_obstacles_behind_robot_dist: 1.5
- obstacle_poses_affected: 15
+ obstacle_poses_affected: 5
 
  dynamic_obstacle_inflation_dist: 0.6
  include_dynamic_obstacles: True
@@ -67,20 +67,20 @@ TebLocalPlannerROS:
  weight_kinematics_nh: 1000
  weight_kinematics_forward_drive: 1
  weight_kinematics_turning_radius: 1
- weight_optimaltime: 0.2 # must be > 0
- weight_shortest_path: 1
+ weight_optimaltime: .4 # must be > 0
+ weight_shortest_path: .6
  weight_obstacle: 100
  weight_inflation: 0.2
- weight_dynamic_obstacle: 12
- weight_dynamic_obstacle_inflation: 0.1
- weight_viapoint: 300
+ weight_dynamic_obstacle: 10
+ weight_dynamic_obstacle_inflation: 0.2
+ weight_viapoint: 500
  weight_adapt_factor: 2
 
  # Homotopy Class Planner
 
  enable_homotopy_class_planning: True
  enable_multithreading: True
- max_number_classes: 4
+ max_number_classes: 3
  selection_cost_hysteresis: 1.0
  selection_prefer_initial_plan: 0.9
  selection_obst_cost_scale: 100.0
