@@ -144,8 +144,7 @@ Visualization Manager:
       Marker Topic: /robot_5/move_base/TebLocalPlannerROS/teb_markers
       Name: Marker
       Namespaces:
-        PointObstacles: true
-        TebContainer: true
+        {}
       Queue Size: 100
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -440,7 +439,7 @@ Visualization Manager:
       X std deviation: 0.5
       Y std deviation: 0.5
     - Class: rviz/SetGoal
-      Topic: /robot_4/move_base_simple/goal
+      Topic: /robot_0/move_base_simple/goal
     - Class: rviz/PublishPoint
       Single click: true
       Topic: /clicked_point

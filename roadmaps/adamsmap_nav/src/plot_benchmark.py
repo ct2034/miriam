@@ -14,7 +14,7 @@ if __name__ == "__main__":
     data = []
     ns_agents = []
     planners = []
-    for fname in os.listdir(folder):
+    for fname in sorted(os.listdir(folder)):
         if fname.endswith(".pkl"):
             # exmpl:
             #   adamsmap_global_planner-AdamsmapGlobalPlanner_x_100_4096.pkl_n_agents-8.pkl

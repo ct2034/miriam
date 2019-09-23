@@ -1,9 +1,11 @@
 <launch>
-  <arg name="headless" default="false" />
-  <node name="stageros" pkg="stage_ros" type="stageros" args="-g $(find adamsmap_stage)/world/demo.world" if="$(arg headless)"/>
-  <node name="stageros" pkg="stage_ros" type="stageros" args="$(find adamsmap_stage)/world/demo.world" unless="$(arg headless)"/>
+  <arg name="n_agents" default="8" />
+
+  <node name="stageros" pkg="stage_ros" type="stageros" args="$(find adamsmap_stage)/world/demo_2agents.world" if="$(eval n_agents == 2)"/>
+  <node name="stageros" pkg="stage_ros" type="stageros" args="$(find adamsmap_stage)/world/demo_4agents.world" if="$(eval n_agents == 4)"/>
+  <node name="stageros" pkg="stage_ros" type="stageros" args="$(find adamsmap_stage)/world/demo_8agents.world" if="$(eval n_agents == 8)"/>
 
   <node name="tf_publisher" pkg="adamsmap_stage" type="tf_publisher.py">
-    <param name="n_agents" value="10" />
+    <param name="n_agents" value="$(arg n_agents)" />
   </node>
 </launch>
