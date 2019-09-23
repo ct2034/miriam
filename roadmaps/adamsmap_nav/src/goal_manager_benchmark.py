@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pickle
+import random
 from math import sqrt, pi
 
 import rospy
@@ -44,6 +45,15 @@ class GoalManager:
     def set_goals_start(self):
         rospy.loginfo("Setting goals: start")
         self.set_goals("start")
+
+    def set_goals_shuffled(self):
+        rospy.loginfo("Setting goals: shuffled")
+        self.set_goals("start")
+        goals_copy = set(self.goals)
+        for i_a in range(n_agents):
+            choice = random.choice(list(goals_copy))
+            self.goals[i_a] = choice
+            goals_copy.remove(choice)
 
     def set_goals_opposite(self):
         rospy.loginfo("Setting goals: opposite")
@@ -129,17 +139,27 @@ if __name__ == '__main__':
     poses = rospy.get_param("poses")
     rospy.loginfo("available poses:\n{}".format("- \n".join(poses.keys())))
     benchmark_data_folder = rospy.get_param("~benchmark_data_folder")
+    command_str = rospy.get_param("~command")  # type: str
+    rospy.loginfo("command: {}".format(command_str))
 
     gm = GoalManager(n_agents, poses)
     ts = []
     gm.set_goals_start()  # preparation
     gm.pub_and_wait()
 
-    for _ in range(25):
-        gm.set_goals_opposite()
-        t = gm.pub_and_wait()
-        ts.append(t)
-        gm.set_goals_start()
-        t = gm.pub_and_wait()
-        ts.append(t)
-        gm.save_data(ts, benchmark_data_folder)
+    if command_str.startswith("swap"):
+        n_swaps = int(command_str.split(" ")[1])
+        for _ in range(int(n_swaps / 2)):
+            gm.set_goals_opposite()
+            t = gm.pub_and_wait()
+            ts.append(t)
+            gm.set_goals_start()
+            t = gm.pub_and_wait()
+            ts.append(t)
+            gm.save_data(ts, benchmark_data_folder)
+    elif command_str.startswith("random"):
+        n_swaps = int(command_str.split(" ")[1])
+        for _ in range(n_swaps):
+            gm.set_goals_shuffled()
+            t = gm.pub_and_wait()
+            ts.append(t)

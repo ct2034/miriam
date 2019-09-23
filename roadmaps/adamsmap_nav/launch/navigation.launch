@@ -1,6 +1,7 @@
 <launch>
 	<arg name="n_agents" default="8" />
 	<arg name="headless" default="false" />
+	<arg name="command" default="swap 50" />
 
 	<include file="$(find adamsmap_graph)/launch/roadmap_server.launch" />
 
@@ -37,6 +38,7 @@
 	<!-- GOAL MANAGER -->
 	<include file="$(find adamsmap_nav)/launch/goal_manager.xml">
 			<arg name="n_agents" value="$(arg n_agents)" />
+			<arg name="command" value="$(arg command)" />
 	</include>
 
 	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find adamsmap_nav)/config/nav.rviz" unless="$(arg headless)" />
