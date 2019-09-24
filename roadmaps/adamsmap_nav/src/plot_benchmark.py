@@ -31,7 +31,6 @@ if __name__ == "__main__":
                 else:
                     planners.append("Gridmap-based")
 
-
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 4))
     violin_parts = ax.violinplot(data, showmeans=True, showextrema=False)
     idx = range(len(data))
@@ -44,11 +43,13 @@ if __name__ == "__main__":
     print(violin_parts['cmeans'])
     ax.set_xticks([x + 1 for x in idx])
 
+
     def get_label(x):
         if x == 1 or x == 4:
             return planners[x] + "\n" + ns_agents[x] + " Agents"
         else:
             return "\n" + ns_agents[x] + " Agents"
+
 
     ax.set_xticklabels(
         map(get_label, idx)
