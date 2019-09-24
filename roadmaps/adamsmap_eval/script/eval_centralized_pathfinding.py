@@ -7,6 +7,7 @@ import numpy as np
 import os
 import pickle
 import psutil
+import uuid
 import random
 import signal
 import sys
@@ -43,12 +44,16 @@ coloredlogs.install(level=logging.INFO)
 if debug:
     logging.debug(">> Debug params active")
     TRIALS = 1
-    TIMEOUT_S = 20
-    MAX_AGENTS = 26
-else:
-    TRIALS = 3
-    TIMEOUT_S = 120  # 2 min
+    TIMEOUT_S = 5 * 60  # 5 min
+    MIN_AGENTS = 25
     MAX_AGENTS = 151
+    STEP_AGENTS = 25
+else:
+    TRIALS = 10
+    TIMEOUT_S = 5 * 60  # 5 min
+    MIN_AGENTS = 25
+    MAX_AGENTS = 151
+    STEP_AGENTS = 25
 
 SUCCESSFUL = "successful"
 COMPUTATION_TIME = "computation_time"
@@ -90,7 +95,7 @@ def evaluate(fname):
     assert os.path.exists(
         fname_graph_undir_adjlist), "Please make csv files first `script/write_graph.py csv res/...pkl`"
     fname_map = resolve_mapname(fname)
-    fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen.pkl"
+    fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen." + str(uuid.uuid1()) + ".pkl"
     assert is_eval_cen_file(fname_eval_results)
 
     # read file
@@ -111,14 +116,14 @@ def evaluate(fname):
     logging.info("fname_grid_posar: " + fname_grid_posar)
     logging.info("fname_graph_adjlist: " + fname_graph_adjlist)
 
-
     # results
     eval_results = {SUCCESSFUL: {}, COMPUTATION_TIME: {}, COST: {}}  # type: Dict[str, Dict[str, Dict[str, list]]]
+    global_seed = random.randint(0, 1000)
 
     # the evaluation per combination
-    n_agentss = range(25, MAX_AGENTS, 25)
-    # planner_iter = Planner
-    planner_iter = [Planner.ILP]
+    n_agentss = range(MIN_AGENTS, MAX_AGENTS, STEP_AGENTS)
+    planner_iter = Planner
+    # planner_iter = [Planner.ECBS]
 
     time_estimate = len(planner_iter) * len(Graph) * len(n_agentss) * TRIALS * TIMEOUT_S
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
@@ -157,14 +162,15 @@ def evaluate(fname):
                     fname_adjlist = fname_grid_adjlist
                     fname_posar = fname_grid_posar
                     n = len(posar_grid)
-                random.seed(3-i_trial)
-                done_agent_nrs = eval_results[SUCCESSFUL][combination_name].keys()
-                done_agent_nrs = sorted(done_agent_nrs, key=int)
+                random.seed(i_trial + global_seed)  # this makes cases with more agents comparable to runs with less
                 run_it = True
                 try:
-                    if eval_results[SUCCESSFUL][combination_name][done_agent_nrs[-1]][i_trial]:  # previous run was succesful
+                    # if the run with the last number of agents on this trial failed ...
+                    if eval_results[SUCCESSFUL][combination_name][str(n_agents - STEP_AGENTS)][i_trial] is False:  
                         run_it = False
-                except Exception:
+                except Exception as e:
+                    logging.debug("e {}".format(e))
+                    logging.debug("e.message {}".format(e.message))
                     pass
                 if run_it:
                     succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist,
@@ -176,11 +182,12 @@ def evaluate(fname):
                 eval_results[COMPUTATION_TIME][combination_name][str(n_agents)].append(comp_time)
                 eval_results[COST][combination_name][str(n_agents)].append(cost)
 
-    # saving / presenting results
-    logging.info(pretty(eval_results))
-    with open(fname_eval_results, 'wb') as f_res:
-        pickle.dump(eval_results, f_res)
-        logging.info("Written results to: " + fname_eval_results)
+                # saving / presenting results
+                logging.info("Saving ..")
+                logging.info(pretty(eval_results))
+                with open(fname_eval_results, 'wb') as f_res:
+                    pickle.dump(eval_results, f_res)
+                    logging.info("Saved results to: " + fname_eval_results)
 
 
 def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_posar):
@@ -195,25 +202,31 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ECBS:
         assert count_processes_with_name("ecbs") < 3
-        cost, _ = benchmark_ecbs.plan(
-            starts=batch[:, 0],
-            goals=batch[:, 1],
-            graph_adjlist_fname=fname_adjlist,
-            graph_pos_fname=fname_posar,
-            timeout=TIMEOUT_S,
-            cwd=os.path.dirname(__file__) + "/../"
-        )
+        try:
+            cost, _ = benchmark_ecbs.plan(
+                starts=batch[:, 0],
+                goals=batch[:, 1],
+                graph_adjlist_fname=fname_adjlist,
+                graph_pos_fname=fname_posar,
+                timeout=TIMEOUT_S,
+                cwd=os.path.dirname(__file__) + "/../"
+            )
+        except TimeoutException:
+            return False, float(TIMEOUT_S), 0
         if cost == benchmark_ecbs.MAX_COST:
             return False, float(TIMEOUT_S), 0
     elif planner_type is Planner.ILP:
         assert count_processes_with_name("java") < 6
-        paths, _ = benchmark_ilp.plan(
-            starts=batch[:, 0],
-            goals=batch[:, 1],
-            N=n,
-            graph_fname=os.path.abspath(os.path.dirname(__file__)) + "/../" + fname_adjlist,
-            timeout=TIMEOUT_S
-        )
+        try:
+            paths, _ = benchmark_ilp.plan(
+                starts=batch[:, 0],
+                goals=batch[:, 1],
+                N=n,
+                graph_fname=os.path.abspath(os.path.dirname(__file__)) + "/../" + fname_adjlist,
+                timeout=TIMEOUT_S
+            )
+        except TimeoutException:
+            return False, float(TIMEOUT_S), 0
         cost = cost_from_paths(paths, posar) / n_agents
         if len(paths) < n_agents:
             return False, float(TIMEOUT_S), 0
@@ -263,8 +276,8 @@ def make_gridmap(N, im, fname):
             if 0 == nx.degree(g_grid, n):
                 g_grid.remove_node(n)
         N_grid = len(g_grid.nodes)
-        logging.debug(edge_len)
-        logging.debug(N_grid)
+        logging.debug("edge_len {}".format(edge_len))
+        logging.debug("N_grid {}".format(N_grid))
 
         grid_adjlist_fname = "res/" + get_basename_wo_extension(fname) + ".grid_adjlist.csv"
         grid_posar_fname = "res/" + get_basename_wo_extension(fname) + ".grid_pos.csv"

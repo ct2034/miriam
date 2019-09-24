@@ -4,7 +4,7 @@ import re
 BASE_NAME = ".*\/[a-z]_[0-9]+_[0-9]+\."
 RESULT_FILE = re.compile(BASE_NAME + "pkl$")
 EVAL_FILE = re.compile(BASE_NAME + "pkl.eval$")
-EVAL_CEN_FILE = re.compile(BASE_NAME + "eval_cen.pkl$")
+EVAL_CEN_FILE = re.compile(BASE_NAME + "eval_cen.*.pkl$")
 
 
 def is_result_file(fname):
