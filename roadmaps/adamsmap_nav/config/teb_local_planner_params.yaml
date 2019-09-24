@@ -73,7 +73,7 @@ TebLocalPlannerROS:
  weight_inflation: 0.2
  weight_dynamic_obstacle: 10
  weight_dynamic_obstacle_inflation: 0.2
- weight_viapoint: 500
+ weight_viapoint: 100
  weight_adapt_factor: 2
 
  # Homotopy Class Planner

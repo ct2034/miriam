@@ -22,13 +22,15 @@
 	<include file="$(find adamsmap_nav)/launch/move_base.xml">
 			<arg name="robot_name" value="robot_3" />
 	</include>
-	<group if="$(eval arg('n_agents') == 8)">
+	<group if="$(eval arg('n_agents') >= 6)">
 		<include file="$(find adamsmap_nav)/launch/move_base.xml">
 				<arg name="robot_name" value="robot_4" />
 		</include>
 		<include file="$(find adamsmap_nav)/launch/move_base.xml">
 				<arg name="robot_name" value="robot_5" />
 		</include>
+	</group>
+	<group if="$(eval arg('n_agents') >= 8)">
 		<include file="$(find adamsmap_nav)/launch/move_base.xml">
 				<arg name="robot_name" value="robot_6" />
 		</include>
