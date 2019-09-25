@@ -1,7 +1,9 @@
 #!/usr/bin/env python2
+import os
 import random
 import sys
 from enum import Enum, unique
+from itertools import product
 from matplotlib import pyplot as plt
 import numpy as np
 import pickle
@@ -40,51 +42,70 @@ def combinations_sort_key(item):
     return g * 3 + p
 
 
+def how_may_datas(eval_results):
+    dims = [0] * 3
+    dims[0] = len(eval_results.keys())
+    allkeys = [[]] * 3
+    allkeys[0] = eval_results.keys()
+    for type in eval_results.keys():
+        if dims[1] < len(eval_results[type].keys()):
+            dims[1] = len(eval_results[type].keys())
+            allkeys[1] = eval_results[type].keys()
+        for combination in eval_results[type].keys():
+            if dims[2] < len(eval_results[type][combination].keys()):
+                dims[2] = len(eval_results[type][combination].keys())
+                allkeys[2] = eval_results[type][combination].keys()
+    lengths = np.zeros(dims)
+    for t, c, a in product(*map(range, dims)):
+        type = allkeys[0][t]
+        combination = allkeys[1][c]
+        agents_n = allkeys[2][a]
+        try:
+            lengths[t, c, a] = len(eval_results[type][combination][agents_n])
+        except Exception:
+            pass
+    return lengths
+
+
+
 if __name__ == "__main__":
     plt.style.use('bmh')
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     markers = ['s', 'X', 'o']
     linestyles = ['solid', 'dashed', 'dotted']
 
-    fname_base = "res/z_200_4096.eval_cen.pkl"
-    fname_rcbs = "res/z_200_4096.eval_cen.RCBS_ONLY.pkl"
-    fname_ecbs = "res/z_200_4096.eval_cen.ECBS_ONLY.pkl"
-    fname_ilp_grid = "res/z_200_4096.eval_cen.ILP-GRID.pkl"
+    folder = sys.argv[1]  # type: str
+    assert folder.endswith("/"), "Please call with folder"
+
+    fname_base = "z_200_4096.eval_cen"
 
     eval_results = None
-    with open(fname_base) as fb:
-        eval_results = pickle.load(fb)
+    for fname in sorted(os.listdir(folder)):
+        if fname.endswith(".pkl") and fname.startswith(fname_base):
+            with open(folder + fname) as fb:
+                if eval_results is None:
+                    eval_results = pickle.load(fb)
+                else:
+                    additional_results = pickle.load(fb)
+                    # type, combination, agents_n
+                    for type in additional_results.keys():
+                        if type not in eval_results.keys():
+                            eval_results[type] = additional_results[type]
+                        else:
+                            for combination in additional_results[type].keys():
+                                if combination not in eval_results[type].keys():
+                                    eval_results[type][combination] = additional_results[type][combination]
+                                else:
+                                    for agents_n in additional_results[type][combination].keys():
+                                        if agents_n not in eval_results[type][combination].keys():
+                                            eval_results[type][combination][agents_n] = additional_results[type][combination][agents_n]
+                                        else:
+                                            eval_results[type][combination][agents_n] += additional_results[type][combination][agents_n]
+            print("read ... {}".format(fname))
+            lengths = how_may_datas(eval_results)
+            print("sum: {}, min_len: {}, max_len: {}".format(lengths.sum(), lengths.min(), lengths.max()))
+
     assert eval_results is not None
-
-    with open(fname_rcbs) as fb:
-        eval_results_rcbs = pickle.load(fb)
-        for fig_title in eval_results.keys():
-            fig_data = eval_results_rcbs[fig_title]
-            names_to_update = filter(
-                lambda n: "RCBS" in n,
-                fig_data.keys())
-            for combination_name in names_to_update:
-                eval_results[fig_title][combination_name] = eval_results_rcbs[fig_title][combination_name]
-
-    with open(fname_ecbs) as fb:
-        eval_results_ecbs = pickle.load(fb)
-        for fig_title in eval_results.keys():
-            fig_data = eval_results_ecbs[fig_title]
-            names_to_update = filter(
-                lambda n: "ECBS" in n,
-                fig_data.keys())
-            for combination_name in names_to_update:
-                eval_results[fig_title][combination_name] = eval_results_ecbs[fig_title][combination_name]
-
-    with open(fname_ilp_grid) as fb:
-        eval_results_ilp_grid = pickle.load(fb)
-        for fig_title in eval_results.keys():
-            fig_data = eval_results_ilp_grid[fig_title]
-            names_to_update = filter(
-                lambda n: "ILP-GRID" in n,
-                fig_data.keys())
-            for combination_name in names_to_update:
-                eval_results[fig_title][combination_name] = eval_results_ilp_grid[fig_title][combination_name]
 
     successful_fig_data = eval_results['successful']
     for fig_title in eval_results.keys():
@@ -133,7 +154,13 @@ if __name__ == "__main__":
             lines.append(line)
 
         # the text around the fig ...
-        fig.legend(handles=lines)
+        # # Shrink current axis by 20%
+        # box = ax.get_position()
+        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        #
+        # # Put a legend to the right of the current axis
+        # # ax.legend()
+        fig.legend(handles=lines, loc='center right')
         ax.set_title(make_nice_title(fig_title))
         x = np.arange(len(agents_ns_strs))  # the label locations
         ax.set_xlabel("Number of Agents")
@@ -143,9 +170,10 @@ if __name__ == "__main__":
             ax.set_ylabel("Planning Success Rate within Time Limit [%]")
         elif fig_title == "computation_time":
             ax.set_ylabel("Computation Time [s]")
+            ax.set_yscale('log')
         elif fig_title == "cost":
             ax.set_ylabel("Average Agent Path Duration [steps]")
         plt.tight_layout()
-        fig.savefig(fname=fname_base + "." + fig_title + ".png")
+        fig.savefig(fname=folder + fname_base + "." + fig_title + ".png")
 
     # plt.show()

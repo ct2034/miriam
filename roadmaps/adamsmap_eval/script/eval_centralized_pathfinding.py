@@ -38,22 +38,13 @@ from adamsmap_eval.filename_verification import (
 )
 from bresenham import bresenham
 
-debug = False
 coloredlogs.install(level=logging.INFO)
 
-if debug:
-    logging.debug(">> Debug params active")
-    TRIALS = 1
-    TIMEOUT_S = 5 * 60  # 5 min
-    MIN_AGENTS = 25
-    MAX_AGENTS = 151
-    STEP_AGENTS = 25
-else:
-    TRIALS = 10
-    TIMEOUT_S = 5 * 60  # 5 min
-    MIN_AGENTS = 25
-    MAX_AGENTS = 151
-    STEP_AGENTS = 25
+TRIALS = 5
+TIMEOUT_S = 5 * 60  # 5 min
+MIN_AGENTS = 25
+MAX_AGENTS = 151
+STEP_AGENTS = 25
 
 SUCCESSFUL = "successful"
 COMPUTATION_TIME = "computation_time"
@@ -122,15 +113,18 @@ def evaluate(fname):
 
     # the evaluation per combination
     n_agentss = range(MIN_AGENTS, MAX_AGENTS, STEP_AGENTS)
-    planner_iter = Planner
-    # planner_iter = [Planner.ECBS]
+    # planner_iter = Planner
+    planner_iter = [Planner.ILP]
 
-    time_estimate = len(planner_iter) * len(Graph) * len(n_agentss) * TRIALS * TIMEOUT_S
+    graph_iter = Graph
+    # graph_iter = [Graph.GRID]
+
+    time_estimate = len(planner_iter) * len(graph_iter) * len(n_agentss) * TRIALS * TIMEOUT_S
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
         str(datetime.timedelta(seconds=time_estimate))
     ))
 
-    for i_c, (planner_type, graph_type) in enumerate(itertools.product(planner_iter, [Graph.GRID])):
+    for i_c, (planner_type, graph_type) in enumerate(itertools.product(planner_iter, graph_iter)):
         combination_name = "{}-{}".format(planner_type.name, graph_type.name)
         logging.info("- Combination {}/{}: {}".format(i_c + 1, len(Planner) * len(Graph),
                                                       combination_name))
