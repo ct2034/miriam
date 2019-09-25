@@ -137,12 +137,6 @@ if __name__ == "__main__":
                     if len(tmp_plot):
                         to_plot.append(np.mean(np.array(tmp_plot)))
                         x.append(i_a)
-            if 'successful' in fig_title:
-                for i in range(len(to_plot)):
-                    if to_plot[i] != 0 and to_plot[i] != 100:
-                        to_plot[i] = to_plot[i] + 5 * random.random()
-            if "RCBS" in combination_name and 'cost' in fig_title:
-                to_plot[0] = 2.5 * to_plot[0] # trying something
             line, = plt.plot(
                 x,
                 to_plot,
@@ -173,6 +167,7 @@ if __name__ == "__main__":
             ax.set_yscale('log')
         elif fig_title == "cost":
             ax.set_ylabel("Average Agent Path Duration [steps]")
+            ax.set_yscale('log')
         plt.tight_layout()
         fig.savefig(fname=folder + fname_base + "." + fig_title + ".png")
 

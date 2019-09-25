@@ -18,6 +18,8 @@ p7
 (lp8
 I00
 aI01
+aI00
+aI01
 asssS'computation_time'
 p9
 (dp10
@@ -36,6 +38,8 @@ p14
 (lp15
 I300
 aF164.72895002365112
+aF300.0
+aF171.94158911705017
 asssS'cost'
 p16
 (dp17
@@ -54,4 +58,6 @@ p21
 (lp22
 I0
 aI30
+aI0
+aI32
 asss.
