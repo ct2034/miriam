@@ -8,7 +8,7 @@ ODRM_STR = "ODRM-based"
 
 if __name__ == "__main__":
     plt.style.use('bmh')
-    plt.rcParams["font.family"] = "serif"
+    # plt.rcParams["font.family"] = "serif"
     plt.rcParams["savefig.dpi"] = 500
 
     folder = sys.argv[1]  # type: str
