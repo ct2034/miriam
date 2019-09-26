@@ -226,7 +226,8 @@ def eval(t, evalset, nn, g, ge, pos, posar, edgew, im, plot=True):
             unsuccesful += 1
         else:
             cost += c
-    if plot & t > -1 & t % 10 == 0:
+    if plot and t > -1 and t % 10 == 0:
+        print("plotting ..")
         fig = plt.figure(figsize=[8, 8])
         ax = plot_path(fig, evalset[ne-1, 0], evalset[ne-1, 1], p, posar, edgew)
         plot_graph(fig, ax, g, pos, edgew, im, fname="anim/frame%04d.png" % t)

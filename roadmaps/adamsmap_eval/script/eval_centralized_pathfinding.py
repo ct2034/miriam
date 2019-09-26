@@ -114,7 +114,8 @@ def evaluate(fname):
     # the evaluation per combination
     n_agentss = range(MIN_AGENTS, MAX_AGENTS, STEP_AGENTS)
     # planner_iter = Planner
-    planner_iter = [Planner.ILP]
+    # planner_iter = [Planner.ILP]
+    planner_iter = [Planner.ECBS, Planner.RCBS]
 
     graph_iter = Graph
     # graph_iter = [Graph.GRID]
@@ -160,7 +161,7 @@ def evaluate(fname):
                 run_it = True
                 try:
                     # if the run with the last number of agents on this trial failed ...
-                    if eval_results[SUCCESSFUL][combination_name][str(n_agents - STEP_AGENTS)][i_trial] is False:  
+                    if eval_results[SUCCESSFUL][combination_name][str(n_agents - STEP_AGENTS)][i_trial] is False:
                         run_it = False
                 except Exception as e:
                     logging.debug("e {}".format(e))
