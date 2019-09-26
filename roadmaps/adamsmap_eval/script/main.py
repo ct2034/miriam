@@ -136,14 +136,15 @@ def fname(image_fname, n, nts):
 
 if __name__ == "__main__":
     # Training
-    ntb = 256  # batch size
+    ntb = 128  # batch size
 
-    for (image_fname, N, nts) in product(
-        ['maps/o.png', 'maps/x.png', 'maps/z.png'],
-        [100, 200, 500],
-        [4096]
-    ):
-        if os.path.exists(fname(image_fname, N, nts)):
-            print("exists")
-        else:
-            optimize(N, ntb, nts, image_fname)
+    # for (image_fname, N, nts) in product(
+    #     ['maps/c.png', 'maps/o.png', 'maps/x.png', 'maps/z.png'],
+    #     [100, 200, 500],
+    #     [4096]
+    # ):
+    #     if os.path.exists(fname(image_fname, N, nts)):
+    #         print("exists")
+    #     else:
+    #         optimize(N, ntb, nts, image_fname)
+    optimize(100, ntb, 8000, 'maps/o.png')
