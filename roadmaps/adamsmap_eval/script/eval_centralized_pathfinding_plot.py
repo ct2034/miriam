@@ -142,7 +142,7 @@ if __name__ == "__main__":
                 to_plot,
                 label=combination_name,
                 color=colors[i_p],
-                marker=markers[i_p],
+                marker=markers[i_g],
                 linestyle=linestyles[i_g],
                 linewidth=1)
             lines.append(line)
