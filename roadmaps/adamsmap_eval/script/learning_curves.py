@@ -1,33 +1,57 @@
 #!/usr/bin/env python2
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 import pickle
+import sys
+from adamsmap_eval.filename_verification import (
+    resolve_number_of_iterations,
+is_result_file,
+resolve_number_of_nodes,
+resolve)
+
+
 
 plt.style.use('bmh')
-plt.rcParams["font.family"] = "serif"
+# plt.rcParams["font.family"] = "serif"
 plt.rcParams["savefig.dpi"] = 500
 
 if __name__ == '__main__':
-    lenght = 512
-    res = np.zeros([3, lenght])
-    i = 0
-    for fname in ["z_200_4096.pkl",
-                  "z_500_2048.pkl",
-                  "z_1000_4096.pkl"]:
-        with open(fname, "rb") as f:
-            store = pickle.load(f)
-        if fname == "z_500_2048.pkl":
-            res[i, :] = np.array(store['batchcost'])[0:lenght*4:4]
-        else:
-            res[i, :] = np.array(store['batchcost'])[0:lenght]
-        i += 1
+    folder = sys.argv[1]  # type: str
+    assert folder.endswith("/"), "Please call with folder"
 
+    dat = []
+    legends = []
+    dummy_lines = []
+    for fname in sorted(os.listdir(folder)):
+        fname = folder + fname
+        if is_result_file(fname):
+            nit = resolve_number_of_iterations(fname)
+            scen = resolve(fname)[0]  # type: str
+            scen = scen.upper()
+            N = resolve_number_of_nodes(fname)
+            if nit == 4096 and scen != "C" and N != 1000:
+                print("reading " + fname)
+                legends.append("{} Nodes, Scenario {}".format(
+                    N,
+                    scen
+                ))
+                with open(fname, "r") as f:
+                    this_dat = pickle.load(f)
+                    print(this_dat.keys())
+                    dat.append(this_dat['batchcost'])
+
+    lines_n = len(legends)
+    colors = map(lambda i: "C{}".format(i), range(lines_n))
     f, ax = plt.subplots()
-    legends = ['200 Vertices', '500 Vertices', '1000 Vertices']
-    ax.plot(np.transpose(res), linewidth=.3)
+    for i in range(lines_n):
+        dummy_lines.append(ax.plot([], [], color=colors[i]))
+    for i in range(lines_n):
+        ax.plot(dat[i], linewidth=.3, color=colors[i])
     ax.set_xlabel("Batch Number")
     ax.set_ylabel("Batch Cost")
-    plt.legend(legends)
+    legend = plt.legend(legends)
+    # ax.add_artist(legend)
     plt.tight_layout()
 
-    plt.savefig('convergence.png')
+    plt.savefig('res/convergence.png')
