@@ -20,7 +20,7 @@ speedup 1.000
 # configure the GUI window
 window
 (
-  size [ 1600 846 ] # in pixels
+  size [ 960 1007 ] # in pixels
   scale 110.002 	# pixels per meter
   center [ 0.543  -0.027 ]
   rotate [ 53.000  -15.000 ]
