@@ -16,7 +16,7 @@ plt.style.use('bmh')
 # plt.rcParams["font.family"] = "serif"
 plt.rcParams["savefig.dpi"] = 500
 
-def moving_average(a, n=3) :
+def moving_average(a, n=5) :
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
@@ -44,7 +44,8 @@ if __name__ == '__main__':
                 with open(fname, "r") as f:
                     this_dat = pickle.load(f)
                     print(this_dat.keys())
-                    dat.append((this_dat['batchcost']))
+                    d = moving_average(this_dat['batchcost'])
+                    dat.append(d)
 
     lines_n = len(legends)
     colors = map(lambda i: "C{}".format(i), range(lines_n))

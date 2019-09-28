@@ -70,6 +70,7 @@ def how_may_datas(eval_results):
 
 if __name__ == "__main__":
     plt.style.use('bmh')
+    plt.rcParams["savefig.dpi"] = 500
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     markers = ['s', 'X', 'o']
     linestyles = ['solid', 'dashed', 'dotted']
