@@ -38,7 +38,7 @@ if __name__ == "__main__":
                     if planner == "adamsmap_global_planner":
                         planners.append(ODRM_STR)
                     else:
-                        planners.append(planner)
+                        planners.append("Gridmap-based")
                     if rand:
                         if mapscen == "x":
                             colors.append("C2")
