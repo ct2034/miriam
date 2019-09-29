@@ -1,9 +1,12 @@
 <launch>
-	<arg name="n_agents" default="4" />
+	<arg name="n_agents" default="8" />
+	<arg name="map" default="z" />
 	<arg name="headless" default="true" />
-	<arg name="command" default="swap 50" />
+	<arg name="command" default="random 5" />
 
-	<include file="$(find adamsmap_graph)/launch/roadmap_server.launch" />
+	<include file="$(find adamsmap_graph)/launch/roadmap_server.launch">
+			<arg name="map" value="$(arg map)" />
+	</include>
 
 	<node pkg="adamsmap_nav" type="obstacle_publisher.py" name="obstacle_publisher" output="screen">
 			<param name="n_agents" value="$(arg n_agents)" />
@@ -40,8 +43,9 @@
 	</group>
 
 	<!-- GOAL MANAGER -->
-	<include file="$(find adamsmap_nav)/launch/goal_manager.xml">
+	<include file="$(find adamsmap_nav)/launch/goal_manager.launch">
 			<arg name="n_agents" value="$(arg n_agents)" />
+			<arg name="map" value="$(arg map)" />
 			<arg name="command" value="$(arg command)" />
 	</include>
 

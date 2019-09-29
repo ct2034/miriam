@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pickle
 import random
-from math import sqrt, pi
+from math import sqrt, pi, ceil
 
 import rospy
 import tf2_ros
@@ -24,6 +24,7 @@ class GoalManager:
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
         self.last_status = [0] * n_agents
+        self.fname_suffix = ''
         for i_a in range(n_agents):
             self.pubs.append(
                 rospy.Publisher("/robot_{}/move_base_simple/goal".format(i_a), PoseStamped, queue_size=0)
@@ -123,7 +124,7 @@ class GoalManager:
 
     def save_data(self, data, folder):
         # type: (list, str)
-        fname = folder + "_".join(self.retrieve_benchmark_metadata()) + ".pkl"
+        fname = folder + "_".join(self.retrieve_benchmark_metadata()) + self.fname_suffix + ".pkl"
         with open(fname, "w") as f:
             pickle.dump(data, f)
         rospy.loginfo("saved data with len: {}".format(len(data)))
@@ -149,7 +150,7 @@ if __name__ == '__main__':
 
     if command_str.startswith("swap"):
         n_swaps = int(command_str.split(" ")[1])
-        for _ in range(int(n_swaps / 2)):
+        for _ in range(ceil(n_swaps / 2)):
             gm.set_goals_opposite()
             t = gm.pub_and_wait()
             ts.append(t)
@@ -159,7 +160,10 @@ if __name__ == '__main__':
             gm.save_data(ts, benchmark_data_folder)
     elif command_str.startswith("random"):
         n_swaps = int(command_str.split(" ")[1])
+        random.seed(0)
+        gm.fname_suffix = "_random"
         for _ in range(n_swaps):
             gm.set_goals_shuffled()
             t = gm.pub_and_wait()
             ts.append(t)
+            gm.save_data(ts, benchmark_data_folder)

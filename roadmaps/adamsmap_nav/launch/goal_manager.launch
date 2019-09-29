@@ -1,7 +1,9 @@
 <launch>
     <arg name="n_agents" />
+    <arg name="map" />
     <arg name="command" />
-    <rosparam file="$(find adamsmap_nav)/config/poses$(arg n_agents).yaml" command="load" ns="poses" />
+    <rosparam file="$(find adamsmap_nav)/config/$(arg map)/poses$(arg n_agents).yaml" command="load" ns="poses" if="$(eval arg('map') == 'x')"/>
+    <rosparam file="$(find adamsmap_nav)/config/$(arg map)/poses8.yaml" command="load" ns="poses" unless="$(eval arg('map') == 'x')"/>
 
     <node pkg="adamsmap_nav" type="goal_manager_benchmark.py" name="goal_manager_benchmark" output="screen">
 			<param name="n_agents" value="$(arg n_agents)" />

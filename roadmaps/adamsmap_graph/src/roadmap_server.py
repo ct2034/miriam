@@ -76,6 +76,7 @@ class RoadmapServer:
             posar = store["posar"]
             edgew = store["edgew"]
             im = (map.reshape(map.shape + (1,)) - 100) * (-2.6)
+            im = np.flip(im, 0)
             __, ge, pos = graphs_from_posar(n, posar)
             make_edges(n, __, ge, posar, edgew, im)
             self.store_graph_and_pub(n, ge, posar, edgew)
@@ -196,7 +197,7 @@ class RoadmapServer:
         self.ps = []
         for i_p in range(posar.shape[0]):
             self.ps.append(Point(posar[i_p, 0] * .01 - 4.8,
-                                 posar[i_p, 1] * .01 - 4.8,
+                                 -1 * (posar[i_p, 1] * .01 - 4.8),
                                  0))
 
         self.edges = []

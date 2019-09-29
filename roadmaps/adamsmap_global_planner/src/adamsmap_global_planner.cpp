@@ -149,7 +149,7 @@ float AdamsmapGlobalPlanner::plan_boost(std::vector<geometry_msgs::PoseStamped>&
         break;
     }
 
-    while (plan.size() >= 2 ? M_PI_2 > get_angle(start, *(plan.end() - 1), *(plan.end())) : false)
+    while (plan.size() >= 2 ? M_PI_2 / 2 > get_angle(start, *(plan.end() - 1), *(plan.end())) : false)
       plan.pop_back();
     if (plan.size() == 2)  // if only goal and one point is in there, go directly
       plan.pop_back();
