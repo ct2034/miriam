@@ -1,6 +1,17 @@
 # An Optimal Baseline Algorithm to Solve the Combined Task Allocation and Path Finding Problem
 
-(after publication this will serve as a landing page for the paper.)
+bibtex:
+```
+@misc{henkel2019optimal,
+    title={An Optimal Algorithm to Solve the Combined Task Allocation and Path Finding Problem},
+    author={Christian Henkel and Jannik Abbenseth and Marc Toussaint},
+    year={2019},
+    eprint={1907.10360},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO}
+}
+```
+[arxiv](https://arxiv.org/abs/1907.10360)
 
 Feel free to browse the code [at the moment of submission](https://github.com/ct2034/miriam/releases/tag/iros19) or the [latest version](https://github.com/ct2034/miriam).
 
