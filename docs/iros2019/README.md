@@ -11,7 +11,7 @@ bibtex:
     primaryClass={cs.RO}
 }
 ```
-[arxiv](https://arxiv.org/abs/1907.10360)
+[Download PDF from arxiv](https://arxiv.org/abs/1907.10360)
 
 Feel free to browse the code [at the moment of submission](https://github.com/ct2034/miriam/releases/tag/iros19) or the [latest version](https://github.com/ct2034/miriam).
 
