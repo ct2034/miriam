@@ -21,3 +21,4 @@ planner/eval/cache/
 roadmaps/
 .pytest_cache/
 venv/
+.vscode
