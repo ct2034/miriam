@@ -37,6 +37,8 @@ def getImageData(fileNameList):
 
 
 def blur(g, imageData, kernel):
+    if imageData.dtype is not tf.float32:
+        imageData = tf.cast(imageData, dtype=tf.float32)
     y = tf.cast(tf.nn.conv2d(imageData, kernel, strides=[
                 1, 1, 1, 1], padding="SAME"), dtype=tf.int32)
     init_op = tf.global_variables_initializer()
@@ -44,22 +46,40 @@ def blur(g, imageData, kernel):
         return sess.run(y)
 
 
+def blur_repeatedly(n, g, imageData, kernel):
+    for _ in range(n):
+        imageData = blur(g, imageData, kernel)
+    return imageData
+
+
 def show(dat):
-    img = Image.fromarray(np.uint8(dat))
+    img = Image.fromarray(np.uint8(dat[0]))
     img.show()
 
 
 g = tf.Graph()
 with g.as_default():
     imageData = getImageData(("tf/map.png",))
-    show(imageData[0])
+    show(imageData)
     imageData = tf.constant(imageData)
-    kernel = getGaussKernel(1.0, 9, 3)
+    kernel = getGaussKernel(1.2, 9, 3)
 
-    # first run
-    resultData = blur(g, imageData, kernel)
-    show(resultData[0])
+    # first 10 run
+    resultData10 = blur_repeatedly(10, g, imageData, kernel)
+    show(resultData10)
 
-    # second
-    resultD2 = blur(g, tf.cast(resultData, dtype=tf.float32), kernel)
-    show(resultD2[0])
+    # second 10 (20)
+    resultData20 = blur_repeatedly(10, g, resultData10, kernel)
+    show(resultData20)
+
+    # third 10 (30)
+    resultData30 = blur_repeatedly(10, g, resultData20, kernel)
+    show(resultData30)
+
+    # fourth 10 (40)
+    resultData40 = blur_repeatedly(10, g, resultData30, kernel)
+    show(resultData40)
+
+    # fifth 10 (50)
+    resultData50 = blur_repeatedly(10, g, resultData40, kernel)
+    show(resultData50)
