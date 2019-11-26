@@ -12,6 +12,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 from tensorflow.contrib import rnn
+import numpy as np
 
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
@@ -24,16 +25,16 @@ handle 28 sequences of 28 steps for every sample.
 '''
 
 # Training Parameters
-learning_rate = 0.001
-training_steps = 10000
+learning_rate = 0.01
+training_steps = 5000
 batch_size = 128
-display_step = 200
+display_step = 100
 
 # Network Parameters
 num_input = 28 # MNIST data input (img shape: 28*28)
 timesteps = 28 # timesteps
-num_hidden = 128 # hidden layer num of features
-num_classes = 10 # MNIST total classes (0-9 digits)
+num_hidden = 64 # hidden layer num of features
+num_classes = 1 # one class for 0 .. 9
 
 # tf Graph input
 X = tf.placeholder("float", [None, timesteps, num_input])
@@ -66,21 +67,25 @@ def RNN(x, weights, biases):
     # Linear activation, using rnn inner loop last output
     return tf.matmul(outputs[-1], weights['out']) + biases['out']
 
-logits = RNN(X, weights, biases)
-prediction = tf.nn.softmax(logits)
+
+pred_cont = RNN(X, weights, biases)
+prediction = tf.math.round(pred_cont)
 
 # Define loss and optimizer
-loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-    logits=logits, labels=Y))
-optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+loss_op = tf.reduce_mean(tf.square(Y - pred_cont))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 train_op = optimizer.minimize(loss_op)
 
 # Evaluate model (with test logits, for dropout to be disabled)
-correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
+correct_pred = tf.equal(prediction, Y)
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
+
+def argmax_label(y):
+    return [[np.argmax(line)] for line in y]
+
 
 # Start training
 with tf.Session() as sess:
@@ -90,6 +95,7 @@ with tf.Session() as sess:
 
     for step in range(1, training_steps+1):
         batch_x, batch_y = mnist.train.next_batch(batch_size)
+        batch_y = argmax_label(batch_y)
         # Reshape data to get 28 seq of 28 elements
         batch_x = batch_x.reshape((batch_size, timesteps, num_input))
         # Run optimization op (backprop)
@@ -108,5 +114,8 @@ with tf.Session() as sess:
     test_len = 128
     test_data = mnist.test.images[:test_len].reshape((-1, timesteps, num_input))
     test_label = mnist.test.labels[:test_len]
+    test_label = argmax_label(test_label)
     print("Testing Accuracy:", \
         sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))
+
+    
