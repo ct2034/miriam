@@ -13,6 +13,7 @@ from __future__ import print_function
 import tensorflow as tf
 from tensorflow.contrib import rnn
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
@@ -26,7 +27,7 @@ handle 28 sequences of 28 steps for every sample.
 
 # Training Parameters
 learning_rate = 0.01
-training_steps = 5000
+training_steps = 1000
 batch_size = 128
 display_step = 100
 
@@ -118,4 +119,9 @@ with tf.Session() as sess:
     print("Testing Accuracy:", \
         sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))
 
-    
+    # trying
+    for dat in mnist.test.images[:5]:       
+        pred = sess.run(prediction, feed_dict={X: dat.reshape((-1, timesteps, num_input))})[0][0]    
+        plt.imshow(dat.reshape([28, 28]))
+        plt.title("pred: " + str(pred))
+        plt.show()
