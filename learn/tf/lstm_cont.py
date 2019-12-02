@@ -14,6 +14,10 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
+
+# Logging
+logdir = "learn/tf/logs/"+datetime.now().strftime("%Y%m%d-%H%M%S")
 
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
@@ -38,19 +42,19 @@ num_hidden = 64 # hidden layer num of features
 num_classes = 1 # one class for 0 .. 9
 
 # tf Graph input
-X = tf.placeholder("float", [None, timesteps, num_input])
-Y = tf.placeholder("float", [None, num_classes])
+X = tf.placeholder("float", [None, timesteps, num_input], name="X")
+Y = tf.placeholder("float", [None, num_classes], name="Y")
 
 # Define weights
 weights = {
-    'out': tf.Variable(tf.random_normal([num_hidden, num_classes]))
+    'out': tf.Variable(tf.random_normal([num_hidden, num_classes]), name="weights")
 }
 biases = {
-    'out': tf.Variable(tf.random_normal([num_classes]))
+    'out': tf.Variable(tf.random_normal([num_classes]), name="biases")
 }
 
 
-def RNN(x, weights, biases):
+def LSTM(x, weights, biases):
 
     # Prepare data shape to match `rnn` function requirements
     # Current data input shape: (batch_size, timesteps, n_input)
@@ -69,7 +73,7 @@ def RNN(x, weights, biases):
     return tf.matmul(outputs[-1], weights['out']) + biases['out']
 
 
-pred_cont = RNN(X, weights, biases)
+pred_cont = LSTM(X, weights, biases)
 prediction = tf.math.round(pred_cont)
 
 # Define loss and optimizer
@@ -84,13 +88,13 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
+
 def argmax_label(y):
     return [[np.argmax(line)] for line in y]
 
 
 # Start training
 with tf.Session() as sess:
-
     # Run the initializer
     sess.run(init)
 
@@ -110,6 +114,7 @@ with tf.Session() as sess:
                   "{:.3f}".format(acc))
 
     print("Optimization Finished!")
+    file_writer = tf.compat.v1.summary.FileWriter(logdir, sess.graph)
 
     # Calculate accuracy for 128 mnist test images
     test_len = 128
@@ -120,7 +125,7 @@ with tf.Session() as sess:
         sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))
 
     # trying
-    for dat in mnist.test.images[:5]:       
+    for dat in mnist.test.images[:2]:       
         pred = sess.run(prediction, feed_dict={X: dat.reshape((-1, timesteps, num_input))})[0][0]    
         plt.imshow(dat.reshape([28, 28]))
         plt.title("pred: " + str(pred))
