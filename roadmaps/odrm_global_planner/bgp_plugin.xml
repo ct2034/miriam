@@ -1,0 +1,7 @@
+<library path="lib/libodrm_global_planner">
+  <class name="odrm_global_planner/OdrmGlobalPlanner" type="odrm_global_planner::OdrmGlobalPlanner" base_class_type="nav_core::BaseGlobalPlanner">
+    <description>
+      A planner using a roadmap
+    </description>
+  </class>
+</library>

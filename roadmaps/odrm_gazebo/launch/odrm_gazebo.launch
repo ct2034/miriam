@@ -1,0 +1,24 @@
+<launch>
+  <env name="GAZEBO_RESOURCE_PATH" value="$(find odrm_gazebo)/gazebo"/>
+  <!-- <arg name="data_file" default="$(find odrm_gazebo)/data/z_200_4096n_agents10_paths_typeev-our_n_trial0.csv" /> -->
+  <arg name="data_file" default="$(find odrm_gazebo)/data/z_200_4096n_agents10_paths_typerandom_n_trial0.csv" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="false" />
+    <arg name="gui" value="true" />
+    <arg name="headless" value="false"/>
+    <arg name="paused" value="false"/>
+    <arg name="recording" default="true"/>
+    <!-- <arg name="physics" value="none"/> -->
+    <arg name="use_sim_time" value="true"/>
+    <arg name="verbose" value="true"/>
+    <arg name="world_name" value="$(find odrm_gazebo)/gazebo/map.world"/>
+  </include>
+
+  <node name="publish_robot_pose" type="publish_robot_pose.py"
+    pkg="odrm_gazebo" output="screen" required="true"
+    args="$(arg data_file)"/>
+
+  <param name="robot_description"
+	 command="$(find xacro)/xacro.py $(find odrm_gazebo)/gazebo/discbot.xacro" />
+</launch>

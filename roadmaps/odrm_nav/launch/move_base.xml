@@ -1,0 +1,32 @@
+<launch>
+<!--  <arg name="map_file" default="$(find odrm_graph)/maps/z.yaml"/>-->
+<!--  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" ns="$(arg robot_name)"/>-->
+  <arg name="robot_name"/>
+
+  <node pkg="move_base" type="move_base" respawn="true" name="move_base" output="screen" ns="$(arg robot_name)">
+    <remap from="/$(arg robot_name)/map" to="/map"/>
+    <remap from="/$(arg robot_name)/roadmap" to="/roadmap"/>
+
+    <param name="base_global_planner" value="navfn/NavfnROS" />
+<!--    <param name="base_global_planner" value="odrm_global_planner/OdrmGlobalPlanner" />-->
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+    
+    <rosparam file="$(find odrm_nav)/config/teb_local_planner_params.yaml" command="load" />
+    
+    <rosparam file="$(find odrm_nav)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam param="global_costmap/scan" subst_value="True">{data_type: LaserScan, topic: /$(arg robot_name)/laser1, marking: true, clearing: true, min_obstacle_height: 0.0, max_obstacle_height: 1.0}</rosparam>
+    
+    <rosparam file="$(find odrm_nav)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam param="local_costmap/scan" subst_value="True">{data_type: LaserScan, topic: /$(arg robot_name)/laser1, marking: true, clearing: true, min_obstacle_height: 0.0, max_obstacle_height: 1.0}</rosparam>
+    
+    <rosparam file="$(find odrm_nav)/config/local_costmap_params.yaml" command="load" />
+    <param name="local_costmap/robot_base_frame" value="$(arg robot_name)/base_link_tf2" />
+    
+    <rosparam file="$(find odrm_nav)/config/global_costmap_params.yaml" command="load" />
+    <param name="global_costmap/robot_base_frame" value="$(arg robot_name)/base_link_tf2" />
+    
+    <rosparam file="$(find odrm_nav)/config/move_base_params.yaml" command="load" />
+  </node>
+
+</launch>
+	

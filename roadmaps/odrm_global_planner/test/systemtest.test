@@ -1,0 +1,10 @@
+<launch>
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" required="true">
+        <param name="base_global_planner" value="odrm_global_planner/OdrmGlobalPlanner" />
+    </node>
+
+    <node pkg="odrm_global_planner" type="publish_graph.py" name="publish_graph" output="screen" />
+    <node pkg="odrm_global_planner" type="pub_goal.sh" name="pub_goal" output="screen" />
+    <node name="tf_base_link_map" pkg="tf" type="static_transform_publisher" args=".1 .1 0 0 0 0 1 map base_link 100" />
+</launch>

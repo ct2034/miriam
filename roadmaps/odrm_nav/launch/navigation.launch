@@ -1,0 +1,59 @@
+<launch>
+	<arg name="n_agents" default="8" />
+	<arg name="map" default="z" />
+	<arg name="headless" default="true" />
+	<arg name="command" default="random 5" />
+
+	<include file="$(find odrm_graph)/launch/roadmap_server.launch">
+			<arg name="map" value="$(arg map)" />
+	</include>
+
+	<node pkg="odrm_nav" type="obstacle_publisher.py" name="obstacle_publisher" output="screen">
+			<param name="n_agents" value="$(arg n_agents)" />
+	</node>
+
+	<!--- Run move base -->
+	<include file="$(find odrm_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_0" />
+	</include>
+	<include file="$(find odrm_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_1" />
+	</include>
+	<include file="$(find odrm_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_2" />
+	</include>
+	<include file="$(find odrm_nav)/launch/move_base.xml">
+			<arg name="robot_name" value="robot_3" />
+	</include>
+	<group if="$(eval arg('n_agents') >= 6)">
+		<include file="$(find odrm_nav)/launch/move_base.xml">
+				<arg name="robot_name" value="robot_4" />
+		</include>
+		<include file="$(find odrm_nav)/launch/move_base.xml">
+				<arg name="robot_name" value="robot_5" />
+		</include>
+	</group>
+	<group if="$(eval arg('n_agents') >= 8)">
+		<include file="$(find odrm_nav)/launch/move_base.xml">
+				<arg name="robot_name" value="robot_6" />
+		</include>
+		<include file="$(find odrm_nav)/launch/move_base.xml">
+				<arg name="robot_name" value="robot_7" />
+		</include>
+	</group>
+
+	<!-- GOAL MANAGER -->
+	<include file="$(find odrm_nav)/launch/goal_manager.launch">
+			<arg name="n_agents" value="$(arg n_agents)" />
+			<arg name="map" value="$(arg map)" />
+			<arg name="command" value="$(arg command)" />
+	</include>
+
+	<!-- SIM
+	<include file="$(find odrm_stage)/launch/odrm_stage.launch">
+			<arg name="n_agents" value="$(arg n_agents)" />
+	</include>-->
+
+	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find odrm_nav)/config/nav.rviz" unless="$(arg headless)" />
+</launch>
+

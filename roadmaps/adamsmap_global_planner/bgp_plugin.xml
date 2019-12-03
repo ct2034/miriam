@@ -1,7 +1,0 @@
-<library path="lib/libadamsmap_global_planner">
-  <class name="adamsmap_global_planner/AdamsmapGlobalPlanner" type="adamsmap_global_planner::AdamsmapGlobalPlanner" base_class_type="nav_core::BaseGlobalPlanner">
-    <description>
-      A planner using a roadmap
-    </description>
-  </class>
-</library>

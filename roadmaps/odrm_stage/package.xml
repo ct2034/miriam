@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>odrm_stage</name>
+  <version>0.0.0</version>
+  <description>The odrm_stage package</description>
+
+  <maintainer email="ch@todo.todo">ch</maintainer>
+
+  <license>TODO</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>stage_ros</build_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>stage_ros</build_export_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>stage_ros</exec_depend>
+
+  <export>
+  </export>
+</package>
