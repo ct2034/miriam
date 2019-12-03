@@ -22,3 +22,5 @@ roadmaps/
 .pytest_cache/
 venv/
 .vscode
+
+learn/tf/logs/*
