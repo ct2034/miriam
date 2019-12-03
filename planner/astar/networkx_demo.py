@@ -7,27 +7,27 @@ import numpy as np
 from planner.astar import astar_grid48con
 
 eight_con = False
-n = 10
+n = 100
 G = nx.grid_graph([n, n])
 map = np.zeros([n, n])
-map[:n * .8, n * .2] = -1
-map[n * .8, n * .2:n * .6] = -1
-map[n * .2, n * .4:n * .8] = -1
-map[n * .2:, n * .8] = -1
+map[:int(n * .8), int(n * .2)] = -1
+map[int(n * .8), int(n * .2):int(n * .6)] = -1
+map[int(n * .2), int(n * .4):int(n * .8)] = -1
+map[int(n * .2):, int(n * .8)] = -1
 
-start = (n * .1, n * .1)
-goal = (n * .9, n * .9)
+start = (int(n * .1), int(n * .1))
+goal = (int(n * .9), int(n * .9))
 
 
 def cost(a, b):
     if map[a] >= 0 and map[b] >= 0:  # no obstacle
-        return astar_grid48con.cost(a, b, map)
+        return np.linalg.norm(np.array(a)-np.array(b))
     else:
         return np.Inf
 
 
 obstacle = []
-for n in G.nodes_iter():
+for n in G.nodes():
     if not map[n] >= 0:  # obstacle
         obstacle.append(n)
 
@@ -35,7 +35,7 @@ G.remove_nodes_from(obstacle)
 
 if eight_con:
     # add 8-connectedness
-    for n in G.nodes_iter():
+    for n in G.nodes():
         for d in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
             checking = (d[0] + n[0], d[1] + n[1])
             if G.has_node(checking):
