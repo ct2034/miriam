@@ -2,7 +2,6 @@ import numpy as np
 
 import generate_data
 
-
 def test_make_random_gridmap():
     w = 999
     h = 100
@@ -19,3 +18,7 @@ def test_make_random_gridmap():
     assert gridmap_half.shape[1] == h
     assert np.max(gridmap_half) == 1
     assert np.min(gridmap_half) == 0
+
+
+def test_import_ecbs():
+    import benchmark_ecbs
