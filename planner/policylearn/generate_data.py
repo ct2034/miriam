@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
-import numpy as np
-import matplotlib.pyplot as plt
 import random
 
-import bench
+import matplotlib.pyplot as plt
+import numpy as np
 
 
-def make_random_gridmap(width, height, fill):
+def make_random_gridmap(width, height, fill) -> np.ndarray:
     gridmap = np.zeros((width, height))
     obstacle_cells = int(fill * width * height)
     for _ in range(obstacle_cells):
