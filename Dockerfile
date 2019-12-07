@@ -10,7 +10,7 @@ RUN pip3 install -r requirements.txt
 
 # ecbs
 RUN apt-get install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
-RUN git clone https://github.com/ct2034/libMultiRobotPlanning.git /libMultiRobotPlanning
+RUN git clone -b policylearn https://github.com/ct2034/libMultiRobotPlanning.git /libMultiRobotPlanning
 RUN mkdir /libMultiRobotPlanning/build
 WORKDIR /libMultiRobotPlanning/build
 RUN cmake ..
