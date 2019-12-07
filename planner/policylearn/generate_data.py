@@ -5,6 +5,7 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
+from benchmark_ecbs import plan_in_gridmap
 
 def make_random_gridmap(width, height, fill) -> np.ndarray:
     gridmap = np.zeros((width, height))
@@ -27,7 +28,7 @@ def show_map(x):
 
 
 def is_free(gridmap, pos):
-    return gridmap[pos] == 0
+    return gridmap[tuple(pos)] == 0
 
 
 def get_random_free_pos(gridmap, width, height):
@@ -42,4 +43,11 @@ def get_random_free_pos(gridmap, width, height):
     return pos
 
 
-gridmap = make_random_gridmap(20, 10, .1)
+if __name__ == "__main__":
+    width = 30
+    height = 30
+    random.seed(1)
+    gridmap = make_random_gridmap(width, height, .1)
+    starts = [get_random_free_pos(gridmap, width, height) for _ in range(2)]
+    goals = [get_random_free_pos(gridmap, width, height) for _ in range(2)]
+    plan_in_gridmap(gridmap, starts, goals)
