@@ -5,7 +5,7 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-from benchmark_ecbs import plan_in_gridmap
+from plan_ecbs import plan_in_gridmap
 
 def make_random_gridmap(width, height, fill) -> np.ndarray:
     gridmap = np.zeros((width, height))

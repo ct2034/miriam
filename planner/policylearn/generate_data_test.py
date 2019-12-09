@@ -21,4 +21,4 @@ def test_make_random_gridmap():
 
 
 def test_import_ecbs():
-    import benchmark_ecbs
+    import plan_ecbs
