@@ -44,10 +44,12 @@ def get_random_free_pos(gridmap, width, height):
 
 
 if __name__ == "__main__":
-    width = 30
-    height = 30
+    width = 10
+    height = 10
     random.seed(1)
-    gridmap = make_random_gridmap(width, height, .1)
-    starts = [get_random_free_pos(gridmap, width, height) for _ in range(2)]
-    goals = [get_random_free_pos(gridmap, width, height) for _ in range(2)]
-    plan_in_gridmap(gridmap, starts, goals)
+    n_agents = 3
+    for n in range (10):
+        gridmap = make_random_gridmap(width, height, .4)
+        starts = [get_random_free_pos(gridmap, width, height) for _ in range(n_agents)]
+        goals = [get_random_free_pos(gridmap, width, height) for _ in range(n_agents)]
+        plan_in_gridmap(gridmap, starts, goals)
