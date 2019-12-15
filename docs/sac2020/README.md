@@ -5,7 +5,7 @@ bibtex:
 ```
 @inproceedings{Henkel2020,
     author = {Henkel, Christian and Toussaint, Marc},
-    title = {{Optimized Directed Roadmap Graph for Multi-Agent Path Finding Using Stochastic Gradient Descent}},
+    title = {Optimized Directed Roadmap Graph for Multi-Agent Path Finding Using Stochastic Gradient Descent},
     booktitle = {The 35th ACM/SIGAPP Symposium on Applied Computing (SAC '20)},
     address = {Brno, Czech Republic},
     isbn = {978-1-4503-6866-7/20/03},
