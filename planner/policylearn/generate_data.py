@@ -7,6 +7,7 @@ import numpy as np
 
 from plan_ecbs import plan_in_gridmap
 
+
 def make_random_gridmap(width, height, fill) -> np.ndarray:
     gridmap = np.zeros((width, height))
     obstacle_cells = int(fill * width * height)
@@ -48,8 +49,10 @@ if __name__ == "__main__":
     height = 10
     random.seed(1)
     n_agents = 3
-    for n in range (10):
-        gridmap = make_random_gridmap(width, height, .4)
-        starts = [get_random_free_pos(gridmap, width, height) for _ in range(n_agents)]
-        goals = [get_random_free_pos(gridmap, width, height) for _ in range(n_agents)]
+    for n in range(10):
+        gridmap = make_random_gridmap(width, height, .3)
+        starts = [get_random_free_pos(gridmap, width, height)
+                  for _ in range(n_agents)]
+        goals = [get_random_free_pos(gridmap, width, height)
+                 for _ in range(n_agents)]
         plan_in_gridmap(gridmap, starts, goals)
