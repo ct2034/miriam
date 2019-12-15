@@ -45,14 +45,18 @@ def get_random_free_pos(gridmap, width, height):
 
 
 if __name__ == "__main__":
-    width = 10
-    height = 10
+    width = 8
+    height = 8
     random.seed(1)
-    n_agents = 3
-    for n in range(10):
-        gridmap = make_random_gridmap(width, height, .3)
+    n_agents = 2
+    gridmap = make_random_gridmap(width, height, .4)
+    has_blocks = 0
+    while not has_blocks:
         starts = [get_random_free_pos(gridmap, width, height)
                   for _ in range(n_agents)]
         goals = [get_random_free_pos(gridmap, width, height)
                  for _ in range(n_agents)]
-        plan_in_gridmap(gridmap, starts, goals)
+        blocks = plan_in_gridmap(gridmap, starts, goals)
+        has_blocks = not all(v == 0 for v in blocks.values())
+        if has_blocks:
+            print("blocks:" + str(blocks.values()))
