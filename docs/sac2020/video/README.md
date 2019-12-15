@@ -1,0 +1,1 @@
+[![youtube](https://img.youtube.com/vi/jWZoDkVTVLU/0.jpg)](https://www.youtube.com/watch?v=jWZoDkVTVLU "Optimized Directed Roadmap Graph for Multi-Agent Path Finding Using Stochastic Gradient Descent")
