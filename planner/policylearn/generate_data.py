@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 import random
 
 import matplotlib.pyplot as plt
@@ -45,19 +46,24 @@ def get_random_free_pos(gridmap, width, height):
 
 
 if __name__ == "__main__":
+    logging.basicConfig()
+    logger = logging.getLogger('benchmark_ecbs')
+    logger.setLevel(logging.WARN)
+
     width = 8
     height = 8
     random.seed(1)
-    n_agents = 2
+    n_agents = 3
     gridmap = make_random_gridmap(width, height, .4)
     count_blocks = 0
-    while count_blocks < 5:
+    while count_blocks < 10:
         starts = [get_random_free_pos(gridmap, width, height)
                   for _ in range(n_agents)]
         goals = [get_random_free_pos(gridmap, width, height)
                  for _ in range(n_agents)]
         blocks = plan_in_gridmap(gridmap, starts, goals)
-        has_blocks = not all(v == 0 for v in blocks.values())
-        if has_blocks:
-            count_blocks += 1
-            print("blocks:" + str(blocks.values()))
+        if blocks:
+            has_blocks = not all(v == 0 for v in blocks.values())
+            if has_blocks:
+                count_blocks += 1
+                print("blocks:" + str(blocks))
