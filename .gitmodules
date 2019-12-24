@@ -1,3 +1,6 @@
 [submodule "elemel_python-astar"]
 	path = astar/elemel_python-astar
 	url = https://github.com/ct2034/python-astar.git
+[submodule "libMultiRobotPlanning"]
+	path = planner/policylearn/libMultiRobotPlanning
+	url = git@github.com:ct2034/libMultiRobotPlanning

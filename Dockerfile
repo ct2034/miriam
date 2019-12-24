@@ -9,16 +9,16 @@ WORKDIR /planner/policylearn
 RUN pip3 install -r requirements.txt
 
 # ecbs
+COPY planner/policylearn/libMultiRobotPlanning /planner/policylearn/libMultiRobotPlanning
 RUN apt-get install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
-RUN git clone https://github.com/ct2034/libMultiRobotPlanning.git /libMultiRobotPlanning
-RUN mkdir /libMultiRobotPlanning/build
-WORKDIR /libMultiRobotPlanning/build
+RUN mkdir /planner/policylearn/libMultiRobotPlanning/build
+WORKDIR /planner/policylearn/libMultiRobotPlanning/build
 RUN cmake ..
 RUN make ecbs
-ENV PYTHONPATH=$PYTHONPATH:/libMultiRobotPlanning
-RUN pip3 install -r /libMultiRobotPlanning/requirements.txt
+ENV PYTHONPATH=$PYTHONPATH:/planner/policylearn/libMultiRobotPlanning
+RUN pip3 install -r /planner/policylearn/libMultiRobotPlanning/requirements.txt
 
 # running it
 COPY planner/policylearn/* /planner/policylearn/
-WORKDIR /planner/policylearn
-CMD ["py.test-3", "-v"]
+WORKDIR /
+CMD ["py.test-3", "-v", "/planner/policylearn"]

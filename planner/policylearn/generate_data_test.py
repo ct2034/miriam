@@ -21,4 +21,4 @@ def test_make_random_gridmap():
 
 
 def test_import_ecbs():
-    import plan_ecbs
+    from libMultiRobotPlanning.plan_ecbs import plan_in_gridmap, BLOCKS_STR

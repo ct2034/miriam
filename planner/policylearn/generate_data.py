@@ -6,14 +6,14 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-from plan_ecbs import plan_in_gridmap, BLOCKS_STR
+from libMultiRobotPlanning.plan_ecbs import plan_in_gridmap, BLOCKS_STR
 
 
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
-SCHEDULE_STR = 'schedule' 
+SCHEDULE_STR = 'schedule'
 
 
-def make_random_gridmap(width, height, fill) -> np.ndarray:
+def make_random_gridmap(width: int, height: int, fill: float) -> np.ndarray:
     gridmap = np.zeros((width, height))
     obstacle_cells = int(fill * width * height)
     for _ in range(obstacle_cells):
@@ -114,7 +114,7 @@ if __name__ == "__main__":
                                  color=colors[ia])
                         if block_coords[ia].shape[0]:
                             plt.plot(block_coords[ia][:, 0],
-                                    block_coords[ia][:, 1],
-                                    'x',
-                                    color=colors[ia])
+                                     block_coords[ia][:, 1],
+                                     'x',
+                                     color=colors[ia])
                     plt.show()
