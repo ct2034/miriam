@@ -10,6 +10,7 @@ from libMultiRobotPlanning.plan_ecbs import plan_in_gridmap, BLOCKS_STR
 
 
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
+EDGE_CONSTRAINTS_STR = 'edgeConstraints'
 SCHEDULE_STR = 'schedule'
 
 
@@ -65,6 +66,21 @@ def get_vertex_block_coords(blocks):  # TODO: edge constraints
     return coords
 
 
+def has_exatly_one_vertex_block(blocks):
+    n_vc = 0
+    n_ec = 0
+    for agent in blocks.keys():
+        if blocks[agent]:
+            blocks_pa = blocks[agent]
+            if VERTEX_CONSTRAINTS_STR in blocks_pa.keys():
+                for _ in blocks_pa[VERTEX_CONSTRAINTS_STR]:
+                    n_vc += 1
+            if EDGE_CONSTRAINTS_STR in blocks_pa.keys():
+                for _ in blocks_pa[EDGE_CONSTRAINTS_STR]:
+                    n_ec += 1
+    return n_ec == 0 and n_vc == 1
+
+
 def get_agent_paths_from_data(data, timed=False):
     agent_paths = []
     if not data:
@@ -98,6 +114,8 @@ def will_they_collide(gridmap, starts, goals):
     for i_a, _ in enumerate(starts):
         data = plan_in_gridmap(gridmap, [starts[i_a], ], [
                                goals[i_a], ], timeout=2)
+        if data is None:
+            return {}
         single_agent_paths = get_agent_paths_from_data(data, True)
         if not single_agent_paths:
             return {}
@@ -118,13 +136,12 @@ if __name__ == "__main__":
 
     data_we_want = []
     plot = True
-    width = 8
-    height = 8
+    width = 10
+    height = 10
     random.seed(1)
     n_agents = 5
-    count_blocks = 0
     colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
-    while count_blocks < 5:
+    while len(data_we_want) < 5:
         collide_count = 0
         while collide_count != 1:
             gridmap = make_random_gridmap(width, height, .2)
@@ -141,11 +158,10 @@ if __name__ == "__main__":
 
         if data and BLOCKS_STR in data.keys():
             blocks = data[BLOCKS_STR]
-            has_blocks = not all(v == 0 for v in blocks.values())
-            if has_blocks:
-                count_blocks += 1
+            has_a_block = has_exatly_one_vertex_block(blocks)
+            if has_a_block:
+                data_we_want.append(data)
                 logger.info("blocks:" + str(blocks))
-
                 if plot:
                     show_map(gridmap)
                     block_coords = get_vertex_block_coords(blocks)
@@ -161,3 +177,4 @@ if __name__ == "__main__":
                                      'x',
                                      color=colors[ia])
                     plt.show()
+    print(data_we_want)
