@@ -2,6 +2,7 @@ import numpy as np
 
 import generate_data
 
+
 def test_make_random_gridmap():
     w = 999
     h = 100
