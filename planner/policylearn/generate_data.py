@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import logging
+import pickle
 import random
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from libMultiRobotPlanning.plan_ecbs import plan_in_gridmap, BLOCKS_STR
-
+from libMultiRobotPlanning.plan_ecbs import BLOCKS_STR, plan_in_gridmap
 
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
 EDGE_CONSTRAINTS_STR = 'edgeConstraints'
@@ -18,6 +18,7 @@ GRIDMAP_STR = 'gridmap'
 OWN_STR = 'own'
 OTHERS_STR = 'others'
 
+FNAME_PKL = 'training_data.pkl'
 FOV_RADIUS = 2  # self plus x in all 4 dircetions
 DTYPE_SAMPLES = np.int8
 
@@ -241,6 +242,11 @@ def plot_map_and_paths(gridmap, blocks, data, n_agents):
     plt.show()
 
 
+def save_data(training_data_we_want):
+    with open(FNAME_PKL, 'wb') as f:
+        pickle.dump(training_data_we_want, f)
+
+
 if __name__ == "__main__":
     logging.basicConfig()
     logger = logging.getLogger(__name__)
@@ -280,7 +286,7 @@ if __name__ == "__main__":
                 training_data_we_want.extend(
                     training_samples_from_data(data)
                 )
+                save_data(training_data_we_want)
                 logger.info("blocks:" + str(blocks))
                 if plot:
                     plot_map_and_paths(gridmap, blocks, data, n_agents)
-    print(training_data_we_want)
