@@ -15,12 +15,15 @@ SCHEDULE_STR = 'schedule'
 INDEP_AGENT_PATHS_STR = 'indepAgentPaths'
 COLLISIONS_STR = 'collisions'
 GRIDMAP_STR = 'gridmap'
+OWN_STR = 'own'
+OTHERS_STR = 'others'
 
 FOV_RADIUS = 2  # self plus x in all 4 dircetions
+DTYPE_SAMPLES = np.int8
 
 
 def generate_random_gridmap(width: int, height: int, fill: float):
-    gridmap = np.zeros((width, height))
+    gridmap = np.zeros((width, height), dtype=DTYPE_SAMPLES)
     while np.count_nonzero(gridmap) < fill * width * height:
         direction = random.randint(0, 1)
         start = (
@@ -107,7 +110,7 @@ def get_agent_paths_from_data(data, timed=False):
                         pose['x'],
                         pose['y']
                     ])
-            agent_paths.append(np.array(path_pa))
+            agent_paths.append(np.array(path_pa, dtype=DTYPE_SAMPLES))
     return agent_paths
 
 
@@ -138,16 +141,16 @@ def add_padding_to_gridmap(gridmap):
     size = gridmap.shape
     padded_gridmap = np.ones([
         size[0] + 2 * FOV_RADIUS,
-        size[1] + 2 * FOV_RADIUS])
+        size[1] + 2 * FOV_RADIUS],
+        dtype=DTYPE_SAMPLES)
     padded_gridmap[
         FOV_RADIUS:size[0]+FOV_RADIUS,
         FOV_RADIUS:size[1]+FOV_RADIUS] = gridmap
     return padded_gridmap
 
 
-def training_sample_from_data(data):
-    training_samples_x = []
-    training_samples_y = []
+def training_samples_from_data(data):
+    training_samples = []
     n_agents = len(data[INDEP_AGENT_PATHS_STR])
     assert len(data[COLLISIONS_STR]
                ) == 1, "assuming we only handle one conflict"
@@ -160,22 +163,35 @@ def training_sample_from_data(data):
                 blocked_agent = i_a
             else:
                 unblocked_agent = i_a
-        fovs = []
-        deltas = []
+        data_pa = []
         for i_a in range(n_agents):
             # training features
-            fovs.append(make_fovs(data[GRIDMAP_STR],
-                                  data[INDEP_AGENT_PATHS_STR][i_a],
-                                  t))
-            deltas.append(make_target_deltas(data[INDEP_AGENT_PATHS_STR][i_a],
-                                             t))
+            fovs = make_fovs(data[GRIDMAP_STR],
+                             data[INDEP_AGENT_PATHS_STR][i_a],
+                             t)
+            deltas = make_target_deltas(data[INDEP_AGENT_PATHS_STR][i_a],
+                                        t)
+            data_this_agent = []
+            for i_t in range(t+1):
+                data_this_agent.append(
+                    np.append(
+                        np.concatenate(fovs[i_t]),
+                        [
+                            deltas[i_t]
+                        ]
+                    )
+                )
+            data_pa.append(data_this_agent)
         for i_a in col_agents:
-
-            x = 1  # todo
-
-            training_samples_x.append(x)
-            training_samples_y.append(1 if i_a == unblocked_agent else 0)
-    return training_samples_x, training_samples_y
+            x = {
+                OWN_STR: data_pa[i_a],
+                OTHERS_STR: [data_pa[i_ao]
+                             for i_ao in range(n_agents) if i_a != i_ao]
+            }
+            training_samples.append((
+                x,
+                1 if i_a == unblocked_agent else 0))
+    return training_samples
 
 
 def make_fovs(gridmap, path, t):
@@ -261,8 +277,8 @@ if __name__ == "__main__":
                     COLLISIONS_STR: collisions,
                     GRIDMAP_STR: add_padding_to_gridmap(gridmap)
                 })
-                training_data_we_want.append(
-                    training_sample_from_data(data)
+                training_data_we_want.extend(
+                    training_samples_from_data(data)
                 )
                 logger.info("blocks:" + str(blocks))
                 if plot:
