@@ -115,10 +115,10 @@ def will_they_collide(gridmap, starts, goals):
         data = plan_in_gridmap(gridmap, [starts[i_a], ], [
                                goals[i_a], ], timeout=2)
         if data is None:
-            return {}
+            return {}, []
         single_agent_paths = get_agent_paths_from_data(data, True)
         if not single_agent_paths:
-            return {}
+            return {}, []
         agent_paths.append(single_agent_paths[0])
         for pos in single_agent_paths[0]:
             pos = tuple(pos)
@@ -126,7 +126,7 @@ def will_they_collide(gridmap, starts, goals):
                 collisions[pos] = (been_at[pos], i_a)
             seen.add(pos)
             been_at[pos] = i_a
-    return collisions
+    return collisions, agent_paths
 
 
 if __name__ == "__main__":
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.INFO)
 
     data_we_want = []
-    plot = True
+    plot = False
     width = 10
     height = 10
     random.seed(1)
@@ -149,7 +149,7 @@ if __name__ == "__main__":
                       for _ in range(n_agents)]
             goals = [get_random_free_pos(gridmap, width, height)
                      for _ in range(n_agents)]
-            collisions = will_they_collide(
+            collisions, indep_agent_paths = will_they_collide(
                 gridmap, starts, goals)
             collide_count = len(collisions.keys())
         print(collisions)
@@ -160,6 +160,7 @@ if __name__ == "__main__":
             blocks = data[BLOCKS_STR]
             has_a_block = has_exatly_one_vertex_block(blocks)
             if has_a_block:
+                data.update({'indep_agent_paths': indep_agent_paths})
                 data_we_want.append(data)
                 logger.info("blocks:" + str(blocks))
                 if plot:
