@@ -12,9 +12,14 @@ from libMultiRobotPlanning.plan_ecbs import plan_in_gridmap, BLOCKS_STR
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
 EDGE_CONSTRAINTS_STR = 'edgeConstraints'
 SCHEDULE_STR = 'schedule'
+INDEP_AGENT_PATHS_STR = 'indepAgentPaths'
+COLLISIONS_STR = 'collisions'
+GRIDMAP_STR = 'gridmap'
+
+FOV_RADIUS = 2  # self plus x in all 4 dircetions
 
 
-def make_random_gridmap(width: int, height: int, fill: float):
+def generate_random_gridmap(width: int, height: int, fill: float):
     gridmap = np.zeros((width, height))
     while np.count_nonzero(gridmap) < fill * width * height:
         direction = random.randint(0, 1)
@@ -116,7 +121,7 @@ def will_they_collide(gridmap, starts, goals):
                                goals[i_a], ], timeout=2)
         if data is None:
             return {}, []
-        single_agent_paths = get_agent_paths_from_data(data, True)
+        single_agent_paths = get_agent_paths_from_data(data, timed=True)
         if not single_agent_paths:
             return {}, []
         agent_paths.append(single_agent_paths[0])
@@ -129,22 +134,113 @@ def will_they_collide(gridmap, starts, goals):
     return collisions, agent_paths
 
 
+def add_padding_to_gridmap(gridmap):
+    size = gridmap.shape
+    padded_gridmap = np.ones([
+        size[0] + 2 * FOV_RADIUS,
+        size[1] + 2 * FOV_RADIUS])
+    padded_gridmap[
+        FOV_RADIUS:size[0]+FOV_RADIUS,
+        FOV_RADIUS:size[1]+FOV_RADIUS] = gridmap
+    return padded_gridmap
+
+
+def training_sample_from_data(data):
+    training_samples_x = []
+    training_samples_y = []
+    n_agents = len(data[INDEP_AGENT_PATHS_STR])
+    assert len(data[COLLISIONS_STR]
+               ) == 1, "assuming we only handle one conflict"
+    for col_vertex, col_agents in data[COLLISIONS_STR].items():
+        t = col_vertex[2]
+        blocked_agent = -1
+        unblocked_agent = -1
+        for i_a in col_agents:
+            if data[BLOCKS_STR]["agent"+str(i_a)] is dict:
+                blocked_agent = i_a
+            else:
+                unblocked_agent = i_a
+        fovs = []
+        deltas = []
+        for i_a in range(n_agents):
+            # training features
+            fovs.append(make_fovs(data[GRIDMAP_STR],
+                                  data[INDEP_AGENT_PATHS_STR][i_a],
+                                  t))
+            deltas.append(make_target_deltas(data[INDEP_AGENT_PATHS_STR][i_a],
+                                             t))
+        for i_a in col_agents:
+
+            x = 1  # todo
+
+            training_samples_x.append(x)
+            training_samples_y.append(1 if i_a == unblocked_agent else 0)
+    return training_samples_x, training_samples_y
+
+
+def make_fovs(gridmap, path, t):
+    fovs = []
+    for i_t in range(t+1):
+        if t < path.shape[0]:
+            pos = path[i_t][:2]
+        else:
+            pos = path[-1][:2]
+        fovs.append(
+            gridmap[
+                pos[0]:pos[0] + 1 + 2 * FOV_RADIUS,
+                pos[1]:pos[1] + 1 + 2 * FOV_RADIUS
+            ]
+        )
+    return fovs
+
+
+def make_target_deltas(path, t):
+    assert len(path) >= t, "t must be in path"
+    deltas = []
+    goal = path[-1][:2]
+    for i_t in range(t+1):
+        if t < path.shape[0]:
+            pos = path[i_t][:2]
+        else:
+            pos = path[-1][:2]
+        deltas.append(goal - pos)
+    return deltas
+
+
+def plot_map_and_paths(gridmap, blocks, data, n_agents):
+    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+    show_map(gridmap)
+    block_coords = get_vertex_block_coords(blocks)
+    agent_paths = get_agent_paths_from_data(data)
+    for ia in range(n_agents):
+        plt.plot(agent_paths[ia][:, 0],
+                 agent_paths[ia][:, 1],
+                 '-',
+                 color=colors[ia])
+        if block_coords[ia].shape[0]:
+            plt.plot(block_coords[ia][:, 0],
+                     block_coords[ia][:, 1],
+                     'x',
+                     color=colors[ia])
+    plt.show()
+
+
 if __name__ == "__main__":
     logging.basicConfig()
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
-    data_we_want = []
+    training_data_we_want = []
     plot = False
     width = 10
     height = 10
-    random.seed(1)
+    random.seed(0)
     n_agents = 5
-    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
-    while len(data_we_want) < 5:
+    n_data_to_gen = 3
+    while len(training_data_we_want) < n_data_to_gen:
         collide_count = 0
         while collide_count != 1:
-            gridmap = make_random_gridmap(width, height, .2)
+            gridmap = generate_random_gridmap(width, height, .2)
             starts = [get_random_free_pos(gridmap, width, height)
                       for _ in range(n_agents)]
             goals = [get_random_free_pos(gridmap, width, height)
@@ -152,7 +248,7 @@ if __name__ == "__main__":
             collisions, indep_agent_paths = will_they_collide(
                 gridmap, starts, goals)
             collide_count = len(collisions.keys())
-        print(collisions)
+        logger.debug(collisions)
 
         data = plan_in_gridmap(gridmap, starts, goals)
 
@@ -160,22 +256,15 @@ if __name__ == "__main__":
             blocks = data[BLOCKS_STR]
             has_a_block = has_exatly_one_vertex_block(blocks)
             if has_a_block:
-                data.update({'indep_agent_paths': indep_agent_paths})
-                data_we_want.append(data)
+                data.update({
+                    INDEP_AGENT_PATHS_STR: indep_agent_paths,
+                    COLLISIONS_STR: collisions,
+                    GRIDMAP_STR: add_padding_to_gridmap(gridmap)
+                })
+                training_data_we_want.append(
+                    training_sample_from_data(data)
+                )
                 logger.info("blocks:" + str(blocks))
                 if plot:
-                    show_map(gridmap)
-                    block_coords = get_vertex_block_coords(blocks)
-                    agent_paths = get_agent_paths_from_data(data)
-                    for ia in range(n_agents):
-                        plt.plot(agent_paths[ia][:, 0],
-                                 agent_paths[ia][:, 1],
-                                 '-',
-                                 color=colors[ia])
-                        if block_coords[ia].shape[0]:
-                            plt.plot(block_coords[ia][:, 0],
-                                     block_coords[ia][:, 1],
-                                     'x',
-                                     color=colors[ia])
-                    plt.show()
-    print(data_we_want)
+                    plot_map_and_paths(gridmap, blocks, data, n_agents)
+    print(training_data_we_want)
