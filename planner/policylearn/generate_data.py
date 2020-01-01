@@ -258,7 +258,7 @@ if __name__ == "__main__":
     height = 10
     random.seed(0)
     n_agents = 5
-    n_data_to_gen = 3
+    n_data_to_gen = 1000
     while len(training_data_we_want) < n_data_to_gen:
         collide_count = 0
         while collide_count != 1:
@@ -287,6 +287,10 @@ if __name__ == "__main__":
                     training_samples_from_data(data)
                 )
                 save_data(training_data_we_want)
-                logger.info("blocks:" + str(blocks))
+                logger.info('Generated {} of {} samples ({}%)'.format(
+                    len(training_data_we_want),
+                    n_data_to_gen,
+                    int(100. * len(training_data_we_want) / n_data_to_gen)
+                ))
                 if plot:
                     plot_map_and_paths(gridmap, blocks, data, n_agents)
