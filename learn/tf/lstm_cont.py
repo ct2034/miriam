@@ -9,7 +9,6 @@ Project: https://github.com/aymericdamien/TensorFlow-Examples/
 """
 
 from __future__ import print_function
-
 import tensorflow as tf
 from tensorflow.contrib import rnn
 import numpy as np
@@ -37,12 +36,12 @@ display_step = 100
 
 # Network Parameters
 num_input = 28 # MNIST data input (img shape: 28*28)
-timesteps = 28 # timesteps
+# timesteps = 28 # timesteps
 num_hidden = 64 # hidden layer num of features
 num_classes = 1 # one class for 0 .. 9
 
 # tf Graph input
-X = tf.placeholder("float", [None, timesteps, num_input], name="X")
+X = tf.placeholder("float", [None, None, num_input], name="X")
 Y = tf.placeholder("float", [None, num_classes], name="Y")
 
 # Define weights
@@ -61,7 +60,9 @@ def LSTM(x, weights, biases):
     # Required shape: 'timesteps' tensors list of shape (batch_size, n_input)
 
     # Unstack to get a list of 'timesteps' tensors of shape (batch_size, n_input)
+    timesteps = 28
     x = tf.unstack(x, timesteps, 1)
+    x = x[:-2]  # training with one row less
 
     # Define a lstm cell with tensorflow
     lstm_cell = rnn.BasicLSTMCell(num_hidden, forget_bias=1.0)
@@ -97,6 +98,9 @@ def argmax_label(y):
 with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
+
+    # defining "at runtime"
+    timesteps = 28
 
     for step in range(1, training_steps+1):
         batch_x, batch_y = mnist.train.next_batch(batch_size)
