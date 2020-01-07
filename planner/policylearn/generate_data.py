@@ -3,6 +3,7 @@
 import logging
 import pickle
 import random
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,7 +19,6 @@ GRIDMAP_STR = 'gridmap'
 OWN_STR = 'own'
 OTHERS_STR = 'others'
 
-FNAME_PKL = 'training_data.pkl'
 FOV_RADIUS = 2  # self plus x in all 4 dircetions
 DTYPE_SAMPLES = np.int8
 
@@ -241,12 +241,16 @@ def plot_map_and_paths(gridmap, blocks, data, n_agents):
     plt.show()
 
 
-def save_data(training_data_we_want):
-    with open(FNAME_PKL, 'wb') as f:
+def save_data(training_data_we_want, fname_pkl):
+    with open(fname_pkl, 'wb') as f:
         pickle.dump(training_data_we_want, f)
 
 
 if __name__ == "__main__":
+    fname_pkl = sys.argv[-1]
+    assert fname_pkl.endswith(
+        ".pkl"), "to save the data, give filname of pickle file as argument"
+
     logging.basicConfig()
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -285,7 +289,7 @@ if __name__ == "__main__":
                 training_data_we_want.extend(
                     training_samples_from_data(data)
                 )
-                save_data(training_data_we_want)
+                save_data(training_data_we_want, fname_pkl)
                 logger.info('Generated {} of {} samples ({}%)'.format(
                     len(training_data_we_want),
                     n_data_to_gen,
