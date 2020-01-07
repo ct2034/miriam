@@ -212,7 +212,6 @@ def make_fovs(gridmap, path, t):
 
 
 def make_target_deltas(path, t):
-    assert len(path) >= t, "t must be in path"
     deltas = []
     goal = path[-1][:2]
     for i_t in range(t+1):
