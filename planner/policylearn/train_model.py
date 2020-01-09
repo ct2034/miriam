@@ -23,7 +23,8 @@ def get_training_steps(training_data, start_step, batch_size, num_input, num_tim
     for i_b in range(batch_size):
         x = []
         this_timesteps = len(xy_batch[i_b][0][OWN_STR])
-        pad = num_timesteps - this_timesteps  # padding, tipp by https://github.com/keras-team/keras/issues/85#issuecomment-96425996
+        # padding, tipp by https://github.com/keras-team/keras/issues/85#issuecomment-96425996
+        pad = num_timesteps - this_timesteps
         for i_t in range(pad):
             x.append(np.zeros(num_input))
         for i_t in range(this_timesteps):
@@ -32,7 +33,7 @@ def get_training_steps(training_data, start_step, batch_size, num_input, num_tim
                 xt = np.append(xt, xy_batch[i_b][0][OTHERS_STR][i_a][i_t])
             x.append(xt)
         X_out.append(x)
-        Y_out.append([xy_batch[i_b][1],])
+        Y_out.append([xy_batch[i_b][1], ])
     return X_out, Y_out
 
 
@@ -59,9 +60,9 @@ if __name__ == "__main__":
     learning_rate = 0.01
     training_precentage = .9
     training_steps = int(len(training_data) * training_precentage)
-    validation_steps = len(training_data) - training_steps
-    batch_size = 10
-    display_step = 10
+    test_steps = len(training_data) - training_steps
+    batch_size = 100
+    display_step = 1
 
     num_inputs_other = training_data[0][0][OTHERS_STR][0][0].shape[0]
     num_others = len(training_data[0][0][OTHERS_STR])
@@ -72,7 +73,8 @@ if __name__ == "__main__":
     num_classes = 1  # one class for 0. .. 1.
     num_timesteps = 20  # TODO: get from generated data
 
-    X = tf.placeholder("float", [batch_size, num_timesteps, num_input], name="X")
+    X = tf.placeholder(
+        "float", [batch_size, num_timesteps, num_input], name="X")
     Y = tf.placeholder("float", [batch_size, num_classes], name="Y")
 
     weights = {
@@ -94,8 +96,8 @@ if __name__ == "__main__":
         # Linear activation, using rnn inner loop last output
         return tf.matmul(outputs[-1], weights['out']) + biases['out']
 
-    pred_cont = LSTM(X, weights, biases)
-    prediction = tf.math.round(pred_cont)
+    pred_cont = LSTM(X, weights, biases)  # continous variable predicted
+    pred_disc = tf.math.round(pred_cont)  # discrete prediction
 
     # Define loss and optimizer
     loss_op = tf.reduce_mean(tf.square(Y - pred_cont))
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     train_op = optimizer.minimize(loss_op)
 
     # Evaluate model (with test logits, for dropout to be disabled)
-    correct_pred = tf.equal(prediction, Y)
+    correct_pred = tf.equal(pred_disc, Y)
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     # Initialize the variables (i.e. assign their default value)
@@ -118,14 +120,16 @@ if __name__ == "__main__":
         for batch_step in range(int(training_steps / batch_size)):
             start_step = batch_step * batch_size
             batch_x, batch_y = get_training_steps(
-                training_data, start_step, batch_size, num_input, num_timesteps)
+                training_data, start_step, batch_size,
+                num_input, num_timesteps)
             # Run optimization op (backprop)
             sess.run(train_op, feed_dict={X: batch_x,
                                           Y: batch_y})
             if batch_step % display_step == 0 or batch_step == 1:
                 # Calculate batch loss and accuracy
-                loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
-                                                                     Y: batch_y})
+                loss, acc = sess.run([loss_op, accuracy],
+                                     feed_dict={X: batch_x,
+                                                Y: batch_y})
                 print("Step " + str(batch_step) + ", Minibatch Loss= " +
                       "{:.4f}".format(loss) + ", Training Accuracy= " +
                       "{:.3f}".format(acc))
@@ -133,11 +137,9 @@ if __name__ == "__main__":
         print("Optimization Finished!")
         file_writer = tf.compat.v1.summary.FileWriter(logdir, sess.graph)
 
-        # Calculate accuracy for 128 mnist test images
-        # test_len = 128
-        # test_data = mnist.test.images[:test_len].reshape(
-        #     (-1, timesteps, num_input))
-        # test_label = mnist.test.labels[:test_len]
-        # test_label = argmax_label(test_label)
-        # print("Testing Accuracy:",
-        #       sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))
+        # Calculate accuracy
+        test_x, test_y = get_training_steps(
+            training_data, training_steps, batch_size,
+            num_input, num_timesteps)
+        print("Testing Accuracy:",
+              sess.run(accuracy, feed_dict={X: test_x, Y: test_y}))
