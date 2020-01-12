@@ -69,26 +69,26 @@ if __name__ == "__main__":
     num_inputs_self = training_data[0][0][OWN_STR][0].shape[0]
     num_input = num_inputs_self + num_others * num_inputs_other  # TODO: use blurmap
     num_com_channels = 3  # how many colors has the image  TODO: use blurmap
-    num_hidden = 64  # hidden layers other and self
+    num_hidden = num_input * 2  # hidden layers other and self
     num_classes = 1  # one class for 0. .. 1.
     num_timesteps = 20  # TODO: get from generated data
 
-    X = tf.placeholder(
+    X = tf.compat.v1.placeholder(
         "float", [batch_size, num_timesteps, num_input], name="X")
-    Y = tf.placeholder("float", [batch_size, num_classes], name="Y")
+    Y = tf.compat.v1.placeholder("float", [batch_size, num_classes], name="Y")
 
     weights = {
-        'out': tf.Variable(tf.random_normal([num_hidden, num_classes]), name="weights")
+        'out': tf.Variable(tf.random.normal([num_hidden, num_classes]), name="weights")
     }
     biases = {
-        'out': tf.Variable(tf.random_normal([num_classes]), name="biases")
+        'out': tf.Variable(tf.random.normal([num_classes]), name="biases")
     }
 
     def LSTM(x, weights, biases):
         x = tf.unstack(x, None, 1)
 
         # Define a lstm cell with tensorflow
-        lstm_cell = rnn.BasicLSTMCell(num_hidden, forget_bias=1.0)
+        lstm_cell = tf.keras.layers.LSTMCell(num_hidden)
 
         # Get lstm cell output
         outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     # Define loss and optimizer
     loss_op = tf.reduce_mean(tf.square(Y - pred_cont))
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
     train_op = optimizer.minimize(loss_op)
 
     # Evaluate model (with test logits, for dropout to be disabled)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     # Initialize the variables (i.e. assign their default value)
-    init = tf.global_variables_initializer()
+    init = tf.compat.v1.global_variables_initializer()
 
     # Start training
     with tf.Session() as sess:
