@@ -74,8 +74,8 @@ if __name__ == "__main__":
     num_timesteps = 20  # TODO: get from generated data
 
     X = tf.compat.v1.placeholder(
-        "float", [batch_size, num_timesteps, num_input], name="X")
-    Y = tf.compat.v1.placeholder("float", [batch_size, num_classes], name="Y")
+        tf.float32, [batch_size, num_timesteps, num_input], name="X")
+    Y = tf.compat.v1.placeholder(tf.float32, [batch_size, num_classes], name="Y")
 
     weights = {
         'out': tf.Variable(tf.random.normal([num_hidden, num_classes]), name="weights")
@@ -91,7 +91,16 @@ if __name__ == "__main__":
         lstm_cell = tf.keras.layers.LSTMCell(num_hidden)
 
         # Get lstm cell output
-        outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+        # outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+        layer = tf.keras.layers.RNN(lstm_cell)
+
+        # maybe: https://www.tensorflow.org/guide/keras/rnn#define_a_custom_cell_that_support_nested_inputoutput
+
+        for i_t in range(len(x)):
+            inputs = x[i_t]
+            if i_t == 0:
+                state = lstm_cell.get_initial_state(inputs, batch_size)
+            outputs, state = layer.call(inputs, state)
 
         # Linear activation, using rnn inner loop last output
         return tf.matmul(outputs[-1], weights['out']) + biases['out']
