@@ -22,5 +22,5 @@ planner/eval/cache/
 venv/
 .vscode
 
-learn/tf/logs/*
+logs/
 cache/
