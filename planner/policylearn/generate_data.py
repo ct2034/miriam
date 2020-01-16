@@ -167,10 +167,11 @@ def training_samples_from_data(data):
         data_pa = []
         for i_a in range(n_agents):
             # training features
+            path = make_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
             fovs = make_fovs(data[GRIDMAP_STR],
-                             data[INDEP_AGENT_PATHS_STR][i_a],
+                             path,
                              t)
-            deltas = make_target_deltas(data[INDEP_AGENT_PATHS_STR][i_a],
+            deltas = make_target_deltas(path,
                                         t)
             data_this_agent = []
             for i_t in range(t+1):
@@ -178,7 +179,8 @@ def training_samples_from_data(data):
                     np.append(
                         np.concatenate(fovs[i_t]),
                         [
-                            deltas[i_t]
+                            deltas[i_t],
+                            path[i_t][:2]
                         ]
                     )
                 )
@@ -198,10 +200,7 @@ def training_samples_from_data(data):
 def make_fovs(gridmap, path, t):
     fovs = []
     for i_t in range(t+1):
-        if t < path.shape[0]:
-            pos = path[i_t][:2]
-        else:
-            pos = path[-1][:2]
+        pos = path[i_t]
         fovs.append(
             gridmap[
                 pos[0]:pos[0] + 1 + 2 * FOV_RADIUS,
@@ -215,12 +214,20 @@ def make_target_deltas(path, t):
     deltas = []
     goal = path[-1][:2]
     for i_t in range(t+1):
-        if t < path.shape[0]:
-            pos = path[i_t][:2]
-        else:
-            pos = path[-1][:2]
+        pos = path[i_t]
         deltas.append(goal - pos)
     return deltas
+
+
+def make_path(path_data, t):
+    path = []
+    for i_t in range(t+1):
+        if t < path_data.shape[0]:
+            pos = path_data[i_t][:2]
+        else:
+            pos = path_data[-1][:2]  # goal
+        path.append(pos)
+    return np.array(path)
 
 
 def plot_map_and_paths(gridmap, blocks, data, n_agents):
