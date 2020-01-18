@@ -10,6 +10,7 @@ from tensorflow.contrib import rnn
 import numpy as np
 
 from generate_data import OTHERS_STR, OWN_STR
+from gaussian_map_layer import GaussianMapLayer
 
 
 def get_training_steps(training_data, start_step, batch_size, num_input, num_timesteps):
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     # tf Logging
-    logdir = datetime.now().strftime("%Y%m%d-%H%M%S")
+    logdir = datetime.now().strftime("logs/%Y%m%d-%H%M%S")
 
     fname_pkl = sys.argv[-1]
     assert fname_pkl.endswith(".pkl"), "to read the training data,\
@@ -67,15 +68,20 @@ if __name__ == "__main__":
     num_inputs_other = training_data[0][0][OTHERS_STR][0][0].shape[0]
     num_others = len(training_data[0][0][OTHERS_STR])
     num_inputs_self = training_data[0][0][OWN_STR][0].shape[0]
-    num_input = num_inputs_self + num_others * num_inputs_other  # TODO: use blurmap
     num_com_channels = 3  # how many colors has the image  TODO: use blurmap
-    num_hidden = num_input * 2  # hidden layers other and self
+    num_hidden = num_inputs_self * 2  # hidden layers other and self
     num_classes = 1  # one class for 0. .. 1.
     num_timesteps = 20  # TODO: get from generated data
+    num_input = num_inputs_self + num_others * num_inputs_other
+
+    # blurmap size
+    map_width = 10
+    map_height = 10  # TODO: read from somewhere
 
     X = tf.compat.v1.placeholder(
         tf.float32, [batch_size, num_timesteps, num_input], name="X")
-    Y = tf.compat.v1.placeholder(tf.float32, [batch_size, num_classes], name="Y")
+    Y = tf.compat.v1.placeholder(
+        tf.float32, [batch_size, num_classes], name="Y")
 
     weights = {
         'out': tf.Variable(tf.random.normal([num_hidden, num_classes]), name="weights")
@@ -88,18 +94,25 @@ if __name__ == "__main__":
         x = tf.unstack(x, None, 1)
 
         # Define a lstm cell with tensorflow
-        lstm_cell = tf.keras.layers.LSTMCell(num_hidden)
+        map_layer = GaussianMapLayer(
+            num_inputs_other,
+            num_inputs_self,
+            num_others,
+            num_com_channels,
+            num_hidden,
+            map_width,
+            map_height)
 
         # Get lstm cell output
         # outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
-        layer = tf.keras.layers.RNN(lstm_cell)
+        layer = tf.keras.layers.RNN(map_layer)
 
         # maybe: https://www.tensorflow.org/guide/keras/rnn#define_a_custom_cell_that_support_nested_inputoutput
 
         for i_t in range(len(x)):
             inputs = x[i_t]
             if i_t == 0:
-                state = lstm_cell.get_initial_state(inputs, batch_size)
+                state = map_layer.get_initial_state(inputs, batch_size)
             outputs, state = layer.call(inputs, state)
 
         # Linear activation, using rnn inner loop last output

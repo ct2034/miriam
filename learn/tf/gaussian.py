@@ -14,10 +14,10 @@ def getGaussValue(kerStd, posX, posY):
                      (2.*(np.power(kerStd, 2)))))
 
 
-def getGaussKernel(kerStd, kerSize, datSize):
-    assert kerSize % 2 == 1, "use with odd kernel size"
-    d = (kerSize-1)/2
+def getGaussKernel(kerStd, datSize):
+    d = int(6*kerStd)
     d_idxs = range(int(-d), int(d+1), 1)
+    kerSize = 2 * d + 1
     kernel = np.zeros([kerSize, kerSize, datSize, datSize])
 
     for ix, iy in product(range(kerSize), repeat=2):
@@ -59,27 +59,27 @@ def show(dat):
 
 g = tf.Graph()
 with g.as_default():
-    imageData = getImageData(("tf/map.png",))
+    imageData = getImageData(("map.png",))
     show(imageData)
     imageData = tf.constant(imageData)
-    kernel = getGaussKernel(1.2, 9, 3)
+    kernel = getGaussKernel(10.0, 3)
 
     # first 10 run
-    resultData10 = blur_repeatedly(10, g, imageData, kernel)
+    resultData10 = blur(g, imageData, kernel)
     show(resultData10)
 
     # second 10 (20)
-    resultData20 = blur_repeatedly(10, g, resultData10, kernel)
+    resultData20 = blur(g, resultData10, kernel)
     show(resultData20)
 
     # third 10 (30)
-    resultData30 = blur_repeatedly(10, g, resultData20, kernel)
+    resultData30 = blur(g, resultData20, kernel)
     show(resultData30)
 
     # fourth 10 (40)
-    resultData40 = blur_repeatedly(10, g, resultData30, kernel)
+    resultData40 = blur(g, resultData30, kernel)
     show(resultData40)
 
     # fifth 10 (50)
-    resultData50 = blur_repeatedly(10, g, resultData40, kernel)
+    resultData50 = blur(g, resultData40, kernel)
     show(resultData50)
