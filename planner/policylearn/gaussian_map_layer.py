@@ -30,6 +30,8 @@ class GaussianMapLayer(tf.keras.layers.Layer):
         self.num_others = num_others
         self.num_com_channels = num_com_channels
         self.num_hidden = num_hidden
+        self.map_width = map_width
+        self.map_height = map_height
         num_classes = 1  # we have one output
 
         self.NestedInput = namedtuple('NestedInput', [
@@ -41,29 +43,33 @@ class GaussianMapLayer(tf.keras.layers.Layer):
                                                          str(i) for i in
                                                          range(num_others)])
 
-        self.blurmap = tf.zeros([map_width, map_height, num_com_channels])
+        self.blurmap = tf.Variable(tf.zeros([map_width, map_height, num_com_channels]))
 
         self.weights_other_to_map = tf.Variable(
-            tf.random_normal([num_hidden, num_com_channels]))
+            tf.random.normal([num_hidden, num_com_channels]))
         self.biases_other_to_map = tf.Variable(
-            tf.random_normal([num_com_channels]))
+            tf.random.normal([num_com_channels]))
 
         self.weights_self_out = tf.Variable(
-            tf.random_normal([num_hidden, num_classes]))
-        self.biases_self_out = tf.Variable(tf.random_normal([num_classes]))
+            tf.random.normal([num_hidden, num_classes]))
+        self.biases_self_out = tf.Variable(tf.random.normal([num_classes]))
 
-        state_sizes = (num_hidden,) * (num_others + 1)
-        self.state_size = self.NestedState(*state_sizes)
+        self.state_size_tuple = ([2, None, num_hidden],) * (num_others + 1)
+        self.state_size = self.NestedState(*self.state_size_tuple)
         self.output_size = 1
+
+        self.cell_self = tf.keras.layers.LSTMCell(
+            self.num_hidden, input_shape=(None, self.num_inputs_self +
+                                          self.num_com_channels))
+        self.cells_others = [tf.keras.layers.LSTMCell(
+            self.num_hidden, input_shape=(None, self.num_inputs_other))
+        ] * self.num_others
+
         super(GaussianMapLayer, self).__init__(**kwargs)
 
     def build(self, input_shapes):
         input_self = input_shapes[0]
         input_others = input_shapes[1:]
-
-        self.cell_self = tf.keras.layers.LSTMCell(self.num_hidden)
-        self.cells_others = [tf.keras.layers.LSTMCell(
-            self.num_hidden)] * self.num_others
 
         self.cell_self.build(input_self)
         for i_a in range(self.num_others):
@@ -75,17 +81,46 @@ class GaussianMapLayer(tf.keras.layers.Layer):
         states_self = states[0]
         states_others = states[1:]
 
-        output_self, new_state_self = self.cell_self.call(
-            inputs_self, states_self)
+        outputs_and_new_states_others = [self.cells_others[i_a](
+            inputs_others[i_a], states_others[i_a]) for i_a in range(self.num_others)]
+        for i_a in range(self.num_others):
+            to_map = tf.matmul([outputs_and_new_states_others[i_a][0][-1]],
+                               self.weights_other_to_map
+                               ) + self.biases_other_to_map
+            pos = inputs_others[i_a][0][-2:]
+            map_upd = tf.SparseTensor([pos], to_map[0], [10, 10, 3])
+            self.blurmap += map_upd
 
         pos_self = inputs_self[2:]  # last two data fields have pose
-        self.blurmap[pos_self] = output_self
+        comm_self = self.blurmap[tuple(pos_self)]
 
-        outputs_and_new_states_others = [self.cells_others[i_a].call(
-            inputs_others[i_a], states_others[i_a])
-            for i_a in range(self.num_others)]
-
+        output_self, new_state_self = self.cell_self(
+            inputs_self, states_self)
+        output = tf.matmul(
+            output_self[-1], self.weights_self_out) + self.biases_self_out
         return output, new_states
+
+    def get_initial_state(self, inputs, batch_size, dtype=tf.dtypes.float32):
+        sizes = []
+        for s in self.state_size_tuple:
+            s[1] = batch_size
+            sizes.append(s)
+        return self.NestedState(
+            *tuple(
+                [tf.random.normal(s, dtype=dtype)
+                 for s in sizes]
+            )
+        )
+
+    def data_to_nested_input(self, x):
+        inputs = tuple()
+        for i in range(self.num_others + 1):
+            per_agent = x[:, :, i *
+                          self.num_inputs_self:(i+1)*self.num_inputs_self]
+            inputs += (per_agent,)
+        return self.NestedInput(
+            *inputs
+        )
 
     def _getGaussValue(self, kerStd, posX, posY):
         return (1./(2. *
@@ -103,7 +138,7 @@ class GaussianMapLayer(tf.keras.layers.Layer):
             dx = d_idxs[ix]
             dy = list(reversed(d_idxs))[iy]
             kernel[ix, iy] = (np.eye(datSize) *
-                self._getGaussValue(kerStd, dx, dy))
+                              self._getGaussValue(kerStd, dx, dy))
 
         return tf.constant(kernel, dtype=tf.float32)
 

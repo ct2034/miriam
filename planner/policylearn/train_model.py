@@ -78,21 +78,16 @@ if __name__ == "__main__":
     map_width = 10
     map_height = 10  # TODO: read from somewhere
 
+    # setting up tf
+    tf.reset_default_graph()
+    # tf.enable_eager_execution()
+
     X = tf.compat.v1.placeholder(
         tf.float32, [batch_size, num_timesteps, num_input], name="X")
     Y = tf.compat.v1.placeholder(
         tf.float32, [batch_size, num_classes], name="Y")
 
-    weights = {
-        'out': tf.Variable(tf.random.normal([num_hidden, num_classes]), name="weights")
-    }
-    biases = {
-        'out': tf.Variable(tf.random.normal([num_classes]), name="biases")
-    }
-
-    def LSTM(x, weights, biases):
-        x = tf.unstack(x, None, 1)
-
+    def LSTM(x):
         # Define a lstm cell with tensorflow
         map_layer = GaussianMapLayer(
             num_inputs_other,
@@ -105,20 +100,15 @@ if __name__ == "__main__":
 
         # Get lstm cell output
         # outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
-        layer = tf.keras.layers.RNN(map_layer)
+        rnn_layer = tf.keras.layers.RNN(map_layer)
 
-        # maybe: https://www.tensorflow.org/guide/keras/rnn#define_a_custom_cell_that_support_nested_inputoutput
+        inputs = map_layer.data_to_nested_input(x)
+        outputs, state = rnn_layer.call(inputs)
 
-        for i_t in range(len(x)):
-            inputs = x[i_t]
-            if i_t == 0:
-                state = map_layer.get_initial_state(inputs, batch_size)
-            outputs, state = layer.call(inputs, state)
+        # returning simply the last output
+        return outputs[-1]
 
-        # Linear activation, using rnn inner loop last output
-        return tf.matmul(outputs[-1], weights['out']) + biases['out']
-
-    pred_cont = LSTM(X, weights, biases)  # continous variable predicted
+    pred_cont = LSTM(X)  # continous variable predicted
     pred_disc = tf.math.round(pred_cont)  # discrete prediction
 
     # Define loss and optimizer
@@ -137,6 +127,7 @@ if __name__ == "__main__":
     with tf.Session() as sess:
         # Run the initializer
         sess.run(init)
+        file_writer = tf.compat.v1.summary.FileWriter(logdir, sess.graph)
 
         assert 0 == training_steps % batch_size, "training steps must be divisible by batch size"
         for batch_step in range(int(training_steps / batch_size)):
@@ -157,7 +148,6 @@ if __name__ == "__main__":
                       "{:.3f}".format(acc))
 
         print("Optimization Finished!")
-        file_writer = tf.compat.v1.summary.FileWriter(logdir, sess.graph)
 
         # Calculate accuracy
         test_x, test_y = get_training_steps(
