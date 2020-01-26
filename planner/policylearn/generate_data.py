@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import logging
 import pickle
 import random
@@ -150,7 +151,7 @@ def add_padding_to_gridmap(gridmap):
     return padded_gridmap
 
 
-def training_samples_from_data(data):
+def lstm_training_samples_from_data(data):  # TODO refactor 
     training_samples = []
     n_agents = len(data[INDEP_AGENT_PATHS_STR])
     assert len(data[COLLISIONS_STR]
@@ -194,6 +195,24 @@ def training_samples_from_data(data):
             training_samples.append((
                 x,
                 1 if i_a == unblocked_agent else 0))
+    return training_samples
+
+
+def classification_training_samples_from_data(data):  # TODO refactor 
+    training_samples = []
+    n_agents = len(data[INDEP_AGENT_PATHS_STR])
+    assert len(data[COLLISIONS_STR]
+               ) == 1, "assuming we only handle one conflict"
+    for col_vertex, col_agents in data[COLLISIONS_STR].items():
+        t = col_vertex[2]
+        blocked_agent = -1
+        unblocked_agent = -1
+        for i_a in col_agents:
+            if data[BLOCKS_STR]["agent"+str(i_a)] is dict:
+                blocked_agent = i_a
+            else:
+                unblocked_agent = i_a
+        # TODO ...
     return training_samples
 
 
@@ -248,59 +267,74 @@ def plot_map_and_paths(gridmap, blocks, data, n_agents):
     plt.show()
 
 
-def save_data(training_data_we_want, fname_pkl):
-    with open(fname_pkl, 'wb') as f:
-        pickle.dump(training_data_we_want, f)
+def save_data(data_dict, file_pkl):
+    pickle.dump(data_dict, file_pkl)
 
 
 if __name__ == "__main__":
-    fname_pkl = sys.argv[-1]
-    assert fname_pkl.endswith(
-        ".pkl"), "to save the data, give filname of pickle file as argument"
-
     logging.basicConfig()
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
-    training_data_we_want = []
-    plot = False
-    width = 10
-    height = 10
-    random.seed(0)
-    n_agents = 5
-    n_data_to_gen = 10000
-    while len(training_data_we_want) < n_data_to_gen:
-        collide_count = 0
-        while collide_count != 1:
-            gridmap = generate_random_gridmap(width, height, .2)
-            starts = [get_random_free_pos(gridmap, width, height)
-                      for _ in range(n_agents)]
-            goals = [get_random_free_pos(gridmap, width, height)
-                     for _ in range(n_agents)]
-            collisions, indep_agent_paths = will_they_collide(
-                gridmap, starts, goals)
-            collide_count = len(collisions.keys())
-        logger.debug(collisions)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('mode', help='mode', nargs=1, choices=(
+        'transfer_lstm',
+        'transfer_classification',
+        'generate_simulation'))
+    parser.add_argument('fname_write_pkl', type=argparse.FileType('wb'))
+    parser.add_argument(
+        'fname_read_pkl', type=argparse.FileType('rb'), nargs='?')
+    args = parser.parse_args()
+    
+    if args.mode[0] == 'transfer_lstm':
+        # transfer mode lstm
+        training_data_we_want = []
+        all_data = pickle.load(args.fname_read_pkl)
+        for d in all_data:
+            training_data_we_want.extend(lstm_training_samples_from_data(d))
+        save_data(training_data_we_want, args.fname_write_pkl)
+    elif args.mode[0] == 'generate_simulation':
+        # generation mode
+        all_data = []
+        plot = False
+        width = 10
+        height = 10
+        random.seed(0)
+        n_agents = 5
+        # n_data_to_gen = 5000
+        n_data_to_gen = 50
+        while len(all_data) < n_data_to_gen:
+            collide_count = 0
+            while collide_count != 1:
+                gridmap = generate_random_gridmap(width, height, .2)
+                starts = [get_random_free_pos(gridmap, width, height)
+                          for _ in range(n_agents)]
+                goals = [get_random_free_pos(gridmap, width, height)
+                         for _ in range(n_agents)]
+                collisions, indep_agent_paths = will_they_collide(
+                    gridmap, starts, goals)
+                collide_count = len(collisions.keys())
+            logger.debug(collisions)
 
-        data = plan_in_gridmap(gridmap, starts, goals)
+            data = plan_in_gridmap(gridmap, starts, goals)
 
-        if data and BLOCKS_STR in data.keys():
-            blocks = data[BLOCKS_STR]
-            has_a_block = has_exatly_one_vertex_block(blocks)
-            if has_a_block:
-                data.update({
-                    INDEP_AGENT_PATHS_STR: indep_agent_paths,
-                    COLLISIONS_STR: collisions,
-                    GRIDMAP_STR: add_padding_to_gridmap(gridmap)
-                })
-                training_data_we_want.extend(
-                    training_samples_from_data(data)
-                )
-                save_data(training_data_we_want, fname_pkl)
-                logger.info('Generated {} of {} samples ({}%)'.format(
-                    len(training_data_we_want),
-                    n_data_to_gen,
-                    int(100. * len(training_data_we_want) / n_data_to_gen)
-                ))
-                if plot:
-                    plot_map_and_paths(gridmap, blocks, data, n_agents)
+            if data and BLOCKS_STR in data.keys():
+                blocks = data[BLOCKS_STR]
+                has_a_block = has_exatly_one_vertex_block(blocks)
+                if has_a_block:
+                    data.update({
+                        INDEP_AGENT_PATHS_STR: indep_agent_paths,
+                        COLLISIONS_STR: collisions,
+                        GRIDMAP_STR: add_padding_to_gridmap(gridmap)
+                    })
+                    all_data.append(data)
+                    save_data(all_data, args.fname_write_pkl)
+                    logger.info('Generated {} of {} samples ({}%)'.format(
+                        len(all_data),
+                        n_data_to_gen,
+                        int(100. * len(all_data) / n_data_to_gen)
+                    ))
+                    if plot:
+                        plot_map_and_paths(gridmap, blocks, data, n_agents)
+    else:
+        raise NotImplementedError("mode >{}< is not implemented yet".format(args.mode))
