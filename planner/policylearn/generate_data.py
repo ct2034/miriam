@@ -360,8 +360,7 @@ if __name__ == "__main__":
         height = 10
         random.seed(0)
         n_agents = 5
-        # n_data_to_gen = 5000
-        n_data_to_gen = 50
+        n_data_to_gen = 5000
         while len(all_data) < n_data_to_gen:
             collide_count = 0
             while collide_count != 1:
