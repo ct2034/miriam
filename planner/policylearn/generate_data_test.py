@@ -26,10 +26,10 @@ def test_import_ecbs():
 
 
 def test_add_padding_to_gridmap():
-    generate_data.FOV_RADIUS = 2  # testing
+    radius = 2  # testing
     my_gridmap = np.zeros([2, 3])
     my_gridmap[1, 2] = 1  # a pixel
-    out_gridmap = generate_data.add_padding_to_gridmap(my_gridmap)
+    out_gridmap = generate_data.add_padding_to_gridmap(my_gridmap, radius)
     assert out_gridmap[0, 0] == 1  # padding
     assert out_gridmap[1, 1] == 1  # padding
     assert out_gridmap[2, 2] == 0  # free map space
@@ -41,15 +41,16 @@ def test_add_padding_to_gridmap():
 
 
 def test_make_fovs():
-    generate_data.FOV_RADIUS = 2  # testing
+    radius = 2  # testing
     my_gridmap = np.zeros([2, 3])
     my_gridmap[1, 2] = 1  # a pixel
-    padded_gridmap = generate_data.add_padding_to_gridmap(my_gridmap)
+    padded_gridmap = generate_data.add_padding_to_gridmap(my_gridmap, radius)
     path = np.array([(0, 0, 0), (0, 1, 1), (1, 1, 2), (1, 2, 3), (99, 99, 99)])
-    out_fovs = generate_data.make_fovs(
+    out_fovs = generate_data.make_obstacle_fovs(
         padded_gridmap,
         path,
-        3
+        3,
+        radius
     )
     assert len(out_fovs) == 3 + 1
     # t = 0
@@ -68,7 +69,7 @@ def test_make_fovs():
 
 def test_make_target_deltas():
     testing_path = np.array(
-        [(0, 0, 0), (0, 1, 1), (1, 1, 2), (1, 2, 3), (99, 99, 99)])
+        [(0, 0), (0, 1), (1, 1), (1, 2), (99, 99)])
     out_deltas = generate_data.make_target_deltas(testing_path, 3)
     # t = 0
     assert out_deltas[0][0] == 99
