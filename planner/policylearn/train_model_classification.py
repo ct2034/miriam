@@ -5,14 +5,15 @@ import pickle
 import random
 
 import numpy as np
+from matplotlib import pyplot as plt
 import tensorflow as tf
 from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
                                      MaxPooling2D, DepthwiseConv2D, Dropout)
 from tensorflow.keras.models import Sequential
 
-IMG_SIZE = 11
-IMG_DEPTH = 10
-TRAININING_PERC = .8
+IMG_SIZE = 13
+IMG_DEPTH = 6
+TRAININING_PERC = 1
 
 
 if __name__ == "__main__":
@@ -69,10 +70,14 @@ if __name__ == "__main__":
 
     # model
     model = Sequential([
-        Conv2D(16, 3, padding='same', activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
+        Conv2D(16, 5, padding='same', activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
+        #Conv2D(16, 5, padding='same', activation='relu'),
+	#Dense(16, activation='relu'),
+        #Conv2D(32, 7, padding='same', activation='relu'),
+	#Dense(4, activation='relu'),
         Flatten(),
 	Dense(32, activation='relu'),
-	Dense(32, activation='relu'),
+	Dense(64, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer='adam',
@@ -81,9 +86,27 @@ if __name__ == "__main__":
     model.summary()
 
     # train
-    model.fit([train_images2], train_labels2, epochs=3)
+    history = model.fit([train_images2], train_labels2, validation_split=0.1, epochs=5, batch_size=32)
 
     # test
-    test_loss, test_acc = model.evaluate([test_images], test_labels)
-    print("Loss " + str(test_loss))
-    print("Accuracy " + str(test_acc))
+    #test_loss, test_acc = model.evaluate([test_images], test_labels)
+    #print("Loss " + str(test_loss))
+    #print("Accuracy " + str(test_acc))
+
+    # Plot training & validation accuracy values
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.show()
+
+    # Plot training & validation loss values
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.show()
