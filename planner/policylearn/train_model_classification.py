@@ -7,11 +7,11 @@ import random
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
-                                     MaxPooling2D)
+                                     MaxPooling2D, DepthwiseConv2D, Dropout)
 from tensorflow.keras.models import Sequential
 
-IMG_SIZE = 7
-IMG_DEPTH = 6
+IMG_SIZE = 11
+IMG_DEPTH = 10
 TRAININING_PERC = .8
 
 
@@ -69,13 +69,10 @@ if __name__ == "__main__":
 
     # model
     model = Sequential([
-        Conv2D(8, 2, padding='same', activation='relu',
-               input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
-        Conv2D(4, 2, padding='same', activation='relu'),
-        MaxPooling2D(),
-        Dense(4, activation='relu'),
+        Conv2D(16, 3, padding='same', activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
         Flatten(),
-        Dense(32, activation='relu'),
+	Dense(32, activation='relu'),
+	Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer='adam',
@@ -84,7 +81,7 @@ if __name__ == "__main__":
     model.summary()
 
     # train
-    model.fit([train_images2], train_labels2)
+    model.fit([train_images2], train_labels2, epochs=3)
 
     # test
     test_loss, test_acc = model.evaluate([test_images], test_labels)
