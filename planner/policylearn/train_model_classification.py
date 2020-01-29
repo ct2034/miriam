@@ -70,14 +70,14 @@ if __name__ == "__main__":
 
     # model
     model = Sequential([
-        Conv2D(16, 5, padding='same', activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
-        #Conv2D(16, 5, padding='same', activation='relu'),
+        Conv2D(16, 4, padding='same', activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
+        Conv2D(16, 4, padding='same', activation='relu'),
 	#Dense(16, activation='relu'),
         #Conv2D(32, 7, padding='same', activation='relu'),
 	#Dense(4, activation='relu'),
         Flatten(),
 	Dense(32, activation='relu'),
-	Dense(64, activation='relu'),
+	Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer='adam',
