@@ -71,12 +71,11 @@ if __name__ == "__main__":
     # model
     model = Sequential([
         Conv2D(16, 4, padding='same', activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
-        Conv2D(16, 4, padding='same', activation='relu'),
-	#Dense(16, activation='relu'),
-        #Conv2D(32, 7, padding='same', activation='relu'),
-	#Dense(4, activation='relu'),
+	Dropout(0.2),
+        Conv2D(32, 4, padding='same', activation='relu'),
         Flatten(),
-	Dense(32, activation='relu'),
+	Dense(64, activation='relu'),
+	Dropout(0.5),
 	Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
@@ -86,7 +85,7 @@ if __name__ == "__main__":
     model.summary()
 
     # train
-    history = model.fit([train_images2], train_labels2, validation_split=0.1, epochs=5, batch_size=32)
+    history = model.fit([train_images2], train_labels2, validation_split=0.1, epochs=8, batch_size=16)
 
     # test
     #test_loss, test_acc = model.evaluate([test_images], test_labels)
