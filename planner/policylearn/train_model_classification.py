@@ -71,7 +71,7 @@ if __name__ == "__main__":
     # model
     model = Sequential([
         Conv2D(16, 4, padding='same', activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
-	Dropout(0.2),
+	Dropout(0.3),
         Conv2D(32, 4, padding='same', activation='relu'),
         Flatten(),
 	Dense(64, activation='relu'),
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     model.summary()
 
     # train
-    history = model.fit([train_images2], train_labels2, validation_split=0.1, epochs=8, batch_size=16)
+    history = model.fit([train_images2], train_labels2, validation_split=0.1, epochs=16, batch_size=512)
 
     # test
     #test_loss, test_acc = model.evaluate([test_images], test_labels)
