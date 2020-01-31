@@ -10,14 +10,16 @@ PLOT_FOVS_STR = "plot_fovs"
 
 
 def plot_fovs(one_fov_data):
-    frames = one_fov_data.shape[2]
-    rows = int(frames / 2)
-    assert rows * 2 == frames
+    rows = one_fov_data.shape[2]
     subplot_base = rows * 100 + 21  # two columns x rows
 
-    for frame in range(frames):
-        plt.subplot(subplot_base + frame)
-        plt.imshow(one_fov_data[:, :, frame], cmap='gray')
+    for row in range(rows):
+        # left
+        plt.subplot(subplot_base + 2 * row)
+        plt.imshow(one_fov_data[:, :, row, 0], cmap='gray')
+        # right
+        plt.subplot(subplot_base + 2*row+1)
+        plt.imshow(one_fov_data[:, :, row, 1], cmap='gray')
 
     plt.show()
 

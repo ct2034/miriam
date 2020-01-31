@@ -239,7 +239,7 @@ def classification_samples(n_agents, data, t, data_pa, col_agents,
                                            CLASSIFICATION_FOV_RADIUS)
         pos_fovs = make_pos_fovs(paths, i_a, CLASSIFICATION_FOV_RADIUS)
         np_obstacle_fovs = np.stack(obstacle_fovs, axis=2)
-        x = np.append(np_obstacle_fovs, pos_fovs, axis=2)
+        x = np.stack([np_obstacle_fovs, pos_fovs], axis=3)
         training_samples.append((
             x,
             1 if i_a == unblocked_agent else 0))

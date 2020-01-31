@@ -7,12 +7,12 @@ import random
 import numpy as np
 from matplotlib import pyplot as plt
 import tensorflow as tf
-from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
-                                     MaxPooling2D, DepthwiseConv2D, Dropout)
+from tensorflow.keras.layers import (Conv3D, Dense, Dropout, Flatten, Dropout)
 from tensorflow.keras.models import Sequential
 
 IMG_SIZE = 13
-IMG_DEPTH = 6
+IMG_DEPTH_T = 3
+IMG_DEPTH_FRAMES = 2
 TRAININING_PERC = 1
 
 
@@ -70,13 +70,14 @@ if __name__ == "__main__":
 
     # model
     model = Sequential([
-        Conv2D(16, 4, padding='same', activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH)),
-	Dropout(0.3),
-        Conv2D(32, 4, padding='same', activation='relu'),
+        Conv3D(16, 4, padding='same', activation='relu',
+               input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
+        Dropout(0.3),
+        Conv3D(32, 4, padding='same', activation='relu'),
         Flatten(),
-	Dense(64, activation='relu'),
-	Dropout(0.5),
-	Dense(32, activation='relu'),
+        Dense(64, activation='relu'),
+        Dropout(0.5),
+        Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer='adam',
@@ -85,7 +86,8 @@ if __name__ == "__main__":
     model.summary()
 
     # train
-    history = model.fit([train_images2], train_labels2, validation_split=0.1, epochs=16, batch_size=512)
+    history = model.fit([train_images2], train_labels2,
+                        validation_split=0.1, epochs=16, batch_size=512)
 
     # test
     #test_loss, test_acc = model.evaluate([test_images], test_labels)
