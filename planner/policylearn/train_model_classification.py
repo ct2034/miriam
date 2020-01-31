@@ -5,9 +5,10 @@ import pickle
 import random
 
 import numpy as np
-from matplotlib import pyplot as plt
 import tensorflow as tf
-from tensorflow.keras.layers import (Conv3D, Dense, Dropout, Flatten, Dropout)
+from matplotlib import pyplot as plt
+from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
+                                     Reshape)
 from tensorflow.keras.models import Sequential
 
 IMG_SIZE = 13
@@ -68,16 +69,17 @@ if __name__ == "__main__":
     train_labels2 = training_data[:, train_images.size //
                                   len(train_images):].reshape(train_labels.shape)
 
+    CONV2D_1_LAYERS = 16
     # model
     model = Sequential([
-        Conv3D(16, 4, padding='same', activation='relu',
+        Conv3D(CONV2D_1_LAYERS, 3, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
         Dropout(0.3),
-        Conv3D(32, 4, padding='same', activation='relu'),
+        Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV2D_1_LAYERS)),
+        Conv2D(32, 4, padding='same', activation='relu'),
         Flatten(),
         Dense(64, activation='relu'),
         Dropout(0.5),
-        Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer='adam',
