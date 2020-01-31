@@ -69,17 +69,19 @@ if __name__ == "__main__":
     train_labels2 = training_data[:, train_images.size //
                                   len(train_images):].reshape(train_labels.shape)
 
-    CONV2D_1_LAYERS = 16
+    CONV3D_1_LAYERS = 16
     # model
     model = Sequential([
-        Conv3D(CONV2D_1_LAYERS, 3, padding='same', activation='relu',
+        Conv3D(CONV3D_1_LAYERS, 3, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
-        Dropout(0.3),
-        Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV2D_1_LAYERS)),
+        Dropout(0.4),
+        Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
         Conv2D(32, 4, padding='same', activation='relu'),
         Flatten(),
+        Dropout(0.5),
         Dense(64, activation='relu'),
         Dropout(0.5),
+        Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer='adam',
@@ -89,7 +91,7 @@ if __name__ == "__main__":
 
     # train
     history = model.fit([train_images2], train_labels2,
-                        validation_split=0.1, epochs=16, batch_size=512)
+                        validation_split=0.1, epochs=32, batch_size=256)
 
     # test
     #test_loss, test_acc = model.evaluate([test_images], test_labels)
