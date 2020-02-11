@@ -13,6 +13,8 @@ from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
 from tensorflow.keras.models import Sequential
 from tensorflow import keras
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 IMG_SIZE = 13
 IMG_DEPTH_T = 3
 IMG_DEPTH_FRAMES = 2
