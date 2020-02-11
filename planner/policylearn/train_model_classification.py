@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import pickle
 import random
 
@@ -8,8 +9,9 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
-                                     Reshape)
+                                     LocallyConnected2D, Reshape)
 from tensorflow.keras.models import Sequential
+from tensorflow import keras
 
 IMG_SIZE = 13
 IMG_DEPTH_T = 3
@@ -84,14 +86,15 @@ if __name__ == "__main__":
         Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
-    model.compile(optimizer='adam',
+    adam = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+    model.compile(optimizer=adam,
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
     model.summary()
 
     # train
     history = model.fit([train_images2], train_labels2,
-                        validation_split=0.1, epochs=32, batch_size=256)
+                        validation_split=0.1, epochs=16, batch_size=128)
 
     # test
     #test_loss, test_acc = model.evaluate([test_images], test_labels)
