@@ -41,10 +41,18 @@ def generate_random_gridmap(width: int, height: int, fill: float):
             gridmap[start[0]:random.randint(0, width-1), start[1]] = 1
         else:  # y
             gridmap[start[0], start[1]:random.randint(0, height-1)] = 1
+    while np.count_nonzero(gridmap) > fill * width * height:
+        make_free = (
+            random.randint(0, width-1),
+            random.randint(0, height-1)
+        )
+        gridmap[make_free] = 0
     return gridmap
 
 
 def show_map(x):
+    """displays the map using matplotlib. You may want to call plt.show()
+    yourself."""
     plt.imshow(
         np.swapaxes(x, 0, 1),
         aspect='equal',
@@ -53,10 +61,15 @@ def show_map(x):
 
 
 def is_free(gridmap, pos):
+    """checks if the cell is free."""
     return gridmap[tuple(pos)] == 0
 
 
-def get_random_free_pos(gridmap, width, height):
+def get_random_free_pos(gridmap):
+    """return a random pose from that map, that is free."""
+    width = gridmap.shape[0]
+    height = gridmap.shape[1]
+
     def random_pos(width, height):
         return [
             random.randint(0, width-1),
@@ -69,6 +82,7 @@ def get_random_free_pos(gridmap, width, height):
 
 
 def get_vertex_block_coords(blocks):  # TODO: edge constraints
+    """from the blocks section of data, get all vertex blocks."""
     coords = []
     for agent in blocks.keys():
         coords_pa = []
@@ -82,6 +96,8 @@ def get_vertex_block_coords(blocks):  # TODO: edge constraints
 
 
 def has_exatly_one_vertex_block(blocks):
+    """counts if these blocks have exactly one vertex block
+    (and no edge block)."""
     n_vc = 0
     n_ec = 0
     for agent in blocks.keys():
@@ -97,6 +113,8 @@ def has_exatly_one_vertex_block(blocks):
 
 
 def get_agent_paths_from_data(data, timed=False):
+    """get paths for all agents from the data dict. Can be chosen to be
+    with time [x, y, t] (timed=True) or only the positions."""
     agent_paths = []
     if not data:
         return []
@@ -122,6 +140,8 @@ def get_agent_paths_from_data(data, timed=False):
 
 
 def will_they_collide(gridmap, starts, goals):
+    """checks if for a given set of starts and goals the agents travelling
+    between may collide on the given gridmap."""
     collisions = {}
     seen = set()
     been_at = {}
@@ -130,9 +150,14 @@ def will_they_collide(gridmap, starts, goals):
         data = plan_in_gridmap(gridmap, [starts[i_a], ], [
                                goals[i_a], ], timeout=2)
         if data is None:
+            logging.warn("no single agent plan in gridmap")
+
+            show_map(gridmap)
+            plt.show()
             return {}, []
         single_agent_paths = get_agent_paths_from_data(data, timed=True)
         if not single_agent_paths:
+            logging.warn("no single agent path from ecbs data")
             return {}, []
         agent_paths.append(single_agent_paths[0])
         for pos in single_agent_paths[0]:
@@ -145,6 +170,8 @@ def will_they_collide(gridmap, starts, goals):
 
 
 def add_padding_to_gridmap(gridmap, radius):
+    """add a border of blocks around the map of given radius.
+    (The new size will be old size + 2 * radius in both directions)"""
     size = gridmap.shape
     padded_gridmap = np.ones([
         size[0] + 2 * radius,
@@ -157,6 +184,7 @@ def add_padding_to_gridmap(gridmap, radius):
 
 
 def training_samples_from_data(data, mode):
+    """extract training samples from the data simulation data dict."""
     training_samples = []
     n_agents = len(data[INDEP_AGENT_PATHS_STR])
     assert len(data[COLLISIONS_STR]
@@ -181,6 +209,7 @@ def training_samples_from_data(data, mode):
 
 
 def lstm_samples(n_agents, data, t, data_pa, col_agents, unblocked_agent):
+    """specifically construct training data for the lstm model."""
     training_samples = []
     padded_gridmap = add_padding_to_gridmap(data[GRIDMAP_STR], LSTM_FOV_RADIUS)
     for i_a in range(n_agents):
@@ -218,6 +247,7 @@ def lstm_samples(n_agents, data, t, data_pa, col_agents, unblocked_agent):
 
 def classification_samples(n_agents, data, t, data_pa, col_agents,
                            unblocked_agent):
+    """specifically construct training data for the classification model."""
     training_samples = []
     paths = []
     padded_gridmap = add_padding_to_gridmap(data[GRIDMAP_STR],
@@ -247,7 +277,7 @@ def classification_samples(n_agents, data, t, data_pa, col_agents,
 
 
 def make_obstacle_fovs(padded_gridmap, path, t, radius):
-    """create for all agents a set of FOVS of radius contatining positions of
+    """create for all agents a set of FOVS of radius containing positions of
     obstacles in gridmap."""
     fovs = []
     for i_t in range(t+1):
@@ -262,7 +292,7 @@ def make_obstacle_fovs(padded_gridmap, path, t, radius):
 
 
 def make_pos_fovs(paths, agent, radius):
-    """create for the agent a set of FOVS of radius contatining positions of
+    """create for the agent a set of FOVS of radius containing positions of
     other agents."""
     t = paths[0].shape[0]
     pos_fovs = np.zeros([
@@ -285,6 +315,8 @@ def make_pos_fovs(paths, agent, radius):
 
 
 def make_target_deltas(path, t):
+    """along the path, construct the deltas between each current position and
+    the end of the path until (including) time t."""
     deltas = []
     goal = path[-1][:2]
     for i_t in range(t+1):
@@ -294,6 +326,8 @@ def make_target_deltas(path, t):
 
 
 def make_path(path_data, t):
+    """from the path data, make a single agent path until
+    (and including) time t."""
     path = []
     for i_t in range(t+1):
         if t < path_data.shape[0]:
@@ -305,6 +339,8 @@ def make_path(path_data, t):
 
 
 def plot_map_and_paths(gridmap, blocks, data, n_agents):
+    """plot the map, agent paths and their blocks.
+    You may call `plt.show()` afterwards."""
     colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
     show_map(gridmap)
     block_coords = get_vertex_block_coords(blocks)
@@ -323,6 +359,7 @@ def plot_map_and_paths(gridmap, blocks, data, n_agents):
 
 
 def save_data(data_dict, fname_pkl):
+    """save the current data dict in the given pickle file."""
     with open(fname_pkl, 'wb') as f:
         pickle.dump(data_dict, f)
 
@@ -358,16 +395,17 @@ if __name__ == "__main__":
         plot = False
         width = 10
         height = 10
-        random.seed(0)
         n_agents = 5
         n_data_to_gen = 5000
+        # start
+        random.seed(0)
         while len(all_data) < n_data_to_gen:
             collide_count = 0
             while collide_count != 1:
                 gridmap = generate_random_gridmap(width, height, .2)
-                starts = [get_random_free_pos(gridmap, width, height)
+                starts = [get_random_free_pos(gridmap)
                           for _ in range(n_agents)]
-                goals = [get_random_free_pos(gridmap, width, height)
+                goals = [get_random_free_pos(gridmap)
                          for _ in range(n_agents)]
                 collisions, indep_agent_paths = will_they_collide(
                     gridmap, starts, goals)
