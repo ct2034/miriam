@@ -13,12 +13,12 @@ from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
 from tensorflow.keras.models import Sequential
 from tensorflow import keras
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 IMG_SIZE = 13
 IMG_DEPTH_T = 3
 IMG_DEPTH_FRAMES = 2
-TRAININING_PERC = 1
+TRAINING_PERCENTAGE = .9
 
 
 if __name__ == "__main__":
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     test_images = []
     test_labels = []
     for i in range(len(d)):
-        if i < TRAININING_PERC * len(d):  # training data
+        if i < TRAINING_PERCENTAGE * len(d):  # training data
             dat = d[i][0]
             train_images.append(dat)
 
@@ -73,14 +73,14 @@ if __name__ == "__main__":
     train_labels2 = training_data[:, train_images.size //
                                   len(train_images):].reshape(train_labels.shape)
 
-    CONV3D_1_LAYERS = 16
+    CONV3D_1_LAYERS = 32
     # model
     model = Sequential([
         Conv3D(CONV3D_1_LAYERS, 3, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
         Dropout(0.4),
         Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
-        Conv2D(32, 4, padding='same', activation='relu'),
+        Conv2D(128, 4, padding='same', activation='relu'),
         Flatten(),
         Dropout(0.5),
         Dense(64, activation='relu'),
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     # train
     history = model.fit([train_images2], train_labels2,
-                        validation_split=0.1, epochs=16, batch_size=128)
+                        validation_split=0.1, epochs=16, batch_size=1024)
 
     # test
     #test_loss, test_acc = model.evaluate([test_images], test_labels)
