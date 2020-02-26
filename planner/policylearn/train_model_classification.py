@@ -69,15 +69,18 @@ if __name__ == "__main__":
         len(train_images), -1), train_labels.reshape(len(train_labels), -1)]
     np.random.shuffle(training_data)
     train_images2 = training_data[:, :train_images.size //
-                                  len(train_images)].reshape(train_images.shape)
+                                  len(train_images)].reshape(
+                                      train_images.shape)
     train_labels2 = training_data[:, train_images.size //
-                                  len(train_images):].reshape(train_labels.shape)
+                                  len(train_images):].reshape(
+                                      train_labels.shape)
 
     CONV3D_1_LAYERS = 32
     # model
     model = Sequential([
         Conv3D(CONV3D_1_LAYERS, 3, padding='same', activation='relu',
-               input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
+               input_shape=(IMG_SIZE, IMG_SIZE, 
+                            IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
         Dropout(0.4),
         Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
         Conv2D(128, 4, padding='same', activation='relu'),
@@ -88,7 +91,8 @@ if __name__ == "__main__":
         Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
-    adam = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+    adam = keras.optimizers.Adam(
+        learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
     model.compile(optimizer=adam,
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
@@ -99,9 +103,9 @@ if __name__ == "__main__":
                         validation_split=0.1, epochs=16, batch_size=1024)
 
     # test
-    #test_loss, test_acc = model.evaluate([test_images], test_labels)
-    #print("Loss " + str(test_loss))
-    #print("Accuracy " + str(test_acc))
+    # test_loss, test_acc = model.evaluate([test_images], test_labels)
+    # print("Loss " + str(test_loss))
+    # print("Accuracy " + str(test_acc))
 
     # Plot training & validation accuracy values
     plt.plot(history.history['acc'])
