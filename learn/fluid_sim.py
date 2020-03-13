@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # LatticeBoltzmannDemo.py:  a two-dimensional lattice-Boltzmann "wind tunnel" simulation
 # Uses numpy to speed up all array handling.
 # Uses matplotlib to plot and animate the curl of the macroscopic velocity
@@ -77,8 +77,8 @@ uy = (nN + nNE + nNW - nS - nSE - nSW) / rho				# macroscopic y velocity
 # Initialize barriers:
 # True wherever there's a barrier
 barrier = numpy.zeros((height, width), bool)
-barrier[(height / 2) - 8:(height / 2) + 8, height /
-        2] = True			# simple linear barrier
+barrier[int(height/2)-8:int(height / 2)+8,
+        int(height/2)] = True			                    # simple linear barrier
 barrierN = numpy.roll(barrier,  1, axis=0)					# sites just north of barriers
 barrierS = numpy.roll(barrier, -1, axis=0)					# sites just south of barriers
 barrierE = numpy.roll(barrier,  1, axis=1)					# etc.
@@ -163,6 +163,7 @@ def collide():
 def curl(ux, uy):
     return numpy.roll(uy, -1, axis=1) - numpy.roll(uy, 1, axis=1) - numpy.roll(ux, -1, axis=0) + numpy.roll(ux, 1, axis=0)
 
+
 # Here comes the graphics and animation...
 theFig = matplotlib.pyplot.figure(figsize=(8, 3))
 fluidImage = matplotlib.pyplot.imshow(curl(ux, uy), origin='lower', norm=matplotlib.pyplot.Normalize(-.1, .1),
@@ -184,7 +185,7 @@ def nextFrame(arg):							# (arg is the frame number, which we don't need)
     global startTime
     if performanceData and (arg % 100 == 0) and (arg > 0):
         endTime = time.clock()
-        print "%1.1f" % (100 / (endTime - startTime)), 'frames per second'
+        print("%1.1f" % (100 / (endTime - startTime)), 'frames per second')
         startTime = endTime
     #frameName = "frame%04d.png" % arg
     # matplotlib.pyplot.savefig(frameName)
@@ -194,6 +195,7 @@ def nextFrame(arg):							# (arg is the frame number, which we don't need)
         collide()
     fluidImage.set_array(curl(ux, uy))
     return (fluidImage, barrierImage)		# return the figure elements to redraw
+
 
 animate = matplotlib.animation.FuncAnimation(
     theFig, nextFrame, interval=1, blit=True)
