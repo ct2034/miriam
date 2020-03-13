@@ -16,7 +16,6 @@ class MyRob:
     routeLines = {}
     queueText = False
     dimensions = array([0, 0])
-    msbThread = False
     scene = False
 
     def __init__(self, simThread, parent=None):

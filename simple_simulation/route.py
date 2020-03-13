@@ -7,8 +7,6 @@ from threading import Lock
 import numpy as np
 from numpy import linalg
 
-msb = None
-
 
 
 class Route(object):
@@ -40,9 +38,6 @@ class Route(object):
 
         self.car = None
 
-        if self.sim.msb_select:
-            global msb
-
         logging.debug("Init:" + str(self))
 
     def assign_car(self, _car):
@@ -57,10 +52,6 @@ class Route(object):
                 self.car = _car
                 self.state = RouteState.TO_START
                 logging.debug(str(self))
-
-                if self.sim.msb_select:
-                    data = {"agvId": self.car.id, "jobId": self.id}
-                    msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eAGVAssignment, data=data)
             elif self.state == RouteState.TO_START:  # had another car already
                 assert self.car, "Should have had a car, had: " + str(self.car) + ", should get: " + str(_car)
                 self.car = _car
@@ -112,8 +103,6 @@ class Route(object):
 
         # self.sim.emit(QtCore.SIGNAL("update_route(PyQt_PyObject)"), self)
 
-        if self.sim.msb_select:
-            emit_car(msb, self.car)
         Route.lock.release()
 
     def at_goal(self):
@@ -126,17 +115,12 @@ class Route(object):
             assert self.state == RouteState.ON_ROUTE, "Must have been on route before"
             self.state = RouteState.FINISHED
         logging.info(str(self) + " reached Goal")
-        if self.sim.msb_select:
-            msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReached, data=self.id)
 
     def at_start(self):
         self.car.set_pose(self.start)
         self.state = RouteState.ON_ROUTE
         self.pre_remaining = 0
         logging.info(str(self) + " reached Start")
-        if self.sim.msb_select:
-            data = {"agvId": self.car.id, "jobId": self.id}
-            msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.eReachedStart, data=data)
 
     def is_running(self):
         return (self.state == RouteState.TO_START or
@@ -175,12 +159,6 @@ class Route(object):
 
     def __hash__(self):
         return hash(self.id * 1000)
-
-
-def emit_car(msb, car):
-    data = {"id": car.id, "x": float(car.pose[0]), "y": float(car.pose[1])}
-    logging.debug(data)
-    msb.Msb.mwc.emit_event(msb.Msb.application, msb.Msb.ePose, data=data)
 
 
 class Car(object):

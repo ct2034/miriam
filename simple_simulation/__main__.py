@@ -39,17 +39,14 @@ if __name__ == '__main__':
     logging.info("__main__.py ...")
 
     # init switches
-    msb = False
     test = False
     vis = False
 
     # module
     mod = Random()
 
-
     # sim
-    msb = True
-    simThread = SimpSim(msb, mod)
+    simThread = SimpSim(mod)
     simThread.start()
 
     # test

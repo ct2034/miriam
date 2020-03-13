@@ -20,7 +20,6 @@ class Vis(QtGui.QWidget):
     routeLines = {}
     queueText = False
     dimensions = array([0, 0])
-    msbThread = False
     scene = False
 
     def __init__(self, sim_thread, parent=None):

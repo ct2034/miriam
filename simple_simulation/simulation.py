@@ -6,9 +6,7 @@ from apscheduler.events import *
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
-from simple_simulation.route import Route, RouteState, Car, emit_car
-
-msb = None
+from simple_simulation.route import Route, RouteState, Car
 
 
 def set_speed_multiplier(multiplier):
@@ -44,16 +42,10 @@ class SimpSim():
     i = 0
     start_time = time.time()
 
-    def __init__(self, msb_select: bool, _mod, parent=None):
+    def __init__(self, _mod, parent=None):
         # QtCore.QThread.__init__(self, parent)
         logging.info("init Simulation")
         self.lock = Lock()
-
-        self.msb_select = msb_select
-        if msb_select:
-            global msb
-            from simple_simulation import msb
-            msb.Msb(self)
 
         self.area = zeros([1])
         self.number_agvs = 1
@@ -78,8 +70,6 @@ class SimpSim():
         for i in range(self.number_agvs):
             c = Car(self)
             SimpSim.cars.append(c)
-            if self.msb_select:
-                emit_car(msb, c)
 
         SimpSim.running = True
         if SimpSim.scheduler.running:
