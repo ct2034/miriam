@@ -12,14 +12,20 @@ PLOT_FOVS_STR = "plot_fovs"
 def plot_fovs(one_fov_data):
     rows = one_fov_data.shape[2]
     subplot_base = rows * 100 + 21  # two columns x rows
+    middle = (one_fov_data[:, :, 0, 0].shape[0] - 1) / 2
+    end = (one_fov_data[:, :, 0, 0].shape[0] - 1)
 
     for row in range(rows):
         # left
         plt.subplot(subplot_base + 2 * row)
         plt.imshow(one_fov_data[:, :, row, 0], cmap='gray')
+        plt.plot([0, end], [middle, middle], 'r')
+        plt.plot([middle, middle], [0, end], 'r')
         # right
-        plt.subplot(subplot_base + 2*row+1)
+        plt.subplot(subplot_base + 2 * row + 1)
         plt.imshow(one_fov_data[:, :, row, 1], cmap='gray')
+        plt.plot([0, end], [middle, middle], 'r')
+        plt.plot([middle, middle], [0, end], 'r')
 
     plt.show()
 
