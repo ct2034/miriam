@@ -25,7 +25,7 @@ GENERATE_SIM_STR = 'generate_simulation'
 
 LSTM_FOV_RADIUS = 2  # self plus x in all 4 dircetions
 CLASSIFICATION_POS_TIMESTEPS = 3
-CLASSIFICATION_FOV_RADIUS = 6
+CLASSIFICATION_FOV_RADIUS = 6  # self plus x in all 4 dircetions
 DTYPE_SAMPLES = np.int8
 
 

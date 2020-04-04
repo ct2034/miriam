@@ -17,7 +17,7 @@ from tensorflow import keras
 
 IMG_SIZE = 13
 IMG_DEPTH_T = 3
-IMG_DEPTH_FRAMES = 2
+IMG_DEPTH_FRAMES = 4
 TRAINING_PERCENTAGE = .9
 
 
@@ -101,11 +101,6 @@ if __name__ == "__main__":
     # train
     history = model.fit([train_images2], train_labels2,
                         validation_split=0.1, epochs=16, batch_size=1024)
-
-    # test
-    # test_loss, test_acc = model.evaluate([test_images], test_labels)
-    # print("Loss " + str(test_loss))
-    # print("Accuracy " + str(test_acc))
 
     # Plot training & validation accuracy values
     plt.plot(history.history['acc'])
