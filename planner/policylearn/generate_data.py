@@ -271,7 +271,7 @@ def classification_samples(n_agents, data, t, data_pa, col_agents,
         pos_other_agent_fovs = make_other_agent_fovs(
             paths_until_col, i_a, CLASSIFICATION_FOV_RADIUS)
         path_fovs, paths_other_agents_fovs = make_path_fovs(
-            paths_full, i_a, t, CLASSIFICATION_POS_TIMESTEPS, CLASSIFICATION_FOV_RADIUS)
+            paths_full, paths_until_col, i_a, t, CLASSIFICATION_FOV_RADIUS)
         x = np.stack([obstacle_fovs, pos_other_agent_fovs, path_fovs, paths_other_agents_fovs], axis=3)
         training_samples.append((
             x,
@@ -314,19 +314,19 @@ def make_other_agent_fovs(paths, agent, radius):
     return other_agent_fovs
 
 
-def make_path_fovs(paths, agent, t_until_col, class_timesteps, radius):
+def make_path_fovs(paths, paths_until_col, agent, t_until_col, radius):
     """create for the agent a set of layers indicating their single-agent
     paths."""
     lengths = map(lambda x: x.shape[0], paths)
     path_fovs = init_empty_fov(radius, t_until_col + 1)
     paths_other_agents_fovs = init_empty_fov(radius, t_until_col + 1)
-    for i_t_steps in range(class_timesteps):
+    for i_t_steps in range(t_until_col + 1):
         for i_a in range(len(paths)):
             if i_a == agent:
                 fov_to_write = path_fovs
             else:
                 fov_to_write = paths_other_agents_fovs
-            pos = paths[agent][i_t_steps - 1]
+            pos = paths_until_col[agent][i_t_steps]
             for i_t_path in range(paths[i_a].shape[0]):
                 d = paths[i_a][i_t_path] - pos
                 if (abs(d[0]) <= CLASSIFICATION_FOV_RADIUS and
