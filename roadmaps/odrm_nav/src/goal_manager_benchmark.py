@@ -150,7 +150,7 @@ if __name__ == '__main__':
 
     if command_str.startswith("swap"):
         n_swaps = int(command_str.split(" ")[1])
-        for _ in range(ceil(n_swaps / 2)):
+        for _ in range(int(ceil(n_swaps / 2))):
             gm.set_goals_opposite()
             t = gm.pub_and_wait()
             ts.append(t)

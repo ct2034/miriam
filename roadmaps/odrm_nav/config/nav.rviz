@@ -141,13 +141,13 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /robot_0/move_base/TebLocalPlannerROS/teb_markers
       Name: Marker
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -480,4 +480,4 @@ Window Geometry:
     collapsed: true
   Width: 960
   X: 960
-  Y: 37
+  Y: 9

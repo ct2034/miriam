@@ -7,8 +7,8 @@
     <remap from="/$(arg robot_name)/map" to="/map"/>
     <remap from="/$(arg robot_name)/roadmap" to="/roadmap"/>
 
-    <param name="base_global_planner" value="navfn/NavfnROS" />
-<!--    <param name="base_global_planner" value="odrm_global_planner/OdrmGlobalPlanner" />-->
+    <!-- <param name="base_global_planner" value="navfn/NavfnROS" /> -->
+    <param name="base_global_planner" value="odrm_global_planner/OdrmGlobalPlanner" />
     <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
     
     <rosparam file="$(find odrm_nav)/config/teb_local_planner_params.yaml" command="load" />
