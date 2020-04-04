@@ -264,12 +264,11 @@ def classification_samples(n_agents, data, t, data_pa, col_agents,
     t = CLASSIFICATION_POS_TIMESTEPS-1
     for i_a in col_agents:
         obstacle_fovs = make_obstacle_fovs(padded_gridmap,
-                                           paths[i_a],
-                                           t,
-                                           CLASSIFICATION_FOV_RADIUS)
-        pos_fovs = make_pos_fovs(paths, i_a, CLASSIFICATION_FOV_RADIUS)
-        np_obstacle_fovs = np.stack(obstacle_fovs, axis=2)
-        x = np.stack([np_obstacle_fovs, pos_fovs], axis=3)
+            paths[i_a], t, CLASSIFICATION_FOV_RADIUS)
+        pos_other_agent_fovs = make_other_agent_fovs(
+            paths, i_a, CLASSIFICATION_FOV_RADIUS)
+        path_fovs = make_path_fovs(paths, i_a, CLASSIFICATION_FOV_RADIUS)
+        x = np.stack([obstacle_fovs, path_fovs, pos_other_agent_fovs], axis=3)
         training_samples.append((
             x,
             1 if i_a == unblocked_agent else 0))
@@ -279,39 +278,64 @@ def classification_samples(n_agents, data, t, data_pa, col_agents,
 def make_obstacle_fovs(padded_gridmap, path, t, radius):
     """create for all agents a set of FOVS of radius containing positions of
     obstacles in gridmap."""
-    fovs = []
+    obstacle_fovs = []
     for i_t in range(t+1):
         pos = path[i_t]
-        fovs.append(
+        obstacle_fovs.append(
             padded_gridmap[
                 int(pos[0]):int(pos[0]) + 1 + 2 * radius,
                 int(pos[1]):int(pos[1]) + 1 + 2 * radius
             ]
         )
-    return fovs
+    obstacle_fovs_np = np.stack(obstacle_fovs, axis=2)
+    return obstacle_fovs_np
 
 
-def make_pos_fovs(paths, agent, radius):
+def make_other_agent_fovs(paths, agent, radius):
     """create for the agent a set of FOVS of radius containing positions of
     other agents."""
     t = paths[0].shape[0]
-    pos_fovs = np.zeros([
-        1 + 2 * radius,
-        1 + 2 * radius,
-        t
-    ])
+    other_agent_fovs = init_empty_fov(radius, t)
     for i_t in range(t):
         pos = paths[agent][i_t]
         for i_a in [i for i in range(len(paths)) if i != agent]:
             d = paths[i_a][i_t] - pos
             if (abs(d[0]) <= CLASSIFICATION_FOV_RADIUS and
                     abs(d[1]) <= CLASSIFICATION_FOV_RADIUS):
-                pos_fovs[
+                other_agent_fovs[
                     int(d[0]) + CLASSIFICATION_FOV_RADIUS,
                     int(d[1]) + CLASSIFICATION_FOV_RADIUS,
                     i_t
                 ] = 1
-    return pos_fovs
+    return other_agent_fovs
+
+
+def make_path_fovs(paths, agent, radius):
+    """create for the agent a set of layers indicating their single-agent
+    paths."""
+    t_until_col = paths[0].shape[0]
+    path_fovs = init_empty_fov(radius, t_until_col)
+    for i_t in range(t_until_col):
+        pass # TO BE IMPLEMENTED
+        # pos = paths[agent][i_t]
+        # for i_a in [i for i in range(len(paths)) if i != agent]:
+        #     d = paths[i_a][i_t] - pos
+        #     if (abs(d[0]) <= CLASSIFICATION_FOV_RADIUS and
+        #             abs(d[1]) <= CLASSIFICATION_FOV_RADIUS):
+        #         path_fovs[
+        #             int(d[0]) + CLASSIFICATION_FOV_RADIUS,
+        #             int(d[1]) + CLASSIFICATION_FOV_RADIUS,
+        #             i_t
+        #         ] = 1
+    return path_fovs
+
+
+def init_empty_fov(radius, t):
+    return np.zeros([
+        1 + 2 * radius,
+        1 + 2 * radius,
+        t
+    ])
 
 
 def make_target_deltas(path, t):
