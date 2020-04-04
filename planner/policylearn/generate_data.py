@@ -326,7 +326,7 @@ def make_path_fovs(paths, agent, t_until_col, radius):
                 fov_to_write = path_fovs
             else:
                 fov_to_write = paths_other_agents_fovs
-            pos = paths[i_a][i_t_steps]
+            pos = paths[agent][i_t_steps]
             for i_t_path in range(paths[i_a].shape[0]):
                 d = paths[i_a][i_t_path] - pos
                 if (abs(d[0]) <= CLASSIFICATION_FOV_RADIUS and
@@ -362,10 +362,10 @@ def get_path(path_data, t):
     """from the path data, make a single agent path until
     (and including) time t. (t = -1 gives full path)"""
     path = []
-    if t == -1:
-        t = path_data.shape[0]
+    if t < 0:
+        t = path_data.shape[0] - 1
     for i_t in range(t+1):
-        if t < path_data.shape[0]:
+        if i_t < path_data.shape[0]:
             pos = path_data[i_t][:2]
         else:
             pos = path_data[-1][:2]  # goal
