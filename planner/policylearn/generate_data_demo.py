@@ -22,12 +22,6 @@ def plot_fovs(one_fov_data):
             # cross
             plt.plot([0, end], [middle, middle], 'r')
             plt.plot([middle, middle], [0, end], 'r')
-            # right
-            # plt.subplot(subplot_base + columns * row + 1)
-            # plt.imshow(one_fov_data[:, :, row, 1], cmap='gray')
-            # plt.plot([0, end], [middle, middle], 'r')
-            # plt.plot([middle, middle], [0, end], 'r')
-
     plt.show()
 
 
