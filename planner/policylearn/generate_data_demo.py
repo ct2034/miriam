@@ -41,5 +41,5 @@ if __name__ == "__main__":
         d = pickle.load(f)
 
     if args.mode == PLOT_FOVS_STR:
-        for i in range(4):
+        for i in range(2, 6):
             plot_fovs(d[i][0])

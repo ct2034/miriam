@@ -84,15 +84,19 @@ class GenerateDataTest(unittest.TestCase):
     def test_get_path(self):
         testing_path = np.array(
             [(0, 0, 0), (0, 1, 1), (1, 1, 2), (1, 2, 3), (99, 99, 4)])
-        # fixed_length
-        fixed_len_path = generate_data.get_path(testing_path, 10)
-        assert len(fixed_len_path) == 11
+        # fixed_length_shorter
+        fixed_len_path = generate_data.get_path(testing_path, 2)
+        assert len(fixed_len_path) == 3
         assert len(fixed_len_path[1]) == 2
         assert len(fixed_len_path[-1]) == 2
-        assert fixed_len_path[1, 0] == 0
+        assert fixed_len_path[0, 0] == 0
+        assert fixed_len_path[0, 1] == 0
+        assert fixed_len_path[1, 0] == 0  
         assert fixed_len_path[1, 1] == 1
-        assert fixed_len_path[-1, 0] == 99
-        assert fixed_len_path[-1, 1] == 99
+        assert fixed_len_path[2, 0] == 1
+        assert fixed_len_path[2, 1] == 1
+        assert fixed_len_path[-1, 0] == 1
+        assert fixed_len_path[-1, 1] == 1
         # fixed_length
         full_len_path = generate_data.get_path(testing_path, -1)
         assert len(full_len_path) == len(testing_path)
