@@ -1,6 +1,6 @@
 <launch>
   <arg name="n_agents" default="8" />
-  <arg name="map" default="z" />
+  <arg name="map" default="x" />
 
   <node name="stageros" pkg="stage_ros" type="stageros" args="$(find odrm_stage)/world/demo_$(arg map)_$(arg n_agents)agents.world" />
 

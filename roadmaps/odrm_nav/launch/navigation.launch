@@ -1,8 +1,8 @@
 <launch>
 	<arg name="n_agents" default="8" />
-	<arg name="map" default="z" />
-	<arg name="headless" default="true" />
-	<arg name="command" default="random 5" />
+	<arg name="map" default="x" />
+	<arg name="headless" default="false" />
+	<arg name="command" default="swap 6" />
 
 	<include file="$(find odrm_graph)/launch/roadmap_server.launch">
 			<arg name="map" value="$(arg map)" />
