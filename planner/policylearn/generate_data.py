@@ -151,7 +151,6 @@ def will_they_collide(gridmap, starts, goals):
                                goals[i_a], ], timeout=2)
         if data is None:
             logging.warn("no single agent plan in gridmap")
-
             show_map(gridmap)
             plt.show()
             return {}, []
@@ -214,7 +213,7 @@ def lstm_samples(n_agents, data, t, data_pa, col_agents, unblocked_agent):
     padded_gridmap = add_padding_to_gridmap(data[GRIDMAP_STR], LSTM_FOV_RADIUS)
     for i_a in range(n_agents):
         # training features
-        path = make_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
+        path = get_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
         fovs = make_obstacle_fovs(padded_gridmap,
                                   path,
                                   t,
@@ -249,26 +248,31 @@ def classification_samples(n_agents, data, t, data_pa, col_agents,
                            unblocked_agent):
     """specifically construct training data for the classification model."""
     training_samples = []
-    paths = []
+    paths_until_col = []
+    paths_full = []
     padded_gridmap = add_padding_to_gridmap(data[GRIDMAP_STR],
                                             CLASSIFICATION_FOV_RADIUS)
     for i_a in range(n_agents):
-        path = make_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
-        if len(path) < CLASSIFICATION_POS_TIMESTEPS:
+        path_until_col = get_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
+        if len(path_until_col) < CLASSIFICATION_POS_TIMESTEPS:
             padded_path = np.zeros([CLASSIFICATION_POS_TIMESTEPS, 2])
-            for i in range(0, CLASSIFICATION_POS_TIMESTEPS - len(path)):
-                padded_path[i] = path[0]
-            padded_path[i+1:] = path
-            path = padded_path
-        paths.append(path[-CLASSIFICATION_POS_TIMESTEPS:])
+            for i in range(0, CLASSIFICATION_POS_TIMESTEPS - len(path_until_col)):
+                padded_path[i] = path_until_col[0]
+            padded_path[i+1:] = path_until_col
+            path_until_col = padded_path
+        paths_until_col.append(path_until_col[-CLASSIFICATION_POS_TIMESTEPS:])
+        # full path:
+        path_full = get_path(data[INDEP_AGENT_PATHS_STR][i_a], -1)
+        paths_full.append(path_full)
     t = CLASSIFICATION_POS_TIMESTEPS-1
     for i_a in col_agents:
-        obstacle_fovs = make_obstacle_fovs(padded_gridmap,
-            paths[i_a], t, CLASSIFICATION_FOV_RADIUS)
+        obstacle_fovs = make_obstacle_fovs(
+            padded_gridmap, paths_until_col[i_a], t, CLASSIFICATION_FOV_RADIUS)
         pos_other_agent_fovs = make_other_agent_fovs(
-            paths, i_a, CLASSIFICATION_FOV_RADIUS)
-        path_fovs = make_path_fovs(paths, i_a, CLASSIFICATION_FOV_RADIUS)
-        x = np.stack([obstacle_fovs, path_fovs, pos_other_agent_fovs], axis=3)
+            paths_until_col, i_a, CLASSIFICATION_FOV_RADIUS)
+        path_fovs, paths_other_agents_fovs = make_path_fovs(
+            paths_full, i_a, t, CLASSIFICATION_FOV_RADIUS)
+        x = np.stack([obstacle_fovs, pos_other_agent_fovs, path_fovs, paths_other_agents_fovs], axis=3)
         training_samples.append((
             x,
             1 if i_a == unblocked_agent else 0))
@@ -310,24 +314,29 @@ def make_other_agent_fovs(paths, agent, radius):
     return other_agent_fovs
 
 
-def make_path_fovs(paths, agent, radius):
+def make_path_fovs(paths, agent, t_until_col, radius):
     """create for the agent a set of layers indicating their single-agent
     paths."""
-    t_until_col = paths[0].shape[0]
-    path_fovs = init_empty_fov(radius, t_until_col)
-    for i_t in range(t_until_col):
-        pass # TO BE IMPLEMENTED
-        # pos = paths[agent][i_t]
-        # for i_a in [i for i in range(len(paths)) if i != agent]:
-        #     d = paths[i_a][i_t] - pos
-        #     if (abs(d[0]) <= CLASSIFICATION_FOV_RADIUS and
-        #             abs(d[1]) <= CLASSIFICATION_FOV_RADIUS):
-        #         path_fovs[
-        #             int(d[0]) + CLASSIFICATION_FOV_RADIUS,
-        #             int(d[1]) + CLASSIFICATION_FOV_RADIUS,
-        #             i_t
-        #         ] = 1
-    return path_fovs
+    lengths = map(lambda x: x.shape[0], paths)
+    path_fovs = init_empty_fov(radius, t_until_col + 1)
+    paths_other_agents_fovs = init_empty_fov(radius, t_until_col + 1)
+    for i_t_steps in range(t_until_col + 1):
+        for i_a in range(len(paths)):
+            if i_a == agent:
+                fov_to_write = path_fovs
+            else:
+                fov_to_write = paths_other_agents_fovs
+            pos = paths[i_a][i_t_steps]
+            for i_t_path in range(paths[i_a].shape[0]):
+                d = paths[i_a][i_t_path] - pos
+                if (abs(d[0]) <= CLASSIFICATION_FOV_RADIUS and
+                        abs(d[1]) <= CLASSIFICATION_FOV_RADIUS):
+                    fov_to_write[
+                        int(d[0]) + CLASSIFICATION_FOV_RADIUS,
+                        int(d[1]) + CLASSIFICATION_FOV_RADIUS,
+                        i_t_steps
+                    ] = 1
+    return path_fovs, paths_other_agents_fovs
 
 
 def init_empty_fov(radius, t):
@@ -349,10 +358,12 @@ def make_target_deltas(path, t):
     return deltas
 
 
-def make_path(path_data, t):
+def get_path(path_data, t):
     """from the path data, make a single agent path until
-    (and including) time t."""
+    (and including) time t. (t = -1 gives full path)"""
     path = []
+    if t == -1:
+        t = path_data.shape[0]
     for i_t in range(t+1):
         if t < path_data.shape[0]:
             pos = path_data[i_t][:2]
