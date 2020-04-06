@@ -13,7 +13,7 @@ from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
 from tensorflow.keras.models import Sequential
 from tensorflow import keras
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 IMG_SIZE = 13
 IMG_DEPTH_T = 3
@@ -81,14 +81,16 @@ if __name__ == "__main__":
         Conv3D(CONV3D_1_LAYERS, 3, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, 
                             IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
-        Dropout(0.4),
+        Dropout(0.5),
         Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
-        Conv2D(128, 4, padding='same', activation='relu'),
+        Conv2D(256, 4, padding='same', activation='relu'),
         Flatten(),
-        Dropout(0.5),
+        Dropout(0.4),
         Dense(64, activation='relu'),
-        Dropout(0.5),
-        Dense(32, activation='relu'),
+        Dropout(0.4),
+        Dense(64, activation='relu'),
+        Dropout(0.4),
+        Dense(64, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     adam = keras.optimizers.Adam(
