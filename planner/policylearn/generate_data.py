@@ -197,13 +197,13 @@ def training_samples_from_data(data, mode):
                 blocked_agent = i_a
             else:
                 unblocked_agent = i_a
-        data_pa = []
         if mode == TRANSFER_LSTM_STR:
+            data_pa = []
             training_samples.extend(lstm_samples(
                 n_agents, data, t, data_pa, col_agents, unblocked_agent))
         elif mode == TRANSFER_CLASSIFICATION_STR:
             training_samples.extend(classification_samples(
-                n_agents, data, t, data_pa, col_agents, unblocked_agent))
+                n_agents, data, t, col_agents, unblocked_agent))
     return training_samples
 
 
@@ -244,7 +244,7 @@ def lstm_samples(n_agents, data, t, data_pa, col_agents, unblocked_agent):
     return training_samples
 
 
-def classification_samples(n_agents, data, t, data_pa, col_agents,
+def classification_samples(n_agents, data, t, col_agents,
                            unblocked_agent):
     """specifically construct training data for the classification model."""
     training_samples = []
@@ -364,8 +364,6 @@ def get_path(path_data, t):
     path = []
     if t < 0:
         t = path_data.shape[0] - 1
-    else:
-        assert t + 1 <= path_data.shape[0], "path must be until collision"
     for i_t in range(t+1):
         if i_t < path_data.shape[0]:
             pos = path_data[i_t][:2]
