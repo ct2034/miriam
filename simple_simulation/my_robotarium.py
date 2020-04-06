@@ -2,6 +2,7 @@ from numpy import *
 from robotarium import Robotarium, transformations, graph
 import json
 
+
 def pointFromPose(pose):
     poseVis = pose * Vis.scale
     # print(str(poseVis))
@@ -52,7 +53,8 @@ class MyRob:
         Vis.scene.addItem(field)
 
         for car in cars:
-            Vis.carCircles[car.id] = QtGui.QGraphicsEllipseItem(0, 0, Vis.scale, Vis.scale)
+            Vis.carCircles[car.id] = QtGui.QGraphicsEllipseItem(
+                0, 0, Vis.scale, Vis.scale)
             Vis.scene.addItem(Vis.carCircles[car.id])
             self.update_car(car)
 
@@ -63,7 +65,8 @@ class MyRob:
 
     def update_car(self, car):
         if car:
-            Vis.carCircles[car.id].setPos(pointFromPose(car.pose)-QtCore.QPointF(Vis.scale/2, Vis.scale/2))
+            Vis.carCircles[car.id].setPos(pointFromPose(
+                car.pose)-QtCore.QPointF(Vis.scale/2, Vis.scale/2))
             # print(Vis.carCircles[car.id].pos().x())
             brush = self.brush_for_car(car)
             Vis.carCircles[car.id].setBrush(brush)
@@ -72,7 +75,8 @@ class MyRob:
         if route:
             if route.id not in Vis.routeLines.keys():
                 Vis.routeLines[route.id] = QtGui.QGraphicsLineItem()
-                Vis.routeLines[route.id].setLine(QtCore.QLineF(pointFromPose(route.start), pointFromPose(route.goal)))
+                Vis.routeLines[route.id].setLine(QtCore.QLineF(
+                    pointFromPose(route.start), pointFromPose(route.goal)))
                 Vis.scene.addItem(Vis.routeLines[route.id])
                 Vis.routeLines[route.id].setPen(QtGui.QPen(blue))
         #         Vis.routeLines[route.id].setArrow('last')

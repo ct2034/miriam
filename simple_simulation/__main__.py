@@ -1,9 +1,11 @@
 import logging
+import random
+import sys
 import threading
 import time
 
+import numpy as np
 from PyQt4 import QtGui
-from numpy import *
 
 from simple_simulation.mod_random import Random
 from simple_simulation.simulation import SimpSim
@@ -19,7 +21,8 @@ def testing(thread: SimpSim):
     height = 20
 
     time.sleep(.5)
-    thread.start_sim(width, height, 3)
+    gridmap = np.zeros([width, width])
+    thread.start_sim(gridmap, 3)
 
     time.sleep(.5)
 
@@ -42,22 +45,26 @@ if __name__ == '__main__':
     test = False
     vis = False
 
+    n_agvs = 5
+    width = 10
+    gridmap = np.zeros([width, width])
+
     # module
-    mod = Random()
+    mod = Random(gridmap)
 
     # sim
-    simThread = SimpSim(mod)
-    simThread.start()
+    sim_thread = SimpSim(mod)
+    sim_thread.start_sim(gridmap, n_agvs)
 
     # test
     test = True
     if test:
-        threading.Thread(target=testing, args=(simThread,)).start()
+        threading.Thread(target=testing, args=(sim_thread,)).start()
 
     # vis
     vis = True
     if vis:
         app = QtGui.QApplication(sys.argv)
-        window = Vis(sim_thread=simThread)
+        window = Vis(sim_thread)
         window.show()
         sys.exit(app.exec_())

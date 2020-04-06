@@ -47,7 +47,7 @@ class SimpSim():
         logging.info("init Simulation")
         self.lock = Lock()
 
-        self.area = zeros([1])
+        self.area = None
         self.number_agvs = 1
         self.module = _mod
 
@@ -59,11 +59,13 @@ class SimpSim():
             max_instances=1,
             replace_existing=True  # for restarting
         )
-        SimpSim.scheduler.add_listener(my_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+        SimpSim.scheduler.add_listener(
+            my_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
-    def start_sim(self, width, height, number_agvs):
+    def start_sim(self, gridmap, number_agvs):
         SimpSim.running = True
-        self.area = zeros([width, height])
+        self.area = gridmap
+        [width, height] = gridmap.shape
         self.number_agvs = number_agvs
         Car.next_id = 0
         SimpSim.cars = []
@@ -78,14 +80,15 @@ class SimpSim():
         else:
             logging.info("Resuming")
             SimpSim.scheduler.start()
-        # self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width, height, SimpSim.cars)
+        # self.emit(QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), width,
+        #                          height, SimpSim.cars)
 
         SimpSim.i = 0
         self.start_time = time.time()
 
     def stop_sim(self):
         SimpSim.running = False
-        self.area = False
+        self.area = None
         SimpSim.routes = []
         SimpSim.cars = []
         Car.next_id = 0
@@ -97,7 +100,9 @@ class SimpSim():
         logging.info('end-start= ' + str(time.time() - self.start_time))
         logging.info('i= ' + str(SimpSim.i))
         logging.info('i*SimTime= ' + str(SimpSim.i * SimpSim.sim_time))
-        logging.info('missing: ' + str(time.time() - self.start_time - SimpSim.i * SimpSim.sim_time) + 's')
+        logging.info('missing: ' + str(time.time() -
+                                       self.start_time - SimpSim.i
+                                       * SimpSim.sim_time) + 's')
 
     def new_job(self, a, b, job_id):
         self.lock.acquire()
@@ -114,7 +119,8 @@ class SimpSim():
     def is_finished(self, _id):
         self.lock.acquire()  # TODO: deadlock?
         route = list(filter(lambda r: r.id == _id, self.routes))
-        assert len(route) == 1, "There should be exactly one route with this id"
+        assert len(route) == 1, "There should be exactly one route"\
+            "with this id"
         is_finished = route[0].is_finished()
         self.lock.release()
         return is_finished
@@ -132,7 +138,9 @@ class SimpSim():
                             SimpSim.speed_multiplier *
                             SimpSim.sim_time
                         )
-                if str(self.module.__class__) == "<class 'planner.mod_nearest.Cbsext'>":  # only catching collisions on Cbsext
+                # only catching collisions on Cbsext
+                if str(self.module.__class__) == "<class 'planner.mod_nearest"\
+                    ".Cbsext'>":
                     poses = set()
                     for c in self.cars:
                         pose = c.pose
@@ -149,7 +157,8 @@ class SimpSim():
         if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
             self.print_debug_info()
         for r in self.routes:
-            if not (r.is_finished() or r.is_on_route()):  # for all but the finished or on_route ones
+            # for all but the finished or on_route ones
+            if not (r.is_finished() or r.is_on_route()):
                 c = self.module.which_car(SimpSim.cars, r, SimpSim.routes)
                 if c:
                     r.assign_car(c)
@@ -175,11 +184,13 @@ class SimpSim():
             elif r.state is RouteState.IDLE_GOAL_RUNNING:
                 n_ig_running += 1
         assert len(self.routes) == n_queued + n_to_start + n_on_route + \
-                                   n_finished + n_ig_queued + n_ig_running, "Not all routes have a state"
+            n_finished + n_ig_queued + n_ig_running, "Not all routes have "\
+                "a state"
         logging.debug("q:" + str(n_queued) +
                       " | ts:" + str(n_to_start) +
                       " | or:" + str(n_on_route) +
                       " | f:" + str(n_finished) +
                       " | iq:" + str(n_ig_queued) +
                       " | ir:" + str(n_ig_running))
-        assert (n_ig_running + n_on_route + n_to_start) <= len(self.cars), "There can be only so many routes running"
+        assert (n_ig_running + n_on_route + n_to_start) <= len(
+            self.cars), "There can be only so many routes running"

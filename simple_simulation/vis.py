@@ -6,6 +6,7 @@ blue = QtGui.QColor(10, 10, 200, 127)
 red = QtGui.QColor(200, 10, 10, 127)
 dark_grey = color = QtGui.QColor(10, 10, 10, 127)
 
+
 def pointFromPose(pose):
     poseVis = pose * Vis.scale
     # print(str(poseVis))
@@ -25,11 +26,14 @@ class Vis(QtGui.QWidget):
     def __init__(self, sim_thread, parent=None):
         QtGui.QWidget.__init__(self, parent)
         print("init vis")
-        print("simThread: " + str(sim_thread))
-        Vis.simThread = sim_thread
-        self.connect(Vis.simThread, QtCore.SIGNAL("open(int, int, PyQt_PyObject)"), self.open)
-        self.connect(Vis.simThread, QtCore.SIGNAL("update_car(PyQt_PyObject)"), self.update_car)
-        self.connect(Vis.simThread, QtCore.SIGNAL("update_route(PyQt_PyObject)"), self.update_route)
+        print("sim_thread: " + str(sim_thread))
+        Vis.sim_thread = sim_thread
+        self.connect(Vis.sim_thread, QtCore.SIGNAL(
+            "open(int, int, PyQt_PyObject)"), self.open)
+        self.connect(Vis.sim_thread, QtCore.SIGNAL(
+            "update_car(PyQt_PyObject)"), self.update_car)
+        self.connect(Vis.sim_thread, QtCore.SIGNAL(
+            "update_route(PyQt_PyObject)"), self.update_route)
         print("connected")
 
     def brush_for_car(self, car):
@@ -65,7 +69,8 @@ class Vis(QtGui.QWidget):
         Vis.scene.addItem(field)
 
         for car in cars:
-            Vis.carCircles[car.id] = QtGui.QGraphicsEllipseItem(0, 0, Vis.scale, Vis.scale)
+            Vis.carCircles[car.id] = QtGui.QGraphicsEllipseItem(
+                0, 0, Vis.scale, Vis.scale)
             Vis.scene.addItem(Vis.carCircles[car.id])
             self.update_car(car)
 
@@ -76,7 +81,8 @@ class Vis(QtGui.QWidget):
 
     def update_car(self, car):
         if car:
-            Vis.carCircles[car.id].setPos(pointFromPose(car.pose)-QtCore.QPointF(Vis.scale/2, Vis.scale/2))
+            Vis.carCircles[car.id].setPos(pointFromPose(
+                car.pose)-QtCore.QPointF(Vis.scale/2, Vis.scale/2))
             # print(Vis.carCircles[car.id].pos().x())
             brush = self.brush_for_car(car)
             Vis.carCircles[car.id].setBrush(brush)
@@ -85,7 +91,8 @@ class Vis(QtGui.QWidget):
         if route:
             if route.id not in Vis.routeLines.keys():
                 Vis.routeLines[route.id] = QtGui.QGraphicsLineItem()
-                Vis.routeLines[route.id].setLine(QtCore.QLineF(pointFromPose(route.start), pointFromPose(route.goal)))
+                Vis.routeLines[route.id].setLine(QtCore.QLineF(
+                    pointFromPose(route.start), pointFromPose(route.goal)))
                 Vis.scene.addItem(Vis.routeLines[route.id])
                 Vis.routeLines[route.id].setPen(QtGui.QPen(blue))
         #         Vis.routeLines[route.id].setArrow('last')

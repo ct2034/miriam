@@ -8,7 +8,6 @@ import numpy as np
 from numpy import linalg
 
 
-
 class Route(object):
     """a route to be simulated"""
     lock = Lock()
@@ -24,14 +23,14 @@ class Route(object):
         else:
             self.state = RouteState.QUEUED
 
-            assert start.__class__ is tuple, 'Start needs to be a numpy.tuple'
+            assert start.__class__ is np.tuple, 'Start needs to be a numpy.tuple'
             assert len(start) == 2, 'Start should have 2 coords'
             self.start = start
-            assert goal.__class__ is tuple, 'Goal needs to be a numpy.tuple'
+            assert goal.__class__ is np.tuple, 'Goal needs to be a numpy.tuple'
             assert len(goal) == 2, 'Goal should have 2 coords'
             self.goal = goal
 
-            self.vector = tuple(np.array(goal) - np.array(start))
+            self.vector = np.tuple(np.array(goal) - np.array(start))
             self.distance = linalg.norm(self.vector)
 
             self.creation_time = datetime.datetime.now()
@@ -53,7 +52,8 @@ class Route(object):
                 self.state = RouteState.TO_START
                 logging.debug(str(self))
             elif self.state == RouteState.TO_START:  # had another car already
-                assert self.car, "Should have had a car, had: " + str(self.car) + ", should get: " + str(_car)
+                assert self.car, "Should have had a car, had: " + \
+                    str(self.car) + ", should get: " + str(_car)
                 self.car = _car
             elif self.is_idle_goal():  # is an idle goal
                 self.car = _car
@@ -91,10 +91,10 @@ class Route(object):
         for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
             if not self.is_idle_goal() and \
                     ((self.car.paths[_i][0:2] == tuple(self.start)) or
-                         (tuple(self.car.pose) == tuple(self.start))):
+                     (tuple(self.car.pose) == tuple(self.start))):
                 self.at_start()
             elif (self.car.paths[_i][0:2] == tuple(self.goal)) and (
-                self.is_on_route() or self.is_idle_goal()):  # @ goal
+                    self.is_on_route() or self.is_idle_goal()):  # @ goal
                 self.at_goal()
                 break
             # somewhere else
@@ -213,10 +213,11 @@ class Car(object):
 
 def free_car(_car: Car):
     if _car.get_route():
-        assert _car.get_route().is_re_assignable(), "This can only have been on the way or on a idle goal"
+        assert _car.get_route().is_re_assignable(
+        ), "This can only have been on the way or on a idle goal"
         if _car.get_route().is_idle_goal():
             _car.get_route().state = RouteState.IDLE_GOAL_QUEUED  # back to queue
-        else: # normal route
+        else:  # normal route
             _car.get_route().state = RouteState.QUEUED  # Other route is now queued again
 
         if _car.get_route().car:  # also routes loose their car
