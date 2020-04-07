@@ -75,20 +75,18 @@ if __name__ == "__main__":
                                   len(train_images):].reshape(
                                       train_labels.shape)
 
-    CONV3D_1_LAYERS = 32
+    CONV3D_1_LAYERS = 16
     # model
     model = Sequential([
-        Conv3D(CONV3D_1_LAYERS, 3, padding='same', activation='relu',
+        Conv3D(CONV3D_1_LAYERS, 2, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, 
                             IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
+        Conv3D(CONV3D_1_LAYERS, 3, padding='same', activation='relu'),
         Dropout(0.5),
         Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
-        Conv2D(256, 4, padding='same', activation='relu'),
+        Conv2D(64, 3, padding='same', activation='relu'),
+        Conv2D(64, 4, padding='same', activation='relu'),
         Flatten(),
-        Dropout(0.4),
-        Dense(64, activation='relu'),
-        Dropout(0.4),
-        Dense(64, activation='relu'),
         Dropout(0.4),
         Dense(64, activation='relu'),
         Dense(1, activation='sigmoid')
