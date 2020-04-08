@@ -9,7 +9,8 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
-                                     LocallyConnected2D, Reshape)
+                                     LocallyConnected2D, Reshape, 
+                                     BatchNormalization, MaxPooling2D)
 from tensorflow.keras.models import Sequential
 from tensorflow import keras
 
@@ -81,24 +82,37 @@ if __name__ == "__main__":
                                   len(train_images):].reshape(
                                       train_labels.shape)
 
-    CONV3D_1_LAYERS = 16
+    CONV3D_1_LAYERS = 32
     # model
     model = Sequential([
         Conv3D(CONV3D_1_LAYERS, 2, padding='same', activation='relu',
-               input_shape=(IMG_SIZE, IMG_SIZE, 
+               input_shape=(IMG_SIZE, IMG_SIZE,
                             IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
         Conv3D(CONV3D_1_LAYERS, 3, padding='same', activation='relu'),
-        Dropout(0.5),
-        Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
-        Conv2D(64, 3, padding='same', activation='relu'),
-        Conv2D(64, 4, padding='same', activation='relu'),
-        Flatten(),
         Dropout(0.4),
-        Dense(64, activation='relu'),
+        BatchNormalization(),
+        Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
+        Conv2D(128, 3, padding='same', activation='relu'),
+        Conv2D(128, 4, padding='same', activation='relu'),
+        Dropout(0.4),
+        MaxPooling2D(pool_size=(2, 2)),
+        BatchNormalization(),
+        Conv2D(64, 4, padding='same', activation='relu'),
+        Dropout(0.4),
+        MaxPooling2D(pool_size=(2, 2)),
+        BatchNormalization(),
+        Flatten(),
+        Dense(256, activation='relu'),
+        Dropout(0.4),
+        BatchNormalization(),
+        Dense(256, activation='relu'),
+        Dropout(0.4),
+        BatchNormalization(),
+        Dense(128, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     adam = keras.optimizers.Adam(
-        learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+        learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
     model.compile(optimizer=adam,
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
@@ -106,7 +120,7 @@ if __name__ == "__main__":
 
     # train
     history = model.fit([train_images2], train_labels2,
-                        validation_split=0.1, epochs=16, batch_size=1024,
+                        validation_split=0.1, epochs=64, batch_size=512,
                         callbacks=[cp_callback])
 
     # Plot training & validation accuracy values
