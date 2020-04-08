@@ -31,6 +31,12 @@ if __name__ == "__main__":
     print(len(d))
     random.shuffle(d)
 
+    checkpoint_path = "checkpoint.ckpt"
+    checkpoint_dir = os.path.dirname(checkpoint_path)
+    cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                 save_weights_only=True,
+                                                 verbose=1)
+
     # data
     train_images = []
     train_labels = []
@@ -100,7 +106,8 @@ if __name__ == "__main__":
 
     # train
     history = model.fit([train_images2], train_labels2,
-                        validation_split=0.1, epochs=16, batch_size=1024)
+                        validation_split=0.1, epochs=16, batch_size=1024,
+                        callbacks=[cp_callback])
 
     # Plot training & validation accuracy values
     plt.plot(history.history['acc'])
