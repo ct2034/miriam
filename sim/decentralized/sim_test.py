@@ -13,6 +13,12 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertEqual(env.shape, (10, 10))
         self.assertEqual(np.count_nonzero(env), 50)
 
+    def test_gridmap_to_nx(self):
+        env = np.array([[0, 1], [1, 1]])
+        g = sim.gridmap_to_nx(env)
+        self.assertEqual(len(g), 1)
+        self.assertTrue((0, 0) in g)
+
     def test_initialize_new_agent(self):
         env_zz = np.array([[0, 1], [1, 1]])
         zero_zero = sim.initialize_new_agent(env_zz, [])
@@ -29,6 +35,15 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertIn([0, 0], agents)
         self.assertIn([0, 1], agents)
         self.assertIn([1, 0], agents)
+
+    def test_plan_path(self):
+        env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
+        g = sim.gridmap_to_nx(env)
+        p = sim.plan_path(g, [0, 2], [2, 2])
+        self.assertEqual(len(p), 7)
+        self.assertTrue((p[1] == [0, 1]).all())
+        self.assertTrue((p[3] == [1, 0]).all())
+        self.assertTrue((p[5] == [2, 1]).all())
 
 if __name__ == "__main__":
     unittest.main()
