@@ -45,5 +45,19 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue((p[3] == [1, 0]).all())
         self.assertTrue((p[5] == [2, 1]).all())
 
+    def test_plan_paths(self):
+        env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
+        g = sim.gridmap_to_nx(env)
+        p = sim.plan_paths(g, [[0, 2], [0, 0]], [[2, 2], [0, 2]])
+        self.assertEqual(len(p[0]), 7)
+        self.assertTrue((p[0][1] == [0, 1]).all())
+        self.assertTrue((p[0][3] == [1, 0]).all())
+        self.assertTrue((p[0][5] == [2, 1]).all())
+        self.assertEqual(len(p[1]), 3)
+        self.assertTrue((p[1][0] == [0, 0]).all())
+        self.assertTrue((p[1][1] == [0, 1]).all())
+        self.assertTrue((p[1][2] == [0, 2]).all())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -105,6 +105,14 @@ def plan_path(env_nx: nx.Graph, start: np.ndarray, goal: np.ndarray) -> np.ndarr
     return np.array(tuple_path)
 
 
+def plan_paths(env_nx: nx.Graph, starts: np.ndarray, goals: np.ndarray) -> list:
+    paths = []
+    assert len(starts) == len(goals)
+    for i_a in range(len(starts)):
+        paths.append(plan_path(env_nx, starts[i_a], goals[i_a]))
+    return paths
+
+
 if __name__ == "__main__":
     n_agents = 10
 
@@ -117,9 +125,7 @@ if __name__ == "__main__":
     goals = initialize_agents(env, n_agents)
 
     # paths
-    paths = []
-    for i_a in range(n_agents):
-        paths.append(plan_path(env_nx, agents[i_a], goals[i_a]))
+    paths = plan_paths(env_nx, agents, goals)
 
     # display
     plot(env, agents, goals, paths)
