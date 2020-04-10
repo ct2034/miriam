@@ -19,9 +19,10 @@ def initialize_environment(size, fill):
     return environent
 
 
-def plot(environent):
+def plot(environent, agents):
     """Plot the environment map with `x` coordinates to the right, `y` up.
     Occupied by colourful agents."""
+    # map
     image = environent * -.5 + 1
     image = np.swapaxes(image, 0, 1)
     fig, ax = plt.subplots()
@@ -33,6 +34,11 @@ def plot(environent):
     ax.set_xticklabels(map(str, baserange))
     ax.set_yticks(baserange + .5)
     ax.set_yticklabels(map(str, baserange))
+
+    # agents
+    for i_a, a in enumerate(agents):
+        ax.plot(a[0]+.5, a[1]+.5, markersize=5, marker='o')
+
     plt.show()
 
 
@@ -62,7 +68,7 @@ if __name__ == "__main__":
     env = initialize_environment(10, .2)
 
     # agents
-    agents = initialize_agents(10)
+    agents = initialize_agents(env, 10)
 
     # display
-    plot(env)
+    plot(env, agents)
