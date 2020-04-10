@@ -17,3 +17,24 @@ def initialize_environment(size, fill):
     for cell in to_fill:
         environent[cell] = 1
     return environent
+
+
+def plot(environent):
+    """Plot the environment map with `x` coordinates to the right, `y` up."""
+    image = environent * -.5 + 1
+    image = np.swapaxes(image, 0, 1)
+    fig, ax = plt.subplots()
+    c = ax.pcolor(image, edgecolors='k', linewidths=.5,
+                  linestyle=':', cmap='gray', vmin=0, vmax=1)
+    ax.set_aspect('equal')
+    baserange = np.arange(environent.shape[0], step=2)
+    ax.set_xticks(baserange + .5)
+    ax.set_xticklabels(map(str, baserange))
+    ax.set_yticks(baserange + .5)
+    ax.set_yticklabels(map(str, baserange))
+    plt.show()
+
+
+if __name__ == "__main__":
+    env = initialize_environment(10, .2)
+    plot(env)
