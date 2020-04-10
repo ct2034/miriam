@@ -20,7 +20,7 @@ def initialize_environment(size, fill):
 
 
 def plot(environent):
-    """Plot the environment map with `x` coordinates to the right, `y` up. 
+    """Plot the environment map with `x` coordinates to the right, `y` up.
     Occupied by colourful agents."""
     image = environent * -.5 + 1
     image = np.swapaxes(image, 0, 1)
@@ -37,16 +37,19 @@ def plot(environent):
 
 
 def initialize_new_agent(environent, agents):
-    """Place new agent in the environment, where no obstacle or other agent is."""
+    """Place new agent in the environment, where no obstacle or other agent
+    is."""
     environent_with_agents = environent.copy()
     for a in agents:
         environent_with_agents[tuple(a)] = 1
-    no_obstacle = np.where(environent_with_agents == 0)
+    no_obstacle_nor_agent = np.where(environent_with_agents == 0)
     gen = np.random.default_rng()
-    return gen.choice(no_obstacle, axis=1)
+    return gen.choice(no_obstacle_nor_agent, axis=1)
 
 
 def initialize_agents(environent, n_agents):
+    """Initialize `n_agents` many agents in unique, free spaces of
+    `environment`, (not colliding with each other)."""
     agents = np.ndarray([0, 2], dtype=np.int64)
     for i_a in range(n_agents):
         agent = initialize_new_agent(environent, agents)
@@ -57,7 +60,7 @@ def initialize_agents(environent, n_agents):
 if __name__ == "__main__":
     # maze (environment)
     env = initialize_environment(10, .2)
-    
+
     # agents
     agents = initialize_agents(10)
 
