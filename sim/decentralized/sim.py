@@ -32,7 +32,7 @@ def gridmap_to_nx(env: np.ndarray):
     return g
 
 
-def plot(environent: np.ndarray, agents: np.ndarray):
+def plot(environent: np.ndarray, agents: np.ndarray,  goals: np.ndarray, paths: np.ndarray):
     """Plot the environment map with `x` coordinates to the right, `y` up.
     Occupied by colourful agents."""
     # map
@@ -67,6 +67,14 @@ def plot(environent: np.ndarray, agents: np.ndarray):
     for i_a, a in enumerate(agents):
         ax.plot(a[0], a[1], markersize=5, marker='o')
 
+    # goals
+    for i_a, a in enumerate(goals):
+        ax.plot(a[0], a[1], markersize=5, marker='x')
+
+    # paths
+    for p in paths:
+        ax.plot(p[:, 0], p[:, 1])
+
     plt.show()
 
 
@@ -93,19 +101,25 @@ def initialize_agents(environent, n_agents) -> np.ndarray:
 
 def plan_path(env_nx: nx.Graph, start: np.ndarray, goal: np.ndarray) -> np.ndarray:
     """Plan a path in the environment"""
-    return nx.shortest_path(env_nx, tuple(start), tuple(goal))
+    tuple_path = nx.shortest_path(env_nx, tuple(start), tuple(goal))
+    return np.array(tuple_path)
 
 
 if __name__ == "__main__":
+    n_agents = 10
+
     # maze (environment)
     env = initialize_environment(10, .1)
     env_nx = gridmap_to_nx(env)
 
     # agents
-    agents = initialize_agents(env, 10)
-    goals = initialize_agents(env, 10)
+    agents = initialize_agents(env, n_agents)
+    goals = initialize_agents(env, n_agents)
 
-    print(plan_path(env_nx, agents[0], goals[0]))
+    # paths
+    paths = []
+    for i_a in range(n_agents):
+        paths.append(plan_path(env_nx, agents[i_a], goals[i_a]))
 
     # display
-    plot(env, agents)
+    plot(env, agents, goals, paths)
