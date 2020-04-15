@@ -32,7 +32,9 @@ def gridmap_to_nx(env: np.ndarray):
     return g
 
 
-def plot(environent: np.ndarray, agents: np.ndarray,  goals: np.ndarray, paths: np.ndarray):
+def plot(
+        environent: np.ndarray, agents: np.ndarray,
+        goals: np.ndarray, paths: np.ndarray):
     """Plot the environment map with `x` coordinates to the right, `y` up.
     Occupied by colourful agents."""
     # map
@@ -99,18 +101,65 @@ def initialize_agents(environent, n_agents) -> np.ndarray:
     return agents
 
 
-def plan_path(env_nx: nx.Graph, start: np.ndarray, goal: np.ndarray) -> np.ndarray:
+def plan_path(
+        env_nx: nx.Graph, start: np.ndarray, goal: np.ndarray) -> np.ndarray:
     """Plan a path in the environment"""
     tuple_path = nx.shortest_path(env_nx, tuple(start), tuple(goal))
     return np.array(tuple_path)
 
 
-def plan_paths(env_nx: nx.Graph, starts: np.ndarray, goals: np.ndarray) -> list:
+def plan_paths(
+        env_nx: nx.Graph, starts: np.ndarray, goals: np.ndarray) -> list:
+    """Plan paths for all agents between their starts and goals."""
     paths = []
     assert len(starts) == len(goals)
     for i_a in range(len(starts)):
         paths.append(plan_path(env_nx, starts[i_a], goals[i_a]))
     return paths
+
+
+def prepare_step(pos: np.ndarray, path: np.ndarray) -> np.ndarray:
+    """Return the next step, if the agent is currently at `pos`,
+    returns end pose if agent reached goal."""
+    path_len = len(path)
+    i = path.index(pos)
+    if i == path_len:
+        return path[i]  # agent is at its goal
+    else:
+        return path[i+1]
+
+
+def check_for_colissions(
+        poses: np.ndarray, next_poses: np.ndarray) -> (dict, dict):
+    """check for two agents going to meet at one vertex or two agents using
+    the same edge."""
+    node_colissions = {}
+    edge_colissions = {}
+    for i_a in range(len(poses)):
+        for i_oa in [i for i in range(len(poses)) if i != i_a]:
+            if next_poses[i_a] == next_poses[i_oa]:
+                node_colissions[next_poses[i_a]] = [i_a, i_oa]
+            if (next_poses[i_a] == poses[i_oa] and
+                    poses[i_a] == next_poses[i_oa]):
+                edge = [poses[i_a], poses[i_oa]]
+                sorted(edge)
+                node_colissions[edge] = [i_a, i_oa]
+    return node_colissions, edge_colissions
+
+
+def iterate_sim(agents: np.ndarray, paths: np.ndarray) -> np.ndarray:
+    """Given a set of current agent poses, find possible next steps for each
+    agent."""
+    possible_next_agent_poses = agents.copy()
+    next_agent_poses = agents.copy()
+    # prepare step
+    for i_a in range(len(agents)):
+        possible_next_agent_poses[i_a] = prepare_step(agents[i_a], paths[i_a])
+    # check collisions
+    node_colissions, edge_colissions = check_for_colissions(
+        agents, possible_next_agent_poses)
+
+    return next_agent_poses
 
 
 if __name__ == "__main__":
