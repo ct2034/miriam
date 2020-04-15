@@ -137,13 +137,12 @@ def check_for_colissions(
     edge_colissions = {}
     for i_a in range(len(poses)):
         for i_oa in [i for i in range(len(poses)) if i != i_a]:
-            if next_poses[i_a] == next_poses[i_oa]:
-                node_colissions[next_poses[i_a]] = [i_a, i_oa]
-            if (next_poses[i_a] == poses[i_oa] and
-                    poses[i_a] == next_poses[i_oa]):
-                edge = [poses[i_a], poses[i_oa]]
-                sorted(edge)
-                node_colissions[edge] = [i_a, i_oa]
+            if (next_poses[i_a] == next_poses[i_oa]).all():
+                node_colissions[tuple(next_poses[i_a])] = [i_a, i_oa]
+            if ((next_poses[i_a] == poses[i_oa]).all() and
+                    (poses[i_a] == next_poses[i_oa]).all()):
+                edge = [tuple(poses[i_a]), tuple(poses[i_oa])]
+                edge_colissions[tuple(sorted(edge))] = [i_a, i_oa]
     return node_colissions, edge_colissions
 
 

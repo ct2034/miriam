@@ -58,6 +58,19 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue((p[1][1] == [0, 1]).all())
         self.assertTrue((p[1][2] == [0, 2]).all())
 
+    def test_check_for_colissions(self):
+        poses = np.array([[0, 0], [1, 0], [1, 1], [1, 2]])
+        next_poses = np.array([[0, 0], [0, 0], [1, 2], [1, 1]])
+        node_col, edge_col = sim.check_for_colissions(poses, next_poses)
+        expected_node_index = (0, 0)
+        self.assertIn(expected_node_index, node_col.keys())
+        self.assertIn(0, node_col[expected_node_index])
+        self.assertIn(1, node_col[expected_node_index])
+        expected_edge_index = ((1, 1), (1, 2))
+        self.assertIn(expected_edge_index, edge_col.keys())
+        self.assertIn(2, edge_col[expected_edge_index])
+        self.assertIn(3, edge_col[expected_edge_index])
+
 
 if __name__ == "__main__":
     unittest.main()
