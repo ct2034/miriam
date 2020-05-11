@@ -5,6 +5,7 @@ import unittest
 import numpy as np
 
 import sim
+from agent import Policy, Agent
 
 
 class TestDecentralizedSim(unittest.TestCase):
@@ -21,43 +22,44 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_initialize_new_agent(self):
         env_zz = np.array([[0, 1], [1, 1]])
-        zero_zero = sim.initialize_new_agent(env_zz, [])
-        self.assertTrue((zero_zero == [0, 0]).all())
+        g = sim.gridmap_to_nx(env_zz)
+        zero_zero = sim.initialize_new_agent(env_zz, g, [], Policy.RANDOM)
+        self.assertTrue((zero_zero.pos == [0, 0]).all())
+        self.assertTrue((zero_zero.goal == [0, 0]).all())
+        self.assertTrue(zero_zero.policy == Policy.RANDOM)
 
         env_zo = np.array([[0, 0], [1, 1]])
-        zero_one = sim.initialize_new_agent(env_zo, np.array([zero_zero]))
-        self.assertTrue((zero_one == [0, 1]).all())
+        g = sim.gridmap_to_nx(env_zo)
+        zero_one = sim.initialize_new_agent(env_zo, g, [zero_zero],
+                                            Policy.RANDOM)
+        self.assertTrue((zero_one.pos == [0, 1]).all())
+        self.assertTrue((zero_one.goal == [0, 1]).all())
+        self.assertTrue(zero_one.policy == Policy.RANDOM)
 
     def test_initialize_agents(self):
         env = np.array([[0, 0], [0, 1]])
-        agents = sim.initialize_agents(env, 3)
+        g = sim.gridmap_to_nx(env)
+        agents = sim.initialize_agents(env, g, 3, Policy.RANDOM)
         self.assertEqual(len(agents), 3)
-        self.assertIn([0, 0], agents)
-        self.assertIn([0, 1], agents)
-        self.assertIn([1, 0], agents)
+        self.assertIn((0, 0), map(lambda a: tuple(a.pos), agents))
+        self.assertIn((0, 1), map(lambda a: tuple(a.pos), agents))
+        self.assertIn((1, 0), map(lambda a: tuple(a.pos), agents))
+        self.assertIn((0, 0), map(lambda a: tuple(a.goal), agents))
+        self.assertIn((0, 1), map(lambda a: tuple(a.goal), agents))
+        self.assertIn((1, 0), map(lambda a: tuple(a.goal), agents))
 
     def test_plan_path(self):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
         g = sim.gridmap_to_nx(env)
-        p = sim.plan_path(g, [0, 2], [2, 2])
+        a = Agent(env, g, np.array([0, 2]), Policy.RANDOM)
+        a.give_a_goal(np.array([2, 2]))
+        p = a.path
         self.assertEqual(len(p), 7)
         self.assertTrue((p[1] == [0, 1]).all())
         self.assertTrue((p[3] == [1, 0]).all())
         self.assertTrue((p[5] == [2, 1]).all())
 
-    def test_plan_paths(self):
-        env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
-        g = sim.gridmap_to_nx(env)
-        p = sim.plan_paths(g, [[0, 2], [0, 0]], [[2, 2], [0, 2]])
-        self.assertEqual(len(p[0]), 7)
-        self.assertTrue((p[0][1] == [0, 1]).all())
-        self.assertTrue((p[0][3] == [1, 0]).all())
-        self.assertTrue((p[0][5] == [2, 1]).all())
-        self.assertEqual(len(p[1]), 3)
-        self.assertTrue((p[1][0] == [0, 0]).all())
-        self.assertTrue((p[1][1] == [0, 1]).all())
-        self.assertTrue((p[1][2] == [0, 2]).all())
-
+    @unittest.skip("to be implemented")
     def test_check_for_colissions(self):
         poses = np.array([[0, 0], [1, 0], [1, 1], [1, 2]])
         next_poses = np.array([[0, 0], [0, 0], [1, 2], [1, 1]])

@@ -97,7 +97,7 @@ def initialize_new_agent(
 
 
 def initialize_agents(
-        env: np.ndarray, env_nx: nx.Graph, agents: List[Agent], policy: Policy
+        env: np.ndarray, env_nx: nx.Graph, n_agents: int, policy: Policy
 ) -> List[Agent]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other)."""
