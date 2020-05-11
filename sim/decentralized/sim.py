@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
-import random
 import itertools
+import random
+from typing import List
 
+import networkx as nx
 import numpy as np
 from matplotlib import pyplot as plt
-import networkx as nx
+
+from agent import Agent, Policy
 
 
 def initialize_environment(size: int, fill: float):
@@ -33,8 +36,7 @@ def gridmap_to_nx(env: np.ndarray):
 
 
 def plot(
-        environent: np.ndarray, agents: np.ndarray,
-        goals: np.ndarray, paths: np.ndarray):
+        environent: np.ndarray, agents: np.ndarray):
     """Plot the environment map with `x` coordinates to the right, `y` up.
     Occupied by colourful agents."""
     # map
@@ -67,55 +69,43 @@ def plot(
 
     # agents
     for i_a, a in enumerate(agents):
-        ax.plot(a[0], a[1], markersize=5, marker='o')
-
-    # goals
-    for i_a, a in enumerate(goals):
-        ax.plot(a[0], a[1], markersize=5, marker='x')
-
-    # paths
-    for p in paths:
-        ax.plot(p[:, 0], p[:, 1])
+        ax.plot(a.pos[0], a.pos[1], markersize=5, marker='o')
+        ax.plot(a.goal[0], a.goal[1], markersize=5, marker='x')
+        ax.plot(a.path[:, 0], a.path[:, 1])
 
     plt.show()
 
 
-def initialize_new_agent(environent, agents) -> np.ndarray:
+def initialize_new_agent(
+        env: np.ndarray, env_nx: nx.Graph, agents: List[Agent], policy: Policy
+) -> List[Agent]:
     """Place new agent in the environment, where no obstacle or other agent
     is."""
-    environent_with_agents = environent.copy()
+    env_with_agents = env.copy()
+    env_with_goals = env.copy()
     for a in agents:
-        environent_with_agents[tuple(a)] = 1
-    no_obstacle_nor_agent = np.where(environent_with_agents == 0)
+        env_with_agents[tuple(a.pos)] = 1
+        env_with_goals[tuple(a.goal)] = 1
+    no_obstacle_nor_agent = np.where(env_with_agents == 0)
+    no_obstacle_nor_goal = np.where(env_with_goals == 0)
     gen = np.random.default_rng()
-    return gen.choice(no_obstacle_nor_agent, axis=1)
+    pos = gen.choice(no_obstacle_nor_agent, axis=1)
+    goal = gen.choice(no_obstacle_nor_goal, axis=1)
+    a = Agent(env, env_nx, pos, policy)
+    a.give_a_goal(goal)
+    return a
 
 
-def initialize_agents(environent, n_agents) -> np.ndarray:
+def initialize_agents(
+        env: np.ndarray, env_nx: nx.Graph, agents: List[Agent], policy: Policy
+) -> List[Agent]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other)."""
-    agents = np.ndarray([0, 2], dtype=np.int64)
+    agents = []
     for i_a in range(n_agents):
-        agent = initialize_new_agent(environent, agents)
-        agents = np.append(agents, [agent], axis=0)
+        agent = initialize_new_agent(env, env_nx, agents, policy)
+        agents.append(agent)
     return agents
-
-
-def plan_path(
-        env_nx: nx.Graph, start: np.ndarray, goal: np.ndarray) -> np.ndarray:
-    """Plan a path in the environment"""
-    tuple_path = nx.shortest_path(env_nx, tuple(start), tuple(goal))
-    return np.array(tuple_path)
-
-
-def plan_paths(
-        env_nx: nx.Graph, starts: np.ndarray, goals: np.ndarray) -> list:
-    """Plan paths for all agents between their starts and goals."""
-    paths = []
-    assert len(starts) == len(goals)
-    for i_a in range(len(starts)):
-        paths.append(plan_path(env_nx, starts[i_a], goals[i_a]))
-    return paths
 
 
 def prepare_step(pos: np.ndarray, path: np.ndarray) -> np.ndarray:
@@ -169,11 +159,7 @@ if __name__ == "__main__":
     env_nx = gridmap_to_nx(env)
 
     # agents
-    agents = initialize_agents(env, n_agents)
-    goals = initialize_agents(env, n_agents)
-
-    # paths
-    paths = plan_paths(env_nx, agents, goals)
+    agents = initialize_agents(env, env_nx, n_agents, Policy.RANDOM)
 
     # display
-    plot(env, agents, goals, paths)
+    plot(env, agents)
