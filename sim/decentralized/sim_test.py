@@ -27,7 +27,6 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue((zero_zero.pos == [0, 0]).all())
         self.assertTrue((zero_zero.goal == [0, 0]).all())
         self.assertTrue(zero_zero.policy == Policy.RANDOM)
-
         env_zo = np.array([[0, 0], [1, 1]])
         g = sim.gridmap_to_nx(env_zo)
         zero_one = sim.initialize_new_agent(env_zo, g, [zero_zero],

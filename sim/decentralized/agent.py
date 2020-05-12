@@ -23,6 +23,7 @@ class Agent():
         self.goal = None
         self.policy = policy
         self.path = None
+        self.path_i = None
 
     def give_a_goal(self, goal: np.ndarray):
         """Set a new goal for the agent, this will calculate the path,
@@ -40,7 +41,27 @@ class Agent():
             raise NotImplementedError
 
     def plan_path(self):
-        """Plan path from currently set `pos` to current `goal` and save it 
+        """Plan path from currently set `pos` to current `goal` and save it
         in `path`."""
-        tuple_path = nx.shortest_path(self.env_nx, tuple(self.pos), tuple(self.goal))
+        tuple_path = nx.shortest_path(
+            self.env_nx, tuple(self.pos), tuple(self.goal))
         self.path = np.array(tuple_path)
+
+    def what_is_next_step(self) -> np.ndarray:
+        """Return the position where this agent would like to go next."""
+        assert self.path_i is not None, "We need to have a current path_i"
+        if self.path_i == len(self.path):
+            return self.path[-1]  # stay at final pose
+        else:
+            return self.path[self.path_i + 1]
+
+    def make_next_step(self, next_pos_to_check: np.ndarray):
+        """Move agent to its next step, pass that pose for clarification."""
+        potential_next_pos = self.what_is_next_step()
+        assert (potential_next_pos == next_pos_to_check).all(
+        ), "Our next position has to be corect."
+        if self.path_i == len(self.path):
+            pass  # at goal already
+        else:
+            self.path_i += 1
+            self.pos = potential_next_pos
