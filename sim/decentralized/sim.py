@@ -108,17 +108,6 @@ def initialize_agents(
     return agents
 
 
-def prepare_step(pos: np.ndarray, path: np.ndarray) -> np.ndarray:
-    """Return the next step, if the agent is currently at `pos`,
-    returns end pose if agent reached goal."""
-    path_len = len(path)
-    i = path.index(pos)
-    if i == path_len:
-        return path[i]  # agent is at its goal
-    else:
-        return path[i+1]
-
-
 def check_for_colissions(
         poses: np.ndarray, next_poses: np.ndarray) -> (dict, dict):
     """check for two agents going to meet at one vertex or two agents using
@@ -136,19 +125,23 @@ def check_for_colissions(
     return node_colissions, edge_colissions
 
 
-def iterate_sim(agents: np.ndarray, paths: np.ndarray) -> np.ndarray:
-    """Given a set of current agent poses, find possible next steps for each
+def iterate_sim(agents: List[Agent]) -> np.ndarray:
+    """Given a set of agents, find possible next steps for each
     agent."""
-    possible_next_agent_poses = agents.copy()
-    next_agent_poses = agents.copy()
+    possible_next_agent_poses = np.zeros((len(agents), 2), dtype=int)
     # prepare step
     for i_a in range(len(agents)):
-        possible_next_agent_poses[i_a] = prepare_step(agents[i_a], paths[i_a])
+        possible_next_agent_poses[i_a, :] = agents[i_a].what_is_next_step()
     # check collisions
     node_colissions, edge_colissions = check_for_colissions(
         agents, possible_next_agent_poses)
 
-    return next_agent_poses
+    if (len(node_colissions.keys()) == 0 and
+            len(edge_colissions.keys()) == 0):
+        for i_a in range(len(agents)):
+            agents[i_a].make_next_step(possible_next_agent_poses[i_a, :])
+    else:
+        raise NotImplementedError("TODO")
 
 
 if __name__ == "__main__":
@@ -162,4 +155,8 @@ if __name__ == "__main__":
     agents = initialize_agents(env, env_nx, n_agents, Policy.RANDOM)
 
     # display
-    plot(env, agents)
+    # plot(env, agents)
+
+    # iterate
+    while True:
+        iterate_sim(agents)

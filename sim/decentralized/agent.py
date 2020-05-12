@@ -31,6 +31,7 @@ class Agent():
         if (self.goal != goal).all():
             self.goal = goal
             self.plan_path()
+            self.path_i = 0
 
     def get_priority(self):
         """Based on the selected policy, this will give the priority of this
@@ -50,7 +51,7 @@ class Agent():
     def what_is_next_step(self) -> np.ndarray:
         """Return the position where this agent would like to go next."""
         assert self.path_i is not None, "We need to have a current path_i"
-        if self.path_i == len(self.path):
+        if self.path_i + 1 == len(self.path):
             return self.path[-1]  # stay at final pose
         else:
             return self.path[self.path_i + 1]
@@ -60,7 +61,7 @@ class Agent():
         potential_next_pos = self.what_is_next_step()
         assert (potential_next_pos == next_pos_to_check).all(
         ), "Our next position has to be corect."
-        if self.path_i == len(self.path):
+        if self.path_i + 1 == len(self.path):
             pass  # at goal already
         else:
             self.path_i += 1
