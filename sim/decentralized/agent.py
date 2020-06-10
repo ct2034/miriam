@@ -33,6 +33,10 @@ class Agent():
             self.plan_path()
             self.path_i = 0
 
+    def is_at_goal(self):
+        """returns true iff the agent is at its goal."""
+        return all(self.pos == self.goal)
+
     def get_priority(self):
         """Based on the selected policy, this will give the priority of this
         agent."""

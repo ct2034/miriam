@@ -109,39 +109,85 @@ def initialize_agents(
 
 
 def check_for_colissions(
-        poses: np.ndarray, next_poses: np.ndarray) -> (dict, dict):
+        agents: List[Agent],
+        poses: np.ndarray) -> (dict, dict):
     """check for two agents going to meet at one vertex or two agents using
     the same edge."""
     node_colissions = {}
     edge_colissions = {}
-    for i_a in range(len(poses)):
-        for i_oa in [i for i in range(len(poses)) if i != i_a]:
-            if (next_poses[i_a] == next_poses[i_oa]).all():
-                node_colissions[tuple(next_poses[i_a])] = [i_a, i_oa]
-            if ((next_poses[i_a] == poses[i_oa]).all() and
-                    (poses[i_a] == next_poses[i_oa]).all()):
-                edge = [tuple(poses[i_a]), tuple(poses[i_oa])]
-                edge_colissions[tuple(sorted(edge))] = [i_a, i_oa]
+    # ignoring finished agents
+    for i_a in range(len(agents)):
+        if not agents[i_a].is_at_goal():
+            for i_oa in [i for i in range(len(agents)) if i != i_a]:
+                if not agents[i_oa].is_at_goal():
+                    if (poses[i_a] ==
+                            poses[i_oa]).all():
+                        node_colissions[tuple(poses[i_a])] = [i_a, i_oa]
+                    if ((poses[i_a] == poses[i_oa]).all() and
+                            (poses[i_a] == poses[i_oa]).all()):
+                        edge = [tuple(poses[i_a]),
+                                tuple(poses[i_oa])]
+                        edge_colissions[tuple(sorted(edge))] = [i_a, i_oa]
     return node_colissions, edge_colissions
+
+
+def get_possible_next_agent_poses(
+        agents: List[Agent],
+        can_proceed: List[bool]) -> np.ndarray:
+    """Where would the agents be if they would be allowed to move to the next
+    step in their paths if they have a true in `can_proceed`."""
+    possible_next_agent_poses = np.zeros((len(agents), 2), dtype=int)
+    # prepare step
+    for i_a in range(len(agents)):
+        if can_proceed[i_a]:
+            possible_next_agent_poses[i_a, :] = agents[i_a].what_is_next_step()
+        else:
+            possible_next_agent_poses[i_a, :] = agents[i_a].pos
+    return possible_next_agent_poses
 
 
 def iterate_sim(agents: List[Agent]) -> np.ndarray:
     """Given a set of agents, find possible next steps for each
     agent."""
-    possible_next_agent_poses = np.zeros((len(agents), 2), dtype=int)
-    # prepare step
-    for i_a in range(len(agents)):
-        possible_next_agent_poses[i_a, :] = agents[i_a].what_is_next_step()
-    # check collisions
-    node_colissions, edge_colissions = check_for_colissions(
-        agents, possible_next_agent_poses)
+    can_proceed = [True] * n_agents
+    there_are_collisions = True
 
-    if (len(node_colissions.keys()) == 0 and
-            len(edge_colissions.keys()) == 0):
-        for i_a in range(len(agents)):
+    while(there_are_collisions):
+        possible_next_agent_poses = get_possible_next_agent_poses(
+            agents, can_proceed)
+
+        # check collisions
+        node_colissions, edge_colissions = check_for_colissions(
+            agents, possible_next_agent_poses)
+
+        if (len(node_colissions.keys()) == 0 and
+                len(edge_colissions.keys()) == 0):
+            # nothing is blocked. everyone can continue
+            there_are_collisions = False
+        else:
+            # we need to solve the blocks be not stepping some agents
+            for pose, [i_a1, i_a2] in node_colissions.items():
+                if agents[i_a1].get_priority() > agents[i_a2].get_priority():
+                    can_proceed[i_a2] = False  # has lower prio
+                else:
+                    can_proceed[i_a1] = False  # has lower prio
+            for edge, [i_a1, i_a2] in edge_colissions.items():
+                if agents[i_a1].get_priority() > agents[i_a2].get_priority():
+                    can_proceed[i_a2] = False  # has lower prio
+                else:
+                    can_proceed[i_a1] = False  # has lower prio
+
+        if not any(can_proceed):
+            raise Exception("Deadlock")
+
+    for i_a in range(len(agents)):
+        if can_proceed[i_a]:
             agents[i_a].make_next_step(possible_next_agent_poses[i_a, :])
-    else:
-        raise NotImplementedError("TODO")
+
+
+def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
+    """Returns true iff all agents are at their respective goals."""
+    return all(map(lambda a: a.is_at_goal(), agents))
 
 
 if __name__ == "__main__":
@@ -154,9 +200,7 @@ if __name__ == "__main__":
     # agents
     agents = initialize_agents(env, env_nx, n_agents, Policy.RANDOM)
 
-    # display
-    # plot(env, agents)
-
     # iterate
-    while True:
+    while not are_all_agents_at_their_goals(agents):
+        plot(env, agents)
         iterate_sim(agents)
