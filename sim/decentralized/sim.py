@@ -185,8 +185,10 @@ def plot(
 
     # agents
     for i_a, a in enumerate(agents):
-        ax.plot(a.pos[0], a.pos[1], markersize=10, marker='o', color=colormap[i_a])
-        ax.plot(a.goal[0], a.goal[1], markersize=10, marker='x', color=colormap[i_a])
+        ax.plot(a.pos[0], a.pos[1], markersize=10,
+                marker='o', color=colormap[i_a])
+        ax.plot(a.goal[0], a.goal[1], markersize=10,
+                marker='x', color=colormap[i_a])
         ax.plot(a.path[:, 0], a.path[:, 1], color=colormap[i_a])
 
     plt.show()
