@@ -7,6 +7,7 @@ from typing import List
 import networkx as nx
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import cm
 
 from agent import Agent, Policy
 
@@ -33,47 +34,6 @@ def gridmap_to_nx(env: np.ndarray):
              obstacles[1][i_o])
         )
     return g
-
-
-def plot(
-        environent: np.ndarray, agents: np.ndarray):
-    """Plot the environment map with `x` coordinates to the right, `y` up.
-    Occupied by colourful agents."""
-    # map
-    image = environent * -.5 + 1
-    image = np.swapaxes(image, 0, 1)
-    fig, ax = plt.subplots()
-    c = ax.imshow(image, cmap='gray', vmin=0, vmax=1)
-    ax.set_aspect('equal')
-    baserange = np.arange(environent.shape[0], step=2)
-    ax.set_xticks(baserange)
-    ax.set_xticklabels(map(str, baserange))
-    ax.set_yticks(baserange)
-    ax.set_yticklabels(map(str, baserange))
-
-    # gridlines
-    for i_x in range(environent.shape[0]-1):
-        ax.plot(
-            [i_x + .5] * 2,
-            [-.5, environent.shape[1]-.5],
-            color='dimgrey',
-            linewidth=.5
-        )
-    for i_y in range(environent.shape[1]-1):
-        ax.plot(
-            [-.5, environent.shape[0]-.5],
-            [i_y + .5] * 2,
-            color='dimgrey',
-            linewidth=.5
-        )
-
-    # agents
-    for i_a, a in enumerate(agents):
-        ax.plot(a.pos[0], a.pos[1], markersize=5, marker='o')
-        ax.plot(a.goal[0], a.goal[1], markersize=5, marker='x')
-        ax.plot(a.path[:, 0], a.path[:, 1])
-
-    plt.show()
 
 
 def initialize_new_agent(
@@ -188,6 +148,48 @@ def iterate_sim(agents: List[Agent]) -> np.ndarray:
 def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
     """Returns true iff all agents are at their respective goals."""
     return all(map(lambda a: a.is_at_goal(), agents))
+
+
+def plot(
+        environent: np.ndarray, agents: np.ndarray):
+    """Plot the environment map with `x` coordinates to the right, `y` up.
+    Occupied by colourful agents."""
+    # map
+    image = environent * -.5 + 1
+    image = np.swapaxes(image, 0, 1)
+    fig, ax = plt.subplots()
+    c = ax.imshow(image, cmap='gray', vmin=0, vmax=1)
+    ax.set_aspect('equal')
+    baserange = np.arange(environent.shape[0], step=2)
+    ax.set_xticks(baserange)
+    ax.set_xticklabels(map(str, baserange))
+    ax.set_yticks(baserange)
+    ax.set_yticklabels(map(str, baserange))
+    colormap = cm.tab10.colors
+
+    # gridlines
+    for i_x in range(environent.shape[0]-1):
+        ax.plot(
+            [i_x + .5] * 2,
+            [-.5, environent.shape[1]-.5],
+            color='dimgrey',
+            linewidth=.5
+        )
+    for i_y in range(environent.shape[1]-1):
+        ax.plot(
+            [-.5, environent.shape[0]-.5],
+            [i_y + .5] * 2,
+            color='dimgrey',
+            linewidth=.5
+        )
+
+    # agents
+    for i_a, a in enumerate(agents):
+        ax.plot(a.pos[0], a.pos[1], markersize=10, marker='o', color=colormap[i_a])
+        ax.plot(a.goal[0], a.goal[1], markersize=10, marker='x', color=colormap[i_a])
+        ax.plot(a.path[:, 0], a.path[:, 1], color=colormap[i_a])
+
+    plt.show()
 
 
 if __name__ == "__main__":
