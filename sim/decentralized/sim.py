@@ -12,6 +12,10 @@ from matplotlib import cm
 from agent import Agent, Policy
 
 
+class SimIterationException(Exception):
+    pass
+
+
 def initialize_environment(size: int, fill: float):
     """Make a square map with edge length `size` and
     `fill` (0..1) obstacle ratio."""
@@ -106,6 +110,14 @@ def check_for_colissions(
     return node_colissions, edge_colissions
 
 
+def make_sure_agents_are_safe(agents: List[Agent]):
+    poses = set()
+    for a in agents:
+        if not a.is_at_goal():
+            assert tuple(a.pos) not in poses, "Two agents at the same place."
+            poses.add(tuple(a.pos))
+
+
 def iterate_sim(agents: List[Agent]):
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
@@ -138,21 +150,23 @@ def iterate_sim(agents: List[Agent]):
                     if not success:
                         success = agents[i_a1].block_edge(edge[0], edge[1])
                         if not success:
-                            raise Exception("Deadlock by edge collision")
+                            raise SimIterationException("Deadlock by edge collision")
                 else:
                     # a2 has higher prio
                     success = agents[i_a1].block_edge(edge[0], edge[1])
                     if not success:
                         success = agents[i_a2].block_edge(edge[1], edge[0])
                         if not success:
-                            raise Exception("Deadlock by edge collision")
+                            raise SimIterationException("Deadlock by edge collision")
 
         if not any(can_proceed):
-            raise Exception("Deadlock by node collisions")
+            raise SimIterationException("Deadlock by node collisions")
 
     for i_a in range(len(agents)):
         if can_proceed[i_a]:
             agents[i_a].make_next_step(possible_next_agent_poses[i_a, :])
+
+    make_sure_agents_are_safe(agents)
 
 
 def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
@@ -214,7 +228,10 @@ def run_main(n_agents=10, plot=True):
     while not are_all_agents_at_their_goals(agents):
         if plot:
             plot_env_agents(env, agents)
-        iterate_sim(agents)
+        try:
+            iterate_sim(agents)
+        except SimIterationException as e:
+            logging.warning(e)
 
 
 if __name__ == "__main__":

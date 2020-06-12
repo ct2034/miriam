@@ -54,10 +54,20 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(a.block_edge((0, 0), (0, 1)))
         self.assertEqual(len(a.path), 7)  # going the long way
 
+        # removing the same edge again should not be a problem
+        self.assertTrue(a.block_edge((0, 0), (0, 1)))
+
+        # removing a necessary edge should return false
+        self.assertFalse(a.block_edge((2, 0), (2, 1)))
+
     def test_is_at_goal(self):
         env = np.array([[0, 0], [0, 1]])
         a = Agent(env, np.array([0, 0]), Policy.RANDOM)
-        a.give_a_goal(np.array([0, 0]))
+        self.assertTrue(a.give_a_goal(np.array([0, 0])))
+        self.assertTrue(a.is_at_goal())
+
+        # giving same goal again should return true and still be there
+        self.assertTrue(a.give_a_goal(np.array([0, 0])))
         self.assertTrue(a.is_at_goal())
 
     def test_get_priority(self):
