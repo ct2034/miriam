@@ -68,29 +68,6 @@ def initialize_agents(
     return agents
 
 
-def check_for_colissions(
-        agents: List[Agent],
-        poses: np.ndarray) -> (dict, dict):
-    """check for two agents going to meet at one vertex or two agents using
-    the same edge."""
-    node_colissions = {}
-    edge_colissions = {}
-    # ignoring finished agents
-    for i_a in range(len(agents)):
-        if not agents[i_a].is_at_goal():
-            for i_oa in [i for i in range(len(agents)) if i != i_a]:
-                if not agents[i_oa].is_at_goal():
-                    if (poses[i_a] ==
-                            poses[i_oa]).all():
-                        node_colissions[tuple(poses[i_a])] = [i_a, i_oa]
-                    if ((poses[i_a] == poses[i_oa]).all() and
-                            (poses[i_a] == poses[i_oa]).all()):
-                        edge = [tuple(poses[i_a]),
-                                tuple(poses[i_oa])]
-                        edge_colissions[tuple(sorted(edge))] = [i_a, i_oa]
-    return node_colissions, edge_colissions
-
-
 def get_possible_next_agent_poses(
         agents: List[Agent],
         can_proceed: List[bool]) -> np.ndarray:
@@ -106,10 +83,33 @@ def get_possible_next_agent_poses(
     return possible_next_agent_poses
 
 
-def iterate_sim(agents: List[Agent]) -> np.ndarray:
+def check_for_colissions(
+        agents: List[Agent],
+        nxt_poses: np.ndarray) -> (dict, dict):
+    """check for two agents going to meet at one vertex or two agents using
+    the same edge."""
+    node_colissions = {}
+    edge_colissions = {}
+    # ignoring finished agents
+    for i_a in range(len(agents)):
+        if not agents[i_a].is_at_goal():
+            for i_oa in [i for i in range(len(agents)) if i != i_a]:
+                if not agents[i_oa].is_at_goal():
+                    if (nxt_poses[i_a] ==
+                            nxt_poses[i_oa]).all():
+                        node_colissions[tuple(nxt_poses[i_a])] = [i_a, i_oa]
+                    if ((nxt_poses[i_a] == agents[i_oa].pos).all() and
+                            (nxt_poses[i_oa] == agents[i_a].pos).all()):
+                        edge = [tuple(nxt_poses[i_a]),
+                                tuple(agents[i_a].pos)]
+                        edge_colissions[tuple(sorted(edge))] = [i_a, i_oa]
+    return node_colissions, edge_colissions
+
+
+def iterate_sim(agents: List[Agent]):
     """Given a set of agents, find possible next steps for each
-    agent."""
-    can_proceed = [True] * n_agents
+    agent and move them there if possible."""
+    can_proceed = [True] * len(agents)
     there_are_collisions = True
 
     while(there_are_collisions):
@@ -150,10 +150,9 @@ def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
     return all(map(lambda a: a.is_at_goal(), agents))
 
 
-def plot(
-        environent: np.ndarray, agents: np.ndarray):
+def plot(environent: np.ndarray, agents: np.ndarray):
     """Plot the environment map with `x` coordinates to the right, `y` up.
-    Occupied by colourful agents."""
+    Occupied by colorful agents and their paths."""
     # map
     image = environent * -.5 + 1
     image = np.swapaxes(image, 0, 1)

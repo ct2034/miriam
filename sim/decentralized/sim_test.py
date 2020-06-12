@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
+from unittest.mock import MagicMock
 
 import numpy as np
 
@@ -47,30 +48,119 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertIn((0, 1), map(lambda a: tuple(a.goal), agents))
         self.assertIn((1, 0), map(lambda a: tuple(a.goal), agents))
 
-    def test_plan_path(self):
-        env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
+    def test_check_for_colissions_and_get_possible_next_agent_poses(self):
+        env = np.array([[0, 0], [0, 1]])
         g = sim.gridmap_to_nx(env)
-        a = Agent(env, g, np.array([0, 2]), Policy.RANDOM)
-        a.give_a_goal(np.array([2, 2]))
-        p = a.path
-        self.assertEqual(len(p), 7)
-        self.assertTrue((p[1] == [0, 1]).all())
-        self.assertTrue((p[3] == [1, 0]).all())
-        self.assertTrue((p[5] == [2, 1]).all())
+        agents = [
+            Agent(env, g, [0, 0], Policy.RANDOM),
+            Agent(env, g, [0, 1], Policy.RANDOM),
+            Agent(env, g, [1, 0], Policy.RANDOM)
+        ]
+        agents[0].give_a_goal(np.array([0, 1]))
+        agents[1].give_a_goal(np.array([0, 0]))
+        agents[2].give_a_goal(np.array([0, 0]))
 
-    @unittest.skip("to be implemented")
-    def test_check_for_colissions(self):
-        poses = np.array([[0, 0], [1, 0], [1, 1], [1, 2]])
-        next_poses = np.array([[0, 0], [0, 0], [1, 2], [1, 1]])
-        node_col, edge_col = sim.check_for_colissions(poses, next_poses)
-        expected_node_index = (0, 0)
-        self.assertIn(expected_node_index, node_col.keys())
-        self.assertIn(0, node_col[expected_node_index])
-        self.assertIn(1, node_col[expected_node_index])
-        expected_edge_index = ((1, 1), (1, 2))
-        self.assertIn(expected_edge_index, edge_col.keys())
-        self.assertIn(2, edge_col[expected_edge_index])
-        self.assertIn(3, edge_col[expected_edge_index])
+        # getting next steps when all are allowed
+        possible_next_agent_poses = sim.get_possible_next_agent_poses(
+            agents, [True] * 3
+        )
+        self.assertTrue(all(possible_next_agent_poses[0] == np.array([0, 1])))
+        self.assertTrue(all(possible_next_agent_poses[1] == np.array([0, 0])))
+        self.assertTrue(all(possible_next_agent_poses[2] == np.array([0, 0])))
+
+        # getting next steps when none are allowed
+        other_possible_next_agent_poses = sim.get_possible_next_agent_poses(
+            agents, [False] * 3
+        )
+        self.assertTrue(
+            all(other_possible_next_agent_poses[0] == np.array([0, 0])))
+        self.assertTrue(
+            all(other_possible_next_agent_poses[1] == np.array([0, 1])))
+        self.assertTrue(
+            all(other_possible_next_agent_poses[2] == np.array([1, 0])))
+
+        # checking for collisions
+        node_colissions, edge_colissions = sim.check_for_colissions(
+            agents, possible_next_agent_poses)
+        self.assertListEqual(list(node_colissions.keys()), [(0, 0)])
+        self.assertIn(1, node_colissions[(0, 0)])
+        self.assertIn(2, node_colissions[(0, 0)])
+        edge_in_col = ((0, 0), (0, 1))
+        self.assertListEqual(list(edge_colissions.keys()), [edge_in_col])
+        self.assertIn(0, edge_colissions[edge_in_col])
+        self.assertIn(1, edge_colissions[edge_in_col])
+
+    def test_iterate_sim_and_are_all_agents_at_their_goals(self):
+        env = np.array([[0, 0], [0, 0]])
+        g = sim.gridmap_to_nx(env)
+        agents = [
+            Agent(env, g, [0, 0], Policy.RANDOM),
+            Agent(env, g, [1, 1], Policy.RANDOM)
+        ]
+        agents[0].give_a_goal(np.array([0, 1]))
+        agents[1].give_a_goal(np.array([1, 0]))
+
+        # first we should not be at the goal
+        self.assertFalse(sim.are_all_agents_at_their_goals(agents))
+
+        # after one iteration all agents should be at their goal
+        sim.iterate_sim(agents)
+        self.assertTrue(all(agents[0].pos == np.array([0, 1])))
+        self.assertTrue(all(agents[1].pos == np.array([1, 0])))
+        self.assertTrue(sim.are_all_agents_at_their_goals(agents))
+
+        # after another iteration they should be still at their goal
+        sim.iterate_sim(agents)
+        self.assertTrue(all(agents[0].pos == np.array([0, 1])))
+        self.assertTrue(all(agents[1].pos == np.array([1, 0])))
+        self.assertTrue(sim.are_all_agents_at_their_goals(agents))
+
+    def test_iterate_sim_with_node_coll(self):
+        env = np.array([[0, 0], [0, 1]])
+        g = sim.gridmap_to_nx(env)
+        agents = [
+            Agent(env, g, [0, 1], Policy.RANDOM),
+            Agent(env, g, [1, 0], Policy.RANDOM)
+        ]
+        agents[0].give_a_goal(np.array([0, 0]))
+        agents[1].give_a_goal(np.array([0, 0]))
+
+        agents[0].get_priority = MagicMock(return_value=.7)
+        agents[1].get_priority = MagicMock(return_value=.3)
+
+        # both agents want to go to `(0,0)` only the first should get there
+        sim.iterate_sim(agents)
+        self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # goal
+        self.assertTrue(all(agents[1].pos == np.array([1, 0])))  # start
+
+        # after another iteration both should be there and finished
+        sim.iterate_sim(agents)
+        self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # goal
+        self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
+        self.assertTrue(sim.are_all_agents_at_their_goals(agents))
+
+        # new agents for reverse prios
+        agents = [
+            Agent(env, g, [0, 1], Policy.RANDOM),
+            Agent(env, g, [1, 0], Policy.RANDOM)
+        ]
+        agents[0].give_a_goal(np.array([0, 0]))
+        agents[1].give_a_goal(np.array([0, 0]))
+
+        # inverse priorities
+        agents[0].get_priority = MagicMock(return_value=0)
+        agents[1].get_priority = MagicMock(return_value=.9)
+
+        # both agents want to go to `(0,0)` only the second should get there
+        sim.iterate_sim(agents)
+        self.assertTrue(all(agents[0].pos == np.array([0, 1])))  # start
+        self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
+
+        # after another iteration both should be there and finished
+        sim.iterate_sim(agents)
+        self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # goal
+        self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
+        self.assertTrue(sim.are_all_agents_at_their_goals(agents))
 
 
 if __name__ == "__main__":
