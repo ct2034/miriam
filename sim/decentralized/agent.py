@@ -33,6 +33,13 @@ class Agent():
             self.plan_path()
             self.path_i = 0
 
+    def plan_path(self):
+        """Plan path from currently set `pos` to current `goal` and save it
+        in `path`."""
+        tuple_path = nx.shortest_path(
+            self.env_nx, tuple(self.pos), tuple(self.goal))
+        self.path = np.array(tuple_path)
+
     def is_at_goal(self):
         """returns true iff the agent is at its goal."""
         return all(self.pos == self.goal)
@@ -45,17 +52,10 @@ class Agent():
         elif self.policy == Policy.CLOSEST:
             raise NotImplementedError
 
-    def plan_path(self):
-        """Plan path from currently set `pos` to current `goal` and save it
-        in `path`."""
-        tuple_path = nx.shortest_path(
-            self.env_nx, tuple(self.pos), tuple(self.goal))
-        self.path = np.array(tuple_path)
-
     def what_is_next_step(self) -> np.ndarray:
         """Return the position where this agent would like to go next."""
         assert self.path_i is not None, "We need to have a current path_i"
-        if self.path_i + 1 == len(self.path):
+        if self.is_at_goal():
             return self.path[-1]  # stay at final pose
         else:
             return self.path[self.path_i + 1]
@@ -65,7 +65,7 @@ class Agent():
         potential_next_pos = self.what_is_next_step()
         assert (potential_next_pos == next_pos_to_check).all(
         ), "Our next position has to be corect."
-        if self.path_i + 1 == len(self.path):
+        if self.is_at_goal():
             pass  # at goal already
         else:
             self.path_i += 1
