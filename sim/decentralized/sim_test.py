@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 import sim
+import agent
 from agent import Policy, Agent
 
 
@@ -15,22 +16,14 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertEqual(env.shape, (10, 10))
         self.assertEqual(np.count_nonzero(env), 50)
 
-    def test_gridmap_to_nx(self):
-        env = np.array([[0, 1], [1, 1]])
-        g = sim.gridmap_to_nx(env)
-        self.assertEqual(len(g), 1)
-        self.assertTrue((0, 0) in g)
-
     def test_initialize_new_agent(self):
         env_zz = np.array([[0, 1], [1, 1]])
-        g = sim.gridmap_to_nx(env_zz)
-        zero_zero = sim.initialize_new_agent(env_zz, g, [], Policy.RANDOM)
+        zero_zero = sim.initialize_new_agent(env_zz, [], Policy.RANDOM)
         self.assertTrue((zero_zero.pos == [0, 0]).all())
         self.assertTrue((zero_zero.goal == [0, 0]).all())
         self.assertTrue(zero_zero.policy == Policy.RANDOM)
         env_zo = np.array([[0, 0], [1, 1]])
-        g = sim.gridmap_to_nx(env_zo)
-        zero_one = sim.initialize_new_agent(env_zo, g, [zero_zero],
+        zero_one = sim.initialize_new_agent(env_zo, [zero_zero],
                                             Policy.RANDOM)
         self.assertTrue((zero_one.pos == [0, 1]).all())
         self.assertTrue((zero_one.goal == [0, 1]).all())
@@ -38,8 +31,7 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_initialize_agents(self):
         env = np.array([[0, 0], [0, 1]])
-        g = sim.gridmap_to_nx(env)
-        agents = sim.initialize_agents(env, g, 3, Policy.RANDOM)
+        agents = sim.initialize_agents(env, 3, Policy.RANDOM)
         self.assertEqual(len(agents), 3)
         self.assertIn((0, 0), map(lambda a: tuple(a.pos), agents))
         self.assertIn((0, 1), map(lambda a: tuple(a.pos), agents))
@@ -50,11 +42,10 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_check_for_colissions_and_get_possible_next_agent_poses(self):
         env = np.array([[0, 0], [0, 1]])
-        g = sim.gridmap_to_nx(env)
         agents = [
-            Agent(env, g, [0, 0], Policy.RANDOM),
-            Agent(env, g, [0, 1], Policy.RANDOM),
-            Agent(env, g, [1, 0], Policy.RANDOM)
+            Agent(env, [0, 0], Policy.RANDOM),
+            Agent(env, [0, 1], Policy.RANDOM),
+            Agent(env, [1, 0], Policy.RANDOM)
         ]
         agents[0].give_a_goal(np.array([0, 1]))
         agents[1].give_a_goal(np.array([0, 0]))
@@ -92,10 +83,9 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_iterate_sim_and_are_all_agents_at_their_goals(self):
         env = np.array([[0, 0], [0, 0]])
-        g = sim.gridmap_to_nx(env)
         agents = [
-            Agent(env, g, [0, 0], Policy.RANDOM),
-            Agent(env, g, [1, 1], Policy.RANDOM)
+            Agent(env, [0, 0], Policy.RANDOM),
+            Agent(env, [1, 1], Policy.RANDOM)
         ]
         agents[0].give_a_goal(np.array([0, 1]))
         agents[1].give_a_goal(np.array([1, 0]))
@@ -117,10 +107,9 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_iterate_sim_with_node_coll(self):
         env = np.array([[0, 0], [0, 1]])
-        g = sim.gridmap_to_nx(env)
         agents = [
-            Agent(env, g, [0, 1], Policy.RANDOM),
-            Agent(env, g, [1, 0], Policy.RANDOM)
+            Agent(env, [0, 1], Policy.RANDOM),
+            Agent(env, [1, 0], Policy.RANDOM)
         ]
         agents[0].give_a_goal(np.array([0, 0]))
         agents[1].give_a_goal(np.array([0, 0]))
@@ -141,8 +130,8 @@ class TestDecentralizedSim(unittest.TestCase):
 
         # new agents for reverse prios
         agents = [
-            Agent(env, g, [0, 1], Policy.RANDOM),
-            Agent(env, g, [1, 0], Policy.RANDOM)
+            Agent(env, [0, 1], Policy.RANDOM),
+            Agent(env, [1, 0], Policy.RANDOM)
         ]
         agents[0].give_a_goal(np.array([0, 0]))
         agents[1].give_a_goal(np.array([0, 0]))

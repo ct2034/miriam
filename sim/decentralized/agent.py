@@ -5,6 +5,18 @@ import networkx as nx
 import numpy as np
 
 
+def gridmap_to_nx(env: np.ndarray):
+    """convert numpy gridmap into networkx graph."""
+    g = nx.grid_graph(dim=list(env.shape))
+    obstacles = np.where(env == 1)
+    for i_o in range(len(obstacles[0])):
+        g.remove_node(
+            (obstacles[0][i_o],
+                obstacles[1][i_o])
+        )
+    return g
+
+
 class Policy(Enum):
     RANDOM = 0
     CLOSEST = 1
@@ -12,13 +24,13 @@ class Policy(Enum):
 
 class Agent():
     def __init__(
-        self, env: np.ndarray, env_nx: nx.Graph, pos: np.ndarray,
+        self, env: np.ndarray, pos: np.ndarray,
         policy: Policy
     ):
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
         self.env = env
-        self.env_nx = env_nx
+        self.env_nx = None
         self.pos = pos
         self.goal = None
         self.policy = policy
@@ -30,6 +42,7 @@ class Agent():
         if the goal is new."""
         if (self.goal != goal).all():  # goal is new
             self.goal = goal
+            self.env_nx = gridmap_to_nx(self.env)
             success = self.plan_path()
             if success:
                 self.path_i = 0
@@ -61,7 +74,6 @@ class Agent():
             # undo changes
             self.env_nx = old_graph.copy()
         return success
-
 
     def is_at_goal(self):
         """returns true iff the agent is at its goal."""

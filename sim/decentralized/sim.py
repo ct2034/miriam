@@ -24,20 +24,8 @@ def initialize_environment(size: int, fill: float):
     return environent
 
 
-def gridmap_to_nx(env: np.ndarray):
-    """convert numpy gridmap into networkx graph."""
-    g = nx.grid_graph(dim=list(env.shape))
-    obstacles = np.where(env == 1)
-    for i_o in range(len(obstacles[0])):
-        g.remove_node(
-            (obstacles[0][i_o],
-             obstacles[1][i_o])
-        )
-    return g
-
-
 def initialize_new_agent(
-        env: np.ndarray, env_nx: nx.Graph, agents: List[Agent], policy: Policy
+        env: np.ndarray, agents: List[Agent], policy: Policy
 ) -> List[Agent]:
     """Place new agent in the environment, where no obstacle or other agent
     is."""
@@ -51,19 +39,19 @@ def initialize_new_agent(
     gen = np.random.default_rng()
     pos = gen.choice(no_obstacle_nor_agent, axis=1)
     goal = gen.choice(no_obstacle_nor_goal, axis=1)
-    a = Agent(env, env_nx, pos, policy)
+    a = Agent(env, pos, policy)
     a.give_a_goal(goal)
     return a
 
 
 def initialize_agents(
-        env: np.ndarray, env_nx: nx.Graph, n_agents: int, policy: Policy
+        env: np.ndarray, n_agents: int, policy: Policy
 ) -> List[Agent]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other)."""
     agents = []
     for i_a in range(n_agents):
-        agent = initialize_new_agent(env, env_nx, agents, policy)
+        agent = initialize_new_agent(env, agents, policy)
         agents.append(agent)
     return agents
 
@@ -198,10 +186,9 @@ if __name__ == "__main__":
 
     # maze (environment)
     env = initialize_environment(10, .1)
-    env_nx = gridmap_to_nx(env)
 
     # agents
-    agents = initialize_agents(env, env_nx, n_agents, Policy.RANDOM)
+    agents = initialize_agents(env, n_agents, Policy.RANDOM)
 
     # iterate
     while not are_all_agents_at_their_goals(agents):
