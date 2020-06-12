@@ -151,6 +151,10 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
         self.assertTrue(sim.are_all_agents_at_their_goals(agents))
 
+    def test_run_main(self):
+        for _ in range(100):
+            sim.run_main(10, False)
+            
 
 if __name__ == "__main__":
     unittest.main()

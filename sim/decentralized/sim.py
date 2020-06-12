@@ -81,16 +81,28 @@ def check_for_colissions(
     # ignoring finished agents
     for i_a in range(len(agents)):
         if not agents[i_a].is_at_goal():
-            for i_oa in [i for i in range(len(agents)) if i != i_a]:
+            for i_oa in [i for i in range(len(agents)) if i > i_a]:
                 if not agents[i_oa].is_at_goal():
                     if (nxt_poses[i_a] ==
                             nxt_poses[i_oa]).all():
                         node_colissions[tuple(nxt_poses[i_a])] = [i_a, i_oa]
                     if ((nxt_poses[i_a] == agents[i_oa].pos).all() and
                             (nxt_poses[i_oa] == agents[i_a].pos).all()):
-                        edge = [tuple(nxt_poses[i_a]),
-                                tuple(agents[i_a].pos)]
-                        edge_colissions[tuple(sorted(edge))] = [i_a, i_oa]
+                        edge = [tuple(agents[i_a].pos),
+                                tuple(nxt_poses[i_a])]
+                        edge_colissions[tuple(edge)] = [i_a, i_oa]
+                        #####################################################
+                        #                                                   #
+                        #  t     i_a   i_oa                                 #
+                        #  |        \ /                                     #
+                        #  |         X            \    edge_colissions[]    #
+                        #  |        / \        ----\       ((0, 0), (1, 0)) #
+                        #  V    i_oa   i_a     ----/   ] = [i_a, i_oa]      #
+                        #                         /                         #
+                        # node (0, 0) (1, 0)                                #
+                        #                                                   #
+                        #                                                   #
+                        #####################################################
     return node_colissions, edge_colissions
 
 
@@ -121,12 +133,22 @@ def iterate_sim(agents: List[Agent]):
                     can_proceed[i_a1] = False  # has lower prio
             for edge, [i_a1, i_a2] in edge_colissions.items():
                 if agents[i_a1].get_priority() > agents[i_a2].get_priority():
-                    can_proceed[i_a2] = False  # has lower prio
+                    # a1 has higher prio
+                    success = agents[i_a2].block_edge(edge[1], edge[0])
+                    if not success:
+                        success = agents[i_a1].block_edge(edge[0], edge[1])
+                        if not success:
+                            raise Exception("Deadlock by edge collision")
                 else:
-                    can_proceed[i_a1] = False  # has lower prio
+                    # a2 has higher prio
+                    success = agents[i_a1].block_edge(edge[0], edge[1])
+                    if not success:
+                        success = agents[i_a2].block_edge(edge[1], edge[0])
+                        if not success:
+                            raise Exception("Deadlock by edge collision")
 
         if not any(can_proceed):
-            raise Exception("Deadlock")
+            raise Exception("Deadlock by node collisions")
 
     for i_a in range(len(agents)):
         if can_proceed[i_a]:
@@ -138,7 +160,7 @@ def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
     return all(map(lambda a: a.is_at_goal(), agents))
 
 
-def plot(environent: np.ndarray, agents: np.ndarray):
+def plot_env_agents(environent: np.ndarray, agents: np.ndarray):
     """Plot the environment map with `x` coordinates to the right, `y` up.
     Occupied by colorful agents and their paths."""
     # map
@@ -181,9 +203,7 @@ def plot(environent: np.ndarray, agents: np.ndarray):
     plt.show()
 
 
-if __name__ == "__main__":
-    n_agents = 10
-
+def run_main(n_agents=10, plot=True):
     # maze (environment)
     env = initialize_environment(10, .1)
 
@@ -192,5 +212,10 @@ if __name__ == "__main__":
 
     # iterate
     while not are_all_agents_at_their_goals(agents):
-        plot(env, agents)
+        if plot:
+            plot_env_agents(env, agents)
         iterate_sim(agents)
+
+
+if __name__ == "__main__":
+    run_main()

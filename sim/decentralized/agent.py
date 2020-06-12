@@ -1,3 +1,4 @@
+import logging
 import random
 from enum import Enum
 
@@ -56,7 +57,8 @@ class Agent():
         try:
             tuple_path = nx.shortest_path(
                 self.env_nx, tuple(self.pos), tuple(self.goal))
-        except nx.exception.NetworkXNoPath:
+        except nx.exception.NetworkXNoPath as e:
+            logging.warning(e)
             return False
         self.path = np.array(tuple_path)
         return True
@@ -65,7 +67,10 @@ class Agent():
         """this will make the agent block this edge. It will return `Treu`
         if there still is a path to the current goal. `False` otherwise."""
         old_graph = self.env_nx.copy()
-        self.env_nx.remove_edge(a, b)
+        try:
+            self.env_nx.remove_edge(a, b)
+        except nx.exception.NetworkXError:
+            logging.warning("Edge already removed")
         success = self.plan_path()
         if success:
             # all good, and we have a new path now
@@ -77,7 +82,7 @@ class Agent():
 
     def is_at_goal(self):
         """returns true iff the agent is at its goal."""
-        return all(self.pos == self.goal)
+        return all(self.pos == self.goal) or self.path is None
 
     def get_priority(self):
         """Based on the selected policy, this will give the priority of this
@@ -89,9 +94,8 @@ class Agent():
 
     def what_is_next_step(self) -> np.ndarray:
         """Return the position where this agent would like to go next."""
-        assert self.path_i is not None, "We need to have a current path_i"
         if self.is_at_goal():
-            return self.path[-1]  # stay at final pose
+            return self.pos  # stay at final pose
         else:
             return self.path[self.path_i + 1]
 
