@@ -25,20 +25,43 @@ class Agent():
         self.path = None
         self.path_i = None
 
-    def give_a_goal(self, goal: np.ndarray):
+    def give_a_goal(self, goal: np.ndarray) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
-        if (self.goal != goal).all():
+        if (self.goal != goal).all():  # goal is new
             self.goal = goal
-            self.plan_path()
-            self.path_i = 0
+            success = self.plan_path()
+            if success:
+                self.path_i = 0
+            return success
+        else:  # still have old goal
+            return True
 
-    def plan_path(self):
+    def plan_path(self) -> bool:
         """Plan path from currently set `pos` to current `goal` and save it
         in `path`."""
-        tuple_path = nx.shortest_path(
-            self.env_nx, tuple(self.pos), tuple(self.goal))
+        try:
+            tuple_path = nx.shortest_path(
+                self.env_nx, tuple(self.pos), tuple(self.goal))
+        except nx.exception.NetworkXNoPath:
+            return False
         self.path = np.array(tuple_path)
+        return True
+
+    def block_edge(self, a: tuple, b: tuple) -> bool:
+        """this will make the agent block this edge. It will return `Treu`
+        if there still is a path to the current goal. `False` otherwise."""
+        old_graph = self.env_nx.copy()
+        self.env_nx.remove_edge(a, b)
+        success = self.plan_path()
+        if success:
+            # all good, and we have a new path now
+            self.path_i = 0
+        else:
+            # undo changes
+            self.env_nx = old_graph.copy()
+        return success
+
 
     def is_at_goal(self):
         """returns true iff the agent is at its goal."""
