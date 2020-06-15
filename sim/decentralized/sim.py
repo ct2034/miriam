@@ -99,12 +99,12 @@ def check_for_colissions(
                         #                                                   #
                         #  t     i_a   i_oa                                 #
                         #  |        \ /                                     #
-                        #  |         X            \    edge_colissions[]    #
-                        #  |        / \        ----\       ((0, 0), (1, 0)) #
-                        #  V    i_oa   i_a     ----/   ] = [i_a, i_oa]      #
-                        #                         /                         #
-                        # node (0, 0) (1, 0)                                #
+                        #  |         X            \    edge_colissions[     #
+                        #  |        / \        ----\     ((0, 0), (1, 0))   #
+                        #  |       |/ \|       ----/   ] = [i_a, i_oa]      #
+                        #  v    i_oa   i_a        /                         #
                         #                                                   #
+                        # node (0, 0) (1, 0)                                #
                         #                                                   #
                         #####################################################
     return node_colissions, edge_colissions
