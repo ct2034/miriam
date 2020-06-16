@@ -151,9 +151,20 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
         self.assertTrue(sim.are_all_agents_at_their_goals(agents))
 
+    def test_iterate_sim_with_edge_coll(self):
+        env = np.array([[0, 0, 0, 0], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
+        agents = [
+            Agent(env, [0, 0], Policy.RANDOM),
+            Agent(env, [0, 3], Policy.RANDOM)
+        ]
+        agents[0].give_a_goal(np.array([0, 3]))
+        agents[1].give_a_goal(np.array([0, 0]))
+        sim.iterate_sim(agents)
+        self.assertRaises(sim.SimIterationException, lambda: sim.iterate_sim(agents))
+
     def test_run_main(self):
         sim.run_main(5, 50, False, False)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     unittest.main()

@@ -116,6 +116,11 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(all(a.pos == np.array(next_step)))
         self.assertTrue(a.is_at_goal())
 
+        # doing this step agaion should not change anything
+        a.make_next_step(next_step)
+        self.assertTrue(all(a.pos == np.array(next_step)))
+        self.assertTrue(a.is_at_goal())
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":  # pragma: no cover
     unittest.main()

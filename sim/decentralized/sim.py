@@ -191,7 +191,47 @@ def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
     return all(map(lambda a: a.is_at_goal(), agents))
 
 
-def plot_env_agents(environent: np.ndarray, agents: np.ndarray):
+def check_time_evaluation(time_progress, space_progress, print_results=True):
+    average_time = sum(time_progress) / len(time_progress)
+    max_time = max(time_progress)
+    average_length = sum(space_progress) / len(space_progress)
+    max_length = max(space_progress)
+
+    if print_results:
+        print("average_time: " + str(average_time))
+        print("max_time: " + str(max_time))
+        print("average_length: " + str(average_length))
+        print("max_length: " + str(max_length))
+
+    return average_time, max_time, average_length, max_length
+
+
+def run_a_scenario(n_agents, policy, plot, print_results=True):
+    # evaluation parameters
+    time_progress = np.zeros([n_agents])
+    space_progress = np.zeros([n_agents])
+
+    # maze (environment)
+    env = initialize_environment(10, .1)
+
+    # agents
+    agents = initialize_agents(env, n_agents, policy)
+
+    # iterate
+    try:
+        while not are_all_agents_at_their_goals(agents):
+            if plot:  # pragma: no cover
+                plot_env_agents(env, agents)
+            time_slice, space_slice = iterate_sim(agents)
+            time_progress += time_slice
+            space_progress += space_slice
+    except SimIterationException as e:
+        logging.warning(e)
+
+    return check_time_evaluation(time_progress, space_progress, print_results)
+
+
+def plot_env_agents(environent: np.ndarray, agents: np.ndarray):  # pragma: no cover
     """Plot the environment map with `x` coordinates to the right, `y` up.
     Occupied by colorful agents and their paths."""
     # map
@@ -234,47 +274,7 @@ def plot_env_agents(environent: np.ndarray, agents: np.ndarray):
     plt.show()
 
 
-def check_time_evaluation(time_progress, space_progress, print_results=True):
-    average_time = sum(time_progress) / len(time_progress)
-    max_time = max(time_progress)
-    average_length = sum(space_progress) / len(space_progress)
-    max_length = max(space_progress)
-
-    if print_results:
-        print("average_time: " + str(average_time))
-        print("max_time: " + str(max_time))
-        print("average_length: " + str(average_length))
-        print("max_length: " + str(max_length))
-
-    return average_time, max_time, average_length, max_length
-
-
-def run_a_scenario(n_agents, policy, plot, print_results=True):
-    # evaluation parameters
-    time_progress = np.zeros([n_agents])
-    space_progress = np.zeros([n_agents])
-
-    # maze (environment)
-    env = initialize_environment(10, .1)
-
-    # agents
-    agents = initialize_agents(env, n_agents, policy)
-
-    # iterate
-    try:
-        while not are_all_agents_at_their_goals(agents):
-            if plot:
-                plot_env_agents(env, agents)
-            time_slice, space_slice = iterate_sim(agents)
-            time_progress += time_slice
-            space_progress += space_slice
-    except SimIterationException as e:
-        logging.warning(e)
-
-    return check_time_evaluation(time_progress, space_progress, print_results)
-
-
-def plot_evaluations(evaluations: Dict[Policy, np.ndarray]):
+def plot_evaluations(evaluations: Dict[Policy, np.ndarray]):  # pragma: no cover
     n_policies = len(evaluations.keys())
     subplot_basenr = 100 + 10 * n_policies + 1
     colormap = cm.tab10.colors
@@ -318,9 +318,9 @@ def run_main(n_agents=10, runs=100, plot=True, plot_eval=True):
                 evaluation_per_policy, np.transpose([results]), axis=1)
         evaluations[policy] = evaluation_per_policy
 
-    if plot_eval:
+    if plot_eval:  # pragma: no cover
         plot_evaluations(evaluations)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     run_main()
