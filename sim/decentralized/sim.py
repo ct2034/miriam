@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import itertools
+import logging
 import random
-from typing import List
+from typing import Dict, List
 
 import networkx as nx
 import numpy as np
-from matplotlib import pyplot as plt
 from matplotlib import cm
+from matplotlib import pyplot as plt
 
 from agent import Agent, Policy
 
@@ -124,6 +125,9 @@ def iterate_sim(agents: List[Agent]):
     can_proceed = [True] * len(agents)
     there_are_collisions = True
 
+    time_slice = [0] * len(agents)
+    space_slice = [0] * len(agents)
+
     while(there_are_collisions):
         possible_next_agent_poses = get_possible_next_agent_poses(
             agents, can_proceed)
@@ -139,7 +143,13 @@ def iterate_sim(agents: List[Agent]):
         else:
             # we need to solve the blocks be not stepping some agents
             for pose, [i_a1, i_a2] in node_colissions.items():
-                if agents[i_a1].get_priority() > agents[i_a2].get_priority():
+                if not can_proceed[i_a1]:  # already blocked
+                    can_proceed[i_a1] = True
+                    can_proceed[i_a2] = False  # block other agent
+                elif not can_proceed[i_a2]:  # already blocked
+                    can_proceed[i_a1] = True
+                    can_proceed[i_a1] = False  # block other agent
+                elif agents[i_a1].get_priority() > agents[i_a2].get_priority():
                     can_proceed[i_a2] = False  # has lower prio
                 else:
                     can_proceed[i_a1] = False  # has lower prio
@@ -150,23 +160,30 @@ def iterate_sim(agents: List[Agent]):
                     if not success:
                         success = agents[i_a1].block_edge(edge[0], edge[1])
                         if not success:
-                            raise SimIterationException("Deadlock by edge collision")
+                            raise SimIterationException(
+                                "Deadlock by edge collision")
                 else:
                     # a2 has higher prio
                     success = agents[i_a1].block_edge(edge[0], edge[1])
                     if not success:
                         success = agents[i_a2].block_edge(edge[1], edge[0])
                         if not success:
-                            raise SimIterationException("Deadlock by edge collision")
+                            raise SimIterationException(
+                                "Deadlock by edge collision")
 
         if not any(can_proceed):
             raise SimIterationException("Deadlock by node collisions")
 
     for i_a in range(len(agents)):
-        if can_proceed[i_a]:
+        if can_proceed[i_a] and not agents[i_a].is_at_goal():
             agents[i_a].make_next_step(possible_next_agent_poses[i_a, :])
+            space_slice[i_a] = 1
+        if not agents[i_a].is_at_goal():
+            time_slice[i_a] = 1
 
     make_sure_agents_are_safe(agents)
+
+    return time_slice, space_slice
 
 
 def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
@@ -217,21 +234,92 @@ def plot_env_agents(environent: np.ndarray, agents: np.ndarray):
     plt.show()
 
 
-def run_main(n_agents=10, plot=True):
+def check_time_evaluation(time_progress, space_progress, print_results=True):
+    average_time = sum(time_progress) / len(time_progress)
+    max_time = max(time_progress)
+    average_length = sum(space_progress) / len(space_progress)
+    max_length = max(space_progress)
+
+    if print_results:
+        print("average_time: " + str(average_time))
+        print("max_time: " + str(max_time))
+        print("average_length: " + str(average_length))
+        print("max_length: " + str(max_length))
+
+    return average_time, max_time, average_length, max_length
+
+
+def run_a_scenario(n_agents, policy, plot, print_results=True):
+    # evaluation parameters
+    time_progress = np.zeros([n_agents])
+    space_progress = np.zeros([n_agents])
+
     # maze (environment)
     env = initialize_environment(10, .1)
 
     # agents
-    agents = initialize_agents(env, n_agents, Policy.RANDOM)
+    agents = initialize_agents(env, n_agents, policy)
 
     # iterate
-    while not are_all_agents_at_their_goals(agents):
-        if plot:
-            plot_env_agents(env, agents)
-        try:
-            iterate_sim(agents)
-        except SimIterationException as e:
-            logging.warning(e)
+    try:
+        while not are_all_agents_at_their_goals(agents):
+            if plot:
+                plot_env_agents(env, agents)
+            time_slice, space_slice = iterate_sim(agents)
+            time_progress += time_slice
+            space_progress += space_slice
+    except SimIterationException as e:
+        logging.warning(e)
+
+    return check_time_evaluation(time_progress, space_progress, print_results)
+
+
+def plot_evaluations(evaluations: Dict[Policy, np.ndarray]):
+    n_policies = len(evaluations.keys())
+    subplot_basenr = 100 + 10 * n_policies + 1
+    colormap = cm.tab10.colors
+
+    max_val = 0
+    for policy in Policy:
+        max_val = max(max_val, np.max(evaluations[policy]))
+
+    plt.figure(figsize=[16, 9])
+
+    for i_p, policy in enumerate(evaluations.keys()):
+        ax = plt.subplot(subplot_basenr + i_p)
+        parts = ax.violinplot(np.transpose(evaluations[policy]), showmeans=True)
+        for pc in parts['bodies']:
+            pc.set_facecolor(colormap[i_p])
+        for partname in ('cbars', 'cmins', 'cmaxes', 'cmeans'):
+            vp = parts[partname]
+            vp.set_edgecolor(colormap[i_p])
+        ax.set_title(str(policy))
+        ax.set_ylim([0, max_val + .5])
+        plt.xticks(range(1, 5), [
+            "average_time",
+            "max_time",
+            "average_length",
+            "max_length"
+        ])
+
+    plt.show()
+
+
+def run_main(n_agents=10, runs=100, plot=True, plot_eval=True):
+    run_a_scenario(n_agents, Policy.RANDOM, plot=False, print_results=True)
+    evaluations = {}
+
+    for policy in Policy:
+        evaluation_per_policy = np.empty([4, 0])
+        for i_r in range(runs):
+            random.seed(i_r)
+            results = run_a_scenario(n_agents, policy, False, False)
+            evaluation_per_policy = np.append(
+                evaluation_per_policy, np.transpose([results]), axis=1)
+        evaluations[policy] = evaluation_per_policy
+
+    if plot_eval:
+        plot_evaluations(evaluations)
 
 
 if __name__ == "__main__":

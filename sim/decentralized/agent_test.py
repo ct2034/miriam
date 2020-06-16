@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
+import math
 import unittest
 
-import numpy as np
 import networkx as nx
+import numpy as np
 
-import sim
 import agent
-from agent import Policy, Agent
+import sim
+from agent import Agent, Policy
 
 
 class TestDecentralizedSim(unittest.TestCase):
@@ -61,7 +62,7 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertFalse(a.block_edge((2, 0), (2, 1)))
 
     def test_is_at_goal(self):
-        env = np.array([[0, 0], [0, 1]])
+        env = np.array([[0, 0], [0, 0]])
         a = Agent(env, np.array([0, 0]), Policy.RANDOM)
         self.assertTrue(a.give_a_goal(np.array([0, 0])))
         self.assertTrue(a.is_at_goal())
@@ -71,7 +72,7 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(a.is_at_goal())
 
     def test_get_priority(self):
-        env = np.array([[0, 0], [0, 1]])
+        env = np.array([[0, 0], [0, 0]])
 
         # test random policy
         a = Agent(env, np.array([0, 0]), Policy.RANDOM)
@@ -81,7 +82,10 @@ class TestDecentralizedSim(unittest.TestCase):
 
         # with clostest policy
         a = Agent(env, np.array([0, 0]), Policy.CLOSEST)
-        self.assertRaises(NotImplementedError, lambda: a.get_priority())
+        self.assertTrue(a.give_a_goal(np.array([1, 0])))
+        self.assertAlmostEqual(a.get_priority(), 1.)
+        self.assertTrue(a.give_a_goal(np.array([1, 1])))
+        self.assertAlmostEqual(a.get_priority(), 1. / math.sqrt(2))
 
     def test_what_is_next_step_and_make_next_step(self):
         env = np.array([[0, 0], [0, 1]])

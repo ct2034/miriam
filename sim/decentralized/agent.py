@@ -41,7 +41,7 @@ class Agent():
     def give_a_goal(self, goal: np.ndarray) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
-        if (self.goal != goal).all():  # goal is new
+        if (self.goal != goal).any():  # goal is new
             self.goal = goal
             self.env_nx = gridmap_to_nx(self.env)
             success = self.plan_path()
@@ -90,7 +90,7 @@ class Agent():
         if self.policy == Policy.RANDOM:
             return random.random()
         elif self.policy == Policy.CLOSEST:
-            raise NotImplementedError
+            return 1. / np.linalg.norm(self.goal - self.pos)
 
     def what_is_next_step(self) -> np.ndarray:
         """Return the position where this agent would like to go next."""
