@@ -160,7 +160,8 @@ class TestDecentralizedSim(unittest.TestCase):
         agents[0].give_a_goal(np.array([0, 3]))
         agents[1].give_a_goal(np.array([0, 0]))
         sim.iterate_sim(agents)
-        self.assertRaises(sim.SimIterationException, lambda: sim.iterate_sim(agents))
+        for _ in range(100):
+            self.assertRaises(sim.SimIterationException, lambda: sim.iterate_sim(agents))
 
     def test_run_main(self):
         sim.run_main(5, 50, False, False)
