@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 
+import random
 import unittest
 from unittest.mock import MagicMock
 
 import numpy as np
 
-import sim
 import agent
-from agent import Policy, Agent
+import sim
+from agent import Agent, Policy
 
 
 class TestDecentralizedSim(unittest.TestCase):
+    def __init__(self):
+        random.seed(0)
+
     def test_initialize_environment(self):
         env = sim.initialize_environment(10, .5)
         self.assertEqual(env.shape, (10, 10))
