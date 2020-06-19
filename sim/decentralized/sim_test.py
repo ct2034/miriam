@@ -12,7 +12,8 @@ from agent import Agent, Policy
 
 
 class TestDecentralizedSim(unittest.TestCase):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(TestDecentralizedSim, self).__init__(*args, **kwargs)
         random.seed(0)
 
     def test_initialize_environment(self):
