@@ -225,7 +225,7 @@ def run_a_scenario(n_agents, policy, plot, print_results=True):
             time_slice, space_slice = iterate_sim(agents)
             time_progress += time_slice
             space_progress += space_slice
-    except SimIterationException as e:
+    except SimIterationException as e:  # pragma: no cover
         logging.warning(e)
 
     return check_time_evaluation(time_progress, space_progress, print_results)

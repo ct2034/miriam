@@ -156,6 +156,24 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
         self.assertTrue(sim.are_all_agents_at_their_goals(agents))
 
+    def test_iterate_sim_with_node_coll_deadlock(self):
+        env = np.array([[0, 0, 1], [0, 0, 1], [0, 1, 1]])
+        agents = [
+            Agent(env, [0, 0], Policy.RANDOM),
+            Agent(env, [0, 1], Policy.RANDOM),
+            Agent(env, [1, 1], Policy.RANDOM),
+            Agent(env, [1, 0], Policy.RANDOM),
+            Agent(env, [2, 0], Policy.RANDOM)
+        ]
+        agents[0].give_a_goal(np.array([0, 1]))
+        agents[1].give_a_goal(np.array([1, 1]))
+        agents[2].give_a_goal(np.array([1, 0]))
+        agents[3].give_a_goal(np.array([0, 0]))
+        agents[4].give_a_goal(np.array([1, 0]))
+        agents[4].get_priority = MagicMock(return_value=1)
+
+        self.assertRaises(sim.SimIterationException, lambda: sim.iterate_sim(agents))
+
     def test_iterate_sim_with_edge_coll(self):
         env = np.array([[0, 0, 0, 0], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
         agents = [
@@ -169,7 +187,7 @@ class TestDecentralizedSim(unittest.TestCase):
             self.assertRaises(sim.SimIterationException, lambda: sim.iterate_sim(agents))
 
     def test_run_main(self):
-        sim.run_main(5, 50, False, False)
+        sim.run_main(5, 100, False, False)
 
 
 if __name__ == "__main__":  # pragma: no cover
