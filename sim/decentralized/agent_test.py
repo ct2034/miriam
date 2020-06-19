@@ -71,7 +71,7 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(a.give_a_goal(np.array([0, 0])))
         self.assertTrue(a.is_at_goal())
 
-    def test_get_priority(self):
+    def test_get_priority_random(self):
         env = np.array([[0, 0], [0, 0]])
 
         # test random policy
@@ -80,12 +80,32 @@ class TestDecentralizedSim(unittest.TestCase):
             self.assertLessEqual(0, a.get_priority())
             self.assertGreaterEqual(1, a.get_priority())
 
+    def test_get_priority_random_closest(self):
+        env = np.array([[0, 0], [0, 0]])
+
         # with clostest policy
         a = Agent(env, np.array([0, 0]), Policy.CLOSEST)
         self.assertTrue(a.give_a_goal(np.array([1, 0])))
         self.assertAlmostEqual(a.get_priority(), 1.)
         self.assertTrue(a.give_a_goal(np.array([1, 1])))
         self.assertAlmostEqual(a.get_priority(), 1. / math.sqrt(2))
+
+    def test_get_priority_random_fill(self):
+        env = np.array([[0, 0, 0, 0, 0],
+                        [0, 0, 1, 1, 1],
+                        [0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0]])
+
+        # in the middel
+        a = Agent(env, np.array([2, 2]), Policy.FILL)
+        self.assertAlmostEqual(a.get_priority(), 3./25.)
+        # one left
+        a = Agent(env, np.array([2, 1]), Policy.FILL)
+        self.assertAlmostEqual(a.get_priority(), 7./25.)
+        # low left corner
+        a = Agent(env, np.array([4, 0]), Policy.FILL)
+        self.assertAlmostEqual(a.get_priority(), 14./25.)
 
     def test_what_is_next_step_and_make_next_step(self):
         env = np.array([[0, 0], [0, 1]])

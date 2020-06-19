@@ -21,6 +21,7 @@ def gridmap_to_nx(env: np.ndarray):
 class Policy(Enum):
     RANDOM = 0
     CLOSEST = 1
+    FILL = 2
 
 
 class Agent():
@@ -88,9 +89,25 @@ class Agent():
         """Based on the selected policy, this will give the priority of this
         agent."""
         if self.policy == Policy.RANDOM:
+            # simply returning a random number on every call
             return random.random()
         elif self.policy == Policy.CLOSEST:
+            # a policy that prefers the agent that is currently closest to its
+            # goal.
             return 1. / np.linalg.norm(self.goal - self.pos)
+        elif self.policy == Policy.FILL:
+            # an agent will get a higher prio if the map around it is fuller of
+            # obstacles.
+            FILL_RADIUS = 2
+            n_total = ((FILL_RADIUS * 2 + 1)**2)
+            n_free = 0
+            for x in range(max(0, self.pos[0] - FILL_RADIUS),
+                           min(self.env.shape[0] - 1, self.pos[0] + FILL_RADIUS)):
+                for y in range(max(0, self.pos[1] - FILL_RADIUS),
+                               min(self.env.shape[1] - 1, self.pos[1] + FILL_RADIUS)):
+                    if self.env[x, y] == 0:
+                        n_free += 1
+            return float(n_total - n_free) / n_total
 
     def what_is_next_step(self) -> np.ndarray:
         """Return the position where this agent would like to go next."""
