@@ -172,10 +172,12 @@ class TestDecentralizedSim(unittest.TestCase):
         agents[4].give_a_goal(np.array([1, 0]))
         agents[4].get_priority = MagicMock(return_value=1)
 
-        self.assertRaises(sim.SimIterationException, lambda: sim.iterate_sim(agents))
+        self.assertRaises(sim.SimIterationException,
+                          lambda: sim.iterate_sim(agents))
 
     def test_iterate_sim_with_edge_coll(self):
-        env = np.array([[0, 0, 0, 0], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
+        env = np.array([[0, 0, 0, 0], [1, 1, 1, 1],
+                        [1, 1, 1, 1], [1, 1, 1, 1]])
         agents = [
             Agent(env, [0, 0], Policy.RANDOM),
             Agent(env, [0, 3], Policy.RANDOM)
@@ -184,7 +186,8 @@ class TestDecentralizedSim(unittest.TestCase):
         agents[1].give_a_goal(np.array([0, 0]))
         sim.iterate_sim(agents)
         for _ in range(100):
-            self.assertRaises(sim.SimIterationException, lambda: sim.iterate_sim(agents))
+            self.assertRaises(sim.SimIterationException,
+                              lambda: sim.iterate_sim(agents))
 
     def test_run_main(self):
         sim.run_main(5, 100, False, False)
