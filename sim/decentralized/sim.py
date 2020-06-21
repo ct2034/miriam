@@ -276,36 +276,40 @@ def plot_env_agents(environent: np.ndarray, agents: np.ndarray):  # pragma: no c
 
 def plot_evaluations(evaluations: Dict[Policy, np.ndarray]):  # pragma: no cover
     n_policies = len(evaluations.keys())
-    subplot_basenr = 100 + 10 * n_policies + 1
     colormap = cm.tab10.colors
+    data_shape = (n_policies, ) + list(evaluations.values())[0].shape
+    data = np.empty(data_shape)
 
-    max_val = 0
-    for policy in Policy:
-        max_val = max(max_val, np.max(evaluations[policy]))
+    evaluation_names = [
+        "average_time",
+        "max_time",
+        "average_length",
+        "max_length"
+    ]
+    policy_names = []
+    subplot_basenr = 100 + 10 * len(evaluation_names) + 1
+    evaluations_per_type = {}
+    for i_p, policy in enumerate(evaluations.keys()):
+        data[i_p, :, :] = evaluations[policy]
+        policy_names.append(str(policy))
 
     plt.figure(figsize=[16, 9])
 
-    for i_p, policy in enumerate(evaluations.keys()):
-        ax = plt.subplot(subplot_basenr + i_p)
-        parts = ax.violinplot(np.transpose(evaluations[policy]), showmeans=True)
-        for pc in parts['bodies']:
-            pc.set_facecolor(colormap[i_p])
+    for i_e, evaluation_name in enumerate(evaluation_names):
+        ax = plt.subplot(subplot_basenr + i_e)
+        parts = ax.violinplot(np.transpose(data[:, i_e, :]), showmeans=True)
+        for i_pc, pc in enumerate(parts['bodies']):
+            pc.set_facecolor(colormap[i_pc])
         for partname in ('cbars', 'cmins', 'cmaxes', 'cmeans'):
             vp = parts[partname]
-            vp.set_edgecolor(colormap[i_p])
-        ax.set_title(str(policy))
-        ax.set_ylim([0, max_val + .5])
-        plt.xticks(range(1, 5), [
-            "average_time",
-            "max_time",
-            "average_length",
-            "max_length"
-        ])
+            vp.set_edgecolor('k')
+        ax.set_title(evaluation_name)
+        plt.xticks(range(1, n_policies + 1), policy_names)
 
     plt.show()
 
 
-def run_main(n_agents=10, runs=100, plot=True, plot_eval=True):
+def run_main(n_agents=10, runs=50, plot=True, plot_eval=True):
     run_a_scenario(n_agents, Policy.RANDOM, plot=False, print_results=True)
     evaluations = {}
 
