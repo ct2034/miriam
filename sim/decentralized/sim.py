@@ -41,9 +41,8 @@ def initialize_new_agent(
         env_with_goals[tuple(a.goal)] = 1
     no_obstacle_nor_agent = np.where(env_with_agents == 0)
     no_obstacle_nor_goal = np.where(env_with_goals == 0)
-    gen = np.random.default_rng()
-    pos = gen.choice(no_obstacle_nor_agent, axis=1)
-    goal = gen.choice(no_obstacle_nor_goal, axis=1)
+    pos = random.choice(np.transpose(no_obstacle_nor_agent))
+    goal = random.choice(np.transpose(no_obstacle_nor_goal))
     a = Agent(env, pos, policy)
     a.give_a_goal(goal)
     return a
