@@ -217,6 +217,7 @@ def run_a_scenario(n_agents, policy, plot, print_results=True):
     agents = initialize_agents(env, n_agents, policy)
 
     # iterate
+    successful = 0
     try:
         while not are_all_agents_at_their_goals(agents):
             if plot:  # pragma: no cover
@@ -224,13 +225,18 @@ def run_a_scenario(n_agents, policy, plot, print_results=True):
             time_slice, space_slice = iterate_sim(agents)
             time_progress += time_slice
             space_progress += space_slice
+        successful = 1
     except SimIterationException as e:  # pragma: no cover
         logging.warning(e)
 
-    return check_time_evaluation(time_progress, space_progress, print_results)
+    return check_time_evaluation(
+        time_progress,
+        space_progress,
+        print_results) + (successful, )
 
 
-def plot_env_agents(environent: np.ndarray, agents: np.ndarray):  # pragma: no cover
+def plot_env_agents(environent: np.ndarray,
+                    agents: np.ndarray):  # pragma: no cover
     """Plot the environment map with `x` coordinates to the right, `y` up.
     Occupied by colorful agents and their paths."""
     # map
@@ -273,24 +279,19 @@ def plot_env_agents(environent: np.ndarray, agents: np.ndarray):  # pragma: no c
     plt.show()
 
 
-def plot_evaluations(evaluations: Dict[Policy, np.ndarray]):  # pragma: no cover
+def plot_evaluations(evaluations: Dict[Policy, np.ndarray],
+                     evaluation_names: List[str]):  # pragma: no cover
     n_policies = len(evaluations.keys())
     colormap = cm.tab10.colors
     data_shape = (n_policies, ) + list(evaluations.values())[0].shape
     data = np.empty(data_shape)
 
-    evaluation_names = [
-        "average_time",
-        "max_time",
-        "average_length",
-        "max_length"
-    ]
     policy_names = []
     subplot_basenr = 100 + 10 * len(evaluation_names) + 1
     evaluations_per_type = {}
     for i_p, policy in enumerate(evaluations.keys()):
         data[i_p, :, :] = evaluations[policy]
-        policy_names.append(str(policy))
+        policy_names.append(str(policy).replace('Policy.', ''))
 
     plt.figure(figsize=[16, 9])
 
@@ -308,12 +309,19 @@ def plot_evaluations(evaluations: Dict[Policy, np.ndarray]):  # pragma: no cover
     plt.show()
 
 
-def run_main(n_agents=10, runs=50, plot=True, plot_eval=True):
+def run_main(n_agents=10, runs=100, plot=True, plot_eval=True):
     run_a_scenario(n_agents, Policy.RANDOM, plot=False, print_results=True)
     evaluations = {}
+    evaluation_names = [
+        "average_time",
+        "max_time",
+        "average_length",
+        "max_length",
+        "successful"
+    ]
 
     for policy in Policy:
-        evaluation_per_policy = np.empty([4, 0])
+        evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):
             random.seed(i_r)
             results = run_a_scenario(n_agents, policy, False, False)
@@ -322,7 +330,7 @@ def run_main(n_agents=10, runs=50, plot=True, plot_eval=True):
         evaluations[policy] = evaluation_per_policy
 
     if plot_eval:  # pragma: no cover
-        plot_evaluations(evaluations)
+        plot_evaluations(evaluations, evaluation_names)
 
 
 if __name__ == "__main__":  # pragma: no cover
