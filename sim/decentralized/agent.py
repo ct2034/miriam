@@ -102,9 +102,11 @@ class Agent():
             n_total = ((FILL_RADIUS * 2 + 1)**2)
             n_free = 0
             for x in range(max(0, self.pos[0] - FILL_RADIUS),
-                           min(self.env.shape[0] - 1, self.pos[0] + FILL_RADIUS)):
+                           min(self.env.shape[0],
+                               self.pos[0] + FILL_RADIUS + 1)):
                 for y in range(max(0, self.pos[1] - FILL_RADIUS),
-                               min(self.env.shape[1] - 1, self.pos[1] + FILL_RADIUS)):
+                               min(self.env.shape[1],
+                                   self.pos[1] + FILL_RADIUS + 1)):
                     if self.env[x, y] == 0:
                         n_free += 1
             return float(n_total - n_free) / n_total

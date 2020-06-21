@@ -105,7 +105,10 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertAlmostEqual(a.get_priority(), 7./25.)
         # low left corner
         a = Agent(env, np.array([4, 0]), Policy.FILL)
-        self.assertAlmostEqual(a.get_priority(), 14./25.)
+        self.assertAlmostEqual(a.get_priority(), 16./25.)
+        # top right corner
+        a = Agent(env, np.array([0, 4]), Policy.FILL)
+        self.assertAlmostEqual(a.get_priority(), 19./25.)
 
     def test_what_is_next_step_and_make_next_step(self):
         env = np.array([[0, 0], [0, 1]])
