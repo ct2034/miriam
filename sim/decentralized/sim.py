@@ -7,6 +7,7 @@ from typing import Dict, List
 
 import networkx as nx
 import numpy as np
+import timeout_decorator
 from matplotlib import cm
 from matplotlib import pyplot as plt
 
@@ -118,6 +119,7 @@ def make_sure_agents_are_safe(agents: List[Agent]):
             poses.add(tuple(a.pos))
 
 
+@timeout_decorator.timeout(1)
 def iterate_sim(agents: List[Agent]):
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""

@@ -19,6 +19,34 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue((a.pos == np.array([0, 2])).all())
         self.assertEqual(a.policy, Policy.RANDOM)
 
+    def test_hash_equality(self):
+        env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
+        a1 = Agent(env, np.array([0, 2]), Policy.RANDOM)
+        a2 = Agent(env, np.array([0, 2]), Policy.RANDOM)  # same
+        self.assertTrue(a1 == a2)
+
+        a3 = Agent(env, np.array([0, 2]), Policy.RANDOM)
+        self.assertTrue(a1 == a3)  # same now
+        a3.give_a_goal(np.array([0, 0]))  # setting goal
+        self.assertTrue(a1 != a3)  # not same any more
+
+        a4 = Agent(env, np.array([0, 2]), Policy.RANDOM)
+        a4.give_a_goal(np.array([0, 1]))  # different goal
+        self.assertTrue(a1 != a4)
+        self.assertTrue(a3 != a4)
+
+        a5 = Agent(env, np.array([0, 1]), Policy.RANDOM)  # different pos
+        self.assertTrue(a1 != a5)
+
+        a6 = Agent(env, np.array([0, 2]), Policy.FILL)  # different policy
+        self.assertTrue(a1 != a6)
+
+        # in comparison to a4 this switches pos with goal
+        a7 = Agent(env, np.array([0, 1]), Policy.RANDOM)  # goal of a4
+        a7.give_a_goal(np.array([0, 2]))  # pos of a4
+        self.assertTrue(a1 != a7)
+        self.assertTrue(a4 != a7)
+
     def test_gridmap_to_nx(self):
         env = np.array([[0, 1], [1, 1]])
         a = Agent(env, np.array([0, 0]), Policy.RANDOM)

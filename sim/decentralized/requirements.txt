@@ -1,4 +1,5 @@
-numpy
+coverage
 matplotlib
 networkx
-coverage
+numpy
+timeout_decorator

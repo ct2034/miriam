@@ -39,6 +39,16 @@ class Agent():
         self.path = None
         self.path_i = None
 
+    def __hash__(self):
+        return hash(
+            hash(str(self.pos) + "pos") +
+            hash(str(self.goal) + "goal") +
+            hash(str(self.policy) + "policy")
+        )
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
     def give_a_goal(self, goal: np.ndarray) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
