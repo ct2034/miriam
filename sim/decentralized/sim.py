@@ -3,7 +3,7 @@
 import itertools
 import logging
 import random
-from typing import Dict, List
+from typing import Dict, List, Set
 
 import networkx as nx
 import numpy as np
@@ -112,6 +112,7 @@ def check_for_colissions(
 
 
 def make_sure_agents_are_safe(agents: List[Agent]):
+    """Assert that no too agents are in the same place"""
     poses = set()
     for a in agents:
         if not a.is_at_goal():
@@ -119,7 +120,15 @@ def make_sure_agents_are_safe(agents: List[Agent]):
             poses.add(tuple(a.pos))
 
 
-@timeout_decorator.timeout(1)
+def make_sure_at_least_one_agent_moved(agents: List[Agent], agents_at_start: Set[int]):
+    """given the set of agents from the start, have they changed now?"""
+    for a in agents:
+        if hash(a) not in agents_at_start:
+            return True
+    return False
+
+
+# @timeout_decorator.timeout(1)
 def iterate_sim(agents: List[Agent]):
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
@@ -128,6 +137,9 @@ def iterate_sim(agents: List[Agent]):
 
     time_slice = [0] * len(agents)
     space_slice = [0] * len(agents)
+
+    # how do agents look like at beginning?
+    agents_at_start = set(map(lambda a: hash(a), agents))
 
     while(there_are_collisions):
         possible_next_agent_poses = get_possible_next_agent_poses(
@@ -183,6 +195,8 @@ def iterate_sim(agents: List[Agent]):
             time_slice[i_a] = 1
 
     make_sure_agents_are_safe(agents)
+    assert make_sure_at_least_one_agent_moved(
+        agents, agents_at_start), "no agent has changed"
 
     return time_slice, space_slice
 
