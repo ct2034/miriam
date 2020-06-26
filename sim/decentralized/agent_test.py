@@ -23,10 +23,10 @@ class TestDecentralizedSim(unittest.TestCase):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
         a1 = Agent(env, np.array([0, 2]), Policy.RANDOM)
         a2 = Agent(env, np.array([0, 2]), Policy.RANDOM)  # same
-        self.assertTrue(a1 == a2)
+        self.assertTrue(a1 != a2)
 
         a3 = Agent(env, np.array([0, 2]), Policy.RANDOM)
-        self.assertTrue(a1 == a3)  # same now
+        self.assertTrue(a1 != a3)
         a3.give_a_goal(np.array([0, 0]))  # setting goal
         self.assertTrue(a1 != a3)  # not same any more
 

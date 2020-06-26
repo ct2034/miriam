@@ -1,5 +1,6 @@
 import logging
 import random
+import uuid
 from enum import Enum
 
 import networkx as nx
@@ -38,12 +39,14 @@ class Agent():
         self.policy = policy
         self.path = None
         self.path_i = None
+        self.uuid = uuid.uuid1()
 
     def __hash__(self):
         return hash(
             hash(str(self.pos) + "pos") +
             hash(str(self.goal) + "goal") +
-            hash(str(self.policy) + "policy")
+            hash(str(self.policy) + "policy") +
+            hash(str(self.uuid) + "uuid")
         )
 
     def __eq__(self, other):
