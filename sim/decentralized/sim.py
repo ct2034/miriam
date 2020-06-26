@@ -61,6 +61,18 @@ def initialize_agents(
     return agents
 
 
+def is_environment_well_formed(agents: List[Agent]):
+    """Check if the environment is well formed according to Cap2015"""
+    for a in agents:
+        blocks = []
+        for other_a in [ia for ia in agents if ia != a]:
+            blocks.append(tuple(other_a.pos))
+            blocks.append(tuple(other_a.goal))
+        if not a.is_there_path_with_node_blocks(blocks):
+            return False
+    return True
+
+
 def get_possible_next_agent_poses(
         agents: List[Agent],
         can_proceed: List[bool]) -> np.ndarray:
