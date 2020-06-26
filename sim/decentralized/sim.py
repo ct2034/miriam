@@ -120,7 +120,7 @@ def make_sure_agents_are_safe(agents: List[Agent]):
             poses.add(tuple(a.pos))
 
 
-def make_sure_at_least_one_agent_moved(agents: List[Agent], agents_at_start: Set[int]):
+def has_at_least_one_agent_moved(agents: List[Agent], agents_at_start: Set[int]):
     """given the set of agents from the start, have they changed now?"""
     for a in agents:
         if hash(a) not in agents_at_start:
@@ -195,7 +195,7 @@ def iterate_sim(agents: List[Agent]):
             time_slice[i_a] = 1
 
     make_sure_agents_are_safe(agents)
-    assert make_sure_at_least_one_agent_moved(
+    assert has_at_least_one_agent_moved(
         agents, agents_at_start), "no agent has changed"
 
     return time_slice, space_slice
@@ -350,4 +350,4 @@ def run_main(n_agents=10, runs=100, plot=True, plot_eval=True):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    run_main()
+    run_main(20, 100)

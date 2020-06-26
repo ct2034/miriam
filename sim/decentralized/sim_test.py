@@ -105,7 +105,7 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(sim.are_all_agents_at_their_goals(agents))
 
         # after another iteration they should be still at their goal
-        sim.iterate_sim(agents)
+        self.assertRaises(AssertionError, lambda: sim.iterate_sim(agents))
         self.assertTrue(all(agents[0].pos == np.array([0, 1])))
         self.assertTrue(all(agents[1].pos == np.array([1, 0])))
         self.assertTrue(sim.are_all_agents_at_their_goals(agents))
@@ -190,9 +190,9 @@ class TestDecentralizedSim(unittest.TestCase):
                               lambda: sim.iterate_sim(agents))
 
     def test_run_main(self):
-        sim.run_main(5, 100, False, False)
-        sim.run_main(10, 100, False, False)
-        # sim.run_main(15, 100, False, False) # TODO: elaborate why this takes forever
+        sim.run_main(5, 50, False, False)
+        sim.run_main(10, 50, False, False)
+        sim.run_main(15, 50, False, False) # TODO: elaborate why this takes forever
 
 
 if __name__ == "__main__":  # pragma: no cover
