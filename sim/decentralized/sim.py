@@ -238,11 +238,16 @@ def run_a_scenario(n_agents, policy, plot, print_results=True):
     time_progress = np.zeros([n_agents])
     space_progress = np.zeros([n_agents])
 
-    # maze (environment)
-    env = initialize_environment(10, .1)
+    is_well_formed = False
+    while not is_well_formed:
+        # maze (environment)
+        env = initialize_environment(10, .05)
 
-    # agents
-    agents = initialize_agents(env, n_agents, policy)
+        # agents
+        agents = initialize_agents(env, n_agents, policy)
+
+        # check well-formedness
+        is_well_formed = is_environment_well_formed(agents)
 
     # iterate
     successful = 0

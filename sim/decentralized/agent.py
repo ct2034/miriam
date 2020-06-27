@@ -80,6 +80,9 @@ class Agent():
         except nx.exception.NetworkXNoPath as e:
             logging.warning(e)
             return None
+        except nx.exception.NodeNotFound as e:
+            logging.warning(e)
+            return None
         return np.array(tuple_path)
 
     def is_there_path_with_node_blocks(self, blocks: List[Tuple[int]]) -> bool:

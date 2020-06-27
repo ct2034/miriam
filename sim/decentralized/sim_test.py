@@ -223,7 +223,7 @@ class TestDecentralizedSim(unittest.TestCase):
     def test_run_main(self):
         sim.run_main(5, 50, False, False)
         sim.run_main(10, 50, False, False)
-        # sim.run_main(15, 50, False, False) # TODO: elaborate why this takes forever
+        sim.run_main(15, 50, False, False)
 
 
 if __name__ == "__main__":  # pragma: no cover
