@@ -15,6 +15,10 @@ bibtex:
 }
 ```
 
-## Video
+
+## Presentation video
+[![youtube](https://img.youtube.com/vi/Cf5TD8emTDs/0.jpg)](https://www.youtube.com/watch?v=Cf5TD8emTDs "Optimized Directed Roadmap Graph for Multi-Agent Path Finding Using Stochastic Gradient Descent")
+
+## Video Attachment
 [![youtube](https://img.youtube.com/vi/jWZoDkVTVLU/0.jpg)](https://www.youtube.com/watch?v=jWZoDkVTVLU "Optimized Directed Roadmap Graph for Multi-Agent Path Finding Using Stochastic Gradient Descent")
 

@@ -14,7 +14,10 @@ bibtex:
 ```
 [Download PDF from arxiv](https://arxiv.org/abs/1907.10360)
 
-## Video
+## Presentation video
+[![youtube](https://img.youtube.com/vi/TyR1LDJwlbA/0.jpg)](https://www.youtube.com/watch?v=TyR1LDJwlbA "An Optimal Baseline Algorithm to Solve the Combined Task Allocation and Path Finding Problem")
+
+## Video Attachment
 [![youtube](https://img.youtube.com/vi/6F7gfNUXstY/0.jpg)](https://www.youtube.com/watch?v=6F7gfNUXstY "An Optimal Baseline Algorithm to Solve the Combined Task Allocation and Path Finding Problem")
 
 ## The Implementation
