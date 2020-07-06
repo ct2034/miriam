@@ -22,11 +22,14 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertEqual(np.count_nonzero(env), 50)
 
     def test_initialize_new_agent(self):
-        env_zz = np.array([[0, 1], [1, 1]])
+        env_zz = np.array([[0, 0], [1, 1]])
         zero_zero = sim.initialize_new_agent(env_zz, [], Policy.RANDOM)
-        self.assertTrue((zero_zero.pos == [0, 0]).all())
-        self.assertTrue((zero_zero.goal == [0, 0]).all())
+        self.assertTrue((zero_zero.pos == [0, 0]).all() or
+                        (zero_zero.goal == [0, 0]).all())
+        self.assertTrue((zero_zero.pos == [0, 1]).all() or
+                        (zero_zero.goal == [0, 1]).all())
         self.assertTrue(zero_zero.policy == Policy.RANDOM)
+
         env_zo = np.array([[0, 0], [1, 1]])
         zero_one = sim.initialize_new_agent(env_zo, [zero_zero],
                                             Policy.RANDOM)
@@ -35,15 +38,17 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(zero_one.policy == Policy.RANDOM)
 
     def test_initialize_agents(self):
-        env = np.array([[0, 0], [0, 1]])
-        agents = sim.initialize_agents(env, 3, Policy.RANDOM)
-        self.assertEqual(len(agents), 3)
-        self.assertIn((0, 0), map(lambda a: tuple(a.pos), agents))
-        self.assertIn((0, 1), map(lambda a: tuple(a.pos), agents))
-        self.assertIn((1, 0), map(lambda a: tuple(a.pos), agents))
-        self.assertIn((0, 0), map(lambda a: tuple(a.goal), agents))
-        self.assertIn((0, 1), map(lambda a: tuple(a.goal), agents))
-        self.assertIn((1, 0), map(lambda a: tuple(a.goal), agents))
+        env = np.array([[0, 0], [0, 0]])
+        agents = sim.initialize_agents(env, 2, Policy.RANDOM)
+        self.assertEqual(len(agents), 2)
+        self.assertTrue((0, 0) in map(lambda a: tuple(a.pos), agents) or
+                        (0, 0) in map(lambda a: tuple(a.goal), agents))
+        self.assertTrue((0, 1) in map(lambda a: tuple(a.pos), agents) or
+                        (0, 1) in map(lambda a: tuple(a.goal), agents))
+        self.assertTrue((1, 0) in map(lambda a: tuple(a.pos), agents) or
+                        (1, 0) in map(lambda a: tuple(a.goal), agents))
+        self.assertTrue((1, 1) in map(lambda a: tuple(a.pos), agents) or
+                        (1, 1) in map(lambda a: tuple(a.goal), agents))
 
     def test_is_environment_well_formed(self):
         env = np.array([[0, 0, 0, 0], [1, 0, 1, 0],

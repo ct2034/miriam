@@ -35,15 +35,13 @@ def initialize_new_agent(
 ) -> List[Agent]:
     """Place new agent in the environment, where no obstacle or other agent
     is."""
-    env_with_agents = env.copy()
-    env_with_goals = env.copy()
+    env_with_agents_and_goals = env.copy()
     for a in agents:
-        env_with_agents[tuple(a.pos)] = 1
-        env_with_goals[tuple(a.goal)] = 1
-    no_obstacle_nor_agent = np.where(env_with_agents == 0)
-    no_obstacle_nor_goal = np.where(env_with_goals == 0)
-    pos = random.choice(np.transpose(no_obstacle_nor_agent))
-    goal = random.choice(np.transpose(no_obstacle_nor_goal))
+        env_with_agents_and_goals[tuple(a.pos)] = 1
+    no_obstacle_nor_agent_or_goal = np.where(env_with_agents_and_goals == 0)
+    assert len(no_obstacle_nor_agent_or_goal[0]) > 0, "Possible poses should be left"
+    pos = random.choice(np.transpose(no_obstacle_nor_agent_or_goal))
+    goal = random.choice(np.transpose(no_obstacle_nor_agent_or_goal))
     a = Agent(env, pos, policy)
     a.give_a_goal(goal)
     return a
@@ -61,7 +59,7 @@ def initialize_agents(
     return agents
 
 
-def is_environment_well_formed(agents: List[Agent]):
+def is_environment_well_formed(agents: List[Agent]) -> bool: 
     """Check if the environment is well formed according to Cap2015"""
     for a in agents:
         blocks = []
@@ -132,7 +130,8 @@ def make_sure_agents_are_safe(agents: List[Agent]):
             poses.add(tuple(a.pos))
 
 
-def has_at_least_one_agent_moved(agents: List[Agent], agents_at_start: Set[int]):
+def has_at_least_one_agent_moved(
+        agents: List[Agent], agents_at_start: Set[int]) -> bool:
     """given the set of agents from the start, have they changed now?"""
     for a in agents:
         if hash(a) not in agents_at_start:
@@ -233,7 +232,7 @@ def check_time_evaluation(time_progress, space_progress, print_results=True):
     return average_time, max_time, average_length, max_length
 
 
-def run_a_scenario(n_agents, policy, plot, print_results=True):
+def run_a_scenario(size, n_agents, policy, plot, print_results=True):
     # evaluation parameters
     time_progress = np.zeros([n_agents])
     space_progress = np.zeros([n_agents])
@@ -241,7 +240,7 @@ def run_a_scenario(n_agents, policy, plot, print_results=True):
     is_well_formed = False
     while not is_well_formed:
         # maze (environment)
-        env = initialize_environment(10, .05)
+        env = initialize_environment(size, .2)
 
         # agents
         agents = initialize_agents(env, n_agents, policy)
@@ -342,8 +341,7 @@ def plot_evaluations(evaluations: Dict[Policy, np.ndarray],
     plt.show()
 
 
-def run_main(n_agents=10, runs=100, plot=True, plot_eval=True):
-    run_a_scenario(n_agents, Policy.RANDOM, plot=False, print_results=True)
+def run_main(size=10, n_agents=10, runs=100, plot=True, plot_eval=True):
     evaluations = {}
     evaluation_names = [
         "average_time",
@@ -357,7 +355,7 @@ def run_main(n_agents=10, runs=100, plot=True, plot_eval=True):
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):
             random.seed(i_r)
-            results = run_a_scenario(n_agents, policy, False, False)
+            results = run_a_scenario(size, n_agents, policy, False, False)
             evaluation_per_policy = np.append(
                 evaluation_per_policy, np.transpose([results]), axis=1)
         evaluations[policy] = evaluation_per_policy
@@ -367,4 +365,4 @@ def run_main(n_agents=10, runs=100, plot=True, plot_eval=True):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    run_main(20, 100)
+    run_main(32, 16, 8)
