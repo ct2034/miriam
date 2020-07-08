@@ -7,4 +7,8 @@ Additionally, the platform provides modules to support predictive maintenance th
 The platform will be developed open source and integrated with ROS.
 
 ## Publications
-Christian Henkel **The combined task allocation and path finding problem** ([slides](iros2018_ws/slides.pdf)) @ [IROS2018 workshop](http://prisma.dieti.unina.it/index.php/news-archive/552-robotics-for-logistics-in-warehouses-and-environments-shared-with-humans)
+* Christian Henkel **The combined task allocation and path finding problem** @ [IROS2018 workshop](http://prisma.dieti.unina.it/index.php/news-archive/552-robotics-for-logistics-in-warehouses-and-environments-shared-with-humans) ([slides](iros2018_ws/slides.pdf))
+
+* Christian Henkel, Jannik Abbenseth and Marc Toussaint **An Optimal Algorithm to Solve the Combined Task Allocation and Path Finding Problem** @ IROS2019 ([more](iros2019))
+
+* Christian Henkel and Marc Toussaint **Optimized Directed Roadmap Graph for Multi-Agent Path Finding Using Stochastic Gradient Descent** @ SAC2020 ([more](sac2020))
