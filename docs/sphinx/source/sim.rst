@@ -5,14 +5,16 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    sim.process
-    sim.simple
+   sim.decentralized
+   sim.process
+   sim.simple
 
 Module contents
 ---------------
 
 .. automodule:: sim
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

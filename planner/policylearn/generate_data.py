@@ -23,9 +23,9 @@ TRANSFER_LSTM_STR = 'transfer_lstm'
 TRANSFER_CLASSIFICATION_STR = 'transfer_classification'
 GENERATE_SIM_STR = 'generate_simulation'
 
-LSTM_FOV_RADIUS = 2  # self plus x in all 4 dircetions
+LSTM_FOV_RADIUS = 2  # self plus x in all 4 directions
 CLASSIFICATION_POS_TIMESTEPS = 3
-CLASSIFICATION_FOV_RADIUS = 6  # self plus x in all 4 dircetions
+CLASSIFICATION_FOV_RADIUS = 6  # self plus x in all 4 directions
 DTYPE_SAMPLES = np.int8
 
 
@@ -449,10 +449,11 @@ if __name__ == "__main__":
 
             data = plan_in_gridmap(gridmap, starts, goals)
 
-            if data and BLOCKS_STR in data.keys():
+            if data and BLOCKS_STR in data.keys():  # has blocks
                 blocks = data[BLOCKS_STR]
-                has_a_block = has_exatly_one_vertex_block(blocks)
+                has_a_block = has_exatly_one_vertex_block(blocks)  
                 if has_a_block:
+                    # we take only these for learning
                     data.update({
                         INDEP_AGENT_PATHS_STR: indep_agent_paths,
                         COLLISIONS_STR: collisions,

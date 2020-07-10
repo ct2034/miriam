@@ -1,53 +1,54 @@
-planner\.tcbs package
-=====================
+planner.tcbs package
+====================
 
 Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    planner.tcbs.results
+   planner.tcbs.results
 
 Submodules
 ----------
 
-planner\.tcbs\.base module
---------------------------
+planner.tcbs.base module
+------------------------
 
 .. automodule:: planner.tcbs.base
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-planner\.tcbs\.multiproc\_demo module
--------------------------------------
+planner.tcbs.multiproc\_demo module
+-----------------------------------
 
 .. automodule:: planner.tcbs.multiproc_demo
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-planner\.tcbs\.plan module
---------------------------
+planner.tcbs.plan module
+------------------------
 
 .. automodule:: planner.tcbs.plan
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-planner\.tcbs\.plan\_test module
---------------------------------
+planner.tcbs.plan\_main module
+------------------------------
 
-.. automodule:: planner.tcbs.plan_test
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. automodule:: planner.tcbs.plan_main
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 
 Module contents
 ---------------
 
 .. automodule:: planner.tcbs
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
