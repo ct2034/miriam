@@ -6,11 +6,11 @@ from datetime import datetime
 import unittest2 as unittest
 
 import numpy as np
-from simple_simulation.mod_cbsextension import Cbsext
-from simple_simulation.mod_nearest import Nearest
+from sim.simple.mod_cbsextension import Cbsext
+from sim.simple.mod_nearest import Nearest
 
-from simple_simulation.mod_random import Random
-from simple_simulation.simulation import SimpSim
+from sim.simple.mod_random import Random
+from sim.simple.simulation import SimpSim
 from tools import is_travis
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"

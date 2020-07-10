@@ -20,13 +20,14 @@ def pathplan(agent_pos, jobs):
     return res_paths
 
 
-# input 1
-agent_pos = [(1, 1), (2, 1), (3, 1)]  # three agents
-jobs = [((1, 7), (9, 1), 0),
-        ((1, 8), (8, 1), 0),
-        ((9, 8), (4, 2), 0)]  # three jobs
+if __name__ == "__main__":
+    # input 1
+    agent_pos = [(1, 1), (2, 1), (3, 1)]  # three agents
+    jobs = [((1, 7), (9, 1), 0),
+            ((1, 8), (8, 1), 0),
+            ((9, 8), (4, 2), 0)]  # three jobs
 
-paths = pathplan(agent_pos, jobs)
-for p in paths:
-    print(p)
-plot_results([], paths, [], agent_pos, plt.figure(), grid, [], jobs)
+    paths = pathplan(agent_pos, jobs)
+    for p in paths:
+        print(p)
+    plot_results([], paths, [], agent_pos, plt.figure(), grid, [], jobs)

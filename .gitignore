@@ -25,3 +25,6 @@ venv/
 logs/
 cache/
 .coverage
+
+# sphinx build folder
+docs/sphinx/build

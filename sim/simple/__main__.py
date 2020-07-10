@@ -5,11 +5,11 @@ import threading
 import time
 
 import numpy as np
-from PyQt4 import QtGui
+from PyQt5 import QtGui
 
-from simple_simulation.mod_random import Random
-from simple_simulation.simulation import SimpSim
-from simple_simulation.vis import Vis
+from sim.simple.mod_random import Random
+from sim.simple.simulation import SimpSim
+from sim.simple.vis import Vis
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)

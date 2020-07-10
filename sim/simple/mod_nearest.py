@@ -1,7 +1,7 @@
 from planner.astar.astar_grid48con import astar_grid4con
 from planner.tcbs.plan import get_nearest
-from simple_simulation.mod import Module
-from simple_simulation.route import Route, Car
+from sim.simple.mod import Module
+from sim.simple.route import Route, Car
 
 
 class Nearest(Module):

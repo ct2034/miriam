@@ -53,13 +53,12 @@ def make_graph(amap, ltop, rbot):
             if check_path(amap, imga, imgb):
                 graph[point].append(goal)
     return graph
-
-
-amap = plt.imread('multi_robot_nav/map/world.png')
-graph = make_graph(amap, (-6, -4), (6, 4))
-print(graph[(2, 0)])
+    
 
 if __name__ == '__main__':
+    amap = plt.imread('multi_robot_nav/map/world.png')
+    graph = make_graph(amap, (-6, -4), (6, 4))
+    print(graph[(2, 0)])
     plt.imshow(amap)
     for o in graph.keys():
         for e in graph[o]:

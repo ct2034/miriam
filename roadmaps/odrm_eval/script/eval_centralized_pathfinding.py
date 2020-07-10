@@ -12,7 +12,7 @@ import random
 import signal
 import sys
 import time
-from enum import Enum, unique
+from enum import Enum
 from math import sqrt
 from typing import Dict
 
@@ -53,14 +53,12 @@ COST = "cost"
 WIDTH = 10000
 
 
-@unique
 class Planner(Enum):
     RCBS = 0
     ILP = 1
     ECBS = 2
 
 
-@unique
 class Graph(Enum):
     ODRM = 0
     UDRM = 1
@@ -86,7 +84,9 @@ def evaluate(fname):
     assert os.path.exists(
         fname_graph_undir_adjlist), "Please make csv files first `script/write_graph.py csv res/...pkl`"
     fname_map = resolve_mapname(fname)
-    fname_eval_results = "res/" + get_basename_wo_extension(fname) + ".eval_cen." + str(uuid.uuid1()) + ".pkl"
+    fname_eval_results = "res/" + \
+        get_basename_wo_extension(fname) + ".eval_cen." + \
+        str(uuid.uuid1()) + ".pkl"
     assert is_eval_cen_file(fname_eval_results)
 
     # read file
@@ -102,13 +102,15 @@ def evaluate(fname):
     graph_undir = graph.to_undirected(as_view=True)
 
     # grid map
-    g_grid, posar_grid, fname_grid_adjlist, fname_grid_posar = make_gridmap(N, im, fname)
+    g_grid, posar_grid, fname_grid_adjlist, fname_grid_posar = make_gridmap(
+        N, im, fname)
     logging.info("fname_grid_adjlist: " + fname_grid_adjlist)
     logging.info("fname_grid_posar: " + fname_grid_posar)
     logging.info("fname_graph_adjlist: " + fname_graph_adjlist)
 
     # results
-    eval_results = {SUCCESSFUL: {}, COMPUTATION_TIME: {}, COST: {}}  # type: Dict[str, Dict[str, Dict[str, list]]]
+    # type: Dict[str, Dict[str, Dict[str, list]]]
+    eval_results = {SUCCESSFUL: {}, COMPUTATION_TIME: {}, COST: {}}
     global_seed = random.randint(0, 1000)
 
     # the evaluation per combination
@@ -120,7 +122,8 @@ def evaluate(fname):
     graph_iter = Graph
     # graph_iter = [Graph.GRID]
 
-    time_estimate = len(planner_iter) * len(graph_iter) * len(n_agentss) * TRIALS * TIMEOUT_S
+    time_estimate = len(planner_iter) * len(graph_iter) * \
+        len(n_agentss) * TRIALS * TIMEOUT_S
     logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
         str(datetime.timedelta(seconds=time_estimate))
     ))
@@ -135,7 +138,8 @@ def evaluate(fname):
         for n_agents in n_agentss:
             logging.info("-- n_agents: " + str(n_agents))
             eval_results[SUCCESSFUL][combination_name][str(n_agents)] = []
-            eval_results[COMPUTATION_TIME][combination_name][str(n_agents)] = []
+            eval_results[COMPUTATION_TIME][combination_name][str(n_agents)] = [
+            ]
             eval_results[COST][combination_name][str(n_agents)] = []
             for i_trial in range(TRIALS):
                 logging.info("--= trial {}/{}".format(i_trial + 1, TRIALS))
@@ -157,7 +161,8 @@ def evaluate(fname):
                     fname_adjlist = fname_grid_adjlist
                     fname_posar = fname_grid_posar
                     n = len(posar_grid)
-                random.seed(i_trial + global_seed)  # this makes cases with more agents comparable to runs with less
+                # this makes cases with more agents comparable to runs with less
+                random.seed(i_trial + global_seed)
                 run_it = True
                 try:
                     # if the run with the last number of agents on this trial failed ...
@@ -171,11 +176,15 @@ def evaluate(fname):
                     succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist,
                                                       fname_posar)
                 else:
-                    logging.warn("skipping because last agent number timed out, too")
+                    logging.warn(
+                        "skipping because last agent number timed out, too")
                     succesful, comp_time, cost = False, TIMEOUT_S, 0
-                eval_results[SUCCESSFUL][combination_name][str(n_agents)].append(succesful)
-                eval_results[COMPUTATION_TIME][combination_name][str(n_agents)].append(comp_time)
-                eval_results[COST][combination_name][str(n_agents)].append(cost)
+                eval_results[SUCCESSFUL][combination_name][str(
+                    n_agents)].append(succesful)
+                eval_results[COMPUTATION_TIME][combination_name][str(
+                    n_agents)].append(comp_time)
+                eval_results[COST][combination_name][str(
+                    n_agents)].append(cost)
 
                 # saving / presenting results
                 logging.info("Saving ..")
@@ -217,7 +226,8 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
                 starts=batch[:, 0],
                 goals=batch[:, 1],
                 N=n,
-                graph_fname=os.path.abspath(os.path.dirname(__file__)) + "/../" + fname_adjlist,
+                graph_fname=os.path.abspath(os.path.dirname(
+                    __file__)) + "/../" + fname_adjlist,
                 timeout=TIMEOUT_S
             )
         except TimeoutException:
@@ -274,8 +284,10 @@ def make_gridmap(N, im, fname):
         logging.debug("edge_len {}".format(edge_len))
         logging.debug("N_grid {}".format(N_grid))
 
-        grid_adjlist_fname = "res/" + get_basename_wo_extension(fname) + ".grid_adjlist.csv"
-        grid_posar_fname = "res/" + get_basename_wo_extension(fname) + ".grid_pos.csv"
+        grid_adjlist_fname = "res/" + \
+            get_basename_wo_extension(fname) + ".grid_adjlist.csv"
+        grid_posar_fname = "res/" + \
+            get_basename_wo_extension(fname) + ".grid_pos.csv"
         g_undir = nx.DiGraph()
         for e in g_grid.edges:
             g_undir.add_edge(e[0], e[1])

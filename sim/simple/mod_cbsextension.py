@@ -8,9 +8,9 @@ from threading import Lock
 import numpy as np
 
 from planner.tcbs.plan import plan, get_paths, comp2condition, comp2state, generate_config
-from simple_simulation.mod import Module
-from simple_simulation.route import Route, Car
-from simple_simulation.simulation import list_hash
+from sim.simple.mod import Module
+from sim.simple.route import Route, Car
+from sim.simple.simulation import list_hash
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)

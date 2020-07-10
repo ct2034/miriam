@@ -1,4 +1,4 @@
-source: https://travis-ci.com/ct2034/smartleitstand#L6369 on https://github.com/ct2034/smartleitstand/commit/6f56e41dbb7853bd8f067c45fdba44a43c7b398f
+source: https://travis-ci.com/ct2034/miriam#L6369 on https://github.com/ct2034/miriam/commit/6f56e41dbb7853bd8f067c45fdba44a43c7b398f
 
 n_j_s = [1, 2, 3]
 n_a_s = [2, 3, 4, 5]
@@ -13,7 +13,7 @@ std ..
  [ 0.20777547  0.4635024   0.25827737  0.57105345]]
 
 
-https://github.com/ct2034/smartleitstand/commit/a43d984a6c2f5f435eccc74e7ee9c48bdb5b154f
+https://github.com/ct2034/miriam/commit/a43d984a6c2f5f435eccc74e7ee9c48bdb5b154f
 
 n_j_s = [2, 3, 4]
 n_a_s = [2, 3, 4, 5, 6]

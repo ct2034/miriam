@@ -146,9 +146,9 @@ def mongodb_save(name, data):
 
     client = pymongo.MongoClient(
         "mongodb://testing:6R8IimXpg0TqVDwm" +
-        "@ds033607.mlab.com:33607/smartleitstand-results"
+        "@ds033607.mlab.com:33607/miriam-results"
     )
-    db = client["smartleitstand-results"]
+    db = client["miriam-results"]
     collection = db.test_collection
     cursor = collection.find({'_id': key})
     print("Saving to MongoDB")

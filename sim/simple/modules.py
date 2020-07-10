@@ -1,4 +1,4 @@
-from simple_simulation.route import Car
+from sim.simple.route import Car
 
 
 def __init__(mod):
@@ -7,7 +7,7 @@ def __init__(mod):
 
 
 def which_car(cars: list, route_todo, routes_queue: list, idle_goals: list) -> Car:
-    # print("### SMARTLEITSTAND ###")
+    # print("### miriam ###")
     # print("cars:" + "; ".join(map(str, cars)))
     # print("route_todo:" + route_todo.__str__())
     # print("routes_queue:" + str(routes_queue))

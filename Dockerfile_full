@@ -3,12 +3,8 @@ FROM ubuntu:xenial
 # REQUIREMENTS
 RUN apt-get update
 
-# bonmin
-RUN apt-get install -y libblas3 liblapack3 wget
-#####
-
 # roadmap
-# RUN apt-get install -y sudo cmake libcgal-dev libcgal-qt5-dev libeigen3-dev libmgl-dev mathgl qt5-default libboost-filesystem-dev
+# RUN apt-get install -y wget sudo cmake libcgal-dev libcgal-qt5-dev libeigen3-dev libmgl-dev mathgl qt5-default libboost-filesystem-dev
 # RUN wget http://ompl.kavrakilab.org/core/install-ompl-ubuntu.sh
 # RUN sh install-ompl-ubuntu.sh
 #####
@@ -21,9 +17,12 @@ RUN pip3 install -r requirements.txt
 #####
 
 # bonmin
+RUN apt-get install -y libblas3 liblapack3 wget
 RUN wget https://www.coin-or.org/download/binary/CoinAll/CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz
 RUN tar -xzf CoinAll-1.6.0-linux-x86_64-gcc4.4.5.tgz
+# sometimes also at /usr/lib/x86_64-linux-gnu/liblapack.so.3
 RUN ln -s /usr/lib/liblapack.so.3 /lib/liblapack.so.3gf
+# sometimes also at /usr/lib/x86_64-linux-gnu/libblas.so.3
 RUN ln -s /usr/lib/libblas.so.3 /lib/libblas.so.3gf
 #####
 

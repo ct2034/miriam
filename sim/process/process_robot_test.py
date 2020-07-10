@@ -1,6 +1,6 @@
-from sim_process.process_test import run_with_sim
-from simple_simulation.mod_cbsextension import Cbsext
-from simple_simulation.simulation import SimpSim
+from sim.process.process_test import run_with_sim
+from sim.simple.mod_cbsextension import Cbsext
+from sim.simple.simulation import SimpSim
 
 
 class RobotSim(SimpSim):

@@ -6,7 +6,7 @@ from apscheduler.events import *
 from apscheduler.schedulers.background import BackgroundScheduler
 from numpy import *
 
-from simple_simulation.route import Route, RouteState, Car
+from sim.simple.route import Route, RouteState, Car
 
 
 def set_speed_multiplier(multiplier):
