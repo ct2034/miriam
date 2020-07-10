@@ -6,9 +6,8 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-import agent
 import sim
-from agent import Agent, Policy
+from sim.decentralized.agent import Agent, Policy
 
 
 class TestDecentralizedSim(unittest.TestCase):

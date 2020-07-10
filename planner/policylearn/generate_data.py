@@ -9,7 +9,8 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-from libMultiRobotPlanning.plan_ecbs import BLOCKS_STR, plan_in_gridmap
+from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
+    BLOCKS_STR, plan_in_gridmap)
 
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
 EDGE_CONSTRAINTS_STR = 'edgeConstraints'

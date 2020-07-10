@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-import generate_data
+import planner.policylearn.generate_data
 
 
 class GenerateDataTest(unittest.TestCase):

@@ -22,9 +22,4 @@ set(odrm_ROS TRUE)
 # set_source_files_properties(${odrm_ROOT}/odrm.pyx PROPERTIES CYTHON_IS_CXX FALSE)
 add_subdirectory(${odrm_ROOT}/src)
 
-install(PROGRAMS
-  scripts/odrm
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 catkin_add_nosetests(${CMAKE_CURRENT_SOURCE_DIR}/test)
