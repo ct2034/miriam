@@ -47,6 +47,7 @@ if __name__ == "__main__":
         cmap='plasma',
         origin='lower'
     )
+    plt.title('Well-formedness y: well; b: not well')
     plt.xlabel('Fills')
     plt.ylabel('Agents')
     plt.show()
