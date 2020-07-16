@@ -10,18 +10,22 @@ import sim.decentralized.runner
 from scenarios.generators import generate_like_sim_decentralized
 
 if __name__ == "__main__":
-    logging.getLogger().setLevel(logging.INFO)  # no warnings pls
+    # no warnings pls
+    logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)  
 
     size = 10  # size for all scenarios
-    n_fills = 10  # how many different fill values there should be
+    n_fills = 20  # how many different fill values there should be
     n_n_agentss = 10  # how many different numbers of agents should there be"""
     n_runs = 10  # how many runs per configuration
 
     results = np.zeros([n_fills, n_n_agentss])  # save results here
 
-    fills = np.linspace(0, .9, n_fills)  # list of fills we want
+    fills = np.around(
+        np.linspace(0, .9, n_fills),  # list of fills we want
+        2
+    )
     # list of different numbers of agents we want
-    n_agentss = np.linspace(1, 10, n_n_agentss)
+    n_agentss = np.linspace(1, n_n_agentss, n_n_agentss)
 
     for _ in range(n_runs):
         for i_f, i_a in product(range(n_fills),
@@ -47,7 +51,9 @@ if __name__ == "__main__":
         cmap='plasma',
         origin='lower'
     )
-    plt.title('Well-formedness y: well; b: not well')
-    plt.xlabel('Fills')
-    plt.ylabel('Agents')
+    plt.title('Well-formedness [y: well; b: not well]')
+    plt.ylabel('Fills')
+    plt.yticks(range(n_fills), map(lambda a: str(a), fills))
+    plt.xlabel('Agents')
+    plt.xticks(range(n_n_agentss), map(lambda a: str(int(a)), n_agentss))
     plt.show()

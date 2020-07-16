@@ -13,6 +13,8 @@ from matplotlib import pyplot as plt
 
 from sim.decentralized.agent import Agent, Policy
 
+logging.basicConfig()
+logger = logging.getLogger(__name__)
 
 class SimIterationException(Exception):
     pass
@@ -307,7 +309,7 @@ def run_a_scenario(size, n_agents, policy, plot, print_results=True):
             space_progress += space_slice
         successful = 1
     except SimIterationException as e:  # pragma: no cover
-        logging.warning(e)
+        logger.warning(e)
 
     return check_time_evaluation(
         time_progress,

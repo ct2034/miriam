@@ -7,6 +7,8 @@ from typing import List, Tuple
 import networkx as nx
 import numpy as np
 
+logging.basicConfig()
+logger = logging.getLogger(__name__)
 
 def gridmap_to_nx(env: np.ndarray) -> nx.Graph:
     """convert numpy gridmap into networkx graph."""
@@ -78,10 +80,10 @@ class Agent():
             tuple_path = nx.shortest_path(
                 env_nx, tuple(self.pos), tuple(self.goal))
         except nx.exception.NetworkXNoPath as e:
-            logging.warning(e)
+            logger.warning(e)
             return None
         except nx.exception.NodeNotFound as e:
-            logging.warning(e)
+            logger.warning(e)
             return None
         return np.array(tuple_path)
 
@@ -99,7 +101,7 @@ class Agent():
         try:
             self.env_nx.remove_edge(a, b)
         except nx.exception.NetworkXError:
-            logging.warning("Edge already removed")
+            logger.warning("Edge already removed")
         path = self.plan_path()
         if path is not None:
             # all good, and we have a new path now
