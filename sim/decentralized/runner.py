@@ -11,7 +11,7 @@ import timeout_decorator
 from matplotlib import cm
 from matplotlib import pyplot as plt
 
-from agent import Agent, Policy
+from sim.decentralized.agent import Agent, Policy
 
 
 class SimIterationException(Exception):
@@ -19,8 +19,15 @@ class SimIterationException(Exception):
 
 
 def initialize_environment(size: int, fill: float):
-    """Make a square map with edge length `size` and
-    `fill` (0..1) obstacle ratio."""
+    """Make a square map with edge length `size` and `fill` (0..1) obstacle ratio.
+
+    :param size: side length of the square (in pixels)
+    :type size: int
+    :param fill: percentage of map to fill
+    :type fill: float
+    :return: the environment
+    :rtype: np.ndarray
+    """
     environent = np.zeros([size, size], dtype=np.int64)
     n_to_fill = int(fill * size ** 2)
     to_fill = random.sample(
@@ -31,35 +38,73 @@ def initialize_environment(size: int, fill: float):
 
 
 def initialize_new_agent(
-        env: np.ndarray, agents: List[Agent], policy: Policy
-) -> List[Agent]:
+        env: np.ndarray, agents: List[Agent], policy: Policy,
+        tight_placement: bool = False) -> Agent:
     """Place new agent in the environment, where no obstacle or other agent
-    is."""
-    env_with_agents_and_goals = env.copy()
-    for a in agents:
-        env_with_agents_and_goals[tuple(a.pos)] = 1
-    no_obstacle_nor_agent_or_goal = np.where(env_with_agents_and_goals == 0)
-    assert len(no_obstacle_nor_agent_or_goal[0]) > 0, "Possible poses should be left"
-    pos = random.choice(np.transpose(no_obstacle_nor_agent_or_goal))
-    goal = random.choice(np.transpose(no_obstacle_nor_agent_or_goal))
-    a = Agent(env, pos, policy)
-    a.give_a_goal(goal)
+    is.
+
+    :param tight_placement: if false, start and goal places are sampled from the same distribution
+    :type tight_placement: bool 
+    :raises AssertionError is no space is left
+    :return: the agent
+    :rtype: Agent
+    """
+    if tight_placement:  # starts can be at other goals
+        env_with_agents = env.copy()
+        env_with_goals = env.copy()
+        for a in agents:
+            env_with_agents[tuple(a.pos)] = 1
+            env_with_goals[tuple(a.goal)] = 1
+        no_obstacle_nor_agent = np.where(env_with_agents == 0)
+        no_obstacle_nor_goal = np.where(env_with_goals == 0)
+        assert len(no_obstacle_nor_agent[0]
+                   ) > 0, "Possible poses should be left"
+        assert len(no_obstacle_nor_goal[0]
+                   ) > 0, "Possible poses should be left"
+        pos = random.choice(np.transpose(no_obstacle_nor_agent))
+        a = Agent(env, pos, policy)  # we have the agent
+
+        # now finding the goal
+        goal = random.choice(np.transpose(no_obstacle_nor_goal))
+        a.give_a_goal(goal)
+    else:  # no tight placement: sample starts and goals from same distribution
+        env_with_agents_and_goals = env.copy()
+        for a in agents:
+            env_with_agents_and_goals[tuple(a.pos)] = 1
+            env_with_agents_and_goals[tuple(a.goal)] = 1
+        no_obstacle_nor_agent_or_goal = np.where(
+            env_with_agents_and_goals == 0)
+        assert len(no_obstacle_nor_agent_or_goal[0]
+                   ) > 0, "Possible poses should be left"
+        pos = random.choice(np.transpose(no_obstacle_nor_agent_or_goal))
+        a = Agent(env, pos, policy)  # we have the agent
+
+        # now finding the goal
+        env_with_agents_and_goals[tuple(pos)] = 1
+        no_obstacle_nor_agent_or_goal = np.where(
+            env_with_agents_and_goals == 0)
+        assert len(no_obstacle_nor_agent_or_goal[0]
+                   ) > 0, "Possible poses should be left"
+        goal = random.choice(np.transpose(no_obstacle_nor_agent_or_goal))
+        a.give_a_goal(goal)
+
     return a
 
 
 def initialize_agents(
-        env: np.ndarray, n_agents: int, policy: Policy
+        env: np.ndarray, n_agents: int, policy: Policy,
+        tight_placement: bool = False
 ) -> List[Agent]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other)."""
     agents = []
     for i_a in range(n_agents):
-        agent = initialize_new_agent(env, agents, policy)
+        agent = initialize_new_agent(env, agents, policy, tight_placement)
         agents.append(agent)
     return agents
 
 
-def is_environment_well_formed(agents: List[Agent]) -> bool: 
+def is_environment_well_formed(agents: List[Agent]) -> bool:
     """Check if the environment is well formed according to Cap2015"""
     for a in agents:
         blocks = []
@@ -195,7 +240,10 @@ def iterate_sim(agents: List[Agent]):
                             raise SimIterationException(
                                 "Deadlock by edge collision")
 
-        if not any(can_proceed):
+        if any(map(lambda c, a: not c and not a.is_at_goal(),
+                   can_proceed, agents)):
+            # there is at least one agent that can not move while not beeing
+            # at its goal.
             raise SimIterationException("Deadlock by node collisions")
 
     for i_a in range(len(agents)):
