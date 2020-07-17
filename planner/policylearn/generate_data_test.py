@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-import planner.policylearn.generate_data
+import planner.policylearn.generate_data as generate_data
 
 
 class GenerateDataTest(unittest.TestCase):
@@ -23,7 +23,9 @@ class GenerateDataTest(unittest.TestCase):
         assert np.min(gridmap_half) == 0
 
     def test_import_ecbs(self):
-        from libMultiRobotPlanning.plan_ecbs import plan_in_gridmap, BLOCKS_STR
+        from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
+            plan_in_gridmap, BLOCKS_STR
+        )
 
     def test_add_padding_to_gridmap(self):
         radius = 2  # testing
@@ -91,7 +93,7 @@ class GenerateDataTest(unittest.TestCase):
         assert len(fixed_len_path[-1]) == 2
         assert fixed_len_path[0, 0] == 0
         assert fixed_len_path[0, 1] == 0
-        assert fixed_len_path[1, 0] == 0  
+        assert fixed_len_path[1, 0] == 0
         assert fixed_len_path[1, 1] == 1
         assert fixed_len_path[2, 0] == 1
         assert fixed_len_path[2, 1] == 1

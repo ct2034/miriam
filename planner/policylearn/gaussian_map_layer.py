@@ -12,8 +12,8 @@ class GaussianMapLayer(tf.keras.layers.Layer):
     call the super's `build()` (which sets `self.built = True`, which is
     nice in case the user wants to call `build()` manually before the
     first `__call__`).
-    * `call()`: Called in `__call__` after making sure `build()` has been called
-    once. Should actually perform the logic of applying the layer to the
+    * `call()`: Called in `__call__` after making sure `build()` has been
+    called once. Should actually perform the logic of applying the layer to the
     input tensors (which should be passed in as the first argument)."""
 
     def __init__(self,
@@ -43,7 +43,8 @@ class GaussianMapLayer(tf.keras.layers.Layer):
                                                          str(i) for i in
                                                          range(num_others)])
 
-        self.blurmap = tf.Variable(tf.zeros([map_width, map_height, num_com_channels]))
+        self.blurmap = tf.Variable(
+            tf.zeros([map_width, map_height, num_com_channels]))
 
         self.weights_other_to_map = tf.Variable(
             tf.random.normal([num_hidden, num_com_channels]))
@@ -81,8 +82,10 @@ class GaussianMapLayer(tf.keras.layers.Layer):
         states_self = states[0]
         states_others = states[1:]
 
-        outputs_and_new_states_others = [self.cells_others[i_a](
-            inputs_others[i_a], states_others[i_a]) for i_a in range(self.num_others)]
+        outputs_and_new_states_others = [
+            self.cells_others[i_a](inputs_others[i_a], states_others[i_a])
+            for i_a in range(self.num_others)
+        ]
         for i_a in range(self.num_others):
             to_map = tf.matmul([outputs_and_new_states_others[i_a][0][-1]],
                                self.weights_other_to_map

@@ -13,7 +13,8 @@ from generate_data import OTHERS_STR, OWN_STR
 from gaussian_map_layer import GaussianMapLayer
 
 
-def get_training_steps(training_data, start_step, batch_size, num_input, num_timesteps):
+def get_training_steps(training_data, start_step, batch_size, num_input,
+                       num_timesteps):
     xy_batch = training_data[start_step:(start_step+batch_size)]
     X_out = []
     Y_out = []
@@ -24,7 +25,8 @@ def get_training_steps(training_data, start_step, batch_size, num_input, num_tim
     for i_b in range(batch_size):
         x = []
         this_timesteps = len(xy_batch[i_b][0][OWN_STR])
-        # padding, tipp by https://github.com/keras-team/keras/issues/85#issuecomment-96425996
+        # padding, tipp by
+        # https://github.com/keras-team/keras/issues/85#issuecomment-96425996
         pad = num_timesteps - this_timesteps
         for i_t in range(pad):
             x.append(np.zeros(num_input))
@@ -129,7 +131,8 @@ if __name__ == "__main__":
         sess.run(init)
         file_writer = tf.compat.v1.summary.FileWriter(logdir, sess.graph)
 
-        assert 0 == training_steps % batch_size, "training steps must be divisible by batch size"
+        assert 0 == training_steps % batch_size, ("training steps must be " +
+                                                  "divisible by batch size")
         for batch_step in range(int(training_steps / batch_size)):
             start_step = batch_step * batch_size
             batch_x, batch_y = get_training_steps(

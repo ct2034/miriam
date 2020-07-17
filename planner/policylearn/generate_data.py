@@ -257,7 +257,9 @@ def classification_samples(n_agents, data, t, col_agents,
         path_until_col = get_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
         if len(path_until_col) < CLASSIFICATION_POS_TIMESTEPS:
             padded_path = np.zeros([CLASSIFICATION_POS_TIMESTEPS, 2])
-            for i in range(0, CLASSIFICATION_POS_TIMESTEPS - len(path_until_col)):
+            for i in range(
+                0, CLASSIFICATION_POS_TIMESTEPS - len(path_until_col)
+            ):
                 padded_path[i] = path_until_col[0]
             padded_path[i+1:] = path_until_col
             path_until_col = padded_path
@@ -273,7 +275,8 @@ def classification_samples(n_agents, data, t, col_agents,
             paths_until_col, i_a, CLASSIFICATION_FOV_RADIUS)
         path_fovs, paths_other_agents_fovs = make_path_fovs(
             paths_full, paths_until_col, i_a, t, CLASSIFICATION_FOV_RADIUS)
-        x = np.stack([obstacle_fovs, pos_other_agent_fovs, path_fovs, paths_other_agents_fovs], axis=3)
+        x = np.stack([obstacle_fovs, pos_other_agent_fovs,
+                      path_fovs, paths_other_agents_fovs], axis=3)
         training_samples.append((
             x,
             1 if i_a == unblocked_agent else 0))
@@ -452,7 +455,7 @@ if __name__ == "__main__":
 
             if data and BLOCKS_STR in data.keys():  # has blocks
                 blocks = data[BLOCKS_STR]
-                has_a_block = has_exatly_one_vertex_block(blocks)  
+                has_a_block = has_exatly_one_vertex_block(blocks)
                 if has_a_block:
                     # we take only these for learning
                     data.update({

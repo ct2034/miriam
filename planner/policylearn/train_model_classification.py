@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
-                                     LocallyConnected2D, Reshape, 
+                                     LocallyConnected2D, Reshape,
                                      BatchNormalization, MaxPooling2D)
 from tensorflow.keras.models import Sequential
 from tensorflow import keras
@@ -35,8 +35,8 @@ if __name__ == "__main__":
     checkpoint_path = "checkpoint.ckpt"
     checkpoint_dir = os.path.dirname(checkpoint_path)
     cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                 save_weights_only=True,
-                                                 verbose=1)
+                                                     save_weights_only=True,
+                                                     verbose=1)
 
     # data
     train_images = []
