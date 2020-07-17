@@ -74,7 +74,8 @@ if __name__ == "__main__":
     train_images_np: np.ndarray = np.array(train_images)
     train_labels_np: np.ndarray = np.array(train_labels)
     training_data: np.ndarray = np.c_[train_images_np.reshape(
-        len(train_images_np), -1), train_labels_np.reshape(len(train_labels_np), -1)]
+        len(train_images_np), -1),
+        train_labels_np.reshape(len(train_labels_np), -1)]
     np.random.shuffle(training_data)
     train_images2 = training_data[:, :train_images_np.size //
                                   len(train_images_np)].reshape(

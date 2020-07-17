@@ -1,6 +1,5 @@
 import logging
 import random
-import uuid
 from enum import Enum
 from typing import *
 
@@ -43,14 +42,14 @@ class Agent():
         self.policy: Policy = policy
         self.path = None
         self.path_i: Union[int, None] = None
-        self.uuid = uuid.uuid1()
+        self.id: int = random.randint(0, int(10E6))
 
     def __hash__(self):
         return hash(
             hash(str(self.pos) + "pos") +
             hash(str(self.goal) + "goal") +
             hash(str(self.policy) + "policy") +
-            hash(str(self.uuid) + "uuid")
+            hash(str(self.id) + "id")
         )
 
     def __eq__(self, other):

@@ -6,7 +6,6 @@ import unittest
 import networkx as nx
 import numpy as np
 
-import sim
 from sim.decentralized.agent import Agent, Policy
 
 

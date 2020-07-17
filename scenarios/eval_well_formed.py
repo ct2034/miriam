@@ -15,9 +15,6 @@ if __name__ == "__main__":
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    # seeding helps with caching
-    random.seed(0)
-
     size = 10  # size for all scenarios
     n_fills = 20  # how many different fill values there should be
     n_n_agentss = 10  # how many different numbers of agents should there be"""
@@ -32,21 +29,24 @@ if __name__ == "__main__":
     # list of different numbers of agents we want
     n_agentss = np.linspace(1, n_n_agentss, n_n_agentss)
 
-    for _ in range(n_runs):
+    for i_r in range(n_runs):
         for i_f, i_a in product(range(n_fills),
                                 range(n_n_agentss)):
             fill = fills[i_f]
             n_agents = n_agentss[i_a]
+            random.seed(i_r)
             try:
                 _, agents = generate_like_sim_decentralized(
                     size, fill, int(n_agents))
-                is_wellformed = sim.decentralized.runner.is_environment_well_formed(
-                    agents)
+                is_wellformed = (
+                    sim.decentralized.runner.is_environment_well_formed(
+                        agents))
             except AssertionError:
                 is_wellformed = False
             results[i_f, i_a] += is_wellformed
 
     print("done")
+    print(hash(agents))
     print(results)
 
     fig = plt.figure()

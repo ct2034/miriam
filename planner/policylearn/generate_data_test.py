@@ -32,7 +32,8 @@ class GenerateDataTest(unittest.TestCase):
         n_agents = 3
 
         collide_count = 0
-        while collide_count != 1:
+        data = None
+        while collide_count != 1 or data is None:
             gridmap = generate_data.generate_random_gridmap(
                 width, height, fill)
             starts = [generate_data.get_random_free_pos(gridmap)
@@ -43,8 +44,9 @@ class GenerateDataTest(unittest.TestCase):
                 gridmap, starts, goals)
             collide_count = len(collisions.keys())
 
-        data = plan_in_gridmap(gridmap, starts, goals)
+            data = plan_in_gridmap(gridmap, starts, goals)
 
+        self.assertNotEqual(data, None)
         self.assertNotEqual(len(data.keys()), 0)
 
     def test_add_padding_to_gridmap(self):
