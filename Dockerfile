@@ -20,5 +20,6 @@ COPY sim/decentralized /sim/decentralized
 RUN pip3 install -r /sim/decentralized/requirements.txt
 
 # testing
+COPY run_tests_policylearn.sh .
 WORKDIR /
 CMD ["./run_tests_policylearn.sh"]
