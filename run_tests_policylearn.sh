@@ -10,6 +10,11 @@ TEST_COMMANDS=(
     "mypy sim/decentralized"
     "pycodestyle sim/decentralized"
     "pytest --cov=sim.decentralized sim/decentralized"
+
+    # scenarios
+    "mypy scenarios"
+    "pycodestyle scenarios"
+    "pytest --cov=scenarios scenarios"
 )
 
 # ------------------
