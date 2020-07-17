@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y python3 python3-pip python3-tk python3-pytest git 
 
 # planner
-COPY planner/policylearn /planner/policylearn
+COPY planner /planner
 RUN pip3 install -r /planner/policylearn/requirements.txt
 
 # ecbs
@@ -15,11 +15,12 @@ RUN cmake ..
 RUN make ecbs
 RUN pip3 install -r /planner/policylearn/libMultiRobotPlanning/requirements.txt
 
-# sim
-COPY sim/decentralized /sim/decentralized
+# sim decentralized
+COPY sim /sim
 RUN pip3 install -r /sim/decentralized/requirements.txt
 
 # testing
 COPY run_tests_policylearn.sh /
+COPY setup.sh /
 WORKDIR /
 CMD ["bash", "run_tests_policylearn.sh"]

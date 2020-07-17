@@ -31,6 +31,8 @@ evaluate () {
     return $RCODE
 }
 
+source setup.sh
+
 declare -a RCODES
 for ((i = 0; i < ${#TEST_COMMANDS[@]}; i++))
 do
