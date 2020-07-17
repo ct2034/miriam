@@ -1,8 +1,15 @@
 #!/bin/bash
 
-TEST_COMMANDS=("mypy sim/decentralized"
-"py.test-3 sim/decentralized"
-"pycodestyle sim/decentralized"
+TEST_COMMANDS=(
+    # planner
+    #"mypy planner/policylearn" TODO: fiy typing
+    "pycodestyle planner/policylearn --exclude=planner/policylearn/libMultiRobotPlanning"
+    "py.test-3 planner/policylearn --ignore=planner/policylearn/libMultiRobotPlanning"
+
+    # sim
+    "mypy sim/decentralized"
+    "pycodestyle sim/decentralized"
+    "py.test-3 sim/decentralized"
 )
 
 # ------------------

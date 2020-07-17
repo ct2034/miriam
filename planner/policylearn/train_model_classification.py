@@ -4,15 +4,16 @@ import argparse
 import os
 import pickle
 import random
+from typing import *
 
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
-from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
-                                     LocallyConnected2D, Reshape,
-                                     BatchNormalization, MaxPooling2D)
-from tensorflow.keras.models import Sequential
 from tensorflow import keras
+from tensorflow.keras.layers import (BatchNormalization, Conv2D, Conv3D, Dense,
+                                     Dropout, Flatten, LocallyConnected2D,
+                                     MaxPooling2D, Reshape)
+from tensorflow.keras.models import Sequential
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
@@ -39,10 +40,10 @@ if __name__ == "__main__":
                                                      verbose=1)
 
     # data
-    train_images = []
-    train_labels = []
-    test_images = []
-    test_labels = []
+    train_images: List[np.ndarray] = []
+    train_labels: List[np.ndarray] = []
+    test_images: List[np.ndarray] = []
+    test_labels: List[np.ndarray] = []
     for i in range(len(d)):
         if i < TRAINING_PERCENTAGE * len(d):  # training data
             dat = d[i][0]
@@ -70,17 +71,17 @@ if __name__ == "__main__":
             test_images.append(d[i][0])
             test_labels.append(d[i][1])
     # shuffling
-    train_images = np.array(train_images)
-    train_labels = np.array(train_labels)
-    training_data = np.c_[train_images.reshape(
-        len(train_images), -1), train_labels.reshape(len(train_labels), -1)]
+    train_images_np: np.ndarray = np.array(train_images)
+    train_labels_np: np.ndarray = np.array(train_labels)
+    training_data: np.ndarray = np.c_[train_images_np.reshape(
+        len(train_images_np), -1), train_labels_np.reshape(len(train_labels_np), -1)]
     np.random.shuffle(training_data)
-    train_images2 = training_data[:, :train_images.size //
-                                  len(train_images)].reshape(
-                                      train_images.shape)
-    train_labels2 = training_data[:, train_images.size //
-                                  len(train_images):].reshape(
-                                      train_labels.shape)
+    train_images2 = training_data[:, :train_images_np.size //
+                                  len(train_images_np)].reshape(
+                                      train_images_np.shape)
+    train_labels2 = training_data[:, train_images_np.size //
+                                  len(train_images_np):].reshape(
+                                      train_labels_np.shape)
 
     CONV3D_1_LAYERS = 32
     # model
