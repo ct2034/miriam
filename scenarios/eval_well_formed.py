@@ -44,9 +44,7 @@ if __name__ == "__main__":
                 is_wellformed = False
             results[i_f, i_a] += is_wellformed
 
-    print("done")
     print(hash(agents))
-    print(results)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)

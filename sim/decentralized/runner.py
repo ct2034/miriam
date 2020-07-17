@@ -184,10 +184,11 @@ def make_sure_agents_are_safe(agents: Tuple[Agent]):
 
 
 def has_at_least_one_agent_moved(
-        agents: Tuple[Agent], agents_at_start: Set[int]) -> bool:
+        agents: Tuple[Agent], agents_at_beginning: Tuple[Tuple[Any, ...], ...]
+) -> bool:
     """given the set of agents from the start, have they changed now?"""
-    for a in agents:
-        if hash(a) not in agents_at_start:
+    for i_a in range(len(agents)):
+        if any(agents[i_a].pos != agents_at_beginning[i_a]):
             return True
     return False
 
@@ -206,7 +207,7 @@ def iterate_sim(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
     space_slice = [0] * len(agents)
 
     # how do agents look like at beginning?
-    agents_at_start = set(map(lambda a: hash(a), agents))
+    agents_at_beginning = tuple(map(lambda a: a.pos, agents))
 
     while(there_are_collisions):
         possible_next_agent_poses = get_possible_next_agent_poses(
@@ -264,7 +265,7 @@ def iterate_sim(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
 
     make_sure_agents_are_safe(agents)
     assert has_at_least_one_agent_moved(
-        agents, agents_at_start), "no agent has changed"
+        agents, agents_at_beginning), "no agent has changed"
 
     return time_slice, space_slice
 

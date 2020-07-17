@@ -14,6 +14,7 @@ import sim.decentralized.agent
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 
+@lru_cache(maxsize=1024)
 def like_sim_decentralized(size: int, fill: float,
                            n_agents: int, seed: Any):
     random.seed(seed)

@@ -37,23 +37,26 @@ class Agent():
         `policy` for resolution of errors."""
         self.env: np.ndarray = env
         self.env_nx: Union[nx.Graph, None] = None
-        self.pos: np.ndarray = pos
+        self.pos: np.ndarray = np.array(pos)
         self.goal: Union[np.ndarray, None] = None
         self.policy: Policy = policy
         self.path = None
         self.path_i: Union[int, None] = None
-        self.id: int = random.randint(0, int(10E6))
+        self.id: int = random.randint(0, int(2E14))
 
     def __hash__(self):
-        return hash(
-            hash(str(self.pos) + "pos") +
-            hash(str(self.goal) + "goal") +
-            hash(str(self.policy) + "policy") +
-            hash(str(self.id) + "id")
-        )
+        return self.id
 
     def __eq__(self, other):
         return hash(self) == hash(other)
+
+    def __str__(self):
+        return "".join(map(str, [
+            self.env,
+            self.pos,
+            self.goal,
+            self.policy,
+            self.id]))
 
     def give_a_goal(self, goal: np.ndarray) -> bool:
         """Set a new goal for the agent, this will calculate the path,
