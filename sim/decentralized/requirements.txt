@@ -4,4 +4,7 @@ networkx
 numpy
 timeout_decorator
 mypy
+pytest-mypy
 pycodestyle
+pytest-pycodestyle
+pytest-cov
