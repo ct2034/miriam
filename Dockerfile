@@ -6,6 +6,7 @@ RUN apt-get install -y python3 python3-pip python3-tk python3-pytest python3-myp
 # planner
 COPY planner /planner
 RUN pip3 install -r /planner/policylearn/requirements.txt
+RUN mkdir cache
 
 # ecbs
 RUN apt-get install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
