@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 import sim.decentralized.runner as runner
+from sim.decentralized.runner import SimIterationException
 from sim.decentralized.agent import Agent, Policy
 
 
@@ -65,39 +66,39 @@ class TestDecentralizedSim(unittest.TestCase):
                         [1, 0, 1, 0], [1, 1, 1, 1]])
 
         # both agents going down left and right
-        agents = [
+        agents = (
             Agent(env, [0, 1]),
             Agent(env, [0, 3])
-        ]
+        )
         agents[0].give_a_goal(np.array([2, 1]))
         agents[1].give_a_goal(np.array([2, 3]))
         self.assertTrue(runner.is_environment_well_formed(agents))
 
         # one goal in the middle
-        agents = [
+        agents = (
             Agent(env, [2, 1]),
             Agent(env, [0, 0])
-        ]
+        )
         agents[0].give_a_goal(np.array([0, 2]))  # top middle
         agents[1].give_a_goal(np.array([0, 3]))
         self.assertFalse(runner.is_environment_well_formed(agents))
 
         # one start in the middle
-        agents = [
+        agents = (
             Agent(env, [0, 2]),  # top middle
             Agent(env, [0, 0])
-        ]
+        )
         agents[0].give_a_goal(np.array([2, 3]))
         agents[1].give_a_goal(np.array([0, 3]))
         self.assertFalse(runner.is_environment_well_formed(agents))
 
     def test_check_for_colissions_and_get_possible_next_agent_poses(self):
         env = np.array([[0, 0], [0, 1]])
-        agents = [
+        agents = (
             Agent(env, [0, 0], Policy.RANDOM),
             Agent(env, [0, 1], Policy.RANDOM),
             Agent(env, [1, 0], Policy.RANDOM)
-        ]
+        )
         agents[0].give_a_goal(np.array([0, 1]))
         agents[1].give_a_goal(np.array([0, 0]))
         agents[2].give_a_goal(np.array([0, 0]))
@@ -134,10 +135,10 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_iterate_sim_and_are_all_agents_at_their_goals(self):
         env = np.array([[0, 0], [0, 0]])
-        agents = [
+        agents = (
             Agent(env, [0, 0], Policy.RANDOM),
             Agent(env, [1, 1], Policy.RANDOM)
-        ]
+        )
         agents[0].give_a_goal(np.array([0, 1]))
         agents[1].give_a_goal(np.array([1, 0]))
 
@@ -150,18 +151,20 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(all(agents[1].pos == np.array([1, 0])))
         self.assertTrue(runner.are_all_agents_at_their_goals(agents))
 
-        # after another iteration they should be still at their goal
-        self.assertRaises(AssertionError, lambda: runner.iterate_sim(agents))
+        # after another iteration they should be still at their goal, raising
+        # an exception for a node deadlock.
+        self.assertRaises(SimIterationException,
+                          lambda: runner.iterate_sim(agents))
         self.assertTrue(all(agents[0].pos == np.array([0, 1])))
         self.assertTrue(all(agents[1].pos == np.array([1, 0])))
         self.assertTrue(runner.are_all_agents_at_their_goals(agents))
 
     def test_iterate_sim_with_node_coll(self):
         env = np.array([[0, 0], [0, 1]])
-        agents = [
+        agents = (
             Agent(env, [0, 1], Policy.RANDOM),
             Agent(env, [1, 0], Policy.RANDOM)
-        ]
+        )
         agents[0].give_a_goal(np.array([0, 0]))
         agents[1].give_a_goal(np.array([0, 0]))
 
@@ -180,10 +183,10 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(runner.are_all_agents_at_their_goals(agents))
 
         # new agents for reverse prios
-        agents = [
+        agents = (
             Agent(env, [0, 1], Policy.RANDOM),
             Agent(env, [1, 0], Policy.RANDOM)
-        ]
+        )
         agents[0].give_a_goal(np.array([0, 0]))
         agents[1].give_a_goal(np.array([0, 0]))
 
@@ -204,13 +207,13 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_iterate_sim_with_node_coll_deadlock(self):
         env = np.array([[0, 0, 1], [0, 0, 1], [0, 1, 1]])
-        agents = [
+        agents = (
             Agent(env, [0, 0], Policy.RANDOM),
             Agent(env, [0, 1], Policy.RANDOM),
             Agent(env, [1, 1], Policy.RANDOM),
             Agent(env, [1, 0], Policy.RANDOM),
             Agent(env, [2, 0], Policy.RANDOM)
-        ]
+        )
         agents[0].give_a_goal(np.array([0, 1]))
         agents[1].give_a_goal(np.array([1, 1]))
         agents[2].give_a_goal(np.array([1, 0]))
@@ -224,10 +227,10 @@ class TestDecentralizedSim(unittest.TestCase):
     def test_iterate_sim_with_edge_coll(self):
         env = np.array([[0, 0, 0, 0], [1, 1, 1, 1],
                         [1, 1, 1, 1], [1, 1, 1, 1]])
-        agents = [
+        agents = (
             Agent(env, [0, 0], Policy.RANDOM),
             Agent(env, [0, 3], Policy.RANDOM)
-        ]
+        )
         agents[0].give_a_goal(np.array([0, 3]))
         agents[1].give_a_goal(np.array([0, 0]))
         runner.iterate_sim(agents)

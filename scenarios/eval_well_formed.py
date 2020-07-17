@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import logging
+import random
+from functools import lru_cache
 from itertools import product
 
 import numpy as np
@@ -11,7 +13,10 @@ from scenarios.generators import generate_like_sim_decentralized
 
 if __name__ == "__main__":
     # no warnings pls
-    logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)  
+    logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
+
+    # seeding helps with caching
+    random.seed(0)
 
     size = 10  # size for all scenarios
     n_fills = 20  # how many different fill values there should be

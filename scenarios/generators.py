@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from functools import lru_cache
 from itertools import product
 
 import numpy as np

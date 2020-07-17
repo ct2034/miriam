@@ -3,7 +3,8 @@
 import itertools
 import logging
 import random
-from typing import Dict, List, Set
+from functools import lru_cache
+from typing import *
 
 import networkx as nx
 import numpy as np
@@ -15,6 +16,7 @@ from sim.decentralized.agent import Agent, Policy
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+
 
 class SimIterationException(Exception):
     pass
@@ -56,6 +58,7 @@ def initialize_new_agent(
         env_with_goals = env.copy()
         for a in agents:
             env_with_agents[tuple(a.pos)] = 1
+            assert a.goal is not None, "Agent should have a goal"
             env_with_goals[tuple(a.goal)] = 1
         no_obstacle_nor_agent = np.where(env_with_agents == 0)
         no_obstacle_nor_goal = np.where(env_with_goals == 0)
@@ -73,6 +76,7 @@ def initialize_new_agent(
         env_with_agents_and_goals = env.copy()
         for a in agents:
             env_with_agents_and_goals[tuple(a.pos)] = 1
+            assert a.goal is not None, "Agent should have a goal"
             env_with_agents_and_goals[tuple(a.goal)] = 1
         no_obstacle_nor_agent_or_goal = np.where(
             env_with_agents_and_goals == 0)
@@ -96,22 +100,24 @@ def initialize_new_agent(
 def initialize_agents(
         env: np.ndarray, n_agents: int, policy: Policy,
         tight_placement: bool = False
-) -> List[Agent]:
+) -> Tuple[Agent, ...]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other)."""
-    agents = []
+    agents: List[Agent] = []  # starting with a list for easy inserting
     for i_a in range(n_agents):
         agent = initialize_new_agent(env, agents, policy, tight_placement)
         agents.append(agent)
-    return agents
+    return tuple(agents)  # returning tuple because it can be immutable now
 
 
-def is_environment_well_formed(agents: List[Agent]) -> bool:
+@lru_cache(maxsize=512)
+def is_environment_well_formed(agents: Tuple[Agent]) -> bool:
     """Check if the environment is well formed according to Cap2015"""
     for a in agents:
-        blocks = []
+        blocks: List[Tuple[Any, ...]] = []
         for other_a in [ia for ia in agents if ia != a]:
             blocks.append(tuple(other_a.pos))
+            assert other_a.goal is not None, "Other agent should have a goal"
             blocks.append(tuple(other_a.goal))
         if not a.is_there_path_with_node_blocks(blocks):
             return False
@@ -119,7 +125,7 @@ def is_environment_well_formed(agents: List[Agent]) -> bool:
 
 
 def get_possible_next_agent_poses(
-        agents: List[Agent],
+        agents: Tuple[Agent],
         can_proceed: List[bool]) -> np.ndarray:
     """Where would the agents be if they would be allowed to move to the next
     step in their paths if they have a true in `can_proceed`."""
@@ -134,8 +140,8 @@ def get_possible_next_agent_poses(
 
 
 def check_for_colissions(
-        agents: List[Agent],
-        nxt_poses: np.ndarray) -> (dict, dict):
+        agents: Tuple[Agent],
+        nxt_poses: np.ndarray) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
     """check for two agents going to meet at one vertex or two agents using
     the same edge."""
     node_colissions = {}
@@ -168,7 +174,7 @@ def check_for_colissions(
     return node_colissions, edge_colissions
 
 
-def make_sure_agents_are_safe(agents: List[Agent]):
+def make_sure_agents_are_safe(agents: Tuple[Agent]):
     """Assert that no too agents are in the same place"""
     poses = set()
     for a in agents:
@@ -178,7 +184,7 @@ def make_sure_agents_are_safe(agents: List[Agent]):
 
 
 def has_at_least_one_agent_moved(
-        agents: List[Agent], agents_at_start: Set[int]) -> bool:
+        agents: Tuple[Agent], agents_at_start: Set[int]) -> bool:
     """given the set of agents from the start, have they changed now?"""
     for a in agents:
         if hash(a) not in agents_at_start:
@@ -187,11 +193,14 @@ def has_at_least_one_agent_moved(
 
 
 # @timeout_decorator.timeout(1)
-def iterate_sim(agents: List[Agent]):
+def iterate_sim(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
-    can_proceed = [True] * len(agents)
-    there_are_collisions = True
+    # all that are not at their goals can generally procede. This is therefore
+    # invariant of agents becoming finished in the iteration.
+    can_proceed: List[bool] = list(map(lambda a: not a.is_at_goal(), agents))
+    # assuming there are collisions
+    there_are_collisions: bool = True
 
     time_slice = [0] * len(agents)
     space_slice = [0] * len(agents)
@@ -242,10 +251,8 @@ def iterate_sim(agents: List[Agent]):
                             raise SimIterationException(
                                 "Deadlock by edge collision")
 
-        if any(map(lambda c, a: not c and not a.is_at_goal(),
-                   can_proceed, agents)):
-            # there is at least one agent that can not move while not beeing
-            # at its goal.
+        if not any(can_proceed):
+            # there is not one agent that can move
             raise SimIterationException("Deadlock by node collisions")
 
     for i_a in range(len(agents)):
@@ -370,7 +377,6 @@ def plot_evaluations(evaluations: Dict[Policy, np.ndarray],
 
     policy_names = []
     subplot_basenr = 100 + 10 * len(evaluation_names) + 1
-    evaluations_per_type = {}
     for i_p, policy in enumerate(evaluations.keys()):
         data[i_p, :, :] = evaluations[policy]
         policy_names.append(str(policy).replace('Policy.', ''))

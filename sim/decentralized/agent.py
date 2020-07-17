@@ -2,13 +2,14 @@ import logging
 import random
 import uuid
 from enum import Enum
-from typing import List, Tuple
+from typing import *
 
 import networkx as nx
 import numpy as np
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+
 
 def gridmap_to_nx(env: np.ndarray) -> nx.Graph:
     """convert numpy gridmap into networkx graph."""
@@ -35,13 +36,13 @@ class Agent():
     ):
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
-        self.env = env
-        self.env_nx = None
-        self.pos = pos
-        self.goal = None
-        self.policy = policy
+        self.env: np.ndarray = env
+        self.env_nx: Union[nx.Graph, None] = None
+        self.pos: np.ndarray = pos
+        self.goal: Union[np.ndarray, None] = None
+        self.policy: Policy = policy
         self.path = None
-        self.path_i = None
+        self.path_i: Union[int, None] = None
         self.uuid = uuid.uuid1()
 
     def __hash__(self):
@@ -71,12 +72,13 @@ class Agent():
         else:  # still have old goal and path
             return True
 
-    def plan_path(self, env_nx: nx.Graph = None) -> bool:
+    def plan_path(self, env_nx: Union[nx.Graph, None] = None) -> Union[np.ndarray, None]:
         """Plan path from currently set `pos` to current `goal` and save it
         in `path`."""
         if env_nx is None:
             env_nx = self.env_nx
         try:
+            assert self.goal is not None, "Should have a goal"
             tuple_path = nx.shortest_path(
                 env_nx, tuple(self.pos), tuple(self.goal))
         except nx.exception.NetworkXNoPath as e:
@@ -87,16 +89,20 @@ class Agent():
             return None
         return np.array(tuple_path)
 
-    def is_there_path_with_node_blocks(self, blocks: List[Tuple[int]]) -> bool:
-        """check if the agent can find a path to his goal with given n blocks [2, n]"""
+    def is_there_path_with_node_blocks(self, blocks: List[Tuple[Any, ...]]
+                                       ) -> bool:
+        """check if the agent can find a path to his goal with given
+        n blocks [2, n]"""
+        assert self.env_nx is not None, "Should have a env_nx"
         tmp_env = self.env_nx.copy()
         tmp_env.remove_nodes_from(blocks)
         path = self.plan_path(tmp_env)
         return path is not None
 
     def block_edge(self, a: tuple, b: tuple) -> bool:
-        """this will make the agent block this edge. It will return `Treu`
+        """this will make the agent block this edge. It will return `True`
         if there still is a path to the current goal. `False` otherwise."""
+        assert self.env_nx is not None, "Should have a env_nx"
         old_graph = self.env_nx.copy()
         try:
             self.env_nx.remove_edge(a, b)
@@ -148,6 +154,7 @@ class Agent():
         if self.is_at_goal():
             return self.pos  # stay at final pose
         else:
+            assert self.path is not None, "Should have a path by now"
             return self.path[self.path_i + 1]
 
     def make_next_step(self, next_pos_to_check: np.ndarray):
@@ -158,5 +165,6 @@ class Agent():
         if self.is_at_goal():
             pass  # at goal already
         else:
+            assert self.path_i is not None, "Should have a path_i by now"
             self.path_i += 1
             self.pos = potential_next_pos
