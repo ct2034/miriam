@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-
 import planner.policylearn.generate_data as generate_data
+from functools import reduce
 
 
 class GenerateDataTest(unittest.TestCase):
@@ -22,10 +22,30 @@ class GenerateDataTest(unittest.TestCase):
         assert np.max(gridmap_half) == 1
         assert np.min(gridmap_half) == 0
 
-    def test_import_ecbs(self):
+    def test_calling_benchmark_ecbs(self):
         from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
-            plan_in_gridmap, BLOCKS_STR
-        )
+            BLOCKS_STR, plan_in_gridmap)
+
+        width = 5
+        height = width
+        fill = .1
+        n_agents = 3
+
+        collide_count = 0
+        while collide_count != 1:
+            gridmap = generate_data.generate_random_gridmap(
+                width, height, fill)
+            starts = [generate_data.get_random_free_pos(gridmap)
+                      for _ in range(n_agents)]
+            goals = [generate_data.get_random_free_pos(gridmap)
+                     for _ in range(n_agents)]
+            collisions, indep_agent_paths = generate_data.will_they_collide(
+                gridmap, starts, goals)
+            collide_count = len(collisions.keys())
+
+        data = plan_in_gridmap(gridmap, starts, goals)
+
+        self.assertNotEqual(len(data.keys()), 0)
 
     def test_add_padding_to_gridmap(self):
         radius = 2  # testing
