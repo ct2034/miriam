@@ -23,7 +23,8 @@ class SimIterationException(Exception):
 
 
 def initialize_environment(size: int, fill: float):
-    """Make a square map with edge length `size` and `fill` (0..1) obstacle ratio.
+    """Make a square map with edge length `size` and `fill` (0..1) obstacle
+    ratio.
 
     :param size: side length of the square (in pixels)
     :type size: int
@@ -47,11 +48,10 @@ def initialize_new_agent(
     """Place new agent in the environment, where no obstacle or other agent
     is.
 
-    :param tight_placement: if false, start and goal places are sampled from the same distribution
-    :type tight_placement: bool 
-    :raises AssertionError is no space is left
+    :param tight_placement: if false, start and goal places are sampled from
+    the same distribution
+    :raises AssertionError if no space is left
     :return: the agent
-    :rtype: Agent
     """
     if tight_placement:  # starts can be at other goals
         env_with_agents = env.copy()

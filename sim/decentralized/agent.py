@@ -72,7 +72,8 @@ class Agent():
         else:  # still have old goal and path
             return True
 
-    def plan_path(self, env_nx: Union[nx.Graph, None] = None) -> Union[np.ndarray, None]:
+    def plan_path(self, env_nx: Union[nx.Graph, None] = None
+                  ) -> Union[np.ndarray, None]:
         """Plan path from currently set `pos` to current `goal` and save it
         in `path`."""
         if env_nx is None:
