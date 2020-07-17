@@ -1,7 +1,7 @@
 FROM ubuntu:bionic
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y python3 python3-pip python3-tk python3-pytest python3-mypy python3-pycodestyle git
+RUN apt-get install -y python3 python3-pip python3-tk python3-pytest git
 
 # planner
 COPY planner /planner

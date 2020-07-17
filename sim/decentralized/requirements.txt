@@ -3,3 +3,5 @@ matplotlib
 networkx
 numpy
 timeout_decorator
+mypy
+pycodestyle
