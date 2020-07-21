@@ -5,11 +5,15 @@ from typing import *
 
 import networkx as nx
 import numpy as np
+from cachier import cachier
+
+import tools
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 
+@cachier(hash_params=tools.hasher)
 def gridmap_to_nx(env: np.ndarray) -> nx.Graph:
     """convert numpy gridmap into networkx graph."""
     g = nx.grid_graph(dim=list(env.shape))
