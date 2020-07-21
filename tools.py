@@ -255,13 +255,11 @@ def run_command(bashCommand):
 
 def hasher(args, kwargs):
     """Hash args that are hashable or np.ndarrays"""
-    hashstr = ""
+    hashstr = tuple()
     for i, arg in enumerate(args + tuple(kwargs.values())):
-        hashstr += "_"*10
-        hashstr += str(i)
-        hashstr += "_"*5
+        hashstr += (str(i),)
         if isinstance(arg, np.ndarray):
-            hashstr += str(arg.data.tobytes)
+            hashstr += (str(arg.data.tobytes),)
         else:
-            hashstr += str(arg)
+            hashstr += (str(arg),)
     return hash(hashstr)

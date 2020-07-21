@@ -11,7 +11,7 @@ from sim.decentralized.runner import is_environment_well_formed
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 
-@cachier(hash_params=tools.hasher)
+# @cachier(hash_params=tools.hasher)
 def is_well_formed(env, starts, goals):
     n_agents = starts.shape[0]
     agents = []
