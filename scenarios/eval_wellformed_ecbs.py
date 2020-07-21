@@ -21,7 +21,7 @@ if __name__ == "__main__":
     size = 8  # size for all scenarios
     n_fills = 8  # how many different fill values there should be
     n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 2  # how many runs per configuration
+    n_runs = 3  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
 
     results_well_formed = np.zeros([n_fills, n_n_agentss])  # save results here
@@ -39,9 +39,12 @@ if __name__ == "__main__":
                             )  # list of different numbers of agents we want
 
     t = time.time()
+    i = 0
     for i_r in range(n_runs):
         for i_f, i_a in product(range(n_fills),
                                 range(n_n_agentss)):
+            i += 1
+            print("run %d of %d" % (i, n_runs * n_fills * n_n_agentss))
             fill = fills[i_f]
             n_agents = n_agentss[i_a]
             try:
