@@ -9,7 +9,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from scenarios.evaluators import is_well_formed
+from scenarios.evaluators import *
 from scenarios.generators import like_sim_decentralized
 
 if __name__ == "__main__":
@@ -19,9 +19,10 @@ if __name__ == "__main__":
     size = 16  # size for all scenarios
     n_fills = 8  # how many different fill values there should be
     n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 10  # how many runs per configuration
+    n_runs = 2  # how many runs per configuration
 
-    results = np.zeros([n_fills, n_n_agentss])  # save results here
+    results_well_formed = np.zeros([n_fills, n_n_agentss])  # save results here
+    results_ecbs_cost = np.zeros([n_fills, n_n_agentss])  # save results here
 
     fills = np.around(
         np.linspace(0, .95, n_fills),  # list of fills we want
@@ -41,16 +42,19 @@ if __name__ == "__main__":
                 is_wellformed = (
                     is_well_formed(
                         env, starts, goals))
+                print(
+                    cost_ecbs(env, starts, goals)
+                )
             except AssertionError:
                 is_wellformed = False
-            results[i_f, i_a] += is_wellformed
+            results_well_formed[i_f, i_a] += is_wellformed
     elapsed_time = time.process_time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.imshow(
-        results,
+        results_well_formed,
         cmap='plasma',
         origin='lower'
     )

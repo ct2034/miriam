@@ -2,10 +2,11 @@ import getpass
 import logging
 import multiprocessing
 import os
-import subprocess
 import signal
+import subprocess
 from contextlib import contextmanager
 from datetime import datetime
+from hashlib import sha256
 from itertools import product
 
 import numpy as np
@@ -255,11 +256,11 @@ def run_command(bashCommand):
 
 def hasher(args, kwargs):
     """Hash args that are hashable or np.ndarrays"""
-    hashstr = tuple()
+    hashstr = ""
     for i, arg in enumerate(args + tuple(kwargs.values())):
-        hashstr += (str(i),)
         if isinstance(arg, np.ndarray):
-            hashstr += (str(arg.data.tobytes),)
+            hashstr += str(arg)
         else:
-            hashstr += (str(arg),)
-    return hash(hashstr)
+            hashstr += str(arg)
+    my_hash = sha256(hashstr.encode('utf-8')).hexdigest()
+    return my_hash
