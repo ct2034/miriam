@@ -14,6 +14,7 @@ import numpy as np
 class TimeoutException(Exception):
     pass
 
+
 def get_system_parameters(disp=True):
     import psutil
     user = getpass.getuser()
@@ -137,7 +138,6 @@ def mongodb_save(name, data):
         logging.warning("No Internet connection -> not saving to mongodb")
         return
 
-
     if 0 != run_command('ping -c2 -W1 ds033607.mlab.com'):
         logging.warning("can not reach mlab -> not saving to mongodb")
         return
@@ -187,7 +187,8 @@ BOLD_SEQ = "\033[1m"
 
 def formatter_message(message, use_color=True):
     if use_color:
-        message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
+        message = message.replace(
+            "$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
     else:
         message = message.replace("$RESET", "").replace("$BOLD", "")
     return message
@@ -210,7 +211,8 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         levelname = record.levelname
         if self.use_color and levelname in COLORS:
-            levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
+            levelname_color = COLOR_SEQ % (
+                30 + COLORS[levelname]) + levelname + RESET_SEQ
             record.levelname = levelname_color
         return logging.Formatter.format(self, record)
 
@@ -244,7 +246,22 @@ def get_map_str(grid):
         map_str += '\n'
     return map_str
 
+
 def run_command(bashCommand):
     process = subprocess.Popen(bashCommand.split(), shell=True,
-          stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
     return process.communicate()[0].decode()
+
+
+def hasher(args, kwargs):
+    """Hash args that are hashable or np.ndarrays"""
+    hashstr = ""
+    for i, arg in enumerate(args + tuple(kwargs.values())):
+        hashstr += "_"*10
+        hashstr += str(i)
+        hashstr += "_"*5
+        if isinstance(arg, np.ndarray):
+            hashstr += str(arg.data.tobytes)
+        else:
+            hashstr += str(arg)
+    return hash(hashstr)

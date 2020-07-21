@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import random
+import time
 from functools import lru_cache
 from itertools import product
 
@@ -8,7 +9,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-import sim.decentralized.runner
+from scenarios.evaluators import is_well_formed
 from scenarios.generators import like_sim_decentralized
 
 if __name__ == "__main__":
@@ -16,8 +17,8 @@ if __name__ == "__main__":
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
     size = 16  # size for all scenarios
-    n_fills = 15  # how many different fill values there should be
-    n_n_agentss = 16  # how many different numbers of agents should there be"""
+    n_fills = 8  # how many different fill values there should be
+    n_n_agentss = 8  # how many different numbers of agents should there be"""
     n_runs = 10  # how many runs per configuration
 
     results = np.zeros([n_fills, n_n_agentss])  # save results here
@@ -28,23 +29,23 @@ if __name__ == "__main__":
     )
     # list of different numbers of agents we want
     n_agentss = np.linspace(1, 16, n_n_agentss, dtype=np.int)
-
+    t = time.process_time()
     for i_r in range(n_runs):
         for i_f, i_a in product(range(n_fills),
                                 range(n_n_agentss)):
             fill = fills[i_f]
             n_agents = n_agentss[i_a]
             try:
-                _, agents = like_sim_decentralized(
+                env, starts, goals = like_sim_decentralized(
                     size, fill, n_agents, seed=i_r)
                 is_wellformed = (
-                    sim.decentralized.runner.is_environment_well_formed(
-                        agents))
+                    is_well_formed(
+                        env, starts, goals))
             except AssertionError:
                 is_wellformed = False
             results[i_f, i_a] += is_wellformed
-
-    print(hash(agents))
+    elapsed_time = time.process_time() - t
+    print("elapsed time: %.3fs" % elapsed_time)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
