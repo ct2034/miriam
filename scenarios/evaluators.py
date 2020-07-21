@@ -26,14 +26,15 @@ def is_well_formed(env, starts, goals):
 @cachier(hash_params=tools.hasher)
 def cost_ecbs(env, starts, goals):
     """get the average agent cost of this from ecbs
-    
+
     returns: `float` and `-1` if planning was unsuccessful."""
     n_agents = starts.shape[0]
     data = plan_in_gridmap(env, list(starts), list(goals), 10)
     if data is None:
         return -1
     schedule = data['schedule']
-    assert n_agents == len(schedule.keys()), "Plans for all agents"
+    if n_agents >= len(schedule.keys()):  # Not plans for all agents
+        return -1
     cost_per_agent = []
     for i_a in range(n_agents):
         agent_key = 'agent'+str(i_a)
