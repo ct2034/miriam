@@ -68,91 +68,58 @@ if __name__ == "__main__":
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
-    # do we have any results?
-    assert not np.all(results_well_formed == 0)
-    assert not np.all(results_ecbs_cost == -1)
-    assert not np.all(results_diff_indep == -1)
+    def plot_results(results, titles):
+        # our cmap with support for over / under
+        palette = copy(plt.cm.plasma)
+        palette.set_over('w', 1.0)
+        palette.set_under('k', 1.0)
+        palette.set_bad('r', 1.0)
 
-    # our cmap with support for over / under
-    palette = copy(plt.cm.plasma)
-    palette.set_over('w', 1.0)
-    palette.set_under('k', 1.0)
-    palette.set_bad('r', 1.0)
-
-    # plot well formed ........................................................
-    fig = plt.figure(figsize=(20, 10))
-    ax = fig.add_subplot(131)
-    im = ax.imshow(
-        results_well_formed,
-        cmap=palette,
-        norm=colors.Normalize(vmin=1, vmax=n_runs),
-        origin='lower'
-    )
-    cbar = fig.colorbar(im, extend='both', spacing='uniform',
-                        shrink=0.9, ax=ax)
-    plt.title('Well-formedness')
-    plt.ylabel('Fills')
-    plt.yticks(range(n_fills), map(lambda a: str(a), fills))
-    plt.xlabel('Agents')
-    plt.xticks(range(n_n_agentss), map(lambda a: str(int(a)), n_agentss))
-
-    # fix ecbs costs mean .....................................................
-    results_ecbs_cost_final = np.zeros([n_fills, n_n_agentss])
-    for i_f, i_a in product(range(n_fills),
-                            range(n_n_agentss)):
-        this_data = results_ecbs_cost[:, i_f, i_a]
-        if len(this_data[this_data != INVALID]) > 0:
-            results_ecbs_cost_final[i_f, i_a] = np.mean(
-                this_data[this_data != INVALID]
+        fig = plt.figure(figsize=(20, 10))
+        subplot_basenr = 101 + len(results) * 10
+        for i, r in enumerate(results):
+            # do we have any results?
+            assert not np.all(r == 0)
+            assert not np.all(r == -1)
+            if len(r.shape) == 3:
+                r_final = np.zeros([n_fills, n_n_agentss])
+                for i_f, i_a in product(range(n_fills),
+                                        range(n_n_agentss)):
+                    this_data = r[:, i_f, i_a]
+                    if len(this_data[this_data != INVALID]) > 0:
+                        r_final[i_f, i_a] = np.mean(
+                            this_data[this_data != INVALID]
+                        )
+                    else:
+                        r_final[i_f, i_a] = INVALID
+            elif len(r.shape) == 2:
+                r_final = r
+            else:
+                raise RuntimeError("results must have 2 or 3 dimensions")
+            r_min = np.min(r_final[r_final != INVALID])
+            r_max = np.max(r_final[r_final != INVALID])
+            ax = fig.add_subplot(subplot_basenr+i)
+            im = ax.imshow(
+                r_final,
+                cmap=palette,
+                norm=colors.Normalize(vmin=r_min, vmax=r_max),
+                origin='lower'
             )
-        else:
-            results_ecbs_cost_final[i_f, i_a] = INVALID
+            cbar = fig.colorbar(im, extend='both', spacing='uniform',
+                                shrink=0.9, ax=ax)
+            plt.title(titles[i])
+            plt.ylabel('Fills')
+            plt.yticks(range(n_fills), map(lambda a: str(a), fills))
+            plt.xlabel('Agents')
+            plt.xticks(range(n_n_agentss), map(
+                lambda a: str(int(a)), n_agentss))
+        plt.show()
 
-    # plot ecbs cost ..........................................................
-    ax = fig.add_subplot(132)
-    ecbs_min = np.min(results_ecbs_cost[results_ecbs_cost != INVALID])
-    ecbs_max = np.max(results_ecbs_cost[results_ecbs_cost != INVALID])
-    im = ax.imshow(
-        results_ecbs_cost_final,
-        cmap=palette,
-        norm=colors.Normalize(vmin=ecbs_min, vmax=ecbs_max),
-        origin='lower'
+    plot_results(
+        [results_well_formed,
+        results_ecbs_cost,
+        results_diff_indep],
+        ["Well-formedness",
+        "Ecbs cost",
+        "Cost difference ecbs to independant"]
     )
-    cbar = fig.colorbar(im, extend='both', spacing='uniform',
-                        shrink=0.9, ax=ax)
-    plt.title('Ecbs cost')
-    plt.ylabel('Fills')
-    plt.yticks(range(n_fills), map(lambda a: str(a), fills))
-    plt.xlabel('Agents')
-    plt.xticks(range(n_n_agentss), map(lambda a: str(int(a)), n_agentss))
-
-    # difference indep mean ...................................................
-    results_diff_indep_final = np.zeros([n_fills, n_n_agentss])
-    for i_f, i_a in product(range(n_fills),
-                            range(n_n_agentss)):
-        this_data = results_diff_indep[:, i_f, i_a]
-        if len(this_data[this_data != INVALID]) > 0:
-            results_diff_indep_final[i_f, i_a] = np.mean(
-                this_data[this_data != INVALID]
-            )
-        else:
-            results_diff_indep_final[i_f, i_a] = INVALID
-
-    # plot cost difference ....................................................
-    ax = fig.add_subplot(133)
-    diff_indep_min = np.min(results_diff_indep[results_diff_indep != INVALID])
-    diff_indep_max = np.max(results_diff_indep[results_diff_indep != INVALID])
-    im = ax.imshow(
-        results_diff_indep_final,
-        cmap=palette,
-        norm=colors.Normalize(vmin=diff_indep_min, vmax=diff_indep_max),
-        origin='lower'
-    )
-    cbar = fig.colorbar(im, extend='both', spacing='uniform',
-                        shrink=0.9, ax=ax)
-    plt.title('Cost difference ecbs to independant')
-    plt.ylabel('Fills')
-    plt.yticks(range(n_fills), map(lambda a: str(a), fills))
-    plt.xlabel('Agents')
-    plt.xticks(range(n_n_agentss), map(lambda a: str(int(a)), n_agentss))
-    plt.show()
