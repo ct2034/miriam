@@ -29,7 +29,7 @@ def plot_results(results, titles):
         assert not np.all(r == 0)
         assert not np.all(r == -1)
         if len(r.shape) == 3:
-            r_final = np.zeros([n_fills, n_n_agentss])
+            r_final = np.full([n_fills, n_n_agentss], INVALID)
             for i_f, i_a in product(range(n_fills),
                                     range(n_n_agentss)):
                 this_data = r[:, i_f, i_a]
@@ -37,13 +37,12 @@ def plot_results(results, titles):
                     r_final[i_f, i_a] = np.mean(
                         this_data[this_data != INVALID]
                     )
-                else:
-                    r_final[i_f, i_a] = INVALID
         elif len(r.shape) == 2:
             r_final = r
         else:
             raise RuntimeError("results must have 2 or 3 dimensions")
         r_min = np.min(r_final[r_final != INVALID])
+        assert r_min >= 0, "no negative results (except INVALID)"
         r_max = np.max(r_final[r_final != INVALID])
         ax = fig.add_subplot(subplot_basenr+i)
         im = ax.imshow(
@@ -68,9 +67,9 @@ if __name__ == "__main__":
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
     size = 8  # size for all scenarios
-    n_fills = 3  # how many different fill values there should be
-    n_n_agentss = 3  # how many different numbers of agents should there be"""
-    n_runs = 3  # how many runs per configuration
+    n_fills = 8  # how many different fill values there should be
+    n_n_agentss = 8  # how many different numbers of agents should there be"""
+    n_runs = 2  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
 
     # save results here first plot
@@ -128,15 +127,6 @@ if __name__ == "__main__":
             else:
                 results_ecbs_vertex_blocks[i_r, i_f, i_a] = INVALID
                 results_ecbs_edge_blocks[i_r, i_f, i_a] = INVALID
-            # how bad are the costs with sim decentralized random .............
-            if results_ecbs_cost[i_r, i_f, i_a] != INVALID:
-                cost_decen = cost_sim_decentralized_random(env, starts, goals)
-                if cost_decen != INVALID:
-                    results_diff_sim_decen[i_r, i_f, i_a] = (
-                        cost_decen - results_ecbs_cost[i_r, i_f, i_a]
-                    )
-                else:
-                    results_diff_sim_decen[i_r, i_f, i_a] = INVALID
             # is this different to the independant costs? .....................
             if results_ecbs_cost[i_r, i_f, i_a] != INVALID:
                 cost_indep = cost_independant(env, starts, goals, ignore_cache=True)
@@ -144,8 +134,13 @@ if __name__ == "__main__":
                     results_diff_indep[i_r, i_f, i_a] = (
                         results_ecbs_cost[i_r, i_f, i_a] - cost_indep
                     )
-                else:
-                    results_diff_indep[i_r, i_f, i_a] = INVALID
+            # how bad are the costs with sim decentralized random .............
+            if results_ecbs_cost[i_r, i_f, i_a] != INVALID:
+                cost_decen = cost_sim_decentralized_random(env, starts, goals)
+                if cost_decen != INVALID:
+                    results_diff_sim_decen[i_r, i_f, i_a] = (
+                        cost_decen - results_ecbs_cost[i_r, i_f, i_a]
+                    )
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
