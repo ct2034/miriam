@@ -129,7 +129,7 @@ if __name__ == "__main__":
                 results_ecbs_edge_blocks[i_r, i_f, i_a] = INVALID
             # is this different to the independant costs? .....................
             if results_ecbs_cost[i_r, i_f, i_a] != INVALID:
-                cost_indep = cost_independant(env, starts, goals, ignore_cache=True)
+                cost_indep = cost_independant(env, starts, goals)
                 if cost_indep != INVALID:
                     results_diff_indep[i_r, i_f, i_a] = (
                         results_ecbs_cost[i_r, i_f, i_a] - cost_indep
