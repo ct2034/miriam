@@ -5,8 +5,10 @@ RUN apt-get install -y python3 python3-pip python3-tk python3-pytest git
 COPY . /
 
 # planner
-# COPY planner /planner
 RUN pip3 install -r /planner/policylearn/requirements.txt
+RUN pip3 install -r /planner/policylearn/libMultiRobotPlanning/requirements.txt
+RUN pip3 install -r /sim/decentralized/requirements.txt
+RUN pip3 install -r requirements.txt
 RUN mkdir cache
 
 # ecbs
@@ -15,11 +17,6 @@ RUN mkdir /planner/policylearn/libMultiRobotPlanning/build
 WORKDIR /planner/policylearn/libMultiRobotPlanning/build
 RUN cmake ..
 RUN make ecbs
-RUN pip3 install -r /planner/policylearn/libMultiRobotPlanning/requirements.txt
-
-# sim decentralized
-# COPY sim /sim
-RUN pip3 install -r /sim/decentralized/requirements.txt
 
 # testing
 WORKDIR /
