@@ -11,6 +11,7 @@ from sim.decentralized.agent import Agent, Policy
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
+logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
 logging.getLogger(
     'planner.policylearn.libMultiRobotPlanning').setLevel(logging.ERROR)
 
