@@ -75,17 +75,17 @@ if __name__ == "__main__":
     # save results here first plot
     results_well_formed = np.zeros([n_fills, n_n_agentss])
     results_diff_indep = np.full(
-        [n_runs, n_fills, n_n_agentss], INVALID)
+        [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
     results_diff_sim_decen = np.full(
-        [n_runs, n_fills, n_n_agentss], INVALID)
+        [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
 
     # second plot ecbs
     results_ecbs_cost = np.full(
-        [n_runs, n_fills, n_n_agentss], INVALID)
+        [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
     results_ecbs_vertex_blocks = np.full(
-        [n_runs, n_fills, n_n_agentss], INVALID)
+        [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
     results_ecbs_edge_blocks = np.full(
-        [n_runs, n_fills, n_n_agentss], INVALID)
+        [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
 
     fills = np.around(
         np.linspace(0, max_fill, n_fills),
