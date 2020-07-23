@@ -275,26 +275,15 @@ def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
     return all(map(lambda a: a.is_at_goal(), agents))
 
 
-def check_time_evaluation(time_progress, space_progress, print_results=True):
+def check_time_evaluation(time_progress, space_progress):
     average_time = sum(time_progress) / len(time_progress)
     max_time = max(time_progress)
     average_length = sum(space_progress) / len(space_progress)
     max_length = max(space_progress)
-
-    if print_results:
-        print("average_time: " + str(average_time))
-        print("max_time: " + str(max_time))
-        print("average_length: " + str(average_length))
-        print("max_length: " + str(max_length))
-
     return average_time, max_time, average_length, max_length
 
 
-def run_a_scenario(size, n_agents, policy, plot, print_results=True):
-    # evaluation parameters
-    time_progress = np.zeros([n_agents])
-    space_progress = np.zeros([n_agents])
-
+def sample_and_run_a_scenario(size, n_agents, policy, plot):
     is_well_formed = False
     while not is_well_formed:
         # maze (environment)
@@ -306,6 +295,14 @@ def run_a_scenario(size, n_agents, policy, plot, print_results=True):
         # check well-formedness
         is_well_formed = is_environment_well_formed(agents)
 
+    return run_a_scenario(env, agents, plot)
+
+
+def run_a_scenario(env, agents, plot):
+    n_agents = len(agents)
+    # evaluation parameters
+    time_progress = np.zeros([n_agents])
+    space_progress = np.zeros([n_agents])
     # iterate
     successful = 0
     try:
@@ -321,8 +318,7 @@ def run_a_scenario(size, n_agents, policy, plot, print_results=True):
 
     return check_time_evaluation(
         time_progress,
-        space_progress,
-        print_results) + (successful, )
+        space_progress) + (successful, )
 
 
 def plot_env_agents(environent: np.ndarray,
@@ -412,7 +408,8 @@ def run_main(size=10, n_agents=10, runs=100, plot=True, plot_eval=True):
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):
             random.seed(i_r)
-            results = run_a_scenario(size, n_agents, policy, False, False)
+            results = sample_and_run_a_scenario(
+                size, n_agents, policy, False)
             evaluation_per_policy = np.append(
                 evaluation_per_policy, np.transpose([results]), axis=1)
         evaluations[policy] = evaluation_per_policy

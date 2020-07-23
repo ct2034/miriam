@@ -2,7 +2,7 @@
 
 TEST_COMMANDS=(
     # planner
-    #"mypy planner/policylearn" TODO: fiy typing
+    #"mypy planner/policylearn" TODO: fix typing
     "pycodestyle planner/policylearn --exclude=planner/policylearn/libMultiRobotPlanning"
     "pytest planner/policylearn --ignore=planner/policylearn/libMultiRobotPlanning"
 

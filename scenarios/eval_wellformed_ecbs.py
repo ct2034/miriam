@@ -23,7 +23,7 @@ def plot_results(results, titles):
     palette.set_bad('r', 1.0)
 
     fig = plt.figure(figsize=(20, 10))
-    subplot_basenr = 101 + len(results) * 10
+    subplot_basenr = 201 + int(len(results) / 2) * 10
     for i, r in enumerate(results):
         # do we have any results?
         assert not np.all(r == 0)
@@ -68,20 +68,25 @@ if __name__ == "__main__":
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
     size = 8  # size for all scenarios
-    n_fills = 8  # how many different fill values there should be
-    n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 2  # how many runs per configuration
+    n_fills = 3  # how many different fill values there should be
+    n_n_agentss = 3  # how many different numbers of agents should there be"""
+    n_runs = 3  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
 
-    results_well_formed = np.zeros([n_fills, n_n_agentss])  # save results here
-    results_ecbs_cost = np.zeros([n_runs, n_fills, n_n_agentss])
-    results_ecbs_cost.fill(INVALID)
-    results_diff_indep = np.zeros([n_runs, n_fills, n_n_agentss])
-    results_diff_indep.fill(INVALID)
-    results_ecbs_vertex_blocks = np.zeros([n_runs, n_fills, n_n_agentss])
-    results_ecbs_vertex_blocks.fill(INVALID)
-    results_ecbs_edge_blocks = np.zeros([n_runs, n_fills, n_n_agentss])
-    results_ecbs_edge_blocks.fill(INVALID)
+    # save results here first plot
+    results_well_formed = np.zeros([n_fills, n_n_agentss])
+    results_diff_indep = np.full(
+        [n_runs, n_fills, n_n_agentss], INVALID)
+    results_diff_sim_decen = np.full(
+        [n_runs, n_fills, n_n_agentss], INVALID)
+
+    # second plot ecbs
+    results_ecbs_cost = np.full(
+        [n_runs, n_fills, n_n_agentss], INVALID)
+    results_ecbs_vertex_blocks = np.full(
+        [n_runs, n_fills, n_n_agentss], INVALID)
+    results_ecbs_edge_blocks = np.full(
+        [n_runs, n_fills, n_n_agentss], INVALID)
 
     fills = np.around(
         np.linspace(0, max_fill, n_fills),
@@ -113,6 +118,7 @@ if __name__ == "__main__":
             results_ecbs_cost[i_r, i_f, i_a] = (
                 cost_ecbs(env, starts, goals)
             )
+            # evaluating blocks
             blocks = blocks_ecbs(env, starts, goals)
             if blocks != INVALID:
                 (
@@ -122,26 +128,38 @@ if __name__ == "__main__":
             else:
                 results_ecbs_vertex_blocks[i_r, i_f, i_a] = INVALID
                 results_ecbs_edge_blocks[i_r, i_f, i_a] = INVALID
+            # how bad are the costs with sim decentralized random .............
+            if results_ecbs_cost[i_r, i_f, i_a] != INVALID:
+                cost_decen = cost_sim_decentralized_random(env, starts, goals)
+                if cost_decen != INVALID:
+                    results_diff_sim_decen[i_r, i_f, i_a] = (
+                        cost_decen - results_ecbs_cost[i_r, i_f, i_a]
+                    )
+                else:
+                    results_diff_sim_decen[i_r, i_f, i_a] = INVALID
             # is this different to the independant costs? .....................
             if results_ecbs_cost[i_r, i_f, i_a] != INVALID:
-                cost_indep = cost_independant(env, starts, goals)
-                results_diff_indep[i_r, i_f, i_a] = (
-                    results_ecbs_cost[i_r, i_f, i_a] - cost_indep) * n_agents
+                cost_indep = cost_independant(env, starts, goals, ignore_cache=True)
+                if cost_indep != INVALID:
+                    results_diff_indep[i_r, i_f, i_a] = (
+                        results_ecbs_cost[i_r, i_f, i_a] - cost_indep
+                    )
+                else:
+                    results_diff_indep[i_r, i_f, i_a] = INVALID
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
     plot_results(
         [results_well_formed,
+         results_diff_sim_decen,
+         results_diff_indep,
          results_ecbs_cost,
-         results_diff_indep],
-        ["Well-formedness",
-         "Ecbs cost",
-         "Cost difference ecbs to independant"]
-    )
-
-    plot_results(
-        [results_ecbs_vertex_blocks,
+         results_ecbs_vertex_blocks,
          results_ecbs_edge_blocks],
-        ["Nr of vertex blocks in ecbs solution",
+        ["Well-formedness",
+         "How sub-optimal is sim decentralized (random)",
+         "Cost difference ecbs to independant",
+         "Ecbs cost",
+         "Nr of vertex blocks in ecbs solution",
          "Nr of edge blocks in ecbs solution"]
     )
