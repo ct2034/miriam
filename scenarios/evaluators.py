@@ -33,12 +33,14 @@ def cost_ecbs(env, starts, goals):
 
     returns: `float` and `-1` if planning was unsuccessful."""
     n_agents = starts.shape[0]
-    data = plan_in_gridmap(env, list(starts), list(goals), 10)
+    try:
+        data = plan_in_gridmap(env, list(starts), list(goals), 10)
+    except KeyError:  # happens when start or goal is not in map
+        return INVALID
     if data is None:
         return INVALID
     schedule = data['schedule']
-    if n_agents != len(schedule.keys()):  # Not plans for all agents
-        return INVALID
+    assert n_agents == len(schedule.keys()), "Plans for all agents"
     cost_per_agent = []
     for i_a in range(n_agents):
         agent_key = 'agent'+str(i_a)
@@ -48,8 +50,10 @@ def cost_ecbs(env, starts, goals):
     return sum(cost_per_agent) / n_agents
 
 
+@cachier(hash_params=tools.hasher)
 def cost_independant(env, starts, goals):
-    """what would be the average agent cost if the agents would be independent of each other"""
+    """what would be the average agent cost if the agents would be independent
+    of each other"""
     n_agents = starts.shape[0]
     agents = []
     cost_per_agent = []
