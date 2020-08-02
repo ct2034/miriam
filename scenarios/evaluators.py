@@ -51,6 +51,7 @@ def plan_ecbs(env, starts, goals):
     return data
 
 
+@cachier(hash_params=tools.hasher)
 def cost_ecbs(env, starts, goals):
     """get the average agent cost of this from ecbs
     returns: `float` and `-1` if planning was unsuccessful."""
@@ -68,6 +69,7 @@ def cost_ecbs(env, starts, goals):
     return sum(cost_per_agent) / n_agents
 
 
+@cachier(hash_params=tools.hasher)
 def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
     """Return numbers of vertex and edge blocks for this scenarios solution
     returns: (n_vertex_blocks, n_edge_blocks)"""

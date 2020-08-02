@@ -15,7 +15,7 @@ import tools
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 
-# @cachier(hash_params=tools.hasher)
+@cachier(hash_params=tools.hasher)
 def like_sim_decentralized(size: int, fill: float,
                            n_agents: int, seed: Any):
     random.seed(seed)

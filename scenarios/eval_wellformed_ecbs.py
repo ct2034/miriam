@@ -15,7 +15,10 @@ from scenarios.evaluators import *
 from scenarios.generators import like_sim_decentralized
 
 
-def plot_results(results, titles):
+def plot_results(results, titles, n_agentss, fills):
+    n_fills = len(fills)
+    n_n_agentss = len(n_agentss)
+
     # our cmap with support for over / under
     palette = copy(plt.cm.plasma)
     palette.set_over('w', 1.0)
@@ -63,7 +66,7 @@ def plot_results(results, titles):
     plt.show()
 
 
-if __name__ == "__main__":
+def main():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
@@ -161,5 +164,11 @@ if __name__ == "__main__":
          "Ecbs success",
          "Ecbs cost",
          "Nr of vertex blocks in ecbs solution",
-         "Nr of edge blocks in ecbs solution"]
+         "Nr of edge blocks in ecbs solution"],
+        n_agentss,
+        fills
     )
+
+
+if __name__ == "__main__":
+    main()
