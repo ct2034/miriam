@@ -18,6 +18,7 @@ logging.getLogger(
 INVALID = -1
 
 
+@cachier(hash_params=tools.hasher)
 def to_agent_objects(env, starts, goals, policy=Policy.RANDOM):
     n_agents = starts.shape[0]
     agents = []

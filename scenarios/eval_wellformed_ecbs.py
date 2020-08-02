@@ -23,7 +23,7 @@ def plot_results(results, titles):
     palette.set_bad('r', 1.0)
 
     fig = plt.figure(figsize=(20, 10))
-    subplot_basenr = 201 + int(len(results) / 2) * 10
+    subplot_basenr = 201 + int(np.ceil(len(results) / 2)) * 10
     for i, r in enumerate(results):
         # do we have any results?
         assert not np.all(r == 0)
@@ -59,6 +59,7 @@ def plot_results(results, titles):
         plt.xlabel('Agents')
         plt.xticks(range(n_n_agentss), map(
             lambda a: str(int(a)), n_agentss))
+    plt.tight_layout()
     plt.show()
 
 
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     size = 8  # size for all scenarios
     n_fills = 8  # how many different fill values there should be
     n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 2  # how many runs per configuration
+    n_runs = 10  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
 
     # save results here first plot
@@ -80,6 +81,7 @@ if __name__ == "__main__":
         [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
 
     # second plot ecbs
+    results_ecbs_success = np.zeros([n_fills, n_n_agentss])
     results_ecbs_cost = np.full(
         [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
     results_ecbs_vertex_blocks = np.full(
@@ -114,9 +116,10 @@ if __name__ == "__main__":
                 is_wellformed = False
             results_well_formed[i_f, i_a] += is_wellformed
             # calculating optimal cost ........................................
-            results_ecbs_cost[i_r, i_f, i_a] = (
-                cost_ecbs(env, starts, goals)
-            )
+            res_ecbs = cost_ecbs(env, starts, goals)
+            results_ecbs_cost[i_r, i_f, i_a] = res_ecbs
+            if res_ecbs != INVALID:
+                results_ecbs_success[i_f, i_a] += 1
             # evaluating blocks
             blocks = blocks_ecbs(env, starts, goals)
             if blocks != INVALID:
@@ -148,12 +151,14 @@ if __name__ == "__main__":
         [results_well_formed,
          results_diff_sim_decen,
          results_diff_indep,
+         results_ecbs_success,
          results_ecbs_cost,
          results_ecbs_vertex_blocks,
          results_ecbs_edge_blocks],
         ["Well-formedness",
-         "How sub-optimal is sim decentralized (random)",
+         "Sub-optimality of sim_decen (p: random)",
          "Cost difference ecbs to independant",
+         "Ecbs success",
          "Ecbs cost",
          "Nr of vertex blocks in ecbs solution",
          "Nr of edge blocks in ecbs solution"]
