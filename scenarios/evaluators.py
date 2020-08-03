@@ -24,7 +24,8 @@ def to_agent_objects(env, starts, goals, policy=Policy.RANDOM):
     agents = []
     for i_a in range(n_agents):
         a = Agent(env, starts[i_a])
-        a.give_a_goal(goals[i_a])
+        if not a.give_a_goal(goals[i_a]):
+            return INVALID
         agents.append(a)
     return agents
 
@@ -33,6 +34,8 @@ def to_agent_objects(env, starts, goals, policy=Policy.RANDOM):
 def is_well_formed(env, starts, goals):
     """Check if the environment is well formed according to Cap2015"""
     agents = to_agent_objects(env, starts, goals)
+    if agents is INVALID:
+        return INVALID
     return is_environment_well_formed(tuple(agents))
 
 
@@ -111,6 +114,8 @@ def cost_independant(env, starts, goals):
 @cachier(hash_params=tools.hasher)
 def cost_sim_decentralized_random(env, starts, goals):
     agents = to_agent_objects(env, starts, goals, Policy.RANDOM)
+    if agents is INVALID:
+        return INVALID
     (average_time, max_time, average_length, max_length, successful
      ) = run_a_scenario(
         env, agents, plot=False)

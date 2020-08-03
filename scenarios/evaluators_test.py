@@ -12,6 +12,24 @@ class TestEvaluators(unittest.TestCase):
         [0, 0, 0]
     ])
 
+    def test_to_agent_objects(self):
+        starts = np.array([
+            [0, 0],
+            [0, 2]
+        ])
+        goals = np.array([
+            [2, 0],
+            [2, 2]
+        ])
+        res_agents = scenarios.evaluators.to_agent_objects(
+            self.env, starts, goals, ignore_cache=True)
+        res_starts = list(map(lambda a: tuple(a.pos), res_agents))
+        res_goals = list(map(lambda a: tuple(a.goal), res_agents))
+        self.assertIn((0, 0), res_starts)
+        self.assertIn((0, 2), res_starts)
+        self.assertIn((2, 0), res_goals)
+        self.assertIn((2, 2), res_goals)
+
     def test_is_well_fromed(self):
         starts_wf = np.array([
             [0, 0],
@@ -50,7 +68,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertAlmostEqual(
             4.5, scenarios.evaluators.cost_ecbs(
-                self.env, starts_4_5, goals_4_5)
+                self.env, starts_4_5, goals_4_5, ignore_cache=True)
         )
         # agents that don't collide
         starts_2 = np.array([
@@ -63,7 +81,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_ecbs(
-                self.env, starts_2, goals_2)
+                self.env, starts_2, goals_2, ignore_cache=True)
         )
         # one agents path is not possible
         starts_invalid = np.array([
@@ -77,7 +95,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertAlmostEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_ecbs(
-                self.env, starts_invalid, goals_invalid)
+                self.env, starts_invalid, goals_invalid, ignore_cache=True)
         )
         # trying to make is time out ...
         starts_timeout = np.array([
@@ -101,7 +119,48 @@ class TestEvaluators(unittest.TestCase):
         self.assertAlmostEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_ecbs(
-                self.env, starts_timeout, goals_timeout)
+                self.env, starts_timeout, goals_timeout, ignore_cache=True)
+        )
+
+    def test_blocks_ecbs(self):
+        # agents that collide on vertex
+        starts_vertex = np.array([
+            [0, 0],
+            [0, 2]
+        ])
+        goals_vertex = np.array([
+            [2, 0],
+            [2, 2]
+        ])
+        self.assertEqual(
+            (1, 0), scenarios.evaluators.blocks_ecbs(
+                self.env, starts_vertex, goals_vertex, ignore_cache=True)
+        )
+
+        # agents that collide on edge
+        starts_edge = np.array([
+            [0, 0],
+            [2, 1]
+        ])
+        goals_edge = np.array([
+            [2, 0],
+            [0, 2]
+        ])
+        self.assertEqual(
+            (1, 1), scenarios.evaluators.blocks_ecbs(
+                self.env, starts_edge, goals_edge, ignore_cache=True)
+        )
+
+        # unsolvable
+        starts_unsolv = np.array([
+            [1, 0]  # obstacle
+        ])
+        goals_unsolv = np.array([
+            [1, 2]  # obstacle
+        ])
+        self.assertEqual(
+            -1, scenarios.evaluators.blocks_ecbs(
+                self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
         )
 
     def test_cost_independant(self):
@@ -160,6 +219,7 @@ class TestEvaluators(unittest.TestCase):
             4.5, scenarios.evaluators.cost_sim_decentralized_random(
                 self.env, starts_4_5, goals_4_5, ignore_cache=True)
         )
+
         # agents that don't collide
         starts_2 = np.array([
             [0, 0],
@@ -172,6 +232,18 @@ class TestEvaluators(unittest.TestCase):
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_sim_decentralized_random(
                 self.env, starts_2, goals_2, ignore_cache=True)
+        )
+
+        # unsolvable
+        starts_unsolv = np.array([
+            [1, 0]  # obstacle
+        ])
+        goals_unsolv = np.array([
+            [1, 2]  # obstacle
+        ])
+        self.assertEqual(
+            -1, scenarios.evaluators.cost_sim_decentralized_random(
+                self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
         )
 
 
