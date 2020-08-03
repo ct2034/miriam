@@ -22,10 +22,16 @@ class GenerateDataTest(unittest.TestCase):
         assert np.max(gridmap_half) == 1
         assert np.min(gridmap_half) == 0
 
-    def test_is_free(self):
-        env = np.array([[0, 0], [1, 1]])
-        self.assertTrue(generate_data.is_free(env, (0, 0)))
-        self.assertFalse(generate_data.is_free(env, (1, 0)))
+    def test_get_random_free_pos(self):
+        env = np.array([[0, 1], [1, 1]])
+        a_free_pose = generate_data.get_random_free_pos(env)
+        self.assertEqual(a_free_pose[0], 0)
+        self.assertEqual(a_free_pose[1], 0)
+
+        env2 = np.array([[0, 0], [1, 1]])
+        a_free_pose2 = generate_data.get_random_free_pos(env2)
+        self.assertEqual(a_free_pose[0], 0)
+        self.assertIn(a_free_pose[1], [0, 1])
 
     def test_calling_benchmark_ecbs(self):
         from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (

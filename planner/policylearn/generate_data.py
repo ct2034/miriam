@@ -6,7 +6,7 @@ import pickle
 import random
 import sys
 
-import cachier
+from cachier import cachier
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -35,6 +35,9 @@ DTYPE_SAMPLES = np.int8
 
 
 def generate_random_gridmap(width: int, height: int, fill: float):
+    """making a random gridmap of size (`width`x`height`). It will be filled
+    with stripes until `fill` is exceeded and then single cells are freed until
+    `fill` is exactly reached."""
     gridmap = np.zeros((width, height), dtype=DTYPE_SAMPLES)
     while np.count_nonzero(gridmap) < fill * width * height:
         direction = random.randint(0, 1)
@@ -65,24 +68,11 @@ def show_map(x):
         origin='lower')
 
 
-def is_free(gridmap, pos):
-    """checks if the cell is free."""
-    return gridmap[tuple(pos)] == FREE
-
-
 def get_random_free_pos(gridmap):
     """return a random pose from that map, that is free."""
-    width = gridmap.shape[0]
-    height = gridmap.shape[1]
-
-    def random_pos(width, height):
-        return [
-            random.randint(0, width-1),
-            random.randint(0, height-1)
-        ]
-    pos = random_pos(width, height)
-    while not is_free(gridmap, pos):
-        pos = random_pos(width, height)
+    free = np.where(gridmap == FREE)
+    choice = random.randint(0, len(free[0])-1)
+    pos = tuple(np.array(free)[:, choice])
     return pos
 
 
