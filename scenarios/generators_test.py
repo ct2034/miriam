@@ -9,14 +9,14 @@ class TestGenerators(unittest.TestCase):
     def test_generate_like_sim_decentralized_determinism(self):
         (base_env, base_starts, base_goals
          ) = scenarios.generators.like_sim_decentralized(
-            10, .5, 10, 0
+            10, .5, 10, 0, ignore_cache=True
         )
         # --------
 
         # everything the same
         (same_env, same_starts, same_goals
          ) = scenarios.generators.like_sim_decentralized(
-            10, .5, 10, 0
+            10, .5, 10, 0, ignore_cache=True
         )
         self.assertTrue(np.all(base_env == same_env))
         self.assertTrue(np.all(base_starts == same_starts))
@@ -26,7 +26,7 @@ class TestGenerators(unittest.TestCase):
         # everything different
         (other_env, other_starts, other_goals
          ) = scenarios.generators.like_sim_decentralized(
-            10, .5, 10, 1
+            10, .5, 10, 1, ignore_cache=True
         )
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -36,7 +36,43 @@ class TestGenerators(unittest.TestCase):
         # only env different -> all different
         (other_env, other_starts, other_goals
          ) = scenarios.generators.like_sim_decentralized(
-            10, .4, 10, 0
+            10, .4, 10, 0, ignore_cache=True
+        )
+        self.assertFalse(np.all(base_env == other_env))
+        self.assertFalse(np.all(base_starts == other_starts))
+        self.assertFalse(np.all(base_goals == other_goals))
+
+    def test_generate_like_policylearn_gen_determinism(self):
+        (base_env, base_starts, base_goals
+         ) = scenarios.generators.like_policylearn_gen(
+            10, .5, 10, 0, ignore_cache=True
+        )
+        # --------
+
+        # everything the same
+        (same_env, same_starts, same_goals
+         ) = scenarios.generators.like_policylearn_gen(
+            10, .5, 10, 0, ignore_cache=True
+        )
+        self.assertTrue(np.all(base_env == same_env))
+        self.assertTrue(np.all(base_starts == same_starts))
+        self.assertTrue(np.all(base_goals == same_goals))
+        # --------
+
+        # everything different
+        (other_env, other_starts, other_goals
+         ) = scenarios.generators.like_policylearn_gen(
+            10, .5, 10, 1, ignore_cache=True
+        )
+        self.assertFalse(np.all(base_env == other_env))
+        self.assertFalse(np.all(base_starts == other_starts))
+        self.assertFalse(np.all(base_goals == other_goals))
+        # --------
+
+        # only env different -> all different
+        (other_env, other_starts, other_goals
+         ) = scenarios.generators.like_policylearn_gen(
+            10, .4, 10, 0, ignore_cache=True
         )
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))

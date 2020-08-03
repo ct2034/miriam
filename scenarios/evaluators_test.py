@@ -13,6 +13,7 @@ class TestEvaluators(unittest.TestCase):
     ])
 
     def test_to_agent_objects(self):
+        # generating successfully
         starts = np.array([
             [0, 0],
             [0, 2]
@@ -29,8 +30,23 @@ class TestEvaluators(unittest.TestCase):
         self.assertIn((0, 2), res_starts)
         self.assertIn((2, 0), res_goals)
         self.assertIn((2, 2), res_goals)
+        # returns invalid when one path is not possible
+        starts_invalid = np.array([
+            [0, 0],
+            [1, 0]  # obstacle
+        ])
+        goals_invalid = np.array([
+            [0, 2],
+            [1, 2]  # obstacle
+        ])
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.to_agent_objects(
+                self.env, starts_invalid, goals_invalid, ignore_cache=True)
+        )
 
     def test_is_well_fromed(self):
+        # well formed
         starts_wf = np.array([
             [0, 0],
             [0, 2]
@@ -43,6 +59,7 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.is_well_formed(
                 self.env, starts_wf, goals_wf, ignore_cache=True)
         )
+        # not well formed
         starts_nwf = np.array([
             [1, 1],
             [0, 2]
@@ -55,8 +72,88 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.is_well_formed(
                 self.env, starts_nwf, goals_nwf, ignore_cache=True)
         )
+        # returns invalid when one path is not possible
+        starts_invalid = np.array([
+            [0, 0],
+            [1, 0]  # obstacle
+        ])
+        goals_invalid = np.array([
+            [0, 2],
+            [1, 2]  # obstacle
+        ])
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.is_well_formed(
+                self.env, starts_invalid, goals_invalid, ignore_cache=True)
+        )
 
-    def test_ecbs_cost(self):
+    def test_plan_ecbs(self):
+        # agents that collide in the middle
+        starts_success = np.array([
+            [0, 0],
+            [0, 2]
+        ])
+        goals_success = np.array([
+            [2, 0],
+            [2, 2]
+        ])
+        res = scenarios.evaluators.plan_ecbs(
+            self.env, starts_success, goals_success, ignore_cache=True)
+        self.assertTrue(len(res.keys()) != 0)
+        # one agents path is not possible
+        starts_invalid = np.array([
+            [0, 0],
+            [1, 0]  # obstacle
+        ])
+        goals_invalid = np.array([
+            [0, 2],
+            [1, 2]  # obstacle
+        ])
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.plan_ecbs(
+                self.env, starts_invalid, goals_invalid, ignore_cache=True)
+        )
+        # returns invalid when one agents path is not possible
+        starts_invalid = np.array([
+            [0, 0],
+            [1, 0]  # obstacle
+        ])
+        goals_invalid = np.array([
+            [0, 2],
+            [1, 2]  # obstacle
+        ])
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.plan_ecbs(
+                self.env, starts_invalid, goals_invalid, ignore_cache=True)
+        )
+        # trying to make deadlocks ...
+        starts_deadlocks = np.array([
+            [0, 0],
+            [0, 1],
+            [0, 2],
+            [1, 1],
+            [2, 0],
+            [2, 1],
+            [2, 2]
+        ])
+        goals_deadlocks = np.array([
+            [2, 0],
+            [2, 1],
+            [2, 2],
+            [0, 0],
+            [0, 1],
+            [0, 2],
+            [1, 1]
+        ])
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.plan_ecbs(
+                self.env, starts_deadlocks, goals_deadlocks, ignore_cache=True)
+        )
+
+    def test_cost_ecbs(self):
         # agents that collide in the middle
         starts_4_5 = np.array([
             [0, 0],
@@ -116,7 +213,7 @@ class TestEvaluators(unittest.TestCase):
             [0, 2],
             [1, 1]
         ])
-        self.assertAlmostEqual(
+        self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_ecbs(
                 self.env, starts_timeout, goals_timeout, ignore_cache=True)
@@ -159,7 +256,7 @@ class TestEvaluators(unittest.TestCase):
             [1, 2]  # obstacle
         ])
         self.assertEqual(
-            -1, scenarios.evaluators.blocks_ecbs(
+            scenarios.evaluators.INVALID, scenarios.evaluators.blocks_ecbs(
                 self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
         )
 
@@ -242,8 +339,33 @@ class TestEvaluators(unittest.TestCase):
             [1, 2]  # obstacle
         ])
         self.assertEqual(
-            -1, scenarios.evaluators.cost_sim_decentralized_random(
+            scenarios.evaluators.INVALID, scenarios.evaluators.cost_sim_decentralized_random(
                 self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
+        )
+
+        # trying to make deadlocks ...
+        starts_deadlocks = np.array([
+            [0, 0],
+            [0, 1],
+            [0, 2],
+            [1, 1],
+            [2, 0],
+            [2, 1],
+            [2, 2]
+        ])
+        goals_deadlocks = np.array([
+            [2, 0],
+            [2, 1],
+            [2, 2],
+            [0, 0],
+            [0, 1],
+            [0, 2],
+            [1, 1]
+        ])
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.cost_sim_decentralized_random(
+                self.env, starts_deadlocks, goals_deadlocks, ignore_cache=True)
         )
 
 
