@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 import sim.decentralized.agent
 import sim.decentralized.runner
 import tools
+import planner.policylearn.generate_data
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
@@ -20,6 +21,23 @@ def like_sim_decentralized(size: int, fill: float,
                            n_agents: int, seed: Any):
     random.seed(seed)
     env = sim.decentralized.runner.initialize_environment(size, fill)
+    agents = sim.decentralized.runner.initialize_agents(
+        env, n_agents, sim.decentralized.agent.Policy.RANDOM)
+
+    starts = np.array([a.pos for a in agents])
+    assert starts.shape == (n_agents, 2)
+    goals = np.array([a.goal for a in agents])
+    assert goals.shape == (n_agents, 2)
+
+    return env, starts, goals
+
+
+@cachier(hash_params=tools.hasher)
+def like_policylearn_gen(size: int, fill: float,
+                         n_agents: int, seed: Any):
+    random.seed(seed)
+    env = planner.policylearn.generate_data.generate_random_gridmap(
+        size, size, fill)
     agents = sim.decentralized.runner.initialize_agents(
         env, n_agents, sim.decentralized.agent.Policy.RANDOM)
 

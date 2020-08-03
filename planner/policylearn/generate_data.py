@@ -32,7 +32,7 @@ DTYPE_SAMPLES = np.int8
 
 def generate_random_gridmap(width: int, height: int, fill: float):
     gridmap = np.zeros((width, height), dtype=DTYPE_SAMPLES)
-    while np.count_nonzero(gridmap) < fill * width * height:
+    while np.count_nonzero(gridmap) <= fill * width * height:
         direction = random.randint(0, 1)
         start = (
             random.randint(0, width-1),

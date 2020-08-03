@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from scenarios.evaluators import *
-from scenarios.generators import like_sim_decentralized
+from scenarios.generators import *
 
 
 def plot_results(results, titles, n_agentss, fills):
@@ -110,7 +110,7 @@ def main():
             fill = fills[i_f]
             n_agents = n_agentss[i_a]
             try:
-                env, starts, goals = like_sim_decentralized(
+                env, starts, goals = like_policylearn_gen(
                     size, fill, n_agents, seed=i_r)
                 is_wellformed = (
                     is_well_formed(
