@@ -6,12 +6,16 @@ import pickle
 import random
 import sys
 
+import cachier
 import matplotlib.pyplot as plt
 import numpy as np
 
+import tools
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
 
+FREE = 0
+OBSTACLE = 1
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
 EDGE_CONSTRAINTS_STR = 'edgeConstraints'
 SCHEDULE_STR = 'schedule'
@@ -32,22 +36,22 @@ DTYPE_SAMPLES = np.int8
 
 def generate_random_gridmap(width: int, height: int, fill: float):
     gridmap = np.zeros((width, height), dtype=DTYPE_SAMPLES)
-    while np.count_nonzero(gridmap) <= fill * width * height:
+    while np.count_nonzero(gridmap) < fill * width * height:
         direction = random.randint(0, 1)
         start = (
             random.randint(0, width-1),
             random.randint(0, height-1)
         )
         if direction:  # x
-            gridmap[start[0]:random.randint(0, width-1), start[1]] = 1
+            gridmap[start[0]:random.randint(0, width-1), start[1]] = OBSTACLE
         else:  # y
-            gridmap[start[0], start[1]:random.randint(0, height-1)] = 1
+            gridmap[start[0], start[1]:random.randint(0, height-1)] = OBSTACLE
     while np.count_nonzero(gridmap) > fill * width * height:
         make_free = (
             random.randint(0, width-1),
             random.randint(0, height-1)
         )
-        gridmap[make_free] = 0
+        gridmap[make_free] = FREE
     return gridmap
 
 
@@ -63,7 +67,7 @@ def show_map(x):
 
 def is_free(gridmap, pos):
     """checks if the cell is free."""
-    return gridmap[tuple(pos)] == 0
+    return gridmap[tuple(pos)] == FREE
 
 
 def get_random_free_pos(gridmap):
@@ -140,6 +144,7 @@ def get_agent_paths_from_data(data, timed=False):
     return agent_paths
 
 
+@cachier(hash_params=tools.hasher)
 def will_they_collide(gridmap, starts, goals):
     """checks if for a given set of starts and goals the agents travelling
     between may collide on the given gridmap."""
@@ -169,6 +174,7 @@ def will_they_collide(gridmap, starts, goals):
     return collisions, agent_paths
 
 
+@cachier(hash_params=tools.hasher)
 def add_padding_to_gridmap(gridmap, radius):
     """add a border of blocks around the map of given radius.
     (The new size will be old size + 2 * radius in both directions)"""

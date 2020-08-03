@@ -22,29 +22,20 @@ class GenerateDataTest(unittest.TestCase):
         assert np.max(gridmap_half) == 1
         assert np.min(gridmap_half) == 0
 
+    def test_is_free(self):
+        env = np.array([[0, 0], [1, 1]])
+        self.assertTrue(generate_data.is_free(env, (0, 0)))
+        self.assertFalse(generate_data.is_free(env, (1, 0)))
+
     def test_calling_benchmark_ecbs(self):
         from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
-            BLOCKS_STR, plan_in_gridmap)
+            plan_in_gridmap)
 
-        width = 5
-        height = width
-        fill = .1
-        n_agents = 3
+        env = np.array([[0, 0], [1, 1]])
+        starts = np.array([[0, 0]])
+        goals = np.array([[0, 1]])
 
-        collide_count = 0
-        data = None
-        while collide_count != 1 or data is None:
-            gridmap = generate_data.generate_random_gridmap(
-                width, height, fill)
-            starts = [generate_data.get_random_free_pos(gridmap)
-                      for _ in range(n_agents)]
-            goals = [generate_data.get_random_free_pos(gridmap)
-                     for _ in range(n_agents)]
-            collisions, indep_agent_paths = generate_data.will_they_collide(
-                gridmap, starts, goals)
-            collide_count = len(collisions.keys())
-
-            data = plan_in_gridmap(gridmap, starts, goals)
+        data = plan_in_gridmap(env, starts, goals)
 
         self.assertNotEqual(data, None)
         self.assertNotEqual(len(data.keys()), 0)
