@@ -16,7 +16,6 @@ import planner.policylearn.generate_data
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 
-@cachier(hash_params=tools.hasher)
 def make_starts_goals_on_env(env: np.ndarray, n_agents: int):
     agents = sim.decentralized.runner.initialize_agents(
         env, n_agents, sim.decentralized.agent.Policy.RANDOM)
