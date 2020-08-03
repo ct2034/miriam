@@ -35,7 +35,7 @@ def is_well_formed(env, starts, goals):
     """Check if the environment is well formed according to Cap2015"""
     agents = to_agent_objects(env, starts, goals)
     if agents is INVALID:
-        return INVALID
+        return False
     return is_environment_well_formed(tuple(agents))
 
 
