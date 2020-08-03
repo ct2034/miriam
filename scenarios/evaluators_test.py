@@ -339,7 +339,8 @@ class TestEvaluators(unittest.TestCase):
             [1, 2]  # obstacle
         ])
         self.assertEqual(
-            scenarios.evaluators.INVALID, scenarios.evaluators.cost_sim_decentralized_random(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.cost_sim_decentralized_random(
                 self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
         )
 
