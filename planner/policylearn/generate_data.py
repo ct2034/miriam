@@ -13,6 +13,7 @@ import numpy as np
 import tools
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
+from sim.decentralized.runner import initialize_environment
 
 FREE = 0
 OBSTACLE = 1
@@ -59,7 +60,7 @@ def generate_random_gridmap(width: int, height: int, fill: float):
 
 
 def show_map(x):
-    """displays the map using matplotlib. You may want to call plt.show()
+    """displays the map using matplotlib. You may want to call `plt.show()`
     yourself."""
     plt.imshow(
         np.swapaxes(x, 0, 1),
@@ -90,9 +91,8 @@ def get_vertex_block_coords(blocks):  # TODO: edge constraints
     return coords
 
 
-def has_exatly_one_vertex_block(blocks):
-    """counts if these blocks have exactly one vertex block
-    (and no edge block)."""
+def count_blocks(blocks):
+    """counts if edge and vertex blocks"""
     n_vc = 0
     n_ec = 0
     for agent in blocks.keys():
@@ -104,7 +104,20 @@ def has_exatly_one_vertex_block(blocks):
             if EDGE_CONSTRAINTS_STR in blocks_pa.keys():
                 for _ in blocks_pa[EDGE_CONSTRAINTS_STR]:
                     n_ec += 1
+    return n_vc, n_ec
+
+
+def has_exactly_one_vertex_block(blocks):
+    """counts if these blocks have exactly one vertex block
+    (and no edge block)."""
+    n_vc, n_ec = count_blocks(blocks)
     return n_ec == 0 and n_vc == 1
+
+
+def has_one_or_more_vertex_blocks(blocks):
+    """counts if these blocks have one or more vertex blocks."""
+    n_vc, n_ec = count_blocks(blocks)
+    return n_vc >= 1
 
 
 def get_agent_paths_from_data(data, timed=False):
@@ -147,7 +160,6 @@ def will_they_collide(gridmap, starts, goals):
                                goals[i_a], ], timeout=2)
         if data is None:
             logging.warn("no single agent plan in gridmap")
-            show_map(gridmap)
             plt.show()
             return {}, []
         single_agent_paths = get_agent_paths_from_data(data, timed=True)
@@ -430,14 +442,16 @@ if __name__ == "__main__":
         plot = False
         width = 10
         height = 10
-        n_agents = 5
+        n_agents = 8
         n_data_to_gen = 5000
+        fill = .4
         # start
         random.seed(0)
         while len(all_data) < n_data_to_gen:
             collide_count = 0
-            while collide_count != 1:
-                gridmap = generate_random_gridmap(width, height, .2)
+            while collide_count < 1:
+                # gridmap = generate_random_gridmap(width, height, fill)
+                gridmap = initialize_environment(width, fill)
                 starts = [get_random_free_pos(gridmap)
                           for _ in range(n_agents)]
                 goals = [get_random_free_pos(gridmap)
@@ -451,8 +465,8 @@ if __name__ == "__main__":
 
             if data and BLOCKS_STR in data.keys():  # has blocks
                 blocks = data[BLOCKS_STR]
-                has_a_block = has_exatly_one_vertex_block(blocks)
-                if has_a_block:
+                at_least_one_block = has_one_or_more_vertex_blocks(blocks)
+                if at_least_one_block:
                     # we take only these for learning
                     data.update({
                         INDEP_AGENT_PATHS_STR: indep_agent_paths,
