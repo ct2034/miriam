@@ -29,8 +29,9 @@ def plot_results(
     palette.set_bad('r', 1.0)
 
     fig = plt.figure(figsize=(20, 10))
-    generator_name = str(generator.__module__)
-    fig.suptitle(generator, fontsize=16)
+    generator_name = str(generator).split("at 0x")[
+        0].replace("<function ", "").replace(" ", "")
+    fig.suptitle(generator_name, fontsize=16)
     subplot_basenr = 201 + int(np.ceil(len(results) / 2)) * 10
     for i, r in enumerate(results):
         # do we have any results?
@@ -68,6 +69,7 @@ def plot_results(
         plt.xticks(range(n_n_agentss), map(
             lambda a: str(int(a)), n_agentss))
     plt.tight_layout()
+    plt.savefig("scenarios/res_" + generator_name + ".png")
 
 
 def main():
