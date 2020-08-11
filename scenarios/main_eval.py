@@ -100,21 +100,23 @@ def main():
         all_results[str(gen)] = {}
         results = all_results[str(gen)]
 
-        # save results here first plot
+        # save results here
+        # first plot row
         results["well_formed"] = np.zeros([n_fills, n_n_agentss])
         results["diff_indep"] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
         results["diff_sim_decen"] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-
-        # second plot ecbs
         results["ecbs_success"] = np.zeros([n_fills, n_n_agentss])
+        # second plot row
         results["ecbs_cost"] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
         results["ecbs_vertex_blocks"] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
         results["ecbs_edge_blocks"] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+        results["usefullness"] = np.zeros(
+            [n_runs, n_fills, n_n_agentss], dtype=np.float)
 
     t = time.time()
     i = 0
@@ -159,6 +161,8 @@ def main():
                         results["diff_indep"][i_r, i_f, i_a] = (
                             results["ecbs_cost"][i_r, i_f, i_a] - cost_indep
                         )
+                        results["usefullness"][i_r, i_f,
+                                               i_a] += results["diff_indep"][i_r, i_f, i_a]
                 # how bad are the costs with sim decentralized random .........
                 if results["ecbs_cost"][i_r, i_f, i_a] != INVALID:
                     cost_decen = cost_sim_decentralized_random(
@@ -167,6 +171,8 @@ def main():
                         results["diff_sim_decen"][i_r, i_f, i_a] = (
                             cost_decen - results["ecbs_cost"][i_r, i_f, i_a]
                         )
+                        results["usefullness"][i_r, i_f,
+                                               i_a] += results["diff_sim_decen"][i_r, i_f, i_a]
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
@@ -179,14 +185,16 @@ def main():
              results["ecbs_success"],
              results["ecbs_cost"],
              results["ecbs_vertex_blocks"],
-             results["ecbs_edge_blocks"]],
+             results["ecbs_edge_blocks"],
+             results["usefullness"]],
             ["Well-formedness",
              "Sub-optimality of sim_decen (p: random)",
              "Cost difference ecbs to independant",
              "Ecbs success",
              "Ecbs cost",
              "Nr of vertex blocks in ecbs solution",
-             "Nr of edge blocks in ecbs solution"],
+             "Nr of edge blocks in ecbs solution",
+             "Usefullness"],
             generator=gen,
             n_agentss=n_agentss,
             fills=fills
