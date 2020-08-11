@@ -79,12 +79,13 @@ def main():
     size = 8  # size for all scenarios
     n_fills = 8  # how many different fill values there should be
     n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 10  # how many runs per configuration
+    n_runs = 1  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
 
     generators = [
         like_policylearn_gen,
-        like_sim_decentralized
+        like_sim_decentralized,
+        tracing_pathes_in_the_dark
     ]
     all_results = {}
 
@@ -140,10 +141,19 @@ def main():
                     is_wellformed = False
                 results["well_formed"][i_f, i_a] += is_wellformed
                 # calculating optimal cost ....................................
-                res_ecbs = cost_ecbs(env, starts, goals)
-                results["ecbs_cost"][i_r, i_f, i_a] = res_ecbs
+                if i_f > 0 and results["ecbs_cost"
+                                       ][i_r, i_f - 1, i_a] == INVALID:
+                    # previous fills timed out
+                    res_ecbs = INVALID
+                elif i_a > 0 and results["ecbs_cost"
+                                         ][i_r, i_f, i_a - 1] == INVALID:
+                    # previous agent count failed as well
+                    res_ecbs = INVALID
+                else:
+                    res_ecbs = cost_ecbs(env, starts, goals)
                 if res_ecbs != INVALID:
                     results["ecbs_success"][i_f, i_a] += 1
+                    results["ecbs_cost"][i_r, i_f, i_a] = res_ecbs
                 # evaluating blocks
                 blocks = blocks_ecbs(env, starts, goals)
                 if blocks != INVALID:
