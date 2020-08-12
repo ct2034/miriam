@@ -81,8 +81,7 @@ class TestEvaluators(unittest.TestCase):
             [0, 2],
             [1, 2]  # obstacle
         ])
-        self.assertEqual(
-            scenarios.evaluators.INVALID,
+        self.assertFalse(
             scenarios.evaluators.is_well_formed(
                 self.env, starts_invalid, goals_invalid, ignore_cache=True)
         )

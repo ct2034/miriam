@@ -79,7 +79,7 @@ def main():
     size = 8  # size for all scenarios
     n_fills = 8  # how many different fill values there should be
     n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 1  # how many runs per configuration
+    n_runs = 16  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
 
     generators = [
