@@ -11,7 +11,6 @@ from matplotlib import pyplot as plt
 import sim.decentralized.agent
 import sim.decentralized.runner
 import tools
-import planner.policylearn.generate_data
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
@@ -38,11 +37,36 @@ def like_sim_decentralized(size: int, fill: float,
     return env, starts, goals
 
 
+# this was previously in planner.policylearn.generate_data
+def generate_random_gridmap(width: int, height: int, fill: float):
+    """making a random gridmap of size (`width`x`height`). It will be filled
+    with stripes until `fill` is exceeded and then single cells are freed until
+    `fill` is exactly reached."""
+    gridmap = np.zeros((width, height), dtype=np.int8)
+    while np.count_nonzero(gridmap) < fill * width * height:
+        direction = random.randint(0, 1)
+        start = (
+            random.randint(0, width-1),
+            random.randint(0, height-1)
+        )
+        if direction:  # x
+            gridmap[start[0]:random.randint(0, width-1), start[1]] = OBSTACLE
+        else:  # y
+            gridmap[start[0], start[1]:random.randint(0, height-1)] = OBSTACLE
+    while np.count_nonzero(gridmap) > fill * width * height:
+        make_free = (
+            random.randint(0, width-1),
+            random.randint(0, height-1)
+        )
+        gridmap[make_free] = FREE
+    return gridmap
+
+
 @cachier(hash_params=tools.hasher)
 def like_policylearn_gen(size: int, fill: float,
                          n_agents: int, seed: Any):
     random.seed(seed)
-    env = planner.policylearn.generate_data.generate_random_gridmap(
+    env = generate_random_gridmap(
         size, size, fill)
     starts, goals = make_starts_goals_on_env(env, n_agents)
     return env, starts, goals

@@ -14,6 +14,7 @@ import tools
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
 from sim.decentralized.runner import initialize_environment
+from scenarios.generators import tracing_pathes_in_the_dark
 
 FREE = 0
 OBSTACLE = 1
@@ -33,30 +34,6 @@ LSTM_FOV_RADIUS = 2  # self plus x in all 4 directions
 CLASSIFICATION_POS_TIMESTEPS = 3
 CLASSIFICATION_FOV_RADIUS = 6  # self plus x in all 4 directions
 DTYPE_SAMPLES = np.int8
-
-
-def generate_random_gridmap(width: int, height: int, fill: float):
-    """making a random gridmap of size (`width`x`height`). It will be filled
-    with stripes until `fill` is exceeded and then single cells are freed until
-    `fill` is exactly reached."""
-    gridmap = np.zeros((width, height), dtype=DTYPE_SAMPLES)
-    while np.count_nonzero(gridmap) < fill * width * height:
-        direction = random.randint(0, 1)
-        start = (
-            random.randint(0, width-1),
-            random.randint(0, height-1)
-        )
-        if direction:  # x
-            gridmap[start[0]:random.randint(0, width-1), start[1]] = OBSTACLE
-        else:  # y
-            gridmap[start[0], start[1]:random.randint(0, height-1)] = OBSTACLE
-    while np.count_nonzero(gridmap) > fill * width * height:
-        make_free = (
-            random.randint(0, width-1),
-            random.randint(0, height-1)
-        )
-        gridmap[make_free] = FREE
-    return gridmap
 
 
 def show_map(x):
@@ -195,8 +172,8 @@ def training_samples_from_data(data, mode):
     """extract training samples from the data simulation data dict."""
     training_samples = []
     n_agents = len(data[INDEP_AGENT_PATHS_STR])
-    assert len(data[COLLISIONS_STR]
-               ) == 1, "assuming we only handle one conflict"
+    # assert len(data[COLLISIONS_STR]
+    #            ) == 1, "assuming we only handle one conflict"
     for col_vertex, col_agents in data[COLLISIONS_STR].items():
         t = col_vertex[2]
         blocked_agent = -1
@@ -447,15 +424,20 @@ if __name__ == "__main__":
         fill = .4
         # start
         random.seed(0)
+        seed = 0
         while len(all_data) < n_data_to_gen:
             collide_count = 0
             while collide_count < 1:
                 # gridmap = generate_random_gridmap(width, height, fill)
-                gridmap = initialize_environment(width, fill)
-                starts = [get_random_free_pos(gridmap)
-                          for _ in range(n_agents)]
-                goals = [get_random_free_pos(gridmap)
-                         for _ in range(n_agents)]
+                # gridmap = initialize_environment(width, fill)
+                # starts = [get_random_free_pos(gridmap)
+                #           for _ in range(n_agents)]
+                # goals = [get_random_free_pos(gridmap)
+                #          for _ in range(n_agents)]
+                gridmap, starts, goals = tracing_pathes_in_the_dark(
+                    width, fill, n_agents, seed
+                )
+                seed += 1
                 collisions, indep_agent_paths = will_they_collide(
                     gridmap, starts, goals)
                 collide_count = len(collisions.keys())
