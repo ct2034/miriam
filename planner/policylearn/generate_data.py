@@ -417,8 +417,8 @@ if __name__ == "__main__":
         # generation mode
         all_data = []
         plot = False
-        width = 10
-        height = 10
+        width = 8
+        height = width
         n_agents = 8
         n_data_to_gen = 5000
         fill = .4
