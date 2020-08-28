@@ -78,6 +78,20 @@ class TestGenerators(unittest.TestCase):
         self.assertFalse(np.all(base_starts == other_starts))
         self.assertFalse(np.all(base_goals == other_goals))
 
+    def test_generate_like_policylearn_gen_low_fills(self):
+        """tests if generator handles low fill numbers correctly"""
+        (env, starts, goals
+         ) = scenarios.generators.like_policylearn_gen(
+            10, .1, 10, 0, ignore_cache=True
+        )
+        self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
+
+        (env, starts, goals
+         ) = scenarios.generators.like_policylearn_gen(
+            10, 0, 10, 0, ignore_cache=True
+        )
+        self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
+
     def test_tracing_pathes_in_the_dark_determinism(self):
         (base_env, base_starts, base_goals
          ) = scenarios.generators.tracing_pathes_in_the_dark(
@@ -112,6 +126,20 @@ class TestGenerators(unittest.TestCase):
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
         self.assertFalse(np.all(base_goals == other_goals))
+
+    def test_tracing_pathes_in_the_dark_gen_low_fills(self):
+        """tests if generator handles low fill numbers correctly"""
+        (env, starts, goals
+         ) = scenarios.generators.tracing_pathes_in_the_dark(
+            10, .1, 10, 0, ignore_cache=True
+        )
+        self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
+
+        (env, starts, goals
+         ) = scenarios.generators.tracing_pathes_in_the_dark(
+            10, 0, 10, 0, ignore_cache=True
+        )
+        self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
 
 if __name__ == "__main__":  # pragma: no cover

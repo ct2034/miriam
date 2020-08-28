@@ -86,7 +86,8 @@ def get_random_next_to_free_pose_or_any_if_full(env):
     basic_pos = np.array(samples)[:, r]
     r_step = random.choice([[0, 1], [0, -1], [1, 0], [-1, 0]])
     step_pos = basic_pos + r_step
-    if (step_pos[0] < 0 or step_pos[1] < 0 or step_pos[0] >= size or step_pos[1] >= size):
+    if (step_pos[0] < 0 or step_pos[1] < 0 or
+            step_pos[0] >= size or step_pos[1] >= size):
         return basic_pos
     else:
         return step_pos

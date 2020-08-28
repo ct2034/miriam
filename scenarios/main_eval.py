@@ -172,7 +172,8 @@ def main():
                             results["ecbs_cost"][i_r, i_f, i_a] - cost_indep
                         )
                         results["usefullness"][i_r, i_f,
-                                               i_a] += results["diff_indep"][i_r, i_f, i_a]
+                                               i_a] += results[
+                                                   "diff_indep"][i_r, i_f, i_a]
                 # how bad are the costs with sim decentralized random .........
                 if results["ecbs_cost"][i_r, i_f, i_a] != INVALID:
                     cost_decen = cost_sim_decentralized_random(
@@ -182,7 +183,9 @@ def main():
                             cost_decen - results["ecbs_cost"][i_r, i_f, i_a]
                         )
                         results["usefullness"][i_r, i_f,
-                                               i_a] += results["diff_sim_decen"][i_r, i_f, i_a]
+                                               i_a] += results[
+                                                   "diff_sim_decen"][
+                                                       i_r, i_f, i_a]
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
