@@ -7,14 +7,14 @@ import random
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
-from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, Dropout, Flatten,
-                                     Reshape)
+from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D,
+                                     Dropout, Flatten, MaxPooling2D, Reshape)
 from tensorflow.keras.models import Sequential
 
 IMG_SIZE = 13
 IMG_DEPTH_T = 3
 IMG_DEPTH_FRAMES = 4
-TRAININING_PERC = 1
+TRAINING_PERC = 1
 
 
 if __name__ == "__main__":
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     test_images = []
     test_labels = []
     for i in range(len(d)):
-        if i < TRAININING_PERC * len(d):  # training data
+        if i < TRAINING_PERC * len(d):  # training data
             dat = d[i][0]
             train_images.append(dat)
 
@@ -72,16 +72,15 @@ if __name__ == "__main__":
     CONV3D_1_LAYERS = 16
     # model
     model = Sequential([
-        Conv3D(CONV3D_1_LAYERS, 3, padding='same', activation='relu',
+        Conv3D(CONV3D_1_LAYERS, 4, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
-        Dropout(0.4),
+        Dropout(0.2),
         Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
         Conv2D(32, 4, padding='same', activation='relu'),
         Flatten(),
-        Dropout(0.5),
-        Dense(64, activation='relu'),
-        Dropout(0.5),
-        Dense(32, activation='relu'),
+	Dense(64, activation='relu'),
+	Dropout(0.5),
+	Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer='adam',
@@ -90,8 +89,7 @@ if __name__ == "__main__":
     model.summary()
 
     # train
-    history = model.fit([train_images2], train_labels2,
-                        validation_split=0.1, epochs=32, batch_size=256)
+    history = model.fit([train_images2], train_labels2, validation_split=0.1, epochs=8, batch_size=16)
 
     # test
     #test_loss, test_acc = model.evaluate([test_images], test_labels)
