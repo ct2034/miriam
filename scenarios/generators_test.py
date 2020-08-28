@@ -131,13 +131,13 @@ class TestGenerators(unittest.TestCase):
         """tests if generator handles low fill numbers correctly"""
         (env, starts, goals
          ) = scenarios.generators.tracing_pathes_in_the_dark(
-            10, .1, 10, 0, ignore_cache=True
+            10, .1, 10, 0
         )
         self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
 
         (env, starts, goals
          ) = scenarios.generators.tracing_pathes_in_the_dark(
-            10, 0, 10, 0, ignore_cache=True
+            10, 0, 10, 0
         )
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 

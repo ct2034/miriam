@@ -31,3 +31,4 @@ docs/sphinx/build
 
 # of ecbs ..
 tmp_jobs.csv
+htmlcov/
