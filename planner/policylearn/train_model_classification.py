@@ -28,46 +28,48 @@ if __name__ == "__main__":
     random.shuffle(d)
 
     # data
-    train_images = []
-    train_labels = []
+    train_images_l = []
+    train_labels_l = []
     test_images = []
     test_labels = []
     for i in range(len(d)):
         if i < TRAINING_PERC * len(d):  # training data
             dat = d[i][0]
-            train_images.append(dat)
+            train_images_l.append(dat)
 
             # more data
             dat = np.rot90(dat)
-            train_images.append(dat)
+            train_images_l.append(dat)
             dat = np.rot90(dat)
-            train_images.append(dat)
+            train_images_l.append(dat)
             dat = np.rot90(dat)
-            train_images.append(dat)
+            train_images_l.append(dat)
             # <->
             dat = np.flip(dat, 0)
-            train_images.append(dat)
+            train_images_l.append(dat)
             dat = np.rot90(dat)
-            train_images.append(dat)
+            train_images_l.append(dat)
             dat = np.rot90(dat)
-            train_images.append(dat)
+            train_images_l.append(dat)
             dat = np.rot90(dat)
-            train_images.append(dat)
+            train_images_l.append(dat)
             for _ in range(8):
-                train_labels.append(d[i][1])
+                train_labels_l.append(d[i][1])
         else:  # test data
             test_images.append(d[i][0])
             test_labels.append(d[i][1])
     # shuffling
-    train_images = np.array(train_images)
-    train_labels = np.array(train_labels)
+    train_images = np.array(train_images_l)
+    train_labels = np.array(train_labels_l)
     training_data = np.c_[train_images.reshape(
         len(train_images), -1), train_labels.reshape(len(train_labels), -1)]
     np.random.shuffle(training_data)
     train_images2 = training_data[:, :train_images.size //
-                                  len(train_images)].reshape(train_images.shape)
+                                  len(train_images)].reshape(
+                                      train_images.shape)
     train_labels2 = training_data[:, train_images.size //
-                                  len(train_images):].reshape(train_labels.shape)
+                                  len(train_images):].reshape(
+                                      train_labels.shape)
 
     CONV3D_1_LAYERS = 16
     # model
@@ -78,9 +80,9 @@ if __name__ == "__main__":
         Reshape((IMG_SIZE, IMG_SIZE, IMG_DEPTH_T * CONV3D_1_LAYERS)),
         Conv2D(32, 4, padding='same', activation='relu'),
         Flatten(),
-	Dense(64, activation='relu'),
-	Dropout(0.5),
-	Dense(32, activation='relu'),
+        Dense(64, activation='relu'),
+        Dropout(0.5),
+        Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer='adam',
@@ -89,12 +91,13 @@ if __name__ == "__main__":
     model.summary()
 
     # train
-    history = model.fit([train_images2], train_labels2, validation_split=0.1, epochs=8, batch_size=16)
+    history = model.fit([train_images2], train_labels2,
+                        validation_split=0.1, epochs=8, batch_size=1024)
 
     # test
-    #test_loss, test_acc = model.evaluate([test_images], test_labels)
-    #print("Loss " + str(test_loss))
-    #print("Accuracy " + str(test_acc))
+    # test_loss, test_acc = model.evaluate([test_images], test_labels)
+    # print("Loss " + str(test_loss))
+    # print("Accuracy " + str(test_acc))
 
     # Plot training & validation accuracy values
     plt.plot(history.history['acc'])
