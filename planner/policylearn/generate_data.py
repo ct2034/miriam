@@ -409,7 +409,11 @@ if __name__ == "__main__":
         training_data_we_want = []
         with open(args.fname_read_pkl.name, 'rb') as f:
             all_data = pickle.load(f)
+        l = len(all_data)
+        i = 0
         for d in all_data:
+            i += 1
+            logger.info("{} of {}".format(i, l))
             training_data_we_want.extend(
                 training_samples_from_data(d, args.mode))
         save_data(training_data_we_want, args.fname_write_pkl.name)
