@@ -64,13 +64,13 @@ def train(n, learn_res, sample_end, t_pred):
 
     # train
     history = model.fit([x], [x],
-                        validation_split=0.3, epochs=128, batch_size=256)
+                        validation_split=0.3, epochs=32, batch_size=256)
     return model, history
 
 
 def run_an_example_and_plot_info():
-    n = 2 ** 15  # samples
-    sample_end = 0  # where does X data stop
+    n = 2 ** 17  # samples
+    sample_end = 1  # where does X data stop
     t_pred = 1  # where to measure y
 
     model, history = train(n, learn_res, sample_end, t_pred)
@@ -93,11 +93,11 @@ def run_an_example_and_plot_info():
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Test'], loc='upper left')
 
-    # having fun with our model
+    # original data and its reconstruction
     plt.figure()
     n = 8
     plot_res = 1000
-    t_plot = np.linspace(-1, 1, plot_res)
+    t_plot = np.linspace(-1.2, 1.2, plot_res)
     t_sample = np.linspace(-1, sample_end, learn_res)
     for i in range(n):
         poly = make_random_poly()
@@ -106,15 +106,7 @@ def run_an_example_and_plot_info():
         plt.subplot(100 * n / 2 + 20 + i)
         plt.plot(t_plot, poly(t_plot), 'k--')
         plt.plot(t_sample, pred, 'r')
-        # if pred == Y:
-        #     col = 'g'
-        # else:
-        #     col = 'r'
-        # plt.plot(t_pred, poly(t_pred), col+'X')
-        # plt.plot(t_sample, X, 'b')
-        # plt.title('True label: {} | Predicted: {}'.format(Y, pred))
         plt.grid(True)
-        # plt.axhline(y=0, color='k')
 
     # The End
     plt.show()
