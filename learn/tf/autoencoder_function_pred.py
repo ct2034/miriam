@@ -15,7 +15,7 @@ from tensorflow.keras.models import Model
 
 size_polynome = 4  # how many parameters has the polynome
 learn_res = 50    # with of input samples (x) == neurons of input and output
-n_encoding = 10    # neurons in encoding layer
+n_encoding = 5    # neurons in encoding layer
 
 
 def make_random_poly():
@@ -45,11 +45,12 @@ def train(n, learn_res, sample_end, t_pred):
         x.append(X)
         y.append(Y)
 
-    # model
+    # helpers
     init = initializers.RandomNormal(mean=0.0,
                                      stddev=0.05, seed=None)
     reg_sparse = regularizers.l2(.01)
 
+    # layers
     input_data = Input(shape=x[0].shape)
     e1 = Dense(learn_res, kernel_initializer=init,
                activation='relu')(input_data)
@@ -58,16 +59,16 @@ def train(n, learn_res, sample_end, t_pred):
     decoded = Dense(learn_res, kernel_initializer=init,
                     activation='linear')(encoded_input)
 
-    model = Model(input_data, decoded)
-    model.compile(optimizer='adam',
+    autoencoder_model = Model(input_data, decoded)
+    autoencoder_model.compile(optimizer='adam',
                   loss='mean_squared_error',
                   metrics=['accuracy'])
-    model.summary()
+    autoencoder_model.summary()
 
     # train
-    history = model.fit([x], [x],
+    history = autoencoder_model.fit([x], [x],
                         validation_split=0.3, epochs=32, batch_size=256)
-    return model, history
+    return autoencoder_model, history
 
 
 def run_an_example_and_plot_info():
@@ -75,7 +76,11 @@ def run_an_example_and_plot_info():
     sample_end = 1  # where does X data stop
     t_pred = 1  # where to measure y
 
-    model, history = train(n, learn_res, sample_end, t_pred)
+    autoencoder_model, history = train(n, learn_res, sample_end, t_pred)
+
+    encoded_input = Input(shape=(n_encoding,))
+    decoder_layer = autoencoder_model.layers[-1]
+    decoder_model = Model(encoded_input, decoder_layer(encoded_input))
 
     plt.subplot(211)
     # Plot training & validation accuracy values
@@ -104,32 +109,28 @@ def run_an_example_and_plot_info():
     for i in range(n):
         poly = make_random_poly()
         X, Y = get_sample(poly, t_sample, t_pred)
-        pred = model.predict(np.array([X]))[0]
+        pred = autoencoder_model.predict(np.array([X]))[0]
         plt.subplot(100 * n / 2 + 20 + i)
         plt.plot(t_plot, poly(t_plot), 'k--')
         plt.plot(t_sample, pred, 'r')
+        plt.title(str(poly.coef))
         plt.grid(True)
+
+    plt.figure()
+    i = 1
+    for pm in [-1, 1]:
+        for i_e in range(n_encoding):
+            plt.subplot(2, n_encoding, i)
+            i += 1
+            code = np.zeros((n_encoding,))
+            code[i_e] += pm
+            decoded = decoder_model.predict(np.array([code]))[0]
+            plt.title(str(code))
+            plt.plot(t_sample, decoded, 'r')
 
     # The End
     plt.show()
 
 
-def see_accuracy_per_learn_res():
-    n = 2 ** 10  # samples
-    sample_end = .5  # where does X data stop
-    t_pred = 1  # where to measure y
-    # -----------
-    n_res = 10  # how often to run with each res
-    learn_resolutions = range(1, 10)
-    res = [list()] * n_res
-    for i_n, learn_res in product(range(n_res), learn_resolutions):
-        model, history = train(n, learn_res, sample_end, t_pred)
-        acc = history.history['val_acc'][-1]
-        res[i_n].append(acc)
-    plt.violinplot(res)
-    plt.show()
-
-
 if __name__ == "__main__":
     run_an_example_and_plot_info()
-    # see_accuracy_per_learn_res()
