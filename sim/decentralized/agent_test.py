@@ -6,7 +6,7 @@ import unittest
 import networkx as nx
 import numpy as np
 
-from sim.decentralized.agent import Agent, Policy
+from sim.decentralized.agent import Agent, Policy, gridmap_to_nx
 
 
 class TestDecentralizedSim(unittest.TestCase):
@@ -47,10 +47,9 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_gridmap_to_nx(self):
         env = np.array([[0, 1], [1, 1]])
-        a = Agent(env, np.array([0, 0]), Policy.RANDOM)
-        a.give_a_goal(np.array([0, 0]))
-        self.assertEqual(len(a.env_nx), 1)
-        self.assertTrue((0, 0) in a.env_nx)
+        env_nx = gridmap_to_nx(env, ignore_cache=True)
+        self.assertEqual(len(env_nx), 1)
+        self.assertTrue((0, 0) in env_nx)
 
     def test_give_a_goal_and_plan_path(self):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
