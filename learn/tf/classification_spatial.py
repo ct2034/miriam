@@ -65,20 +65,20 @@ def make_data(n):
 
 def train(x, y):
     # model
-    layer_width = 32
+    layer_width = 64
     init = initializers.RandomNormal(mean=0.0,
                                      stddev=0.05, seed=None)
-    reg = regularizers.l1(0.01)
+    reg = regularizers.l2(0.001)
     ls = [
         layers.Conv2D(
-            4, 3, input_shape=x[0].shape, kernel_initializer=init, activity_regularizer=reg),
-        # layers.Conv2D(
-        #     4, 3, input_shape=x[0].shape, kernel_initializer=init, activity_regularizer=reg),
+            8, 5, input_shape=x[0].shape, kernel_initializer=init, activity_regularizer=reg),
+        layers.Dropout(.3),
+        layers.Conv2D(
+            8, 3, kernel_initializer=init, activity_regularizer=reg),
         layers.Flatten(),
-        layers.Dropout(0.3),
+        layers.Dropout(.3),
         layers.Dense(layer_width, kernel_initializer=init, activity_regularizer=reg,
                      activation='relu'),
-        layers.Dropout(0.3),
         layers.Dense(1, kernel_initializer=init,
                      activity_regularizer=reg, activation='sigmoid'),
     ]
@@ -90,12 +90,12 @@ def train(x, y):
 
     # train
     history = model.fit([x], y,
-                        validation_split=0.3, epochs=64, batch_size=512)
+                        validation_split=0.3, epochs=512, batch_size=128)
     return model, history
 
 
 def run_an_example_and_plot_info():
-    n = 5000  # samples
+    n = 10000  # samples
     x, y = make_data(n)
 
     model, history = train(x, y)
@@ -124,7 +124,9 @@ def run_an_example_and_plot_info():
     for i in range(n_p):
         success_desired = i < n_p / 2
         success = not success_desired
-        while success != success_desired:
+        Y_desired = np.floor(i/4) % 2 == 0
+        Y = not Y_desired
+        while success != success_desired or Y != Y_desired:
             X, Y = make_sample(8, .6, random.randint(1, 1000))
             pred = model.predict_classes(np.array([X]))[0][0]
             success = Y == pred
