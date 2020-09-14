@@ -137,5 +137,5 @@ def see_accuracy_per_learn_res():
 
 
 if __name__ == "__main__":
-    # run_an_example_and_plot_info()
-    see_accuracy_per_learn_res()
+    run_an_example_and_plot_info()
+    # see_accuracy_per_learn_res()
