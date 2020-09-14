@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 nx_base_graph: Union[None, nx.Graph] = None
 
+
 def gridmap_to_nx(env: np.ndarray) -> nx.Graph:
     """convert numpy gridmap into networkx graph."""
     def filter_node(n):
@@ -168,7 +169,7 @@ class Agent():
         """Move agent to its next step, pass that pose for clarification."""
         potential_next_pos = self.what_is_next_step()
         assert (potential_next_pos == next_pos_to_check).all(
-        ), "Our next position has to be corect."
+        ), "Our next position has to be correct."
         if self.is_at_goal():
             pass  # at goal already
         else:
