@@ -129,6 +129,7 @@ def main():
                 i += 1
                 print("run %d of %d" %
                       (i, n_runs * n_fills * n_n_agentss * len(generators)))
+                # generating a scenario .......................................
                 fill = fills[i_f]
                 n_agents = n_agentss[i_a]
                 try:
