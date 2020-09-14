@@ -9,9 +9,9 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from tensorflow.keras import initializers, regularizers
-from tensorflow.keras.layers import (Dense, DepthwiseConv2D,
-                                     Dropout, Flatten, MaxPooling2D, Reshape)
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import (Dense, DepthwiseConv2D, Dropout, Flatten,
+                                     Input, MaxPooling2D, Reshape)
+from tensorflow.keras.models import Model
 
 size_polynome = 4  # how many parameters has the polynome
 learn_res = 50    # with of input samples (x) == neurons of input and output
@@ -49,14 +49,16 @@ def train(n, learn_res, sample_end, t_pred):
     init = initializers.RandomNormal(mean=0.0,
                                      stddev=0.05, seed=None)
     reg_sparse = regularizers.l2(.01)
-    layers = [
-        Dense(learn_res, kernel_initializer=init,
-              activation='relu', input_shape=x[0].shape),
-        Dense(n_encoding, kernel_initializer=init,
-              kernel_regularizer=reg_sparse, activation='relu'),
-        Dense(learn_res, kernel_initializer=init, activation='linear'),
-    ]
-    model = Sequential(layers)
+
+    input_data = Input(shape=x[0].shape)
+    e1 = Dense(learn_res, kernel_initializer=init,
+               activation='relu')(input_data)
+    encoded_input = Dense(n_encoding, kernel_initializer=init,
+                          kernel_regularizer=reg_sparse, activation='relu')(e1)
+    decoded = Dense(learn_res, kernel_initializer=init,
+                    activation='linear')(encoded_input)
+
+    model = Model(input_data, decoded)
     model.compile(optimizer='adam',
                   loss='mean_squared_error',
                   metrics=['accuracy'])
