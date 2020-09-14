@@ -8,7 +8,7 @@ from itertools import product
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
-from tensorflow.keras import initializers
+from tensorflow.keras import initializers, regularizers
 from tensorflow.keras.layers import (Dense, DepthwiseConv2D,
                                      Dropout, Flatten, MaxPooling2D, Reshape)
 from tensorflow.keras.models import Sequential
@@ -46,15 +46,15 @@ def train(n, learn_res, sample_end, t_pred):
         y.append(Y)
 
     # model
-    my_init = initializers.RandomNormal(mean=0.0,
-                                        stddev=0.05, seed=None)
+    init = initializers.RandomNormal(mean=0.0,
+                                     stddev=0.05, seed=None)
+    reg_sparse = regularizers.l2(.01)
     layers = [
-        Dense(learn_res, kernel_initializer=my_init,
+        Dense(learn_res, kernel_initializer=init,
               activation='relu', input_shape=x[0].shape),
-        # Dense(learn_res / 2, kernel_initializer=my_init, activation='relu'),
-        Dense(n_encoding, kernel_initializer=my_init, activation='relu'),
-        # Dense(learn_res / 2, kernel_initializer=my_init, activation='relu'),
-        Dense(learn_res, kernel_initializer=my_init, activation='linear'),
+        Dense(n_encoding, kernel_initializer=init,
+              kernel_regularizer=reg_sparse, activation='relu'),
+        Dense(learn_res, kernel_initializer=init, activation='linear'),
     ]
     model = Sequential(layers)
     model.compile(optimizer='adam',
