@@ -12,18 +12,18 @@ import tools
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
+nx_base_graph: Union[None, nx.Graph] = None
 
-@cachier(hash_params=tools.hasher)
 def gridmap_to_nx(env: np.ndarray) -> nx.Graph:
     """convert numpy gridmap into networkx graph."""
-    g = nx.grid_graph(dim=list(env.shape))
-    obstacles = np.where(env == 1)
-    for i_o in range(len(obstacles[0])):
-        g.remove_node(
-            (obstacles[0][i_o],
-                obstacles[1][i_o])
-        )
-    return g
+    def filter_node(n):
+        return env[n] == 0
+    global nx_base_graph
+    if nx_base_graph is None:
+        nx_base_graph = nx.grid_graph(dim=list(env.shape))
+    assert nx_base_graph.number_of_nodes() == env.shape[0] * env.shape[1]
+    view = nx.subgraph_view(nx_base_graph, filter_node=filter_node)
+    return view
 
 
 class Policy(Enum):
