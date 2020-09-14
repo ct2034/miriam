@@ -253,15 +253,17 @@ def classification_samples(n_agents, data, t, col_agents,
         path_full = get_path(data[INDEP_AGENT_PATHS_STR][i_a], -1)
         paths_full.append(path_full)
     t = CLASSIFICATION_POS_TIMESTEPS-1
-    for i_a in col_agents:
+    assert len(col_agents) == 2, "assuming two agent in colission here"
+    for i_ca, i_a in enumerate(col_agents):
+        i_oa = col_agents[(i_ca+1) % 2]
         obstacle_fovs = make_obstacle_fovs(
             padded_gridmap, paths_until_col[i_a], t, CLASSIFICATION_FOV_RADIUS)
         pos_other_agent_fovs = make_other_agent_fovs(
             paths_until_col, i_a, CLASSIFICATION_FOV_RADIUS)
-        path_fovs, paths_other_agents_fovs = make_path_fovs(
-            paths_full, paths_until_col, i_a, t, CLASSIFICATION_FOV_RADIUS)
+        path_fovs, paths_other_agent_fovs, paths_other_agents_fovs = make_path_fovs(
+            paths_full, paths_until_col, i_a, i_oa, t, CLASSIFICATION_FOV_RADIUS)
         x = np.stack([obstacle_fovs, pos_other_agent_fovs,
-                      path_fovs, paths_other_agents_fovs], axis=3)
+                      path_fovs, paths_other_agent_fovs, paths_other_agents_fovs], axis=3)
         training_samples.append((
             x,
             1 if i_a == unblocked_agent else 0))
@@ -303,16 +305,19 @@ def make_other_agent_fovs(paths, agent, radius):
     return other_agent_fovs
 
 
-def make_path_fovs(paths, paths_until_col, agent, t_until_col, radius):
+def make_path_fovs(paths, paths_until_col, agent, other_agent, t_until_col, radius):
     """create for the agent a set of layers indicating their single-agent
     paths."""
     lengths = map(lambda x: x.shape[0], paths)
     path_fovs = init_empty_fov(radius, t_until_col + 1)
+    paths_other_agent_fovs = init_empty_fov(radius, t_until_col + 1)
     paths_other_agents_fovs = init_empty_fov(radius, t_until_col + 1)
     for i_t_steps in range(t_until_col + 1):
         for i_a in range(len(paths)):
             if i_a == agent:
                 fov_to_write = path_fovs
+            elif i_a == other_agent:
+                fov_to_write = paths_other_agent_fovs
             else:
                 fov_to_write = paths_other_agents_fovs
             pos = paths_until_col[agent][i_t_steps]
@@ -325,7 +330,7 @@ def make_path_fovs(paths, paths_until_col, agent, t_until_col, radius):
                         int(d[1]) + CLASSIFICATION_FOV_RADIUS,
                         i_t_steps
                     ] = 1
-    return path_fovs, paths_other_agents_fovs
+    return path_fovs, paths_other_agent_fovs, paths_other_agents_fovs
 
 
 def init_empty_fov(radius, t):
