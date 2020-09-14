@@ -33,7 +33,7 @@ def initialize_environment(size: int, fill: float):
     :return: the environment
     :rtype: np.ndarray
     """
-    environent = np.zeros([size, size], dtype=np.int64)
+    environent = np.zeros([size, size], dtype=np.int8)
     n_to_fill = int(fill * size ** 2)
     to_fill = random.sample(
         list(itertools.product(range(size), repeat=2)), k=n_to_fill)
