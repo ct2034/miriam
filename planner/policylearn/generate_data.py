@@ -260,10 +260,13 @@ def classification_samples(n_agents, data, t, col_agents,
             padded_gridmap, paths_until_col[i_a], t, CLASSIFICATION_FOV_RADIUS)
         pos_other_agent_fovs = make_other_agent_fovs(
             paths_until_col, i_a, CLASSIFICATION_FOV_RADIUS)
-        path_fovs, paths_other_agent_fovs, paths_other_agents_fovs = make_path_fovs(
-            paths_full, paths_until_col, i_a, i_oa, t, CLASSIFICATION_FOV_RADIUS)
+        (path_fovs, paths_other_agent_fovs,
+         paths_other_agents_fovs) = make_path_fovs(
+            paths_full, paths_until_col, i_a, i_oa, t,
+            CLASSIFICATION_FOV_RADIUS)
         x = np.stack([obstacle_fovs, pos_other_agent_fovs,
-                      path_fovs, paths_other_agent_fovs, paths_other_agents_fovs], axis=3)
+                      path_fovs, paths_other_agent_fovs,
+                      paths_other_agents_fovs], axis=3)
         training_samples.append((
             x,
             1 if i_a == unblocked_agent else 0))
@@ -305,7 +308,8 @@ def make_other_agent_fovs(paths, agent, radius):
     return other_agent_fovs
 
 
-def make_path_fovs(paths, paths_until_col, agent, other_agent, t_until_col, radius):
+def make_path_fovs(paths, paths_until_col, agent, other_agent,
+                   t_until_col, radius):
     """create for the agent a set of layers indicating their single-agent
     paths."""
     lengths = map(lambda x: x.shape[0], paths)
@@ -414,11 +418,11 @@ if __name__ == "__main__":
         training_data_we_want = []
         with open(args.fname_read_pkl.name, 'rb') as f:
             all_data = pickle.load(f)
-        l = len(all_data)
+        data_len = len(all_data)
         i = 0
         for d in all_data:
             i += 1
-            logger.info("{} of {}".format(i, l))
+            logger.info("{} of {}".format(i, data_len))
             training_data_we_want.extend(
                 training_samples_from_data(d, args.mode))
         save_data(training_data_we_want, args.fname_write_pkl.name)
