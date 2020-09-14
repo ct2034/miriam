@@ -1,16 +1,9 @@
 import cProfile
 import numpy as np
-from scenarios.generators import like_policylearn_gen
-
-import cachier
+from learn.tf.classification_spatial import run_an_example_and_plot_info
 
 
-def some_gridmaps():
-    for fill in np.arange(0, .8, 100):
-        like_policylearn_gen(10, fill, 16, 99)
-
-
-cProfile.run("some_gridmaps()")
+cProfile.run("run_an_example_and_plot_info()")
 
 # from scenarios.eval_wellformed_ecbs import main
 
