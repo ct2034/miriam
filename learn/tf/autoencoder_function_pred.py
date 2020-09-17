@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse
-import pickle
 import random
-from itertools import product
 
 import numpy as np
 import tensorflow as tf
@@ -14,8 +11,8 @@ from tensorflow.keras.layers import (Dense, DepthwiseConv2D, Dropout, Flatten,
 from tensorflow.keras.models import Model
 
 size_polynome = 4  # how many parameters has the polynome
-learn_res = 50    # with of input samples (x) == neurons of input and output
-n_encoding = 5    # neurons in encoding layer
+learn_res = 50     # with of input samples (x) == neurons of input and output
+n_encoding = 5     # neurons in encoding layer
 
 
 def make_random_poly():
@@ -35,7 +32,7 @@ def get_poly_with_res(res, model, t, t_pred):
             return poly
 
 
-def train(n, learn_res, sample_end, t_pred):
+def train_autoenc(n, learn_res, sample_end, t_pred):
     t = np.linspace(-1, sample_end, learn_res)
     x = []
     y = []
@@ -76,7 +73,7 @@ def run_an_example_and_plot_info():
     sample_end = 1  # where does X data stop
     t_pred = 1  # where to measure y
 
-    autoencoder_model, history = train(n, learn_res, sample_end, t_pred)
+    autoencoder_model, history = train_autoenc(n, learn_res, sample_end, t_pred)
 
     encoded_input = Input(shape=(n_encoding,))
     decoder_layer = autoencoder_model.layers[-1]
