@@ -44,7 +44,7 @@ def train_autoenc(n, learn_res, sample_end, t_pred):
 
     # helpers
     init = initializers.RandomNormal(mean=0.0,
-                                     stddev=0.05, seed=None)
+                                     stddev=0.1, seed=None)
     reg_sparse = regularizers.l2(.01)
 
     # layers
@@ -76,6 +76,7 @@ def run_an_example_and_plot_info():
     autoencoder_model, history = train_autoenc(n, learn_res, sample_end, t_pred)
 
     encoded_input = Input(shape=(n_encoding,))
+    decoder_layer = autoencoder_model.layers[-1]
     decoder_layer = autoencoder_model.layers[-1]
     decoder_model = Model(encoded_input, decoder_layer(encoded_input))
 
