@@ -7,14 +7,15 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from tensorflow.keras import initializers, regularizers
-from tensorflow.keras.layers import (Dense, DepthwiseConv2D, Dropout, Flatten,
-                                     Input, MaxPooling2D, Reshape)
+from tensorflow.keras.layers import (Dense, Flatten, Input, MaxPooling2D,
+                                     Reshape)
 from tensorflow.keras.models import Model
 
+# meta params
 size_polynome = 4  # how many parameters has the polynome
-learn_res = 50     # with of input samples (x) == neurons of input and output
+learn_res = 500    # width of input samples (x)
 n_encoding = 8     # neurons in encoding layer
-epochs = 16
+epochs = 8
 batch_size = 256
 
 
@@ -57,19 +58,20 @@ def train_pred(x, y):
     reg_sparse = regularizers.l2(.01)
 
     # layers
-    input_data = Input(shape=x[0].shape)
-    e1 = Dense(learn_res, kernel_initializer=init,
-               activation='relu')(input_data)
-    encoded_input = Dense(n_encoding, kernel_initializer=init,
-                          kernel_regularizer=reg_sparse, activation='relu')(e1)
+    input_data = Input(shape=(learn_res,), name='input_polynome')
+    # e1 = Dense(learn_res, kernel_initializer=init,
+    #            activation='relu', name='e1')(input_data)
+    encoded = Dense(n_encoding, kernel_initializer=init,
+                    kernel_regularizer=reg_sparse, activation='relu',
+                    name='encoded')(input_data)
     predicted_coeff = Dense(size_polynome, kernel_initializer=init,
-                            activation='linear')(encoded_input)
+                            activation='linear', name='predicted_coeff'
+                            )(encoded)
 
     pred_model = Model(input_data, predicted_coeff, name='pred')
     pred_model.compile(optimizer='adam',
                        loss='mean_squared_error',
                        metrics=['accuracy'])
-    pred_model.summary()
 
     # train
     history = pred_model.fit([x], [y],
@@ -86,19 +88,19 @@ def train_autoenc(x) -> (Model, Any):
     reg_sparse = regularizers.l2(.01)
 
     # layers
-    input_data = Input(shape=x[0].shape)
-    e1 = Dense(learn_res, kernel_initializer=init,
-               activation='relu')(input_data)
-    encoded_input = Dense(n_encoding, kernel_initializer=init,
-                          kernel_regularizer=reg_sparse, activation='relu')(e1)
+    input_data = Input(shape=(learn_res,), name='input_polynome')
+    # e1 = Dense(learn_res, kernel_initializer=init,
+    #            activation='relu', name='e1')(input_data)
+    encoded = Dense(n_encoding, kernel_initializer=init,
+                    kernel_regularizer=reg_sparse, activation='relu',
+                    name='encoded')(input_data)
     decoded = Dense(learn_res, kernel_initializer=init,
-                    activation='linear')(encoded_input)
+                    activation='linear', name='decoded')(encoded)
 
     autoenc_model = Model(input_data, decoded, name='autoenc')
     autoenc_model.compile(optimizer='adam',
                           loss='mean_squared_error',
                           metrics=['accuracy'])
-    autoenc_model.summary()
 
     # train
     history = autoenc_model.fit([x], [x],
@@ -113,16 +115,16 @@ def train_transfer(x, y, encoder_layer):
                                      stddev=0.1, seed=None)
 
     # layers
-    input_data = Input(shape=x[0].shape)
-    encoded_input = encoder_layer(input_data)
+    input_data = Input(shape=(learn_res,), name='input_polynome')
+    encoded = encoder_layer(input_data)  # reusing autoenc layer
     predicted_coeff = Dense(size_polynome, kernel_initializer=init,
-                            activation='linear')(encoded_input)
+                            activation='linear', name='predicted_coeff'
+                            )(encoded)
 
-    transfer_model = Model(input_data, predicted_coeff)
+    transfer_model = Model(input_data, predicted_coeff, name='transfer')
     transfer_model.compile(optimizer='adam',
                            loss='mean_squared_error',
                            metrics=['accuracy'])
-    transfer_model.summary()
 
     # train
     history = transfer_model.fit([x], [y],
@@ -133,9 +135,9 @@ def train_transfer(x, y, encoder_layer):
 
 def run_an_example_and_plot_info():
     # samples per model
-    n_pred = 2 ** 16
-    n_autoenc = 2 ** 19
-    n_transfer = 2 ** 14
+    n_pred = 2 ** 19
+    n_autoenc = 2 ** 20
+    n_transfer = 2 ** 18
     x_autoenc, _ = make_data(n_autoenc)
     x_pred, y_pred = make_data(n_pred)
     x_transfer, y_transfer = make_data(n_transfer)
@@ -147,7 +149,7 @@ def run_an_example_and_plot_info():
     autoenc_model, autoenc_history = train_autoenc(x_autoenc)
 
     # the encoder for the transfer learning
-    encoder_layer = autoenc_model.layers[0]
+    encoder_layer = autoenc_model.layers[1]
     encoder_layer.trainable = False
 
     # transfer learning using autoencode info
@@ -155,66 +157,38 @@ def run_an_example_and_plot_info():
         x_transfer, y_transfer, encoder_layer)
 
     # the decoder for fun
-    encoded_input = Input(shape=(n_encoding,))
+    encoded = Input(shape=(n_encoding,))
     decoder_layer = autoenc_model.layers[-1]
-    decoder_model = Model(encoded_input, decoder_layer(encoded_input))
+    decoder_model = Model(encoded, decoder_layer(encoded))
 
-    plt.subplot(321)
-    # Plot training & validation accuracy values
-    plt.plot(pred_history.history['acc'])
-    plt.plot(pred_history.history['val_acc'])
-    plt.ylim(0, 1.1)
-    plt.title('Prediction Model accuracy')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
+    # summaries
+    for i, (h, m) in enumerate([
+        (pred_history, pred_model),
+        (autoenc_history, autoenc_model),
+        (transfer_history, transfer_model)
+    ]):
+        # summaries
+        m.summary()
 
-    plt.subplot(322)
-    # Plot training & validation loss values
-    plt.plot(pred_history.history['loss'])
-    plt.plot(pred_history.history['val_loss'])
-    plt.title('Prediction Model loss')
-    plt.ylabel('Loss')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
+        # plots
+        plt.subplot(320 + 2*i + 1)
+        # Plot training & validation accuracy values
+        plt.plot(h.history['acc'])
+        plt.plot(h.history['val_acc'])
+        plt.ylim(0, 1.1)
+        plt.title(m.name.capitalize() + ' Model accuracy')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Test'], loc='upper left')
 
-    plt.subplot(323)
-    # Plot training & validation accuracy values
-    plt.plot(autoenc_history.history['acc'])
-    plt.plot(autoenc_history.history['val_acc'])
-    plt.ylim(0, 1.1)
-    plt.title('Autoenc Model accuracy')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
-
-    plt.subplot(324)
-    # Plot training & validation loss values
-    plt.plot(autoenc_history.history['loss'])
-    plt.plot(autoenc_history.history['val_loss'])
-    plt.title('Autoenc Model loss')
-    plt.ylabel('Loss')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
-
-    plt.subplot(325)
-    # Plot training & validation accuracy values
-    plt.plot(transfer_history.history['acc'])
-    plt.plot(transfer_history.history['val_acc'])
-    plt.ylim(0, 1.1)
-    plt.title('Transfer Model accuracy')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
-
-    plt.subplot(326)
-    # Plot training & validation loss values
-    plt.plot(transfer_history.history['loss'])
-    plt.plot(transfer_history.history['val_loss'])
-    plt.title('Transfer Model loss')
-    plt.ylabel('Loss')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
+        plt.subplot(320 + 2*i + 2)
+        # Plot training & validation loss values
+        plt.plot(h.history['loss'])
+        plt.plot(h.history['val_loss'])
+        plt.title(m.name.capitalize() + ' Model loss')
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Test'], loc='upper left')
 
     # The End
     plt.show()
