@@ -80,7 +80,7 @@ def train_pred(x, y):
     return pred_model, history
 
 
-def train_autoenc(x) -> (Model, Any):
+def train_autoenc(x) -> Tuple[Model, Any]:
     """train model that autoencodes polynoms"""
     # helpers
     init = initializers.RandomNormal(mean=0.0,
