@@ -174,8 +174,8 @@ def run_an_example_and_plot_info():
         # plots
         plt.subplot(320 + 2*i + 1)
         # Plot training & validation accuracy values
-        plt.plot(h.history['acc'])
-        plt.plot(h.history['val_acc'])
+        plt.plot(h.history['accuracy'])
+        plt.plot(h.history['val_accuracy'])
         plt.ylim(0, 1.1)
         plt.title(m.name.capitalize() + ' Model accuracy')
         plt.ylabel('Accuracy')
