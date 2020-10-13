@@ -135,9 +135,10 @@ def train_transfer(x, y, encoder_layer):
 
 def run_an_example_and_plot_info():
     # samples per model
-    n_pred = 2 ** 19
-    n_autoenc = 2 ** 20
-    n_transfer = 2 ** 18
+    base_exp = 14
+    n_transfer = 2 ** base_exp
+    n_pred = 2 ** (base_exp + 2)
+    n_autoenc = 2 ** (base_exp + 4)
     x_autoenc, _ = make_data(n_autoenc)
     x_pred, y_pred = make_data(n_pred)
     x_transfer, y_transfer = make_data(n_transfer)
