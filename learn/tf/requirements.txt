@@ -1,1 +1,4 @@
-tensorflow-gpu
+numpy
+matplotlib
+tensorflow-gpu==2.1
+tensorflow-gpu==2.1
