@@ -58,13 +58,13 @@ def train_autoenc(n, learn_res, sample_end, t_pred):
 
     autoencoder_model = Model(input_data, decoded)
     autoencoder_model.compile(optimizer='adam',
-                  loss='mean_squared_error',
-                  metrics=['accuracy'])
+                              loss='mean_squared_error',
+                              metrics=['accuracy'])
     autoencoder_model.summary()
 
     # train
     history = autoencoder_model.fit([x], [x],
-                        validation_split=0.3, epochs=32, batch_size=256)
+                                    validation_split=0.3, epochs=32, batch_size=256)
     return autoencoder_model, history
 
 
@@ -73,7 +73,8 @@ def run_an_example_and_plot_info():
     sample_end = 1  # where does X data stop
     t_pred = 1  # where to measure y
 
-    autoencoder_model, history = train_autoenc(n, learn_res, sample_end, t_pred)
+    autoencoder_model, history = train_autoenc(
+        n, learn_res, sample_end, t_pred)
 
     encoded_input = Input(shape=(n_encoding,))
     decoder_layer = autoencoder_model.layers[-1]
