@@ -1,3 +1,5 @@
 numpy
 matplotlib
-tensorflow==2.1
+tensorflow==1.15  # final ? tf1
+cachier
+networkx

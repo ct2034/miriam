@@ -109,7 +109,7 @@ def run_an_example_and_plot_info():
         poly = make_random_poly()
         X, Y = get_sample(poly, t_sample, t_pred)
         pred = autoencoder_model.predict(np.array([X]))[0]
-        plt.subplot(100 * n / 2 + 20 + i)
+        plt.subplot(int(100 * n / 2 + 21 + i))
         plt.plot(t_plot, poly(t_plot), 'k--')
         plt.plot(t_sample, pred, 'r')
         plt.title(str(poly.coef))
