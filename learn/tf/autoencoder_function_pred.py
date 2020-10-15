@@ -10,6 +10,11 @@ from tensorflow.keras.layers import (Dense, DepthwiseConv2D, Dropout, Flatten,
                                      Input, MaxPooling2D, Reshape)
 from tensorflow.keras.models import Model
 
+if int(tf.__version__.split('.')[0]) > 1:
+    accuracy = 'accuracy'
+else:
+    accuracy = 'acc'
+
 size_polynome = 4  # how many parameters has the polynome
 learn_res = 50     # with of input samples (x) == neurons of input and output
 n_encoding = 5     # neurons in encoding layer
@@ -83,8 +88,8 @@ def run_an_example_and_plot_info():
 
     plt.subplot(211)
     # Plot training & validation accuracy values
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
+    plt.plot(h.history[accuracy])
+    plt.plot(h.history['val_' + accuracy])
     plt.title('Model accuracy')
     plt.ylabel('Accuracy')
     plt.xlabel('Epoch')

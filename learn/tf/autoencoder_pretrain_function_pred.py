@@ -11,6 +11,11 @@ from tensorflow.keras.layers import (Dense, Flatten, Input, MaxPooling2D,
                                      Reshape)
 from tensorflow.keras.models import Model
 
+if int(tf.__version__.split('.')[0]) > 1:
+    accuracy = 'accuracy'
+else:
+    accuracy = 'acc'
+
 # meta params
 size_polynome = 4  # how many parameters has the polynome
 learn_res = 500    # width of input samples (x)
@@ -174,8 +179,8 @@ def run_an_example_and_plot_info():
         # plots
         plt.subplot(320 + 2*i + 1)
         # Plot training & validation accuracy values
-        plt.plot(h.history['accuracy'])
-        plt.plot(h.history['val_accuracy'])
+        plt.plot(h.history[accuracy])
+        plt.plot(h.history['val_' + accuracy])
         plt.ylim(0, 1.1)
         plt.title(m.name.capitalize() + ' Model accuracy')
         plt.ylabel('Accuracy')
