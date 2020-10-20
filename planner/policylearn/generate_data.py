@@ -9,12 +9,15 @@ import sys
 from cachier import cachier
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 import tools
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
 from sim.decentralized.runner import initialize_environment
+from sim.decentralized.agent import Agent
 from scenarios.generators import tracing_pathes_in_the_dark
+from multiprocessing import Pool
 
 FREE = 0
 OBSTACLE = 1
@@ -29,6 +32,7 @@ OTHERS_STR = 'others'
 TRANSFER_LSTM_STR = 'transfer_lstm'
 TRANSFER_CLASSIFICATION_STR = 'transfer_classification'
 GENERATE_SIM_STR = 'generate_simulation'
+NO_SOLUTION_STR = 'no_solution'
 
 LSTM_FOV_RADIUS = 2  # self plus x in all 4 directions
 CLASSIFICATION_POS_TIMESTEPS = 3
@@ -124,33 +128,29 @@ def get_agent_paths_from_data(data, timed=False):
     return agent_paths
 
 
+def time_path(path: np.ndarray):
+    nrs = np.array([np.arange(path.shape[0])]).transpose()
+    return np.append(path, nrs, axis=1)
+
+
 @cachier(hash_params=tools.hasher)
 def will_they_collide(gridmap, starts, goals):
     """checks if for a given set of starts and goals the agents travelling
     between may collide on the given gridmap."""
-    collisions = {}
+    do_collide = False
     seen = set()
-    been_at = {}
     agent_paths = []
     for i_a, _ in enumerate(starts):
-        data = plan_in_gridmap(gridmap, [starts[i_a], ], [
-                               goals[i_a], ], timeout=2)
-        if data is None:
-            logging.warn("no single agent plan in gridmap")
-            plt.show()
-            return {}, []
-        single_agent_paths = get_agent_paths_from_data(data, timed=True)
-        if not single_agent_paths:
-            logging.warn("no single agent path from ecbs data")
-            return {}, []
-        agent_paths.append(single_agent_paths[0])
-        for pos in single_agent_paths[0]:
-            pos = tuple(pos)
-            if pos in seen:  # TODO: edge collisions
-                collisions[pos] = (been_at[pos], i_a)
-            seen.add(pos)
-            been_at[pos] = i_a
-    return collisions, agent_paths
+        a = Agent(gridmap, starts[i_a])
+        success = a.give_a_goal(goals[i_a])
+        tp = time_path(a.path)
+        agent_paths.append(tp)
+        for pos in tp:
+            if not do_collide:  # only need to do this if no collision was found
+                if tuple(pos) in seen:
+                    do_collide = True
+                seen.add(tuple(pos))
+    return do_collide, agent_paths
 
 
 @cachier(hash_params=tools.hasher)
@@ -397,6 +397,26 @@ def save_data(data_dict, fname_pkl):
         pickle.dump(data_dict, f)
 
 
+def print_stats():
+    current = len(all_data)
+    now = datetime.datetime.now()
+    elapsed_time = now - start_time
+    perc_rem = float((n_data_to_gen - current)/current)
+    if perc_rem > 1e10:
+        remaining_time = 'Inf'
+    else:
+        remaining_time = elapsed_time * perc_rem
+    logger.info('Generated {} of {} samples ({}%)'.format(
+        current,
+        n_data_to_gen,
+        int(100. * current / n_data_to_gen)
+    ))
+    logger.info('Elapsed time: {}, remaining: {}'.format(
+        elapsed_time,
+        remaining_time
+    ))
+
+
 if __name__ == "__main__":
     logging.basicConfig()
     logger = logging.getLogger(__name__)
@@ -406,11 +426,14 @@ if __name__ == "__main__":
     parser.add_argument('mode', help='mode', choices=(
         TRANSFER_LSTM_STR,
         TRANSFER_CLASSIFICATION_STR,
-        GENERATE_SIM_STR))
+        GENERATE_SIM_STR,
+        NO_SOLUTION_STR))
     parser.add_argument('fname_write_pkl', type=argparse.FileType('wb'))
     parser.add_argument(
         'fname_read_pkl', type=argparse.FileType('rb'), nargs='?')
     args = parser.parse_args()
+
+    start_time = datetime.datetime.now()
 
     if (args.mode == TRANSFER_LSTM_STR or
             args.mode == TRANSFER_CLASSIFICATION_STR):
@@ -439,8 +462,8 @@ if __name__ == "__main__":
         random.seed(0)
         seed = 0
         while len(all_data) < n_data_to_gen:
-            collide_count = 0
-            while collide_count < 1:
+            do_collide = False
+            while not do_collide:
                 # gridmap = generate_random_gridmap(width, height, fill)
                 # gridmap = initialize_environment(width, fill)
                 # starts = [get_random_free_pos(gridmap)
@@ -451,10 +474,8 @@ if __name__ == "__main__":
                     width, fill, n_agents, seed
                 )
                 seed += 1
-                collisions, indep_agent_paths = will_they_collide(
+                do_collide, indep_agent_paths = will_they_collide(
                     gridmap, starts, goals)
-                collide_count = len(collisions.keys())
-            logger.debug(collisions)
 
             data = plan_in_gridmap(gridmap, starts, goals)
 
@@ -465,18 +486,51 @@ if __name__ == "__main__":
                     # we take only these for learning
                     data.update({
                         INDEP_AGENT_PATHS_STR: indep_agent_paths,
-                        COLLISIONS_STR: collisions,
+                        COLLISIONS_STR: do_collide,
                         GRIDMAP_STR: gridmap
                     })
                     all_data.append(data)
                     save_data(all_data, args.fname_write_pkl.name)
-                    logger.info('Generated {} of {} samples ({}%)'.format(
-                        len(all_data),
-                        n_data_to_gen,
-                        int(100. * len(all_data) / n_data_to_gen)
-                    ))
+                    print_stats()
                     if plot:
                         plot_map_and_paths(gridmap, blocks, data, n_agents)
+    elif args.mode == NO_SOLUTION_STR:
+        # generate data of scenarios without solution (no info on how to solve
+        # collision) for autoencoding.
+        # generation mode
+        all_data = []
+        plot = False
+        width = 8
+        height = width
+        n_agents = 8
+        data_exp = 2
+        n_data_to_gen = 10 ** data_exp
+        fill = .4
+
+        # start
+        random.seed(0)
+        seed = 0
+        while len(all_data) < n_data_to_gen:
+            do_collide = False
+            while not do_collide:
+                gridmap, starts, goals = tracing_pathes_in_the_dark(
+                    width, fill, n_agents, seed
+                )
+                seed += 1
+                do_collide, indep_agent_paths = will_they_collide(
+                    gridmap, starts, goals)
+
+            data = {
+                INDEP_AGENT_PATHS_STR: indep_agent_paths,
+                GRIDMAP_STR: gridmap
+            }
+            all_data.append(data)
+            if len(all_data) % 100 == 0:
+                save_data(all_data, args.fname_write_pkl.name)
+                print_stats()
+            if plot:
+                plot_map_and_paths(gridmap, blocks, data, n_agents)
+
     else:
         raise NotImplementedError(
             "mode >{}< is not implemented yet".format(args.mode))
