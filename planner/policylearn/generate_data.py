@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
 import logging
+import os
 import pickle
 import random
 import sys
+import uuid
+from multiprocessing import Pool
 
-from cachier import cachier
 import matplotlib.pyplot as plt
 import numpy as np
-import datetime
-
 import tools
+from cachier import cachier
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
-from sim.decentralized.runner import initialize_environment
-from sim.decentralized.agent import Agent
 from scenarios.generators import tracing_pathes_in_the_dark
-from multiprocessing import Pool
+from sim.decentralized.agent import Agent
+from sim.decentralized.runner import initialize_environment
 
 FREE = 0
 OBSTACLE = 1
@@ -428,7 +429,7 @@ if __name__ == "__main__":
         TRANSFER_CLASSIFICATION_STR,
         GENERATE_SIM_STR,
         NO_SOLUTION_STR))
-    parser.add_argument('fname_write_pkl', type=argparse.FileType('wb'))
+    parser.add_argument('fname_write_pkl', type=argparse.FileType('wb'), nargs='?')
     parser.add_argument(
         'fname_read_pkl', type=argparse.FileType('rb'), nargs='?')
     args = parser.parse_args()
@@ -450,17 +451,20 @@ if __name__ == "__main__":
                 training_samples_from_data(d, args.mode))
         save_data(training_data_we_want, args.fname_write_pkl.name)
     elif args.mode == GENERATE_SIM_STR:
-        # generation mode
-        all_data = []
-        plot = False
+        # scenario paramters
         width = 8
         height = width
         n_agents = 8
-        n_data_to_gen = 5000
         fill = .4
+        # generation parameters
+        plot = False
+        all_data = []
+        n_data_to_gen = os.getenv("N_DATA_TO_GEN", 5000)
+        logger.info("Generating {} data points.".format(n_data_to_gen))
+        seed = os.getenv("SEED", 0)
+        random.seed(seed)
+        logger.info("Using initial seed: {}".format(seed))
         # start
-        random.seed(0)
-        seed = 0
         while len(all_data) < n_data_to_gen:
             do_collide = False
             while not do_collide:
@@ -497,19 +501,29 @@ if __name__ == "__main__":
     elif args.mode == NO_SOLUTION_STR:
         # generate data of scenarios without solution (no info on how to solve
         # collision) for autoencoding.
-        # generation mode
-        all_data = []
-        plot = False
+        # scenario paramters
         width = 8
         height = width
         n_agents = 8
-        data_exp = 2
-        n_data_to_gen = 10 ** data_exp
         fill = .4
-
+        # generation parameters
+        plot = False
+        all_data = []
+        n_data_to_gen = int(os.getenv("N_DATA_TO_GEN", 2 ** 10))
+        logger.info("Generating {} data points.".format(n_data_to_gen))
+        # seed = int(os.getenv("SEED", 0))
+        my_uuid = uuid.uuid4()
+        logger.info("My UUID: {}".format(my_uuid))
+        seed = my_uuid.time
+        random.seed(seed)
+        logger.info("Using initial seed: {}".format(seed))
+        if not args.fname_write_pkl:
+            fname = "/data/" + str(my_uuid) + ".pkl"
+            logger.warn("No filename provided.")
+        else:
+            fname = args.fname_write_pkl.name
+        logger.warn("Our filename will be: {}".format(fname))
         # start
-        random.seed(0)
-        seed = 0
         while len(all_data) < n_data_to_gen:
             do_collide = False
             while not do_collide:
@@ -526,7 +540,7 @@ if __name__ == "__main__":
             }
             all_data.append(data)
             if len(all_data) % 100 == 0:
-                save_data(all_data, args.fname_write_pkl.name)
+                save_data(all_data, fname)
                 print_stats()
             if plot:
                 plot_map_and_paths(gridmap, blocks, data, n_agents)

@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  policylearn:
+    build:
+      context: .
+      dockerfile: po_gen_no_solution.Dockerfile
+    environment:
+      N_DATA_TO_GEN: 1024
+    volumes:
+      - type: volume
+        source: data_out
+        target: /data
+
+volumes: 
+  data_out:
+
+# start with ... docker-compose up --no-recreate --scale policylearn=8

@@ -3,18 +3,18 @@
 TEST_COMMANDS=(
     # planner
     #"mypy planner/policylearn" TODO: fix typing
-    "pycodestyle planner/policylearn --exclude=planner/policylearn/libMultiRobotPlanning"
-    "pytest planner/policylearn --ignore=planner/policylearn/libMultiRobotPlanning"
+    "pycodestyle planner/policylearn --exclude='planner/policylearn/libMultiRobotPlanning,planner/policylearn/policylearn_env'"
+    # "pytest planner/policylearn --ignore=planner/policylearn/libMultiRobotPlanning"
 
     # sim
-    "mypy sim/decentralized"
-    "pycodestyle sim/decentralized"
-    "pytest --cov=sim.decentralized sim/decentralized"
+    # "mypy sim/decentralized"
+    # "pycodestyle sim/decentralized"
+    # "pytest --cov=sim.decentralized sim/decentralized"
 
     # scenarios
-    "mypy scenarios"
-    "pycodestyle scenarios"
-    "pytest --cov=scenarios scenarios"
+    # "mypy scenarios"
+    # "pycodestyle scenarios"
+    # "pytest --cov=scenarios scenarios"
 )
 
 # ------------------
