@@ -26,7 +26,8 @@ def check_for_reachability(remote_pcs: List[str]):
     FNULL = open(os.devnull, 'w')
     for host in remote_pcs:
         command = ['ping', '-c', '1', name_to_hostname(host)]
-        if subprocess.call(command, stdout=FNULL, stderr=subprocess.STDOUT) != 0:
+        if subprocess.call(command, stdout=FNULL, stderr=subprocess.STDOUT
+                           ) != 0:
             logging.warn("Can not reach {}".format(host))
             return False
     logging.info("All hosts reachable.")
