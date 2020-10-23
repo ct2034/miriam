@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import os
+import stat
 import subprocess
 import sys
 from typing import List
@@ -59,6 +60,7 @@ def get_local_volume_data(volume_name: str):
     container_id = out.decode("utf-8").replace('\n', '')
     logging.debug(container_id)
 
+    # getting the files
     command = [
         "docker",
         "cp",
@@ -71,15 +73,85 @@ def get_local_volume_data(volume_name: str):
     n_received = len(os.listdir(local_path))
     logging.info("Got {} file from local volume".format(n_received))
 
+    # cleaning up
+    command = [
+        "docker",
+        "rm",
+        "-f",
+        container_id
+    ]
+    out = subprocess.check_output(command)
+    logging.debug(out.decode("utf-8"))
+
 
 def get_remote_volumes(remote_pcs: List[str], volume_name: str):
     for host in remote_pcs:
+        their_path = "/tmp/data_" + host + "/"
+        local_path = "./data_" + host + "/"
         ssh = SSHClient()
         ssh.load_system_host_keys()
         ssh.connect(name_to_hostname(host), username='ch')
-        cmd = 'pwd'
-        stdin, stdout, stderr = ssh.exec_command(cmd)
-        logging.info("{}\n{}:\n{}".format(host, cmd, stdout.readlines()))
+        sftp = ssh.open_sftp()
+        try:
+            assert len(sftp.listdir(their_path)
+                       ) == 0, "remote directory should be empty"
+        except IOError:  # if the folder does not even exist
+            pass
+
+        command = [
+            "docker",
+            "run",
+            "-t",  # pseudo-tty to keep container running
+            "-d",
+            "-v", volume_name + ":/data_from",
+            "alpine"
+        ]
+        stdin, stdout, stderr = ssh.exec_command(" ".join(command))
+        out = stdout.readlines()
+        logging.debug("{}\n{}:\n{}".format(host, command, out))
+        container_id = out[0].replace('\n', '')
+        logging.debug(container_id)
+
+        # getting the files on their filesystem
+        command = [
+            "docker",
+            "cp",
+            container_id+":data_from/.",
+            their_path
+        ]
+        stdin, stdout, stderr = ssh.exec_command(" ".join(command))
+        out = stdout.readlines()
+        logging.debug("{}\n{}:\n{}".format(host, command, out))
+
+        # copy files to our machine
+        for fname in sftp.listdir(their_path):
+            if stat.S_ISDIR(sftp.stat(their_path + fname).st_mode):
+                logging.error("There is a path in the source folder: {}"
+                              .format(their_path + fname))
+            else:
+                logging.info("Receiving {} from {}".format(fname, host))
+                if not os.path.isfile(os.path.join(local_path, fname)):
+                    sftp.get(their_path + fname,
+                             os.path.join(local_path, fname))
+                    sftp.remove(their_path + fname)
+                else:
+                    logging.info("File exists: {}".format(fname))
+
+        # cleaning up
+        command = [
+            "docker",
+            "rm",
+            "-f",
+            container_id
+        ]
+        stdin, stdout, stderr = ssh.exec_command(" ".join(command))
+        out = stdout.readlines()
+        logging.debug("{}\n{}:\n{}".format(host, command, out))
+
+        # stats
+        n_received = len(os.listdir(local_path))
+        logging.info("Got {} file from {}".format(n_received, host))
+
         ssh.close()
 
 
@@ -96,4 +168,4 @@ if __name__ == "__main__":
     if not make_folders_check_empty(remote_pcs):
         sys.exit(2)
     get_local_volume_data(volume_name)
-    # get_remote_volumes(remote_pcs, volume_name)
+    get_remote_volumes(remote_pcs, volume_name)
