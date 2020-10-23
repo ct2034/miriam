@@ -184,10 +184,10 @@ if __name__ == "__main__":
     volume_name = "policylearn_data_out"
     out_fname = "all_data.pkl"
 
-    # if not check_for_reachability(remote_pcs):
-    #     sys.exit(1)
-    # if not make_folders_check_empty(remote_pcs):
-    #     sys.exit(2)
-    # get_local_volume_data(volume_name)
-    # get_remote_volumes(remote_pcs, volume_name)
+    if not check_for_reachability(remote_pcs):
+        sys.exit(1)
+    if not make_folders_check_empty(remote_pcs):
+        sys.exit(2)
+    get_local_volume_data(volume_name)
+    get_remote_volumes(remote_pcs, volume_name)
     combine_pkl_files(remote_pcs, out_fname)
