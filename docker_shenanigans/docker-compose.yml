@@ -5,8 +5,8 @@ services:
     deploy:
       replicas: 16
     build:
-      context: .
-      dockerfile: po_gen_no_solution.Dockerfile
+      context: ..
+      dockerfile: docker_shenanigans/po_gen_no_solution.Dockerfile
     environment:
       N_DATA_TO_GEN: 2048
     volumes:
