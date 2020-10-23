@@ -152,12 +152,14 @@ def get_remote_volumes(remote_pcs: List[str], volume_name: str):
 
         # stats
         n_received = len(os.listdir(local_path))
-        logging.info("Got {} file from {}".format(n_received, host))
+        logging.info("Got {} files from {}".format(n_received, host))
 
         ssh.close()
 
 
 def combine_pkl_files(remote_pcs: List[str], out_fname: str):
+    logging.info(
+        "Attempting to merge all pkl files into {}.".format(out_fname))
     if os.path.exists(out_fname):
         logging.error("File exists {}".format(out_fname))
         sys.exit(3)
