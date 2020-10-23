@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import logging
 import os
+import pickle
 import stat
 import subprocess
 import sys
-from typing import List
+from typing import Any, Dict, List
 
 import docker
 from paramiko import SSHClient
@@ -155,6 +156,24 @@ def get_remote_volumes(remote_pcs: List[str], volume_name: str):
         ssh.close()
 
 
+def combine_pkl_files(remote_pcs: List[str], out_fname: str):
+    if os.path.exists(out_fname):
+        logging.error("File exists {}".format(out_fname))
+        sys.exit(3)
+    data: List[Dict[Any, Any]] = []
+    for host in remote_pcs + ["localhost"]:
+        path = "./data_" + host
+        for root, dirs, files in os.walk(path):
+            for fname in files:
+                with open(path+'/'+fname, 'rb') as f:
+                    d = pickle.load(f)
+                    data = data + d
+    with open(out_fname, 'wb') as fo:
+        pickle.dump(data, fo)
+    logging.info("Merged {:,} items into {}, size: {:,}B".format(
+        len(data), out_fname, os.path.getsize(out_fname)))
+
+
 if __name__ == "__main__":
     # variables we need
     remote_pcs = [
@@ -162,10 +181,12 @@ if __name__ == "__main__":
         "marble"
     ]
     volume_name = "policylearn_data_out"
+    out_fname = "all_data.pkl"
 
-    if not check_for_reachability(remote_pcs):
-        sys.exit(1)
-    if not make_folders_check_empty(remote_pcs):
-        sys.exit(2)
-    get_local_volume_data(volume_name)
-    get_remote_volumes(remote_pcs, volume_name)
+    # if not check_for_reachability(remote_pcs):
+    #     sys.exit(1)
+    # if not make_folders_check_empty(remote_pcs):
+    #     sys.exit(2)
+    # get_local_volume_data(volume_name)
+    # get_remote_volumes(remote_pcs, volume_name)
+    combine_pkl_files(remote_pcs, out_fname)
