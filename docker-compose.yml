@@ -1,11 +1,14 @@
 version: "3.8"
 services:
   policylearn:
+    image: metaverse.local:5000/policylearn
+    deploy:
+      replicas: 16
     build:
       context: .
       dockerfile: po_gen_no_solution.Dockerfile
     environment:
-      N_DATA_TO_GEN: 1024
+      N_DATA_TO_GEN: 2048
     volumes:
       - type: volume
         source: data_out
@@ -14,4 +17,24 @@ services:
 volumes: 
   data_out:
 
-# start with ... docker-compose up --no-recreate --scale policylearn=8
+
+# HOW TO:
+
+# 1) COMPOSE
+# start with ...
+# $ docker-compose up --no-recreate --scale policylearn=8
+# $ docker-compose up --build
+# then:
+# $ docker-compose push
+
+# 2) SWARM
+# make swarm with
+# $ docker swarm init
+# and joint --token on other machine(s)
+# maybe check with state with
+# $ docker node ls
+# then ...
+# $ docker stack deploy --compose-file docker-compose.yml policylearn
+
+# 3) COLLECT DATA
+# somehow
