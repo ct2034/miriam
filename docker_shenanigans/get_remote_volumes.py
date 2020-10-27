@@ -167,14 +167,22 @@ def combine_pkl_files(remote_pcs: List[str], out_fname: str):
     for host in remote_pcs + ["localhost"]:
         path = "./data_" + host
         for root, dirs, files in os.walk(path):
-            for fname in files:
-                with open(path+'/'+fname, 'rb') as f:
+            for i_f, fname in enumerate(files):
+                fpath = path+'/'+fname
+                logging.info("Processing {} of {}: {} ...".format(
+                    i_f, len(files), fpath))
+                with open(fpath, 'rb') as f:
                     d = pickle.load(f)
                     data = data + d
-    with open(out_fname, 'wb') as fo:
-        pickle.dump(data, fo)
-    logging.info("Merged {:,} items into {}, size: {:,}B".format(
-        len(data), out_fname, os.path.getsize(out_fname)))
+    logging.info("Writing {:,} items into {}".format(
+        len(data), out_fname))
+    try:
+        with open(out_fname, 'wb') as fo:
+            pickle.dump(data, fo)
+    except Exception as e:
+        logging.error(e)
+    logging.info("Done {}, size: {:,}B".format(
+        out_fname, os.path.getsize(out_fname)))
 
 
 if __name__ == "__main__":
@@ -186,10 +194,11 @@ if __name__ == "__main__":
     volume_name = "policylearn_data_out"
     out_fname = "all_data.pkl"
 
-    if not check_for_reachability(remote_pcs):
-        sys.exit(1)
-    if not make_folders_check_empty(remote_pcs):
-        sys.exit(2)
-    get_local_volume_data(volume_name)
-    get_remote_volumes(remote_pcs, volume_name)
-    combine_pkl_files(remote_pcs, out_fname)
+    # if not check_for_reachability(remote_pcs):
+    #     sys.exit(1)
+    # if not make_folders_check_empty(remote_pcs):
+    #     sys.exit(2)
+    # get_local_volume_data(volume_name)
+    # get_remote_volumes(remote_pcs, volume_name)
+    # combine_pkl_files(remote_pcs, out_fname)
+    sys.exit(0)

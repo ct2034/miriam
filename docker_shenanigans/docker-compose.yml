@@ -3,7 +3,7 @@ services:
   policylearn:
     image: metaverse.local:5000/policylearn
     deploy:
-      replicas: 16
+      replicas: 20
     build:
       context: ..
       dockerfile: docker_shenanigans/po_gen_no_solution.Dockerfile
