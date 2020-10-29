@@ -18,9 +18,12 @@ else:
 
 # meta params
 size_polynome = 4  # how many parameters has the polynome
-learn_res = 500    # width of input samples (x)
-n_encoding = 8     # neurons in encoding layer
-epochs = 8
+learn_res = 200    # width of input samples (x)
+n_encoding = 6     # neurons in encoding layer
+epochs_base = 32
+epochs_transfer = epochs_base * 32
+epochs_pred = epochs_base
+epochs_autoenc = epochs_base
 batch_size = 256
 
 
@@ -80,7 +83,7 @@ def train_pred(x, y):
 
     # train
     history = pred_model.fit([x], [y],
-                             validation_split=0.3, epochs=epochs,
+                             validation_split=0.3, epochs=epochs_pred,
                              batch_size=batch_size)
     return pred_model, history
 
@@ -109,7 +112,7 @@ def train_autoenc(x) -> Tuple[Model, Any]:
 
     # train
     history = autoenc_model.fit([x], [x],
-                                validation_split=0.3, epochs=epochs,
+                                validation_split=0.3, epochs=epochs_autoenc,
                                 batch_size=batch_size)
     return autoenc_model, history
 
@@ -133,17 +136,19 @@ def train_transfer(x, y, encoder_layer):
 
     # train
     history = transfer_model.fit([x], [y],
-                                 validation_split=0.3, epochs=epochs,
+                                 validation_split=0.3, epochs=epochs_transfer,
                                  batch_size=batch_size)
     return transfer_model, history
 
 
 def run_an_example_and_plot_info():
     # samples per model
-    base_exp = 14
+    base_exp = 13
     n_transfer = 2 ** base_exp
     n_pred = 2 ** (base_exp + 2)
-    n_autoenc = 2 ** (base_exp + 4)
+    n_autoenc = 2 ** (base_exp + 5)
+
+    # make data
     x_autoenc, _ = make_data(n_autoenc)
     x_pred, y_pred = make_data(n_pred)
     x_transfer, y_transfer = make_data(n_transfer)

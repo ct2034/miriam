@@ -16,7 +16,7 @@ else:
     accuracy = 'acc'
 
 size_polynome = 4  # how many parameters has the polynome
-learn_res = 50     # with of input samples (x) == neurons of input and output
+learn_res = 100     # with of input samples (x) == neurons of input and output
 n_encoding = 5     # neurons in encoding layer
 
 
@@ -69,7 +69,8 @@ def train_autoenc(n, learn_res, sample_end, t_pred):
 
     # train
     history = autoencoder_model.fit([x], [x],
-                                    validation_split=0.3, epochs=32, batch_size=256)
+                                    validation_split=0.3, epochs=32,
+                                    batch_size=256)
     return autoencoder_model, history
 
 
@@ -88,8 +89,8 @@ def run_an_example_and_plot_info():
 
     plt.subplot(211)
     # Plot training & validation accuracy values
-    plt.plot(h.history[accuracy])
-    plt.plot(h.history['val_' + accuracy])
+    plt.plot(history.history[accuracy])
+    plt.plot(history.history['val_' + accuracy])
     plt.title('Model accuracy')
     plt.ylabel('Accuracy')
     plt.xlabel('Epoch')
