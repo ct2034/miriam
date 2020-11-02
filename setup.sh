@@ -1,2 +1,2 @@
-source miriam_env/bin/activatesource 
+source miriam_env/bin/activate
 export PYTHONPATH=${PYTHONPATH}:$(pwd)
