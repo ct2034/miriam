@@ -33,3 +33,4 @@ docs/sphinx/build
 tmp_jobs.csv
 htmlcov/
 *.pkl
+miriam_env/
