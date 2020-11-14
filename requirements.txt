@@ -8,6 +8,7 @@ gitpython
 iso8601
 matplotlib
 munkres
+networkx
 numpy
 psutil
 git+https://github.com/scottgs/pyflann.git@1e06ec23ea99385920ad3554cf06451ce44cf442
