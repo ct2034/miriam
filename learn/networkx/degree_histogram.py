@@ -7,9 +7,7 @@ import networkx as nx
 def plot_degree_dist(G):
     plt.figure(figsize=(8, 8))
     degrees = [G.degree(n) for n in G.nodes()]
-    print(degrees)
     bin_borders = np.arange(min(degrees)-.5, max(degrees)+1.5)
-    print(bin_borders)
     plt.hist(degrees, bins=bin_borders)
     plt.xticks(
         bin_borders[:-1] + .5,
@@ -30,12 +28,12 @@ def plot_graph(G):
     plt.axis('off')
 
 
-g = nx.grid_graph([5, 5])
+g = nx.grid_graph([3, 3])
 
-g.remove_node((1, 2))
-g.remove_node((3, 3))
-g.remove_node((4, 1))
-g.remove_node((1, 0))
+g.remove_node((0, 0))
+g.remove_node((0, 2))
+g.remove_node((2, 0))
+g.remove_node((2, 2))
 
 plot_graph(g)
 plot_degree_dist(g)
