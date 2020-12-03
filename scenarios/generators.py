@@ -3,6 +3,7 @@ import logging
 import random
 from itertools import product
 from typing import *
+import os
 
 from cachier import cachier
 import numpy as np
@@ -113,3 +114,74 @@ def tracing_pathes_in_the_dark(size: int, fill: float,
             to_clear = to_clear_start - np.sum(env == FREE)
     starts, goals = make_starts_goals_on_env(env, n_agents)
     return env, starts, goals
+
+
+def movingai_read_mapfile(mapfile: str):
+    FREE_CHAR = "."
+    OBSTACLE_CHAR = "@"
+    def decode(c): return FREE if c == FREE_CHAR else OBSTACLE
+    with open(mapfile, 'r') as f:
+        mapfile_content = f.read().split("\n")
+    assert mapfile_content[0] == "type octile"
+    assert mapfile_content[1].startswith("height")
+    height = int(mapfile_content[1].split(" ")[1])
+    assert mapfile_content[2].startswith("width")
+    width = int(mapfile_content[2].split(" ")[1])
+    assert mapfile_content[3] == "map"
+    LINES_OFFSET = 4
+
+    grid = np.zeros((width, height), dtype=np.int8)
+    for i_l in range(height):
+        grid[:, i_l] = list(map(decode, mapfile_content[i_l + LINES_OFFSET]))
+    return grid
+
+
+def movingai(map_str: str, scene_str: str, scene_nr: int, n_agents: int):
+    MOVINGAI_PATH = 'scenarios/movingai'
+
+    assert (scene_str == "even" or scene_str == "random"
+            ), "scene_str may be either >even< or >random<"
+    scenfiles: List[str] = []
+    scen_nr_str = "{}-{:d}.".format(scene_str, scene_nr+1)
+    for subdir, dirs, files in os.walk(MOVINGAI_PATH):
+        for filename in files:
+            filepath = subdir + os.sep + filename
+            if filepath.endswith(map_str + ".map"):
+                mapfile = filepath
+            if (filepath.endswith(".scen") and
+                map_str in filepath and
+                    scen_nr_str in filepath):
+                scenfiles.append(filepath)
+    print("\n".join(scenfiles))
+
+    # reading mapfile
+    print(mapfile)
+    grid = movingai_read_mapfile(mapfile)
+
+    # reading scenfile
+    assert len(scenfiles) == 1
+    print(scenfiles[0])
+    with open(scenfiles[0], 'r') as f:
+        scenfile_content = f.read().split("\n")
+    assert scenfile_content[0] == "version 1"
+    max_n_jobs = len(scenfile_content) - 2
+    assert max_n_jobs >= n_agents
+    jobs = np.zeros((n_agents, 4), dtype=np.int32)
+
+    starts = []
+    goals = []
+    LINES_OFFSET = 1
+    for i_l in range(n_agents):
+        line = scenfile_content[i_l + LINES_OFFSET]
+        elem = line.split("\t")
+        assert map_str in elem[1]
+        # start
+        start = [int(elem[4]), int(elem[5])]
+        assert grid[tuple(start)] == FREE
+        starts.append(start)
+        # goal
+        goal = [int(elem[6]), int(elem[7])]
+        assert grid[tuple(goal)] == FREE
+        goals.append(goal)
+
+    return grid, starts, goals

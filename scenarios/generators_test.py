@@ -141,6 +141,11 @@ class TestGenerators(unittest.TestCase):
         )
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
+    def test_movingai_loading_maps(self):
+        for mapfile in ["Berlin_1_256", "Paris_1_256", "warehouse-10-20-10-2-1", "brc202d"]:
+            (env, starts, goals
+                ) = scenarios.generators.movingai(mapfile, "even", 0, 100)
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

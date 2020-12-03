@@ -8,6 +8,7 @@ gitpython
 iso8601
 matplotlib
 munkres
+mypy
 networkx
 numpy
 psutil
@@ -17,6 +18,8 @@ pymongo
 pyomo==5.2
 pypng
 pytest
+pytest-cov
 scipy
+timeout-decorator
 unittest2
 ws4py
