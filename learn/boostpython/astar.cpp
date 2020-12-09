@@ -104,8 +104,8 @@ class Maze {
   }
   std::string to_string();
   bool add_barrier(std::size_t x, std::size_t y);
-  void set_source(vertex_descriptor s);
-  void set_goal(vertex_descriptor g);
+  bool set_source(vertex_descriptor s);
+  bool set_goal(vertex_descriptor g);
 
  private:
   // Create the underlying rank-2 grid with the specified dimensions.
@@ -269,16 +269,28 @@ std::size_t random_int(std::size_t a, std::size_t b) {
 bool Maze::add_barrier(std::size_t x, std::size_t y) {
   vertices_size_type width = this->length(0);
   vertex_descriptor b = vertex(x + width * y, this->m_grid);
-  vertex_descriptor s = this->source();
-  vertex_descriptor g = this->goal();
-  if (!this->has_barrier(b) && b != s && b != g) {
+  if (!this->has_barrier(b) && b != m_goal && b != m_source) {
     this->m_barriers.insert(b);
     return true;
   } else
     return false;
 }
-void Maze::set_source(vertex_descriptor s) { this->m_source = s; }
-void Maze::set_goal(vertex_descriptor g) { this->m_goal = g; }
+
+bool Maze::set_source(vertex_descriptor s) {
+  if (!this->has_barrier(s) && s != m_goal) {
+    this->m_source = s;
+    return true;
+  } else
+    return false;
+}
+
+bool Maze::set_goal(vertex_descriptor g) {
+  if (!this->has_barrier(g) && g != m_source) {
+    this->m_goal = g;
+    return true;
+  } else
+    return false;
+}
 
 BOOST_PYTHON_MODULE(libastar) {
   using namespace boost::python;
