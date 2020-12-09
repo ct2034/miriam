@@ -24,6 +24,7 @@
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/grid_graph.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/python.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/variate_generator.hpp>
@@ -31,7 +32,6 @@
 #include <boost/unordered_set.hpp>
 #include <ctime>
 #include <iostream>
-#include <boost/python.hpp>
 
 boost::mt19937 random_generator;
 
@@ -44,10 +44,8 @@ typedef boost::graph_traits<grid>::vertex_descriptor vertex_descriptor;
 typedef boost::graph_traits<grid>::vertices_size_type vertices_size_type;
 
 // A hash function for vertices.
-struct vertex_hash : std::unary_function<vertex_descriptor, std::size_t>
-{
-  std::size_t operator()(vertex_descriptor const& u) const
-  {
+struct vertex_hash : std::unary_function<vertex_descriptor, std::size_t> {
+  std::size_t operator()(vertex_descriptor const& u) const {
     std::size_t seed = 0;
     boost::hash_combine(seed, u[0]);
     boost::hash_combine(seed, u[1]);
@@ -56,7 +54,8 @@ struct vertex_hash : std::unary_function<vertex_descriptor, std::size_t>
 };
 
 typedef boost::unordered_set<vertex_descriptor, vertex_hash> vertex_set;
-typedef boost::vertex_subset_complement_filter<grid, vertex_set>::type filtered_grid;
+typedef boost::vertex_subset_complement_filter<grid, vertex_set>::type
+    filtered_grid;
 
 // A searchable maze
 //
@@ -73,70 +72,52 @@ typedef boost::vertex_subset_complement_filter<grid, vertex_set>::type filtered_
 // A-star search is used to find a path through the maze. Each edge has a
 // weight of one, so the total path length is equal to the number of edges
 // traversed.
-class Maze
-{
-public:
+class Maze {
+ public:
   friend std::ostream& operator<<(std::ostream&, const Maze&);
   friend Maze random_maze(std::size_t, std::size_t);
 
   Maze() : m_grid(create_grid(0, 0)), m_barrier_grid(create_barrier_grid()){};
-  Maze(std::size_t x, std::size_t y)
-    : m_grid(create_grid(x, y))
-    , m_barrier_grid(create_barrier_grid())
-    , m_source(vertex(0, m_grid))
-    , m_goal(vertex(num_vertices(m_grid) - 1, m_grid)){};
+  Maze(std::size_t x, std::size_t y, std::size_t sx, std::size_t sy,
+       std::size_t gx, std::size_t gy)
+      : m_grid(create_grid(x, y)),
+        m_barrier_grid(create_barrier_grid()),
+        m_source(vertex(sx + m_grid.length(0) * sy, m_grid)),
+        m_goal(vertex(gx + m_grid.length(0) * gy, m_grid)){};
 
   // The length of the maze along the specified dimension.
-  vertices_size_type length(std::size_t d) const
-  {
-    return m_grid.length(d);
-  }
+  vertices_size_type length(std::size_t d) const { return m_grid.length(d); }
 
-  bool has_barrier(vertex_descriptor u) const
-  {
+  bool has_barrier(vertex_descriptor u) const {
     return m_barriers.find(u) != m_barriers.end();
   }
 
   // Try to find a path from the lower-left-hand corner source (0,0) to the
   // upper-right-hand corner goal (x-1, y-1).
-  vertex_descriptor source() const
-  {
-    return m_source;
-  }
-  vertex_descriptor goal() const
-  {
-    return m_goal;
-  }
+  vertex_descriptor source() const { return m_source; }
+  vertex_descriptor goal() const { return m_goal; }
 
   bool solve();
-  bool solved() const
-  {
-    return !m_solution.empty();
-  }
-  bool solution_contains(vertex_descriptor u) const
-  {
+  bool solved() const { return !m_solution.empty(); }
+  bool solution_contains(vertex_descriptor u) const {
     return m_solution.find(u) != m_solution.end();
   }
   std::string to_string();
-  std::string to_string2();
-  vertex_descriptor get_vertex(int x, int y);
-  void add_barrier(vertex_descriptor b);
+  bool add_barrier(std::size_t x, std::size_t y);
   void set_source(vertex_descriptor s);
   void set_goal(vertex_descriptor g);
 
-private:
+ private:
   // Create the underlying rank-2 grid with the specified dimensions.
-  grid create_grid(std::size_t x, std::size_t y)
-  {
-    std::cout << "create_grid()" << std::endl;
-    boost::array<std::size_t, GRID_RANK> lengths = { { x, y } };
+  grid create_grid(std::size_t x, std::size_t y) {
+    // std::cout << "create_grid()" << std::endl;
+    boost::array<std::size_t, GRID_RANK> lengths = {{x, y}};
     return grid(lengths);
   }
 
   // Filter the barrier vertices out of the underlying grid.
-  filtered_grid create_barrier_grid()
-  {
-    std::cout << "create_barrier_grid()" << std::endl;
+  filtered_grid create_barrier_grid() {
+    // std::cout << "create_barrier_grid()" << std::endl;
     return boost::make_vertex_subset_complement_filter(m_grid, m_barriers);
   }
 
@@ -160,54 +141,51 @@ private:
 //
 // This calculates the Euclidean distance between a vertex and a goal
 // vertex.
-class euclidean_heuristic : public boost::astar_heuristic<filtered_grid, double>
-{
-public:
+class euclidean_heuristic
+    : public boost::astar_heuristic<filtered_grid, double> {
+ public:
   euclidean_heuristic(vertex_descriptor goal) : m_goal(goal){};
 
-  double operator()(vertex_descriptor v)
-  {
+  double operator()(vertex_descriptor v) {
     // std::cout << "euclidean_heuristic()" << std::endl;
-    return sqrt(pow(double(m_goal[0] - v[0]), 2) + pow(double(m_goal[1] - v[1]), 2));
+    return sqrt(pow(double(m_goal[0] - v[0]), 2) +
+                pow(double(m_goal[1] - v[1]), 2));
   }
 
-private:
+ private:
   vertex_descriptor m_goal;
 };
 
 // Exception thrown when the goal vertex is found
-struct found_goal
-{
-};
+struct found_goal {};
 
 // Visitor that terminates when we find the goal vertex
-struct astar_goal_visitor : public boost::default_astar_visitor
-{
+struct astar_goal_visitor : public boost::default_astar_visitor {
   astar_goal_visitor(vertex_descriptor goal) : m_goal(goal){};
 
-  void examine_vertex(vertex_descriptor u, const filtered_grid&)
-  {
+  void examine_vertex(vertex_descriptor u, const filtered_grid&) {
     // std::cout << "examine_vertex 1" << std::endl;
-    if (u == m_goal)
-      throw found_goal();
+    if (u == m_goal) throw found_goal();
     // std::cout << "examine_vertex 2" << std::endl;
   }
 
-private:
+ private:
   vertex_descriptor m_goal;
 };
 
 // Solve the maze using A-star search.  Return true if a solution was found.
-bool Maze::solve()
-{
-  std::cout << "solve()" << std::endl;
+bool Maze::solve() {
+  // std::cout << "solve()" << std::endl;
   boost::static_property_map<distance> weight(1);
   // The predecessor map is a vertex-to-vertex mapping.
-  typedef boost::unordered_map<vertex_descriptor, vertex_descriptor, vertex_hash> pred_map;
+  typedef boost::unordered_map<vertex_descriptor, vertex_descriptor,
+                               vertex_hash>
+      pred_map;
   pred_map predecessor;
   boost::associative_property_map<pred_map> pred_pmap(predecessor);
   // The distance map is a vertex-to-distance mapping.
-  typedef boost::unordered_map<vertex_descriptor, distance, vertex_hash> dist_map;
+  typedef boost::unordered_map<vertex_descriptor, distance, vertex_hash>
+      dist_map;
   dist_map distance;
   boost::associative_property_map<dist_map> dist_pmap(distance);
 
@@ -216,15 +194,15 @@ bool Maze::solve()
   euclidean_heuristic heuristic(g);
   astar_goal_visitor visitor(g);
 
-  try
-  {
-    std::cout << "solve() astar_search 1" << std::endl;
+  try {
+    // std::cout << "solve() astar_search 1" << std::endl;
     astar_search(m_barrier_grid, s, heuristic,
-                 boost::weight_map(weight).predecessor_map(pred_pmap).distance_map(dist_pmap).visitor(visitor));
-    std::cout << "solve() astar_search 2" << std::endl;
-  }
-  catch (found_goal fg)
-  {
+                 boost::weight_map(weight)
+                     .predecessor_map(pred_pmap)
+                     .distance_map(dist_pmap)
+                     .visitor(visitor));
+    // std::cout << "solve() astar_search 2" << std::endl;
+  } catch (found_goal fg) {
     // Walk backwards from the goal through the predecessor chain adding
     // vertices to the solution path.
     for (vertex_descriptor u = g; u != s; u = predecessor[u])
@@ -239,27 +217,23 @@ bool Maze::solve()
 
 #define BARRIER "#"
 // Print the maze as an ASCII map.
-std::string Maze::to_string()
-{
+std::string Maze::to_string() {
   std::ostringstream output;
   // Header
   for (vertices_size_type i = 0; i < this->length(0) + 2; i++)
     output << BARRIER;
   output << std::endl;
   // Body
-  for (int y = this->length(1) - 1; y >= 0; y--)
-  {
+  for (int y = this->length(1) - 1; y >= 0; y--) {
     // Enumerate rows in reverse order and columns in regular order so that
     // (0,0) appears in the lower left-hand corner.  This requires that y be
     // int and not the unsigned vertices_size_type because the loop exit
     // condition is y==-1.
-    for (vertices_size_type x = 0; x < this->length(0); x++)
-    {
+    for (vertices_size_type x = 0; x < this->length(0); x++) {
       // Put a barrier on the left-hand side.
-      if (x == 0)
-        output << BARRIER;
+      if (x == 0) output << BARRIER;
       // Put the character representing this point in the maze grid.
-      vertex_descriptor u = { { x, vertices_size_type(y) } };
+      vertex_descriptor u = {{x, vertices_size_type(y)}};
       if (this->solution_contains(u))
         output << ".";
       else if (this->has_barrier(u))
@@ -267,8 +241,7 @@ std::string Maze::to_string()
       else
         output << " ";
       // Put a barrier on the right-hand side.
-      if (x == this->length(0) - 1)
-        output << BARRIER;
+      if (x == this->length(0) - 1) output << BARRIER;
     }
     // Put a newline after every row except the last one.
     output << std::endl;
@@ -285,86 +258,34 @@ std::string Maze::to_string()
 }
 
 // Return a random integer in the interval [a, b].
-std::size_t random_int(std::size_t a, std::size_t b)
-{
-  if (b < a)
-    b = a;
+std::size_t random_int(std::size_t a, std::size_t b) {
+  if (b < a) b = a;
   boost::uniform_int<> dist(a, b);
-  boost::variate_generator<boost::mt19937&, boost::uniform_int<> > generate(random_generator, dist);
+  boost::variate_generator<boost::mt19937&, boost::uniform_int<> > generate(
+      random_generator, dist);
   return generate();
 }
 
-// Generate a maze with a random assignment of barriers.
-Maze random_maze(std::size_t x, std::size_t y)
-{
-  Maze m(x, y);
-  vertices_size_type n = num_vertices(m.m_grid);
-  vertex_descriptor s = m.source();
-  vertex_descriptor g = m.goal();
-  // A tenth of the cells in the maze should be barriers.
-  int barriers = n * .1;
-  while (barriers > 0)
-  {
-    // Choose horizontal or vertical direction.
-    std::size_t direction = random_int(0, 1);
-    // Walls range up to one quarter the dimension length in this direction.
-    vertices_size_type wall = random_int(1, m.length(direction) / 4);
-    // Create the wall while decrementing the total barrier count.
-    vertex_descriptor u = vertex(random_int(0, n - 1), m.m_grid);
-    while (wall)
-    {
-      // Start and goal spaces should never be barriers.
-      if (u != s && u != g)
-      {
-        wall--;
-        if (!m.has_barrier(u))
-        {
-          m.m_barriers.insert(u);
-          barriers--;
-        }
-      }
-      vertex_descriptor v = m.m_grid.next(u, direction);
-      // Stop creating this wall if we reached the maze's edge.
-      if (u == v)
-        break;
-      u = v;
-    }
-  }
-  return m;
-}
-
-vertex_descriptor Maze::get_vertex(int x, int y)
-{
+bool Maze::add_barrier(std::size_t x, std::size_t y) {
   vertices_size_type width = this->length(0);
-  return vertex(x + width * y, this->m_grid);
-}
-
-void Maze::add_barrier(vertex_descriptor b)
-{
+  vertex_descriptor b = vertex(x + width * y, this->m_grid);
   vertex_descriptor s = this->source();
   vertex_descriptor g = this->goal();
-  if (!this->has_barrier(b) && b != s && b != g)
-  {
+  if (!this->has_barrier(b) && b != s && b != g) {
     this->m_barriers.insert(b);
-  }
+    return true;
+  } else
+    return false;
 }
-void Maze::set_source(vertex_descriptor s)
-{
-  this->m_source = s;
-}
-void Maze::set_goal(vertex_descriptor g){ this->m_goal = g; }
+void Maze::set_source(vertex_descriptor s) { this->m_source = s; }
+void Maze::set_goal(vertex_descriptor g) { this->m_goal = g; }
 
-BOOST_PYTHON_MODULE(libastar)
-{
+BOOST_PYTHON_MODULE(libastar) {
   using namespace boost::python;
-  class_<Maze>("Maze", init<int, int>())
+  class_<Maze>("Maze", init<int, int, int, int, int, int>())
       .def("solve", &Maze::solve)
       .def("goal", &Maze::goal)
       .def("to_string", &Maze::to_string)
-      .def("get_vertex", &Maze::get_vertex)
-      .def("add_barrier", &Maze::add_barrier)
-      .def("set_source", &Maze::set_source)
-      .def("set_goal", &Maze::set_goal);
-  def("random_maze", random_maze);
+      .def("add_barrier", &Maze::add_barrier);
   class_<vertex_descriptor>("vertex_descriptor");
 }
