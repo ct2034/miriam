@@ -15,18 +15,6 @@ logger = logging.getLogger(__name__)
 nx_base_graph: Union[None, nx.Graph] = None
 
 
-def gridmap_to_nx(env: np.ndarray) -> nx.Graph:
-    """convert numpy gridmap into networkx graph."""
-    def filter_node(n):
-        return env[n] == 0
-    global nx_base_graph
-    if nx_base_graph is None:
-        nx_base_graph = nx.grid_graph(dim=list(env.shape))
-    assert nx_base_graph.number_of_nodes() == env.shape[0] * env.shape[1]
-    view = nx.subgraph_view(nx_base_graph, filter_node=filter_node)
-    return view
-
-
 class Policy(Enum):
     RANDOM = 0
     CLOSEST = 1
@@ -63,12 +51,25 @@ class Agent():
             self.policy,
             self.id]))
 
+    def filter_node(self, n):
+        """filter for gridmap_to_nx"""
+        return self.env[n] == 0
+
+    def gridmap_to_nx(self, env: np.ndarray) -> nx.Graph:
+        """convert numpy gridmap into networkx graph."""
+        global nx_base_graph
+        if nx_base_graph is None:
+            nx_base_graph = nx.grid_graph(dim=list(env.shape))
+        assert nx_base_graph.number_of_nodes() == env.shape[0] * env.shape[1]
+        view = nx.subgraph_view(nx_base_graph, filter_node=self.filter_node)
+        return view
+
     def give_a_goal(self, goal: np.ndarray) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
         if (self.goal != goal).any():  # goal is new
             self.goal = goal
-            self.env_nx = gridmap_to_nx(self.env)
+            self.env_nx = self.gridmap_to_nx(self.env)
             path = self.plan_path()
             if path is not None:
                 self.path = path
