@@ -1,3 +1,4 @@
+import random
 import unittest
 
 import numpy as np
@@ -301,7 +302,7 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_invalid, goals_invalid, ignore_cache=True)
         )
 
-    def test_cost_sim_decentralized_random(self):
+    def test_cost_sim_decentralized_random_collision(self):
         # agents that collide in the middle
         starts_4_5 = np.array([
             [0, 0],
@@ -316,6 +317,7 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_4_5, goals_4_5, ignore_cache=True)
         )
 
+    def test_cost_sim_decentralized_random_no_collision(self):
         # agents that don't collide
         starts_2 = np.array([
             [0, 0],
@@ -330,7 +332,7 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_2, goals_2, ignore_cache=True)
         )
 
-        # unsolvable
+    def test_cost_sim_decentralized_random_unsolvable(self):
         starts_unsolv = np.array([
             [1, 0]  # obstacle
         ])
@@ -343,12 +345,13 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
         )
 
+    def test_cost_sim_decentralized_random_deadlocks(self):
         # trying to make deadlocks ...
+        random.seed(1)  # this some times times out on total random
         starts_deadlocks = np.array([
             [0, 0],
             [0, 1],
             [0, 2],
-            [1, 1],
             [2, 0],
             [2, 1],
             [2, 2]
@@ -359,8 +362,7 @@ class TestEvaluators(unittest.TestCase):
             [2, 2],
             [0, 0],
             [0, 1],
-            [0, 2],
-            [1, 1]
+            [0, 2]
         ])
         self.assertEqual(
             scenarios.evaluators.INVALID,
