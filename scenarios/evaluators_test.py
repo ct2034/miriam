@@ -370,6 +370,21 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_deadlocks, goals_deadlocks, ignore_cache=True)
         )
 
+    def test_expanded_nodes_icts_no_collision(self):
+        # agents that don't collide should not expand icts nodes
+        starts = np.array([
+            [0, 0],
+            [2, 0]
+        ])
+        goals = np.array([
+            [0, 2],
+            [2, 2]
+        ])
+        self.assertAlmostEqual(
+            0, scenarios.evaluators.expanded_nodes_icts(
+                self.env, starts, goals)
+        )
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

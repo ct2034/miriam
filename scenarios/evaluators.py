@@ -7,6 +7,7 @@ from cachier import cachier
 
 import tools
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
+from planner.matteoantoniazzi_mapf.plan import icts
 from sim.decentralized.agent import Agent, Policy
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
 
@@ -123,3 +124,7 @@ def cost_sim_decentralized_random(env, starts, goals):
         return average_time + 1
     else:
         return INVALID
+
+
+def expanded_nodes_icts(env, starts, goals):
+    icts(env, starts, goals)

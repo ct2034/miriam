@@ -4,3 +4,6 @@
 [submodule "libMultiRobotPlanning"]
 	path = planner/policylearn/libMultiRobotPlanning
 	url = git@github.com:ct2034/libMultiRobotPlanning
+[submodule "planner/matteoantoniazzi-mapf/external"]
+	path = planner/matteoantoniazzi_mapf/external
+	url = https://github.com/MatteoAntoniazzi/MAPF.git
