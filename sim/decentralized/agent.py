@@ -12,8 +12,6 @@ import tools
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
-nx_base_graph: Union[None, nx.Graph] = None
-
 
 class Policy(Enum):
     RANDOM = 0
@@ -57,9 +55,8 @@ class Agent():
 
     def gridmap_to_nx(self, env: np.ndarray) -> nx.Graph:
         """convert numpy gridmap into networkx graph."""
-        global nx_base_graph
-        if nx_base_graph is None:
-            nx_base_graph = nx.grid_graph(dim=list(env.shape))
+        nx_base_graph = nx.grid_graph(dim=list(env.shape))
+        assert len(env.shape) == 2
         assert nx_base_graph.number_of_nodes() == env.shape[0] * env.shape[1]
         view = nx.subgraph_view(nx_base_graph, filter_node=self.filter_node)
         return view

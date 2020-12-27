@@ -6,6 +6,12 @@ import scenarios.generators
 
 
 class TestGenerators(unittest.TestCase):
+    # movingai
+    MAPS_WE_CARE_ABOUT = {"Berlin_1_256": [256, 256],
+                          "Paris_1_256": [256, 256],
+                          "brc202d": [530, 481],
+                          "warehouse-10-20-10-2-1": [161, 63]}
+
     def test_generate_like_sim_decentralized_determinism(self):
         (base_env, base_starts, base_goals
          ) = scenarios.generators.like_sim_decentralized(
@@ -141,10 +147,19 @@ class TestGenerators(unittest.TestCase):
         )
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
+    # movingai ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def test_movingai_read_mapfile(self):
+        for mapname in self.MAPS_WE_CARE_ABOUT.keys():
+            mapfile = 'scenarios/movingai/mapf-map/' + mapname + '.map'
+            env = scenarios.generators.movingai_read_mapfile(mapfile)
+            assert len(env.shape) == 2
+            assert env.shape[0] == self.MAPS_WE_CARE_ABOUT[mapname][0]
+            assert env.shape[1] == self.MAPS_WE_CARE_ABOUT[mapname][1]
+
     def test_movingai_loading_maps(self):
-        for mapfile in ["Berlin_1_256", "Paris_1_256", "warehouse-10-20-10-2-1", "brc202d"]:
+        for mapfile in self.MAPS_WE_CARE_ABOUT:
             (env, starts, goals
-                ) = scenarios.generators.movingai(mapfile, "even", 0, 100)
+             ) = scenarios.generators.movingai(mapfile, "even", 0, 100)
 
 
 if __name__ == "__main__":  # pragma: no cover
