@@ -14,14 +14,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tools
 from cachier import cachier
+from definitions import FREE, OBSTACLE
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
 from scenarios.generators import tracing_pathes_in_the_dark
 from sim.decentralized.agent import Agent
 from sim.decentralized.runner import initialize_environment
 
-FREE = 0
-OBSTACLE = 1
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
 EDGE_CONSTRAINTS_STR = 'edgeConstraints'
 SCHEDULE_STR = 'schedule'
@@ -429,7 +428,8 @@ if __name__ == "__main__":
         TRANSFER_CLASSIFICATION_STR,
         GENERATE_SIM_STR,
         NO_SOLUTION_STR))
-    parser.add_argument('fname_write_pkl', type=argparse.FileType('wb'), nargs='?')
+    parser.add_argument('fname_write_pkl',
+                        type=argparse.FileType('wb'), nargs='?')
     parser.add_argument(
         'fname_read_pkl', type=argparse.FileType('rb'), nargs='?')
     args = parser.parse_args()

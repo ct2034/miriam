@@ -3,11 +3,11 @@ from functools import lru_cache
 from typing import Tuple
 
 import numpy as np
-from cachier import cachier
-
 import tools
-from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
+from cachier import cachier
+from definitions import INVALID
 from planner.matteoantoniazzi_mapf.plan import icts
+from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent, Policy
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
 
@@ -15,8 +15,6 @@ logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
 logging.getLogger(
     'planner.policylearn.libMultiRobotPlanning').setLevel(logging.ERROR)
-
-INVALID = -1
 
 
 @cachier(hash_params=tools.hasher)

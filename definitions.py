@@ -1,0 +1,3 @@
+FREE = 0
+INVALID = -1
+OBSTACLE = 1

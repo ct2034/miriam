@@ -12,11 +12,9 @@ from matplotlib import pyplot as plt
 import sim.decentralized.agent
 import sim.decentralized.runner
 import tools
+from definitions import FREE, OBSTACLE
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
-
-FREE = 0
-OBSTACLE = 1
 
 
 def make_starts_goals_on_env(env: np.ndarray, n_agents: int):
