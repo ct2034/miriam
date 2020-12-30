@@ -103,7 +103,7 @@ def planner_comparison(seed):
 def test_planner_comparison():
     if is_cch():
         n_samples = 3
-    else: # travis
+    else:  # travis
         n_samples = 5
 
     all_results = []

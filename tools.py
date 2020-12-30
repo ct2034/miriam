@@ -93,7 +93,8 @@ def benchmark(fun, vals, samples=10, disp=True, timeout=60):
             res = None
         return t, res
 
-    assert vals.__class__ == list and vals[0].__class__ == list, "Please provide list of lists per argument"
+    assert (vals.__class__ == list and vals[0].__class__ == list,
+            "Please provide list of lists per argument")
 
     lens = list(map(len, vals))
     ts = np.zeros(lens + [samples])
@@ -181,7 +182,8 @@ def mongodb_save(name, data):
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
-# The background is set with 40 plus the number of the color, and the foreground with 30
+# The background is set with 40 plus the number of the color, and the
+# foreground with 30
 
 # These are the sequences need to get colored ouput
 RESET_SEQ = "\033[0m"
@@ -223,7 +225,8 @@ class ColoredFormatter(logging.Formatter):
 
 # Custom logger class with multiple destinations
 class ColoredLogger(logging.Logger):
-    FORMAT = "[$BOLD%(name)-20s$RESET][%(levelname)-18s]  %(message)s ($BOLD%(filename)s$RESET:%(lineno)d)"
+    FORMAT = "[$BOLD%(name)-20s$RESET][%(levelname)-18s]  "\
+        "%(message)s ($BOLD%(filename)s$RESET:%(lineno)d)"
     COLOR_FORMAT = formatter_message(FORMAT, True)
 
     def __init__(self, name):
