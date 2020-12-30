@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from hashlib import sha256
 from itertools import product
+from typing import Tuple
 
 import numpy as np
 
@@ -119,6 +120,7 @@ def benchmark(fun, vals, samples=10, disp=True, timeout=60):
 
 def get_git():
     from git import Repo
+
     # TODO: Set log level for git.cmd to info
     return Repo(os.getcwd(), search_parent_directories=True)
 
@@ -132,8 +134,9 @@ def get_git_message():
 
 
 def mongodb_save(name, data):
-    import pymongo
     import datetime
+
+    import pymongo
 
     if 0 != run_command('ping -c2 -W1 8.8.8.8'):
         logging.warning("No Internet connection -> not saving to mongodb")
@@ -249,10 +252,16 @@ def get_map_str(grid):
     return map_str
 
 
-def run_command(bashCommand):
-    process = subprocess.Popen(bashCommand.split(), shell=True,
-                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
-    return process.communicate()[0].decode()
+def run_command(bashCommand, timeout=None) -> Tuple[str, str, int]:
+    """executes given command as subprocess with optional timeout. Returns
+    tuple of stdout, stderr and returncode."""
+    process = subprocess.Popen(bashCommand.split(" "),
+                               stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+    out = process.communicate(timeout=timeout)
+    return (out[0].decode(),
+            out[1].decode(),
+            process.returncode)
 
 
 def hasher(args, kwargs):

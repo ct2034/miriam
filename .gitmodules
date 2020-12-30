@@ -7,3 +7,6 @@
 [submodule "planner/matteoantoniazzi-mapf/external"]
 	path = planner/matteoantoniazzi_mapf/external
 	url = https://github.com/MatteoAntoniazzi/MAPF.git
+[submodule "planner/cobra/external"]
+	path = planner/cobra/external
+	url = https://github.com/ct2034/cobra.git

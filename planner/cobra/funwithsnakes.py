@@ -21,10 +21,11 @@ def plan_cobra(agent_pos, jobs, grid, config) -> ([], []):
     if not cobra_bin:  # if env not set, assuming bin in path
         cobra_bin = "cobra"
 
-    job_endpoints_i, agent_points_i = write_map_file(agent_pos, jobs, grid, cobra_filename_base)
+    job_endpoints_i, agent_points_i = write_map_file(
+        agent_pos, jobs, grid, cobra_filename_base)
     write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base)
 
-    time.sleep(1)
+    time.sleep(.2)
 
     pwd = os.getcwd()
     cmd = " ".join([
@@ -32,18 +33,20 @@ def plan_cobra(agent_pos, jobs, grid, config) -> ([], []):
         cobra_filename_base + MAP_EXT,
         cobra_filename_base + TASK_EXT
     ])
-    res = tools.run_command(cmd)
+    _stdout, _stderr, retcode = tools.run_command(cmd)
 
     time.sleep(.2)
 
     try:
-        if res != 0:
+        if retcode != 0:
             logging.warn("Error when calling cobra: " + cmd + "\nin: " + pwd)
             return [], []
         paths = read_path_file(cobra_filename_base + PATH_EXT, grid)
         agent_job, paths = allocation_from_paths(paths, agent_pos, jobs)
         paths = make_paths_comparable(paths, agent_job, agent_pos, jobs)
         return agent_job, paths
+    except Exception as e:
+        logging.error(e)
     finally:
         clean_up(cobra_filename_base)
 
@@ -87,7 +90,6 @@ def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
                 else:
                     line += "."
             f.write(line + "\n")
-    f.close()
 
     job_endpoints_i = []
     for j in jobs:
@@ -101,7 +103,6 @@ def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
 
 def write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base):
     fname = cobra_filename_base + TASK_EXT
-
     with open(fname, 'w') as f:
         f.write(str(len(job_endpoints_i)) + "\n")
         for jei in job_endpoints_i:
@@ -112,7 +113,6 @@ def write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base):
                 "0",
                 "10\n"
             ]))
-    f.close()
 
 
 def read_path_file(fname, grid):
@@ -142,7 +142,7 @@ def read_path_file(fname, grid):
     new_paths = []
     for pathset in paths:
         path = pathset[0]
-        prev = (-1,-1)
+        prev = (-1, -1)
         n_same = 0
         for pose in path:
             if prev == pose[:2]:
@@ -151,7 +151,7 @@ def read_path_file(fname, grid):
                 n_same = 0
             prev = pose[:2]
         pathset = (path[0:-n_same], path[-n_same:-1])
-        new_paths.append(pathset)    
+        new_paths.append(pathset)
     f.close()
     return new_paths
 
@@ -223,8 +223,6 @@ def make_paths_comparable(paths, agent_job, agent_pos, jobs):
         else:
             assert False
     return paths_out
-
-
 
 
 def sort_by_lines(l):

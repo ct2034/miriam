@@ -1,5 +1,5 @@
 import os
-import unittest
+import pytest
 from functools import reduce
 
 import numpy as np
@@ -12,7 +12,6 @@ from planner.tcbs_test import get_data_random
 from planner.cobra.funwithsnakes import read_path_file, plan_cobra
 
 
-@unittest.skip("Cobra has problems at the moment")
 def test_read_file(fname='planner/cobra/test.path', plot=False):
     print("cwd: " + str(os.getcwd()))
     grid = np.zeros([10, 10, 100])
@@ -21,10 +20,9 @@ def test_read_file(fname='planner/cobra/test.path', plot=False):
         plot_results([], paths, [], [], plt.figure(), grid, [], [])
     assert len(paths[0][0]) > 0, "No path"
     assert len(paths) == 3, "Not all agents have paths"
-    assert len(paths[0][0]) == 30, "No full paths"
+    assert len(paths[0][0]) == 11, "No full paths"
 
 
-@unittest.skip("Cobra has problems at the moment")
 def test_cobra_simple(plot=False):
     grid = np.zeros([5, 5, 30])
     res_agent_job, res_paths = plan_cobra(
@@ -39,7 +37,6 @@ def test_cobra_simple(plot=False):
     assert res_paths, "No result"
 
 
-@unittest.skip("Cobra has problems at the moment")
 def test_cobra_random(plot=False):
     agent_pos, grid, idle_goals, jobs = get_data_random(seed=1,
                                                         map_res=8,
@@ -64,9 +61,10 @@ def test_cobra_random(plot=False):
         ax = fig.add_subplot(121)
         plot_inputs(ax, agent_pos, idle_goals, jobs, grid)
         ax2 = fig.add_subplot(122, projection='3d')
-        plot_results(ax2, [], res_paths, res_agent_job, agent_pos, grid, [], jobs)
+        plot_results(ax2, [], res_paths, res_agent_job,
+                     agent_pos, grid, [], jobs)
         plt.show()
 
 
-if __name__ == "__main__":
-    test_cobra_random(True)
+if __name__ == "__main__":  # pragma: no cover
+    pytest.main(["planner/cobra"])
