@@ -236,7 +236,8 @@ class ColoredLogger(logging.Logger):
 
 
 def get_map_str(grid):
-    grid = grid[:, :, 0]
+    if len(grid.shape) == 3:
+        grid = grid[:, :, 0]
     map_str = ""
     for y in range(grid.shape[1]):
         for x in range(grid.shape[0]):

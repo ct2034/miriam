@@ -10,14 +10,17 @@ if __name__ == "__main__":
 
     # input
     agent_pos = [(1, 1), (9, 1), (3, 1)]  # three agents
-    jobs = [((1, 6), (9, 6), 0), ((3, 3), (7, 3), 0)]  # two jobs 1,6 -> 9,1, 3,3 -> 7,3
+    # two jobs 1,6 -> 9,1, 3,3 -> 7,3
+    jobs = [((1, 6), (9, 6), 0), ((3, 3), (7, 3), 0)]
     idle_goals = [((9, 7), (5, .5))]  # one idle goal 9,7 with P~N(5,.5)
 
     start_time = datetime.datetime.now()
 
-    res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], idle_goals, grid, plot=True)
+    res_agent_job, res_agent_idle, res_paths = plan(
+        agent_pos, jobs, [], idle_goals, grid, plot=True)
 
-    print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
+    print("computation time:", (datetime.datetime.now() -
+                                start_time).total_seconds(), "s")
     print(res_agent_job, res_agent_idle, res_paths)
 
     assert res_agent_job == ((0,), (), (1,)), "Wrong agent job assignment"

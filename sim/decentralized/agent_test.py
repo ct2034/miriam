@@ -6,7 +6,7 @@ import unittest
 import networkx as nx
 import numpy as np
 
-from sim.decentralized.agent import Agent, Policy, gridmap_to_nx
+from sim.decentralized.agent import Agent, Policy
 
 
 class TestDecentralizedSim(unittest.TestCase):

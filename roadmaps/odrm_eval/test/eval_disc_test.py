@@ -3,7 +3,7 @@ import random
 import networkx as nx
 import numpy as np
 
-from odrm_eval.eval_disc import synchronize_paths, eval_disc
+from roadmaps.odrm_eval import synchronize_paths, eval_disc
 
 
 def test_eval_disc_basic():

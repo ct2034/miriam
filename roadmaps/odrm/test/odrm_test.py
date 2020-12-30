@@ -5,7 +5,7 @@ import networkx as nx
 import numpy as np
 from random import random
 
-from odrm import (
+from roadmaps.odrm import (
     grad_func,
     graphs_from_posar,
     make_edges
