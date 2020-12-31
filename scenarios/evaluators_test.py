@@ -380,7 +380,7 @@ class TestEvaluators(unittest.TestCase):
             [0, 2],
             [2, 2]
         ])
-        self.assertAlmostEqual(
+        self.assertEqual(
             0, scenarios.evaluators.expanded_nodes_icts(
                 self.env, starts, goals)
         )

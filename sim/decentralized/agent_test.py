@@ -47,9 +47,10 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_gridmap_to_nx(self):
         env = np.array([[0, 1], [1, 1]])
-        env_nx = gridmap_to_nx(env, ignore_cache=True)
-        self.assertEqual(len(env_nx), 1)
-        self.assertTrue((0, 0) in env_nx)
+        a = Agent(env, (0, 0))
+        a.give_a_goal(np.array([0, 0]))
+        self.assertEqual(len(a.env_nx), 1)
+        self.assertTrue((0, 0) in a.env_nx)
 
     def test_give_a_goal_and_plan_path(self):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
@@ -68,6 +69,7 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_block_edge(self):
         env = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
+        edge_to_block = ((0, 0), (0, 1))
         a = Agent(env, np.array([0, 0]), Policy.RANDOM)
         self.assertTrue(a.give_a_goal(np.array([0, 2])))
         self.assertEqual(len(a.path), 3)  # quick path
@@ -77,14 +79,26 @@ class TestDecentralizedSim(unittest.TestCase):
             (0, 1), (1, 1))
 
         # blocking edge
-        self.assertTrue(a.block_edge((0, 0), (0, 1)))
+        # should still be in there
+        self.assertTrue(a.env_nx.has_edge(*edge_to_block))
+        # blocking it, path should still be possible
+        self.assertTrue(a.block_edge(*edge_to_block))
+        self.assertFalse(a.env_nx.has_edge(*edge_to_block)
+                         )  # should not be in there any more
         self.assertEqual(len(a.path), 7)  # going the long way
 
         # removing the same edge again should not be a problem
-        self.assertTrue(a.block_edge((0, 0), (0, 1)))
+        self.assertTrue(a.block_edge(*edge_to_block))
 
         # removing a necessary edge should return false
         self.assertFalse(a.block_edge((2, 0), (2, 1)))
+
+        # but path should still be there
+        self.assertEqual(len(a.path), 7)
+
+        # and we should also be able to give another goal
+        self.assertTrue(a.give_a_goal(np.array([1, 0])))
+        self.assertEqual(len(a.path), 2)
 
     def test_is_at_goal(self):
         env = np.array([[0, 0], [0, 0]])

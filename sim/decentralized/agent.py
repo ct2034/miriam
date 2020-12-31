@@ -12,6 +12,8 @@ import tools
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
+BLOCKED_EDGES_TYPE = Set[Tuple[Tuple[int, int], Tuple[int, int]]]
+
 
 class Policy(Enum):
     RANDOM = 0
@@ -34,6 +36,7 @@ class Agent():
         self.path = None
         self.path_i: Union[int, None] = None
         self.id: int = random.randint(0, int(2E14))
+        self.blocked_edges: BLOCKED_EDGES_TYPE = set()
 
     def __hash__(self):
         return self.id
@@ -50,15 +53,20 @@ class Agent():
             self.id]))
 
     def filter_node(self, n):
-        """filter for gridmap_to_nx"""
+        """node filter for gridmap_to_nx"""
         return self.env[n] == 0
+
+    def filter_edge(self, a, b):
+        """edge filter for gridmap_to_nx"""
+        return (a, b) not in self.blocked_edges
 
     def gridmap_to_nx(self, env: np.ndarray) -> nx.Graph:
         """convert numpy gridmap into networkx graph."""
         nx_base_graph = nx.grid_graph(dim=list(env.shape))
         assert len(env.shape) == 2
         assert nx_base_graph.number_of_nodes() == env.shape[0] * env.shape[1]
-        view = nx.subgraph_view(nx_base_graph, filter_node=self.filter_node)
+        view = nx.subgraph_view(
+            nx_base_graph, filter_node=self.filter_node, filter_edge=self.filter_edge)
         return view
 
     def give_a_goal(self, goal: np.ndarray) -> bool:
@@ -105,25 +113,26 @@ class Agent():
         path = self.plan_path(tmp_env)
         return path is not None
 
-    def block_edge(self, a: tuple, b: tuple) -> bool:
+    def block_edge(self, a: Tuple[int, int], b: Tuple[int, int]) -> bool:
         """this will make the agent block this edge. It will return `True`
         if there still is a path to the current goal. `False` otherwise."""
         assert self.env_nx is not None, "Should have a env_nx"
-        old_graph = self.env_nx.copy()
-        try:
-            self.env_nx.remove_edge(a, b)
-        except nx.exception.NetworkXError:
-            logger.warning("Edge already removed")
-            return False
-        path = self.plan_path()
+        tmp_edge = (a, b)
+        save_blocked_edges = self.blocked_edges.copy()
+        self.blocked_edges.add(tmp_edge)
+        tmp_env_nx = self.gridmap_to_nx(
+            self.env)
+
+        path = self.plan_path(tmp_env_nx)
         if path is not None:
             # all good, and we have a new path now
             self.path = path
             self.path_i = 0
+            self.env_nx = self.gridmap_to_nx(self.env)
             return True
         else:
-            # undo changes
-            self.env_nx = old_graph.copy()
+            # forget changes
+            self.blocked_edges = save_blocked_edges
             return False
 
     def is_at_goal(self):

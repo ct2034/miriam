@@ -6,7 +6,7 @@ import numpy as np
 import tools
 from cachier import cachier
 from definitions import INVALID
-from planner.matteoantoniazzi_mapf.plan import icts
+from planner.matteoantoniazzi_mapf.plan import icts, expanded_nodes_from_info
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent, Policy
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
@@ -125,4 +125,5 @@ def cost_sim_decentralized_random(env, starts, goals):
 
 
 def expanded_nodes_icts(env, starts, goals):
-    icts(env, starts, goals)
+    info = icts(env, starts, goals)
+    return expanded_nodes_from_info(info)
