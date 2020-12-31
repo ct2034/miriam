@@ -93,8 +93,8 @@ def benchmark(fun, vals, samples=10, disp=True, timeout=60):
             res = None
         return t, res
 
-    assert (vals.__class__ == list and vals[0].__class__ == list,
-            "Please provide list of lists per argument")
+    assert vals.__class__ == list and vals[0].__class__ == list, \
+        "Please provide list of lists per argument"
 
     lens = list(map(len, vals))
     ts = np.zeros(lens + [samples])

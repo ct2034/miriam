@@ -23,6 +23,9 @@ jobs:
     - name: Lint with pycodestyle
       run: |
         pycodestyle .
+    - name: Typing with mypy
+      run: |
+        mypy scenarios
     - name: Test with pytest
       run: |
         pytest
