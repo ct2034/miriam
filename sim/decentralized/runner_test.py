@@ -5,10 +5,10 @@ import unittest
 from unittest.mock import MagicMock
 
 import numpy as np
-
+import pytest
 import sim.decentralized.runner as runner
-from sim.decentralized.runner import SimIterationException
 from sim.decentralized.agent import Agent, Policy
+from sim.decentralized.runner import SimIterationException
 
 
 class TestDecentralizedSim(unittest.TestCase):
@@ -234,7 +234,7 @@ class TestDecentralizedSim(unittest.TestCase):
         agents[0].give_a_goal(np.array([0, 3]))
         agents[1].give_a_goal(np.array([0, 0]))
         runner.iterate_sim(agents)
-        for _ in range(100):
+        for _ in range(10):
             self.assertRaises(runner.SimIterationException,
                               lambda: runner.iterate_sim(agents))
 
@@ -246,4 +246,4 @@ class TestDecentralizedSim(unittest.TestCase):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    unittest.main()
+    pytest.main(["sim/decentralized/runner_test.py"])

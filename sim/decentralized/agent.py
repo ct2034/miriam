@@ -114,6 +114,7 @@ class Agent():
             self.env_nx.remove_edge(a, b)
         except nx.exception.NetworkXError:
             logger.warning("Edge already removed")
+            return False
         path = self.plan_path()
         if path is not None:
             # all good, and we have a new path now
