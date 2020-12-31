@@ -1,26 +1,10 @@
 import unittest
 import numpy as np
-import planner.policylearn.generate_data as generate_data
+from planner.policylearn import generate_data
 from functools import reduce
 
 
 class GenerateDataTest(unittest.TestCase):
-    def test_generate_random_gridmap(self):
-        w = 999
-        h = 100
-        gridmap_empty = generate_data.generate_random_gridmap(w, h, 0)
-
-        assert gridmap_empty.shape[0] == w
-        assert gridmap_empty.shape[1] == h
-        assert np.max(gridmap_empty) == 0
-        assert np.min(gridmap_empty) == 0
-
-        gridmap_half = generate_data.generate_random_gridmap(w, h, 0.5)
-
-        assert gridmap_half.shape[0] == w
-        assert gridmap_half.shape[1] == h
-        assert np.max(gridmap_half) == 1
-        assert np.min(gridmap_half) == 0
 
     def test_get_random_free_pos(self):
         env = np.array([[0, 1], [1, 1]])
@@ -30,8 +14,8 @@ class GenerateDataTest(unittest.TestCase):
 
         env2 = np.array([[0, 0], [1, 1]])
         a_free_pose2 = generate_data.get_random_free_pos(env2)
-        self.assertEqual(a_free_pose[0], 0)
-        self.assertIn(a_free_pose[1], [0, 1])
+        self.assertEqual(a_free_pose2[0], 0)
+        self.assertIn(a_free_pose2[1], [0, 1])
 
     def test_calling_benchmark_ecbs(self):
         from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (

@@ -12,6 +12,23 @@ class TestGenerators(unittest.TestCase):
                           "brc202d": [530, 481],
                           "warehouse-10-20-10-2-1": [161, 63]}
 
+    def test_generate_random_gridmap(self):
+        w = 999
+        h = 100
+        gridmap_empty = scenarios.generators.generate_random_gridmap(w, h, 0)
+
+        assert gridmap_empty.shape[0] == w
+        assert gridmap_empty.shape[1] == h
+        assert np.max(gridmap_empty) == 0
+        assert np.min(gridmap_empty) == 0
+
+        gridmap_half = scenarios.generators.generate_random_gridmap(w, h, 0.5)
+
+        assert gridmap_half.shape[0] == w
+        assert gridmap_half.shape[1] == h
+        assert np.max(gridmap_half) == 1
+        assert np.min(gridmap_half) == 0
+
     def test_generate_like_sim_decentralized_determinism(self):
         (base_env, base_starts, base_goals
          ) = scenarios.generators.like_sim_decentralized(
