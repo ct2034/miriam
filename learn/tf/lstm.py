@@ -1,8 +1,10 @@
 """ Recurrent Neural Network.
-A Recurrent Neural Network (LSTM) implementation example using TensorFlow library.
-This example is using the MNIST database of handwritten digits (http://yann.lecun.com/exdb/mnist/)
+A Recurrent Neural Network (LSTM) implementation example using TensorFlow
+library. This example is using the MNIST database of handwritten digits
+(http://yann.lecun.com/exdb/mnist/)
 Links:
-    [Long Short Term Memory](http://deeplearning.cs.cmu.edu/pdfs/Hochreiter97_lstm.pdf)
+    [Long Short Term Memory](
+        http://deeplearning.cs.cmu.edu/pdfs/Hochreiter97_lstm.pdf)
     [MNIST Dataset](http://yann.lecun.com/exdb/mnist/).
 Author: Aymeric Damien
 Project: https://github.com/aymericdamien/TensorFlow-Examples/
@@ -22,19 +24,21 @@ batch_size = 128
 display_step = 10
 
 # Network Parameters
-num_inputs = 1 # one y value per timestep
-timesteps = 1000 # timesteps
-num_hidden = 128 # hidden layer num of features
-num_outputs = 1 # function value
+num_inputs = 1  # one y value per timestep
+timesteps = 1000  # timesteps
+num_hidden = 128  # hidden layer num of features
+num_outputs = 1  # function value
 
 t = np.linspace(0., 2*np.pi, timesteps-1)[:-1]
 s = np.sin(t) + np.sin(2*t - 3/2) + np.sin(3*t - 4)
+
 
 def get_sample():
     d = random.randint(0, timesteps-1)
     x = s[d:] + s[:d]
     y = s[d]
     return tf.constant(x), tf.constant(y)
+
 
 def get_batch(n):
     xs = []
@@ -43,7 +47,8 @@ def get_batch(n):
         x, y = get_sample()
         xs.append(x)
         ys.append(y)
-    return tf.constant(xs), tf.constant(ys) 
+    return tf.constant(xs), tf.constant(ys)
+
 
 # tf Graph input
 X = tf.placeholder("float", [None, timesteps, num_inputs])
@@ -63,7 +68,8 @@ def RNN(x, weights, biases):
     # Current data input shape: (batch_size, timesteps, n_input)
     # Required shape: 'timesteps' tensors list of shape (batch_size, n_input)
 
-    # Unstack to get a list of 'timesteps' tensors of shape (batch_size, n_input)
+    # Unstack to get a list of 'timesteps' tensors of shape
+    # (batch_size, n_input)
     x = tf.unstack(x, timesteps, 1)
 
     # Define a lstm cell with tensorflow
@@ -74,6 +80,7 @@ def RNN(x, weights, biases):
 
     # Linear activation, using rnn inner loop last output
     return tf.matmul(outputs[-1], weights['out']) + biases['out']
+
 
 prediction = RNN(X, weights, biases)
 
@@ -104,15 +111,16 @@ with tf.Session() as sess:
             # Calculate batch loss and accuracy
             loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
                                                                  Y: batch_y})
-            print("Step " + str(step) + ", Minibatch Loss= " + \
-                  "{:.4f}".format(loss) + ", Training Accuracy= " + \
+            print("Step " + str(step) + ", Minibatch Loss= " +
+                  "{:.4f}".format(loss) + ", Training Accuracy= " +
                   "{:.3f}".format(acc))
 
     print("Optimization Finished!")
 
     # Calculate accuracy for 128 mnist test images
     test_len = 128
-    test_data = mnist.test.images[:test_len].reshape((-1, timesteps, num_inputs))
+    test_data = mnist.test.images[:test_len].reshape(
+        (-1, timesteps, num_inputs))
     test_label = mnist.test.labels[:test_len]
-    print("Testing Accuracy:", \
-        sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))
+    print("Testing Accuracy:",
+          sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))

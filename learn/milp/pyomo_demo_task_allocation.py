@@ -77,23 +77,26 @@ def optimize(agents, tasks):
                 obj_agent += m.assignments[ia, 0, it] * dist_at[ia][it]
                 obj_agent += m.assignments[ia, 0, it] * dist_t[it]
             for ic in range(1, len(tasks)):  # for all consecutive assignments
-                obj_agent += m.assignments[ia, ic, it] * obj_agent  # how did we get here?
+                # how did we get here?
+                obj_agent += m.assignments[ia, ic, it] * obj_agent
                 for it in m.tasks:
                     for it_prev in m.tasks:  # for all possible previous tasks
                         # from previous task end to this start
                         obj_agent += m.assignments[ia, ic, it] * \
-                                     m.assignments[ia, ic - 1, it_prev] * \
-                                     dist_tt[it_prev][it]
+                            m.assignments[ia, ic - 1, it_prev] * \
+                            dist_tt[it_prev][it]
                     obj_agent += m.assignments[ia, ic, it] * dist_t[it]
         for it in m.tasks:
-            obj += tasks[it][2]  # all tasks arrival time, TODO: whats the difference then?
+            # all tasks arrival time, TODO: whats the difference then?
+            obj += tasks[it][2]
         return obj
     m.duration = Objective(rule=total_duration)
 
     # Constraints
     # every task has exactly one agent
     def one_agent_per_task(m, i_t):
-        return sum(m.assignments[a, c, i_t] for a in m.agents for c in m.tasks) == 1
+        return sum(m.assignments[a, c, i_t]
+                   for a in m.agents for c in m.tasks) == 1
     m.one_agent = Constraint(m.tasks, rule=one_agent_per_task)
 
     # one agent can only have one task per time
@@ -102,7 +105,8 @@ def optimize(agents, tasks):
 
     m.one_task = Constraint(m.agents, m.tasks, rule=one_task_per_time)
 
-    # consecutive assignments can only happen after a previous one (consecutive)
+    # consecutive assignments can only happen after a previous one
+    # (consecutive)
     def consecutive(m, a, c):
         now = sum([m.assignments[a, c, t] for t in m.tasks])
         prev = sum([m.assignments[a, c - 1, t] for t in m.tasks])

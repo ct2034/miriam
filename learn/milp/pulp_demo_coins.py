@@ -1,7 +1,8 @@
 from pulp import *
 import random
 
-# Example for IP to find smallest number of coins necessary to represent an amount of money in e.g. EUR coin sizes
+# Example for IP to find smallest number of coins necessary to represent an
+# amount of money in e.g. EUR coin sizes
 # Author: Christian Henkel
 
 prob = LpProblem("testCoins", LpMinimize)

@@ -1,38 +1,54 @@
 #!/usr/bin/env python3
-# LatticeBoltzmannDemo.py:  a two-dimensional lattice-Boltzmann "wind tunnel" simulation
+# LatticeBoltzmannDemo.py:  a two-dimensional lattice-Boltzmann "wind tunnel"
+# simulation
 # Uses numpy to speed up all array handling.
 # Uses matplotlib to plot and animate the curl of the macroscopic velocity
 # field.
 
 # Copyright 2013, Daniel V. Schroeder (Weber State University) 2013
 
-# Permission is hereby granted, free of charge, to any person obtaining a copy of
-# this software and associated data and documentation (the "Software"), to deal in
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of
+# this software and associated data and documentation (the "Software"), to
+# deal in
 # the Software without restriction, including without limitation the rights to
-# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-# of the Software, and to permit persons to whom the Software is furnished to do
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies
+# of the Software, and to permit persons to whom the Software is furnished to
+# do
 # so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in all
+# The above copyright notice and this permission notice shall be included in
+# all
 # copies or substantial portions of the Software.
 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED,
 # INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-# ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE
+# LIABLE FOR
+# ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-# Except as contained in this notice, the name of the author shall not be used in
+# Except as contained in this notice, the name of the author shall not be used
+# in
 # advertising or otherwise to promote the sale, use or other dealings in this
 # Software without prior written authorization.
 
 # Credits:
 # The "wind tunnel" entry/exit conditions are inspired by Graham Pullan's code
-# (http://www.many-core.group.cam.ac.uk/projects/LBdemo.shtml).  Additional inspiration from
-# Thomas Pohl's applet (http://thomas-pohl.info/work/lba.html).  Other portions of code are based
-# on Wagner (http://www.ndsu.edu/physics/people/faculty/wagner/lattice_boltzmann_codes/) and
-# Gonsalves (http://www.physics.buffalo.edu/phy411-506-2004/index.html; code adapted from Succi,
+# (http://www.many-core.group.cam.ac.uk/projects/LBdemo.shtml).  Additional
+# inspiration from
+# Thomas Pohl's applet (http://thomas-pohl.info/work/lba.html).  Other
+# portions of code are based
+# on Wagner
+# (http://www.ndsu.edu/physics/people/faculty/wagner/lattice_boltzmann_codes/)
+# and Gonsalves
+# (http://www.physics.buffalo.edu/phy411-506-2004/index.html; code adapted
+# from Succi,
 # http://global.oup.com/academic/product/the-lattice-boltzmann-equation-9780199679249).
 
 # For related materials see http://physics.weber.edu/schroeder/fluids
@@ -161,13 +177,17 @@ def collide():
 
 
 def curl(ux, uy):
-    return numpy.roll(uy, -1, axis=1) - numpy.roll(uy, 1, axis=1) - numpy.roll(ux, -1, axis=0) + numpy.roll(ux, 1, axis=0)
+    return (numpy.roll(uy, -1, axis=1) - numpy.roll(uy, 1, axis=1) -
+            numpy.roll(ux, -1, axis=0) + numpy.roll(ux, 1, axis=0))
 
 
 # Here comes the graphics and animation...
 theFig = matplotlib.pyplot.figure(figsize=(8, 3))
-fluidImage = matplotlib.pyplot.imshow(curl(ux, uy), origin='lower', norm=matplotlib.pyplot.Normalize(-.1, .1),
-                                      cmap=matplotlib.pyplot.get_cmap('jet'), interpolation='none')
+fluidImage = matplotlib.pyplot.imshow(curl(ux, uy), origin='lower',
+                                      norm=matplotlib.pyplot.Normalize(
+                                          -.1, .1),
+                                      cmap=matplotlib.pyplot.get_cmap('jet'),
+                                      interpolation='none')
 # See http://www.loria.fr/~rougier/teaching/matplotlib/#colormaps for
 # other cmap options
 bImageArray = numpy.zeros((height, width, 4), numpy.uint8)  # an RGBA image
@@ -187,9 +207,9 @@ def nextFrame(arg):							# (arg is the frame number, which we don't need)
         endTime = time.clock()
         print("%1.1f" % (100 / (endTime - startTime)), 'frames per second')
         startTime = endTime
-    #frameName = "frame%04d.png" % arg
+    # frameName = "frame%04d.png" % arg
     # matplotlib.pyplot.savefig(frameName)
-    #frameList.write(frameName + '\n')
+    # frameList.write(frameName + '\n')
     for step in range(20):					# adjust number of steps for smooth animation
         stream()
         collide()

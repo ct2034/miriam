@@ -70,7 +70,6 @@ def plan_to_map(x_plan):
     return tuple((np.array(x_plan) - delta) / scale)
 
 
-
 if __name__ == "__main__":
     cherrypy.config.update({'server.socket_port': 5432})
     cherrypy.quickstart(Interface())

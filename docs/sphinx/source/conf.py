@@ -163,6 +163,3 @@ texinfo_documents = [
      author, 'miriam', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

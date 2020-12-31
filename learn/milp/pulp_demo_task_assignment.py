@@ -35,7 +35,8 @@ def optimize(agents, tasks):
         for ic in range(len(tasks)):  # over possibly consecutive tasks
             consec_temp = []
             for it in range(len(tasks)):  # for all possible tasks
-                consec_temp.append(LpVariable("assignment_a%d_c%d_t%d" % (ia, ic, it),
+                consec_temp.append(LpVariable("assignment_a%d_c%d_t%d" %
+                                              (ia, ic, it),
                                               lowBound=0,
                                               cat=LpBinary))
             agent_temp.append(consec_temp)

@@ -30,8 +30,8 @@ def make_sample(size, fill_scale, seed):
     env = sim.decentralized.runner.initialize_environment(size, fill)
     free = np.array(np.where(env == FREE))
     env_nx = gridmap_to_nx(env)
-    l = len(free[0])
-    smpls = np.random.randint(0, l, (2))
+    le = len(free[0])
+    smpls = np.random.randint(0, le, (2))
     start = np.transpose(free[:, smpls[0]])
     goal = np.transpose(free[:, smpls[1]])
     Y = int(nx.has_path(
@@ -71,13 +71,15 @@ def train(x, y):
     reg = regularizers.l2(0.001)
     ls = [
         layers.Conv2D(
-            8, 5, input_shape=x[0].shape, kernel_initializer=init, activity_regularizer=reg),
+            8, 5, input_shape=x[0].shape, kernel_initializer=init,
+            activity_regularizer=reg),
         layers.Dropout(.3),
         layers.Conv2D(
             8, 3, kernel_initializer=init, activity_regularizer=reg),
         layers.Flatten(),
         layers.Dropout(.3),
-        layers.Dense(layer_width, kernel_initializer=init, activity_regularizer=reg,
+        layers.Dense(layer_width, kernel_initializer=init,
+                     activity_regularizer=reg,
                      activation='relu'),
         layers.Dense(1, kernel_initializer=init,
                      activity_regularizer=reg, activation='sigmoid'),
@@ -147,7 +149,7 @@ def run_an_example_and_plot_info():
             path = np.array(p)
             plt.plot(path[:, 0], path[:, 1], col)
         elif Y == 1 and start_goal.shape[1] == 1:
-            plt.plot(start_goal[0], start_goal[1], col+'x')            
+            plt.plot(start_goal[0], start_goal[1], col+'x')
         else:
             plt.plot(start_goal[0], start_goal[1], col+'x')
         plt.title('True label: {} | Predicted: {}'.format(Y, pred))

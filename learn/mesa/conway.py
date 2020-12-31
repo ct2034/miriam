@@ -32,7 +32,7 @@ class ConveyModel(Model):
             # Add the agent to a random grid cell
             x = random.randrange(self.grid.width)
             y = random.randrange(self.grid.height)
-            while(len(self.grid.get_cell_list_contents((x,y)))):
+            while(len(self.grid.get_cell_list_contents((x, y)))):
                 x = random.randrange(self.grid.width)
                 y = random.randrange(self.grid.height)
             self.grid.place_agent(a, (x, y))
@@ -46,7 +46,7 @@ class ConveyModel(Model):
         self.datacollector.collect(self)
         new_agents = []
         for (x, y) in product(range(self.grid.width), range(self.grid.height)):
-            ns = self.grid.iter_neighbors((x,y), True)
+            ns = self.grid.iter_neighbors((x, y), True)
             neighbors = 0
             for n in ns:
                 if(n):

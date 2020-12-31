@@ -12,6 +12,7 @@ import numpy as np
 import png
 import io
 
+
 def pubGoal(x, y, th):
     ps = PoseStamped()
     ps.header.seq = 1
@@ -40,10 +41,11 @@ def callbackGoal(data):
         str(data.theta) +
         ")"
     )
-    #clear_costmaps()
+    # clear_costmaps()
     pubGoal(data.x, data.y, data.theta)
-    #clear_costmaps()
+    # clear_costmaps()
     pubGoal(data.x, data.y, data.theta)
+
 
 def callbackMap(data):
     rospy.loginfo("RELAY recieved map")
@@ -103,10 +105,11 @@ if __name__ == '__main__':
 
             rospy.logdebug("RELAY pose " + str(p))
 
-            pubCurrentPose.publish(p)            
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            pubCurrentPose.publish(p)
+        except (tf.LookupException, tf.ConnectivityException,
+                tf.ExtrapolationException):
             rospy.logdebug("tf error")
             rate.sleep()
-            continue       
+            continue
 
         rate.sleep()

@@ -1,14 +1,17 @@
 """ Recurrent Neural Network.
-A Recurrent Neural Network (LSTM) implementation example using TensorFlow library.
-This example is using the MNIST database of handwritten digits (http://yann.lecun.com/exdb/mnist/)
+A Recurrent Neural Network (LSTM) implementation example using TensorFlow
+library. This example is using the MNIST database of handwritten digits
+(http://yann.lecun.com/exdb/mnist/)
 Links:
-    [Long Short Term Memory](http://deeplearning.cs.cmu.edu/pdfs/Hochreiter97_lstm.pdf)
+    [Long Short Term Memory](
+        http://deeplearning.cs.cmu.edu/pdfs/Hochreiter97_lstm.pdf)
     [MNIST Dataset](http://yann.lecun.com/exdb/mnist/).
 Author: Aymeric Damien
 Project: https://github.com/aymericdamien/TensorFlow-Examples/
 """
 
 from __future__ import print_function
+from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 from tensorflow.contrib import rnn
 import numpy as np
@@ -19,7 +22,6 @@ from datetime import datetime
 logdir = "learn/tf/logs/"+datetime.now().strftime("%Y%m%d-%H%M%S")
 
 # Import MNIST data
-from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
 
 '''
@@ -35,10 +37,10 @@ batch_size = 128
 display_step = 100
 
 # Network Parameters
-num_input = 28 # MNIST data input (img shape: 28*28)
+num_input = 28  # MNIST data input (img shape: 28*28)
 # timesteps = 28 # timesteps
-num_hidden = 64 # hidden layer num of features
-num_classes = 1 # one class for 0 .. 9
+num_hidden = 64  # hidden layer num of features
+num_classes = 1  # one class for 0 .. 9
 
 # tf Graph input
 X = tf.placeholder("float", [None, None, num_input], name="X")
@@ -46,7 +48,8 @@ Y = tf.placeholder("float", [None, num_classes], name="Y")
 
 # Define weights
 weights = {
-    'out': tf.Variable(tf.random_normal([num_hidden, num_classes]), name="weights")
+    'out': tf.Variable(tf.random_normal([num_hidden, num_classes]),
+                       name="weights")
 }
 biases = {
     'out': tf.Variable(tf.random_normal([num_classes]), name="biases")
@@ -59,7 +62,8 @@ def LSTM(x, weights, biases):
     # Current data input shape: (batch_size, timesteps, n_input)
     # Required shape: 'timesteps' tensors list of shape (batch_size, n_input)
 
-    # Unstack to get a list of 'timesteps' tensors of shape (batch_size, n_input)
+    # Unstack to get a list of 'timesteps' tensors of shape
+    # (batch_size, n_input)
     timesteps = 28
     x = tf.unstack(x, timesteps, 1)
     x = x[:-2]  # training with one row less
@@ -113,8 +117,8 @@ with tf.Session() as sess:
             # Calculate batch loss and accuracy
             loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
                                                                  Y: batch_y})
-            print("Step " + str(step) + ", Minibatch Loss= " + \
-                  "{:.4f}".format(loss) + ", Training Accuracy= " + \
+            print("Step " + str(step) + ", Minibatch Loss= " +
+                  "{:.4f}".format(loss) + ", Training Accuracy= " +
                   "{:.3f}".format(acc))
 
     print("Optimization Finished!")
@@ -122,15 +126,17 @@ with tf.Session() as sess:
 
     # Calculate accuracy for 128 mnist test images
     test_len = 128
-    test_data = mnist.test.images[:test_len].reshape((-1, timesteps, num_input))
+    test_data = mnist.test.images[:test_len].reshape(
+        (-1, timesteps, num_input))
     test_label = mnist.test.labels[:test_len]
     test_label = argmax_label(test_label)
-    print("Testing Accuracy:", \
-        sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))
+    print("Testing Accuracy:",
+          sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))
 
     # trying
-    for dat in mnist.test.images[:2]:       
-        pred = sess.run(prediction, feed_dict={X: dat.reshape((-1, timesteps, num_input))})[0][0]    
+    for dat in mnist.test.images[:2]:
+        pred = sess.run(prediction, feed_dict={
+                        X: dat.reshape((-1, timesteps, num_input))})[0][0]
         plt.imshow(dat.reshape([28, 28]))
         plt.title("pred: " + str(pred))
         plt.show()

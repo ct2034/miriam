@@ -25,15 +25,15 @@ def dist(a, b):  # Manhattan Distance
 def is_obstacle(amap, x):
     try:
         color = amap[int(x[1]), int(x[0]), :]
-    except:
+    except Exception as e:
         return True
     return not (color == [1, 1, 1, 1]).all()
 
 
 def check_path(amap, a, b):
     d = np.array(a) - np.array(b)
-    l = dist(a, b)
-    for p in [np.array(b) + i / l * d for i in np.arange(l)]:
+    le = dist(a, b)
+    for p in [np.array(b) + i / le * d for i in np.arange(le)]:
         if is_obstacle(amap, p):
             return False
     return True
@@ -53,7 +53,7 @@ def make_graph(amap, ltop, rbot):
             if check_path(amap, imga, imgb):
                 graph[point].append(goal)
     return graph
-    
+
 
 if __name__ == '__main__':
     amap = plt.imread('multi_robot_nav/map/world.png')

@@ -44,4 +44,5 @@ def main():
     "n=%d m=%d" % (G.number_of_nodes(), G.number_of_edges())
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

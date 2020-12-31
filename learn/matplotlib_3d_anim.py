@@ -38,6 +38,7 @@ def update_lines(num, dataLines, lines):
         line.set_3d_properties(data[2, :num])
     return lines
 
+
 # Attaching 3D axis to the figure
 fig = plt.figure()
 ax = p3.Axes3D(fig)
@@ -68,9 +69,9 @@ Z = np.random.uniform(0, .2, N)
 ax.scatter(X, Y, Z)
 
 # Cylinder
-x=np.linspace(-.1, .1, 100)
-z=np.linspace(0, .2, 100)
-Xc, Zc=np.meshgrid(x, z)
+x = np.linspace(-.1, .1, 100)
+z = np.linspace(0, .2, 100)
+Xc, Zc = np.meshgrid(x, z)
 Yc = np.sqrt(.01-Xc**2)
 
 # Draw parameters

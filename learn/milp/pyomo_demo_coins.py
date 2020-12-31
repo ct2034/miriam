@@ -1,9 +1,10 @@
 from __future__ import division
 
-from pyomo.core.base import Var
-from pyomo.environ import ConcreteModel, NonNegativeIntegers, Objective, Expression, Constraint
-from pyomo.opt import SolverFactory
 import numpy as np
+from pyomo.core.base import Var
+from pyomo.environ import (ConcreteModel, Constraint, Expression,
+                           NonNegativeIntegers, Objective)
+from pyomo.opt import SolverFactory
 
 model = ConcreteModel()
 

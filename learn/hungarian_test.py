@@ -11,6 +11,7 @@ def munkres_call(x):
     print(res)
     return len(res)  # does not really make sense
 
+
 def test_munkres_benchmark():
     if is_travis():
         vals = [10, 30, 70, 100, 300]
@@ -28,6 +29,7 @@ def test_munkres_benchmark():
             'durations': ts.tolist()
         }
     )
+
 
 if __name__ == "__main__":
     matrix = [[1, 2, 3], [3, 1, 2], [2, 3, 1]]

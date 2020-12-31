@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-compare: 
+compare:
 * https://en.wikipedia.org/wiki/Spectral_clustering
 * https://en.wikipedia.org/wiki/Spectral_graph_theory
 

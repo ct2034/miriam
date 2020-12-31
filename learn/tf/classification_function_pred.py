@@ -23,6 +23,7 @@ from tensorflow.keras.models import Sequential
 #                > 0 : 1
 #                <=0 : 0
 
+
 def make_random_poly():
     return np.polynomial.Polynomial(np.random.random(5)-.5)
 
@@ -64,7 +65,8 @@ def train(n, learn_res, sample_end, t_pred):
 
     # train
     history = model.fit([x], y,
-                        validation_split=0.3, epochs=16, batch_size=256, verbose=0)
+                        validation_split=0.3, epochs=16,
+                        batch_size=256, verbose=0)
     return model, history
 
 
