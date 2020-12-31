@@ -25,7 +25,8 @@ jobs:
         pip install -r requirements.txt
     - name: Build dependencies
       run: |
-        . planner/cobra/make_cobra.sh
+        cd planner/cobra/external
+        . make_cobra.sh
     - name: Lint with pycodestyle
       run: |
         pycodestyle .

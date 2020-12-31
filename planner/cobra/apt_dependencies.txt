@@ -1,4 +1,0 @@
-gcc 
-g++
-make 
-libboost-all-dev
