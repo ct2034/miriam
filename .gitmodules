@@ -3,7 +3,7 @@
 	url = https://github.com/ct2034/python-astar.git
 [submodule "libMultiRobotPlanning"]
 	path = planner/policylearn/libMultiRobotPlanning
-	url = git@github.com:ct2034/libMultiRobotPlanning
+	url = https://github.com/ct2034/libMultiRobotPlanning.git
 [submodule "planner/matteoantoniazzi-mapf/external"]
 	path = planner/matteoantoniazzi_mapf/external
 	url = https://github.com/MatteoAntoniazzi/MAPF.git
