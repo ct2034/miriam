@@ -241,7 +241,7 @@ class TestDecentralizedSim(unittest.TestCase):
     def test_run_main(self):
         runner.run_main(8, 1, 32, False, False)
         runner.run_main(8, 2, 32, False, False)
-        runner.run_main(8, 4, 32, False, False)
+        # runner.run_main(8, 4, 32, False, False)
         # runner.run_main(8, 8, 32, False, False)
 
 
