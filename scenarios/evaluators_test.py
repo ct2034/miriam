@@ -222,7 +222,8 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_ecbs(
-                self.env, starts_timeout, goals_timeout, timeout=3, ignore_cache=True)
+                self.env, starts_timeout, goals_timeout,
+                timeout=3, ignore_cache=True)
         )
 
     def test_blocks_ecbs(self):
