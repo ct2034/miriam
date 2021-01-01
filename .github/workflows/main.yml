@@ -29,6 +29,13 @@ jobs:
     #   run: |
     #     cd planner/cobra/external
     #     ./make_cobra.sh
+    - name: Build ecbs
+      run: |
+        sudo apt install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
+        mkdir planner/policylearn/libMultiRobotPlanning/build
+        cd planner/policylearn/libMultiRobotPlanning/build
+        cmake ..
+        make ecbs
     - name: Lint with pycodestyle
       run: |
         pycodestyle .
