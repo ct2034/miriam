@@ -20,6 +20,7 @@ pyomo==5.2
 pypng
 pytest
 pytest-cov
+pytest-timeout
 scipy
 timeout-decorator
 unittest2
