@@ -272,7 +272,7 @@ def hasher(args, kwargs):
     hashstr = ""
     for i, arg in enumerate(args + tuple(kwargs.values())):
         if isinstance(arg, np.ndarray):
-            hashstr += str(arg)
+            hashstr += str(hash(arg.data.hex()))
         else:
             hashstr += str(arg)
     my_hash = sha256(hashstr.encode('utf-8')).hexdigest()
