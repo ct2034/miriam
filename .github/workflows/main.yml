@@ -24,7 +24,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r planner/policylearn/libMultiRobotPlanning/requirements.txt
-    # - name: Build dependencies
+        pip install -r sim/decentralized/requirements.txt
+    # - name: Build cobra
     #   run: |
     #     cd planner/cobra/external
     #     ./make_cobra.sh
