@@ -39,10 +39,10 @@ def is_well_formed(env, starts, goals):
 
 
 @cachier(hash_params=tools.hasher)
-def plan_ecbs(env, starts, goals):
+def plan_ecbs(env, starts, goals, timeout=10):
     """Plan scenario using ecbs returning results data"""
     try:
-        data = plan_in_gridmap(env, list(starts), list(goals), 10)
+        data = plan_in_gridmap(env, list(starts), list(goals), timeout)
     except KeyError:  # happens when start or goal is not in map
         return INVALID
     if data is None:
@@ -54,10 +54,10 @@ def plan_ecbs(env, starts, goals):
 
 
 @cachier(hash_params=tools.hasher)
-def cost_ecbs(env, starts, goals):
+def cost_ecbs(env, starts, goals, timeout=10):
     """get the average agent cost of this from ecbs
     returns: `float` and `-1` if planning was unsuccessful."""
-    data = plan_ecbs(env, starts, goals)
+    data = plan_ecbs(env, starts, goals, timeout=timeout)
     if data == INVALID:
         return data
     n_agents = starts.shape[0]

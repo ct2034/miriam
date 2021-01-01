@@ -2,6 +2,7 @@ import random
 import unittest
 
 import numpy as np
+import pytest
 
 import scenarios.evaluators
 
@@ -46,7 +47,7 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_invalid, goals_invalid, ignore_cache=True)
         )
 
-    def test_is_well_fromed(self):
+    def test_is_well_formed(self):
         # well formed
         starts_wf = np.array([
             [0, 0],
@@ -87,7 +88,7 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_invalid, goals_invalid, ignore_cache=True)
         )
 
-    def test_plan_ecbs(self):
+    def test_plan_ecbs_success(self):
         # agents that collide in the middle
         starts_success = np.array([
             [0, 0],
@@ -100,6 +101,8 @@ class TestEvaluators(unittest.TestCase):
         res = scenarios.evaluators.plan_ecbs(
             self.env, starts_success, goals_success, ignore_cache=True)
         self.assertTrue(len(res.keys()) != 0)
+
+    def test_plan_ecbs_invalid(self):
         # one agents path is not possible
         starts_invalid = np.array([
             [0, 0],
@@ -128,14 +131,14 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.plan_ecbs(
                 self.env, starts_invalid, goals_invalid, ignore_cache=True)
         )
+
+    def test_plan_ecbs_deadlocks(self):
         # trying to make deadlocks ...
         starts_deadlocks = np.array([
             [0, 0],
             [0, 1],
             [0, 2],
             [1, 1],
-            [2, 0],
-            [2, 1],
             [2, 2]
         ])
         goals_deadlocks = np.array([
@@ -143,8 +146,6 @@ class TestEvaluators(unittest.TestCase):
             [2, 1],
             [2, 2],
             [0, 0],
-            [0, 1],
-            [0, 2],
             [1, 1]
         ])
         self.assertEqual(
@@ -153,7 +154,7 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_deadlocks, goals_deadlocks, ignore_cache=True)
         )
 
-    def test_cost_ecbs(self):
+    def test_cost_ecbs_success(self):
         # agents that collide in the middle
         starts_4_5 = np.array([
             [0, 0],
@@ -180,6 +181,8 @@ class TestEvaluators(unittest.TestCase):
             2, scenarios.evaluators.cost_ecbs(
                 self.env, starts_2, goals_2, ignore_cache=True)
         )
+
+    def test_cost_ecbs_invalid(self):
         # one agents path is not possible
         starts_invalid = np.array([
             [0, 0],
@@ -194,6 +197,9 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.cost_ecbs(
                 self.env, starts_invalid, goals_invalid, ignore_cache=True)
         )
+
+    @pytest.mark.timeout(20)  # internal timeout is 10
+    def test_cost_ecbs_timeout(self):
         # trying to make is time out ...
         starts_timeout = np.array([
             [0, 0],
@@ -216,7 +222,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_ecbs(
-                self.env, starts_timeout, goals_timeout, ignore_cache=True)
+                self.env, starts_timeout, goals_timeout, timeout=3, ignore_cache=True)
         )
 
     def test_blocks_ecbs(self):
@@ -248,6 +254,7 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_edge, goals_edge, ignore_cache=True)
         )
 
+    def test_blocks_ecbs_invalid(self):
         # unsolvable
         starts_unsolv = np.array([
             [1, 0]  # obstacle
@@ -260,7 +267,7 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
         )
 
-    def test_cost_independant(self):
+    def test_cost_independent(self):
         # agents that would collide in the middle
         starts_4 = np.array([
             [0, 0],
@@ -287,6 +294,8 @@ class TestEvaluators(unittest.TestCase):
             2, scenarios.evaluators.cost_independant(
                 self.env, starts_2, goals_2, ignore_cache=True)
         )
+
+    def test_cost_independent_invalid(self):
         # one agents path is not possible
         starts_invalid = np.array([
             [0, 0],
@@ -352,16 +361,12 @@ class TestEvaluators(unittest.TestCase):
             [0, 0],
             [0, 1],
             [0, 2],
-            [2, 0],
-            [2, 1],
             [2, 2]
         ])
         goals_deadlocks = np.array([
             [2, 0],
             [2, 1],
             [2, 2],
-            [0, 0],
-            [0, 1],
             [0, 2]
         ])
         self.assertEqual(
