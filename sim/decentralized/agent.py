@@ -176,6 +176,7 @@ class Agent():
             return self.pos  # stay at final pose
         else:
             assert self.path is not None, "Should have a path by now"
+            assert self.path_i is not None, "Should have a path index by now"
             return self.path[self.path_i + 1]
 
     def make_next_step(self, next_pos_to_check: np.ndarray):
