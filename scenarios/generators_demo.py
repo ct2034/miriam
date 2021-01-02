@@ -12,6 +12,12 @@ def demo_movingai():
     plot(env, starts, goals)
 
 
+def demo_tracing_pathes_in_the_dark():
+    n_agents = 3
+    env, starts, goals = tracing_pathes_in_the_dark(50, .5, n_agents, 0)
+    plot(env, starts, goals)
+
+
 def plot(env, starts, goals):
     plt.imshow(np.swapaxes(env, 0, 1), cmap='Greys', origin='lower')
     n_agents = len(starts)
@@ -25,14 +31,7 @@ def plot(env, starts, goals):
             length_includes_head=True,
             linewidth=0
         )
-
     plt.show()
-
-
-def demo_tracing_pathes_in_the_dark():
-    n_agents = 3
-    env, starts, goals = tracing_pathes_in_the_dark(50, .5, n_agents, 0)
-    plot(env, starts, goals)
 
 
 if __name__ == "__main__":
