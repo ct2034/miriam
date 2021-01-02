@@ -36,9 +36,11 @@ class Agent():
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
         self.env: np.ndarray = env
-        self.pos: np.ndarray = np.array(pos)
+        self.pos: np.ndarray = pos
         self.policy: Policy = policy
         self.id: int = random.randint(0, int(2E14))
+        self.blocked_edges = set()
+        self.filter_blocked_edges = set()
 
     def __hash__(self):
         return self.id

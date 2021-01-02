@@ -95,9 +95,9 @@ class TestDecentralizedSim(unittest.TestCase):
     def test_check_for_colissions_and_get_possible_next_agent_poses(self):
         env = np.array([[0, 0], [0, 1]])
         agents = (
-            Agent(env, [0, 0], Policy.RANDOM),
-            Agent(env, [0, 1], Policy.RANDOM),
-            Agent(env, [1, 0], Policy.RANDOM)
+            Agent(env, np.array([0, 0]), Policy.RANDOM),
+            Agent(env, np.array([0, 1]), Policy.RANDOM),
+            Agent(env, np.array([1, 0]), Policy.RANDOM)
         )
         agents[0].give_a_goal(np.array([0, 1]))
         agents[1].give_a_goal(np.array([0, 0]))
@@ -107,6 +107,7 @@ class TestDecentralizedSim(unittest.TestCase):
         possible_next_agent_poses = runner.get_possible_next_agent_poses(
             agents, [True] * 3
         )
+        self.assertEqual(possible_next_agent_poses.shape, (3, 2))
         self.assertTrue(all(possible_next_agent_poses[0] == np.array([0, 1])))
         self.assertTrue(all(possible_next_agent_poses[1] == np.array([0, 0])))
         self.assertTrue(all(possible_next_agent_poses[2] == np.array([0, 0])))
@@ -246,4 +247,5 @@ class TestDecentralizedSim(unittest.TestCase):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    pytest.main(["sim/decentralized/runner_test.py"])
+    pytest.main()
+    # pytest.main(["sim/decentralized/runner_test.py"])
