@@ -163,8 +163,8 @@ class TestDecentralizedSim(unittest.TestCase):
     def test_iterate_sim_with_node_coll(self):
         env = np.array([[0, 0], [0, 1]])
         agents = (
-            Agent(env, [0, 1], Policy.RANDOM),
-            Agent(env, [1, 0], Policy.RANDOM)
+            Agent(env, np.array([0, 1]), Policy.RANDOM),
+            Agent(env, np.array([1, 0]), Policy.RANDOM)
         )
         agents[0].give_a_goal(np.array([0, 0]))
         agents[1].give_a_goal(np.array([0, 0]))
@@ -183,10 +183,12 @@ class TestDecentralizedSim(unittest.TestCase):
         self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
         self.assertTrue(runner.are_all_agents_at_their_goals(agents))
 
+    def test_iterate_sim_with_node_coll_reverse(self):
         # new agents for reverse prios
+        env = np.array([[0, 0], [0, 1]])
         agents = (
-            Agent(env, [0, 1], Policy.RANDOM),
-            Agent(env, [1, 0], Policy.RANDOM)
+            Agent(env, np.array([0, 1]), Policy.RANDOM),
+            Agent(env, np.array([1, 0]), Policy.RANDOM)
         )
         agents[0].give_a_goal(np.array([0, 0]))
         agents[1].give_a_goal(np.array([0, 0]))
