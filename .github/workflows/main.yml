@@ -39,7 +39,7 @@ jobs:
     - name: Lint with pycodestyle
       run: |
         pycodestyle .
-    - name: Typing with mypy
+    - name: Type checking with mypy
       run: |
         mypy scenarios sim/decentralized/
     - name: Test with pytest
