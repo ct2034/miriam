@@ -41,7 +41,7 @@ jobs:
         pycodestyle .
     - name: Typing with mypy
       run: |
-        mypy scenarios
+        mypy scenarios sim/decentralized/
     - name: Test with pytest
       run: |
         pytest

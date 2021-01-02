@@ -67,8 +67,8 @@ class TestDecentralizedSim(unittest.TestCase):
 
         # both agents going down left and right
         agents = (
-            Agent(env, [0, 1]),
-            Agent(env, [0, 3])
+            Agent(env, np.array([0, 1])),
+            Agent(env, np.array([0, 3]))
         )
         agents[0].give_a_goal(np.array([2, 1]))
         agents[1].give_a_goal(np.array([2, 3]))
@@ -76,8 +76,8 @@ class TestDecentralizedSim(unittest.TestCase):
 
         # one goal in the middle
         agents = (
-            Agent(env, [2, 1]),
-            Agent(env, [0, 0])
+            Agent(env, np.array([2, 1])),
+            Agent(env, np.array([0, 0]))
         )
         agents[0].give_a_goal(np.array([0, 2]))  # top middle
         agents[1].give_a_goal(np.array([0, 3]))
@@ -85,8 +85,8 @@ class TestDecentralizedSim(unittest.TestCase):
 
         # one start in the middle
         agents = (
-            Agent(env, [0, 2]),  # top middle
-            Agent(env, [0, 0])
+            Agent(env, np.array([0, 2])),  # top middle
+            Agent(env, np.array([0, 0]))
         )
         agents[0].give_a_goal(np.array([2, 3]))
         agents[1].give_a_goal(np.array([0, 3]))
@@ -137,8 +137,8 @@ class TestDecentralizedSim(unittest.TestCase):
     def test_iterate_sim_and_are_all_agents_at_their_goals(self):
         env = np.array([[0, 0], [0, 0]])
         agents = (
-            Agent(env, [0, 0], Policy.RANDOM),
-            Agent(env, [1, 1], Policy.RANDOM)
+            Agent(env, np.array([0, 0]), Policy.RANDOM),
+            Agent(env, np.array([1, 1]), Policy.RANDOM)
         )
         agents[0].give_a_goal(np.array([0, 1]))
         agents[1].give_a_goal(np.array([1, 0]))
@@ -211,11 +211,11 @@ class TestDecentralizedSim(unittest.TestCase):
     def test_iterate_sim_with_node_coll_deadlock(self):
         env = np.array([[0, 0, 1], [0, 0, 1], [0, 1, 1]])
         agents = (
-            Agent(env, [0, 0], Policy.RANDOM),
-            Agent(env, [0, 1], Policy.RANDOM),
-            Agent(env, [1, 1], Policy.RANDOM),
-            Agent(env, [1, 0], Policy.RANDOM),
-            Agent(env, [2, 0], Policy.RANDOM)
+            Agent(env, np.array([0, 0]), Policy.RANDOM),
+            Agent(env, np.array([0, 1]), Policy.RANDOM),
+            Agent(env, np.array([1, 1]), Policy.RANDOM),
+            Agent(env, np.array([1, 0]), Policy.RANDOM),
+            Agent(env, np.array([2, 0]), Policy.RANDOM)
         )
         agents[0].give_a_goal(np.array([0, 1]))
         agents[1].give_a_goal(np.array([1, 1]))
@@ -231,8 +231,8 @@ class TestDecentralizedSim(unittest.TestCase):
         env = np.array([[0, 0, 0, 0], [1, 1, 1, 1],
                         [1, 1, 1, 1], [1, 1, 1, 1]])
         agents = (
-            Agent(env, [0, 0], Policy.RANDOM),
-            Agent(env, [0, 3], Policy.RANDOM)
+            Agent(env, np.array([0, 0]), Policy.RANDOM),
+            Agent(env, np.array([0, 3]), Policy.RANDOM)
         )
         agents[0].give_a_goal(np.array([0, 3]))
         agents[1].give_a_goal(np.array([0, 0]))

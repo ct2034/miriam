@@ -47,7 +47,7 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_gridmap_to_nx(self):
         env = np.array([[0, 1], [1, 1]])
-        a = Agent(env, (0, 0))
+        a = Agent(env, np.array([0, 0]))
         a.give_a_goal(np.array([0, 0]))
         self.assertEqual(len(a.env_nx), 1)
         self.assertTrue((0, 0) in a.env_nx)

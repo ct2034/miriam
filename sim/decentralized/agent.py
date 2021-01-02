@@ -36,6 +36,7 @@ class Agent():
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
         self.env: np.ndarray = env
+        assert isinstance(pos, np.ndarray), "Position must be numpy array"
         self.pos: np.ndarray = pos
         self.policy: Policy = policy
         self.id: int = random.randint(0, int(2E14))
