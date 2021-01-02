@@ -102,13 +102,10 @@ def tracing_pathes_in_the_dark(size: int, fill: float,
         to_clear_start = int((1. - fill) * size * size)
         to_clear = to_clear_start
         while to_clear > 0:
-            direction = random.randint(0, 1)
+            env = np.rot90(env)
             start = get_random_next_to_free_pose_or_any_if_full(env)
             dist = min(random.randrange(size), to_clear)
-            if direction:  # x
-                env[start[0]:dist, start[1]] = FREE
-            else:  # y
-                env[start[0], start[1]:dist] = FREE
+            env[start[0]:dist, start[1]] = FREE
             to_clear = to_clear_start - np.sum(env == FREE)
     starts, goals = make_starts_goals_on_env(env, n_agents)
     return env, starts, goals

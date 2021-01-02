@@ -3,13 +3,17 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
-from scenarios.generators import movingai
+from scenarios.generators import movingai, tracing_pathes_in_the_dark
 
-if __name__ == "__main__":
+
+def demo_movingai():
     n_agents = 25
-    grid, starts, goals = movingai("Paris_1_256", "even", 0, n_agents)
+    env, starts, goals = movingai("Paris_1_256", "even", 0, n_agents)
+    plot(env, starts, goals)
 
-    plt.imshow(np.swapaxes(grid, 0, 1), cmap='Greys', origin='lower')
+
+def plot(env, starts, goals):
+    plt.imshow(np.swapaxes(env, 0, 1), cmap='Greys', origin='lower')
     n_agents = len(starts)
     for i_a in range(n_agents):
         plt.arrow(
@@ -23,3 +27,13 @@ if __name__ == "__main__":
         )
 
     plt.show()
+
+
+def demo_tracing_pathes_in_the_dark():
+    n_agents = 3
+    env, starts, goals = tracing_pathes_in_the_dark(50, .5, n_agents, 0)
+    plot(env, starts, goals)
+
+
+if __name__ == "__main__":
+    demo_tracing_pathes_in_the_dark()
