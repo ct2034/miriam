@@ -110,8 +110,8 @@ def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
-    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
+    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
     generators = [
         like_policylearn_gen,
@@ -223,7 +223,7 @@ def main_icts():
                         q = 1000
                     else:
                         q = (
-                            results[ECBS_EXPANDED_NODES][i_r, i_f, i_a] /
+                            float(results[ECBS_EXPANDED_NODES][i_r, i_f, i_a]) /
                             results[ICTS_EXPANDED_NODES][i_r, i_f, i_a]
                         )
                     results[QUOTIENT_ECBS_EN_OVER_ICTS_EN][i_r, i_f, i_a] = q
@@ -231,31 +231,31 @@ def main_icts():
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
-    # for gen in generators:
-    #     results = all_results[str(gen)]
-    #     plot_results(
-    #         [results[WELL_FORMED],
-    #          results[DIFF_SIM_DECEN],
-    #          results[DIFF_INDEP],
-    #          results[ECBS_SUCCESS],
-    #          results[ECBS_COST],
-    #          results[ECBS_VERTEX_BLOCKS],
-    #          results[ECBS_EDGE_BLOCKS],
-    #          results[USEFULLNESS]],
-    #         ["Well-formedness",
-    #          "Sub-optimality of sim_decen (p: random)",
-    #          "Cost difference ecbs to independant",
-    #          "Ecbs success",
-    #          "Ecbs cost",
-    #          "Nr of vertex blocks in ecbs solution",
-    #          "Nr of edge blocks in ecbs solution",
-    #          "Usefullness"],
-    #         generator=gen,
-    #         n_agentss=n_agentss,
-    #         fills=fills,
-    #         evaluation="icts"
-    #     )
-    # plt.show()
+    for gen in generators:
+        results = all_results[str(gen)]
+        plot_results(
+            [results[ECBS_SUCCESS],
+             results[ECBS_COST],
+             results[ECBS_EXPANDED_NODES],
+             results[ECBS_VERTEX_BLOCKS],
+             results[ICTS_SUCCESS],
+             results[ICTS_COST],
+             results[ICTS_EXPANDED_NODES],
+             results[QUOTIENT_ECBS_EN_OVER_ICTS_EN]],
+            ["ECBS success",
+             "ECBS cost",
+             "ECBS expanded nodes",
+             "Nr of vertex blocks in ecbs solution",
+             "ICTS success",
+             "ICTS cost",
+             "ICTS expanded nodes",
+             "Quotient ECBS over ICTS expanded nodes"],
+            generator=gen,
+            n_agentss=n_agentss,
+            fills=fills,
+            evaluation="icts"
+        )
+    plt.show()
 
 
 def main_base():
