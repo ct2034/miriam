@@ -31,6 +31,24 @@ ICTS_EXPANDED_NODES = "icts_expanded_nodes"
 QUOTIENT_ECBS_EN_OVER_ICTS_EN = "quotient_ecbs_en_over_icts_en"
 
 
+def init_values_debug():
+    size = 8  # size for all scenarios
+    n_fills = 2  # how many different fill values there should be
+    n_n_agentss = 2  # how many different numbers of agents should there be"""
+    n_runs = 2  # how many runs per configuration
+    max_fill = .6  # maximal fill to sample until
+    return max_fill, n_fills, n_n_agentss, n_runs, size
+
+
+def init_values_main():
+    size = 8  # size for all scenarios
+    n_fills = 8  # how many different fill values there should be
+    n_n_agentss = 8  # how many different numbers of agents should there be"""
+    n_runs = 16  # how many runs per configuration
+    max_fill = .6  # maximal fill to sample until
+    return max_fill, n_fills, n_n_agentss, n_runs, size
+
+
 def plot_results(
         results: List[np.ndarray], titles: List[str],
         generator: Callable, n_agentss: List[int], fills: List[float],
@@ -92,11 +110,8 @@ def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    size = 8  # size for all scenarios
-    n_fills = 2  # how many different fill values there should be
-    n_n_agentss = 2  # how many different numbers of agents should there be"""
-    n_runs = 2  # how many runs per configuration
-    max_fill = .6  # maximal fill to sample until
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
+    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
     generators = [
         like_policylearn_gen,
@@ -247,12 +262,7 @@ def main_base():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    size = 8  # size for all scenarios
-    n_fills = 8  # how many different fill values there should be
-    n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 16  # how many runs per configuration
-    max_fill = .6  # maximal fill to sample until
-
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
     generators = [
         like_policylearn_gen,
         like_sim_decentralized,
