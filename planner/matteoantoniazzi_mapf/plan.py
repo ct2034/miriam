@@ -1,19 +1,25 @@
-from typing import List, Tuple, Any, Dict, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
-from definitions import OBSTACLE
+import tools
+from cachier import cachier
+from definitions import INVALID, OBSTACLE
 
 from .external.MAPFSolver.SearchBasedAlgorithms import ICTSSolver
 from .external.MAPFSolver.Utilities import (Agent, Map, ProblemInstance,
                                             SolverSettings)
 
-
 EXPANDED_NODES = 'expanded_nodes'
+SUM_OF_COSTS = 'sum_of_costs'
+INFO_TYPE = Tuple[List[List[Tuple[int, int]]],
+                  Dict[str, Union[int, float]]]
 
 
-def icts(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray
-         ) -> Tuple[Any]:
+@cachier(hash_params=tools.hasher)
+def icts(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
+         timeout: int = 30) -> Tuple[Any]:
     sse = SolverSettings()
+    sse.set_time_out(timeout)
     solver = ICTSSolver(sse)
 
     n_agents = starts.shape[0]
@@ -30,9 +36,17 @@ def icts(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray
     return info
 
 
-def expanded_nodes_from_info(info:
-                             Tuple[List[List[Tuple[int, int]]],
-                                   Dict[str, Union[int, float]]]) -> int:
+def is_info_valid(info: INFO_TYPE) -> bool:
+    return not len(info[0]) == 0
+
+
+def expanded_nodes_from_info(info: INFO_TYPE) -> int:
     en = info[1][EXPANDED_NODES]
     assert isinstance(en, int)
     return en
+
+
+def sum_of_costs_from_info(info: INFO_TYPE) -> int:
+    soc = info[1][SUM_OF_COSTS]
+    assert isinstance(soc, int)
+    return soc

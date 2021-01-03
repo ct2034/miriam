@@ -16,9 +16,25 @@ from scenarios.evaluators import *
 from scenarios.generators import *
 
 
+WELL_FORMED = "well_formed"
+DIFF_INDEP = "diff_indep"
+DIFF_SIM_DECEN = "diff_sim_decen"
+ECBS_SUCCESS = "ecbs_success"
+ECBS_COST = "ecbs_cost"
+ECBS_VERTEX_BLOCKS = "ecbs_vertex_blocks"
+ECBS_EDGE_BLOCKS = "ecbs_edge_blocks"
+ECBS_EXPANDED_NODES = "ecbs_expanded_nodes"
+USEFULLNESS = "usefullness"
+ICTS_SUCCESS = "icts_success"
+ICTS_COST = "icts_cost"
+ICTS_EXPANDED_NODES = "icts_expanded_nodes"
+QUOTIENT_ECBS_EN_OVER_ICTS_EN = "quotient_ecbs_en_over_icts_en"
+
+
 def plot_results(
         results: List[np.ndarray], titles: List[str],
-        generator: Callable, n_agentss: List[int], fills: List[float]):
+        generator: Callable, n_agentss: List[int], fills: List[float],
+        evaluation: str = 'main'):
     n_fills = len(fills)
     n_n_agentss = len(n_agentss)
 
@@ -69,10 +85,165 @@ def plot_results(
         plt.xticks(range(n_n_agentss), map(
             lambda a: str(int(a)), n_agentss))
     plt.tight_layout()
-    plt.savefig("scenarios/res_" + generator_name + ".png")
+    plt.savefig("scenarios/res_" + generator_name + "-" + evaluation + ".png")
 
 
-def main():
+def main_icts():
+    # no warnings pls
+    logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
+
+    size = 8  # size for all scenarios
+    n_fills = 2  # how many different fill values there should be
+    n_n_agentss = 2  # how many different numbers of agents should there be"""
+    n_runs = 2  # how many runs per configuration
+    max_fill = .6  # maximal fill to sample until
+
+    generators = [
+        like_policylearn_gen,
+        like_sim_decentralized,
+        tracing_pathes_in_the_dark
+    ]
+    all_results = {}
+
+    fills = np.around(
+        np.linspace(0, max_fill, n_fills),
+        2
+    )  # list of fills we want
+
+    n_agentss = np.linspace(1, 16, n_n_agentss, dtype=np.int
+                            )  # list of different numbers of agents we want
+
+    for gen in generators:
+        all_results[str(gen)] = {}
+        results = all_results[str(gen)]
+
+        # save results here
+        # first plot row
+        results[ECBS_SUCCESS] = np.zeros([n_fills, n_n_agentss])
+        results[ECBS_COST] = np.full(
+            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+        results[ECBS_EXPANDED_NODES] = np.full(
+            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+        results[ECBS_VERTEX_BLOCKS] = np.full(
+            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+        results[ECBS_EDGE_BLOCKS] = np.full(  # don't plot (maybe)
+            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+        # second plot row
+        results[ICTS_SUCCESS] = np.zeros([n_fills, n_n_agentss])
+        results[ICTS_COST] = np.full(
+            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+        results[ICTS_EXPANDED_NODES] = np.full(
+            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+        results[QUOTIENT_ECBS_EN_OVER_ICTS_EN] = np.full(
+            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+
+    t = time.time()
+    i = 0
+    for gen in generators:
+        results = all_results[str(gen)]
+        for i_r in range(n_runs):
+            for i_f, i_a in product(range(n_fills),
+                                    range(n_n_agentss)):
+                i += 1
+                print("run %d of %d" %
+                      (i, n_runs * n_fills * n_n_agentss * len(generators)))
+                # generating a scenario .......................................
+                fill = fills[i_f]
+                n_agents = n_agentss[i_a]
+                env, starts, goals = gen(
+                    size, fill, n_agents, seed=i_r)
+                # calculating optimal cost ....................................
+                if i_f > 0 and results[ECBS_COST
+                                       ][i_r, i_f - 1, i_a] == INVALID:
+                    # previous fills timed out
+                    res_ecbs = INVALID
+                elif i_a > 0 and results[ECBS_COST
+                                         ][i_r, i_f, i_a - 1] == INVALID:
+                    # previous agent count failed as well
+                    res_ecbs = INVALID
+                else:
+                    res_ecbs = cost_ecbs(env, starts, goals)
+                if res_ecbs != INVALID:
+                    results[ECBS_SUCCESS][i_f, i_a] += 1
+                    results[ECBS_COST][i_r, i_f, i_a] = res_ecbs
+                    results[ECBS_EXPANDED_NODES
+                            ][i_r, i_f, i_a] = expanded_nodes_ecbs(
+                                env, starts, goals)
+                # evaluating blocks
+                blocks = blocks_ecbs(env, starts, goals)
+                if blocks != INVALID:
+                    (
+                        results[ECBS_VERTEX_BLOCKS][i_r, i_f, i_a],
+                        results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a]
+                    ) = blocks
+                else:
+                    results[ECBS_VERTEX_BLOCKS][i_r, i_f, i_a] = INVALID
+                    results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a] = INVALID
+                # what is icts cost? ..........................................
+                if i_f > 0 and results[ICTS_COST
+                                       ][i_r, i_f - 1, i_a] == INVALID:
+                    # previous fills timed out
+                    res_icts = INVALID
+                elif i_a > 0 and results[ICTS_COST
+                                         ][i_r, i_f, i_a - 1] == INVALID:
+                    # previous agent count failed as well
+                    res_icts = INVALID
+                else:
+                    res_icts = cost_icts(env, starts, goals)
+                if res_icts != INVALID:
+                    results[ICTS_SUCCESS][i_f, i_a] += 1
+                    results[ICTS_COST][i_r, i_f, i_a] = res_ecbs
+                    results[ICTS_EXPANDED_NODES
+                            ][i_r, i_f, i_a] = expanded_nodes_icts(
+                                env, starts, goals)
+                # run icts and compare n of expanded nodes
+                if (
+                    results[ECBS_EXPANDED_NODES][i_r, i_f, i_a] != INVALID and
+                    results[ICTS_EXPANDED_NODES][i_r, i_f, i_a] != INVALID
+                ):
+                    if (results[ECBS_EXPANDED_NODES][i_r, i_f, i_a] == 0 and
+                            results[ICTS_EXPANDED_NODES][i_r, i_f, i_a] == 0):
+                        q = 0
+                    elif results[ICTS_EXPANDED_NODES][i_r, i_f, i_a] == 0:
+                        q = 1000
+                    else:
+                        q = (
+                            results[ECBS_EXPANDED_NODES][i_r, i_f, i_a] /
+                            results[ICTS_EXPANDED_NODES][i_r, i_f, i_a]
+                        )
+                    results[QUOTIENT_ECBS_EN_OVER_ICTS_EN][i_r, i_f, i_a] = q
+
+    elapsed_time = time.time() - t
+    print("elapsed time: %.3fs" % elapsed_time)
+
+    # for gen in generators:
+    #     results = all_results[str(gen)]
+    #     plot_results(
+    #         [results[WELL_FORMED],
+    #          results[DIFF_SIM_DECEN],
+    #          results[DIFF_INDEP],
+    #          results[ECBS_SUCCESS],
+    #          results[ECBS_COST],
+    #          results[ECBS_VERTEX_BLOCKS],
+    #          results[ECBS_EDGE_BLOCKS],
+    #          results[USEFULLNESS]],
+    #         ["Well-formedness",
+    #          "Sub-optimality of sim_decen (p: random)",
+    #          "Cost difference ecbs to independant",
+    #          "Ecbs success",
+    #          "Ecbs cost",
+    #          "Nr of vertex blocks in ecbs solution",
+    #          "Nr of edge blocks in ecbs solution",
+    #          "Usefullness"],
+    #         generator=gen,
+    #         n_agentss=n_agentss,
+    #         fills=fills,
+    #         evaluation="icts"
+    #     )
+    # plt.show()
+
+
+def main_base():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
@@ -217,4 +388,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main_icts()

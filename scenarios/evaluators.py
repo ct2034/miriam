@@ -6,7 +6,9 @@ import numpy as np
 import tools
 from cachier import cachier
 from definitions import INVALID
-from planner.matteoantoniazzi_mapf.plan import icts, expanded_nodes_from_info
+from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info, icts,
+                                                is_info_valid,
+                                                sum_of_costs_from_info)
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent, Policy
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
@@ -15,6 +17,10 @@ logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
 logging.getLogger(
     'planner.policylearn.libMultiRobotPlanning').setLevel(logging.ERROR)
+
+SCHEDULE = 'schedule'
+HIGHLEVELEXPANDED = 'highLevelExpanded'
+STATISTICS = 'statistics'
 
 
 @cachier(hash_params=tools.hasher)
@@ -48,7 +54,7 @@ def plan_ecbs(env, starts, goals, timeout=10):
     if data is None:
         return INVALID
     n_agents = starts.shape[0]
-    schedule = data['schedule']
+    schedule = data[SCHEDULE]
     assert n_agents == len(schedule.keys()), "Plans for all agents"
     return data
 
@@ -61,7 +67,7 @@ def cost_ecbs(env, starts, goals, timeout=10):
     if data == INVALID:
         return data
     n_agents = starts.shape[0]
-    schedule = data['schedule']
+    schedule = data[SCHEDULE]
     cost_per_agent = []
     for i_a in range(n_agents):
         agent_key = 'agent'+str(i_a)
@@ -69,6 +75,14 @@ def cost_ecbs(env, starts, goals, timeout=10):
         path = schedule[agent_key]
         cost_per_agent.append(path[-1]['t'])
     return sum(cost_per_agent) / n_agents
+
+
+@cachier(hash_params=tools.hasher)
+def expanded_nodes_ecbs(env, starts, goals, timeout=10):
+    data = plan_ecbs(env, starts, goals, timeout=timeout)
+    if data == INVALID:
+        return data
+    return data[STATISTICS][HIGHLEVELEXPANDED]
 
 
 @cachier(hash_params=tools.hasher)
@@ -125,5 +139,19 @@ def cost_sim_decentralized_random(env, starts, goals):
 
 
 def expanded_nodes_icts(env, starts, goals):
-    info = icts(env, starts, goals)
-    return expanded_nodes_from_info(info)
+    info = icts(env, starts, goals, timeout=30)
+    print(info)
+    if is_info_valid(info):
+        return expanded_nodes_from_info(info)
+    else:
+        return INVALID
+
+
+def cost_icts(env, starts, goals):
+    n_agents = starts.shape[0]
+    info = icts(env, starts, goals, timeout=30)
+    print(info)
+    if is_info_valid(info):
+        return sum_of_costs_from_info(info) / n_agents
+    else:
+        return INVALID
