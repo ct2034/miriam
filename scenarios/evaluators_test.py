@@ -268,6 +268,21 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
         )
 
+    def test_expanded_nodes_ecbs_no_collision(self):
+        # agents that don't collide should not expand ecbs nodes
+        starts = np.array([
+            [0, 0],
+            [2, 0]
+        ])
+        goals = np.array([
+            [0, 2],
+            [2, 2]
+        ])
+        self.assertEqual(
+            1, scenarios.evaluators.expanded_nodes_ecbs(
+                self.env, starts, goals)
+        )
+
     def test_cost_independent(self):
         # agents that would collide in the middle
         starts_4 = np.array([
@@ -387,7 +402,7 @@ class TestEvaluators(unittest.TestCase):
             [2, 2]
         ])
         self.assertEqual(
-            0, scenarios.evaluators.expanded_nodes_icts(
+            1, scenarios.evaluators.expanded_nodes_icts(
                 self.env, starts, goals)
         )
 
