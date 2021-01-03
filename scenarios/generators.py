@@ -19,7 +19,8 @@ logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 def make_starts_goals_on_env(env: np.ndarray, n_agents: int):
     agents = sim.decentralized.runner.initialize_agents(
-        env, n_agents, sim.decentralized.agent.Policy.RANDOM)
+        env, n_agents, sim.decentralized.agent.Policy.RANDOM,
+        tight_placement=True)
     starts = np.array([a.pos for a in agents])
     assert starts.shape == (n_agents, 2)
     goals = np.array([a.goal for a in agents])
