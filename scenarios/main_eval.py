@@ -36,7 +36,7 @@ def init_values_debug():
     n_fills = 2  # how many different fill values there should be
     n_n_agentss = 2  # how many different numbers of agents should there be"""
     n_runs = 2  # how many runs per configuration
-    max_fill = .6  # maximal fill to sample until
+    max_fill = .4  # maximal fill to sample until
     return max_fill, n_fills, n_n_agentss, n_runs, size
 
 
