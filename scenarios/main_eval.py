@@ -223,8 +223,8 @@ def main_icts():
                         q = 1000
                     else:
                         q = (
-                            float(results[ECBS_EXPANDED_NODES][i_r, i_f, i_a]) /
-                            results[ICTS_EXPANDED_NODES][i_r, i_f, i_a]
+                            float(results[ECBS_EXPANDED_NODES][i_r, i_f, i_a])
+                            / results[ICTS_EXPANDED_NODES][i_r, i_f, i_a]
                         )
                     results[QUOTIENT_ECBS_EN_OVER_ICTS_EN][i_r, i_f, i_a] = q
 
