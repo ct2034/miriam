@@ -14,6 +14,21 @@ class TestEvaluators(unittest.TestCase):
         [0, 0, 0]
     ])
 
+    # narrow hallway with two agents that can not pass each other
+    env_deadlock = np.array([
+        [1, 1, 1],
+        [0, 0, 0],
+        [1, 1, 1]
+    ])
+    starts_deadlock = np.array([
+        [1, 0],
+        [1, 2]
+    ])
+    goals_deadlock = np.array([
+        [1, 2],
+        [1, 0]
+    ])
+
     def test_to_agent_objects(self):
         # generating successfully
         starts = np.array([
@@ -404,6 +419,22 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             1, scenarios.evaluators.expanded_nodes_icts(
                 self.env, starts, goals)
+        )
+
+    def test_expanded_nodes_icts_deadlock(self):
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.expanded_nodes_icts(
+                self.env_deadlock, self.starts_deadlock,
+                self.goals_deadlock, timeout=10)
+        )
+
+    def test_cost_icts_deadlock(self):
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.cost_icts(
+                self.env_deadlock, self.starts_deadlock,
+                self.goals_deadlock, timeout=10)
         )
 
 
