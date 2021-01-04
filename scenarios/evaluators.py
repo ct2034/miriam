@@ -140,7 +140,6 @@ def cost_sim_decentralized_random(env, starts, goals):
 
 def expanded_nodes_icts(env, starts, goals):
     info = icts(env, starts, goals, timeout=30)
-    print(info)
     if is_info_valid(info):
         return expanded_nodes_from_info(info)
     else:
@@ -150,7 +149,6 @@ def expanded_nodes_icts(env, starts, goals):
 def cost_icts(env, starts, goals):
     n_agents = starts.shape[0]
     info = icts(env, starts, goals, timeout=30)
-    print(info)
     if is_info_valid(info):
         return float(sum_of_costs_from_info(info)) / n_agents
     else:
