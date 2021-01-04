@@ -207,7 +207,7 @@ def main_icts():
                     res_icts = cost_icts(env, starts, goals)
                 if res_icts != INVALID:
                     results[ICTS_SUCCESS][i_f, i_a] += 1
-                    results[ICTS_COST][i_r, i_f, i_a] = res_ecbs
+                    results[ICTS_COST][i_r, i_f, i_a] = res_icts
                     results[ICTS_EXPANDED_NODES
                             ][i_r, i_f, i_a] = expanded_nodes_icts(
                                 env, starts, goals)

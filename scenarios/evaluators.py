@@ -74,7 +74,7 @@ def cost_ecbs(env, starts, goals, timeout=10):
         assert agent_key in schedule.keys(), "Path for this agent"
         path = schedule[agent_key]
         cost_per_agent.append(path[-1]['t'])
-    return sum(cost_per_agent) / n_agents
+    return float(sum(cost_per_agent)) / n_agents
 
 
 @cachier(hash_params=tools.hasher)
@@ -121,7 +121,7 @@ def cost_independant(env, starts, goals):
         if not success:
             return INVALID
         cost_per_agent.append(len(a.path)-1)
-    return sum(cost_per_agent) / n_agents
+    return float(sum(cost_per_agent)) / n_agents
 
 
 @cachier(hash_params=tools.hasher)
@@ -152,6 +152,6 @@ def cost_icts(env, starts, goals):
     info = icts(env, starts, goals, timeout=30)
     print(info)
     if is_info_valid(info):
-        return sum_of_costs_from_info(info) / n_agents
+        return float(sum_of_costs_from_info(info)) / n_agents
     else:
         return INVALID
