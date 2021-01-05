@@ -28,7 +28,7 @@ USEFULLNESS = "usefullness"
 ICTS_SUCCESS = "icts_success"
 ICTS_COST = "icts_cost"
 ICTS_EXPANDED_NODES = "icts_expanded_nodes"
-QUOTIENT_ECBS_EN_OVER_ICTS_EN = "quotient_ecbs_en_over_icts_en"
+DIFFERENCE_ECBS_EN_MINUS_ICTS_EN = "difference_ecbs_en_-_icts_en"
 
 
 def init_values_debug():
@@ -94,8 +94,8 @@ def plot_results(
             norm=colors.Normalize(vmin=r_min, vmax=r_max),
             origin='lower'
         )
-        cbar = fig.colorbar(im, extend='both', spacing='uniform',
-                            shrink=0.9, ax=ax)
+        fig.colorbar(im, extend='both', spacing='uniform',
+                     shrink=0.9, ax=ax)
         plt.title(titles[i])
         plt.ylabel('Fills')
         plt.yticks(range(n_fills), map(lambda a: str(a), fills))
@@ -110,8 +110,8 @@ def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
-    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
+    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
     generators = [
         like_policylearn_gen,
@@ -149,7 +149,7 @@ def main_icts():
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
         results[ICTS_EXPANDED_NODES] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[QUOTIENT_ECBS_EN_OVER_ICTS_EN] = np.full(
+        results[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
 
     t = time.time()
@@ -218,15 +218,16 @@ def main_icts():
                 ):
                     if (results[ECBS_EXPANDED_NODES][i_r, i_f, i_a] == 0 and
                             results[ICTS_EXPANDED_NODES][i_r, i_f, i_a] == 0):
-                        q = 0
+                        d = 0
                     elif results[ICTS_EXPANDED_NODES][i_r, i_f, i_a] == 0:
-                        q = 1000
+                        d = 1000
                     else:
-                        q = (
+                        d = (
                             float(results[ECBS_EXPANDED_NODES][i_r, i_f, i_a])
-                            / results[ICTS_EXPANDED_NODES][i_r, i_f, i_a]
+                            - results[ICTS_EXPANDED_NODES][i_r, i_f, i_a]
                         )
-                    results[QUOTIENT_ECBS_EN_OVER_ICTS_EN][i_r, i_f, i_a] = q
+                    results[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN
+                            ][i_r, i_f, i_a] = d
 
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
@@ -241,7 +242,7 @@ def main_icts():
              results[ICTS_SUCCESS],
              results[ICTS_COST],
              results[ICTS_EXPANDED_NODES],
-             results[QUOTIENT_ECBS_EN_OVER_ICTS_EN]],
+             results[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]],
             ["ECBS success",
              "ECBS cost",
              "ECBS expanded nodes",
@@ -249,7 +250,7 @@ def main_icts():
              "ICTS success",
              "ICTS cost",
              "ICTS expanded nodes",
-             "Quotient ECBS over ICTS expanded nodes"],
+             "Difference ECBS minus ICTS expanded nodes"],
             generator=gen,
             n_agentss=n_agentss,
             fills=fills,
@@ -284,20 +285,20 @@ def main_base():
 
         # save results here
         # first plot row
-        results["well_formed"] = np.zeros([n_fills, n_n_agentss])
-        results["diff_indep"] = np.full(
+        results[WELL_FORMED] = np.zeros([n_fills, n_n_agentss])
+        results[DIFF_INDEP] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results["diff_sim_decen"] = np.full(
+        results[DIFF_SIM_DECEN] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results["ecbs_success"] = np.zeros([n_fills, n_n_agentss])
+        results[ECBS_SUCCESS] = np.zeros([n_fills, n_n_agentss])
         # second plot row
-        results["ecbs_cost"] = np.full(
+        results[ECBS_COST] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results["ecbs_vertex_blocks"] = np.full(
+        results[ECBS_VERTEX_BLOCKS] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results["ecbs_edge_blocks"] = np.full(
+        results[ECBS_EDGE_BLOCKS] = np.full(
             [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results["usefullness"] = np.zeros(
+        results[USEFULLNESS] = np.zeros(
             [n_runs, n_fills, n_n_agentss], dtype=np.float)
 
     t = time.time()
@@ -321,67 +322,67 @@ def main_base():
                             env, starts, goals))
                 except AssertionError:
                     is_wellformed = False
-                results["well_formed"][i_f, i_a] += is_wellformed
+                results[WELL_FORMED][i_f, i_a] += is_wellformed
                 # calculating optimal cost ....................................
-                if i_f > 0 and results["ecbs_cost"
+                if i_f > 0 and results[ECBS_COST
                                        ][i_r, i_f - 1, i_a] == INVALID:
                     # previous fills timed out
                     res_ecbs = INVALID
-                elif i_a > 0 and results["ecbs_cost"
+                elif i_a > 0 and results[ECBS_COST
                                          ][i_r, i_f, i_a - 1] == INVALID:
                     # previous agent count failed as well
                     res_ecbs = INVALID
                 else:
                     res_ecbs = cost_ecbs(env, starts, goals)
                 if res_ecbs != INVALID:
-                    results["ecbs_success"][i_f, i_a] += 1
-                    results["ecbs_cost"][i_r, i_f, i_a] = res_ecbs
+                    results[ECBS_SUCCESS][i_f, i_a] += 1
+                    results[ECBS_COST][i_r, i_f, i_a] = res_ecbs
                 # evaluating blocks
                 blocks = blocks_ecbs(env, starts, goals)
                 if blocks != INVALID:
                     (
-                        results["ecbs_vertex_blocks"][i_r, i_f, i_a],
-                        results["ecbs_edge_blocks"][i_r, i_f, i_a]
+                        results[ECBS_VERTEX_BLOCKS][i_r, i_f, i_a],
+                        results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a]
                     ) = blocks
                 else:
-                    results["ecbs_vertex_blocks"][i_r, i_f, i_a] = INVALID
-                    results["ecbs_edge_blocks"][i_r, i_f, i_a] = INVALID
+                    results[ECBS_VERTEX_BLOCKS][i_r, i_f, i_a] = INVALID
+                    results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a] = INVALID
                 # is this different to the independant costs? .................
-                if results["ecbs_cost"][i_r, i_f, i_a] != INVALID:
+                if results[ECBS_COST][i_r, i_f, i_a] != INVALID:
                     cost_indep = cost_independant(env, starts, goals)
                     if cost_indep != INVALID:
-                        results["diff_indep"][i_r, i_f, i_a] = (
-                            results["ecbs_cost"][i_r, i_f, i_a] - cost_indep
+                        results[DIFF_INDEP][i_r, i_f, i_a] = (
+                            results[ECBS_COST][i_r, i_f, i_a] - cost_indep
                         )
-                        results["usefullness"][i_r, i_f,
-                                               i_a] += results[
-                                                   "diff_indep"][i_r, i_f, i_a]
+                        results[USEFULLNESS][i_r, i_f,
+                                             i_a] += results[
+                            DIFF_INDEP][i_r, i_f, i_a]
                 # how bad are the costs with sim decentralized random .........
-                if results["ecbs_cost"][i_r, i_f, i_a] != INVALID:
+                if results[ECBS_COST][i_r, i_f, i_a] != INVALID:
                     cost_decen = cost_sim_decentralized_random(
                         env, starts, goals)
                     if cost_decen != INVALID:
-                        results["diff_sim_decen"][i_r, i_f, i_a] = (
-                            cost_decen - results["ecbs_cost"][i_r, i_f, i_a]
+                        results[DIFF_SIM_DECEN][i_r, i_f, i_a] = (
+                            cost_decen - results[ECBS_COST][i_r, i_f, i_a]
                         )
-                        results["usefullness"][i_r, i_f,
-                                               i_a] += results[
-                                                   "diff_sim_decen"][
-                                                       i_r, i_f, i_a]
+                        results[USEFULLNESS][i_r, i_f,
+                                             i_a] += results[
+                            DIFF_SIM_DECEN][
+                            i_r, i_f, i_a]
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
     for gen in generators:
         results = all_results[str(gen)]
         plot_results(
-            [results["well_formed"],
-             results["diff_sim_decen"],
-             results["diff_indep"],
-             results["ecbs_success"],
-             results["ecbs_cost"],
-             results["ecbs_vertex_blocks"],
-             results["ecbs_edge_blocks"],
-             results["usefullness"]],
+            [results[WELL_FORMED],
+             results[DIFF_SIM_DECEN],
+             results[DIFF_INDEP],
+             results[ECBS_SUCCESS],
+             results[ECBS_COST],
+             results[ECBS_VERTEX_BLOCKS],
+             results[ECBS_EDGE_BLOCKS],
+             results[USEFULLNESS]],
             ["Well-formedness",
              "Sub-optimality of sim_decen (p: random)",
              "Cost difference ecbs to independant",
