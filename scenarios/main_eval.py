@@ -72,7 +72,7 @@ def plot_results(
         assert not np.all(r == 0)
         assert not np.all(r == -1)
         if len(r.shape) == 3:
-            r_final = np.full([n_fills, n_n_agentss], INVALID)
+            r_final = np.full([n_fills, n_n_agentss], INVALID, dtype=np.float)
             for i_f, i_a in product(range(n_fills),
                                     range(n_n_agentss)):
                 this_data = r[:, i_f, i_a]
@@ -110,8 +110,8 @@ def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
-    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
+    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
     generators = [
         like_policylearn_gen,
