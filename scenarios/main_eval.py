@@ -94,7 +94,7 @@ def plot_results(
         else:
             raise RuntimeError("results must have 2 or 3 dimensions")
         r_min = np.min(r_final[r_final != INVALID])
-        if not "Difference" in titles[i]:  # not on the difference
+        if "Difference" not in titles[i]:  # not on the difference
             assert r_min >= 0, "no negative results (except INVALID)"
         r_max = np.max(r_final[r_final != INVALID])
         ax = fig.add_subplot(subplot_basenr+i)
@@ -113,7 +113,7 @@ def plot_results(
         plt.xticks(range(n_n_agentss), map(
             lambda a: str(int(a)), n_agentss))
     plt.tight_layout()
-    fname = get_fname(generator, evaluation, "png")
+    fname = get_fname(generator_name, evaluation, "png")
     plt.savefig(fname)
 
 
