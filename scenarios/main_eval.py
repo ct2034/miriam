@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+import pickle
 import random
 import time
 from copy import copy
@@ -14,7 +15,6 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from scenarios.evaluators import *
 from scenarios.generators import *
-
 
 WELL_FORMED = "well_formed"
 DIFF_INDEP = "diff_indep"
@@ -49,10 +49,21 @@ def init_values_main():
     return max_fill, n_fills, n_n_agentss, n_runs, size
 
 
+def get_fname(generator_name, evaluation, extension):
+    return ("scenarios/res_" + generator_name + "-" +
+            evaluation + "." + extension)
+
+
+def name_from_gen(generator):
+    generator_name = str(generator).split("at 0x")[
+        0].replace("<function ", "").replace(" ", "")
+    return generator_name
+
+
 def plot_results(
         results: List[np.ndarray], titles: List[str],
-        generator: Callable, n_agentss: List[int], fills: List[float],
-        evaluation: str = 'main'):
+        generator_name: Callable, n_agentss: List[int], fills: List[float],
+        evaluation: str):
     n_fills = len(fills)
     n_n_agentss = len(n_agentss)
 
@@ -63,8 +74,6 @@ def plot_results(
     palette.set_bad('r', 1.0)
 
     fig = plt.figure(figsize=(20, 10))
-    generator_name = str(generator).split("at 0x")[
-        0].replace("<function ", "").replace(" ", "")
     fig.suptitle(generator_name, fontsize=16)
     subplot_basenr = 201 + int(np.ceil(len(results) / 2)) * 10
     for i, r in enumerate(results):
@@ -104,7 +113,8 @@ def plot_results(
         plt.xticks(range(n_n_agentss), map(
             lambda a: str(int(a)), n_agentss))
     plt.tight_layout()
-    plt.savefig("scenarios/res_" + generator_name + "-" + evaluation + ".png")
+    fname = get_fname(generator, evaluation, "png")
+    plt.savefig(fname)
 
 
 def main_icts():
@@ -235,6 +245,10 @@ def main_icts():
 
     for gen in generators:
         results = all_results[str(gen)]
+        # saving
+        with open(get_fname(name_from_gen(gen), "icts", "pkl"), 'wb') as f:
+            pickle.dump(results, f)
+        # plot
         plot_results(
             [results[ECBS_SUCCESS],
              results[ECBS_COST],
@@ -252,7 +266,7 @@ def main_icts():
              "ICTS cost",
              "ICTS expanded nodes",
              "Difference ECBS minus ICTS expanded nodes"],
-            generator=gen,
+            generator_name=name_from_gen(gen),
             n_agentss=n_agentss,
             fills=fills,
             evaluation="icts"
@@ -375,6 +389,10 @@ def main_base():
 
     for gen in generators:
         results = all_results[str(gen)]
+        # saving
+        with open(get_fname(name_from_gen(gen), "main", "pkl"), 'wb') as f:
+            pickle.dump(results, f)
+        # plot
         plot_results(
             [results[WELL_FORMED],
              results[DIFF_SIM_DECEN],
@@ -392,9 +410,10 @@ def main_base():
              "Nr of vertex blocks in ecbs solution",
              "Nr of edge blocks in ecbs solution",
              "Usefullness"],
-            generator=gen,
+            generator_name=name_from_gen(gen),
             n_agentss=n_agentss,
-            fills=fills
+            fills=fills,
+            evaluation='main'
         )
     plt.show()
 
