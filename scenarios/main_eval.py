@@ -85,7 +85,8 @@ def plot_results(
         else:
             raise RuntimeError("results must have 2 or 3 dimensions")
         r_min = np.min(r_final[r_final != INVALID])
-        assert r_min >= 0, "no negative results (except INVALID)"
+        if not "Difference" in titles[i]:  # not on the difference
+            assert r_min >= 0, "no negative results (except INVALID)"
         r_max = np.max(r_final[r_final != INVALID])
         ax = fig.add_subplot(subplot_basenr+i)
         im = ax.imshow(
