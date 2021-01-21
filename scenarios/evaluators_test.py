@@ -14,6 +14,16 @@ class TestEvaluators(unittest.TestCase):
         [0, 0, 0]
     ])
 
+    # starts and goals with a no collision on env
+    starts_no_collision = np.array([
+        [0, 0],
+        [2, 0]
+    ])
+    goals_no_collision = np.array([
+        [0, 2],
+        [2, 2]
+    ])
+
     # narrow hallway with two agents that can not pass each other
     env_deadlock = np.array([
         [1, 1, 1],
@@ -184,17 +194,9 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_4_5, goals_4_5, ignore_cache=True)
         )
         # agents that don't collide
-        starts_2 = np.array([
-            [0, 0],
-            [2, 0]
-        ])
-        goals_2 = np.array([
-            [0, 2],
-            [2, 2]
-        ])
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_ecbs(
-                self.env, starts_2, goals_2, ignore_cache=True)
+                self.env, self.starts_no_collision, self.goals_no_collision, ignore_cache=True)
         )
 
     def test_cost_ecbs_invalid(self):
@@ -285,17 +287,23 @@ class TestEvaluators(unittest.TestCase):
 
     def test_expanded_nodes_ecbs_no_collision(self):
         # agents that don't collide should not expand ecbs nodes
-        starts = np.array([
-            [0, 0],
-            [2, 0]
-        ])
-        goals = np.array([
-            [0, 2],
-            [2, 2]
-        ])
         self.assertEqual(
             1, scenarios.evaluators.expanded_nodes_ecbs(
-                self.env, starts, goals)
+                self.env, self.starts_no_collision, self.goals_no_collision)
+        )
+
+    def test_expanded_nodes_ecbs_invalid(self):
+        # unsolvable
+        starts_unsolv = np.array([
+            [1, 0]  # obstacle
+        ])
+        goals_unsolv = np.array([
+            [1, 2]  # obstacle
+        ])
+        self.assertEqual(
+            scenarios.evaluators.INVALID,
+            scenarios.evaluators.expanded_nodes_ecbs(
+                self.env, starts_unsolv, goals_unsolv, ignore_cache=True)
         )
 
     def test_cost_independent(self):
@@ -313,17 +321,9 @@ class TestEvaluators(unittest.TestCase):
                 self.env, starts_4, goals_4, ignore_cache=True)
         )
         # agents that don't collide
-        starts_2 = np.array([
-            [0, 0],
-            [2, 0]
-        ])
-        goals_2 = np.array([
-            [0, 2],
-            [2, 2]
-        ])
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_independant(
-                self.env, starts_2, goals_2, ignore_cache=True)
+                self.env, self.starts_no_collision, self.goals_no_collision, ignore_cache=True)
         )
 
     def test_cost_independent_invalid(self):
@@ -359,17 +359,9 @@ class TestEvaluators(unittest.TestCase):
 
     def test_cost_sim_decentralized_random_no_collision(self):
         # agents that don't collide
-        starts_2 = np.array([
-            [0, 0],
-            [2, 0]
-        ])
-        goals_2 = np.array([
-            [0, 2],
-            [2, 2]
-        ])
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_sim_decentralized_random(
-                self.env, starts_2, goals_2, ignore_cache=True)
+                self.env, self.starts_no_collision, self.goals_no_collision, ignore_cache=True)
         )
 
     def test_cost_sim_decentralized_random_unsolvable(self):
@@ -408,17 +400,9 @@ class TestEvaluators(unittest.TestCase):
 
     def test_expanded_nodes_icts_no_collision(self):
         # agents that don't collide should not expand icts nodes
-        starts = np.array([
-            [0, 0],
-            [2, 0]
-        ])
-        goals = np.array([
-            [0, 2],
-            [2, 2]
-        ])
         self.assertEqual(
             1, scenarios.evaluators.expanded_nodes_icts(
-                self.env, starts, goals)
+                self.env, self.starts_no_collision, self.goals_no_collision)
         )
 
     def test_expanded_nodes_icts_deadlock(self):
@@ -427,6 +411,12 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.expanded_nodes_icts(
                 self.env_deadlock, self.starts_deadlock,
                 self.goals_deadlock, timeout=10)
+        )
+
+    def test_cost_icts_no_collision(self):
+        self.assertAlmostEqual(
+            2, scenarios.evaluators.cost_icts(
+                self.env, self.starts_no_collision, self.goals_no_collision)
         )
 
     def test_cost_icts_deadlock(self):
