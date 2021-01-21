@@ -115,6 +115,13 @@ class TestGenerators(unittest.TestCase):
         )
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
+    def test_get_random_next_to_free_pose_or_any_if_full(self):
+        env = scenarios.generators.generate_random_gridmap(2, 2, 0)
+        pos = scenarios.generators.get_random_next_to_free_pose_or_any_if_full(
+            env)
+        self.assertIn(pos[0], [0, 1])
+        self.assertIn(pos[1], [0, 1])
+
     def test_tracing_pathes_in_the_dark_determinism(self):
         (base_env, base_starts, base_goals
          ) = scenarios.generators.tracing_pathes_in_the_dark(
