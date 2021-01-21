@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import itertools
 
-# this was for https://stackoverflow.com/questions/65828530/is-there-a-good-framework-or-package-in-python-to-compare-something-over-a-numbe/65829172#65829172
+# this was for
+""" https://stackoverflow.com/questions/65828530/
+is-there-a-good-framework-or-package-in-python-
+to-compare-something-over-a-numbe/65829172#65829172 """
 
 
 def evaluate(a, b, c):

@@ -196,7 +196,8 @@ class TestEvaluators(unittest.TestCase):
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_ecbs(
-                self.env, self.starts_no_collision, self.goals_no_collision, ignore_cache=True)
+                self.env, self.starts_no_collision, self.goals_no_collision,
+                ignore_cache=True)
         )
 
     def test_cost_ecbs_invalid(self):
@@ -323,7 +324,8 @@ class TestEvaluators(unittest.TestCase):
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_independant(
-                self.env, self.starts_no_collision, self.goals_no_collision, ignore_cache=True)
+                self.env, self.starts_no_collision, self.goals_no_collision,
+                ignore_cache=True)
         )
 
     def test_cost_independent_invalid(self):
@@ -361,7 +363,8 @@ class TestEvaluators(unittest.TestCase):
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_sim_decentralized_random(
-                self.env, self.starts_no_collision, self.goals_no_collision, ignore_cache=True)
+                self.env, self.starts_no_collision, self.goals_no_collision,
+                ignore_cache=True)
         )
 
     def test_cost_sim_decentralized_random_unsolvable(self):
