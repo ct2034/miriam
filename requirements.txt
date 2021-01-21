@@ -25,3 +25,4 @@ scipy
 timeout-decorator
 unittest2
 ws4py
+pytest-parallel
