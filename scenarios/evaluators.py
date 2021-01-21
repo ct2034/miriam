@@ -138,6 +138,7 @@ def cost_sim_decentralized_random(env, starts, goals):
         return INVALID
 
 
+@cachier(hash_params=tools.hasher)
 def expanded_nodes_icts(env, starts, goals, timeout=30):
     info = icts(env, starts, goals, timeout=timeout)
     if is_info_valid(info):
@@ -146,6 +147,7 @@ def expanded_nodes_icts(env, starts, goals, timeout=30):
         return INVALID
 
 
+@cachier(hash_params=tools.hasher)
 def cost_icts(env, starts, goals, timeout=30):
     n_agents = starts.shape[0]
     info = icts(env, starts, goals, timeout=timeout)

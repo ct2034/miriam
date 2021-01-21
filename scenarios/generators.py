@@ -93,6 +93,7 @@ def get_random_next_to_free_pose_or_any_if_full(env):
         return step_pos
 
 
+@cachier(hash_params=tools.hasher)
 def tracing_pathes_in_the_dark(size: int, fill: float,
                                n_agents: int, seed: Any):
     if fill == 0:

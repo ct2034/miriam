@@ -125,7 +125,7 @@ def main_icts():
     max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
     generators = [
-        like_policylearn_gen,
+        # like_policylearn_gen,
         like_sim_decentralized,
         tracing_pathes_in_the_dark
     ]
