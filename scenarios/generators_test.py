@@ -115,24 +115,45 @@ class TestGenerators(unittest.TestCase):
         )
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
-    def test_get_random_next_to_free_pose_or_any_if_full(self):
-        env = generate_random_gridmap(2, 2, 0)
-        pos = get_random_next_to_free_pose_or_any_if_full(
-            env)
-        self.assertIn(pos[0], [0, 1])
-        self.assertIn(pos[1], [0, 1])
+    def test_get_random_next_to_free_pose_or_any_if_full_empty(self):
+        # empty map should give any cell
+        env_empty = generate_random_gridmap(2, 2, 0)
+        pos_empty = get_random_next_to_free_pose_or_any_if_full(
+            env_empty)
+        self.assertIn(pos_empty[0], [0, 1])
+        self.assertIn(pos_empty[1], [0, 1])
+
+    def test_get_random_next_to_free_pose_or_any_if_full_full(self):
+        # full map should also give any cell
+        env_full = np.full((2, 2), OBSTACLE)
+        pos_full = get_random_next_to_free_pose_or_any_if_full(
+            env_full)
+        self.assertIn(pos_full[0], [0, 1])
+        self.assertIn(pos_full[1], [0, 1])
+
+    def test_get_random_next_to_free_pose_or_any_if_full_next(self):
+        # checking for the 'next_to' options around center piece
+        env_next = np.full((3, 3), OBSTACLE)
+        env_next[1, 1] = 0
+        pos_next = get_random_next_to_free_pose_or_any_if_full(env_next)
+        self.assertIn(tuple(pos_next), [
+            (1, 0),
+            (2, 1),
+            (1, 2),
+            (0, 1)
+        ])
 
     def test_tracing_pathes_in_the_dark_determinism(self):
         (base_env, base_starts, base_goals
          ) = tracing_pathes_in_the_dark(
-            10, .5, 10, 0
+            10, .5, 10, 0, ignore_cache=True
         )
         # --------
 
         # everything the same
         (same_env, same_starts, same_goals
          ) = tracing_pathes_in_the_dark(
-            10, .5, 10, 0
+            10, .5, 10, 0, ignore_cache=True
         )
         self.assertTrue(np.all(base_env == same_env))
         self.assertTrue(np.all(base_starts == same_starts))
@@ -141,7 +162,7 @@ class TestGenerators(unittest.TestCase):
         # everything different
         (other_env, other_starts, other_goals
          ) = tracing_pathes_in_the_dark(
-            10, .5, 10, 1
+            10, .5, 10, 1, ignore_cache=True
         )
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -151,7 +172,7 @@ class TestGenerators(unittest.TestCase):
         # only env different -> all different
         (other_env, other_starts, other_goals
          ) = tracing_pathes_in_the_dark(
-            10, .4, 10, 0
+            10, .4, 10, 0, ignore_cache=True
         )
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -161,13 +182,13 @@ class TestGenerators(unittest.TestCase):
         """tests if generator handles low fill numbers correctly"""
         (env, starts, goals
          ) = tracing_pathes_in_the_dark(
-            10, .1, 10, 0
+            10, .1, 10, 0, ignore_cache=True
         )
         self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
 
         (env, starts, goals
          ) = tracing_pathes_in_the_dark(
-            10, 0, 10, 0
+            10, 0, 10, 0, ignore_cache=True
         )
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
