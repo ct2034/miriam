@@ -5,6 +5,7 @@ cherrypy
 coloredlogs
 flask
 gitpython
+ipykernel
 iso8601
 matplotlib
 munkres
@@ -20,9 +21,9 @@ pyomo==5.2
 pypng
 pytest
 pytest-cov
+pytest-parallel
 pytest-timeout
 scipy
 timeout-decorator
 unittest2
 ws4py
-pytest-parallel
