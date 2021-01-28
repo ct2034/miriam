@@ -10,6 +10,7 @@ iso8601
 matplotlib
 munkres
 mypy
+nbval
 networkx
 numpy
 psutil

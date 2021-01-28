@@ -24,4 +24,4 @@ def plot_with_arrows(env, starts, goals):
             length_includes_head=True,
             linewidth=0,
             color=colors[i_a])
-    fig.show()
+    plt.show()
