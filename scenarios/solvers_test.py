@@ -4,23 +4,16 @@ import numpy as np
 import pytest
 from definitions import INVALID
 
-import scenarios.solvers
 from scenarios import test_data
+from scenarios.solvers import *
 
 
 class TestSolvers(unittest.TestCase):
     def test_ecbs_success(self):
         # agents that collide in the middle
-        starts_success = np.array([
-            [0, 0],
-            [0, 2]
-        ])
-        goals_success = np.array([
-            [2, 0],
-            [2, 2]
-        ])
-        res = scenarios.solvers.ecbs(
-            test_data.env, starts_success, goals_success)
+        res = ecbs(
+            test_data.env, test_data.starts_collision,
+            test_data.goals_collision)
         self.assertTrue(len(res.keys()) != 0)
 
     def test_ecbs_invalid(self):
@@ -35,7 +28,7 @@ class TestSolvers(unittest.TestCase):
         ])
         self.assertEqual(
             INVALID,
-            scenarios.solvers.ecbs(
+            ecbs(
                 test_data.env, starts_invalid, goals_invalid)
         )
         # returns invalid when one agents path is not possible
@@ -49,7 +42,7 @@ class TestSolvers(unittest.TestCase):
         ])
         self.assertEqual(
             INVALID,
-            scenarios.solvers.ecbs(
+            ecbs(
                 test_data.env, starts_invalid, goals_invalid)
         )
 
@@ -71,6 +64,15 @@ class TestSolvers(unittest.TestCase):
         ])
         self.assertEqual(
             INVALID,
-            scenarios.solvers.ecbs(
+            ecbs(
                 test_data.env, starts_deadlocks, goals_deadlocks)
         )
+
+    def test_indep(self):
+        res = indep(
+            test_data.env, test_data.starts_collision,
+            test_data.goals_collision)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    unittest.main()

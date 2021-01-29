@@ -4,13 +4,14 @@ from typing import Tuple
 
 import numpy as np
 import tools
-from scenarios.solvers import ecbs, icts, SCHEDULE
 from definitions import INVALID
 from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
-from sim.decentralized.agent import Agent, Policy
+from sim.decentralized.agent import Agent
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
+
+from scenarios.solvers import SCHEDULE, ecbs, icts, indep, to_agent_objects
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
@@ -19,17 +20,6 @@ logging.getLogger(
 
 HIGHLEVELEXPANDED = 'highLevelExpanded'
 STATISTICS = 'statistics'
-
-
-def to_agent_objects(env, starts, goals, policy=Policy.RANDOM):
-    n_agents = starts.shape[0]
-    agents = []
-    for i_a in range(n_agents):
-        a = Agent(env, starts[i_a])
-        if not a.give_a_goal(goals[i_a]):
-            return INVALID
-        agents.append(a)
-    return agents
 
 
 def is_well_formed(env, starts, goals):
@@ -90,18 +80,14 @@ def cost_independent(env, starts, goals):
     """what would be the average agent cost if the agents would be independent
     of each other"""
     n_agents = starts.shape[0]
-    cost_per_agent = []
-    for i_a in range(n_agents):
-        a = Agent(env, starts[i_a])
-        success = a.give_a_goal(goals[i_a])
-        if not success:
-            return INVALID
-        cost_per_agent.append(len(a.path)-1)
-    return float(sum(cost_per_agent)) / n_agents
+    paths = indep(env, starts, goals)
+    if paths is INVALID:
+        return INVALID
+    return float(sum(map(lambda p: len(p)-1, paths))) / n_agents
 
 
 def cost_sim_decentralized_random(env, starts, goals):
-    agents = to_agent_objects(env, starts, goals, Policy.RANDOM)
+    agents = to_agent_objects(env, starts, goals)
     if agents is INVALID:
         return INVALID
     (average_time, _, _, _, successful

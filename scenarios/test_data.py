@@ -6,13 +6,23 @@ env = np.array([
     [0, 0, 0]
 ])
 
-# starts and goals with a no collision on env
+# starts and goals with no collision on env
 starts_no_collision = np.array([
     [0, 0],
     [2, 0]
 ])
 goals_no_collision = np.array([
     [0, 2],
+    [2, 2]
+])
+
+# starts and goals with a collision in middle of env
+starts_collision = np.array([
+    [0, 0],
+    [0, 2]
+])
+goals_collision = np.array([
+    [2, 0],
     [2, 2]
 ])
 
