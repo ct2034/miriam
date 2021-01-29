@@ -101,7 +101,8 @@ class TestEvaluators(unittest.TestCase):
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_ecbs(
-                test_data.env, test_data.starts_no_collision, test_data.goals_no_collision)
+                test_data.env, test_data.starts_no_collision,
+                test_data.goals_no_collision)
         )
 
     def test_cost_ecbs_invalid(self):
@@ -194,7 +195,8 @@ class TestEvaluators(unittest.TestCase):
         # agents that don't collide should not expand ecbs nodes
         self.assertEqual(
             1, scenarios.evaluators.expanded_nodes_ecbs(
-                test_data.env, test_data.starts_no_collision, test_data.goals_no_collision)
+                test_data.env, test_data.starts_no_collision,
+                test_data.goals_no_collision)
         )
 
     def test_expanded_nodes_ecbs_invalid(self):
@@ -228,7 +230,8 @@ class TestEvaluators(unittest.TestCase):
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_independent(
-                test_data.env, test_data.starts_no_collision, test_data.goals_no_collision)
+                test_data.env, test_data.starts_no_collision,
+                test_data.goals_no_collision)
         )
 
     def test_cost_independent_invalid(self):
@@ -266,7 +269,8 @@ class TestEvaluators(unittest.TestCase):
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_sim_decentralized_random(
-                test_data.env, test_data.starts_no_collision, test_data.goals_no_collision)
+                test_data.env, test_data.starts_no_collision,
+                test_data.goals_no_collision)
         )
 
     def test_cost_sim_decentralized_random_unsolvable(self):
@@ -307,7 +311,8 @@ class TestEvaluators(unittest.TestCase):
         # agents that don't collide should not expand icts nodes
         self.assertEqual(
             1, scenarios.evaluators.expanded_nodes_icts(
-                test_data.env, test_data.starts_no_collision, test_data.goals_no_collision)
+                test_data.env, test_data.starts_no_collision,
+                test_data.goals_no_collision)
         )
 
     def test_expanded_nodes_icts_deadlock(self):
@@ -321,7 +326,8 @@ class TestEvaluators(unittest.TestCase):
     def test_cost_icts_no_collision(self):
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_icts(
-                test_data.env, test_data.starts_no_collision, test_data.goals_no_collision)
+                test_data.env, test_data.starts_no_collision,
+                test_data.goals_no_collision)
         )
 
     def test_cost_icts_deadlock(self):
