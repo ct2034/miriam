@@ -13,7 +13,6 @@ from multiprocessing import Pool
 import matplotlib.pyplot as plt
 import numpy as np
 import tools
-from cachier import cachier
 from definitions import FREE, OBSTACLE
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
@@ -133,7 +132,6 @@ def time_path(path: np.ndarray):
     return np.append(path, nrs, axis=1)
 
 
-@cachier(hash_params=tools.hasher)
 def will_they_collide(gridmap, starts, goals):
     """checks if for a given set of starts and goals the agents travelling
     between may collide on the given gridmap."""
@@ -153,7 +151,6 @@ def will_they_collide(gridmap, starts, goals):
     return do_collide, agent_paths
 
 
-@cachier(hash_params=tools.hasher)
 def add_padding_to_gridmap(gridmap, radius):
     """add a border of blocks around the map of given radius.
     (The new size will be old size + 2 * radius in both directions)"""

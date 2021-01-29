@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import tools
-from cachier import cachier
 from definitions import INVALID, OBSTACLE
 
 from .external.MAPFSolver.SearchBasedAlgorithms import ICTSSolver
@@ -15,7 +14,6 @@ INFO_TYPE = Tuple[List[List[Tuple[int, int]]],
                   Dict[str, Union[int, float]]]
 
 
-@cachier(hash_params=tools.hasher)
 def icts_plan(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
               timeout: int = 30) -> Tuple[Any]:
     sse = SolverSettings()

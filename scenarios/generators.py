@@ -5,7 +5,6 @@ from itertools import product
 from typing import *
 import os
 
-from cachier import cachier
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -28,7 +27,6 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int):
     return starts, goals
 
 
-@cachier(hash_params=tools.hasher)
 def like_sim_decentralized(size: int, fill: float,
                            n_agents: int, seed: Any):
     random.seed(seed)
@@ -62,7 +60,6 @@ def generate_random_gridmap(width: int, height: int, fill: float):
     return gridmap
 
 
-@cachier(hash_params=tools.hasher)
 def like_policylearn_gen(size: int, fill: float,
                          n_agents: int, seed: Any):
     random.seed(seed)
@@ -93,7 +90,6 @@ def get_random_next_to_free_pose_or_any_if_full(env):
         return step_pos
 
 
-@cachier(hash_params=tools.hasher)
 def tracing_pathes_in_the_dark(size: int, fill: float,
                                n_agents: int, seed: Any):
     if fill == 0:

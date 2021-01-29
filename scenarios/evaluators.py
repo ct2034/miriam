@@ -4,7 +4,6 @@ from typing import Tuple
 
 import numpy as np
 import tools
-from cachier import cachier
 from definitions import INVALID
 from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info, icts_plan,
                                                 is_info_valid,
@@ -23,7 +22,6 @@ HIGHLEVELEXPANDED = 'highLevelExpanded'
 STATISTICS = 'statistics'
 
 
-@cachier(hash_params=tools.hasher)
 def to_agent_objects(env, starts, goals, policy=Policy.RANDOM):
     n_agents = starts.shape[0]
     agents = []
@@ -35,7 +33,6 @@ def to_agent_objects(env, starts, goals, policy=Policy.RANDOM):
     return agents
 
 
-@cachier(hash_params=tools.hasher)
 def is_well_formed(env, starts, goals):
     """Check if the environment is well formed according to Cap2015"""
     agents = to_agent_objects(env, starts, goals)
@@ -44,7 +41,6 @@ def is_well_formed(env, starts, goals):
     return is_environment_well_formed(tuple(agents))
 
 
-@cachier(hash_params=tools.hasher)
 def plan_ecbs(env, starts, goals, timeout=10):
     """Plan scenario using ecbs returning results data"""
     try:
@@ -59,7 +55,6 @@ def plan_ecbs(env, starts, goals, timeout=10):
     return data
 
 
-@cachier(hash_params=tools.hasher)
 def cost_ecbs(env, starts, goals, timeout=10):
     """get the average agent cost of this from ecbs
     returns: `float` and `-1` if planning was unsuccessful."""
@@ -77,7 +72,6 @@ def cost_ecbs(env, starts, goals, timeout=10):
     return float(sum(cost_per_agent)) / n_agents
 
 
-@cachier(hash_params=tools.hasher)
 def expanded_nodes_ecbs(env, starts, goals, timeout=10):
     data = plan_ecbs(env, starts, goals, timeout=timeout)
     if data == INVALID:
@@ -85,7 +79,6 @@ def expanded_nodes_ecbs(env, starts, goals, timeout=10):
     return data[STATISTICS][HIGHLEVELEXPANDED]
 
 
-@cachier(hash_params=tools.hasher)
 def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
     """Return numbers of vertex and edge blocks for this scenarios solution
     returns: (n_vertex_blocks, n_edge_blocks)"""
@@ -108,7 +101,6 @@ def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
     return (n_vertex_blocks, n_edge_blocks)
 
 
-@cachier(hash_params=tools.hasher)
 def cost_independant(env, starts, goals):
     """what would be the average agent cost if the agents would be independent
     of each other"""
@@ -124,7 +116,6 @@ def cost_independant(env, starts, goals):
     return float(sum(cost_per_agent)) / n_agents
 
 
-@cachier(hash_params=tools.hasher)
 def cost_sim_decentralized_random(env, starts, goals):
     agents = to_agent_objects(env, starts, goals, Policy.RANDOM)
     if agents is INVALID:
@@ -138,7 +129,6 @@ def cost_sim_decentralized_random(env, starts, goals):
         return INVALID
 
 
-@cachier(hash_params=tools.hasher)
 def expanded_nodes_icts(env, starts, goals, timeout=30):
     info = icts_plan(env, starts, goals, timeout=timeout)
     if is_info_valid(info):
@@ -147,7 +137,6 @@ def expanded_nodes_icts(env, starts, goals, timeout=30):
         return INVALID
 
 
-@cachier(hash_params=tools.hasher)
 def cost_icts(env, starts, goals, timeout=30):
     n_agents = starts.shape[0]
     info = icts_plan(env, starts, goals, timeout=timeout)

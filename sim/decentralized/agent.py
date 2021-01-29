@@ -5,7 +5,6 @@ from typing import *
 
 import networkx as nx
 import numpy as np
-from cachier import cachier
 
 import tools
 
