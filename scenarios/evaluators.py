@@ -4,11 +4,11 @@ from typing import Tuple
 
 import numpy as np
 import tools
+from scenarios.solvers import ecbs, icts, SCHEDULE
 from definitions import INVALID
 from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
-                                                icts_plan, is_info_valid,
+                                                is_info_valid,
                                                 sum_of_costs_from_info)
-from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent, Policy
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
 
@@ -17,7 +17,6 @@ logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
 logging.getLogger(
     'planner.policylearn.libMultiRobotPlanning').setLevel(logging.ERROR)
 
-SCHEDULE = 'schedule'
 HIGHLEVELEXPANDED = 'highLevelExpanded'
 STATISTICS = 'statistics'
 
@@ -41,24 +40,10 @@ def is_well_formed(env, starts, goals):
     return is_environment_well_formed(tuple(agents))
 
 
-def plan_ecbs(env, starts, goals, timeout=10):
-    """Plan scenario using ecbs returning results data"""
-    try:
-        data = plan_in_gridmap(env, list(starts), list(goals), timeout)
-    except KeyError:  # happens when start or goal is not in map
-        return INVALID
-    if data is None:
-        return INVALID
-    n_agents = starts.shape[0]
-    schedule = data[SCHEDULE]
-    assert n_agents == len(schedule.keys()), "Plans for all agents"
-    return data
-
-
 def cost_ecbs(env, starts, goals, timeout=10):
     """get the average agent cost of this from ecbs
     returns: `float` and `-1` if planning was unsuccessful."""
-    data = plan_ecbs(env, starts, goals, timeout=timeout)
+    data = ecbs(env, starts, goals, timeout=timeout)
     if data == INVALID:
         return data
     n_agents = starts.shape[0]
@@ -73,7 +58,7 @@ def cost_ecbs(env, starts, goals, timeout=10):
 
 
 def expanded_nodes_ecbs(env, starts, goals, timeout=10):
-    data = plan_ecbs(env, starts, goals, timeout=timeout)
+    data = ecbs(env, starts, goals, timeout=timeout)
     if data == INVALID:
         return data
     return data[STATISTICS][HIGHLEVELEXPANDED]
@@ -82,7 +67,7 @@ def expanded_nodes_ecbs(env, starts, goals, timeout=10):
 def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
     """Return numbers of vertex and edge blocks for this scenarios solution
     returns: (n_vertex_blocks, n_edge_blocks)"""
-    data = plan_ecbs(env, starts, goals)
+    data = ecbs(env, starts, goals)
     if data == INVALID:
         return data
     blocks = data['blocks']
@@ -101,11 +86,10 @@ def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
     return (n_vertex_blocks, n_edge_blocks)
 
 
-def cost_independant(env, starts, goals):
+def cost_independent(env, starts, goals):
     """what would be the average agent cost if the agents would be independent
     of each other"""
     n_agents = starts.shape[0]
-    agents = []
     cost_per_agent = []
     for i_a in range(n_agents):
         a = Agent(env, starts[i_a])
@@ -120,7 +104,7 @@ def cost_sim_decentralized_random(env, starts, goals):
     agents = to_agent_objects(env, starts, goals, Policy.RANDOM)
     if agents is INVALID:
         return INVALID
-    (average_time, max_time, average_length, max_length, successful
+    (average_time, _, _, _, successful
      ) = run_a_scenario(
         env, agents, plot=False)
     if successful:
@@ -130,7 +114,7 @@ def cost_sim_decentralized_random(env, starts, goals):
 
 
 def expanded_nodes_icts(env, starts, goals, timeout=30):
-    info = icts_plan(env, starts, goals, timeout=timeout)
+    info = icts(env, starts, goals, timeout=timeout)
     if is_info_valid(info):
         return expanded_nodes_from_info(info)
     else:
@@ -139,7 +123,7 @@ def expanded_nodes_icts(env, starts, goals, timeout=30):
 
 def cost_icts(env, starts, goals, timeout=30):
     n_agents = starts.shape[0]
-    info = icts_plan(env, starts, goals, timeout=timeout)
+    info = icts(env, starts, goals, timeout=timeout)
     if is_info_valid(info):
         return float(sum_of_costs_from_info(info)) / n_agents
     else:

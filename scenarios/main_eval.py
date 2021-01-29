@@ -364,7 +364,7 @@ def main_base():
                     results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a] = INVALID
                 # is this different to the independant costs? .................
                 if results[ECBS_COST][i_r, i_f, i_a] != INVALID:
-                    cost_indep = cost_independant(env, starts, goals)
+                    cost_indep = cost_independent(env, starts, goals)
                     if cost_indep != INVALID:
                         results[DIFF_INDEP][i_r, i_f, i_a] = (
                             results[ECBS_COST][i_r, i_f, i_a] - cost_indep
