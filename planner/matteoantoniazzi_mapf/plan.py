@@ -16,8 +16,8 @@ INFO_TYPE = Tuple[List[List[Tuple[int, int]]],
 
 
 @cachier(hash_params=tools.hasher)
-def icts(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
-         timeout: int = 30) -> Tuple[Any]:
+def icts_plan(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
+              timeout: int = 30) -> Tuple[Any]:
     sse = SolverSettings()
     sse.set_time_out(timeout)
     solver = ICTSSolver(sse)

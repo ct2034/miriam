@@ -6,7 +6,7 @@ import numpy as np
 import tools
 from cachier import cachier
 from definitions import INVALID
-from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info, icts,
+from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info, icts_plan,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
@@ -140,7 +140,7 @@ def cost_sim_decentralized_random(env, starts, goals):
 
 @cachier(hash_params=tools.hasher)
 def expanded_nodes_icts(env, starts, goals, timeout=30):
-    info = icts(env, starts, goals, timeout=timeout)
+    info = icts_plan(env, starts, goals, timeout=timeout)
     if is_info_valid(info):
         return expanded_nodes_from_info(info)
     else:
@@ -150,7 +150,7 @@ def expanded_nodes_icts(env, starts, goals, timeout=30):
 @cachier(hash_params=tools.hasher)
 def cost_icts(env, starts, goals, timeout=30):
     n_agents = starts.shape[0]
-    info = icts(env, starts, goals, timeout=timeout)
+    info = icts_plan(env, starts, goals, timeout=timeout)
     if is_info_valid(info):
         return float(sum_of_costs_from_info(info)) / n_agents
     else:
