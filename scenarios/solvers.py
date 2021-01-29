@@ -25,10 +25,10 @@ def indep(env, starts, goals):
     paths = []
     for a in agents:
         p = a.path
-        l = p.shape[0]
-        ts = np.arange(l)
+        le = p.shape[0]
+        ts = np.arange(le)
         paths.append(
-            np.append(p, ts.reshape((l, 1)), axis=1)
+            np.append(p, ts.reshape((le, 1)), axis=1)
         )
     return paths
 
