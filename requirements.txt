@@ -21,8 +21,8 @@ pyomo==5.2
 pypng
 pytest
 pytest-cov
-pytest-parallel
 pytest-timeout
+pytest-xdist
 scipy
 timeout-decorator
 unittest2
