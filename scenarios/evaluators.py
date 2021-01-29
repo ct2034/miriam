@@ -5,8 +5,8 @@ from typing import Tuple
 import numpy as np
 import tools
 from definitions import INVALID
-from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info, icts_plan,
-                                                is_info_valid,
+from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
+                                                icts_plan, is_info_valid,
                                                 sum_of_costs_from_info)
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent, Policy
