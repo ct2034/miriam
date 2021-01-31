@@ -1,10 +1,11 @@
 import numpy as np
 from definitions import INVALID
-from planner.matteoantoniazzi_mapf.plan import icts_plan
+from planner.matteoantoniazzi_mapf.plan import icts_plan, paths_from_info
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent, Policy
 
 SCHEDULE = 'schedule'
+AGENT = 'agent'
 
 
 def to_agent_objects(env, starts, goals, policy=Policy.RANDOM):
@@ -33,7 +34,7 @@ def indep(env, starts, goals):
     return paths
 
 
-def ecbs(env, starts, goals, timeout=10):
+def ecbs(env, starts, goals, timeout=10, return_paths=False):
     """Plan scenario using ecbs returning results data"""
     try:
         data = plan_in_gridmap(env, list(starts), list(goals), timeout)
@@ -44,8 +45,30 @@ def ecbs(env, starts, goals, timeout=10):
     n_agents = starts.shape[0]
     schedule = data[SCHEDULE]
     assert n_agents == len(schedule.keys()), "Plans for all agents"
-    return data
+    if return_paths:
+        return _ecbs_data_to_paths(data)
+    else:
+        return data
 
 
-def icts(env, starts, goals, timeout=30):
-    return icts_plan(env, starts, goals, timeout)
+def _ecbs_data_to_paths(data):
+    schedule = data[SCHEDULE]
+    n_agents = len(schedule.keys())
+    paths = []
+    for i_a in range(n_agents):
+        key = AGENT + str(i_a)
+        assert key in schedule.keys()
+        one_path = list(map(
+            lambda d: [d['x'], d['y'], d['t']],
+            schedule[key]
+        ))
+        paths.append(np.array(one_path))
+    return paths
+
+
+def icts(env, starts, goals, timeout=30, return_paths=False):
+    info = icts_plan(env, starts, goals, timeout)
+    if return_paths:
+        return paths_from_info(info)
+    else:
+        return info

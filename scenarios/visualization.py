@@ -32,9 +32,9 @@ def plot_with_arrows(env, starts, goals):
             starts[i_a][1] + .5,
             goals[i_a][0] - starts[i_a][0],
             goals[i_a][1] - starts[i_a][1],
-            width=1,
+            width=float(env.shape[0]/20),
             length_includes_head=True,
-            linewidth=0,
+            linewidth=float(env.shape[0]/20),
             color=colors[i_a])
 
 

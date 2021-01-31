@@ -1,8 +1,7 @@
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
-import tools
-from definitions import INVALID, OBSTACLE
+from definitions import OBSTACLE
 
 from .external.MAPFSolver.SearchBasedAlgorithms import ICTSSolver
 from .external.MAPFSolver.Utilities import (Agent, Map, ProblemInstance,
@@ -48,3 +47,15 @@ def sum_of_costs_from_info(info: INFO_TYPE) -> int:
     soc = info[1][SUM_OF_COSTS]
     assert isinstance(soc, int)
     return soc
+
+
+def paths_from_info(info: INFO_TYPE) -> List[np.array]:
+    paths = []
+    for pt in info[0]:
+        p = np.array(pt)
+        le = p.shape[0]
+        ts = np.arange(le)
+        paths.append(
+            np.append(p, ts.reshape((le, 1)), axis=1)
+        )
+    return paths
