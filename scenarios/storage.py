@@ -52,21 +52,22 @@ def has_result(scenario: SCENARIO_TYPE, result_type: ResultType) -> bool:
 
 def get_result(scenario: SCENARIO_TYPE, result_type: ResultType) -> Any:
     # Retrieve `result` for `scenario`.
+    assert has_result(scenario, result_type)
     with open(get_filepath(scenario), 'rb') as f:
         data = pkl.load(f)
-        assert result_type.name in data.keys()
         return data[result_type.name]
 
 
 def save_result(scenario: SCENARIO_TYPE, result_type: ResultType, result: Any):
     # Save a `result` for `scenario`.
     if has_file(scenario):
-        with open(get_filepath(scenario), 'r+b') as f:
+        with open(get_filepath(scenario), 'rb') as f:
             data: dict = pkl.load(f)
             assert result_type.name not in data.keys()  # was not there before
-            data[result_type.name] = result
-            pkl.dump(result, f)
+        data[result_type.name] = result
+        with open(get_filepath(scenario), 'wb') as f:
+            pkl.dump(data, f)
     else:
         with open(get_filepath(scenario), 'wb') as f:
             data = {result_type.name: result}
-            pkl.dump(result, f)
+            pkl.dump(data, f)
