@@ -270,10 +270,11 @@ def run_command(bashCommand, timeout=None) -> Tuple[str, str, int]:
 def hasher(args, kwargs):
     """Hash args that are hashable or np.ndarrays"""
     hashstr = ""
-    for i, arg in enumerate(args + tuple(kwargs.values())):
+    for i, arg in enumerate(list(args) + list(kwargs.values())):
         if isinstance(arg, np.ndarray):
             hashstr += str(hash(arg.tobytes()))
         else:
             hashstr += str(arg)
+        hashstr += str(i)
     my_hash = sha256(hashstr.encode('utf-8')).hexdigest()
     return my_hash

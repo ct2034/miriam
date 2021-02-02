@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import logging
 import pickle
-import random
 import time
 from copy import copy
 from functools import lru_cache
@@ -10,6 +9,7 @@ from typing import *
 
 import matplotlib.colors as colors
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -129,7 +129,7 @@ def main_icts():
         like_sim_decentralized,
         tracing_pathes_in_the_dark
     ]
-    all_results = {}
+    all_results = pd.DataFrame()
 
     fills = np.around(
         np.linspace(0, max_fill, n_fills),
