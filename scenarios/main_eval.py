@@ -54,7 +54,7 @@ def get_fname(generator_name, evaluation, extension):
             evaluation + "." + extension)
 
 
-def name_from_gen(generator):
+def genstr(generator):
     generator_name = str(generator).split("at 0x")[
         0].replace("<function ", "").replace(" ", "")
     return generator_name
@@ -121,15 +121,15 @@ def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
-    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
+    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
+    # parameters to evaluate against
     generators = [
         # like_policylearn_gen,
         like_sim_decentralized,
         tracing_pathes_in_the_dark
     ]
-    all_results = pd.DataFrame()
 
     fills = np.around(
         np.linspace(0, max_fill, n_fills),
@@ -139,139 +139,175 @@ def main_icts():
     n_agentss = np.linspace(1, 16, n_n_agentss, dtype=np.int
                             )  # list of different numbers of agents we want
 
-    for gen in generators:
-        all_results[str(gen)] = {}
-        results = all_results[str(gen)]
+    evaluations = [
+        ECBS_SUCCESS,
+        ECBS_COST,
+        ECBS_EXPANDED_NODES,
+        ECBS_VERTEX_BLOCKS,
+        ECBS_EDGE_BLOCKS,
+        ICTS_SUCCESS,
+        ICTS_EXPANDED_NODES,
+        DIFFERENCE_ECBS_EN_MINUS_ICTS_EN
+    ]
 
-        # save results here
-        # first plot row
-        results[ECBS_SUCCESS] = np.zeros([n_fills, n_n_agentss])
-        results[ECBS_COST] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[ECBS_EXPANDED_NODES] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[ECBS_VERTEX_BLOCKS] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[ECBS_EDGE_BLOCKS] = np.full(  # don't plot (maybe)
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        # second plot row
-        results[ICTS_SUCCESS] = np.zeros([n_fills, n_n_agentss])
-        results[ICTS_COST] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[ICTS_EXPANDED_NODES] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
+    # preparing panda dataframes
+    index_arrays = {
+        'generators': list(map(genstr, generators)),
+        'fills': fills,
+        'n_agentss': n_agentss,
+        'evaluations': evaluations
+    }
+    idx = pd.MultiIndex.from_product(
+        index_arrays.values(), names=index_arrays.keys())
+    all_results = pd.DataFrame(index=idx)
+
+    all_results.sort_index(inplace=True)
+    assert len(index_arrays) == all_results.index.lexsort_depth
 
     t = time.time()
     i = 0
-    for gen in generators:
-        results = all_results[str(gen)]
-        for i_r in range(n_runs):
-            for i_f, i_a in product(range(n_fills),
-                                    range(n_n_agentss)):
-                i += 1
-                print("run %d of %d" %
-                      (i, n_runs * n_fills * n_n_agentss * len(generators)))
-                # generating a scenario .......................................
-                fill = fills[i_f]
-                n_agents = n_agentss[i_a]
-                env, starts, goals = gen(
-                    size, fill, n_agents, seed=i_r)
-                # calculating optimal cost ....................................
-                if i_f > 0 and results[ECBS_COST
-                                       ][i_r, i_f - 1, i_a] == INVALID:
-                    # previous fills timed out
-                    res_ecbs = INVALID
-                elif i_a > 0 and results[ECBS_COST
-                                         ][i_r, i_f, i_a - 1] == INVALID:
-                    # previous agent count failed as well
-                    res_ecbs = INVALID
-                else:
-                    res_ecbs = cost_ecbs(env, starts, goals)
-                if res_ecbs != INVALID:
-                    results[ECBS_SUCCESS][i_f, i_a] += 1
-                    results[ECBS_COST][i_r, i_f, i_a] = res_ecbs
-                    results[ECBS_EXPANDED_NODES
-                            ][i_r, i_f, i_a] = expanded_nodes_ecbs(
-                                env, starts, goals)
-                # evaluating blocks
-                blocks = blocks_ecbs(env, starts, goals)
-                if blocks != INVALID:
-                    (
-                        results[ECBS_VERTEX_BLOCKS][i_r, i_f, i_a],
-                        results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a]
-                    ) = blocks
-                else:
-                    results[ECBS_VERTEX_BLOCKS][i_r, i_f, i_a] = INVALID
-                    results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a] = INVALID
-                # what is icts cost? ..........................................
-                if i_f > 0 and results[ICTS_COST
-                                       ][i_r, i_f - 1, i_a] == INVALID:
-                    # previous fills timed out
-                    res_icts = INVALID
-                elif i_a > 0 and results[ICTS_COST
-                                         ][i_r, i_f, i_a - 1] == INVALID:
-                    # previous agent count failed as well
-                    res_icts = INVALID
-                else:
-                    res_icts = cost_icts(env, starts, goals)
-                if res_icts != INVALID:
-                    results[ICTS_SUCCESS][i_f, i_a] += 1
-                    results[ICTS_COST][i_r, i_f, i_a] = res_icts
-                    results[ICTS_EXPANDED_NODES
-                            ][i_r, i_f, i_a] = expanded_nodes_icts(
-                                env, starts, goals)
-                # run icts and compare n of expanded nodes
-                if (
-                    results[ECBS_EXPANDED_NODES][i_r, i_f, i_a] != INVALID and
-                    results[ICTS_EXPANDED_NODES][i_r, i_f, i_a] != INVALID
-                ):
-                    if (results[ECBS_EXPANDED_NODES][i_r, i_f, i_a] == 0 and
-                            results[ICTS_EXPANDED_NODES][i_r, i_f, i_a] == 0):
-                        d = 0
-                    elif results[ICTS_EXPANDED_NODES][i_r, i_f, i_a] == 0:
-                        d = 1000
-                    else:
-                        d = (
-                            float(results[ECBS_EXPANDED_NODES][i_r, i_f, i_a])
-                            - results[ICTS_EXPANDED_NODES][i_r, i_f, i_a]
-                        )
-                    results[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN
-                            ][i_r, i_f, i_a] = d
+    for gen, i_r, i_f, i_a in product(generators,
+                                      range(n_runs),
+                                      range(n_fills),
+                                      range(n_n_agentss)):
+        i += 1
+        print("run %d of %d" %
+              (i, n_runs * n_fills * n_n_agentss * len(generators)))
+        # Taking care of some little pandas ...........................
+        col = str(i_r)
+        if col not in all_results.columns:
+            all_results[col] = [-1] * len(all_results.index)
+        all_results.sort_index(inplace=True)
+        # generating a scenario .......................................
+        fill = fills[i_f]
+        n_agents = n_agentss[i_a]
+        env, starts, goals = gen(
+            size, fill, n_agents, seed=i_r)
+        # calculating optimal cost ....................................
+        if i_f > 0 and all_results.loc[
+                (genstr(gen), fills[i_f-1], n_agents, ECBS_COST), col
+        ] == INVALID:
+            # previous fills timed out
+            res_ecbs = INVALID
+        elif i_a > 0 and all_results.loc[
+                (genstr(gen), fill, n_agentss[i_a-1], ECBS_COST), col
+        ] == INVALID:
+            # previous agent count failed as well
+            res_ecbs = INVALID
+        else:
+            res_ecbs = cost_ecbs(env, starts, goals)
+        if res_ecbs != INVALID:
+            all_results.loc[
+                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col] = 1
+            all_results.loc[
+                (genstr(gen), fill, n_agents, ECBS_COST), col] = res_ecbs
+            all_results.loc[
+                (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col
+            ] = expanded_nodes_ecbs(
+                env, starts, goals)
+            # evaluating blocks
+            blocks = blocks_ecbs(env, starts, goals)
+            if blocks != INVALID:
+                (
+                    all_results.loc[
+                        (genstr(gen), fill, n_agents,
+                         ECBS_VERTEX_BLOCKS), col],
+                    all_results.loc[
+                        (genstr(gen), fill, n_agents,
+                         ECBS_EDGE_BLOCKS), col]
+                ) = blocks
+            else:
+                all_results.loc[
+                    (genstr(gen), fill, n_agents, ECBS_VERTEX_BLOCKS), col
+                ] = INVALID
+                all_results.loc[
+                    (genstr(gen), fill, n_agents, ECBS_EDGE_BLOCKS)
+                ] = INVALID
+        # what is icts cost? ..........................................
+        if i_f > 0 and all_results.loc[
+                (genstr(gen), fills[i_f-1], n_agents, ICTS_SUCCESS), col
+        ] == INVALID:
+            # previous fills timed out
+            res_icts = INVALID
+        elif i_a > 0 and all_results.loc[
+                (genstr(gen), fill, n_agentss[i_a-1], ICTS_SUCCESS), col
+        ] == INVALID:
+            # previous agent count failed as well
+            res_icts = INVALID
+        else:
+            res_icts = cost_icts(env, starts, goals)
+        if res_icts != INVALID:
+            all_results.loc[
+                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col] = 1
+            # all_results.loc[
+            #     (genstr(gen), fill, n_agents, ICTS_COST), col] = res_icts
+            all_results.loc[
+                (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col
+            ] = expanded_nodes_icts(
+                env, starts, goals)
+        # run icts and compare n of expanded nodes
+        if (
+            all_results.loc[
+                (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col
+            ] != INVALID and
+            all_results.loc[
+                (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col
+            ] != INVALID
+        ):
+            all_results.loc[
+                (genstr(gen), fill, n_agents,
+                 DIFFERENCE_ECBS_EN_MINUS_ICTS_EN),
+                col
+            ] = float(
+                all_results.loc[
+                    (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES),
+                    col
+                ] -
+                all_results.loc[
+                    (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES),
+                    col
+                ]
+            )
 
+        print(all_results)
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
 
-    for gen in generators:
-        results = all_results[str(gen)]
-        # saving
-        with open(get_fname(name_from_gen(gen), "icts", "pkl"), 'wb') as f:
-            pickle.dump(results, f)
-        # plot
-        plot_results(
-            [results[ECBS_SUCCESS],
-             results[ECBS_COST],
-             results[ECBS_EXPANDED_NODES],
-             results[ECBS_VERTEX_BLOCKS],
-             results[ICTS_SUCCESS],
-             results[ICTS_COST],
-             results[ICTS_EXPANDED_NODES],
-             results[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]],
-            ["ECBS success",
-             "ECBS cost",
-             "ECBS expanded nodes",
-             "Nr of vertex blocks in ecbs solution",
-             "ICTS success",
-             "ICTS cost",
-             "ICTS expanded nodes",
-             "Difference ECBS minus ICTS expanded nodes"],
-            generator_name=name_from_gen(gen),
-            n_agentss=n_agentss,
-            fills=fills,
-            evaluation="icts"
-        )
-    plt.show()
+    with pd.option_context('display.max_rows',
+                           None,
+                           'display.max_columns',
+                           None):  # all rows and columns
+        print(all_results)
+
+    # for gen in generators:
+    #     results = all_results[str(gen)]
+    #     # saving
+    #     with open(get_fname(genstr(gen), "icts", "pkl"), 'wb') as f:
+    #         pickle.dump(results, f)
+    #     # plot
+    #     plot_results(
+    #         [results[ECBS_SUCCESS],
+    #          results[ECBS_COST],
+    #          results[ECBS_EXPANDED_NODES],
+    #          results[ECBS_VERTEX_BLOCKS],
+    #          results[ICTS_SUCCESS],
+    #          results[ICTS_COST],
+    #          results[ICTS_EXPANDED_NODES],
+    #          results[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]],
+    #         ["ECBS success",
+    #          "ECBS cost",
+    #          "ECBS expanded nodes",
+    #          "Nr of vertex blocks in ecbs solution",
+    #          "ICTS success",
+    #          "ICTS cost",
+    #          "ICTS expanded nodes",
+    #          "Difference ECBS minus ICTS expanded nodes"],
+    #         generator_name=genstr(gen),
+    #         n_agentss=n_agentss,
+    #         fills=fills,
+    #         evaluation="icts"
+    #     )
+    # plt.show()
 
 
 def main_base():
@@ -390,7 +426,7 @@ def main_base():
     for gen in generators:
         results = all_results[str(gen)]
         # saving
-        with open(get_fname(name_from_gen(gen), "main", "pkl"), 'wb') as f:
+        with open(get_fname(genstr(gen), "main", "pkl"), 'wb') as f:
             pickle.dump(results, f)
         # plot
         plot_results(
@@ -410,7 +446,7 @@ def main_base():
              "Nr of vertex blocks in ecbs solution",
              "Nr of edge blocks in ecbs solution",
              "Usefullness"],
-            generator_name=name_from_gen(gen),
+            generator_name=genstr(gen),
             n_agentss=n_agentss,
             fills=fills,
             evaluation='main'
