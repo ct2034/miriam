@@ -23,7 +23,8 @@ def make_cache_folder_and_set_envvar(set_envvar=True):
 
 
 def remove_cache_folder_and_unset_envvar(unset_envvar=True):
-    assert ENVVAR_STORAGE_PATH_STR in os.environ, "environment variable must be set"
+    assert (ENVVAR_STORAGE_PATH_STR in os.environ
+            ), "environment variable must be set"
     data_path = os.environ[ENVVAR_STORAGE_PATH_STR]
     shutil.rmtree(data_path)
     if unset_envvar:
