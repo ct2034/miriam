@@ -5,10 +5,20 @@ import numpy as np
 import pytest
 
 import scenarios.evaluators
-from scenarios import test_data
+from scenarios import test_helper
 
 
 class TestEvaluators(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # making the folder to store data for test in.
+        test_helper.make_cache_folder_and_set_envvar()
+
+    @classmethod
+    def tearDownClass(cls):
+        # remove the folder that the test stored data in.
+        test_helper.remove_cache_folder_and_unset_envvar()
 
     def test_to_agent_objects(self):
         # generating successfully
@@ -21,7 +31,7 @@ class TestEvaluators(unittest.TestCase):
             [2, 2]
         ])
         res_agents = scenarios.evaluators.to_agent_objects(
-            test_data.env, starts, goals)
+            test_helper.env, starts, goals)
         res_starts = list(map(lambda a: tuple(a.pos), res_agents))
         res_goals = list(map(lambda a: tuple(a.goal), res_agents))
         self.assertIn((0, 0), res_starts)
@@ -40,7 +50,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.to_agent_objects(
-                test_data.env, starts_invalid, goals_invalid)
+                test_helper.env, starts_invalid, goals_invalid)
         )
 
     def test_is_well_formed(self):
@@ -55,7 +65,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertTrue(
             scenarios.evaluators.is_well_formed(
-                test_data.env, starts_wf, goals_wf)
+                test_helper.env, starts_wf, goals_wf)
         )
         # not well formed
         starts_nwf = np.array([
@@ -68,7 +78,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertFalse(
             scenarios.evaluators.is_well_formed(
-                test_data.env, starts_nwf, goals_nwf)
+                test_helper.env, starts_nwf, goals_nwf)
         )
         # returns invalid when one path is not possible
         starts_invalid = np.array([
@@ -81,7 +91,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertFalse(
             scenarios.evaluators.is_well_formed(
-                test_data.env, starts_invalid, goals_invalid)
+                test_helper.env, starts_invalid, goals_invalid)
         )
 
     def test_cost_ecbs_success(self):
@@ -96,13 +106,13 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertAlmostEqual(
             4.5, scenarios.evaluators.cost_ecbs(
-                test_data.env, starts_4_5, goals_4_5)
+                test_helper.env, starts_4_5, goals_4_5)
         )
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_ecbs(
-                test_data.env, test_data.starts_no_collision,
-                test_data.goals_no_collision)
+                test_helper.env, test_helper.starts_no_collision,
+                test_helper.goals_no_collision)
         )
 
     def test_cost_ecbs_invalid(self):
@@ -118,7 +128,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertAlmostEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_ecbs(
-                test_data.env, starts_invalid, goals_invalid)
+                test_helper.env, starts_invalid, goals_invalid)
         )
 
     @pytest.mark.timeout(20)  # internal timeout is 10
@@ -145,7 +155,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_ecbs(
-                test_data.env, starts_timeout, goals_timeout,
+                test_helper.env, starts_timeout, goals_timeout,
                 timeout=3)
         )
 
@@ -161,7 +171,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertEqual(
             (1, 0), scenarios.evaluators.blocks_ecbs(
-                test_data.env, starts_vertex, goals_vertex)
+                test_helper.env, starts_vertex, goals_vertex)
         )
 
         # agents that collide on edge
@@ -175,7 +185,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertEqual(
             (1, 1), scenarios.evaluators.blocks_ecbs(
-                test_data.env, starts_edge, goals_edge)
+                test_helper.env, starts_edge, goals_edge)
         )
 
     def test_blocks_ecbs_invalid(self):
@@ -188,15 +198,15 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertEqual(
             scenarios.evaluators.INVALID, scenarios.evaluators.blocks_ecbs(
-                test_data.env, starts_unsolv, goals_unsolv)
+                test_helper.env, starts_unsolv, goals_unsolv)
         )
 
     def test_expanded_nodes_ecbs_no_collision(self):
         # agents that don't collide should not expand ecbs nodes
         self.assertEqual(
             1, scenarios.evaluators.expanded_nodes_ecbs(
-                test_data.env, test_data.starts_no_collision,
-                test_data.goals_no_collision)
+                test_helper.env, test_helper.starts_no_collision,
+                test_helper.goals_no_collision)
         )
 
     def test_expanded_nodes_ecbs_invalid(self):
@@ -210,7 +220,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.expanded_nodes_ecbs(
-                test_data.env, starts_unsolv, goals_unsolv)
+                test_helper.env, starts_unsolv, goals_unsolv)
         )
 
     def test_cost_independent(self):
@@ -225,13 +235,13 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertAlmostEqual(
             4, scenarios.evaluators.cost_independent(
-                test_data.env, starts_4, goals_4)
+                test_helper.env, starts_4, goals_4)
         )
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_independent(
-                test_data.env, test_data.starts_no_collision,
-                test_data.goals_no_collision)
+                test_helper.env, test_helper.starts_no_collision,
+                test_helper.goals_no_collision)
         )
 
     def test_cost_independent_invalid(self):
@@ -247,7 +257,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertAlmostEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_independent(
-                test_data.env, starts_invalid, goals_invalid)
+                test_helper.env, starts_invalid, goals_invalid)
         )
 
     def test_cost_sim_decentralized_random_collision(self):
@@ -262,15 +272,15 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertAlmostEqual(
             4.5, scenarios.evaluators.cost_sim_decentralized_random(
-                test_data.env, starts_4_5, goals_4_5)
+                test_helper.env, starts_4_5, goals_4_5)
         )
 
     def test_cost_sim_decentralized_random_no_collision(self):
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_sim_decentralized_random(
-                test_data.env, test_data.starts_no_collision,
-                test_data.goals_no_collision)
+                test_helper.env, test_helper.starts_no_collision,
+                test_helper.goals_no_collision)
         )
 
     def test_cost_sim_decentralized_random_unsolvable(self):
@@ -283,7 +293,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_sim_decentralized_random(
-                test_data.env, starts_unsolv, goals_unsolv)
+                test_helper.env, starts_unsolv, goals_unsolv)
         )
 
     def test_cost_sim_decentralized_random_deadlocks(self):
@@ -304,38 +314,38 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_sim_decentralized_random(
-                test_data.env, starts_deadlocks, goals_deadlocks)
+                test_helper.env, starts_deadlocks, goals_deadlocks)
         )
 
     def test_expanded_nodes_icts_no_collision(self):
         # agents that don't collide should not expand icts nodes
         self.assertEqual(
             1, scenarios.evaluators.expanded_nodes_icts(
-                test_data.env, test_data.starts_no_collision,
-                test_data.goals_no_collision)
+                test_helper.env, test_helper.starts_no_collision,
+                test_helper.goals_no_collision)
         )
 
     def test_expanded_nodes_icts_deadlock(self):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.expanded_nodes_icts(
-                test_data.env_deadlock, test_data.starts_deadlock,
-                test_data.goals_deadlock, timeout=10)
+                test_helper.env_deadlock, test_helper.starts_deadlock,
+                test_helper.goals_deadlock, timeout=10)
         )
 
     def test_cost_icts_no_collision(self):
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_icts(
-                test_data.env, test_data.starts_no_collision,
-                test_data.goals_no_collision)
+                test_helper.env, test_helper.starts_no_collision,
+                test_helper.goals_no_collision)
         )
 
     def test_cost_icts_deadlock(self):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_icts(
-                test_data.env_deadlock, test_data.starts_deadlock,
-                test_data.goals_deadlock, timeout=10)
+                test_helper.env_deadlock, test_helper.starts_deadlock,
+                test_helper.goals_deadlock, timeout=10)
         )
 
 

@@ -1,6 +1,34 @@
-from os import SEEK_CUR
+import os
+import shutil
+import uuid
 
 import numpy as np
+
+ENVVAR_STORAGE_PATH_STR = 'SCENARIO_STORAGE_PATH'
+STORAGE_PATH_TESTING = "/tmp/testing/"
+
+
+def make_cache_folder_and_set_envvar(set_envvar=True):
+    if not os.path.exists(STORAGE_PATH_TESTING):
+        os.mkdir(STORAGE_PATH_TESTING)
+    assert not os.listdir(
+        STORAGE_PATH_TESTING), "testing cache folder is not empty"
+    data_path = STORAGE_PATH_TESTING + str(uuid.uuid1())
+    assert not os.path.exists(data_path)
+    os.mkdir(data_path)
+    if set_envvar:
+        os.environ[ENVVAR_STORAGE_PATH_STR] = data_path
+    print("folder for testing created under " + data_path)
+    return data_path
+
+
+def remove_cache_folder_and_unset_envvar(unset_envvar=True):
+    assert ENVVAR_STORAGE_PATH_STR in os.environ, "environment variable must be set"
+    data_path = os.environ[ENVVAR_STORAGE_PATH_STR]
+    shutil.rmtree(data_path)
+    if unset_envvar:
+        del os.environ[ENVVAR_STORAGE_PATH_STR]
+    print("folder for testing deleted under " + data_path)
 
 
 def assert_path_equality(self, should_be, test):
@@ -38,6 +66,8 @@ paths_no_collision = [
         [2, 1, 1],
         [2, 2, 2]
     ])
+
+
 ]
 
 # starts and goals with a collision in middle of env

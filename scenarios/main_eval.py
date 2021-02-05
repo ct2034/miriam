@@ -270,8 +270,6 @@ def main_icts():
             )
 
         print(all_results)
-    elapsed_time = time.time() - t
-    print("elapsed time: %.3fs" % elapsed_time)
 
     with pd.option_context('display.max_rows',
                            None,
@@ -279,35 +277,38 @@ def main_icts():
                            None):  # all rows and columns
         print(all_results)
 
-    # for gen in generators:
-    #     results = all_results[str(gen)]
-    #     # saving
-    #     with open(get_fname(genstr(gen), "icts", "pkl"), 'wb') as f:
-    #         pickle.dump(results, f)
-    #     # plot
-    #     plot_results(
-    #         [results[ECBS_SUCCESS],
-    #          results[ECBS_COST],
-    #          results[ECBS_EXPANDED_NODES],
-    #          results[ECBS_VERTEX_BLOCKS],
-    #          results[ICTS_SUCCESS],
-    #          results[ICTS_COST],
-    #          results[ICTS_EXPANDED_NODES],
-    #          results[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]],
-    #         ["ECBS success",
-    #          "ECBS cost",
-    #          "ECBS expanded nodes",
-    #          "Nr of vertex blocks in ecbs solution",
-    #          "ICTS success",
-    #          "ICTS cost",
-    #          "ICTS expanded nodes",
-    #          "Difference ECBS minus ICTS expanded nodes"],
-    #         generator_name=genstr(gen),
-    #         n_agentss=n_agentss,
-    #         fills=fills,
-    #         evaluation="icts"
-    #     )
-    # plt.show()
+    elapsed_time = time.time() - t
+    print("elapsed time: %.3fs" % elapsed_time)
+
+    for gen in generators:
+        results = all_results[str(gen)]
+        # saving
+        with open(get_fname(genstr(gen), "icts", "pkl"), 'wb') as f:
+            pickle.dump(results, f)
+        # plot
+        plot_results(
+            [all_results.loc[ECBS_SUCCESS],
+             all_results.loc[ECBS_COST],
+             all_results.loc[ECBS_EXPANDED_NODES],
+             all_results.loc[ECBS_VERTEX_BLOCKS],
+             all_results.loc[ICTS_SUCCESS],
+             all_results.loc[ICTS_COST],
+             all_results.loc[ICTS_EXPANDED_NODES],
+             all_results.loc[DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]],
+            ["ECBS success",
+             "ECBS cost",
+             "ECBS expanded nodes",
+             "Nr of vertex blocks in ecbs solution",
+             "ICTS success",
+             "ICTS cost",
+             "ICTS expanded nodes",
+             "Difference ECBS minus ICTS expanded nodes"],
+            generator_name=genstr(gen),
+            n_agentss=n_agentss,
+            fills=fills,
+            evaluation="icts"
+        )
+    plt.show()
 
 
 def main_base():

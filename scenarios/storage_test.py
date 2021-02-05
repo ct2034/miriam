@@ -1,18 +1,15 @@
 import os
-import shutil
 import unittest
-import uuid
 
 import numpy as np
 import pytest
 from definitions import INVALID
 
-from scenarios import generators, storage
+from scenarios import generators, storage, test_helper
 from scenarios.storage import ResultType
 
 
-class TestSolvers(unittest.TestCase):
-    envvar_str = 'SCENARIO_STORAGE_PATH'
+class TestStorage(unittest.TestCase):
     scenario1 = generators.tracing_pathes_in_the_dark(2, .5, 1, seed=1)
     scenario2 = generators.tracing_pathes_in_the_dark(2, .5, 1, seed=2)
     to_store = 42
@@ -21,33 +18,31 @@ class TestSolvers(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # making the folder to store data for test in.
-        cls.data_path = "/tmp/" + str(uuid.uuid1())
-        assert not os.path.exists(cls.data_path)
-        os.mkdir(cls.data_path)
-        print("folder for testing created under " + cls.data_path)
+        cls.data_path = test_helper.make_cache_folder_and_set_envvar(
+            set_envvar=False)
 
     @classmethod
     def tearDownClass(cls):
         # remove the folder that the test stored data in.
-        shutil.rmtree(cls.data_path)
-        print("folder for testing deleted under " + cls.data_path)
+        test_helper.remove_cache_folder_and_unset_envvar()
 
     def test_get_filepath(self):
         # without envvar this should fail
-        self.assertRaises(AssertionError, lambda: storage.get_filepath((1,)))
-        os.environ[self.envvar_str] = TestSolvers.data_path
+        self.assertRaises(
+            AssertionError, lambda: storage.get_filepath((1, 1, 1)))
+        os.environ[test_helper.ENVVAR_STORAGE_PATH_STR] = TestStorage.data_path
 
         # same paths for same scenarios
         path1 = storage.get_filepath(self.scenario1)
-        self.assertTrue(path1.startswith(TestSolvers.data_path))
+        self.assertTrue(path1.startswith(TestStorage.data_path))
         scenario1_2 = generators.tracing_pathes_in_the_dark(2, .5, 1, seed=1)
         path1_2 = storage.get_filepath(scenario1_2)
-        self.assertTrue(path1_2.startswith(TestSolvers.data_path))
+        self.assertTrue(path1_2.startswith(TestStorage.data_path))
         self.assertEqual(path1, path1_2)
 
         # different paths for different scenarios
         path2 = storage.get_filepath(self.scenario2)
-        self.assertTrue(path2.startswith(TestSolvers.data_path))
+        self.assertTrue(path2.startswith(TestStorage.data_path))
         self.assertNotEqual(path1, path2)
 
     # test has_file
