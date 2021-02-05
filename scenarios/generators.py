@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
 import logging
+import os
 import random
 from itertools import product
 from typing import *
-import os
 
 import numpy as np
-from matplotlib import pyplot as plt
-
 import sim.decentralized.agent
 import sim.decentralized.runner
 import tools
 from definitions import FREE, OBSTACLE
+from matplotlib import pyplot as plt
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 
-def make_starts_goals_on_env(env: np.ndarray, n_agents: int):
+def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
+                             seed: Any = random.random()):
+    random.seed(seed)
     agents = sim.decentralized.runner.initialize_agents(
         env, n_agents, sim.decentralized.agent.Policy.RANDOM,
-        tight_placement=True)
+        tight_placement=True, seed=seed)
     starts = np.array([a.pos for a in agents])
     assert starts.shape == (n_agents, 2)
     goals = np.array([a.goal for a in agents])
@@ -30,8 +31,9 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int):
 def like_sim_decentralized(size: int, fill: float,
                            n_agents: int, seed: Any):
     random.seed(seed)
-    env = sim.decentralized.runner.initialize_environment(size, fill)
-    starts, goals = make_starts_goals_on_env(env, n_agents)
+    env = sim.decentralized.runner.initialize_environment(
+        size, fill, seed=seed)
+    starts, goals = make_starts_goals_on_env(env, n_agents, seed=seed)
     return env, starts, goals
 
 
@@ -96,6 +98,7 @@ def tracing_pathes_in_the_dark(size: int, fill: float,
         env = np.zeros((size, size), dtype=np.int8)
     else:
         random.seed(seed)
+        np.random.seed(seed)
         env = np.ones((size, size), dtype=np.int8)
         to_clear_start = int((1. - fill) * size * size)
         to_clear = to_clear_start
@@ -105,7 +108,7 @@ def tracing_pathes_in_the_dark(size: int, fill: float,
             dist = min(random.randrange(size), to_clear)
             env[start[0]:dist, start[1]] = FREE
             to_clear = to_clear_start - np.sum(env == FREE)
-    starts, goals = make_starts_goals_on_env(env, n_agents)
+    starts, goals = make_starts_goals_on_env(env, n_agents, seed)
     return env, starts, goals
 
 

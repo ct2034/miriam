@@ -168,8 +168,8 @@ def main_icts():
     i = 0
     for gen, i_r, i_f, i_a in product(generators,
                                       range(n_runs),
-                                      range(n_fills),
-                                      range(n_n_agentss)):
+                                      range(len(fills)),
+                                      range(len(n_agentss))):
         i += 1
         print("run %d of %d" %
               (i, n_runs * n_fills * n_n_agentss * len(generators)))
@@ -268,8 +268,6 @@ def main_icts():
                     col
                 ]
             )
-
-        print(all_results)
 
     with pd.option_context('display.max_rows',
                            None,

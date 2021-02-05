@@ -11,7 +11,6 @@ import numpy as np
 import timeout_decorator
 from matplotlib import cm
 from matplotlib import pyplot as plt
-
 from sim.decentralized.agent import Agent, Policy
 
 logging.basicConfig()
@@ -22,7 +21,7 @@ class SimIterationException(Exception):
     pass
 
 
-def initialize_environment(size: int, fill: float):
+def initialize_environment(size: int, fill: float, seed: Any = random.random()):
     """Make a square map with edge length `size` and `fill` (0..1) obstacle
     ratio.
 
@@ -33,6 +32,7 @@ def initialize_environment(size: int, fill: float):
     :return: the environment
     :rtype: np.ndarray
     """
+    random.seed(seed)
     environent = np.zeros([size, size], dtype=np.int8)
     n_to_fill = int(fill * size ** 2)
     to_fill = random.sample(
@@ -44,7 +44,7 @@ def initialize_environment(size: int, fill: float):
 
 def initialize_new_agent(
         env: np.ndarray, agents: List[Agent], policy: Policy,
-        tight_placement: bool = False) -> Agent:
+        tight_placement: bool = False, seed: Any = random.random()) -> Agent:
     """Place new agent in the environment, where no obstacle or other agent
     is.
 
@@ -53,6 +53,7 @@ def initialize_new_agent(
     :raises AssertionError if no space is left
     :return: the agent
     """
+    random.seed(seed)
     if tight_placement:  # starts can be at other goals
         env_with_agents = env.copy()
         env_with_goals = env.copy()
@@ -99,13 +100,14 @@ def initialize_new_agent(
 
 def initialize_agents(
         env: np.ndarray, n_agents: int, policy: Policy,
-        tight_placement: bool = False
+        tight_placement: bool = False, seed: Any = random.random()
 ) -> Tuple[Agent, ...]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other)."""
     agents: List[Agent] = []  # starting with a list for easy inserting
     for i_a in range(n_agents):
-        agent = initialize_new_agent(env, agents, policy, tight_placement)
+        agent = initialize_new_agent(
+            env, agents, policy, tight_placement, seed=seed)
         agents.append(agent)
     return tuple(agents)  # returning tuple because it can be immutable now
 
