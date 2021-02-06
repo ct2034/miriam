@@ -121,8 +121,8 @@ def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
-    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
+    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
     # parameters to evaluate against
     generators = [
