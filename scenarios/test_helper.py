@@ -122,12 +122,10 @@ env_complicated = np.array([
 starts_complicated = np.array([
     [0, 0],
     [0, 3],
-    [3, 0],
-    [3, 3]
+    [3, 0]
 ])
 goals_complicated = np.array([
     [3, 0],
     [3, 3],
-    [0, 0],
-    [0, 3],
+    [0, 0]
 ])
