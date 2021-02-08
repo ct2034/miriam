@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
-from definitions import OBSTACLE
+from definitions import DEFAULT_TIMEOUT_S, OBSTACLE
 
 from .external.MAPFSolver.SearchBasedAlgorithms import ICTSSolver
 from .external.MAPFSolver.Utilities import (Agent, Map, ProblemInstance,
@@ -14,7 +14,7 @@ INFO_TYPE = Tuple[List[List[Tuple[int, int]]],
 
 
 def icts_plan(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
-              timeout: int = 30) -> Tuple[Any]:
+              timeout: int = DEFAULT_TIMEOUT_S) -> Tuple[Any]:
     sse = SolverSettings()
     sse.set_time_out(timeout)
     solver = ICTSSolver(sse)

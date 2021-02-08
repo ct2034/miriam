@@ -4,7 +4,7 @@ from typing import Tuple
 
 import numpy as np
 import tools
-from definitions import INVALID
+from definitions import DEFAULT_TIMEOUT_S, INVALID
 from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
@@ -22,7 +22,6 @@ logging.getLogger(
 
 HIGHLEVELEXPANDED = 'highLevelExpanded'
 STATISTICS = 'statistics'
-DEFAULT_TIMEOUT = 10
 
 
 def is_well_formed(env, starts, goals):
@@ -33,18 +32,18 @@ def is_well_formed(env, starts, goals):
     return is_environment_well_formed(tuple(agents))
 
 
-def cached_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT):
+def cached_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
     scenario = (env, starts, goals)
     if storage.has_result(scenario, storage.ResultType.ECBS_DATA):
         data = storage.get_result(
             scenario, storage.ResultType.ECBS_DATA)
     else:
-        data = ecbs(env, starts, goals, timeout)
+        data = ecbs(env, starts, goals, timeout=timeout)
         storage.save_result(scenario, storage.ResultType.ECBS_DATA, data)
     return data
 
 
-def cost_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT):
+def cost_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
     """get the average agent cost of this from ecbs
     returns: `float` and `-1` if planning was unsuccessful."""
     data = cached_ecbs(env, starts, goals, timeout=timeout)
@@ -61,7 +60,7 @@ def cost_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT):
     return float(sum(cost_per_agent)) / n_agents
 
 
-def expanded_nodes_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT):
+def expanded_nodes_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
     data = cached_ecbs(env, starts, goals, timeout=timeout)
     if data == INVALID:
         return data
@@ -113,7 +112,7 @@ def cost_sim_decentralized_random(env, starts, goals):
         return INVALID
 
 
-def cached_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT):
+def cached_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
     scenario = (env, starts, goals)
     if storage.has_result(scenario, storage.ResultType.ICTS_INFO):
         info = storage.get_result(
@@ -124,7 +123,7 @@ def cached_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT):
     return info
 
 
-def expanded_nodes_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT):
+def expanded_nodes_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
     info = cached_icts(env, starts, goals, timeout=timeout)
     if is_info_valid(info):
         return expanded_nodes_from_info(info)
@@ -132,7 +131,7 @@ def expanded_nodes_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT):
         return INVALID
 
 
-def cost_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT):
+def cost_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
     n_agents = starts.shape[0]
     info = cached_icts(env, starts, goals, timeout=timeout)
     if is_info_valid(info):

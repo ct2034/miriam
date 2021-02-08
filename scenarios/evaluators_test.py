@@ -7,6 +7,8 @@ import pytest
 import scenarios.evaluators
 from scenarios import test_helper
 
+TEST_TIMEOUT = 5  # to be used for ecbs and icts calls
+
 
 class TestEvaluators(unittest.TestCase):
 
@@ -131,7 +133,7 @@ class TestEvaluators(unittest.TestCase):
                 test_helper.env, starts_invalid, goals_invalid)
         )
 
-    @pytest.mark.timeout(20)  # internal timeout is 10
+    @pytest.mark.timeout(TEST_TIMEOUT)
     def test_cost_ecbs_timeout(self):
         # trying to make is time out ...
         starts_timeout = np.array([
@@ -156,7 +158,7 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_ecbs(
                 test_helper.env, starts_timeout, goals_timeout,
-                timeout=3)
+                timeout=TEST_TIMEOUT/2)
         )
 
     def test_blocks_ecbs(self):
@@ -330,7 +332,7 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.INVALID,
             scenarios.evaluators.expanded_nodes_icts(
                 test_helper.env_deadlock, test_helper.starts_deadlock,
-                test_helper.goals_deadlock, timeout=10)
+                test_helper.goals_deadlock, timeout=TEST_TIMEOUT)
         )
 
     def test_cost_icts_no_collision(self):
@@ -345,7 +347,7 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_icts(
                 test_helper.env_deadlock, test_helper.starts_deadlock,
-                test_helper.goals_deadlock, timeout=10)
+                test_helper.goals_deadlock, timeout=TEST_TIMEOUT)
         )
 
 

@@ -1,7 +1,8 @@
 import unittest
+from functools import reduce
+
 import numpy as np
 from planner.policylearn import generate_data
-from functools import reduce
 
 
 class GenerateDataTest(unittest.TestCase):
@@ -18,14 +19,15 @@ class GenerateDataTest(unittest.TestCase):
         self.assertIn(a_free_pose2[1], [0, 1])
 
     def test_calling_benchmark_ecbs(self):
-        from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
-            plan_in_gridmap)
+        from planner.policylearn.libMultiRobotPlanning.plan_ecbs import \
+            plan_in_gridmap
+        timeout = 30
 
         env = np.array([[0, 0], [1, 1]])
         starts = np.array([[0, 0]])
         goals = np.array([[0, 1]])
 
-        data = plan_in_gridmap(env, starts, goals)
+        data = plan_in_gridmap(env, starts, goals, timeout)
 
         self.assertNotEqual(data, None)
         self.assertNotEqual(len(data.keys()), 0)
@@ -34,7 +36,8 @@ class GenerateDataTest(unittest.TestCase):
         radius = 2  # testing
         my_gridmap = np.zeros([2, 3])
         my_gridmap[1, 2] = 1  # a pixel
-        out_gridmap = generate_data.add_padding_to_gridmap(my_gridmap, radius)
+        out_gridmap = generate_data.add_padding_to_gridmap(
+            my_gridmap, radius)
         assert out_gridmap[0, 0] == 1  # padding
         assert out_gridmap[1, 1] == 1  # padding
         assert out_gridmap[2, 2] == 0  # free map space

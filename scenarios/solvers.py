@@ -1,5 +1,5 @@
 import numpy as np
-from definitions import INVALID
+from definitions import DEFAULT_TIMEOUT_S, INVALID
 from planner.matteoantoniazzi_mapf.plan import icts_plan, paths_from_info
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent, Policy
@@ -34,10 +34,10 @@ def indep(env, starts, goals):
     return paths
 
 
-def ecbs(env, starts, goals, timeout=10, return_paths=False):
+def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
     """Plan scenario using ecbs returning results data"""
     try:
-        data = plan_in_gridmap(env, list(starts), list(goals), timeout)
+        data = plan_in_gridmap(env, list(starts), list(goals), timeout=timeout)
     except KeyError:  # happens when start or goal is not in map
         return INVALID
     if data is None:
@@ -66,7 +66,7 @@ def _ecbs_data_to_paths(data):
     return paths
 
 
-def icts(env, starts, goals, timeout=30, return_paths=False):
+def icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
     info = icts_plan(env, starts, goals, timeout)
     if return_paths:
         return paths_from_info(info)
