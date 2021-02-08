@@ -281,6 +281,12 @@ def hasher(args, kwargs):
     return my_hash
 
 
+RED_SEQ = "\033[;31m"
+GREEN_SEQ = "\033[;32m"
+YELLOW_SEQ = "\033[;33m"
+BLUE_SEQ = "\033[;34m"
+
+
 class ProgressBar(object):
     def __init__(self, name: str, total: int, step_perc: int = 0):
         """Track progress of something.

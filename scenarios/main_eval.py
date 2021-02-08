@@ -12,7 +12,7 @@ import pandas as pd
 from definitions import INVALID, NO_SUCCESS, SUCCESS
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from tools import ProgressBar
+from tools import BLUE_SEQ, RESET_SEQ, ProgressBar
 
 from scenarios.evaluators import *
 from scenarios.generators import *
@@ -178,7 +178,7 @@ def main_icts():
     df_results.sort_index(inplace=True)
     assert len(index_arrays) == df_results.index.lexsort_depth
 
-    pdo = ProgressBar("Overall", n_runs)
+    pdo = ProgressBar(BLUE_SEQ + "Overall" + RESET_SEQ, n_runs)
     for i_r in range(n_runs):
         df_col = evaluate_one_column(
             i_r, idx, generators, fills, n_agentss, size)
