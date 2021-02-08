@@ -1,8 +1,9 @@
 #!/usr/bin/python
-import sys
-import networkx as nx
-import heapq
 import copy
+import heapq
+import sys
+
+import networkx as nx
 
 DEBUG = True
 DEBUG_verbose = False
@@ -21,7 +22,7 @@ T = G.nodes()
 list.sort(T)
 g = [-1 for i in
      range(len(T))]  # g[]: the path length from root node to the specific
-node in the graph G. Initial values are - 1.
+# node in the graph G. Initial values are - 1.
 f = [-1 for i in range(len(T))]
 # 1 means visited; -1 means unvisited
 visit_status = [-1 for i in range(len(T))]
@@ -42,10 +43,10 @@ while heap:
     if visit_status[int(current_node)] == -1:
         visit_status[int(current_node)] = 1
         if DEBUG:
-            print
-        str(count) + "th loop: node " + current_node + ", visited " + str(
-            g[int(current_node)]) + ", estimate total path " +
-        str(estimate_min_path)
+            print(
+                str(count) + "th loop: node " + current_node + ", visited " +
+                str(g[int(current_node)]) + ", estimate total path " +
+                str(estimate_min_path))
         count = count + 1  # debug variable
         heap = []  # clear old data in heap
         # the graph consists of unvisited nodes
