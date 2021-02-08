@@ -79,7 +79,7 @@ def plot_results(
     palette = copy(plt.cm.plasma)
     palette.set_over('w', 1.0)
     palette.set_under('k', 1.0)
-    palette.set_bad('r', 1.0)
+    palette.set_bad('k', 1.0)
 
     fig = plt.figure(figsize=(20, 10))
     fig.suptitle(generator_name, fontsize=16)
@@ -94,14 +94,14 @@ def plot_results(
             fill = fills[i_f]
             n_agents = n_agentss[i_a]
             this_data = r.loc[(fill, n_agents)].to_numpy()
-            if len(this_data[this_data != np.nan]) > 0:
+            if len(this_data[np.logical_not(np.isnan(this_data))]) > 0:
                 r_final[i_f, i_a] = np.mean(
-                    this_data[this_data != np.nan]
+                    this_data[np.logical_not(np.isnan(this_data))]
                 )
-        r_min = np.min(r_final[r_final != np.nan])
+        r_min = np.min(r_final[np.logical_not(np.isnan(r_final))])
         if "Difference" not in titles[i]:  # not on the difference
-            assert r_min >= 0, "no negative results (except np.nan)"
-        r_max = np.max(r_final[r_final != np.nan])
+            assert r_min >= 0, "no negative results"
+        r_max = np.max(r_final[np.logical_not(np.isnan(r_final))])
         ax = fig.add_subplot(subplot_basenr+i)
         im = ax.imshow(
             r_final,
@@ -254,10 +254,10 @@ def main_icts():
         if (
             df_results.loc[
                 (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col
-            ] != np.nan and
+            ] is not np.nan and
             df_results.loc[
                 (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col
-            ] != np.nan
+            ] is not np.nan
         ):
             df_results.loc[
                 (genstr(gen), fill, n_agents,
