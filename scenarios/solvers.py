@@ -37,7 +37,8 @@ def indep(env, starts, goals):
 def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
     """Plan scenario using ecbs returning results data"""
     try:
-        data = plan_in_gridmap(env, list(starts), list(goals), timeout=timeout)
+        data = plan_in_gridmap(env, list(starts), list(
+            goals), suboptimality=1.0, timeout=timeout)  # OPTIMAL !
     except KeyError:  # happens when start or goal is not in map
         return INVALID
     if data is None:
