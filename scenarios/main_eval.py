@@ -10,6 +10,7 @@ from typing import *
 import matplotlib.colors as colors
 import numpy as np
 import pandas as pd
+from definitions import INVALID, NO_SUCCESS, SUCCESS
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -35,9 +36,9 @@ DIFFERENCE_ECBS_EN_MINUS_ICTS_EN = "difference_ecbs_en_-_icts_en"
 
 def init_values_debug():
     size = 8  # size for all scenarios
-    n_fills = 3  # how many different fill values there should be
-    n_n_agentss = 2  # how many different numbers of agents should there be"""
-    n_runs = 2  # how many runs per configuration
+    n_fills = 4  # how many different fill values there should be
+    n_n_agentss = 4  # how many different numbers of agents should there be"""
+    n_runs = 4  # how many runs per configuration
     max_fill = .4  # maximal fill to sample until
     return max_fill, n_fills, n_n_agentss, n_runs, size
 
@@ -87,20 +88,20 @@ def plot_results(
         # do we have any results?
         assert not np.all(r == 0)
         assert not np.all(r == -1)
-        r_final = np.full([n_fills, n_n_agentss], INVALID, dtype=np.float)
+        r_final = np.full([n_fills, n_n_agentss], np.nan, dtype=np.float)
         for i_f, i_a in product(range(n_fills),
                                 range(n_n_agentss)):
             fill = fills[i_f]
             n_agents = n_agentss[i_a]
             this_data = r.loc[(fill, n_agents)].to_numpy()
-            if len(this_data[this_data != INVALID]) > 0:
+            if len(this_data[this_data != np.nan]) > 0:
                 r_final[i_f, i_a] = np.mean(
-                    this_data[this_data != INVALID]
+                    this_data[this_data != np.nan]
                 )
-        r_min = np.min(r_final[r_final != INVALID])
+        r_min = np.min(r_final[r_final != np.nan])
         if "Difference" not in titles[i]:  # not on the difference
-            assert r_min >= 0, "no negative results (except INVALID)"
-        r_max = np.max(r_final[r_final != INVALID])
+            assert r_min >= 0, "no negative results (except np.nan)"
+        r_max = np.max(r_final[r_final != np.nan])
         ax = fig.add_subplot(subplot_basenr+i)
         im = ax.imshow(
             r_final,
@@ -125,8 +126,8 @@ def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
-    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
+    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
     # parameters to evaluate against
     generators = [
@@ -149,6 +150,7 @@ def main_icts():
         ECBS_EXPANDED_NODES,
         ECBS_VERTEX_BLOCKS,
         ECBS_EDGE_BLOCKS,
+        ICTS_COST,
         ICTS_SUCCESS,
         ICTS_EXPANDED_NODES,
         DIFFERENCE_ECBS_EN_MINUS_ICTS_EN
@@ -180,7 +182,7 @@ def main_icts():
         # Taking care of some little pandas ...........................
         col = str(i_r)
         if col not in df_results.columns:
-            df_results[col] = [-1] * len(df_results.index)
+            df_results[col] = [np.nan] * len(df_results.index)
         df_results.sort_index(inplace=True)
         # generating a scenario .......................................
         fill = fills[i_f]
@@ -189,20 +191,23 @@ def main_icts():
             size, fill, n_agents, seed=i_r)
         # calculating optimal cost ....................................
         if i_f > 0 and df_results.loc[
-                (genstr(gen), fills[i_f-1], n_agents, ECBS_COST), col
-        ] == INVALID:
+                (genstr(gen), fills[i_f-1], n_agents, ECBS_SUCCESS), col
+        ] == NO_SUCCESS:
             # previous fills timed out
             res_ecbs = INVALID
         elif i_a > 0 and df_results.loc[
-                (genstr(gen), fill, n_agentss[i_a-1], ECBS_COST), col
-        ] == INVALID:
+                (genstr(gen), fill, n_agentss[i_a-1], ECBS_SUCCESS), col
+        ] == NO_SUCCESS:
             # previous agent count failed as well
             res_ecbs = INVALID
         else:
             res_ecbs = cost_ecbs(env, starts, goals)
-        if res_ecbs != INVALID:
+        if res_ecbs == INVALID:
             df_results.loc[
-                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col] = 1
+                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col] = NO_SUCCESS
+        else:  # valid ecbs result
+            df_results.loc[
+                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col] = SUCCESS
             df_results.loc[
                 (genstr(gen), fill, n_agents, ECBS_COST), col] = res_ecbs
             df_results.loc[
@@ -220,31 +225,27 @@ def main_icts():
                         (genstr(gen), fill, n_agents,
                          ECBS_EDGE_BLOCKS), col]
                 ) = blocks
-            else:
-                df_results.loc[
-                    (genstr(gen), fill, n_agents, ECBS_VERTEX_BLOCKS), col
-                ] = INVALID
-                df_results.loc[
-                    (genstr(gen), fill, n_agents, ECBS_EDGE_BLOCKS)
-                ] = INVALID
         # what is icts cost? ..........................................
         if i_f > 0 and df_results.loc[
                 (genstr(gen), fills[i_f-1], n_agents, ICTS_SUCCESS), col
-        ] == INVALID:
+        ] == NO_SUCCESS:
             # previous fills timed out
             res_icts = INVALID
         elif i_a > 0 and df_results.loc[
                 (genstr(gen), fill, n_agentss[i_a-1], ICTS_SUCCESS), col
-        ] == INVALID:
+        ] == NO_SUCCESS:
             # previous agent count failed as well
             res_icts = INVALID
         else:
             res_icts = cost_icts(env, starts, goals)
-        if res_icts != INVALID:
+        if res_icts == INVALID:
             df_results.loc[
-                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col] = 1
-            # all_results.loc[
-            #     (genstr(gen), fill, n_agents, ICTS_COST), col] = res_icts
+                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col] = NO_SUCCESS
+        else:
+            df_results.loc[
+                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col] = SUCCESS
+            df_results.loc[
+                (genstr(gen), fill, n_agents, ICTS_COST), col] = res_icts
             df_results.loc[
                 (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col
             ] = expanded_nodes_icts(
@@ -253,10 +254,10 @@ def main_icts():
         if (
             df_results.loc[
                 (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col
-            ] != INVALID and
+            ] != np.nan and
             df_results.loc[
                 (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col
-            ] != INVALID
+            ] != np.nan
         ):
             df_results.loc[
                 (genstr(gen), fill, n_agents,
@@ -278,6 +279,7 @@ def main_icts():
                            'display.max_columns',
                            None):  # all rows and columns
         print(df_results)
+    print(df_results.info)
 
     elapsed_time = time.time() - t
     print("elapsed time: %.3fs" % elapsed_time)
