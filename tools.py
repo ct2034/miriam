@@ -4,6 +4,7 @@ import multiprocessing
 import os
 import signal
 import subprocess
+import time
 from contextlib import contextmanager
 from datetime import datetime
 from hashlib import sha256
@@ -278,3 +279,41 @@ def hasher(args, kwargs):
         hashstr += str(i)
     my_hash = sha256(hashstr.encode('utf-8')).hexdigest()
     return my_hash
+
+
+class ProgressBar(object):
+    def __init__(self, name: str, total: int, step_perc: int = 0):
+        """Track progress of something.
+        :param name: What is this tracking progress of?
+        :param total: How many iterations are there in total?
+        :param step_perc: Print info only after a increase by this percentage?"""
+        self.name = name
+        self.total = total
+        self.step_perc = step_perc / 100.
+        self.last_print = 0
+        self.i = 0
+        self.start_time = datetime.now()
+        self.t_format = "%H:%M:%S"
+        print(BOLD_SEQ + "{} started.".format(
+            self.name) + RESET_SEQ)
+
+    def progress(self):
+        """call this after every of `total` iterations."""
+        self.i += 1
+        progress = self.i / self.total
+        elapsed_time: datetime.timedelta = datetime.now() - self.start_time
+        eta_time = (elapsed_time / progress) - elapsed_time
+        if progress-self.last_print >= self.step_perc:
+            self.last_print = progress
+            print("{} progress: {:.0f}%\n > took: {}, eta: {}".format(
+                self.name,
+                progress * 100,
+                str(elapsed_time),
+                str(eta_time)))
+
+    def end(self):
+        """call this at the end to get total time."""
+        elapsed_time = datetime.now() - self.start_time
+        print(BOLD_SEQ + "{} finished. elapsed time: {}".format(
+            self.name,
+            str(elapsed_time))+RESET_SEQ)

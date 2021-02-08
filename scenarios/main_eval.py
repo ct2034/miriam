@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import logging
 import pickle
-import time
 from copy import copy
 from functools import lru_cache
 from itertools import product
@@ -13,6 +12,7 @@ import pandas as pd
 from definitions import INVALID, NO_SUCCESS, SUCCESS
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from tools import ProgressBar
 
 from scenarios.evaluators import *
 from scenarios.generators import *
@@ -66,6 +66,14 @@ def genstr(generator):
     generator_name = str(generator).split("at 0x")[
         0].replace("<function ", "").replace(" ", "")
     return generator_name
+
+
+def add_colums(df1: pd.DataFrame, df2: pd.DataFrame):
+    """Assuming df2 has only one column,
+    it will be added as new column to df1."""
+    assert len(df2.columns) == 1
+    assert df2.columns[0] not in df1.columns
+    df1[df2.columns[0]] = df2
 
 
 def plot_results(
@@ -126,8 +134,8 @@ def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
-    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
+    # max_fill, n_fills, n_n_agentss, n_runs, size = init_values_debug()
+    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
 
     # parameters to evaluate against
     generators = [
@@ -170,109 +178,13 @@ def main_icts():
     df_results.sort_index(inplace=True)
     assert len(index_arrays) == df_results.index.lexsort_depth
 
-    t = time.time()
-    i = 0
-    for gen, i_r, i_f, i_a in product(generators,
-                                      range(n_runs),
-                                      range(len(fills)),
-                                      range(len(n_agentss))):
-        i += 1
-        print("run %d of %d" %
-              (i, n_runs * n_fills * n_n_agentss * len(generators)))
-        # Taking care of some little pandas ...........................
-        col = str(i_r)
-        if col not in df_results.columns:
-            df_results[col] = [np.nan] * len(df_results.index)
-        df_results.sort_index(inplace=True)
-        # generating a scenario .......................................
-        fill = fills[i_f]
-        n_agents = n_agentss[i_a]
-        env, starts, goals = gen(
-            size, fill, n_agents, seed=i_r)
-        # calculating optimal cost ....................................
-        if i_f > 0 and df_results.loc[
-                (genstr(gen), fills[i_f-1], n_agents, ECBS_SUCCESS), col
-        ] == NO_SUCCESS:
-            # previous fills timed out
-            res_ecbs = INVALID
-        elif i_a > 0 and df_results.loc[
-                (genstr(gen), fill, n_agentss[i_a-1], ECBS_SUCCESS), col
-        ] == NO_SUCCESS:
-            # previous agent count failed as well
-            res_ecbs = INVALID
-        else:
-            res_ecbs = cost_ecbs(env, starts, goals)
-        if res_ecbs == INVALID:
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col] = NO_SUCCESS
-        else:  # valid ecbs result
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col] = SUCCESS
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ECBS_COST), col] = res_ecbs
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col
-            ] = expanded_nodes_ecbs(
-                env, starts, goals)
-            # evaluating blocks
-            blocks = blocks_ecbs(env, starts, goals)
-            if blocks != INVALID:
-                (
-                    df_results.loc[
-                        (genstr(gen), fill, n_agents,
-                         ECBS_VERTEX_BLOCKS), col],
-                    df_results.loc[
-                        (genstr(gen), fill, n_agents,
-                         ECBS_EDGE_BLOCKS), col]
-                ) = blocks
-        # what is icts cost? ..........................................
-        if i_f > 0 and df_results.loc[
-                (genstr(gen), fills[i_f-1], n_agents, ICTS_SUCCESS), col
-        ] == NO_SUCCESS:
-            # previous fills timed out
-            res_icts = INVALID
-        elif i_a > 0 and df_results.loc[
-                (genstr(gen), fill, n_agentss[i_a-1], ICTS_SUCCESS), col
-        ] == NO_SUCCESS:
-            # previous agent count failed as well
-            res_icts = INVALID
-        else:
-            res_icts = cost_icts(env, starts, goals)
-        if res_icts == INVALID:
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col] = NO_SUCCESS
-        else:
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col] = SUCCESS
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ICTS_COST), col] = res_icts
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col
-            ] = expanded_nodes_icts(
-                env, starts, goals)
-        # run icts and compare n of expanded nodes
-        if (
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col
-            ] is not np.nan and
-            df_results.loc[
-                (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col
-            ] is not np.nan
-        ):
-            df_results.loc[
-                (genstr(gen), fill, n_agents,
-                 DIFFERENCE_ECBS_EN_MINUS_ICTS_EN),
-                col
-            ] = float(
-                df_results.loc[
-                    (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES),
-                    col
-                ] -
-                df_results.loc[
-                    (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES),
-                    col
-                ]
-            )
+    pdo = ProgressBar("Overall", n_runs)
+    for i_r in range(n_runs):
+        df_col = evaluate_one_column(
+            i_r, idx, generators, fills, n_agentss, size)
+        add_colums(df_results, df_col)
+        pdo.progress()
+    pdo.end()
 
     with pd.option_context('display.max_rows',
                            None,
@@ -280,9 +192,6 @@ def main_icts():
                            None):  # all rows and columns
         print(df_results)
     print(df_results.info)
-
-    elapsed_time = time.time() - t
-    print("elapsed time: %.3fs" % elapsed_time)
 
     df_results.to_pickle(get_fname_both("icts", "pkl"))
 
@@ -319,6 +228,111 @@ def main_icts():
             evaluation="icts"
         )
     plt.show()
+
+
+def evaluate_one_column(i_r, idx, generators, fills, n_agentss, size):
+    col_name = "seed{}".format(i_r)
+    pb = ProgressBar("column >{}<".format(col_name),
+                     (len(generators) * len(fills) * len(n_agentss)), 10)
+    # Taking care of some little pandas ...........................
+    df_col = pd.DataFrame(index=idx)
+    df_col[col_name] = [np.nan] * len(df_col.index)
+    df_col.sort_index(inplace=True)
+    for gen, i_f, i_a in product(generators,
+                                 range(len(fills)),
+                                 range(len(n_agentss))):
+        pb.progress()
+        # generating a scenario .......................................
+        fill = fills[i_f]
+        n_agents = n_agentss[i_a]
+        env, starts, goals = gen(
+            size, fill, n_agents, seed=i_r)
+        # calculating optimal cost ....................................
+        if i_f > 0 and df_col.loc[
+                (genstr(gen), fills[i_f-1], n_agents, ECBS_SUCCESS), col_name
+        ] == NO_SUCCESS:
+            # previous fills timed out
+            res_ecbs = INVALID
+        elif i_a > 0 and df_col.loc[
+                (genstr(gen), fill, n_agentss[i_a-1], ECBS_SUCCESS), col_name
+        ] == NO_SUCCESS:
+            # previous agent count failed as well
+            res_ecbs = INVALID
+        else:
+            res_ecbs = cost_ecbs(env, starts, goals)
+        if res_ecbs == INVALID:
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col_name] = NO_SUCCESS
+        else:  # valid ecbs result
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col_name] = SUCCESS
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ECBS_COST), col_name] = res_ecbs
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col_name
+            ] = expanded_nodes_ecbs(
+                env, starts, goals)
+            # evaluating blocks
+            blocks = blocks_ecbs(env, starts, goals)
+            if blocks != INVALID:
+                (
+                    df_col.loc[
+                        (genstr(gen), fill, n_agents,
+                         ECBS_VERTEX_BLOCKS), col_name],
+                    df_col.loc[
+                        (genstr(gen), fill, n_agents,
+                         ECBS_EDGE_BLOCKS), col_name]
+                ) = blocks
+        # what is icts cost? ..........................................
+        if i_f > 0 and df_col.loc[
+                (genstr(gen), fills[i_f-1], n_agents, ICTS_SUCCESS), col_name
+        ] == NO_SUCCESS:
+            # previous fills timed out
+            res_icts = INVALID
+        elif i_a > 0 and df_col.loc[
+                (genstr(gen), fill, n_agentss[i_a-1], ICTS_SUCCESS), col_name
+        ] == NO_SUCCESS:
+            # previous agent count failed as well
+            res_icts = INVALID
+        else:
+            res_icts = cost_icts(env, starts, goals)
+        if res_icts == INVALID:
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col_name] = NO_SUCCESS
+        else:
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col_name] = SUCCESS
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ICTS_COST), col_name] = res_icts
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col_name
+            ] = expanded_nodes_icts(
+                env, starts, goals)
+        # run icts and compare n of expanded nodes
+        if (
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col_name
+            ] is not np.nan and
+            df_col.loc[
+                (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES), col_name
+            ] is not np.nan
+        ):
+            df_col.loc[
+                (genstr(gen), fill, n_agents,
+                 DIFFERENCE_ECBS_EN_MINUS_ICTS_EN),
+                col_name
+            ] = float(
+                df_col.loc[
+                    (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES),
+                    col_name
+                ] -
+                df_col.loc[
+                    (genstr(gen), fill, n_agents, ICTS_EXPANDED_NODES),
+                    col_name
+                ]
+            )
+    pb.end()
+    return df_col
 
 
 def main_base():
