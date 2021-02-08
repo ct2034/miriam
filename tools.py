@@ -292,7 +292,7 @@ class ProgressBar(object):
         """Track progress of something.
         :param name: What is this tracking progress of?
         :param total: How many iterations are there in total?
-        :param step_perc: Print info only after a increase by this percentage?"""
+        :param step_perc: Print info only after a increase by this percent?"""
         self.name = name
         self.total = total
         self.step_perc = step_perc / 100.

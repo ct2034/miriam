@@ -262,12 +262,15 @@ def evaluate_one_column(i_r, idx, generators, fills, n_agentss, size):
             res_ecbs = cost_ecbs(env, starts, goals)
         if res_ecbs == INVALID:
             df_col.loc[
-                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col_name] = NO_SUCCESS
+                (genstr(gen), fill, n_agents,
+                 ECBS_SUCCESS), col_name] = NO_SUCCESS
         else:  # valid ecbs result
             df_col.loc[
-                (genstr(gen), fill, n_agents, ECBS_SUCCESS), col_name] = SUCCESS
+                (genstr(gen), fill, n_agents, ECBS_SUCCESS),
+                col_name] = SUCCESS
             df_col.loc[
-                (genstr(gen), fill, n_agents, ECBS_COST), col_name] = res_ecbs
+                (genstr(gen), fill, n_agents, ECBS_COST),
+                col_name] = res_ecbs
             df_col.loc[
                 (genstr(gen), fill, n_agents, ECBS_EXPANDED_NODES), col_name
             ] = expanded_nodes_ecbs(
@@ -298,10 +301,12 @@ def evaluate_one_column(i_r, idx, generators, fills, n_agentss, size):
             res_icts = cost_icts(env, starts, goals)
         if res_icts == INVALID:
             df_col.loc[
-                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col_name] = NO_SUCCESS
+                (genstr(gen), fill, n_agents, ICTS_SUCCESS),
+                col_name] = NO_SUCCESS
         else:
             df_col.loc[
-                (genstr(gen), fill, n_agents, ICTS_SUCCESS), col_name] = SUCCESS
+                (genstr(gen), fill, n_agents, ICTS_SUCCESS),
+                col_name] = SUCCESS
             df_col.loc[
                 (genstr(gen), fill, n_agents, ICTS_COST), col_name] = res_icts
             df_col.loc[
