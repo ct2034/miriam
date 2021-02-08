@@ -22,12 +22,13 @@ class GenerateDataTest(unittest.TestCase):
         from planner.policylearn.libMultiRobotPlanning.plan_ecbs import \
             plan_in_gridmap
         timeout = 30
+        suboptimality = 1.5
 
         env = np.array([[0, 0], [1, 1]])
         starts = np.array([[0, 0]])
         goals = np.array([[0, 1]])
 
-        data = plan_in_gridmap(env, starts, goals, timeout)
+        data = plan_in_gridmap(env, starts, goals, suboptimality, timeout)
 
         self.assertNotEqual(data, None)
         self.assertNotEqual(len(data.keys()), 0)
