@@ -111,3 +111,23 @@ goals_deadlock = np.array([
     [1, 2],
     [1, 0]
 ])
+
+# complicated example
+env_complicated = np.array([
+    [0, 0, 0, 0],
+    [1, 1, 0, 0],
+    [0, 1, 0, 1],
+    [0, 0, 0, 0]
+])
+starts_complicated = np.array([
+    [0, 0],
+    [0, 3],
+    [3, 0],
+    [3, 3]
+])
+goals_complicated = np.array([
+    [3, 0],
+    [3, 3],
+    [0, 0],
+    [0, 3],
+])

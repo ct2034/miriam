@@ -350,6 +350,28 @@ class TestEvaluators(unittest.TestCase):
                 test_helper.goals_deadlock, timeout=TEST_TIMEOUT)
         )
 
+    def test_cost_icts_vs_ecbs(self):
+        # basic example
+        self.assertAlmostEqual(
+            scenarios.evaluators.cost_icts(
+                test_helper.env, test_helper.starts_collision,
+                test_helper.goals_collision, timeout=TEST_TIMEOUT),
+            scenarios.evaluators.cost_ecbs(
+                test_helper.env, test_helper.starts_collision,
+                test_helper.goals_collision, timeout=TEST_TIMEOUT)
+        )
+
+    def test_cost_icts_vs_ecbs_complicated(self):
+        # complicated
+        self.assertAlmostEqual(
+            scenarios.evaluators.cost_icts(
+                test_helper.env_complicated, test_helper.starts_complicated,
+                test_helper.goals_complicated, timeout=TEST_TIMEOUT),
+            scenarios.evaluators.cost_ecbs(
+                test_helper.env_complicated, test_helper.starts_complicated,
+                test_helper.goals_complicated, timeout=TEST_TIMEOUT)
+        )
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
