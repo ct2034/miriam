@@ -46,3 +46,29 @@ print("editing")
 df.loc[(1, 'blue', 'sweet'), 'col3'] = 66
 print(df)
 print("-"*80)
+
+print("Merging Columns " + "="*60)
+
+df1 = pd.DataFrame(data={
+    'col1': range(8),
+    'col2': np.linspace(9, 9.1, 8)},
+    index=idx
+)
+print("df1")
+print(df1)
+print("-"*80)
+
+df2 = pd.DataFrame(data={
+    'col3': np.linspace(90, 20, 8)},
+    index=idx
+)
+print("df2")
+print(df2)
+print("-"*80)
+
+assert len(df2.columns) == 1
+assert df2.columns[0] not in df1.columns
+df1[df2.columns[0]] = df2
+print("df1 after merge")
+print(df1)
+print("-"*80)
