@@ -22,6 +22,7 @@ logging.getLogger(
     'planner.policylearn.libMultiRobotPlanning').setLevel(logging.ERROR)
 
 HIGHLEVELEXPANDED = 'highLevelExpanded'
+LOWLEVELEXPANDED = 'lowLevelExpanded'
 STATISTICS = 'statistics'
 
 
