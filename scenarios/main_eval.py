@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import pickle
+from collections import OrderedDict
 from copy import copy
 from functools import lru_cache
 from itertools import product
@@ -47,7 +48,7 @@ def init_values_main():
     size = 8  # size for all scenarios
     n_fills = 8  # how many different fill values there should be
     n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 16  # how many runs per configuration
+    n_runs = 32  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
     return max_fill, n_fills, n_n_agentss, n_runs, size
 
@@ -78,20 +79,42 @@ def add_colums(df1: pd.DataFrame, df2: pd.DataFrame):
 
 def plot_results(
         results: List[pd.DataFrame], titles: List[str],
-        generator_name: Callable, n_agentss: List[int], fills: List[float],
-        evaluation: str):
+        title: Callable, n_agentss: List[int], fills: List[float],
+        evaluation: str, normalize_cbars: str = ""):
     n_fills = len(fills)
     n_n_agentss = len(n_agentss)
 
     # our cmap with support for over / under
-    palette = copy(plt.cm.plasma)
+    palette = copy(plt.cm.viridis)
     palette.set_over('w', 1.0)
     palette.set_under('k', 1.0)
     palette.set_bad('k', 1.0)
 
     fig = plt.figure(figsize=(20, 10))
-    fig.suptitle(generator_name, fontsize=16)
-    subplot_basenr = 201 + int(np.ceil(len(results) / 2)) * 10
+    fig.suptitle(title, fontsize=16)
+    subplot_rows = 2
+    subplot_cols = int(np.ceil(len(results) / 2))
+
+    if normalize_cbars == "expanded":
+        # same min / max for top bottom plots
+        mins = [0]*subplot_cols
+        maxs = [0]*subplot_cols
+        for i, r in enumerate(results):
+            this_data = r.to_numpy()
+            this_min = np.min(this_data[np.logical_not(np.isnan(this_data))])
+            this_max = np.max(this_data[np.logical_not(np.isnan(this_data))])
+            if i < subplot_cols:
+                mins[i] = this_min
+                maxs[i] = this_max
+            else:
+                mins[i-subplot_cols] = min(this_min, mins[i-subplot_cols])
+                maxs[i-subplot_cols] = max(this_max, maxs[i-subplot_cols])
+
+        # same min / max for ecbs and icts expanded nodes
+        for i in [0, 1]:
+            mins[i] = min(mins[0], mins[1])
+            maxs[i] = max(maxs[0], maxs[1])
+
     for i, r in enumerate(results):
         # do we have any results?
         assert not np.all(r == 0)
@@ -106,15 +129,12 @@ def plot_results(
                 r_final[i_f, i_a] = np.mean(
                     this_data[np.logical_not(np.isnan(this_data))]
                 )
-        r_min = np.min(r_final[np.logical_not(np.isnan(r_final))])
-        if "Difference" not in titles[i]:  # not on the difference
-            assert r_min >= 0, "no negative results"
-        r_max = np.max(r_final[np.logical_not(np.isnan(r_final))])
-        ax = fig.add_subplot(subplot_basenr+i)
+        ax = fig.add_subplot(subplot_rows, subplot_cols, i+1)
         im = ax.imshow(
             r_final,
             cmap=palette,
-            norm=colors.Normalize(vmin=r_min, vmax=r_max),
+            norm=colors.SymLogNorm(1, vmin=mins[i % subplot_cols],
+                                   vmax=maxs[i % subplot_cols]),
             origin='lower'
         )
         fig.colorbar(im, extend='both', spacing='uniform',
@@ -125,8 +145,9 @@ def plot_results(
         plt.xlabel('Agents')
         plt.xticks(range(n_n_agentss), map(
             lambda a: str(int(a)), n_agentss))
+
     plt.tight_layout()
-    fname = get_fname(generator_name, evaluation, "png")
+    fname = get_fname(title, evaluation, "png")
     plt.savefig(fname)
 
 
@@ -195,38 +216,39 @@ def main_icts():
 
     df_results.to_pickle(get_fname_both("icts", "pkl"))
 
+    data_to_print = OrderedDict()
     for gen in generators:
+        genname = genstr(gen)
+        # data_to_print[genname+" ECBS success"] = df_results.loc[
+        #     (genname)].xs(ECBS_SUCCESS, level=EVALUATIONS)
+        # data_to_print[genname+"..."] = df_results.loc[
+        #     (genname)].xs(ECBS_COST, level=EVALUATIONS)
+        data_to_print[genname+" ECBS expanded nodes"] = df_results.loc[
+            (genname)].xs(ECBS_EXPANDED_NODES, level=EVALUATIONS)
+        # data_to_print[genname+"..."] = df_results.loc[
+        #     (genname)].xs(ECBS_VERTEX_BLOCKS, level=EVALUATIONS)
+        # data_to_print[genname+"..."] = df_results.loc[
+        #     (genname)].xs(ECBS_EDGE_BLOCKS, level=EVALUATIONS)
+        # data_to_print[genname+" ICTS success"] = df_results.loc[
+        #     (genname)].xs(ICTS_SUCCESS, level=EVALUATIONS)
+        # data_to_print[genname+"..."] = df_results.loc[
+        #     (genname)].xs(ICTS_COST, level=EVALUATIONS)
+        data_to_print[genname+" ICTS expanded nodes"] = df_results.loc[
+            (genname)].xs(ICTS_EXPANDED_NODES, level=EVALUATIONS)
+        data_to_print[genname+" Difference ECBS minus ICTS expanded nodes"
+                      ] = df_results.loc[(genname)].xs(
+                          DIFFERENCE_ECBS_EN_MINUS_ICTS_EN,
+            level=EVALUATIONS)
         # plot
-        plot_results(
-            [df_results.loc[(genstr(gen))].xs(
-                ECBS_SUCCESS, level=EVALUATIONS),
-             df_results.loc[(genstr(gen))].xs(
-                 ECBS_COST, level=EVALUATIONS),
-             df_results.loc[(genstr(gen))].xs(
-                 ECBS_EXPANDED_NODES, level=EVALUATIONS),
-             df_results.loc[(genstr(gen))].xs(
-                 ECBS_VERTEX_BLOCKS, level=EVALUATIONS),
-             df_results.loc[(genstr(gen))].xs(
-                 ECBS_EDGE_BLOCKS, level=EVALUATIONS),
-             df_results.loc[(genstr(gen))].xs(
-                 ICTS_SUCCESS, level=EVALUATIONS),
-             df_results.loc[(genstr(gen))].xs(
-                 ICTS_EXPANDED_NODES, level=EVALUATIONS),
-             df_results.loc[(genstr(gen))].xs(
-                 DIFFERENCE_ECBS_EN_MINUS_ICTS_EN, level=EVALUATIONS)],
-            ["ECBS success",
-             "ECBS cost",
-             "ECBS expanded nodes",
-             "Nr of vertex blocks in ecbs solution",
-             "Nr of edge blocks in ecbs solution",
-             "ICTS success",
-             "ICTS expanded nodes",
-             "Difference ECBS minus ICTS expanded nodes"],
-            generator_name=genstr(gen),
-            n_agentss=n_agentss,
-            fills=fills,
-            evaluation="icts"
-        )
+    plot_results(
+        list(data_to_print.values()),
+        list(data_to_print.keys()),
+        title="expanded-nodes",
+        n_agentss=n_agentss,
+        fills=fills,
+        evaluation="icts",
+        normalize_cbars="expanded"
+    )
     plt.show()
 
 
@@ -338,150 +360,6 @@ def evaluate_one_column(i_r, idx, generators, fills, n_agentss, size):
             )
     pb.end()
     return df_col
-
-
-def main_base():
-    # no warnings pls
-    logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
-
-    max_fill, n_fills, n_n_agentss, n_runs, size = init_values_main()
-    generators = [
-        like_policylearn_gen,
-        like_sim_decentralized,
-        tracing_pathes_in_the_dark
-    ]
-    all_results = {}
-
-    fills = np.around(
-        np.linspace(0, max_fill, n_fills),
-        2
-    )  # list of fills we want
-
-    n_agentss = np.linspace(1, 16, n_n_agentss, dtype=np.int
-                            )  # list of different numbers of agents we want
-
-    for gen in generators:
-        all_results[str(gen)] = {}
-        results = all_results[str(gen)]
-
-        # save results here
-        # first plot row
-        results[WELL_FORMED] = np.zeros([n_fills, n_n_agentss])
-        results[DIFF_INDEP] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[DIFF_SIM_DECEN] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[ECBS_SUCCESS] = np.zeros([n_fills, n_n_agentss])
-        # second plot row
-        results[ECBS_COST] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[ECBS_VERTEX_BLOCKS] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[ECBS_EDGE_BLOCKS] = np.full(
-            [n_runs, n_fills, n_n_agentss], INVALID, dtype=np.float)
-        results[USEFULLNESS] = np.zeros(
-            [n_runs, n_fills, n_n_agentss], dtype=np.float)
-
-    t = time.time()
-    i = 0
-    for gen in generators:
-        results = all_results[str(gen)]
-        for i_r in range(n_runs):
-            for i_f, i_a in product(range(n_fills),
-                                    range(n_n_agentss)):
-                i += 1
-                print("run %d of %d" %
-                      (i, n_runs * n_fills * n_n_agentss * len(generators)))
-                # generating a scenario .......................................
-                fill = fills[i_f]
-                n_agents = n_agentss[i_a]
-                try:
-                    env, starts, goals = gen(
-                        size, fill, n_agents, seed=i_r)
-                    is_wellformed = (
-                        is_well_formed(
-                            env, starts, goals))
-                except AssertionError:
-                    is_wellformed = False
-                results[WELL_FORMED][i_f, i_a] += is_wellformed
-                # calculating optimal cost ....................................
-                if i_f > 0 and results[ECBS_COST
-                                       ][i_r, i_f - 1, i_a] == INVALID:
-                    # previous fills timed out
-                    res_ecbs = INVALID
-                elif i_a > 0 and results[ECBS_COST
-                                         ][i_r, i_f, i_a - 1] == INVALID:
-                    # previous agent count failed as well
-                    res_ecbs = INVALID
-                else:
-                    res_ecbs = cost_ecbs(env, starts, goals)
-                if res_ecbs != INVALID:
-                    results[ECBS_SUCCESS][i_f, i_a] += 1
-                    results[ECBS_COST][i_r, i_f, i_a] = res_ecbs
-                # evaluating blocks
-                blocks = blocks_ecbs(env, starts, goals)
-                if blocks != INVALID:
-                    (
-                        results[ECBS_VERTEX_BLOCKS][i_r, i_f, i_a],
-                        results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a]
-                    ) = blocks
-                else:
-                    results[ECBS_VERTEX_BLOCKS][i_r, i_f, i_a] = INVALID
-                    results[ECBS_EDGE_BLOCKS][i_r, i_f, i_a] = INVALID
-                # is this different to the independant costs? .................
-                if results[ECBS_COST][i_r, i_f, i_a] != INVALID:
-                    cost_indep = cost_independent(env, starts, goals)
-                    if cost_indep != INVALID:
-                        results[DIFF_INDEP][i_r, i_f, i_a] = (
-                            results[ECBS_COST][i_r, i_f, i_a] - cost_indep
-                        )
-                        results[USEFULLNESS][i_r, i_f,
-                                             i_a] += results[
-                            DIFF_INDEP][i_r, i_f, i_a]
-                # how bad are the costs with sim decentralized random .........
-                if results[ECBS_COST][i_r, i_f, i_a] != INVALID:
-                    cost_decen = cost_sim_decentralized_random(
-                        env, starts, goals)
-                    if cost_decen != INVALID:
-                        results[DIFF_SIM_DECEN][i_r, i_f, i_a] = (
-                            cost_decen - results[ECBS_COST][i_r, i_f, i_a]
-                        )
-                        results[USEFULLNESS][i_r, i_f,
-                                             i_a] += results[
-                            DIFF_SIM_DECEN][
-                            i_r, i_f, i_a]
-    elapsed_time = time.time() - t
-    print("elapsed time: %.3fs" % elapsed_time)
-
-    for gen in generators:
-        results = all_results[str(gen)]
-        # saving
-        with open(get_fname(genstr(gen), "main", "pkl"), 'wb') as f:
-            pickle.dump(results, f)
-        # plot
-        plot_results(
-            [results[WELL_FORMED],
-             results[DIFF_SIM_DECEN],
-             results[DIFF_INDEP],
-             results[ECBS_SUCCESS],
-             results[ECBS_COST],
-             results[ECBS_VERTEX_BLOCKS],
-             results[ECBS_EDGE_BLOCKS],
-             results[USEFULLNESS]],
-            ["Well-formedness",
-             "Sub-optimality of sim_decen (p: random)",
-             "Cost difference ecbs to independant",
-             "Ecbs success",
-             "Ecbs cost",
-             "Nr of vertex blocks in ecbs solution",
-             "Nr of edge blocks in ecbs solution",
-             "Usefullness"],
-            generator_name=genstr(gen),
-            n_agentss=n_agentss,
-            fills=fills,
-            evaluation='main'
-        )
-    plt.show()
 
 
 if __name__ == "__main__":
