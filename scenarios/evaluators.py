@@ -5,14 +5,13 @@ from typing import Tuple
 
 import numpy as np
 import tools
-from definitions import DEFAULT_TIMEOUT_S, INVALID
+from definitions import DEFAULT_TIMEOUT_S, FREE, INVALID
 from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
 from sim.decentralized.agent import Agent
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
 
-import scenarios
 from scenarios import storage
 from scenarios.solvers import SCHEDULE, ecbs, icts, indep, to_agent_objects
 
@@ -150,3 +149,25 @@ def cost_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
         return float(sum_of_costs_from_info(info)) / n_agents
     else:
         return INVALID
+
+
+def n_nodes(env):
+    return np.count_nonzero(env == FREE)
+
+
+def _gridmap_to_nx(env):
+    a = Agent(env, [0, 0])
+    return a.gridmap_to_nx(env, None)
+
+
+def n_edges(env):
+    g = _gridmap_to_nx(env)
+    return len(g.edges)
+
+
+def mean_degree(env):
+    g = _gridmap_to_nx(env)
+    degrees = []
+    for n in g.nodes:
+        degrees.append(g.degree(n))
+    return np.mean(degrees)
