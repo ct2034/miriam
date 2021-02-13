@@ -38,9 +38,9 @@ def is_info_valid(info: INFO_TYPE) -> bool:
 
 
 def expanded_nodes_from_info(info: INFO_TYPE) -> int:
-    en = info[1][EXPANDED_NODES] + 1  # we count the root node also as expanded
+    en = info[1][EXPANDED_NODES]
     assert isinstance(en, int)
-    return en
+    return en + 1  # we count the root node also as expanded
 
 
 def sum_of_costs_from_info(info: INFO_TYPE) -> int:
