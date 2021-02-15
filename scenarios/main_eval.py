@@ -33,6 +33,9 @@ ICTS_SUCCESS = "icts_success"
 ICTS_COST = "icts_cost"
 ICTS_EXPANDED_NODES = "icts_expanded_nodes"
 DIFFERENCE_ECBS_EN_MINUS_ICTS_EN = "difference_ecbs_en_-_icts_en"
+N_NODES = "n_nodes"
+N_EDGES = "n_edges"
+MEAN_DEGREE = "mean_degree"
 
 
 def init_values_debug():
@@ -95,7 +98,7 @@ def add_colums(df1: pd.DataFrame, df2: pd.DataFrame):
     df1[df2.columns[0]] = df2
 
 
-def plot_results(
+def plot_images(
         results: List[pd.DataFrame], titles: List[str],
         title: Callable, n_agentss: List[int], fills: List[float],
         evaluation: str, normalize_cbars: str = ""):
@@ -169,6 +172,41 @@ def plot_results(
     plt.savefig(fname)
 
 
+def plot_scatter(df, xs, ys, titles, title="scatter"):
+    assert len(xs) == len(titles)
+    n_plots = len(xs) * len(ys)
+    rows = 2
+    columns = int(np.ceil(float(n_plots)/rows))
+
+    fig = plt.figure(figsize=(20, 10))
+    fig.suptitle(title, fontsize=16)
+    i_p = 1
+    cm = plt.cm.viridis
+    max_agents = np.max(df.index.get_level_values(
+        level='n_agentss').to_numpy())
+    df_cols = len(df.columns)
+    for i_xs, i_ys in product(range(len(xs)), range(len(ys))):
+        x = xs[i_xs]
+        y = ys[i_ys]
+        ax = fig.add_subplot(rows, columns, i_p)
+        i_p += 1
+        colors = cm(df.xs(x, level=EVALUATIONS).index.get_level_values(
+            level='n_agentss').to_numpy().repeat(df_cols).flatten()
+            / max_agents)
+        ax.scatter(
+            df.xs(x, level=EVALUATIONS).to_numpy().flatten(),
+            df.xs(y, level=EVALUATIONS).to_numpy().flatten(),
+            c=colors,
+            marker="."
+        )
+        plt.title(titles[i_xs])
+        plt.xlabel(x)
+        plt.ylabel(y)
+    plt.tight_layout()
+    fname = get_fname(title, "ecbs_icts", "png")
+    plt.savefig(fname)
+
+
 def main_icts():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
@@ -204,7 +242,10 @@ def main_icts():
         ICTS_COST,
         ICTS_SUCCESS,
         ICTS_EXPANDED_NODES,
-        DIFFERENCE_ECBS_EN_MINUS_ICTS_EN
+        DIFFERENCE_ECBS_EN_MINUS_ICTS_EN,
+        N_NODES,
+        N_EDGES,
+        MEAN_DEGREE
     ]
 
     # preparing panda dataframes
@@ -223,7 +264,7 @@ def main_icts():
 
     pdo = ProgressBar(BLUE_SEQ + "Overall" + RESET_SEQ, n_runs)
     for i_r in range(n_runs):
-        df_col = evaluate_en_comparison(
+        df_col = evaluate_full(
             i_r, idx, generators, fills, n_agentss, size)
         add_colums(df_results, df_col)
         pdo.progress()
@@ -238,39 +279,34 @@ def main_icts():
 
     df_results.to_pickle(get_fname_both("icts", "pkl"))
 
-    data_to_print = OrderedDict()
-    for gen in generators:
-        genname = genstr(gen)
-        # data_to_print[genname+" ECBS success"] = df_results.loc[
-        #     (genname)].xs(ECBS_SUCCESS, level=EVALUATIONS)
-        # data_to_print[genname+"..."] = df_results.loc[
-        #     (genname)].xs(ECBS_COST, level=EVALUATIONS)
-        data_to_print[genname+" ECBS expanded nodes"] = df_results.loc[
-            (genname)].xs(ECBS_EXPANDED_NODES, level=EVALUATIONS)
-        # data_to_print[genname+"..."] = df_results.loc[
-        #     (genname)].xs(ECBS_VERTEX_BLOCKS, level=EVALUATIONS)
-        # data_to_print[genname+"..."] = df_results.loc[
-        #     (genname)].xs(ECBS_EDGE_BLOCKS, level=EVALUATIONS)
-        # data_to_print[genname+" ICTS success"] = df_results.loc[
-        #     (genname)].xs(ICTS_SUCCESS, level=EVALUATIONS)
-        # data_to_print[genname+"..."] = df_results.loc[
-        #     (genname)].xs(ICTS_COST, level=EVALUATIONS)
-        data_to_print[genname+" ICTS expanded nodes"] = df_results.loc[
-            (genname)].xs(ICTS_EXPANDED_NODES, level=EVALUATIONS)
-        data_to_print[genname+" Difference ECBS minus ICTS expanded nodes"
-                      ] = df_results.loc[(genname)].xs(
-                          DIFFERENCE_ECBS_EN_MINUS_ICTS_EN,
-            level=EVALUATIONS)
-        # plot
-    plot_results(
-        list(data_to_print.values()),
-        list(data_to_print.keys()),
-        title="expanded-nodes",
-        n_agentss=n_agentss,
-        fills=fills,
-        evaluation="icts",
-        normalize_cbars="expanded"
-    )
+    # compare expanded nodes
+    # data_to_print = OrderedDict()
+    # for gen in generators:
+    #     genname = genstr(gen)
+    #     data_to_print[genname+" ECBS expanded nodes"] = df_results.loc[
+    #         (genname)].xs(ECBS_EXPANDED_NODES, level=EVALUATIONS)
+    #     data_to_print[genname+" ICTS expanded nodes"] = df_results.loc[
+    #         (genname)].xs(ICTS_EXPANDED_NODES, level=EVALUATIONS)
+    #     data_to_print[genname+" Difference ECBS minus ICTS expanded nodes"
+    #                   ] = df_results.loc[(genname)].xs(
+    #                       DIFFERENCE_ECBS_EN_MINUS_ICTS_EN,
+    #         level=EVALUATIONS)
+    #     # plot
+    # plot_images(
+    #     list(data_to_print.values()),
+    #     list(data_to_print.keys()),
+    #     title="expanded-nodes",
+    #     n_agentss=n_agentss,
+    #     fills=fills,
+    #     evaluation="icts",
+    #     normalize_cbars="expanded"
+    # )
+
+    # compare expanded nodes over graph properties
+    xs = [N_NODES, N_EDGES, MEAN_DEGREE]
+    ys = [DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]
+    plot_scatter(df_results, xs, ys, xs)
+
     plt.show()
 
 
@@ -291,6 +327,13 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
         n_agents = n_agentss[i_a]
         env, starts, goals = gen(
             size, fill, n_agents, seed=i_r)
+        # graph based metrics .........................................
+        df_col.loc[(genstr(gen), fill, n_agents, N_NODES), col_name
+                   ] = n_nodes(env)
+        df_col.loc[(genstr(gen), fill, n_agents, N_EDGES), col_name
+                   ] = n_edges(env)
+        df_col.loc[(genstr(gen), fill, n_agents, MEAN_DEGREE), col_name
+                   ] = mean_degree(env)
         # calculating optimal cost ....................................
         if i_f > 0 and df_col.loc[
                 (genstr(gen), fills[i_f-1], n_agents, ECBS_SUCCESS), col_name

@@ -33,6 +33,10 @@ print("nr: 1")
 print(df.loc[1])
 print("-"*80)
 
+print("color")
+print(df.index.get_level_values(level='color').to_numpy())
+print("-"*80)
+
 print("color: blue")
 print(df.xs('blue', level='color'))
 print((df.xs('blue', level='color')).__class__)
