@@ -36,6 +36,8 @@ DIFFERENCE_ECBS_EN_MINUS_ICTS_EN = "difference_ecbs_en_-_icts_en"
 N_NODES = "n_nodes"
 N_EDGES = "n_edges"
 MEAN_DEGREE = "mean_degree"
+N_NODES_TA = "n_nodes_ta"
+N_EDGES_TA = "n_edges_ta"
 
 
 def init_values_debug():
@@ -188,17 +190,24 @@ def plot_scatter(df, xs, ys, titles, title="scatter"):
     for i_xs, i_ys in product(range(len(xs)), range(len(ys))):
         x = xs[i_xs]
         y = ys[i_ys]
+        dx = df.xs(x, level=EVALUATIONS).to_numpy().flatten()
+        dy = df.xs(y, level=EVALUATIONS).to_numpy().flatten()
         ax = fig.add_subplot(rows, columns, i_p)
         i_p += 1
         colors = cm(df.xs(x, level=EVALUATIONS).index.get_level_values(
             level='n_agentss').to_numpy().repeat(df_cols).flatten()
             / max_agents)
         ax.scatter(
-            df.xs(x, level=EVALUATIONS).to_numpy().flatten(),
-            df.xs(y, level=EVALUATIONS).to_numpy().flatten(),
+            dx, dy,
             c=colors,
             marker="."
         )
+        i_nn = np.isfinite(dx) & np.isfinite(dy)
+        coeff = np.polyfit(dx[i_nn], dy[i_nn], 1)
+        poly = np.poly1d(coeff)
+        plt.plot(dx[i_nn], poly(dx[i_nn]), "r--")
+        # the line equation:
+        print("y=%.6fx+(%.6f)" % (coeff[0], coeff[1]))
         plt.title(titles[i_xs])
         plt.xlabel(x)
         plt.ylabel(y)
@@ -245,7 +254,9 @@ def main_icts():
         DIFFERENCE_ECBS_EN_MINUS_ICTS_EN,
         N_NODES,
         N_EDGES,
-        MEAN_DEGREE
+        MEAN_DEGREE,
+        N_NODES_TA,
+        N_EDGES_TA
     ]
 
     # preparing panda dataframes
@@ -303,7 +314,7 @@ def main_icts():
     # )
 
     # compare expanded nodes over graph properties
-    xs = [N_NODES, N_EDGES, MEAN_DEGREE]
+    xs = [N_NODES, N_EDGES, MEAN_DEGREE, N_NODES_TA, N_EDGES_TA]
     ys = [DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]
     plot_scatter(df_results, xs, ys, xs)
 
@@ -334,6 +345,10 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                    ] = n_edges(env)
         df_col.loc[(genstr(gen), fill, n_agents, MEAN_DEGREE), col_name
                    ] = mean_degree(env)
+        df_col.loc[(genstr(gen), fill, n_agents, N_NODES_TA), col_name
+                   ] = n_nodes(env) * n_agents
+        df_col.loc[(genstr(gen), fill, n_agents, N_EDGES_TA), col_name
+                   ] = n_edges(env) * n_agents
         # calculating optimal cost ....................................
         if i_f > 0 and df_col.loc[
                 (genstr(gen), fills[i_f-1], n_agents, ECBS_SUCCESS), col_name
