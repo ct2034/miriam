@@ -4,7 +4,7 @@ import pickle
 from collections import OrderedDict
 from copy import copy
 from functools import lru_cache
-from itertools import product
+from itertools import product, repeat
 from typing import *
 
 import matplotlib.colors as colors
@@ -18,6 +18,9 @@ from tools import BLUE_SEQ, RESET_SEQ, ProgressBar
 from scenarios.evaluators import *
 from scenarios.generators import *
 
+GENERATORS = 'generators'
+FILLS = 'fills'
+N_AGENTSS = 'n_agentss'
 EVALUATIONS = 'evaluations'
 # -------------------------
 WELL_FORMED = "well_formed"
@@ -70,7 +73,7 @@ def init_values_focus():
     n_n_agentss = 10  # how many different numbers of agents should there be"""
     n_runs = 64  # how many runs per configuration
     max_fill = .5  # maximal fill to sample until
-    low_agents = 2  # lowest number of agents
+    low_agents = 5  # lowest number of agents
     high_agents = 14  # highest number of agents
     return (max_fill, n_fills, n_n_agentss, n_runs, size,
             low_agents, high_agents)
@@ -174,7 +177,7 @@ def plot_images(
     plt.savefig(fname)
 
 
-def plot_scatter(df, xs, ys, titles, title="scatter"):
+def plot_scatter(df, xs, ys, cs, titles, title="scatter"):
     assert len(xs) == len(titles)
     n_plots = len(xs) * len(ys)
     rows = 2
@@ -184,30 +187,31 @@ def plot_scatter(df, xs, ys, titles, title="scatter"):
     fig.suptitle(title, fontsize=16)
     i_p = 1
     cm = plt.cm.viridis
-    max_agents = np.max(df.index.get_level_values(
-        level='n_agentss').to_numpy())
+    colors = df.index.get_level_values(
+        level=cs).to_numpy()
+    unique_colors = np.unique(colors)
     df_cols = len(df.columns)
     for i_xs, i_ys in product(range(len(xs)), range(len(ys))):
         x = xs[i_xs]
         y = ys[i_ys]
         dx = df.xs(x, level=EVALUATIONS).to_numpy().flatten()
         dy = df.xs(y, level=EVALUATIONS).to_numpy().flatten()
+        dc = df.xs(x, level=EVALUATIONS).index.get_level_values(
+            level=cs)
+        c = cm(np.array([np.where(unique_colors == ic)
+                         for ic in dc]).repeat(df_cols) / len(unique_colors))
         ax = fig.add_subplot(rows, columns, i_p)
         i_p += 1
-        colors = cm(df.xs(x, level=EVALUATIONS).index.get_level_values(
-            level='n_agentss').to_numpy().repeat(df_cols).flatten()
-            / max_agents)
         ax.scatter(
             dx, dy,
-            c=colors,
+            c=c,
             marker="."
         )
         i_nn = np.isfinite(dx) & np.isfinite(dy)
         coeff = np.polyfit(dx[i_nn], dy[i_nn], 1)
         poly = np.poly1d(coeff)
         plt.plot(dx[i_nn], poly(dx[i_nn]), "r--")
-        # the line equation:
-        print("y=%.6fx+(%.6f)" % (coeff[0], coeff[1]))
+        print("%s y=%.6fx+(%.6f)" % (x, coeff[0], coeff[1]))
         plt.title(titles[i_xs])
         plt.xlabel(x)
         plt.ylabel(y)
@@ -261,9 +265,9 @@ def main_icts():
 
     # preparing panda dataframes
     index_arrays = {
-        'generators': list(map(genstr, generators)),
-        'fills': fills,
-        'n_agentss': n_agentss,
+        GENERATORS: list(map(genstr, generators)),
+        FILLS: fills,
+        N_AGENTSS: n_agentss,
         EVALUATIONS: evaluations
     }
     idx = pd.MultiIndex.from_product(
@@ -316,7 +320,7 @@ def main_icts():
     # compare expanded nodes over graph properties
     xs = [N_NODES, N_EDGES, MEAN_DEGREE, N_NODES_TA, N_EDGES_TA]
     ys = [DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]
-    plot_scatter(df_results, xs, ys, xs)
+    plot_scatter(df_results, xs, ys, cs=GENERATORS, titles=xs)
 
     plt.show()
 
