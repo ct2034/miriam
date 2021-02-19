@@ -49,7 +49,8 @@ for t in range(int(1e4)):
 
 
 print(
-    f'Result: y = {a.item()} + {b.item()} x + {c.item()} x^2 + {d.item()} x^3 + {e.item()} x^4')
+    f'Result: y={a.item()} + {b.item()} x +' +
+    f'{c.item()} x ^ 2 + {d.item()} x ^ 3 + {e.item()} x ^ 4')
 
 plt.plot(x, y, 'r', linewidth=1)
 n = len(y_preds)
