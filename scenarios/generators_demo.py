@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-from scenarios.generators import movingai, tracing_pathes_in_the_dark
+from matplotlib import pyplot as plt
+
+from scenarios.generators import (building_walls, movingai,
+                                  tracing_pathes_in_the_dark)
 from visualization import plot_with_arrows
 
 
@@ -15,5 +18,12 @@ def demo_tracing_pathes_in_the_dark():
     plot_with_arrows(env, starts, goals)
 
 
+def demo_building_walls():
+    n_agents = 6
+    env, starts, goals = building_walls(8, .3, n_agents, 0)
+    plot_with_arrows(env, starts, goals)
+    plt.show()
+
+
 if __name__ == "__main__":
-    demo_tracing_pathes_in_the_dark()
+    demo_building_walls()

@@ -2,7 +2,7 @@
 import logging
 import os
 import random
-from itertools import product
+from itertools import product, repeat
 from typing import *
 
 import numpy as np
@@ -11,6 +11,7 @@ import sim.decentralized.runner
 import tools
 from definitions import FREE, OBSTACLE
 from matplotlib import pyplot as plt
+from numpy.lib.function_base import diff
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
@@ -181,3 +182,64 @@ def movingai(map_str: str, scene_str: str, scene_nr: int, n_agents: int):
         goals.append(goal)
 
     return grid, starts, goals
+
+
+def no_diagonals(area):
+    """make sure this area will produce no diagonal walls"""
+    return area[0, 1] or area[2, 1] or area[1, 0] or area[1, 2]
+
+
+def can_area_be_set(area):
+    """can the pixel in the middle of this 3x3 are be set as an obstacle
+    without making disconnected areas in the map."""
+    assert area.shape[0] == 3
+    assert area.shape[1] == 3
+    assert area[1, 1] == FREE
+    sequence = area[
+        [0, 0, 0, 1, 2, 2, 2, 1],
+        [0, 1, 2, 2, 2, 1, 0, 0]
+    ]
+    diffs = np.where(sequence != np.roll(sequence, 1))
+    return (len(diffs[0]) <= 2 and
+            no_diagonals(area))
+
+
+def can_be_set(env, pos):
+    """can the pixel at pos in env be set without making disconnected areas"""
+    assert len(pos) == 2
+    assert pos[0] < env.shape[0]
+    assert pos[1] < env.shape[1]
+    area = np.full((3, 3), OBSTACLE)
+    for x, y in product(range(3), repeat=2):
+        penv = np.array(pos) + [x, y] + [-1, -1]
+        if (
+                penv[0] < 0 or penv[0] >= env.shape[0] or
+                penv[1] < 0 or penv[1] >= env.shape[1]
+        ):
+            area[x, y] = OBSTACLE
+        else:
+            area[x, y] = env[tuple(penv)]
+    return can_area_be_set(area)
+
+
+def building_walls(size: int, fill: float,
+                   n_agents: int, seed: Any):
+    if fill == 0:
+        env = np.zeros((size, size), dtype=np.int8)
+    else:
+        random.seed(seed)
+        np.random.seed(seed)
+        env = np.full((size, size), FREE, dtype=np.int8)
+        to_fill = int(fill * size ** 2)
+        while np.sum(env == OBSTACLE) < to_fill:
+            free = np.where(env == FREE)
+            can_fill = False
+            pos = [0, 0]
+            while not can_fill:
+                i_f = random.randrange(len(free[0]))
+                pos[0] = free[0][i_f]
+                pos[1] = free[1][i_f]
+                can_fill = can_be_set(env, pos)
+            env[tuple(pos)] = OBSTACLE
+    starts, goals = make_starts_goals_on_env(env, n_agents, seed)
+    return env, starts, goals

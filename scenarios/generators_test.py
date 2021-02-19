@@ -190,6 +190,100 @@ class TestGenerators(unittest.TestCase):
             (env, starts, goals
              ) = movingai(mapfile, "even", 0, 100)
 
+    def test_can_area_be_set_true(self):
+        # completely free area can be set
+        free = np.array([
+            [1, 1, 1],
+            [0, 0, 0],
+            [0, 0, 0]
+        ])
+        self.assertTrue(can_area_be_set(free))
+
+        # half free area can be set
+        half_free = np.array([
+            [1, 1, 1],
+            [0, 0, 1],
+            [0, 0, 0]
+        ])
+        self.assertTrue(can_area_be_set(half_free))
+
+    def test_can_area_be_set_false(self):
+        # some two changes can not be set
+        some = np.array([
+            [1, 0, 1],
+            [1, 0, 0],
+            [1, 1, 1]
+        ])
+        self.assertFalse(can_area_be_set(some))
+
+        # connecting two walls can not be set
+        two_walls = np.array([
+            [0, 1, 0],
+            [0, 0, 0],
+            [0, 1, 0]
+        ])
+        self.assertFalse(can_area_be_set(two_walls))
+
+    # building walls ----------------------------------------------------------
+    def test_can_area_be_set_raises(self):
+        # full area raises assertion
+        full = np.full((3, 3), OBSTACLE)
+        self.assertRaises(AssertionError, lambda: can_area_be_set(full))
+        # wrong width raises assertion
+        wrong_width = np.full((2, 3), FREE)
+        self.assertRaises(AssertionError, lambda: can_area_be_set(wrong_width))
+        # wrong height raises assertion
+        wrong_height = np.full((3, 2), FREE)
+        self.assertRaises(
+            AssertionError, lambda: can_area_be_set(wrong_height))
+
+    def test_can_be_set_true(self):
+        # completely free area can be set
+        free = np.array([
+            [1, 0, 0],
+            [1, 0, 0],
+            [1, 0, 0]
+        ])
+        self.assertTrue(can_be_set(free, [0, 1]))
+        self.assertTrue(can_be_set(free, [1, 1]))
+        self.assertTrue(can_be_set(free, [2, 1]))
+
+        # half free area can be set
+        half_free = np.array([
+            [1, 1, 1],
+            [0, 0, 1],
+            [0, 0, 0]
+        ])
+        self.assertTrue(can_be_set(half_free, [1, 1]))
+
+    def test_can_be_set_false(self):
+        # some two changes can not be set
+        some = np.array([
+            [1, 0, 1, 0],
+            [1, 0, 0, 0],
+            [1, 1, 1, 1]
+        ])
+        self.assertFalse(can_be_set(some, [1, 1]))
+        self.assertFalse(can_be_set(some, [1, 2]))
+        self.assertFalse(can_be_set(some, [1, 3]))
+
+        # connecting two walls can not be set
+        two_walls = np.array([
+            [0, 1, 0],
+            [0, 0, 0],
+            [0, 1, 0]
+        ])
+        self.assertFalse(can_be_set(two_walls, [1, 1]))
+
+    def test_can_be_set_raises(self):
+        # wrong pos dims
+        full = np.full((3, 3), OBSTACLE)
+        self.assertRaises(AssertionError, lambda: can_be_set(full, [1, 1, 1]))
+        # pos out ot right
+        self.assertRaises(AssertionError, lambda: can_be_set(full, [1, 3]))
+        # pos out to bottom
+        self.assertRaises(AssertionError, lambda: can_be_set(full, [3, 1]))
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
