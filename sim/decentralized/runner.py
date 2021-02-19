@@ -44,7 +44,7 @@ def initialize_environment(size: int, fill: float, seed: Any = random.random()):
 
 def initialize_new_agent(
         env: np.ndarray, agents: List[Agent], policy: Policy,
-        tight_placement: bool = False, seed: Any = random.random()) -> Agent:
+        tight_placement: bool = False) -> Agent:
     """Place new agent in the environment, where no obstacle or other agent
     is.
 
@@ -53,7 +53,6 @@ def initialize_new_agent(
     :raises AssertionError if no space is left
     :return: the agent
     """
-    random.seed(seed)
     if tight_placement:  # starts can be at other goals
         env_with_agents = env.copy()
         env_with_goals = env.copy()
@@ -104,10 +103,11 @@ def initialize_agents(
 ) -> Tuple[Agent, ...]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other)."""
+    random.seed(0)
     agents: List[Agent] = []  # starting with a list for easy inserting
     for i_a in range(n_agents):
         agent = initialize_new_agent(
-            env, agents, policy, tight_placement, seed=seed)
+            env, agents, policy, tight_placement)
         agents.append(agent)
     return tuple(agents)  # returning tuple because it can be immutable now
 

@@ -28,11 +28,11 @@ def plot_with_arrows(env, starts, goals):
     colors = get_colors(n_agents)
     for i_a in range(n_agents):
         ax.arrow(
-            starts[i_a][0] + .5,
-            starts[i_a][1] + .5,
+            starts[i_a][0],
+            starts[i_a][1],
             goals[i_a][0] - starts[i_a][0],
             goals[i_a][1] - starts[i_a][1],
-            width=float(env.shape[0]/20),
+            width=float(env.shape[0]/50),
             length_includes_head=True,
             linewidth=float(env.shape[0]/20),
             color=colors[i_a])
