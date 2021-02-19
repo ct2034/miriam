@@ -145,7 +145,7 @@ def plot_images(
         # do we have any results?
         assert not np.all(r == 0)
         assert not np.all(r == -1)
-        r_final = np.full([n_fills, n_n_agentss], np.nan, dtype=np.float)
+        r_final = np.full([n_fills, n_n_agentss], np.nan, dtype=float)
         for i_f, i_a in product(range(n_fills),
                                 range(n_n_agentss)):
             fill = fills[i_f]
@@ -235,7 +235,8 @@ def main_icts():
     generators = [
         # like_policylearn_gen,
         like_sim_decentralized,
-        tracing_pathes_in_the_dark
+        tracing_pathes_in_the_dark,
+        building_walls
     ]
 
     fills = np.around(
@@ -243,7 +244,7 @@ def main_icts():
         2
     )  # list of fills we want
 
-    n_agentss = np.linspace(low_agents, high_agents, n_n_agentss, dtype=np.int
+    n_agentss = np.linspace(low_agents, high_agents, n_n_agentss, dtype=int
                             )  # list of different numbers of agents we want
 
     evaluations = [
@@ -330,7 +331,7 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
     pb = ProgressBar("column >{}<".format(col_name),
                      (len(generators) * len(fills) * len(n_agentss)), 10)
     # Taking care of some little pandas ...........................
-    df_col = pd.DataFrame(index=idx, dtype=np.float)
+    df_col = pd.DataFrame(index=idx, dtype=float)
     df_col[col_name] = [np.nan] * len(df_col.index)
     df_col.sort_index(inplace=True)
     for gen, i_f, i_a in product(generators,
@@ -450,7 +451,7 @@ def evaluate_en_comparison(i_r, idx, generators, fills, n_agentss, size):
     pb = ProgressBar("column >{}<".format(col_name),
                      (len(generators) * len(fills) * len(n_agentss)), 10)
     # Taking care of some little pandas ...........................
-    df_col = pd.DataFrame(index=idx, dtype=np.float)
+    df_col = pd.DataFrame(index=idx, dtype=float)
     df_col[col_name] = [np.nan] * len(df_col.index)
     df_col.sort_index(inplace=True)
     for gen, i_f, i_a in product(generators,

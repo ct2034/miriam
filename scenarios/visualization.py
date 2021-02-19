@@ -51,7 +51,7 @@ def plot_with_paths(env, paths):
         np.arange(env.shape[1]))
     zeros = np.zeros(env.shape)
 
-    facecolors = cm.Greys(np.array(np.swapaxes(env, 0, 1), dtype=np.float))
+    facecolors = cm.Greys(np.array(np.swapaxes(env, 0, 1), dtype=float))
     # ax.contourf(xx, yy, np.swapaxes(env, 0, 1),
     #             antialiased=False, zdir='z', cmap=cm.Greys, alpha=0.8,
     #             zorder=0, levels=2, origin='lower')
