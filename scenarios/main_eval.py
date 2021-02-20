@@ -68,13 +68,13 @@ def init_values_main():
 
 
 def init_values_focus():
-    size = 8  # size for all scenarios
+    size = 10  # size for all scenarios
     n_fills = 6  # how many different fill values there should be
-    n_n_agentss = 10  # how many different numbers of agents should there be"""
-    n_runs = 64  # how many runs per configuration
-    max_fill = .5  # maximal fill to sample until
+    n_n_agentss = 6  # how many different numbers of agents should there be"""
+    n_runs = 32  # how many runs per configuration
+    max_fill = .7  # maximal fill to sample until
     low_agents = 5  # lowest number of agents
-    high_agents = 14  # highest number of agents
+    high_agents = 10  # highest number of agents
     return (max_fill, n_fills, n_n_agentss, n_runs, size,
             low_agents, high_agents)
 
@@ -286,11 +286,11 @@ def main_icts():
         pdo.progress()
     pdo.end()
 
-    with pd.option_context('display.max_rows',
-                           None,
-                           'display.max_columns',
-                           None):  # all rows and columns
-        print(df_results)
+    # with pd.option_context('display.max_rows',
+    #                        None,
+    #                        'display.max_columns',
+    #                        None):  # all rows and columns
+    #     print(df_results)
     print(df_results.info)
 
     df_results.to_pickle(get_fname_both("icts", "pkl"))
