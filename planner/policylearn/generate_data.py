@@ -271,8 +271,8 @@ def classification_samples(n_agents, data, t, col_agents,
         i_oa = col_agents[(i_ca+1) % 2]
         obstacle_fovs = make_obstacle_fovs(
             padded_gridmap, paths_until_col[i_a], t, CLASSIFICATION_FOV_RADIUS)
-        pos_other_agent_fovs = make_other_agent_fovs(
-            paths_until_col, i_a, CLASSIFICATION_FOV_RADIUS)
+        pos_other_agent_fovs = make_all_agents_fovs(
+            paths_until_col, i_a, i_oa, CLASSIFICATION_FOV_RADIUS)
         (path_fovs, paths_other_agent_fovs,
          paths_other_agents_fovs) = make_path_fovs(
             paths_full, paths_until_col, i_a, i_oa, t,
@@ -302,7 +302,7 @@ def make_obstacle_fovs(padded_gridmap, path, t, radius):
     return obstacle_fovs_np
 
 
-def make_other_agent_fovs(paths, agent, radius):
+def make_all_agents_fovs(paths, agent, other_agent, radius):
     """create for the agent a set of FOVS of radius containing positions of
     other agents."""
     t = paths[0].shape[0]
@@ -317,7 +317,7 @@ def make_other_agent_fovs(paths, agent, radius):
                     int(d[0]) + CLASSIFICATION_FOV_RADIUS,
                     int(d[1]) + CLASSIFICATION_FOV_RADIUS,
                     i_t
-                ] = 1
+                ] = 1. if i_a == other_agent else .5
     return other_agent_fovs
 
 
@@ -325,7 +325,7 @@ def make_path_fovs(paths, paths_until_col, agent, other_agent,
                    t_until_col, radius):
     """create for the agent a set of layers indicating their single-agent
     paths."""
-    lengths = map(lambda x: x.shape[0], paths)
+    lengths = list(map(lambda x: x.shape[0], paths))
     path_fovs = init_empty_fov(radius, t_until_col + 1)
     paths_other_agent_fovs = init_empty_fov(radius, t_until_col + 1)
     paths_other_agents_fovs = init_empty_fov(radius, t_until_col + 1)
@@ -346,7 +346,7 @@ def make_path_fovs(paths, paths_until_col, agent, other_agent,
                         int(d[0]) + CLASSIFICATION_FOV_RADIUS,
                         int(d[1]) + CLASSIFICATION_FOV_RADIUS,
                         i_t_steps
-                    ] = 1
+                    ] += i_t_path / lengths[i_a]
     return path_fovs, paths_other_agent_fovs, paths_other_agents_fovs
 
 

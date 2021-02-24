@@ -12,5 +12,10 @@ Then transfer to classification samples
 
 Have a look at the data with ...
 ```
-/generate_data_demo.py plot_fovs data_class.pkl
+./generate_data_demo.py plot_fovs data_class.pkl
+```
+
+Train the model
+```
+./train_model_classification.py data_class.pkl
 ```

@@ -7,10 +7,10 @@ import random
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
+from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D,
                                      Dropout, Flatten, MaxPooling2D, Reshape)
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.callbacks import ReduceLROnPlateau
 
 tf.compat.v1.GPUOptions(allow_growth=True)
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                                   patience=5, min_lr=0.001)
     history = model.fit([train_images], train_labels, callbacks=[reduce_lr],
-                        validation_split=0.1, epochs=32, batch_size=2048)
+                        validation_split=0.1, epochs=32, batch_size=2)
 
     # test
     # test_loss, test_acc = model.evaluate([test_images], test_labels)
@@ -93,8 +93,8 @@ if __name__ == "__main__":
     # print("Accuracy " + str(test_acc))
 
     # Plot training & validation accuracy values
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
     plt.title('Model accuracy')
     plt.ylabel('Accuracy')
     plt.xlabel('Epoch')
