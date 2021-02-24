@@ -16,6 +16,7 @@ import tools
 from definitions import FREE, OBSTACLE
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
+from scenarios.evaluators import cached_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark
 from sim.decentralized.agent import Agent
 from sim.decentralized.runner import initialize_environment
@@ -488,8 +489,8 @@ if __name__ == "__main__":
                 do_collide, indep_agent_paths = will_they_collide(
                     gridmap, starts, goals)
 
-            data = plan_in_gridmap(
-                gridmap, starts, goals, suboptimality=1.5, timeout=10)
+            data = cached_ecbs(
+                gridmap, starts, goals, timeout=10)
             collisions = where_will_they_collide(indep_agent_paths)
 
             if data and BLOCKS_STR in data.keys():  # has blocks
