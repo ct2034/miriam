@@ -52,15 +52,15 @@ if __name__ == "__main__":
     train_images = np.array(train_images_l)
     train_labels = np.array(train_labels_l)
     # shuffling
-    # training_data = np.c_[train_images.reshape(
-    #     len(train_images), -1), train_labels.reshape(len(train_labels), -1)]
-    # np.random.shuffle(training_data)
-    # train_images2 = training_data[:, :train_images.size //
-    #                               len(train_images)].reshape(
-    #                                   train_images.shape)
-    # train_labels2 = training_data[:, train_images.size //
-    #                               len(train_images):].reshape(
-    #                                   train_labels.shape)
+    training_data = np.c_[train_images.reshape(
+        len(train_images), -1), train_labels.reshape(len(train_labels), -1)]
+    np.random.shuffle(training_data)
+    train_images2 = training_data[:, :train_images.size //
+                                  len(train_images)].reshape(
+                                      train_images.shape)
+    train_labels2 = training_data[:, train_images.size //
+                                  len(train_images):].reshape(
+                                      train_labels.shape)
 
     CONV3D_1_FILTERS = 4
     # model
@@ -68,13 +68,13 @@ if __name__ == "__main__":
         Conv3D(CONV3D_1_FILTERS, 2, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
         Flatten(),
-        Dense(64, activation='relu'),
-        Dropout(0.4),
-        Dense(64, activation='relu'),
-        Dropout(0.4),
-        Dense(64, activation='relu'),
-        Dropout(0.2),
-        Dense(64, activation='relu'),
+        #Dense(128, activation='relu'),
+        Dropout(0.6),
+        Dense(32, activation='relu'),
+        Dropout(0.6),
+        Dense(32, activation='relu'),
+        Dropout(0.6),
+        Dense(16, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(loss='binary_crossentropy',
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                                   patience=5, min_lr=0.001)
     history = model.fit([train_images], train_labels, callbacks=[reduce_lr],
-                        validation_split=0.1, epochs=32, batch_size=2)
+                        validation_split=0.1, epochs=4, batch_size=4)
 
     # test
     # test_loss, test_acc = model.evaluate([test_images], test_labels)
@@ -99,6 +99,7 @@ if __name__ == "__main__":
     plt.ylabel('Accuracy')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Test'], loc='upper left')
+    plt.savefig('training_accuracy.png')
     plt.show()
 
     # Plot training & validation loss values
@@ -108,4 +109,5 @@ if __name__ == "__main__":
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Test'], loc='upper left')
+    plt.savefig('training_loss.png')
     plt.show()
