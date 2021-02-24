@@ -9,19 +9,22 @@ from matplotlib import pyplot as plt
 PLOT_FOVS_STR = "plot_fovs"
 
 
-def plot_fovs(one_fov_data):
-    rows = one_fov_data.shape[2]
-    columns = one_fov_data.shape[3]
-    middle = (one_fov_data[:, :, 0, 0].shape[0] - 1) / 2
-    end = (one_fov_data[:, :, 0, 0].shape[0] - 1)
+def plot_fovs(X, Y):
+    rows = X.shape[2]
+    columns = X.shape[3]
+    middle = (X[:, :, 0, 0].shape[0] - 1) / 2
+    end = (X[:, :, 0, 0].shape[0] - 1)
 
+    fig = plt.figure()
     for row in range(rows):
         for col in range(columns):
             plt.subplot(rows, columns, columns * row + col + 1)
-            plt.imshow(one_fov_data[:, :, row, col], cmap='gray')
+            plt.imshow(X[:, :, row, col], cmap='gray')
             # cross
             plt.plot([0, end], [middle, middle], 'r')
             plt.plot([middle, middle], [0, end], 'r')
+    # label
+    fig.suptitle(f'y={Y}')
     plt.show()
 
 
@@ -42,4 +45,4 @@ if __name__ == "__main__":
 
     if args.mode == PLOT_FOVS_STR:
         for i in range(6):
-            plot_fovs(d[i][0])
+            plot_fovs(*d[i])

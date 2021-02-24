@@ -151,6 +151,22 @@ def will_they_collide(gridmap, starts, goals):
     return do_collide, agent_paths
 
 
+def where_will_they_collide(agent_paths):
+    """checks if for a given set of starts and goals the agents travelling
+    between may collide on the given gridmap."""
+    collisions = {}
+    seen = set()
+    been_at = {}
+    for i_a, _ in enumerate(starts):
+        for pos in agent_paths[i_a]:
+            pos = tuple(pos)
+            if pos in seen:  # TODO: edge collisions
+                collisions[pos] = (been_at[pos], i_a)
+            seen.add(pos)
+            been_at[pos] = i_a
+    return collisions
+
+
 def add_padding_to_gridmap(gridmap, radius):
     """add a border of blocks around the map of given radius.
     (The new size will be old size + 2 * radius in both directions)"""
@@ -465,12 +481,6 @@ if __name__ == "__main__":
         while len(all_data) < n_data_to_gen:
             do_collide = False
             while not do_collide:
-                # gridmap = generate_random_gridmap(width, height, fill)
-                # gridmap = initialize_environment(width, fill)
-                # starts = [get_random_free_pos(gridmap)
-                #           for _ in range(n_agents)]
-                # goals = [get_random_free_pos(gridmap)
-                #          for _ in range(n_agents)]
                 gridmap, starts, goals = tracing_pathes_in_the_dark(
                     width, fill, n_agents, seed
                 )
@@ -478,7 +488,9 @@ if __name__ == "__main__":
                 do_collide, indep_agent_paths = will_they_collide(
                     gridmap, starts, goals)
 
-            data = plan_in_gridmap(gridmap, starts, goals)
+            data = plan_in_gridmap(
+                gridmap, starts, goals, suboptimality=1.5, timeout=10)
+            collisions = where_will_they_collide(indep_agent_paths)
 
             if data and BLOCKS_STR in data.keys():  # has blocks
                 blocks = data[BLOCKS_STR]
@@ -487,8 +499,9 @@ if __name__ == "__main__":
                     # we take only these for learning
                     data.update({
                         INDEP_AGENT_PATHS_STR: indep_agent_paths,
-                        COLLISIONS_STR: do_collide,
-                        GRIDMAP_STR: gridmap
+                        COLLISIONS_STR: collisions,
+                        GRIDMAP_STR: gridmap,
+                        BLOCKS_STR: blocks
                     })
                     all_data.append(data)
                     save_data(all_data, args.fname_write_pkl.name)
