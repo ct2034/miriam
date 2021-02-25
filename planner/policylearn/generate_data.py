@@ -13,7 +13,7 @@ from multiprocessing import Pool
 import matplotlib.pyplot as plt
 import numpy as np
 import tools
-from definitions import FREE, OBSTACLE
+from definitions import FREE, INVALID, OBSTACLE
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
     BLOCKS_STR, plan_in_gridmap)
 from scenarios.evaluators import cached_ecbs
@@ -473,7 +473,7 @@ if __name__ == "__main__":
         # generation parameters
         plot = False
         all_data = []
-        n_data_to_gen = os.getenv("N_DATA_TO_GEN", 5000)
+        n_data_to_gen = os.getenv("N_DATA_TO_GEN", 50000)
         logger.info("Generating {} data points.".format(n_data_to_gen))
         seed = os.getenv("SEED", 0)
         random.seed(seed)
@@ -493,7 +493,7 @@ if __name__ == "__main__":
                 gridmap, starts, goals, timeout=10)
             collisions = where_will_they_collide(indep_agent_paths)
 
-            if data and BLOCKS_STR in data.keys():  # has blocks
+            if data != INVALID and BLOCKS_STR in data.keys():  # has blocks
                 blocks = data[BLOCKS_STR]
                 at_least_one_block = has_one_or_more_vertex_blocks(blocks)
                 if at_least_one_block:
