@@ -473,11 +473,12 @@ if __name__ == "__main__":
         # generation parameters
         plot = False
         all_data = []
-        n_data_to_gen = os.getenv("N_DATA_TO_GEN", 50000)
+        n_data_to_gen = int(os.getenv("N_DATA_TO_GEN", 5000))
         logger.info("Generating {} data points.".format(n_data_to_gen))
         seed = os.getenv("SEED", 0)
         random.seed(seed)
         logger.info("Using initial seed: {}".format(seed))
+        save_every = 500
         # start
         while len(all_data) < n_data_to_gen:
             do_collide = False
@@ -505,10 +506,13 @@ if __name__ == "__main__":
                         BLOCKS_STR: blocks
                     })
                     all_data.append(data)
-                    save_data(all_data, args.fname_write_pkl.name)
+                    if len(all_data) % save_every == 0:
+                        save_data(all_data, args.fname_write_pkl.name)
                     print_stats()
                     if plot:
                         plot_map_and_paths(gridmap, blocks, data, n_agents)
+        # save in the end for sure
+        save_data(all_data, args.fname_write_pkl.name)
     elif args.mode == NO_SOLUTION_STR:
         # generate data of scenarios without solution (no info on how to solve
         # collision) for autoencoding.
