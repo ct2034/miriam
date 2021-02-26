@@ -35,32 +35,32 @@ if __name__ == "__main__":
 
     dat_transformers = [
         lambda x: x,
-        lambda x: np.rot90(x, k=1, axes=(0, 1)),
-        lambda x: np.rot90(x, k=2, axes=(0, 1)),
-        lambda x: np.rot90(x, k=3, axes=(0, 1)),
+        #lambda x: np.rot90(x, k=1, axes=(0, 1)),
+        #lambda x: np.rot90(x, k=2, axes=(0, 1)),
+        #lambda x: np.rot90(x, k=3, axes=(0, 1)),
         lambda x: np.flip(x, axis=0),
-        lambda x: np.rot90(np.flip(x, axis=0), k=1, axes=(0, 1)),
-        lambda x: np.rot90(np.flip(x, axis=0), k=2, axes=(0, 1)),
-        lambda x: np.rot90(np.flip(x, axis=0), k=3, axes=(0, 1)),
+        #lambda x: np.rot90(np.flip(x, axis=0), k=1, axes=(0, 1)),
+        #lambda x: np.rot90(np.flip(x, axis=0), k=2, axes=(0, 1)),
+        #lambda x: np.rot90(np.flip(x, axis=0), k=3, axes=(0, 1)),
     ]
 
-    for i in range(len(d)):
+    for i in range(int(len(d))):
         dat = d[i][0]
         for transf in dat_transformers:
             train_images_l.append(transf(dat))
             train_labels_l.append(d[i][1])
     train_images = np.array(train_images_l)
     train_labels = np.array(train_labels_l)
-    # shuffling
-    training_data = np.c_[train_images.reshape(
-        len(train_images), -1), train_labels.reshape(len(train_labels), -1)]
-    np.random.shuffle(training_data)
-    train_images2 = training_data[:, :train_images.size //
-                                  len(train_images)].reshape(
-                                      train_images.shape)
-    train_labels2 = training_data[:, train_images.size //
-                                  len(train_images):].reshape(
-                                      train_labels.shape)
+    # # shuffling
+    # training_data = np.c_[train_images.reshape(
+    #     len(train_images), -1), train_labels.reshape(len(train_labels), -1)]
+    # np.random.shuffle(training_data)
+    # train_images2 = training_data[:, :train_images.size //
+    #                               len(train_images)].reshape(
+    #                                   train_images.shape)
+    # train_labels2 = training_data[:, train_images.size //
+    #                               len(train_images):].reshape(
+    #                                   train_labels.shape)
 
     CONV3D_1_FILTERS = 4
     # model
