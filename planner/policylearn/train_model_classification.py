@@ -14,6 +14,20 @@ from tensorflow.keras.models import Sequential
 tf.compat.v1.GPUOptions(allow_growth=True)
 
 
+class BatchHistory(tf.keras.callbacks.Callback):
+    """Collection history per batch,
+    src: https://stackoverflow.com/a/66401457/1493204"""
+    batch_accuracy: List[float] = []  # accuracy at given batch
+    batch_loss: List[float] = []  # loss at given batch
+
+    def __init__(self):
+        super(BatchHistory, self).__init__()
+
+    def on_train_batch_end(self, batch, logs=None):
+        BatchHistory.batch_accuracy.append(logs.get('accuracy'))
+        BatchHistory.batch_loss.append(logs.get('loss'))
+
+
 def construct_model(img_width, img_depth_t, img_depth_frames):
     CONV3D_FILTERS = 4
     CONV2D_FILTERS = 8
@@ -63,9 +77,9 @@ if __name__ == "__main__":
     model = construct_model(img_width, img_depth_t, img_depth_frames)
 
     # train
-    bcp = BCP()
+    bcp = BatchHistory()
     history = model.fit([train_images], train_labels,
-                        epochs=1, batch_size=1
+                        epochs=1, batch_size=1, callbacks=[bcp]
                         )
     model.save('my_model.h5')
 
@@ -73,3 +87,11 @@ if __name__ == "__main__":
     val_loss, val_acc = model.evaluate([val_images], val_labels)
     print(f"val_loss: {val_loss}")
     print(f"val_acc: {val_acc}")
+
+    # print history
+    plt.plot(bcp.batch_accuracy, label="accuracy")
+    plt.plot(bcp.batch_loss, label="loss")
+    plt.legend()
+    plt.xlabel('Batch')
+    plt.savefig("training_history.png")
+    plt.show()
