@@ -29,10 +29,10 @@ class BatchHistory(tf.keras.callbacks.Callback):
 
 
 def construct_model(img_width, img_depth_t, img_depth_frames):
-    CONV3D_FILTERS = 4
+    CONV3D_FILTERS = 8
     CONV2D_FILTERS = 8
     model = Sequential([
-        Conv3D(CONV3D_FILTERS, 2, padding='same', activation='relu',
+        Conv3D(CONV3D_FILTERS, 3, padding='same', activation='relu',
                input_shape=(img_width, img_width, img_depth_t, img_depth_frames)),
         Reshape((img_width, img_width, img_depth_t * CONV3D_FILTERS)),
         Conv2D(CONV2D_FILTERS, 2, padding='same', activation='relu'),
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     assert img_width == img_height, "Images must be square."
 
     # optimizer
-    opt = tf.keras.optimizers.Adam(learning_rate=0.01, epsilon=1)
+    opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
 
     # model
     model = construct_model(img_width, img_depth_t, img_depth_frames)
