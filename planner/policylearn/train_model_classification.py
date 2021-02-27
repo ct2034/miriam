@@ -71,13 +71,7 @@ if __name__ == "__main__":
         Conv3D(CONV3D_1_FILTERS, 2, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
         Flatten(),
-        #Dense(128, activation='relu'),
-        #Dropout(0.6),
         Dense(32, activation='relu'),
-        #Dropout(0.6),
-        Dense(32, activation='relu'),
-        #Dropout(0.6),
-        Dense(16, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer=opt, loss='binary_crossentropy',
