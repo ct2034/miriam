@@ -72,11 +72,11 @@ if __name__ == "__main__":
                input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
         Flatten(),
         #Dense(128, activation='relu'),
-        Dropout(0.6),
+        #Dropout(0.6),
         Dense(32, activation='relu'),
-        Dropout(0.6),
+        #Dropout(0.6),
         Dense(32, activation='relu'),
-        Dropout(0.6),
+        #Dropout(0.6),
         Dense(16, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
@@ -95,21 +95,21 @@ if __name__ == "__main__":
     # print("Accuracy " + str(test_acc))
 
     # Plot training & validation accuracy values
-    plt.plot(history.history['accuracy'])
-    plt.plot(history.history['val_accuracy'])
-    plt.title('Model accuracy')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
-    plt.savefig('training_accuracy.png')
-    plt.show()
+    #plt.plot(history.history['accuracy'])
+    #plt.plot(history.history['val_accuracy'])
+    #plt.title('Model accuracy')
+    #plt.ylabel('Accuracy')
+    #plt.xlabel('Epoch')
+    #plt.legend(['Train', 'Test'], loc='upper left')
+    #plt.savefig('training_accuracy.png')
+    #plt.show()
 
     # Plot training & validation loss values
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('Model loss')
-    plt.ylabel('Loss')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
-    plt.savefig('training_loss.png')
-    plt.show()
+    #plt.plot(history.history['loss'])
+    #plt.plot(history.history['val_loss'])
+    #plt.title('Model loss')
+    #plt.ylabel('Loss')
+    #plt.xlabel('Epoch')
+    #plt.legend(['Train', 'Test'], loc='upper left')
+    #plt.savefig('training_loss.png')
+    #plt.show()
