@@ -20,6 +20,7 @@ from scenarios.evaluators import cached_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark
 from sim.decentralized.agent import Agent
 from sim.decentralized.runner import initialize_environment
+from tools import ProgressBar
 
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
 EDGE_CONSTRAINTS_STR = 'edgeConstraints'
@@ -456,12 +457,14 @@ if __name__ == "__main__":
             all_data = pickle.load(f)
         data_len = len(all_data)
         i = 0
+        pb = ProgressBar("main", data_len, 1)
         for d in all_data:
             i += 1
-            logger.info("{} of {}".format(i, data_len))
+            pb.progress()
             training_data_we_want.extend(
                 training_samples_from_data(d, args.mode))
         save_data(training_data_we_want, args.fname_write_pkl.name)
+        pb.end()
     elif args.mode == GENERATE_SIM_STR:
         # scenario paramters
         width = 8
