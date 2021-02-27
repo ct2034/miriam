@@ -62,8 +62,11 @@ if __name__ == "__main__":
     #                               len(train_images):].reshape(
     #                                   train_labels.shape)
 
-    CONV3D_1_FILTERS = 4
+    # optimizer
+    opt = tf.keras.optimizers.Adam(learning_rate=0.01, epsilon=1)
+
     # model
+    CONV3D_1_FILTERS = 4
     model = Sequential([
         Conv3D(CONV3D_1_FILTERS, 2, padding='same', activation='relu',
                input_shape=(IMG_SIZE, IMG_SIZE, IMG_DEPTH_T, IMG_DEPTH_FRAMES)),
@@ -77,15 +80,14 @@ if __name__ == "__main__":
         Dense(16, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
-    model.compile(loss='binary_crossentropy',
+    model.compile(optimizer=opt, loss='binary_crossentropy',
                   metrics=['accuracy'])
     model.summary()
 
     # train
-    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                                  patience=5, min_lr=0.001)
-    history = model.fit([train_images], train_labels, callbacks=[reduce_lr],
-                        validation_split=0.1, epochs=4, batch_size=4)
+    history = model.fit([train_images], train_labels,
+                        validation_split=0.2, epochs=1, batch_size=len(dat_transformers))
+    model.save('my_model.h5')
 
     # test
     # test_loss, test_acc = model.evaluate([test_images], test_labels)
