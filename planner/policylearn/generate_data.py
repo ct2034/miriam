@@ -36,7 +36,7 @@ NO_SOLUTION_STR = 'no_solution'
 
 LSTM_FOV_RADIUS = 2  # self plus x in all 4 directions
 CLASSIFICATION_POS_TIMESTEPS = 3
-CLASSIFICATION_FOV_RADIUS = 6  # self plus x in all 4 directions
+CLASSIFICATION_FOV_RADIUS = 3  # self plus x in all 4 directions
 DTYPE_SAMPLES = np.int8
 
 
@@ -186,8 +186,6 @@ def training_samples_from_data(data, mode):
     """extract training samples from the data simulation data dict."""
     training_samples = []
     n_agents = len(data[INDEP_AGENT_PATHS_STR])
-    # assert len(data[COLLISIONS_STR]
-    #            ) == 1, "assuming we only handle one conflict"
     for col_vertex, col_agents in data[COLLISIONS_STR].items():
         t = col_vertex[2]
         blocked_agent = -1
