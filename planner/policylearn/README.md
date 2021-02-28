@@ -19,3 +19,8 @@ Train the model
 ```
 ./train_model_classification.py data_class.pkl
 ```
+
+Evaluate the model with ..
+```
+./evaluate_model_classification.py my_model.h5
+```

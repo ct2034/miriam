@@ -15,7 +15,7 @@ tf.compat.v1.GPUOptions(allow_growth=True)
 
 
 class BatchHistory(tf.keras.callbacks.Callback):
-    """Collection history per batch,
+    """Collection of history per batch,
     src: https://stackoverflow.com/a/66401457/1493204"""
     batch_accuracy: List[float] = []  # accuracy at given batch
     batch_loss: List[float] = []  # loss at given batch
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # print history
     plt.plot(bcp.batch_accuracy, label="accuracy")
     plt.plot(bcp.batch_loss, label="loss")
-    plt.legend()
+    plt.legend(loc='lower left')
     plt.xlabel('Batch')
     plt.savefig("training_history.png")
     plt.show()
