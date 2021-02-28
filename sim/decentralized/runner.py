@@ -12,6 +12,7 @@ import timeout_decorator
 from matplotlib import cm
 from matplotlib import pyplot as plt
 from sim.decentralized.agent import Agent, Policy
+from tools import ProgressBar
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -103,9 +104,9 @@ def initialize_agents(
 ) -> Tuple[Agent, ...]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other)."""
-    random.seed(0)
+    random.seed(seed)
     agents: List[Agent] = []  # starting with a list for easy inserting
-    for i_a in range(n_agents):
+    for _ in range(n_agents):
         agent = initialize_new_agent(
             env, agents, policy, tight_placement)
         agents.append(agent)
@@ -285,18 +286,9 @@ def check_time_evaluation(time_progress, space_progress):
     return average_time, max_time, average_length, max_length
 
 
-def sample_and_run_a_scenario(size, n_agents, policy, plot):
-    is_well_formed = False
-    while not is_well_formed:
-        # maze (environment)
-        env = initialize_environment(size, .2)
-
-        # agents
-        agents = initialize_agents(env, n_agents, policy)
-
-        # check well-formedness
-        is_well_formed = is_environment_well_formed(agents)
-
+def sample_and_run_a_scenario(size, n_agents, policy, plot, seed):
+    env = initialize_environment(size, .2, seed)
+    agents = initialize_agents(env, n_agents, policy, seed)
     return run_a_scenario(env, agents, plot)
 
 
@@ -396,7 +388,8 @@ def plot_evaluations(evaluations: Dict[Policy, np.ndarray],
     plt.show()
 
 
-def run_main(size=10, n_agents=10, runs=100, plot=True, plot_eval=True):
+def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
+    """run the simulation with all policies"""
     evaluations = {}
     evaluation_names = [
         "average_time",
@@ -405,20 +398,26 @@ def run_main(size=10, n_agents=10, runs=100, plot=True, plot_eval=True):
         "max_length",
         "successful"
     ]
+    pb = ProgressBar("evaluate_policies", len(Policy)*runs, 5)
 
     for policy in Policy:
+        logger.info(f"policy: {policy.name}")
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):
+            print(i_r)
             random.seed(i_r)
             results = sample_and_run_a_scenario(
-                size, n_agents, policy, False)
+                size, n_agents, policy, False, i_r)
             evaluation_per_policy = np.append(
                 evaluation_per_policy, np.transpose([results]), axis=1)
+            pb.progress()
         evaluations[policy] = evaluation_per_policy
+    pb.end()
 
     if plot_eval:  # pragma: no cover
         plot_evaluations(evaluations, evaluation_names)
+    return (evaluations, evaluation_names)
 
 
 if __name__ == "__main__":  # pragma: no cover
-    run_main(32, 16, 8)
+    evaluate_policies(32, 16, 8)

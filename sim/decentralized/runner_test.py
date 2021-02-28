@@ -241,13 +241,20 @@ class TestDecentralizedSim(unittest.TestCase):
             self.assertRaises(runner.SimIterationException,
                               lambda: runner.iterate_sim(agents))
 
-    def test_run_main(self):
-        runner.run_main(8, 1, 32, False, False)
-        runner.run_main(8, 2, 32, False, False)
-        # runner.run_main(8, 4, 32, False, False)
-        # runner.run_main(8, 8, 32, False, False)
+    def test_evaluate_policies(self):
+        n_runs = 8
+        for agents in [2, 3]:
+            data, names = runner.evaluate_policies(10, agents, n_runs, False)
+            assert len(data) == len(Policy)
+            for p in data.keys():
+                dat = data[p]
+                (n_evals_out, n_runs_out) = dat.shape
+                assert n_runs_out == n_runs
+                assert n_evals_out == len(names)
+                for i_e in range(n_evals_out):
+                    if names[i_e] != "successful":
+                        assert np.std(dat[i_e, :]) > 0
 
 
 if __name__ == "__main__":  # pragma: no cover
     pytest.main()
-    # pytest.main(["sim/decentralized/runner_test.py"])
