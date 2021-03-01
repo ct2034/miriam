@@ -94,7 +94,7 @@ class Agent():
             env_nx = self.env_nx
         try:
             assert self.goal is not None, "Should have a goal"
-            tuple_path = nx.shortest_path(
+            tuple_path = nx.astar_path(
                 env_nx, tuple(self.pos), tuple(self.goal))
         except nx.exception.NetworkXNoPath as e:
             logger.warning(e)
@@ -119,9 +119,11 @@ class Agent():
         if there still is a path to the current goal. `False` otherwise."""
         assert self.env_nx is not None, "Should have a env_nx"
         tmp_edge = (a, b)
+        self.filter_blocked_edges = self.blocked_edges.union({tmp_edge})
         tmp_env_nx = self.gridmap_to_nx(
             self.env, self.blocked_edges.union({tmp_edge}))
 
+        assert not tmp_env_nx.has_edge(a, b)
         path = self.plan_path(tmp_env_nx)
         if path is not None:
             # all good, and we have a new path now
@@ -132,6 +134,7 @@ class Agent():
             return True
         else:
             # forget changes
+            self.filter_blocked_edges = self.blocked_edges
             return False
 
     def is_at_goal(self):

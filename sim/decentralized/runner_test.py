@@ -12,9 +12,9 @@ from sim.decentralized.policy import PolicyType, RandomPolicy
 from sim.decentralized.runner import SimIterationException
 
 
-class TestDecentralizedSim(unittest.TestCase):
+class TestRunner(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestDecentralizedSim, self).__init__(*args, **kwargs)
+        super(TestRunner, self).__init__(*args, **kwargs)
         random.seed(0)
 
     def test_initialize_environment(self):

@@ -9,7 +9,7 @@ from sim.decentralized.agent import Agent
 from sim.decentralized.policy import Policy, PolicyType, RandomPolicy
 
 
-class TestDecentralizedSim(unittest.TestCase):
+class TestAgent(unittest.TestCase):
     def test_init(self):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
         a = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
@@ -100,6 +100,13 @@ class TestDecentralizedSim(unittest.TestCase):
         # and we should also be able to give another goal
         self.assertTrue(a.give_a_goal(np.array([1, 0])))
         self.assertEqual(len(a.path), 2)
+
+        # should not be able to block a necessary edge
+        self.assertFalse(a.block_edge((0, 0), (1, 0)))
+
+        # and we should still be able to give another goal
+        self.assertTrue(a.give_a_goal(np.array([1, 0])))
+        self.assertEqual(len(a.path), 2)  # and have path
 
     def test_is_at_goal(self):
         env = np.array([[0, 0], [0, 0]])

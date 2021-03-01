@@ -1,13 +1,14 @@
 import random
-from enum import Enum
+from enum import Enum, auto
 
 import numpy as np
 
 
 class PolicyType(Enum):
-    RANDOM = 0
-    CLOSEST = 1
-    FILL = 2
+    RANDOM = auto()
+    CLOSEST = auto()
+    FILL = auto()
+    LEARNED = auto()
 
 
 class Policy(object):
@@ -19,6 +20,8 @@ class Policy(object):
             return ClosestPolicy(agent)
         elif type == PolicyType.FILL:
             return FillPolicy(agent)
+        elif type == PolicyType.LEARNED:
+            return LearnedPolicy(agent)
 
     def __init__(self, agent) -> None:
         super().__init__()
@@ -66,3 +69,13 @@ class FillPolicy(Policy):
                 if self.a.env[x, y] == 0:
                     n_free += 1
         return float(n_total - n_free) / n_total
+
+
+class LearnedPolicy(Policy):
+    # using machine learning for a greater tomorrow
+    def __init__(self, agent) -> None:
+        super().__init__(agent)
+        print("init")
+
+    def get_priority(self) -> float:
+        return .5
