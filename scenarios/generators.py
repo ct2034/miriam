@@ -10,8 +10,7 @@ import sim.decentralized.agent
 import sim.decentralized.runner
 import tools
 from definitions import FREE, OBSTACLE
-from matplotlib import pyplot as plt
-from numpy.lib.function_base import diff
+from sim.decentralized.policy import PolicyType
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
@@ -20,7 +19,7 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
                              seed: Any = random.random()):
     random.seed(seed)
     agents = sim.decentralized.runner.initialize_agents(
-        env, n_agents, sim.decentralized.agent.Policy.RANDOM,
+        env, n_agents, PolicyType.RANDOM,
         tight_placement=True, seed=seed)
     starts = np.array([a.pos for a in agents])
     assert starts.shape == (n_agents, 2)

@@ -1,23 +1,15 @@
 import logging
 import random
-from enum import Enum
 from typing import *
 
 import networkx as nx
 import numpy as np
-
-import tools
+from sim.decentralized.policy import Policy, PolicyType
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 BLOCKED_EDGES_TYPE = Set[Tuple[Tuple[int, int], Tuple[int, int]]]
-
-
-class Policy(Enum):
-    RANDOM = 0
-    CLOSEST = 1
-    FILL = 2
 
 
 class Agent():
@@ -30,14 +22,14 @@ class Agent():
 
     def __init__(
         self, env: np.ndarray, pos: np.ndarray,
-        policy: Policy = Policy.RANDOM
+        policy: PolicyType = PolicyType.RANDOM
     ):
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
         self.env: np.ndarray = env
         assert isinstance(pos, np.ndarray), "Position must be numpy array"
         self.pos: np.ndarray = pos
-        self.policy: Policy = policy
+        self.policy: Policy = Policy.construct_by_type(policy, self)
         self.id: int = random.randint(0, int(2E14))
         self.blocked_edges = set()
         self.filter_blocked_edges = set()
@@ -146,31 +138,10 @@ class Agent():
         """returns true iff the agent is at its goal."""
         return all(self.pos == self.goal) or self.path is None
 
-    def get_priority(self):
+    def get_priority(self) -> float:
         """Based on the selected policy, this will give the priority of this
         agent."""
-        if self.policy == Policy.RANDOM:
-            # simply returning a random number on every call
-            return random.random()
-        elif self.policy == Policy.CLOSEST:
-            # a policy that prefers the agent that is currently closest to its
-            # goal.
-            return 1. / np.linalg.norm(self.goal - self.pos)
-        elif self.policy == Policy.FILL:
-            # an agent will get a higher prio if the map around it is fuller of
-            # obstacles.
-            FILL_RADIUS = 2
-            n_total = ((FILL_RADIUS * 2 + 1)**2)
-            n_free = 0
-            for x in range(max(0, self.pos[0] - FILL_RADIUS),
-                           min(self.env.shape[0],
-                               self.pos[0] + FILL_RADIUS + 1)):
-                for y in range(max(0, self.pos[1] - FILL_RADIUS),
-                               min(self.env.shape[1],
-                                   self.pos[1] + FILL_RADIUS + 1)):
-                    if self.env[x, y] == 0:
-                        n_free += 1
-            return float(n_total - n_free) / n_total
+        return self.policy.get_priority()
 
     def what_is_next_step(self) -> np.ndarray:
         """Return the position where this agent would like to go next."""

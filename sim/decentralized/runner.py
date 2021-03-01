@@ -11,7 +11,8 @@ import numpy as np
 import timeout_decorator
 from matplotlib import cm
 from matplotlib import pyplot as plt
-from sim.decentralized.agent import Agent, Policy
+from sim.decentralized.agent import Agent
+from sim.decentralized.policy import PolicyType
 from tools import ProgressBar
 
 logging.basicConfig()
@@ -44,7 +45,7 @@ def initialize_environment(size: int, fill: float, seed: Any = random.random()):
 
 
 def initialize_new_agent(
-        env: np.ndarray, agents: List[Agent], policy: Policy,
+        env: np.ndarray, agents: List[Agent], policy: PolicyType,
         tight_placement: bool = False) -> Agent:
     """Place new agent in the environment, where no obstacle or other agent
     is.
@@ -99,7 +100,7 @@ def initialize_new_agent(
 
 
 def initialize_agents(
-        env: np.ndarray, n_agents: int, policy: Policy,
+        env: np.ndarray, n_agents: int, policy: PolicyType,
         tight_placement: bool = False, seed: Any = random.random()
 ) -> Tuple[Agent, ...]:
     """Initialize `n_agents` many agents in unique, free spaces of
@@ -359,7 +360,7 @@ def plot_env_agents(environent: np.ndarray,
     plt.show()
 
 
-def plot_evaluations(evaluations: Dict[Policy, np.ndarray],
+def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
                      evaluation_names: List[str]):  # pragma: no cover
     n_policies = len(evaluations.keys())
     colormap = cm.tab10.colors
@@ -398,9 +399,9 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         "max_length",
         "successful"
     ]
-    pb = ProgressBar("evaluate_policies", len(Policy)*runs, 5)
+    pb = ProgressBar("evaluate_policies", len(PolicyType)*runs, 5)
 
-    for policy in Policy:
+    for policy in PolicyType:
         logger.info(f"policy: {policy.name}")
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):

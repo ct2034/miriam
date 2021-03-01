@@ -2,13 +2,14 @@ import numpy as np
 from definitions import DEFAULT_TIMEOUT_S, INVALID
 from planner.matteoantoniazzi_mapf.plan import icts_plan, paths_from_info
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
-from sim.decentralized.agent import Agent, Policy
+from sim.decentralized.agent import Agent
+from sim.decentralized.policy import PolicyType
 
 SCHEDULE = 'schedule'
 AGENT = 'agent'
 
 
-def to_agent_objects(env, starts, goals, policy=Policy.RANDOM):
+def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM):
     n_agents = starts.shape[0]
     agents = []
     for i_a in range(n_agents):

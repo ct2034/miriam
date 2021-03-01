@@ -5,42 +5,43 @@ import unittest
 
 import networkx as nx
 import numpy as np
-
-from sim.decentralized.agent import Agent, Policy
+from sim.decentralized.agent import Agent
+from sim.decentralized.policy import Policy, PolicyType, RandomPolicy
 
 
 class TestDecentralizedSim(unittest.TestCase):
     def test_init(self):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
-        a = Agent(env, np.array([0, 2]), Policy.RANDOM)
+        a = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
         self.assertTrue((a.env == env).all())
         self.assertTrue((a.pos == np.array([0, 2])).all())
-        self.assertEqual(a.policy, Policy.RANDOM)
+        self.assertIsInstance(a.policy, Policy)
+        self.assertIsInstance(a.policy, RandomPolicy)
 
     def test_hash_equality(self):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
-        a1 = Agent(env, np.array([0, 2]), Policy.RANDOM)
-        a2 = Agent(env, np.array([0, 2]), Policy.RANDOM)  # same
+        a1 = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
+        a2 = Agent(env, np.array([0, 2]), PolicyType.RANDOM)  # same
         self.assertTrue(a1 != a2)
 
-        a3 = Agent(env, np.array([0, 2]), Policy.RANDOM)
+        a3 = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
         self.assertTrue(a1 != a3)
         a3.give_a_goal(np.array([0, 0]))  # setting goal
         self.assertTrue(a1 != a3)  # not same any more
 
-        a4 = Agent(env, np.array([0, 2]), Policy.RANDOM)
+        a4 = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
         a4.give_a_goal(np.array([0, 1]))  # different goal
         self.assertTrue(a1 != a4)
         self.assertTrue(a3 != a4)
 
-        a5 = Agent(env, np.array([0, 1]), Policy.RANDOM)  # different pos
+        a5 = Agent(env, np.array([0, 1]), PolicyType.RANDOM)  # different pos
         self.assertTrue(a1 != a5)
 
-        a6 = Agent(env, np.array([0, 2]), Policy.FILL)  # different policy
+        a6 = Agent(env, np.array([0, 2]), PolicyType.FILL)  # different policy
         self.assertTrue(a1 != a6)
 
         # in comparison to a4 this switches pos with goal
-        a7 = Agent(env, np.array([0, 1]), Policy.RANDOM)  # goal of a4
+        a7 = Agent(env, np.array([0, 1]), PolicyType.RANDOM)  # goal of a4
         a7.give_a_goal(np.array([0, 2]))  # pos of a4
         self.assertTrue(a1 != a7)
         self.assertTrue(a4 != a7)
@@ -54,7 +55,7 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_give_a_goal_and_plan_path(self):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
-        a = Agent(env, np.array([0, 2]), Policy.RANDOM)
+        a = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
         self.assertTrue(a.give_a_goal(np.array([2, 2])))
         p = a.path
         self.assertEqual(len(p), 7)
@@ -64,13 +65,13 @@ class TestDecentralizedSim(unittest.TestCase):
 
         # if no path can be found
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 0]])
-        a = Agent(env, np.array([0, 0]), Policy.RANDOM)
+        a = Agent(env, np.array([0, 0]), PolicyType.RANDOM)
         self.assertFalse(a.give_a_goal(np.array([2, 2])))
 
     def test_block_edge(self):
         env = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
         edge_to_block = ((0, 0), (0, 1))
-        a = Agent(env, np.array([0, 0]), Policy.RANDOM)
+        a = Agent(env, np.array([0, 0]), PolicyType.RANDOM)
         self.assertTrue(a.give_a_goal(np.array([0, 2])))
         self.assertEqual(len(a.path), 3)  # quick path
 
@@ -102,7 +103,7 @@ class TestDecentralizedSim(unittest.TestCase):
 
     def test_is_at_goal(self):
         env = np.array([[0, 0], [0, 0]])
-        a = Agent(env, np.array([0, 0]), Policy.RANDOM)
+        a = Agent(env, np.array([0, 0]), PolicyType.RANDOM)
         self.assertTrue(a.give_a_goal(np.array([0, 0])))
         self.assertTrue(a.is_at_goal())
 
@@ -114,7 +115,7 @@ class TestDecentralizedSim(unittest.TestCase):
         env = np.array([[0, 0], [0, 0]])
 
         # test random policy
-        a = Agent(env, np.array([0, 0]), Policy.RANDOM)
+        a = Agent(env, np.array([0, 0]), PolicyType.RANDOM)
         for _ in range(1000):
             self.assertLessEqual(0, a.get_priority())
             self.assertGreaterEqual(1, a.get_priority())
@@ -123,7 +124,7 @@ class TestDecentralizedSim(unittest.TestCase):
         env = np.array([[0, 0], [0, 0]])
 
         # with clostest policy
-        a = Agent(env, np.array([0, 0]), Policy.CLOSEST)
+        a = Agent(env, np.array([0, 0]), PolicyType.CLOSEST)
         self.assertTrue(a.give_a_goal(np.array([1, 0])))
         self.assertAlmostEqual(a.get_priority(), 1.)
         self.assertTrue(a.give_a_goal(np.array([1, 1])))
@@ -137,21 +138,21 @@ class TestDecentralizedSim(unittest.TestCase):
                         [0, 0, 0, 0, 0]])
 
         # in the middel
-        a = Agent(env, np.array([2, 2]), Policy.FILL)
+        a = Agent(env, np.array([2, 2]), PolicyType.FILL)
         self.assertAlmostEqual(a.get_priority(), 3./25.)
         # one left
-        a = Agent(env, np.array([2, 1]), Policy.FILL)
+        a = Agent(env, np.array([2, 1]), PolicyType.FILL)
         self.assertAlmostEqual(a.get_priority(), 7./25.)
         # low left corner
-        a = Agent(env, np.array([4, 0]), Policy.FILL)
+        a = Agent(env, np.array([4, 0]), PolicyType.FILL)
         self.assertAlmostEqual(a.get_priority(), 16./25.)
         # top right corner
-        a = Agent(env, np.array([0, 4]), Policy.FILL)
+        a = Agent(env, np.array([0, 4]), PolicyType.FILL)
         self.assertAlmostEqual(a.get_priority(), 19./25.)
 
     def test_what_is_next_step_and_make_next_step(self):
         env = np.array([[0, 0], [0, 1]])
-        a = Agent(env, np.array([0, 1]), Policy.RANDOM)
+        a = Agent(env, np.array([0, 1]), PolicyType.RANDOM)
         a.give_a_goal(np.array([1, 0]))
         self.assertFalse(a.is_at_goal())
 
