@@ -27,12 +27,14 @@ if __name__ == "__main__":
     visualization.plot_with_arrows(gridmap, starts, goals)
     # plt.show()
 
-    agents = []
-    for i_a in range(len(starts)):
-        a = Agent(gridmap, starts[i_a], PolicyType.LEARNED)
-        a.give_a_goal(goals[i_a])
-        agents.append(a)
-    (average_time, max_time, average_length,
-     max_length, successful) = run_a_scenario(gridmap, agents, False)
-    print((average_time, max_time, average_length,
-           max_length, successful))
+    for p in PolicyType:
+        agents = []
+        for i_a in range(len(starts)):
+            a = Agent(gridmap, starts[i_a], p)
+            a.give_a_goal(goals[i_a])
+            agents.append(a)
+        (average_time, max_time, average_length,
+         max_length, successful) = run_a_scenario(gridmap, agents, False)
+        print(p.name)
+        print((average_time, max_time, average_length,
+               max_length, successful))

@@ -170,20 +170,6 @@ def where_will_they_collide(agent_paths):
     return collisions
 
 
-def add_padding_to_gridmap(gridmap, radius):
-    """add a border of blocks around the map of given radius.
-    (The new size will be old size + 2 * radius in both directions)"""
-    size = gridmap.shape
-    padded_gridmap = np.ones([
-        size[0] + 2 * radius,
-        size[1] + 2 * radius],
-        dtype=DTYPE_SAMPLES)
-    padded_gridmap[
-        radius:size[0]+radius,
-        radius:size[1]+radius] = gridmap
-    return padded_gridmap
-
-
 def training_samples_from_data(data, mode):
     """extract training samples from the data simulation data dict."""
     training_samples = []
@@ -270,17 +256,8 @@ def classification_samples(n_agents, data, t, col_agents,
     assert len(col_agents) == 2, "assuming two agent in colission here"
     for i_ca, i_a in enumerate(col_agents):
         i_oa = col_agents[(i_ca+1) % 2]
-        obstacle_fovs = make_obstacle_fovs(
-            padded_gridmap, paths_until_col[i_a], t, CLASSIFICATION_FOV_RADIUS)
-        pos_other_agent_fovs = make_all_agents_fovs(
-            paths_until_col, i_a, i_oa, CLASSIFICATION_FOV_RADIUS)
-        (path_fovs, paths_other_agent_fovs,
-         paths_other_agents_fovs) = make_path_fovs(
-            paths_full, paths_until_col, i_a, i_oa, t,
-            CLASSIFICATION_FOV_RADIUS)
-        x = np.stack([obstacle_fovs, pos_other_agent_fovs,
-                      path_fovs, paths_other_agent_fovs,
-                      paths_other_agents_fovs], axis=3)
+        x = extract_all_fovs(t, paths_until_col, paths_full,
+                             padded_gridmap, i_a, i_oa, CLASSIFICATION_FOV_RADIUS)
         training_samples.append((
             x,
             1 if i_a == unblocked_agent else 0))

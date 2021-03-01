@@ -11,12 +11,15 @@ import numpy as np
 import timeout_decorator
 from matplotlib import cm
 from matplotlib import pyplot as plt
+from numpy import linalg
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import PolicyType
 from tools import ProgressBar
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+
+OBSERVATION_DISTANCE = 6
 
 
 class SimIterationException(Exception):
@@ -213,6 +216,18 @@ def iterate_sim(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
     # how do agents look like at beginning?
     agents_at_beginning = tuple(map(lambda a: a.pos, agents))
 
+    for i_a in range(len(agents)):
+        # who is this agent seeing?
+        for i_oa in [i for i in range(len(agents)) if i != i_a]:
+            if np.linalg.norm(
+                agents[i_a].pos - agents[i_oa].pos
+            ) < OBSERVATION_DISTANCE:
+                agents[i_a].policy.register_observation(
+                    agents[i_oa].id,
+                    agents[i_oa].path,
+                    agents[i_oa].pos
+                )
+
     while(there_are_collisions):
         possible_next_agent_poses = get_possible_next_agent_poses(
             agents, can_proceed)
@@ -234,12 +249,14 @@ def iterate_sim(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
                 elif not can_proceed[i_a2]:  # already blocked
                     can_proceed[i_a1] = True
                     can_proceed[i_a1] = False  # block other agent
-                elif agents[i_a1].get_priority() > agents[i_a2].get_priority():
+                elif (agents[i_a1].get_priority(agents[i_a2].id) >
+                        agents[i_a2].get_priority(agents[i_a1].id)):
                     can_proceed[i_a2] = False  # has lower prio
                 else:
                     can_proceed[i_a1] = False  # has lower prio
             for edge, [i_a1, i_a2] in edge_colissions.items():
-                if agents[i_a1].get_priority() > agents[i_a2].get_priority():
+                if (agents[i_a1].get_priority(agents[i_a2].id) >
+                        agents[i_a2].get_priority(agents[i_a1].id)):
                     # a1 has higher prio
                     success = agents[i_a2].block_edge(edge[1], edge[0])
                     if not success:
@@ -421,4 +438,4 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    evaluate_policies(32, 16, 8)
+    evaluate_policies(8, 8, 8)

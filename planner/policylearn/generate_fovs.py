@@ -1,6 +1,20 @@
 import numpy as np
 
 
+def add_padding_to_gridmap(gridmap, radius):
+    """add a border of blocks around the map of given radius.
+    (The new size will be old size + 2 * radius in both directions)"""
+    size = gridmap.shape
+    padded_gridmap = np.ones([
+        size[0] + 2 * radius,
+        size[1] + 2 * radius],
+        dtype=np.int8)
+    padded_gridmap[
+        radius:size[0]+radius,
+        radius:size[1]+radius] = gridmap
+    return padded_gridmap
+
+
 def init_empty_fov(radius, t):
     return np.zeros([
         1 + 2 * radius,
@@ -71,3 +85,18 @@ def make_path_fovs(paths, paths_until_col, agent, other_agent,
                         i_t_steps
                     ] += i_t_path / lengths[i_a]
     return path_fovs, paths_other_agent_fovs, paths_other_agents_fovs
+
+
+def extract_all_fovs(t, paths_until_col, paths_full, padded_gridmap, i_a, i_oa, radius):
+    obstacle_fovs = make_obstacle_fovs(
+        padded_gridmap, paths_until_col[i_a], t, radius)
+    pos_other_agent_fovs = make_all_agents_fovs(
+        paths_until_col, i_a, i_oa, radius)
+    (path_fovs, paths_other_agent_fovs,
+     paths_other_agents_fovs) = make_path_fovs(
+        paths_full, paths_until_col, i_a, i_oa, t,
+        radius)
+    x = np.stack([obstacle_fovs, pos_other_agent_fovs,
+                  path_fovs, paths_other_agent_fovs,
+                  paths_other_agents_fovs], axis=3)
+    return x

@@ -141,10 +141,10 @@ class Agent():
         """returns true iff the agent is at its goal."""
         return all(self.pos == self.goal) or self.path is None
 
-    def get_priority(self) -> float:
+    def get_priority(self, other_id) -> float:
         """Based on the selected policy, this will give the priority of this
         agent."""
-        return self.policy.get_priority()
+        return self.policy.get_priority(other_id)
 
     def what_is_next_step(self) -> np.ndarray:
         """Return the position where this agent would like to go next."""
