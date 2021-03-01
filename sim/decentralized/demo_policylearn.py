@@ -15,7 +15,7 @@ def make_scenario():
     width = 8
     n_agents = 8
     fill = .4
-    seed = 2034
+    seed = 2035
     gridmap, starts, goals = tracing_pathes_in_the_dark(
         width, fill, n_agents, seed
     )
