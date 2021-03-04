@@ -218,6 +218,7 @@ def iterate_sim(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
 
     for i_a in range(len(agents)):
         # who is this agent seeing?
+        agents[i_a].policy.step()
         for i_oa in [i for i in range(len(agents)) if i != i_a]:
             if np.linalg.norm(
                 agents[i_a].pos - agents[i_oa].pos
@@ -225,7 +226,8 @@ def iterate_sim(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
                 agents[i_a].policy.register_observation(
                     agents[i_oa].id,
                     agents[i_oa].path,
-                    agents[i_oa].pos
+                    agents[i_oa].pos,
+                    agents[i_oa].path_i
                 )
 
     while(there_are_collisions):
@@ -422,7 +424,6 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         logger.info(f"policy: {policy.name}")
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):
-            print(i_r)
             random.seed(i_r)
             results = sample_and_run_a_scenario(
                 size, n_agents, policy, False, i_r)
@@ -438,4 +439,4 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    evaluate_policies(8, 8, 8)
+    evaluate_policies(8, 8, 128)

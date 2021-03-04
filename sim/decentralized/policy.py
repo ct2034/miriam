@@ -1,9 +1,11 @@
 
 import random
 from enum import Enum, auto
+from typing import OrderedDict
 
 import numpy as np
-from importtf import keras
+from importtf import keras, tf
+from numpy.core.fromnumeric import shape
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
 
@@ -30,8 +32,12 @@ class Policy(object):
     def __init__(self, agent) -> None:
         super().__init__()
         self.a = agent
+        self.i = 0
 
-    def register_observation(self, id, path, pos) -> None:
+    def step(self):
+        self.i += 0
+
+    def register_observation(self, id, path, pos, path_i) -> None:
         """we have seen another agent"""
         pass
 
@@ -86,32 +92,35 @@ class LearnedPolicy(Policy):
         self.radius = 3  # how far to look in each direction
         self.ts = 3  # how long to collect data for
         self.padded_gridmap = add_padding_to_gridmap(self.a.env, self.radius)
-        self.paths = {}
-        self.poss = {}
+        self.paths = OrderedDict()
+        self.poss = OrderedDict()
+        self.path_is = OrderedDict()
         self.t = 0
         self.model: keras.Model = keras.models.load_model(
             "planner/policylearn/my_model.h5")
 
-    def _path_until_pos(self, path, until_pos, n_t):
+    def _path_until_coll(self, path, path_i, n_t):
         path_until_pos = []
-        for i_t, pos in enumerate(path):
-            if tuple(pos) != tuple(until_pos):
-                path_until_pos.append(pos)
-            else:
-                path_until_pos.append(pos)
-                while len(path_until_pos) < n_t:
-                    path_until_pos.insert(0, pos)
-                return path_until_pos[-n_t:]
-        assert False, "you should not be here"
+        for t in range(n_t):
+            i_t = min(max(0, path_i - 1 + t), len(path) - 1)
+            path_until_pos.append(path[i_t])
+        return path_until_pos
 
-    def register_observation(self, id, path, pos) -> None:
+    def step(self):
+        super().step()
+        self.paths = OrderedDict()
+        self.poss = OrderedDict()
+        self.path_is = OrderedDict()
+
+    def register_observation(self, id, path, pos, path_i) -> None:
         if path is None:
-            self.paths[id] = [pos] * self.ts
+            self.paths[id] = np.array([pos] * self.ts)
         else:
             self.paths[id] = path
         self.poss[id] = pos
+        self.path_is[id] = path_i
 
-    def get_priority(self, id) -> float:
+    def get_priority(self, id_coll) -> float:
         """[summary]
 
         :param id: which agent are we meeting
@@ -120,14 +129,14 @@ class LearnedPolicy(Policy):
         N_T = 3
         i_oa = None
         paths_full = [self.a.path]  # self always first
-        paths_until_col = [self._path_until_pos(
-            self.a.path, self.a.pos, N_T)]  # self always first
-        for i_a, i_id in enumerate(self.paths.keys()):
-            if id == i_id:
-                i_oa = i_a
+        paths_until_col = [self._path_until_coll(
+            self.a.path, self.a.path_i, N_T)]  # self always first
+        ids = sorted(self.paths.keys())
+        i_oa = ids.index(id_coll) + 1
+        for i_id in ids:
             paths_full.append(self.paths[i_id])
-            paths_until_col.append(self._path_until_pos(
-                self.paths[i_id], self.poss[i_id], N_T))
+            paths_until_col.append(self._path_until_coll(
+                self.paths[i_id], self.path_is[i_id], N_T))
         assert i_oa is not None
         x = extract_all_fovs(
             t=N_T-1,
@@ -138,5 +147,9 @@ class LearnedPolicy(Policy):
             i_oa=i_oa,
             radius=self.radius
         )
-        y = self.model.predict(np.array([x]))[0]
+        x_tensor = tf.constant(np.array([x]))
+        y = self.model.predict(x_tensor)[0][0]
+        # from planner.policylearn.generate_data_demo import plot_fovs
+        # plot_fovs(x, y)
+        print(y)
         return y

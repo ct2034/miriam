@@ -46,7 +46,7 @@ def make_all_agents_fovs(paths, agent, other_agent, radius):
     other_agent_fovs = init_empty_fov(radius, t)
     for i_t in range(t):
         pos = paths[agent][i_t]
-        for i_a in [i for i in range(len(paths)) if i != agent]:
+        for i_a in [i for i in range(len(paths)) if i != agent] + [other_agent, ]:
             d = paths[i_a][i_t] - pos
             if (abs(d[0]) <= radius and
                     abs(d[1]) <= radius):
