@@ -115,10 +115,11 @@ class LearnedPolicy(Policy):
     def register_observation(self, id, path, pos, path_i) -> None:
         if path is None:
             self.paths[id] = np.array([pos] * self.ts)
+            self.path_is[id] = 0
         else:
             self.paths[id] = path
+            self.path_is[id] = path_i
         self.poss[id] = pos
-        self.path_is[id] = path_i
 
     def get_priority(self, id_coll) -> float:
         """[summary]
