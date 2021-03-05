@@ -9,6 +9,7 @@ import random
 import sys
 import uuid
 from multiprocessing import Pool
+from operator import add
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -158,38 +159,95 @@ def where_will_they_collide(agent_paths):
     """checks if for a given set of starts and goals the agents travelling
     between may collide on the given gridmap."""
     collisions = {}
-    seen = set()
+    seen_pos = set()
+    seen_edge = set()
     been_at = {}
     for i_a, _ in enumerate(starts):
+        prev_pos = None
         for pos in agent_paths[i_a]:
             pos = tuple(pos)
-            if pos in seen:  # TODO: edge collisions
+            # vertex collisions
+            if pos in seen_pos:
                 collisions[pos] = (been_at[pos], i_a)
-            seen.add(pos)
+            seen_pos.add(pos)
             been_at[pos] = i_a
+            # edge collisions
+            if prev_pos is not None:
+                edge = tuple(sorted((prev_pos, pos)))
+                if edge in seen_edge:
+                    collisions[edge] = (been_at[edge], i_a)
+                seen_edge.add(edge)
+                been_at[edge] = i_a
+            prev_pos = pos
     return collisions
+
+
+def is_vertex_coll(collision):
+    if len(collision) == 2:
+        assert len(collision[0]) == 3
+        return False  # edge
+    else:
+        assert isinstance(collision[0], (int, np.int64))
+        return True  # vertex
+
+
+def get_other(agents: tuple, agent):
+    assert agent in agents
+    assert len(agents) == 2
+    if agent == agents[0]:
+        return agents[1]
+    else:
+        return agents[0]
+
+
+def find_unblocked_agent(data, is_vertex_c, collision, col_agents):
+    unblocked_agent = None
+    for i_a in col_agents:
+        i_oa = get_other(col_agents, i_a)
+        if data[BLOCKS_STR]["agent"+str(i_a)] is dict:
+            if data[BLOCKS_STR]["agent"+str(i_oa)] == 0:
+                return i_oa
+            blocks = data[BLOCKS_STR]["agent"+str(i_a)]
+            if is_vertex_c and VERTEX_CONSTRAINTS_STR in blocks.keys():
+                for block in blocks[VERTEX_CONSTRAINTS_STR]:
+                    if (collision[0] == block['v.x'] and
+                        collision[1] == block['v.y'] and
+                            collision[2] == block['t']):
+                        return i_oa
+            elif not is_vertex_c and EDGE_CONSTRAINTS_STR in blocks.keys():
+                for block in blocks[EDGE_CONSTRAINTS_STR]:
+                    if (
+                        (collision[0][0] == block['v1.x'] and
+                         collision[0][1] == block['v1.y'] and
+                            collision[0][2] == block['t']) or
+                        (collision[1][0] == block['v2.x'] and
+                         collision[1][1] == block['v2.y'] and
+                            collision[1][2] == block['t'])):
+                        return i_oa
+
+    return unblocked_agent
 
 
 def training_samples_from_data(data, mode):
     """extract training samples from the data simulation data dict."""
     training_samples = []
     n_agents = len(data[INDEP_AGENT_PATHS_STR])
-    for col_vertex, col_agents in data[COLLISIONS_STR].items():
-        t = col_vertex[2]
-        blocked_agent = -1
-        unblocked_agent = -1
-        for i_a in col_agents:
-            if data[BLOCKS_STR]["agent"+str(i_a)] is dict:
-                blocked_agent = i_a
-            else:
-                unblocked_agent = i_a
-        if mode == TRANSFER_LSTM_STR:
-            data_pa = []
-            training_samples.extend(lstm_samples(
-                n_agents, data, t, data_pa, col_agents, unblocked_agent))
-        elif mode == TRANSFER_CLASSIFICATION_STR:
-            training_samples.extend(classification_samples(
-                n_agents, data, t, col_agents, unblocked_agent))
+    for collision, col_agents in data[COLLISIONS_STR].items():
+        is_vertex_c = is_vertex_coll(collision)
+        if is_vertex_c:
+            t = collision[2]
+        else:  # edge collision
+            t = collision[0][2]
+        unblocked_agent = find_unblocked_agent(
+            data, is_vertex_c, collision, col_agents)
+        if unblocked_agent is not None:
+            if mode == TRANSFER_LSTM_STR:  # if we were able to find it
+                data_pa = []
+                training_samples.extend(lstm_samples(
+                    n_agents, data, t, data_pa, col_agents, unblocked_agent))
+            elif mode == TRANSFER_CLASSIFICATION_STR:
+                training_samples.extend(classification_samples(
+                    n_agents, data, t, col_agents, unblocked_agent))
     return training_samples
 
 
