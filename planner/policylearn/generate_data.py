@@ -240,8 +240,8 @@ def training_samples_from_data(data, mode):
             t = collision[0][2]
         unblocked_agent = find_unblocked_agent(
             data, is_vertex_c, collision, col_agents)
-        if unblocked_agent is not None:
-            if mode == TRANSFER_LSTM_STR:  # if we were able to find it
+        if unblocked_agent is not None:  # if we were able to find it
+            if mode == TRANSFER_LSTM_STR:
                 data_pa = []
                 training_samples.extend(lstm_samples(
                     n_agents, data, t, data_pa, col_agents, unblocked_agent))
