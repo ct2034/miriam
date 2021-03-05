@@ -94,9 +94,9 @@ class LearnedPolicy(Policy):
         self.radius = 3  # how far to look in each direction
         self.ts = 3  # how long to collect data for
         self.padded_gridmap = add_padding_to_gridmap(self.a.env, self.radius)
-        self.paths = OrderedDict()
-        self.poss = OrderedDict()
-        self.path_is = OrderedDict()
+        self.paths: OrderedDict = OrderedDict()
+        self.poss: OrderedDict = OrderedDict()
+        self.path_is: OrderedDict = OrderedDict()
         self.t = 0
         self.model: keras.Model = keras.models.load_model(
             "planner/policylearn/my_model.h5")
