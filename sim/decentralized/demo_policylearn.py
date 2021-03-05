@@ -12,10 +12,10 @@ from sim.decentralized.runner import run_a_scenario
 def make_scenario():
     """this makes a scenario as in generate_data.py 
     (what the policy was trained on)"""
-    width = 8
-    n_agents = 8
+    width = 35
+    n_agents = 100
     fill = .4
-    seed = 2035
+    seed = 2034
     gridmap, starts, goals = tracing_pathes_in_the_dark(
         width, fill, n_agents, seed
     )
@@ -25,7 +25,7 @@ def make_scenario():
 if __name__ == "__main__":
     (gridmap, starts, goals) = make_scenario()
     visualization.plot_with_arrows(gridmap, starts, goals)
-    # plt.show()
+    plt.show()
 
     for p in PolicyType:
         agents = []
