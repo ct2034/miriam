@@ -1,7 +1,7 @@
 
 import random
+from collections import OrderedDict
 from enum import Enum, auto
-from typing import OrderedDict
 
 import numpy as np
 from importtf import keras, tf
@@ -10,6 +10,7 @@ from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
 
 class PolicyType(Enum):
     RANDOM = auto()
