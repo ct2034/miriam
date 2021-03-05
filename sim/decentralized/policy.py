@@ -9,6 +9,7 @@ from numpy.core.fromnumeric import shape
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
 
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 class PolicyType(Enum):
     RANDOM = auto()
@@ -152,5 +153,5 @@ class LearnedPolicy(Policy):
         y = self.model.predict(x_tensor)[0][0]
         # from planner.policylearn.generate_data_demo import plot_fovs
         # plot_fovs(x, y)
-        print(y)
+        # print(y)
         return y
