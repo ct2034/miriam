@@ -83,7 +83,7 @@ def make_path_fovs(paths, paths_until_col, agent, other_agent,
                         int(d[0]) + radius,
                         int(d[1]) + radius,
                         i_t_steps
-                    ] += i_t_path / lengths[i_a]
+                    ] += (i_t_path+1) / lengths[i_a]
     return path_fovs, paths_other_agent_fovs, paths_other_agents_fovs
 
 

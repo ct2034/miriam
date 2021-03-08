@@ -79,7 +79,7 @@ if __name__ == "__main__":
     # train
     bcp = BatchHistory()
     history = model.fit([train_images], train_labels,
-                        epochs=1, batch_size=1, callbacks=[bcp]
+                        epochs=2, batch_size=1, callbacks=[bcp]
                         )
     model.save('my_model.h5')
 
