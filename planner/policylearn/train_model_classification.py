@@ -32,10 +32,10 @@ def construct_model(img_width, img_depth_t, img_depth_frames):
     CONV3D_FILTERS = 8
     CONV2D_FILTERS = 8
     model = Sequential([
-        Conv3D(CONV3D_FILTERS, 3, padding='same', activation='relu',
+        Conv3D(CONV3D_FILTERS, (5, 5, 3), padding='same', activation='relu',
                input_shape=(img_width, img_width, img_depth_t, img_depth_frames)),
         Reshape((img_width, img_width, img_depth_t * CONV3D_FILTERS)),
-        Conv2D(CONV2D_FILTERS, 2, padding='same', activation='relu'),
+        Conv2D(CONV2D_FILTERS, 3, padding='same', activation='relu'),
         Flatten(),
         Dense(32, activation='relu'),
         Dense(1, activation='sigmoid')
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument(
         'fname_read_pkl', type=argparse.FileType('rb'))
     args = parser.parse_args()
-    validation_split = .2
+    validation_split = .1
 
     # data
     with open(args.fname_read_pkl.name, 'rb') as f:
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     # train
     bcp = BatchHistory()
     history = model.fit([train_images], train_labels,
-                        epochs=2, batch_size=1, callbacks=[bcp]
+                        epochs=4, batch_size=4, callbacks=[bcp]
                         )
     model.save('my_model.h5')
 
