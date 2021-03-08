@@ -200,46 +200,74 @@ def get_other(agents: tuple, agent):
         return agents[0]
 
 
-def find_unblocked_agent(data, is_vertex_c, collision, col_agents):
-    unblocked_agent = None
-    for i_a in col_agents:
-        i_oa = get_other(col_agents, i_a)
-        if data[BLOCKS_STR]["agent"+str(i_a)] is dict:
-            if data[BLOCKS_STR]["agent"+str(i_oa)] == 0:
-                return i_oa
-            blocks = data[BLOCKS_STR]["agent"+str(i_a)]
-            if is_vertex_c and VERTEX_CONSTRAINTS_STR in blocks.keys():
-                for block in blocks[VERTEX_CONSTRAINTS_STR]:
-                    if (collision[0] == block['v.x'] and
-                        collision[1] == block['v.y'] and
-                            collision[2] == block['t']):
-                        return i_oa
-            elif not is_vertex_c and EDGE_CONSTRAINTS_STR in blocks.keys():
-                for block in blocks[EDGE_CONSTRAINTS_STR]:
-                    if (
-                        (collision[0][0] == block['v1.x'] and
-                         collision[0][1] == block['v1.y'] and
-                            collision[0][2] == block['t']) or
-                        (collision[1][0] == block['v2.x'] and
-                         collision[1][1] == block['v2.y'] and
-                            collision[1][2] == block['t'])):
-                        return i_oa
+def blocks_from_data_to_lists(data):
+    data_blocks = data[BLOCKS_STR]
+    n_agents = len(data_blocks)
+    blocks = [None] * n_agents
+    for agent_str, data_blocks_pa in data_blocks.items():
+        i_a = int(agent_str.replace("agent", ""))
+        if data_blocks_pa != 0:
+            blocks_pa = []
+            if VERTEX_CONSTRAINTS_STR in data_blocks_pa.keys():
+                for db in data_blocks_pa[VERTEX_CONSTRAINTS_STR]:
+                    block = (
+                        db['v.x'],
+                        db['v.y'],
+                        db['t']
+                    )
+                    blocks_pa.append(block)
+            if EDGE_CONSTRAINTS_STR in data_blocks_pa.keys():
+                for db in data_blocks_pa[EDGE_CONSTRAINTS_STR]:
+                    block = ((
+                        db['v1.x'],
+                        db['v1.y'],
+                        db['t']
+                    ), (
+                        db['v2.x'],
+                        db['v2.y'],
+                        db['t']+1
+                    ))
+                    blocks_pa.append(block)
+            blocks[i_a] = blocks_pa
+    return blocks
 
-    return unblocked_agent
+
+def is_collision_in_blocks(collision, blocks):
+    if blocks is None:
+        return False
+    for b in blocks:
+        if len(b) == 3 and len(collision) == 3:  # vertex
+            if collision == b:
+                return True
+        elif len(b) == 2 and len(collision) == 2:  # edge
+            if collision[0] == b[0] or collision[1] == b[1]:
+                return True
+        elif len(b) == 2 and len(collision) == 3:  # vertex coll, edge block
+            if collision == b[0] or collision == b[1]:
+                return True
+    return False
 
 
 def training_samples_from_data(data, mode):
     """extract training samples from the data simulation data dict."""
     training_samples = []
-    n_agents = len(data[INDEP_AGENT_PATHS_STR])
+    paths = data[INDEP_AGENT_PATHS_STR]
+    n_agents = len(paths)
+    bs = blocks_from_data_to_lists(data)
     for collision, col_agents in data[COLLISIONS_STR].items():
-        is_vertex_c = is_vertex_coll(collision)
-        if is_vertex_c:
-            t = collision[2]
-        else:  # edge collision
-            t = collision[0][2]
-        unblocked_agent = find_unblocked_agent(
-            data, is_vertex_c, collision, col_agents)
+        unblocked_agent = None
+        for i_a in col_agents:
+            i_oa = get_other(col_agents, i_a)
+            if is_vertex_coll(collision):
+                pos = collision
+            else:
+                pos = collision[0]
+            t = pos[2]
+            if pos in paths[i_a] or collision in paths[i_oa]:
+                if is_collision_in_blocks(collision, bs[i_a]):
+                    unblocked_agent = i_a
+                elif is_collision_in_blocks(collision, bs[i_oa]):
+                    unblocked_agent = i_oa
         if unblocked_agent is not None:  # if we were able to find it
             if mode == TRANSFER_LSTM_STR:
                 data_pa = []
@@ -428,6 +456,8 @@ if __name__ == "__main__":
             training_data_we_want.extend(
                 training_samples_from_data(d, args.mode))
         save_data(training_data_we_want, args.fname_write_pkl.name)
+        print(f'got {len(training_data_we_want)} samples '
+              + f'from {len(all_data)} simulations')
         pb.end()
     elif args.mode == GENERATE_SIM_STR:
         # scenario paramters
