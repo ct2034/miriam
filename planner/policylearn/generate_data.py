@@ -155,7 +155,7 @@ def will_they_collide(gridmap, starts, goals):
     return do_collide, agent_paths
 
 
-def where_will_they_collide(agent_paths):
+def where_will_they_collide(agent_paths, starts):
     """checks if for a given set of starts and goals the agents travelling
     between may collide on the given gridmap."""
     collisions = {}
@@ -422,6 +422,41 @@ def print_stats():
     ))
 
 
+def simulate_one_data(width, fill, n_agents, pb: ProgressBar, base_seed):
+    data_ok = False
+    random.seed(base_seed)
+    seed = base_seed
+    while not data_ok:
+        do_collide = False
+        while not do_collide:
+            gridmap, starts, goals = tracing_pathes_in_the_dark(
+                width, fill, n_agents, seed
+            )
+            seed += random.randint(0, pb.total*100)
+            do_collide, indep_agent_paths = will_they_collide(
+                gridmap, starts, goals)
+
+        data = cached_ecbs(
+            gridmap, starts, goals, timeout=10)
+        collisions = where_will_they_collide(indep_agent_paths, starts)
+
+        data_ok = (
+            data != INVALID and
+            BLOCKS_STR in data.keys() and
+            has_one_or_more_vertex_blocks(data[BLOCKS_STR])
+        )
+        if data_ok:
+            # we take only these for learning
+            data.update({
+                INDEP_AGENT_PATHS_STR: indep_agent_paths,
+                COLLISIONS_STR: collisions,
+                GRIDMAP_STR: gridmap,
+                BLOCKS_STR: data[BLOCKS_STR]
+            })
+    pb.progress(base_seed)
+    return data
+
+
 if __name__ == "__main__":
     logging.basicConfig()
     logger = logging.getLogger(__name__)
@@ -467,46 +502,18 @@ if __name__ == "__main__":
         fill = .4
         # generation parameters
         plot = False
-        all_data = []
         n_data_to_gen = int(os.getenv("N_DATA_TO_GEN", 5000))
         logger.info("Generating {} data points.".format(n_data_to_gen))
         seed = os.getenv("SEED", 0)
         random.seed(seed)
         logger.info("Using initial seed: {}".format(seed))
-        save_every = 500
         # start
-        while len(all_data) < n_data_to_gen:
-            do_collide = False
-            while not do_collide:
-                gridmap, starts, goals = tracing_pathes_in_the_dark(
-                    width, fill, n_agents, seed
-                )
-                seed += 1
-                do_collide, indep_agent_paths = will_they_collide(
-                    gridmap, starts, goals)
-
-            data = cached_ecbs(
-                gridmap, starts, goals, timeout=10)
-            collisions = where_will_they_collide(indep_agent_paths)
-
-            if data != INVALID and BLOCKS_STR in data.keys():  # has blocks
-                blocks = data[BLOCKS_STR]
-                at_least_one_block = has_one_or_more_vertex_blocks(blocks)
-                if at_least_one_block:
-                    # we take only these for learning
-                    data.update({
-                        INDEP_AGENT_PATHS_STR: indep_agent_paths,
-                        COLLISIONS_STR: collisions,
-                        GRIDMAP_STR: gridmap,
-                        BLOCKS_STR: blocks
-                    })
-                    all_data.append(data)
-                    if len(all_data) % save_every == 0:
-                        save_data(all_data, args.fname_write_pkl.name)
-                    print_stats()
-                    if plot:
-                        plot_map_and_paths(gridmap, blocks, data, n_agents)
-        # save in the end for sure
+        p = Pool(4)
+        pb = ProgressBar("main", n_data_to_gen)
+        arguments = [(width, fill, n_agents, pb, seed)
+                     for seed in range(n_data_to_gen)]
+        all_data = p.starmap(simulate_one_data, arguments)
+        # save in the end
         save_data(all_data, args.fname_write_pkl.name)
     elif args.mode == NO_SOLUTION_STR:
         # generate data of scenarios without solution (no info on how to solve

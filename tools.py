@@ -303,9 +303,13 @@ class ProgressBar(object):
         print(BOLD_SEQ + "{} started.".format(
             self.name) + RESET_SEQ)
 
-    def progress(self):
-        """call this after every of `total` iterations."""
-        self.i += 1
+    def progress(self, i=None):
+        """call this after every of `total` iterations. Pass argument 
+        0 < `i` <= `total` for setting absolute iteration."""
+        if i is None:
+            self.i += 1
+        else:
+            self.i = i +1
         progress = self.i / self.total
         elapsed_time: datetime.timedelta = datetime.now() - self.start_time
         eta_time = (elapsed_time / progress) - elapsed_time
