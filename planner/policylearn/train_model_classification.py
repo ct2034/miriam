@@ -7,6 +7,7 @@ from typing import List
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
+from numpy.core.shape_base import _concatenate_shapes
 from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D,
                                      Flatten, MaxPooling2D, Reshape)
 from tensorflow.keras.models import Sequential
@@ -46,6 +47,32 @@ def construct_model(img_width, img_depth_t, img_depth_frames):
     return model
 
 
+def augment_data(images_in, labels_in):
+    assert len(images_in) == len(images_in)
+    n = len(images_in)
+    shape = images_in.shape
+    augmentations = [
+        lambda x: x,
+        lambda x: np.rot90(x, k=1),
+        lambda x: np.rot90(x, k=2),
+        lambda x: np.rot90(x, k=3),
+        lambda x: np.flip(x, axis=0),
+        lambda x: np.flip(np.rot90(x, k=1), axis=0),
+        lambda x: np.flip(np.rot90(x, k=2), axis=0),
+        lambda x: np.flip(np.rot90(x, k=3), axis=0)
+    ]
+    shape_out = list(shape)
+    shape_out[0] = shape_out[0] * len(augmentations)
+    images_out = np.zeros(shape=shape_out)
+    labels_out = np.zeros(shape=len(augmentations)*n)
+    for i_d in range(n):
+        for i_a, aug in enumerate(augmentations):
+            i_out = i_d * len(augmentations) + i_a
+            images_out[i_out] = aug(images_in[i_d])
+            labels_out[i_out] = labels_in[i_d]
+    return images_out, labels_out
+
+
 if __name__ == "__main__":
     # arguments
     parser = argparse.ArgumentParser()
@@ -69,6 +96,11 @@ if __name__ == "__main__":
     print(f"train_images.shape: {train_images.shape}")
     (_, img_width, img_height, img_depth_t, img_depth_frames) = train_images.shape
     assert img_width == img_height, "Images must be square."
+
+    # data augmentation
+    # train_images_augmented, train_labels_augmented = augment_data(train_images, train_labels,
+    #                                                               )
+    # print(f"train_images_augmented.shape: {train_images_augmented.shape}")
 
     # optimizer
     opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
