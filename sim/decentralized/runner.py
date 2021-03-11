@@ -307,7 +307,7 @@ def check_time_evaluation(time_progress, space_progress):
 
 
 def sample_and_run_a_scenario(size, n_agents, policy, plot, seed):
-    env = initialize_environment(size, .2, seed)
+    env = initialize_environment(size, .4, seed)
     agents = initialize_agents(env, n_agents, policy, seed)
     return run_a_scenario(env, agents, plot)
 
@@ -385,18 +385,28 @@ def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
     colormap = cm.tab10.colors
     data_shape = (n_policies, ) + list(evaluations.values())[0].shape
     data = np.empty(data_shape)
+    i_success = evaluation_names.index('successful')
 
     policy_names = []
     subplot_basenr = 100 + 10 * len(evaluation_names) + 1
+    all_successfull = [True] * data_shape[2]
     for i_p, policy in enumerate(evaluations.keys()):
         data[i_p, :, :] = evaluations[policy]
-        policy_names.append(str(policy).replace('Policy.', ''))
+        all_successfull = np.logical_and(
+            all_successfull,
+            data[i_p, i_success, :])
+        policy_names.append(str(policy).replace('PolicyType.', ''))
 
     plt.figure(figsize=[16, 9])
 
     for i_e, evaluation_name in enumerate(evaluation_names):
         ax = plt.subplot(subplot_basenr + i_e)
-        parts = ax.violinplot(np.transpose(data[:, i_e, :]), showmeans=True)
+        if i_e == i_success:
+            run_choice = [True] * data_shape[2]
+        else:
+            run_choice = all_successfull
+        parts = ax.violinplot(np.transpose(
+            data[:, i_e, run_choice]), showmeans=True)
         for i_pc, pc in enumerate(parts['bodies']):
             pc.set_facecolor(colormap[i_pc])
         for partname in ('cbars', 'cmins', 'cmaxes', 'cmeans'):
@@ -404,6 +414,10 @@ def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
             vp.set_edgecolor('k')
         ax.set_title(evaluation_name)
         plt.xticks(range(1, n_policies + 1), policy_names)
+
+    print(
+        'success for all policies in '
+        + f'{np.count_nonzero(all_successfull)} of {data_shape[2]} runs.')
 
     plt.show()
 
@@ -439,4 +453,4 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    evaluate_policies(8, 8, 128)
+    evaluate_policies(16, 16, 16)
