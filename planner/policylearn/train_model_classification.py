@@ -5,12 +5,12 @@ import pickle
 from typing import List
 
 import numpy as np
-import tensorflow as tf
+from importtf import keras, tf
+from keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D, Flatten,
+                          MaxPooling2D, Reshape)
+from keras.models import Sequential
 from matplotlib import pyplot as plt
 from numpy.core.shape_base import _concatenate_shapes
-from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D,
-                                     Flatten, MaxPooling2D, Reshape)
-from tensorflow.keras.models import Sequential
 
 tf.compat.v1.GPUOptions(allow_growth=True)
 
