@@ -6,15 +6,12 @@ import random
 from functools import lru_cache
 from typing import *
 
-import networkx as nx
 import numpy as np
-import timeout_decorator
-from matplotlib import cm
-from matplotlib import pyplot as plt
-from numpy import linalg
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import PolicyType
 from tools import ProgressBar
+
+from .visualization import *
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -333,93 +330,6 @@ def run_a_scenario(env, agents, plot):
     return check_time_evaluation(
         time_progress,
         space_progress) + (successful, )
-
-
-def plot_env_agents(environent: np.ndarray,
-                    agents: np.ndarray):  # pragma: no cover
-    """Plot the environment map with `x` coordinates to the right, `y` up.
-    Occupied by colorful agents and their paths."""
-    # map
-    image = environent * -.5 + 1
-    image = np.swapaxes(image, 0, 1)
-    fig, ax = plt.subplots()
-    c = ax.imshow(image, cmap='gray', vmin=0, vmax=1)
-    ax.set_aspect('equal')
-    baserange = np.arange(environent.shape[0], step=2)
-    ax.set_xticks(baserange)
-    ax.set_xticklabels(map(str, baserange))
-    ax.set_yticks(baserange)
-    ax.set_yticklabels(map(str, baserange))
-    colormap = cm.tab10.colors
-
-    # gridlines
-    for i_x in range(environent.shape[0]-1):
-        ax.plot(
-            [i_x + .5] * 2,
-            [-.5, environent.shape[1]-.5],
-            color='dimgrey',
-            linewidth=.5
-        )
-    for i_y in range(environent.shape[1]-1):
-        ax.plot(
-            [-.5, environent.shape[0]-.5],
-            [i_y + .5] * 2,
-            color='dimgrey',
-            linewidth=.5
-        )
-
-    # agents
-    for i_a, a in enumerate(agents):
-        ax.plot(a.pos[0], a.pos[1], markersize=10,
-                marker='o', color=colormap[i_a])
-        ax.plot(a.goal[0], a.goal[1], markersize=10,
-                marker='x', color=colormap[i_a])
-        ax.plot(a.path[:, 0], a.path[:, 1], color=colormap[i_a])
-
-    plt.show()
-
-
-def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
-                     evaluation_names: List[str]):  # pragma: no cover
-    n_policies = len(evaluations.keys())
-    colormap = cm.tab10.colors
-    data_shape = (n_policies, ) + list(evaluations.values())[0].shape
-    data = np.empty(data_shape)
-    i_success = evaluation_names.index('successful')
-
-    policy_names = []
-    subplot_basenr = 100 + 10 * len(evaluation_names) + 1
-    all_successfull = [True] * data_shape[2]
-    for i_p, policy in enumerate(evaluations.keys()):
-        data[i_p, :, :] = evaluations[policy]
-        all_successfull = np.logical_and(
-            all_successfull,
-            data[i_p, i_success, :])
-        policy_names.append(str(policy).replace('PolicyType.', ''))
-
-    plt.figure(figsize=[16, 9])
-
-    for i_e, evaluation_name in enumerate(evaluation_names):
-        ax = plt.subplot(subplot_basenr + i_e)
-        if i_e == i_success:
-            run_choice = [True] * data_shape[2]
-        else:
-            run_choice = all_successfull
-        parts = ax.violinplot(np.transpose(
-            data[:, i_e, run_choice]), showmeans=True)
-        for i_pc, pc in enumerate(parts['bodies']):
-            pc.set_facecolor(colormap[i_pc])
-        for partname in ('cbars', 'cmins', 'cmaxes', 'cmeans'):
-            vp = parts[partname]
-            vp.set_edgecolor('k')
-        ax.set_title(evaluation_name)
-        plt.xticks(range(1, n_policies + 1), policy_names)
-
-    print(
-        'success for all policies in '
-        + f'{np.count_nonzero(all_successfull)} of {data_shape[2]} runs.')
-
-    plt.show()
 
 
 def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
