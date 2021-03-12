@@ -545,7 +545,7 @@ if __name__ == "__main__":
             if len(all_data) % 100 == 0:
                 save_data(all_data, fname)
             if plot:
-                plot_map_and_paths(gridmap, blocks, data, n_agents)
+                plot_map_and_paths(gridmap, {}, data, n_agents)
 
     else:
         raise NotImplementedError(

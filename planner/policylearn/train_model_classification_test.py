@@ -33,7 +33,6 @@ class TrainModelClassTest(unittest.TestCase):
         ])
 
         self.assertEqual(images.shape[0] * n_augmentations, len(images_out))
-        test_images = np.array(images_out)[:n_augmentations]
         for i in range(n_augmentations):
             test_seq = np.array(images_out)[i, [
                 0, 0, 3, 3
