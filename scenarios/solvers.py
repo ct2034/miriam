@@ -46,7 +46,8 @@ def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
         return INVALID
     n_agents = starts.shape[0]
     schedule = data[SCHEDULE]
-    assert n_agents == len(schedule.keys()), "Plans for all agents"
+    if n_agents != len(schedule.keys()):  # not plans for all agents
+        return INVALID
     if return_paths:
         return _ecbs_data_to_paths(data)
     else:
