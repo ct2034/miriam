@@ -1,27 +1,22 @@
 #!/usr/bin/env python3
-
 import argparse
 import datetime
 import logging
+import math
 import os
 import pickle
 import random
-import sys
 import uuid
 from multiprocessing import Pool
-from operator import add
 
 import matplotlib.pyplot as plt
 import numpy as np
-import tools
-from definitions import FREE, INVALID, OBSTACLE
+from definitions import FREE, INVALID
 from planner.policylearn.generate_fovs import *
-from planner.policylearn.libMultiRobotPlanning.plan_ecbs import (
-    BLOCKS_STR, plan_in_gridmap)
+from planner.policylearn.libMultiRobotPlanning.plan_ecbs import BLOCKS_STR
 from scenarios.evaluators import cached_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark
 from sim.decentralized.agent import Agent
-from sim.decentralized.runner import initialize_environment
 from tools import ProgressBar
 
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
@@ -402,27 +397,7 @@ def save_data(data_dict, fname_pkl):
         pickle.dump(data_dict, f)
 
 
-def print_stats():
-    current = len(all_data)
-    now = datetime.datetime.now()
-    elapsed_time = now - start_time
-    perc_rem = float((n_data_to_gen - current)/current)
-    if perc_rem > 1e10:
-        remaining_time = 'Inf'
-    else:
-        remaining_time = elapsed_time * perc_rem
-    logger.info('Generated {} of {} samples ({}%)'.format(
-        current,
-        n_data_to_gen,
-        int(100. * current / n_data_to_gen)
-    ))
-    logger.info('Elapsed time: {}, remaining: {}'.format(
-        elapsed_time,
-        remaining_time
-    ))
-
-
-def simulate_one_data(width, fill, n_agents, pb: ProgressBar, base_seed):
+def simulate_one_data(width, fill, n_agents, base_seed):
     data_ok = False
     random.seed(base_seed)
     seed = base_seed
@@ -432,7 +407,7 @@ def simulate_one_data(width, fill, n_agents, pb: ProgressBar, base_seed):
             gridmap, starts, goals = tracing_pathes_in_the_dark(
                 width, fill, n_agents, seed
             )
-            seed += random.randint(0, pb.total*100)
+            seed += random.randint(0, 10E6)
             do_collide, indep_agent_paths = will_they_collide(
                 gridmap, starts, goals)
 
@@ -453,7 +428,6 @@ def simulate_one_data(width, fill, n_agents, pb: ProgressBar, base_seed):
                 GRIDMAP_STR: gridmap,
                 BLOCKS_STR: data[BLOCKS_STR]
             })
-    pb.progress(base_seed)
     return data
 
 
@@ -503,18 +477,30 @@ if __name__ == "__main__":
         # generation parameters
         plot = False
         n_data_to_gen = int(os.getenv("N_DATA_TO_GEN", 5000))
-        logger.info("Generating {} data points.".format(n_data_to_gen))
+        batch_size = int(n_data_to_gen / 10)
+        n_batches = math.ceil(n_data_to_gen / batch_size)
+        logger.info(f'Generating {n_data_to_gen} data points ' +
+                    f'in {n_batches} batches of {batch_size}.')
         seed = os.getenv("SEED", 0)
         random.seed(seed)
-        logger.info("Using initial seed: {}".format(seed))
+        logger.info(f"Using initial seed: {seed}")
         # start
-        p = Pool(4)
-        pb = ProgressBar("main", n_data_to_gen)
-        arguments = [(width, fill, n_agents, pb, seed)
-                     for seed in range(n_data_to_gen)]
-        all_data = p.starmap(simulate_one_data, arguments)
-        # save in the end
-        save_data(all_data, args.fname_write_pkl.name)
+        with Pool(4) as p:
+            all_data = []
+            pb_main = ProgressBar(f'main', n_batches)
+            for i_batch in range(n_batches):
+                start = batch_size * i_batch
+                stop = min(start + batch_size, n_data_to_gen)
+                arguments = [(width, fill, n_agents, seed)
+                             for seed in range(start, stop)]
+                batch_data = p.starmap(simulate_one_data, arguments)
+                all_data.extend(batch_data)
+                save_data(all_data, args.fname_write_pkl.name)
+                pb_main.progress()
+            # save in the end for sure
+            save_data(all_data, args.fname_write_pkl.name)
+            assert len(all_data) == n_data_to_gen
+            pb_main.end()
     elif args.mode == NO_SOLUTION_STR:
         # generate data of scenarios without solution (no info on how to solve
         # collision) for autoencoding.
@@ -558,7 +544,6 @@ if __name__ == "__main__":
             all_data.append(data)
             if len(all_data) % 100 == 0:
                 save_data(all_data, fname)
-                print_stats()
             if plot:
                 plot_map_and_paths(gridmap, blocks, data, n_agents)
 
