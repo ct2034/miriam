@@ -95,6 +95,8 @@ def has_exactly_one_vertex_block(blocks):
 
 def has_one_or_more_vertex_blocks(blocks):
     """counts if these blocks have one or more vertex blocks."""
+    if blocks is None:
+        return False
     n_vc, n_ec = count_blocks(blocks)
     return n_vc >= 1
 
