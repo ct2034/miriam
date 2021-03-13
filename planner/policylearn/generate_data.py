@@ -75,7 +75,7 @@ def count_blocks(blocks):
     n_vc = 0
     n_ec = 0
     for agent in blocks.keys():
-        if blocks[agent] != 0:
+        if blocks[agent] != 0 and blocks[agent] is not None:
             blocks_pa = blocks[agent]
             if VERTEX_CONSTRAINTS_STR in blocks_pa.keys():
                 for _ in blocks_pa[VERTEX_CONSTRAINTS_STR]:
