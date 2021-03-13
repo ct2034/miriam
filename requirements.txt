@@ -6,6 +6,7 @@ flask
 gitpython
 ipykernel
 iso8601
+keras
 matplotlib
 munkres
 mypy
