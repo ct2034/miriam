@@ -77,10 +77,12 @@ def count_blocks(blocks):
     for agent in blocks.keys():
         if blocks[agent] != 0 and blocks[agent] is not None:
             blocks_pa = blocks[agent]
-            if VERTEX_CONSTRAINTS_STR in blocks_pa.keys():
+            if (VERTEX_CONSTRAINTS_STR in blocks_pa.keys() and
+                    blocks_pa[VERTEX_CONSTRAINTS_STR] is not None):
                 for _ in blocks_pa[VERTEX_CONSTRAINTS_STR]:
                     n_vc += 1
-            if EDGE_CONSTRAINTS_STR in blocks_pa.keys():
+            if (EDGE_CONSTRAINTS_STR in blocks_pa.keys() and
+                    blocks_pa[EDGE_CONSTRAINTS_STR] is not None):
                 for _ in blocks_pa[EDGE_CONSTRAINTS_STR]:
                     n_ec += 1
     return n_vc, n_ec
