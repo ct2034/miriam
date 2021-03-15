@@ -45,7 +45,11 @@ def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
     if data is None:
         return INVALID
     n_agents = starts.shape[0]
+    if SCHEDULE not in data.keys():
+        return INVALID
     schedule = data[SCHEDULE]
+    if schedule is None:
+        return INVALID
     if n_agents != len(schedule.keys()):  # not plans for all agents
         return INVALID
     if return_paths:
