@@ -22,7 +22,7 @@ def plot_env_agents(environent: np.ndarray,
     ax.set_xticklabels(map(str, baserange))
     ax.set_yticks(baserange)
     ax.set_yticklabels(map(str, baserange))
-    colormap = cm.tab10.colors
+    colormap = [cm.hsv(i/len(agents)) for i in range(len(agents))]
 
     # gridlines
     for i_x in range(environent.shape[0]-1):
@@ -42,11 +42,20 @@ def plot_env_agents(environent: np.ndarray,
 
     # agents
     for i_a, a in enumerate(agents):
-        ax.plot(a.pos[0], a.pos[1], markersize=10,
-                marker='o', color=colormap[i_a])
-        ax.plot(a.goal[0], a.goal[1], markersize=10,
-                marker='x', color=colormap[i_a])
+        # path
         ax.plot(a.path[:, 0], a.path[:, 1], color=colormap[i_a])
+        # position
+        if a.pos[0] != a.goals[0] or a.pos[1] != a.goals[1]:  # not at goal
+            ax.plot(a.pos[0], a.pos[1], markersize=10,
+                    marker='o', color=colormap[i_a])
+        # goal
+        ax.plot(a.goal[0], a.goal[1], markersize=10,
+                marker='.', color=colormap[i_a])
+        # blocked nodes
+        blocks = np.array(list(a.filter_blocked_nodes), dtype=int)
+        if len(blocks) > 0:
+            ax.plot(blocks[:, 0], blocks[:, 1], markersize=10,
+                    marker='s', color=colormap[i_a], linewidth=0)
 
     plt.show()
 

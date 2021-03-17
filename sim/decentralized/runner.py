@@ -138,7 +138,7 @@ def check_time_evaluation(time_progress, space_progress):
 
 
 def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator):
-    env = initialize_environment(size, .4, seed)
+    env = initialize_environment(size, .2, seed)
     agents = initialize_agents(env, n_agents, policy, seed)
     return run_a_scenario(env, agents, plot, iterator)
 
@@ -184,7 +184,7 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         for i_r in range(runs):
             random.seed(i_r)
             results = sample_and_run_a_scenario(
-                size, n_agents, policy, False, i_r, IteratorType.BLOCKING)
+                size, n_agents, policy, True, i_r, IteratorType.BLOCKING)
             evaluation_per_policy = np.append(
                 evaluation_per_policy, np.transpose([results]), axis=1)
             pb.progress()
@@ -197,4 +197,4 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    evaluate_policies(16, 16, 16)
+    evaluate_policies(16, 16, 1)
