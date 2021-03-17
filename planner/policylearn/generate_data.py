@@ -395,6 +395,13 @@ def plot_map_and_paths(gridmap, blocks, data, n_agents):
     plt.show()
 
 
+def insert_str_before_extension(fname: str, to_insert: str):
+    """in a filename, insert string before extension"""
+    parts = fname.split(".")
+    parts[0] = parts[0] + to_insert
+    return ".".join(parts)
+
+
 def save_data(data_dict, fname_pkl):
     """save the current data dict in the given pickle file."""
     with open(fname_pkl, 'wb') as f:
@@ -490,7 +497,6 @@ if __name__ == "__main__":
         logger.info(f"Using initial seed: {seed}")
         # start
         with Pool(4) as p:
-            all_data = []
             pb_main = ProgressBar(f'main', n_batches)
             for i_batch in range(n_batches):
                 start = batch_size * i_batch
@@ -498,12 +504,9 @@ if __name__ == "__main__":
                 arguments = [(width, fill, n_agents, seed)
                              for seed in range(start, stop)]
                 batch_data = p.starmap(simulate_one_data, arguments)
-                all_data.extend(batch_data)
-                save_data(all_data, args.fname_write_pkl.name)
+                save_data(batch_data, insert_str_before_extension(args.fname_write_pkl.name, f'{i_batch:02}'))
                 pb_main.progress()
             # save in the end for sure
-            save_data(all_data, args.fname_write_pkl.name)
-            assert len(all_data) == n_data_to_gen
             pb_main.end()
     elif args.mode == NO_SOLUTION_STR:
         # generate data of scenarios without solution (no info on how to solve

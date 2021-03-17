@@ -34,3 +34,4 @@ tmp_jobs.csv
 htmlcov/
 *.pkl
 miriam_env/
+planner/policylearn/data/
