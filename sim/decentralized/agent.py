@@ -191,3 +191,8 @@ class Agent():
             assert self.path_i is not None, "Should have a path_i by now"
             self.path_i += 1
             self.pos = potential_next_pos
+            # resetting blocks now
+            self.blocked_nodes = set()
+            self.filter_blocked_nodes = set()
+            self.blocked_edges = set()
+            self.filter_blocked_edges = set()
