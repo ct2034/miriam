@@ -209,24 +209,29 @@ def blocks_from_data_to_lists(data):
             blocks_pa = []
             if VERTEX_CONSTRAINTS_STR in data_blocks_pa.keys():
                 for db in data_blocks_pa[VERTEX_CONSTRAINTS_STR]:
-                    block = (
-                        db['v.x'],
-                        db['v.y'],
-                        db['t']
-                    )
-                    blocks_pa.append(block)
+                    if ('v.x' in db.keys() and 'v.y' in db.keys() 
+                        and 't' in db.keys()):
+                        block = (
+                            db['v.x'],
+                            db['v.y'],
+                            db['t']
+                        )
+                        blocks_pa.append(block)
             if EDGE_CONSTRAINTS_STR in data_blocks_pa.keys():
                 for db in data_blocks_pa[EDGE_CONSTRAINTS_STR]:
-                    block = ((
-                        db['v1.x'],
-                        db['v1.y'],
-                        db['t']
-                    ), (
-                        db['v2.x'],
-                        db['v2.y'],
-                        db['t']+1
-                    ))
-                    blocks_pa.append(block)
+                    if ('v1.x' in db.keys() and 'v1.y' in db.keys()
+                        and 'v2.x' in db.keys() and 'v2.y' in db.keys()
+                        and 't' in db.keys()):
+                        block = ((
+                            db['v1.x'],
+                            db['v1.y'],
+                            db['t']
+                        ), (
+                            db['v2.x'],
+                            db['v2.y'],
+                            db['t']+1
+                        ))
+                        blocks_pa.append(block)
             blocks[i_a] = blocks_pa
     return blocks
 
@@ -250,32 +255,36 @@ def is_collision_in_blocks(collision, blocks):
 def training_samples_from_data(data, mode):
     """extract training samples from the data simulation data dict."""
     training_samples = []
-    paths = data[INDEP_AGENT_PATHS_STR]
-    n_agents = len(paths)
-    bs = blocks_from_data_to_lists(data)
-    for collision, col_agents in data[COLLISIONS_STR].items():
-        unblocked_agent = None
-        for i_a in col_agents:
-            i_oa = get_other(col_agents, i_a)
-            if is_vertex_coll(collision):
-                pos = collision
-            else:
-                pos = collision[0]
-            t = pos[2]
-            if pos in paths[i_a] or collision in paths[i_oa]:
-                if is_collision_in_blocks(collision, bs[i_a]):
-                    unblocked_agent = i_a
-                elif is_collision_in_blocks(collision, bs[i_oa]):
-                    unblocked_agent = i_oa
-        if unblocked_agent is not None:  # if we were able to find it
-            if mode == TRANSFER_LSTM_STR:
-                data_pa = []
-                training_samples.extend(lstm_samples(
-                    n_agents, data, t, data_pa, col_agents, unblocked_agent))
-            elif mode == TRANSFER_CLASSIFICATION_STR:
-                training_samples.extend(classification_samples(
-                    n_agents, data, t, col_agents, unblocked_agent))
-    return training_samples
+    try:
+        paths = data[INDEP_AGENT_PATHS_STR]
+        n_agents = len(paths)
+        bs = blocks_from_data_to_lists(data)
+        for collision, col_agents in data[COLLISIONS_STR].items():
+            unblocked_agent = None
+            for i_a in col_agents:
+                i_oa = get_other(col_agents, i_a)
+                if is_vertex_coll(collision):
+                    pos = collision
+                else:
+                    pos = collision[0]
+                t = pos[2]
+                if pos in paths[i_a] or collision in paths[i_oa]:
+                    if is_collision_in_blocks(collision, bs[i_a]):
+                        unblocked_agent = i_a
+                    elif is_collision_in_blocks(collision, bs[i_oa]):
+                        unblocked_agent = i_oa
+            if unblocked_agent is not None:  # if we were able to find it
+                if mode == TRANSFER_LSTM_STR:
+                    data_pa = []
+                    training_samples.extend(lstm_samples(
+                        n_agents, data, t, data_pa, col_agents, unblocked_agent))
+                elif mode == TRANSFER_CLASSIFICATION_STR:
+                    training_samples.extend(classification_samples(
+                        n_agents, data, t, col_agents, unblocked_agent))
+    except Exception as e:
+        print(e)
+    finally:
+        return training_samples
 
 
 def lstm_samples(n_agents, data, t, data_pa, col_agents, unblocked_agent):

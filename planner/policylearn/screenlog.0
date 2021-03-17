@@ -1,0 +1,1521 @@
+writing b'r'
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ exit
+writing b'r'
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ (reverse-i-search)`': [K^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ po
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ (reverse-i-search)`': [Kr': screenu': ./run_all.sh [1@n[C[C[C[C[Cch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ./run_all.sh 
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 51, in starmapstar
+    return list(itertools.starmap(args[0], args[1]))
+  File "./generate_data.py", line 421, in simulate_one_data
+    has_one_or_more_vertex_blocks(data[BLOCKS_STR])
+  File "./generate_data.py", line 98, in has_one_or_more_vertex_blocks
+    n_vc, n_ec = count_blocks(blocks)
+  File "./generate_data.py", line 77, in count_blocks
+    for agent in blocks.keys():
+AttributeError: 'NoneType' object has no attribute 'keys'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "./generate_data.py", line 496, in <module>
+    batch_data = p.starmap(simulate_one_data, arguments)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 372, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 771, in get
+    raise self._value
+AttributeError: 'NoneType' object has no attribute 'keys'
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ./run_all.sh po[Kscreen[K[K[K[K[K[Kgit s
+On branch private-policylearn
+Your branch is up to date with 'PRIVATE/private-policylearn'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	[31mmodified:   run_all.sh[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	[31mscreenlog.0[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull
+remote: Enumerating objects: 15, done.[K
+remote: Counting objects:   6% (1/15)[Kremote: Counting objects:  13% (2/15)[Kremote: Counting objects:  20% (3/15)[Kremote: Counting objects:  26% (4/15)[Kremote: Counting objects:  33% (5/15)[Kremote: Counting objects:  40% (6/15)[Kremote: Counting objects:  46% (7/15)[Kremote: Counting objects:  53% (8/15)[Kremote: Counting objects:  60% (9/15)[Kremote: Counting objects:  66% (10/15)[Kremote: Counting objects:  73% (11/15)[Kremote: Counting objects:  80% (12/15)[Kremote: Counting objects:  86% (13/15)[Kremote: Counting objects:  93% (14/15)[Kremote: Counting objects: 100% (15/15)[Kremote: Counting objects: 100% (15/15), done.[K
+remote: Compressing objects:  20% (1/5)[Kremote: Compressing objects:  40% (2/5)[Kremote: Compressing objects:  60% (3/5)[Kremote: Compressing objects:  80% (4/5)[Kremote: Compressing objects: 100% (5/5)[Kremote: Compressing objects: 100% (5/5), done.[K
+remote: Total 10 (delta 7), reused 7 (delta 5), pack-reused 0[K
+Unpacking objects:  10% (1/10)Unpacking objects:  20% (2/10)Unpacking objects:  30% (3/10)Unpacking objects:  40% (4/10)Unpacking objects:  50% (5/10)Unpacking objects:  60% (6/10)Unpacking objects:  70% (7/10)Unpacking objects:  80% (8/10)Unpacking objects:  90% (9/10)Unpacking objects: 100% (10/10)Unpacking objects: 100% (10/10), 1.31 KiB | 149.00 KiB/s, done.
+From github.com:ct2034/miriam_private
+   4e21e8f..5281495  private-policylearn -> PRIVATE/private-policylearn
+Updating 4e21e8f..5281495
+Fast-forward
+ planner/policylearn/generate_data.py | 2 [32m++[m
+ requirements.txt                     | 3 [32m++[m[31m-[m
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+[33mhint: The '.git/hooks/post-merge' hook was ignored because it's not set as executable.[m
+[33mhint: You can disable this warning with `git config advice.ignoredHook false`.[m
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pulls[K./run_all.sh po[K./run_all.sh 
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 51, in starmapstar
+    return list(itertools.starmap(args[0], args[1]))
+  File "./generate_data.py", line 423, in simulate_one_data
+    has_one_or_more_vertex_blocks(data[BLOCKS_STR])
+  File "./generate_data.py", line 100, in has_one_or_more_vertex_blocks
+    n_vc, n_ec = count_blocks(blocks)
+  File "./generate_data.py", line 81, in count_blocks
+    for _ in blocks_pa[VERTEX_CONSTRAINTS_STR]:
+TypeError: 'NoneType' object is not iterable
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "./generate_data.py", line 498, in <module>
+    batch_data = p.starmap(simulate_one_data, arguments)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 372, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 771, in get
+    raise self._value
+TypeError: 'NoneType' object is not iterable
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull
+Already up to date.
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull
+remote: Enumerating objects: 9, done.[K
+remote: Counting objects:  11% (1/9)[Kremote: Counting objects:  22% (2/9)[Kremote: Counting objects:  33% (3/9)[Kremote: Counting objects:  44% (4/9)[Kremote: Counting objects:  55% (5/9)[Kremote: Counting objects:  66% (6/9)[Kremote: Counting objects:  77% (7/9)[Kremote: Counting objects:  88% (8/9)[Kremote: Counting objects: 100% (9/9)[Kremote: Counting objects: 100% (9/9), done.[K
+remote: Compressing objects: 100% (1/1)[Kremote: Compressing objects: 100% (1/1), done.[K
+remote: Total 5 (delta 4), reused 5 (delta 4), pack-reused 0[K
+Unpacking objects:  20% (1/5)Unpacking objects:  40% (2/5)Unpacking objects:  60% (3/5)Unpacking objects:  80% (4/5)Unpacking objects: 100% (5/5)Unpacking objects: 100% (5/5), 415 bytes | 29.00 KiB/s, done.
+From github.com:ct2034/miriam_private
+   5281495..7811ece  private-policylearn -> PRIVATE/private-policylearn
+Updating 5281495..7811ece
+Fast-forward
+ planner/policylearn/generate_data.py | 2 [32m+[m[31m-[m
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[33mhint: The '.git/hooks/post-merge' hook was ignored because it's not set as executable.[m
+[33mhint: You can disable this warning with `git config advice.ignoredHook false`.[m
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull./run_all.sh [5Pgit pull./run_all.sh 
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 51, in starmapstar
+    return list(itertools.starmap(args[0], args[1]))
+  File "./generate_data.py", line 423, in simulate_one_data
+    has_one_or_more_vertex_blocks(data[BLOCKS_STR])
+  File "./generate_data.py", line 100, in has_one_or_more_vertex_blocks
+    n_vc, n_ec = count_blocks(blocks)
+  File "./generate_data.py", line 80, in count_blocks
+    if VERTEX_CONSTRAINTS_STR in blocks_pa.keys():
+AttributeError: 'NoneType' object has no attribute 'keys'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "./generate_data.py", line 498, in <module>
+    batch_data = p.starmap(simulate_one_data, arguments)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 372, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 771, in get
+    raise self._value
+AttributeError: 'NoneType' object has no attribute 'keys'
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ nana[K^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull
+remote: Enumerating objects: 9, done.[K
+remote: Counting objects:  11% (1/9)[Kremote: Counting objects:  22% (2/9)[Kremote: Counting objects:  33% (3/9)[Kremote: Counting objects:  44% (4/9)[Kremote: Counting objects:  55% (5/9)[Kremote: Counting objects:  66% (6/9)[Kremote: Counting objects:  77% (7/9)[Kremote: Counting objects:  88% (8/9)[Kremote: Counting objects: 100% (9/9)[Kremote: Counting objects: 100% (9/9), done.[K
+remote: Compressing objects: 100% (1/1)[Kremote: Compressing objects: 100% (1/1), done.[K
+remote: Total 5 (delta 4), reused 5 (delta 4), pack-reused 0[K
+Unpacking objects:  20% (1/5)Unpacking objects:  40% (2/5)Unpacking objects:  60% (3/5)Unpacking objects:  80% (4/5)Unpacking objects: 100% (5/5)Unpacking objects: 100% (5/5), 445 bytes | 49.00 KiB/s, done.
+From github.com:ct2034/miriam_private
+   7811ece..d964f79  private-policylearn -> PRIVATE/private-policylearn
+Updating 7811ece..d964f79
+Fast-forward
+ planner/policylearn/generate_data.py | 2 [32m+[m[31m-[m
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[33mhint: The '.git/hooks/post-merge' hook was ignored because it's not set as executable.[m
+[33mhint: You can disable this warning with `git config advice.ignoredHook false`.[m
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull./run_all.sh 
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+^CProcess ForkPoolWorker-2:
+Process ForkPoolWorker-3:
+Process ForkPoolWorker-4:
+Process ForkPoolWorker-1:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.8/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 114, in worker
+    task = get()
+  File "/usr/lib/python3.8/multiprocessing/queues.py", line 358, in get
+    return _ForkingPickler.loads(res)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "./generate_data.py", line 498, in <module>
+    batch_data = p.starmap(simulate_one_data, arguments)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 372, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 765, in get
+    self.wait(timeout)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 762, in wait
+    self._event.wait(timeout)
+  File "/usr/lib/python3.8/threading.py", line 558, in wait
+    signaled = self._cond.wait(timeout)
+  File "/usr/lib/python3.8/threading.py", line 302, in wait
+    waiter.acquire()
+KeyboardInterrupt
+
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git s
+On branch private-policylearn
+Your branch is up to date with 'PRIVATE/private-policylearn'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	[31mmodified:   run_all.sh[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	[31mscreenlog.0[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git s./run_all.sh ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ (reverse-i-search)`': [Ks': git sc': screen[1@r[C[C[C[1@e[C[C[C[C[8@failed reverse-i-search)`scren[C[C[Cch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ screen^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ screen -r
+There is a screen on:
+	453705.pts-0.metaverse	(12.03.2021 21:09:47)	(Attached)
+There is no screen to be resumed.
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ screen -r[4Pgit s./run_all.sh 
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 51, in starmapstar
+    return list(itertools.starmap(args[0], args[1]))
+  File "./generate_data.py", line 423, in simulate_one_data
+    has_one_or_more_vertex_blocks(data[BLOCKS_STR])
+  File "./generate_data.py", line 100, in has_one_or_more_vertex_blocks
+    n_vc, n_ec = count_blocks(blocks)
+  File "./generate_data.py", line 81, in count_blocks
+    for _ in blocks_pa[VERTEX_CONSTRAINTS_STR]:
+TypeError: 'NoneType' object is not iterable
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "./generate_data.py", line 498, in <module>
+    batch_data = p.starmap(simulate_one_data, arguments)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 372, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 771, in get
+    raise self._value
+TypeError: 'NoneType' object is not iterable
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull
+remote: Enumerating objects: 9, done.[K
+remote: Counting objects:  11% (1/9)[Kremote: Counting objects:  22% (2/9)[Kremote: Counting objects:  33% (3/9)[Kremote: Counting objects:  44% (4/9)[Kremote: Counting objects:  55% (5/9)[Kremote: Counting objects:  66% (6/9)[Kremote: Counting objects:  77% (7/9)[Kremote: Counting objects:  88% (8/9)[Kremote: Counting objects: 100% (9/9)[Kremote: Counting objects: 100% (9/9), done.[K
+remote: Compressing objects: 100% (1/1)[Kremote: Compressing objects: 100% (1/1), done.[K
+remote: Total 5 (delta 4), reused 5 (delta 4), pack-reused 0[K
+Unpacking objects:  20% (1/5)Unpacking objects:  40% (2/5)Unpacking objects:  60% (3/5)Unpacking objects:  80% (4/5)Unpacking objects: 100% (5/5)Unpacking objects: 100% (5/5), 484 bytes | 34.00 KiB/s, done.
+From github.com:ct2034/miriam_private
+   d964f79..fbcf690  private-policylearn -> PRIVATE/private-policylearn
+Updating d964f79..fbcf690
+Fast-forward
+ planner/policylearn/generate_data.py | 6 [32m++++[m[31m--[m
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+[33mhint: The '.git/hooks/post-merge' hook was ignored because it's not set as executable.[m
+[33mhint: You can disable this warning with `git config advice.ignoredHook false`.[m
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull./run_all.sh 
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 51, in starmapstar
+    return list(itertools.starmap(args[0], args[1]))
+  File "./generate_data.py", line 418, in simulate_one_data
+    data = cached_ecbs(
+  File "/home/ch/src/miriam/scenarios/evaluators.py", line 46, in cached_ecbs
+    data = ecbs(env, starts, goals, timeout=timeout)
+  File "/home/ch/src/miriam/scenarios/solvers.py", line 41, in ecbs
+    data = plan_in_gridmap(env, list(starts), list(
+  File "/home/ch/src/miriam/planner/policylearn/libMultiRobotPlanning/plan_ecbs.py", line 71, in plan_in_gridmap
+    cost, time, out_fname = plan(starts_nodes, goals_nodes, fname_adjlist,
+  File "/home/ch/src/miriam/planner/policylearn/libMultiRobotPlanning/benchmark_ecbs.py", line 147, in plan
+    logger.debug("cost: " + str(cost))
+UnboundLocalError: local variable 'cost' referenced before assignment
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "./generate_data.py", line 500, in <module>
+    batch_data = p.starmap(simulate_one_data, arguments)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 372, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 771, in get
+    raise self._value
+UnboundLocalError: local variable 'cost' referenced before assignment
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ./run_all.sh [5Pgit pull./run_all.sh [5Pgit pull./run_all.sh [K./run_all.sh [5Pgit pull./run_all.sh [5Pgit pull --re
+--rebase               --recurse-submodules   --refmap=              
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull --re
+--rebase               --recurse-submodules   --refmap=              
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull --recurse-submodules 
+remote: Enumerating objects: 7, done.[K
+remote: Counting objects:  14% (1/7)[Kremote: Counting objects:  28% (2/7)[Kremote: Counting objects:  42% (3/7)[Kremote: Counting objects:  57% (4/7)[Kremote: Counting objects:  71% (5/7)[Kremote: Counting objects:  85% (6/7)[Kremote: Counting objects: 100% (7/7)[Kremote: Counting objects: 100% (7/7), done.[K
+remote: Compressing objects: 100% (1/1)[Kremote: Compressing objects: 100% (1/1), done.[K
+remote: Total 4 (delta 3), reused 4 (delta 3), pack-reused 0[K
+Unpacking objects:  25% (1/4)Unpacking objects:  50% (2/4)Unpacking objects:  75% (3/4)Unpacking objects: 100% (4/4)Unpacking objects: 100% (4/4), 373 bytes | 33.00 KiB/s, done.
+From github.com:ct2034/miriam_private
+   fbcf690..eb67462  private-policylearn -> PRIVATE/private-policylearn
+Fetching submodule planner/cobra/external
+Fetching submodule planner/matteoantoniazzi_mapf/external
+Fetching submodule planner/policylearn/libMultiRobotPlanning
+From github.com:ct2034/libMultiRobotPlanning
+   a66833e..0b2e263  master     -> origin/master
+Updating fbcf690..eb67462
+Fast-forward
+ planner/policylearn/libMultiRobotPlanning | 2 [32m+[m[31m-[m
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[33mhint: The '.git/hooks/post-merge' hook was ignored because it's not set as executable.[m
+[33mhint: You can disable this warning with `git config advice.ignoredHook false`.[m
+Submodule path 'planner/policylearn/libMultiRobotPlanning': checked out '0b2e263eab76fb49554c7c35343806e78680ec4a'
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ cd ../..^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ mi
+ch@metaverse:~/src/miriam ([32mprivate-policylearn[0m [31m*[0m=)$ cd planner/policylearn/libMultiRobotPlanning
+ch@metaverse:~/src/miriam/planner/policylearn/libMultiRobotPlanning ([31m(0b2e263...)[0m)$ git lg
+[?1h=* [33m0b2e263[m[33m ([m[1;36mHEAD[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m making sure cost is defined[m
+* [33ma66833e[m psutil esception import correct[m
+* [33m42ff972[m[33m ([m[1;32mmaster[m[33m)[m suboptimality without default value[m
+* [33mfc90887[m no default timeout[m
+* [33me056573[m removing cachier[m
+* [33m320f6e0[m newer boost[m
+* [33m4c8ad16[m solving memoryview: underlying buffer is not C -contiguous[m
+* [33m9709435[m formatting and safe yaml[m
+* [33m00c0092[m requirements[m
+* [33m0ae5b27[m formatting and simplifactions[m
+* [33m5837a98[m making file names temporary[m
+* [33m989e1fd[m another warning[m
+* [33m784be16[m warnings instead of warn[m
+* [33m829d526[m typing[m
+* [33m32e63b7[m error output warnings when to be expected[m
+* [33m1acc41d[m importing relatively[m
+* [33macdd8ee[m handling an exception when killing a process[m
+* [33m0eec75a[m none if timeout[m
+* [33m5d1ce6f[m passing the timeout[m
+* [33m9be8e9a[m caching that makes sense[m
+* [33m270028d[m x, y, t in this order for printing[m
+* [33m8d3c8c8[m import as module[m
+* [33mc1a1754[m chaning logging[m
+* [33m8595591[m logging[m
+* [33m85a8821[m coordinates for vortices[m
+* [33m2f51849[m can read out blocks[m
+* [33m0485df8[m trying to print constraint info[m
+* [33m01be564[m params[m
+:[K[K[?1l>ch@metaverse:~/src/miriam/planner/policylearn/libMultiRobotPlanning ([31m(0b2e263...)[0m)$ git checkout master 
+Previous HEAD position was 0b2e263 making sure cost is defined
+Switched to branch 'master'
+Your branch is behind 'origin/master' by 2 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+ch@metaverse:~/src/miriam/planner/policylearn/libMultiRobotPlanning ([32mmaster[0m<)$ git pull
+Updating 42ff972..0b2e263
+Fast-forward
+ benchmark_ecbs.py | 3 [32m++[m[31m-[m
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+ch@metaverse:~/src/miriam/planner/policylearn/libMultiRobotPlanning ([32mmaster[0m=)$ git lg
+[?1h=* [33m0b2e263[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m making sure cost is defined[m
+* [33ma66833e[m psutil esception import correct[m
+* [33m42ff972[m suboptimality without default value[m
+* [33mfc90887[m no default timeout[m
+* [33me056573[m removing cachier[m
+* [33m320f6e0[m newer boost[m
+* [33m4c8ad16[m solving memoryview: underlying buffer is not C -contiguous[m
+* [33m9709435[m formatting and safe yaml[m
+* [33m00c0092[m requirements[m
+* [33m0ae5b27[m formatting and simplifactions[m
+* [33m5837a98[m making file names temporary[m
+* [33m989e1fd[m another warning[m
+* [33m784be16[m warnings instead of warn[m
+* [33m829d526[m typing[m
+* [33m32e63b7[m error output warnings when to be expected[m
+* [33m1acc41d[m importing relatively[m
+* [33macdd8ee[m handling an exception when killing a process[m
+* [33m0eec75a[m none if timeout[m
+* [33m5d1ce6f[m passing the timeout[m
+* [33m9be8e9a[m caching that makes sense[m
+* [33m270028d[m x, y, t in this order for printing[m
+* [33m8d3c8c8[m import as module[m
+* [33mc1a1754[m chaning logging[m
+* [33m8595591[m logging[m
+* [33m85a8821[m coordinates for vortices[m
+* [33m2f51849[m can read out blocks[m
+* [33m0485df8[m trying to print constraint info[m
+* [33m01be564[m params[m
+:[K[K[?1l>ch@metaverse:~/src/miriam/planner/policylearn/libMultiRobotPlanning ([32mmaster[0m=)$ po
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git s
+On branch private-policylearn
+Your branch is up to date with 'PRIVATE/private-policylearn'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	[31mmodified:   run_all.sh[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	[31mscreenlog.0[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull
+Already up to date.
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ r[K.8ru[K[K/run[K[K[K[K[K/run_all.sh 
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 51, in starmapstar
+    return list(itertools.starmap(args[0], args[1]))
+  File "./generate_data.py", line 418, in simulate_one_data
+    data = cached_ecbs(
+  File "/home/ch/src/miriam/scenarios/evaluators.py", line 46, in cached_ecbs
+    data = ecbs(env, starts, goals, timeout=timeout)
+  File "/home/ch/src/miriam/scenarios/solvers.py", line 49, in ecbs
+    if n_agents != len(schedule.keys()):  # not plans for all agents
+AttributeError: 'NoneType' object has no attribute 'keys'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "./generate_data.py", line 500, in <module>
+    batch_data = p.starmap(simulate_one_data, arguments)
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 372, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+  File "/usr/lib/python3.8/multiprocessing/pool.py", line 771, in get
+    raise self._value
+AttributeError: 'NoneType' object has no attribute 'keys'
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull
+remote: Enumerating objects: 7, done.[K
+remote: Counting objects:  14% (1/7)[Kremote: Counting objects:  28% (2/7)[Kremote: Counting objects:  42% (3/7)[Kremote: Counting objects:  57% (4/7)[Kremote: Counting objects:  71% (5/7)[Kremote: Counting objects:  85% (6/7)[Kremote: Counting objects: 100% (7/7)[Kremote: Counting objects: 100% (7/7), done.[K
+remote: Compressing objects: 100% (1/1)[Kremote: Compressing objects: 100% (1/1), done.[K
+remote: Total 4 (delta 3), reused 4 (delta 3), pack-reused 0[K
+Unpacking objects:  25% (1/4)Unpacking objects:  50% (2/4)Unpacking objects:  75% (3/4)Unpacking objects: 100% (4/4)Unpacking objects: 100% (4/4), 400 bytes | 80.00 KiB/s, done.
+From github.com:ct2034/miriam_private
+   eb67462..c2b6cff  private-policylearn -> PRIVATE/private-policylearn
+Updating eb67462..c2b6cff
+Fast-forward
+ scenarios/solvers.py | 4 [32m++++[m
+ 1 file changed, 4 insertions(+)
+[33mhint: The '.git/hooks/post-merge' hook was ignored because it's not set as executable.[m
+[33mhint: You can disable this warning with `git config advice.ignoredHook false`.[m
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ git pull./run_all.sh [5Pgit pull./run_all.sh 
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+main progress: 10%
+ > took: 1:03:00.217326, eta: 9:27:01.955934
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+main progress: 20%
+ > took: 4:19:14.153399, eta: 17:16:56.613596
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+./run_all.sh: line 4: 577959 Killed                  N_DATA_TO_GEN=1000000 ./generate_data.py generate_simulation data.pkl
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ls -h
+data_class.pkl                    [0m[01;32mgaussian_map_layer.py[0m  generate_fovs.py       [01;34m__pycache__[0m     screenlog.0                     [01;35mtraining_history.png[0m
+data.pkl                          [01;32mgenerate_data_demo.py[0m  __init__.py            README.md       setup.bash                      [01;32mtrain_model_classification.py[0m
+Dockerfile                        [01;32mgenerate_data.py[0m       [01;34mlibMultiRobotPlanning[0m  [01;32mrun_all.sh[0m      test_tf.py                      train_model_classification_test.py
+[01;32mevaluate_model_classification.py[0m  [01;32mgenerate_data_test.py[0m  my_model.h5            [01;34mscenario_cache[0m  [01;35mtraining_history_augmented.png[0m  [01;32mtrain_model.py[0m
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ [Kch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ls -h./run_all.sh [5Pgit pull./run_all.sh [5Pgit pulls[Kpull./run_all.sh [5Pgit pull./run_all.sh [8Pls -h[K^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ls -h./run_all.sh [5Pgit pull./run_all.sh ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ nano generate_data.py 
+[?2004h[?1049h[22;0;0t[1;29r(B[m[4l[?7h[39;49m[?1h=[?1h=[?25l[39;49m(B[m[H[2J[27;113H(B[0;7m[ Reading... ](B[m[27;111H(B[0;7m[ Read 556 lines ](B[m[H(B[0;7m  GNU nano 4.8                                                                                                   generate_data.py                                                                                                             [1;237H(B[m[28d(B[0;7m^G(B[m Get Help[19G(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is[55G(B[0;7m^K(B[m Cut Text[73G(B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos[28;109H(B[0;7mM-U(B[m Undo[28;127H(B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous[181G(B[0;7m^B(B[m Back[28;199H(B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29d(B[0;7m^X(B[m Exit[29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace[29;55H(B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo[29;127H(B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[29;181H(B[0;7m^F(B[m Forward[29;199H(B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[2d(B[0;1m[31m#!/usr/bin/env python3[3d[36mimport[39m(B[m argparse[4d(B[0;1m[36mimport[39m(B[m datetime[5d(B[0;1m[36mimport[39m(B[m logging[6d(B[0;1m[36mimport[39m(B[m math[7d(B[0;1m[36mimport[39m(B[m os[8d(B[0;1m[36mimport[39m(B[m pickle[9d(B[0;1m[36mimport[39m(B[m random[10d(B[0;1m[36mimport[39m(B[m uuid[11d(B[0;1m[36mfrom[39m(B[m multiprocessing (B[0;1m[36mimport[39m(B[m Pool[13d(B[0;1m[36mimport[39m(B[m matplotlib.pyplot (B[0;1m[36mas[39m(B[m plt[14d(B[0;1m[36mimport[39m(B[m numpy (B[0;1m[36mas[39m(B[m np[15d(B[0;1m[36mfrom[39m(B[m definitions (B[0;1m[36mimport[39m(B[m FREE, INVALID[16d(B[0;1m[36mfrom[39m(B[m planner.policylearn.generate_fovs (B[0;1m[36mimport[39m(B[m *[17d(B[0;1m[36mfrom[39m(B[m planner.policylearn.libMultiRobotPlanning.plan_ecbs (B[0;1m[36mimport[39m(B[m BLOCKS_STR[18d(B[0;1m[36mfrom[39m(B[m scenarios.evaluators (B[0;1m[36mimport[39m(B[m cached_ecbs[19d(B[0;1m[36mfrom[39m(B[m scenarios.generators (B[0;1m[36mimport[39m(B[m tracing_pathes_in_the_dark[20d(B[0;1m[36mfrom[39m(B[m sim.decentralized.agent (B[0;1m[36mimport[39m(B[m Agent[21d(B[0;1m[36mfrom[39m(B[m tools (B[0;1m[36mimport[39m(B[m ProgressBar[23dVERTEX_CONSTRAINTS_STR = (B[0;1m[32m'vertexConstraints'[24d[39m(B[mEDGE_CONSTRAINTS_STR = (B[0;1m[32m'edgeConstraints'[25d[39m(B[mSCHEDULE_STR = (B[0;1m[32m'schedule'[26d[39m(B[mINDEP_AGENT_PATHS_STR = (B[0;1m[32m'indepAgentPaths'[2d[39m(B[m[?12l[?25h[?25l[3d[?12l[?25h[?25l[4d[?12l[?25h[?25l[5d[?12l[?25h[?25l[6d[?12l[?25h[?25l[7d[?12l[?25h[?25l[8d[?12l[?25h[?25l[9d[?12l[?25h[?25l[10d[?12l[?25h[?25l[11d[?12l[?25h[?25l[12d[?12l[?25h[?25l[13d[?12l[?25h[?25l[14d[?12l[?25h[?25l[15d[?12l[?25h[?25l[16d[?12l[?25h[?25l[17d[?12l[?25h[?25l[18d[?12l[?25h[?25l[19d[?12l[?25h[?25l[20d[?12l[?25h[?25l[21d[?12l[?25h[?25l[22d[?12l[?25h[?25l[23d[?12l[?25h[?25l[24d[?12l[?25h[?25l[25d[?12l[?25h[?25l[26d[?12l[?25h[?25l7[2;26r8
+[1;29r[26;1HCOLLISIONS_STR = (B[0;1m[32m'collisions'[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HGRIDMAP_STR = (B[0;1m[32m'gridmap'[39m(B[m[K[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HOWN_STR = (B[0;1m[32m'own'[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HOTHERS_STR = (B[0;1m[32m'others'[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HTRANSFER_LSTM_STR = (B[0;1m[32m'transfer_lstm'[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HTRANSFER_CLASSIFICATION_STR = (B[0;1m[32m'transfer_classification'[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HGENERATE_SIM_STR = (B[0;1m[32m'generate_simulation'[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HNO_SOLUTION_STR = (B[0;1m[32m'no_solution'[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HLSTM_FOV_RADIUS = 2 (B[0;1m[31m # self plus x in all 4 directions[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HCLASSIFICATION_POS_TIMESTEPS = 3[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HCLASSIFICATION_FOV_RADIUS = 3 (B[0;1m[31m # self plus x in all 4 directions[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1HDTYPE_SAMPLES = np.int8[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H(B[0;1m[36mdef[34m show_map[39m(B[m(x):[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5H(B[0;1m[32m"""displays the map using matplotlib. You may want to call `plt.show()`[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H(B[0;1m[32m    yourself."""[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5Hplt.imshow([?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;9Hnp.swapaxes(x, 0, 1),[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;9Haspect=(B[0;1m[32m'equal'[39m(B[m,[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;9Hcmap=plt.get_cmap((B[0;1m[32m"binary"[39m(B[m),[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;9Horigin=(B[0;1m[32m'lower'[39m(B[m)[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H(B[0;1m[36mdef[34m get_random_free_pos[39m(B[m(gridmap):[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5H(B[0;1m[32m"""return a random pose from that map, that is free."""[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5Hfree = np.where(gridmap == FREE)[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5Hchoice = random.randint(0, len(free[0])-1)[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5Hpos = tuple(np.array(free)[:, choice])[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5H(B[0;1m[36mreturn[39m(B[m pos[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H(B[0;1m[36mdef[34m get_vertex_block_coords[39m(B[m(blocks): (B[0;1m[31m # [37m[43mTODO[39;49m[31m: edge constraints[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5H(B[0;1m[32m"""from the blocks section of data, get all vertex blocks."""[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5Hcoords = [][?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5H(B[0;1m[36mfor[39m(B[m agent (B[0;1m[36min[39m(B[m blocks.keys():[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;9Hcoords_pa = [][?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;9H(B[0;1m[36mif[39m(B[m blocks[agent]:[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;13Hblocks_pa = blocks[agent][?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;13H(B[0;1m[36mif[39m(B[m VERTEX_CONSTRAINTS_STR (B[0;1m[36min[39m(B[m blocks_pa.keys():[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17H(B[0;1m[36mfor[39m(B[m vc (B[0;1m[36min[39m(B[m blocks_pa[VERTEX_CONSTRAINTS_STR]:[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;21Hcoords_pa.append([vc[(B[0;1m[32m'v.x'[39m(B[m], vc[(B[0;1m[32m'v.y'[39m(B[m]])[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;9Hcoords.append(np.array(coords_pa))[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5H(B[0;1m[36mreturn[39m(B[m coords[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;1H(B[0;1m[36mdef[34m count_blocks[39m(B[m(blocks):[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;5H(B[0;1m[32m"""counts if edge and vertex blocks"""[39m(B[m[?12l[?25h[?25l[28;19H            [37G           (B[0;7mM-C(B[m Case Sens     [73G          [28;91H    (B[0;7mM-B(B[m Backwards         [28;127H[15X[28;142H(B[0;7m^P(B[m Older[25X[28;181H        (B[0;7m^T(B[m Go To Line[K[29;2H(B[0;7mC(B[m Cancel[29;19H            [37G           (B[0;7mM-R(B[m Regexp[26X[29;91H    (B[0;7m^R(B[m Replace            [29;127H[15X[29;142H(B[0;7m^N(B[m Newer       [163G        [29;181H        (B[0;7mM-J(B[m FullJstify[K[27d(B[0;7mSearch:                                                                                                                                                                                                                                       [27;1H(B[m[27;9H[?12l[?25h[?25l(B[0;7mb(B[m[27;10H[?12l[?25h[?25l(B[0;7ma(B[m[27;11H[?12l[?25h[?25l(B[0;7mt(B[m[27;12H[?12l[?25h[?25l(B[0;7mc(B[m[27;13H[?12l[?25h[?25l[K[28;19H(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is       (B[0;7m^K(B[m Cut Text[73G(B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos        (B[0;7mM-U(B[m Undo[28;127H(B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous[181G(B[0;7m^B(B[m Back           (B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29;2H(B[0;7mX(B[m Exit  [29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace        (B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo[29;127H(B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[29;181H(B[0;7m^F(B[m Forward        (B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[2;9Hprint(f(B[0;1m[32m'got {len(training_data_we_want)} samples '[3;14H[39m(B[m[1K + f(B[0;1m[32m'from {len(all_data)} simulations'[39m(B[m)[4;5H    pb.end()[K[5;5H(B[0;1m[36melif[39m(B[m args.mode == GENERATE_SIM_STR:[6;5H   (B[0;1m[31m # scenario paramters[39m(B[m[K[7;5H    width = 8[K[8;5H    height = width[9;9Hn_agents = 8[10;9Hfill = .4[11;7H[1K (B[0;1m[31m # generation parameters[39m(B[m[K[12;5H    plot = (B[0;1m[35mFalse[39m(B[m[K[13;5H    n_data_to_gen = int(os.getenv((B[0;1m[32m"N_DATA_TO_GEN"[39m(B[m, 5000))[14;5H    batch_size = int(n_data_to_gen / 10)[15;9Hn_batches = math.ceil(n_data_to_gen / batch_size)[16;9Hlogger.info(f(B[0;1m[32m'Generating {n_data_to_gen} data points '[39m(B[m +[17;20H[1K f(B[0;1m[32m'in {n_batches} batches of {batch_size}.'[39m(B[m)[18;9Hseed = os.getenv((B[0;1m[32m"SEED"[39m(B[m, 0)[K[19;9Hrandom.seed(seed)[K[20;9Hlogger.info(f(B[0;1m[32m"Using initial seed: {seed}"[39m(B[m)[K[21;8H(B[0;1m[31m # start[39m(B[m[K[22;5H    (B[0;1m[36mwith[39m(B[m Pool(4) (B[0;1m[36mas[39m(B[m p:[23;13Hall_data = [][24;13Hpb_main = ProgressBar(f(B[0;1m[32m'main'[39m(B[m, n_batches)[25;12H[1K (B[0;1m[36mfor[39m(B[m i_batch (B[0;1m[36min[39m(B[m range(n_batches):[26;16H[1K start = batch_size * i_batch[14;9H[?12l[?25h[?25l[15d[?12l[?25h[?25l[16d[?12l[?25h[?25l[17d[?12l[?25h[?25l[18d[?12l[?25h[?25l[19d[?12l[?25h[?25l[20d[?12l[?25h[?25l[21d[?12l[?25h[?25l[22d[?12l[?25h[?25l[23d[?12l[?25h[?25l[24d[?12l[?25h[?25l[25d[?12l[?25h[?25l[26d[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Hstop = min(start + batch_size, n_data_to_gen)[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Harguments = [(width, fill, n_agents, seed)[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;30H(B[0;1m[36mfor[39m(B[m seed (B[0;1m[36min[39m(B[m range(start, stop)][26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Hbatch_data = p.starmap(simulate_one_data, arguments)[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Hall_data.extend(batch_data)[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Hsave_data(all_data, args.fname_write_pkl.name)[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Hpb_main.progress()[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;12H(B[0;1m[31m # save in the end for sure[26;9H[39m(B[m[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;13Hsave_data(all_data, args.fname_write_pkl.name)[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;13H(B[0;1m[36massert[39m(B[m len(all_data) == n_data_to_gen[26;9H[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[15d[?12l[?25h[?25l[16d[?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[1;229H(B[0;7mModified(B[m[16;26r[16;1HM[1;29r[16;1H[42m                [17d[49m(B[m[16P[?12l[?25h[?25l[8G[1K start = batch_size * i_batch[17;9H[?12l[?25h[?25l[16G[1K start = batch_size * i_batch[17;17H[?12l[?25h[?25l[A[?12l[?25h[?25l[1K a[?12l[?25h[?25ll[?12l[?25h[?25ll[?12l[?25h[?25l_[?12l[?25h[?25ld[?12l[?25h[?25la[?12l[?25h[?25lt[?12l[?25h[?25la[?12l[?25h[?25l[42m [49m(B[m[?12l[?25h[?25l =[?12l[?25h[?25l[42m [49m(B[m[?12l[?25h[?25l [[?12l[?25h[?25l][?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[1Pl[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25lb_data = [][16;18H[?12l[?25h[?25la_data = [][16;19H[?12l[?25h[?25lt_data = [][16;20H[?12l[?25h[?25lc_data = [][16;21H[?12l[?25h[?25lh_data = [][16;22H[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l=[?12l[?25h[?25l [?12l[?25h[?25l[[?12l[?25h[?25l][?12l[?25h[?25l [?12l[?25h[?25l[42m [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l[42m [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[42m            [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[K[?12l[?25h[?25l[13;27r[27;1H
+[1;29r[26;13H(B[0;1m[36massert[39m(B[m len(all_data) == n_data_to_gen[12;27H[?12l[?25h[?25l[13d[?12l[?25h[?25l[14d[?12l[?25h[?25l[15d[?12l[?25h[?25l[16d[?12l[?25h[?25l[17d[?12l[?25h[?25l[18d[?12l[?25h[?25l[19d[?12l[?25h[?25l[20d[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25lt_data = p.starmap(simulate_one_data, arguments)[20;18H[?12l[?25h[?25lh_data = p.starmap(simulate_one_data, arguments)[20;19H[?12l[?25h[?25li_data = p.starmap(simulate_one_data, arguments)[20;20H[?12l[?25h[?25ls_data = p.starmap(simulate_one_data, arguments)[20;21H[?12l[?25h[?25l[21d[?12l[?25h[?25ld[?12l[?25h[?25la[?12l[?25h[?25lt[?12l[?25h[?25la[?12l[?25h[?25l.[?12l[?25h[?25le[?12l[?25h[?25lx[?12l[?25h[?25lt[?12l[?25h[?25le[?12l[?25h[?25ln[?12l[?25h[?25ld[?12l[?25h[?25l([?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25lt_data)[34G[?12l[?25h[?25lh_data)[35G[?12l[?25h[?25li_data)[36G[?12l[?25h[?25ls_data)[37G[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[1Pl[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25lb_data.extend(this_data)[21;18H[?12l[?25h[?25la_data.extend(this_data)[21;19H[?12l[?25h[?25lt_data.extend(this_data)[21;20H[?12l[?25h[?25lc_data.extend(this_data)[21;21H[?12l[?25h[?25lh_data.extend(this_data)[21;22H[?12l[?25h[?25l[22d[?12l[?25h[?25ld[?12l[?25h[?25la[?12l[?25h[?25lt[?12l[?25h[?25la[?12l[?25h[?25l([?12l[?25h[?25la[?12l[?25h[?25ll[?12l[?25h[?25ll[?12l[?25h[?25l[1Pl[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25lb_data, args.fname_write_pkl.name)[22;28H[?12l[?25h[?25la_data, args.fname_write_pkl.name)[22;29H[?12l[?25h[?25lt_data, args.fname_write_pkl.name)[22;30H[?12l[?25h[?25lc_data, args.fname_write_pkl.name)[22;31H[?12l[?25h[?25lh_data, args.fname_write_pkl.name)[22;32H[?12l[?25h[?25l_[?12l[?25h[?25l[39G[?12l[?25h[?25l[44G[?12l[?25h[?25l[50G[?12l[?25h[?25l[56G[?12l[?25h[?25lpkl.[?12l[?25h[?25l[23;17H[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[22;60H[?12l[?25h[?25l[?12l[?25h[?25lp[?12l[?25h[?25lk[?12l[?25h[?25ll[?12l[?25h[?25l.[?12l[?25h[?25ln[?12l[?25h[?25la[?12l[?25h[?25lm[?12l[?25h[?25le[?12l[?25h[?25l+)[?12l[?25h[?25ls)[?12l[?25h[?25l)[K[?12l[?25h[?25lF)[?12l[?25h[?25lf)[?12l[?25h[?25l)[K[?12l[?25h[?25l)[K[?12l[?25h[?25lf)[?12l[?25h[?25l')[?12l[?25h[?25l(B[0;1m[32m''[39m(B[m)[?12l[?25h[?25l[?12l[?25h[?25l(B[0;1m[32m{'[39m(B[m)[?12l[?25h[?25l(B[0;1m[32m}'[39m(B[m)[?12l[?25h[?25l[?12l[?25h[?25l(B[0;1m[32mi}'[39m(B[m)[?12l[?25h[?25l(B[0;1m[32m_}'[39m(B[m)[?12l[?25h[?25l(B[0;1m[32mb}'[39m(B[m)[?12l[?25h[?25l(B[0;1m[32ma}'[39m(B[m)[?12l[?25h[?25l(B[0;1m[32mt}'[39m(B[m)[?12l[?25h[?25l(B[0;1m[32mc}'[39m(B[m)[?12l[?25h[?25l(B[0;1m[32mh}'[39m(B[m)[?12l[?25h[?25l[27;113H(B[0;7m[ Writing... ](B[m[1;229H(B[0;7m        (B[m[27;110H(B[0;7m[ Wrote 556 lines ](B[m[22;75H[?12l[?25h[?25l[1;229H(B[0;7mModified(B[m[22;75H(B[0;1m[32m:}'[39m(B[m)[?12l[?25h[?25l(B[0;1m[32m2}'[39m(B[m)[?12l[?25h[?25l[28;19H            [37G           [55G     (B[0;7mM-D(B[m DOS Format         [28;91H          [28;109H          (B[0;7mM-A(B[m Append[49X[28;178H(B[0;7mM-B(B[m Backup File[K[29;2H(B[0;7mC(B[m Cancel[29;19H            [37G          [29;55H     (B[0;7mM-M(B[m Mac Format          [91G[28X[29;119H(B[0;7mM-P(B[m Prepend[27X[29;163H        [178G(B[0;7m^T(B[m To Files[K[27d(B[0;7mFile Name to Write: generate_data.py                                                                                                                                                                                                          [27;1H(B[m[27;37H[?12l[?25h[?25l[27;112H[1K (B[0;7m[ Writing... ](B[m[K[1;229H(B[0;7m        (B[m[27;110H(B[0;7m[ Wrote 556 lines ](B[m[28;19H(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is[55G(B[0;7m^K(B[m Cut Text       (B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos[28;109H(B[0;7mM-U(B[m Undo          (B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous      (B[0;7m^B(B[m Back     [199G(B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29;2H(B[0;7mX(B[m Exit  [29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace[29;55H(B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo          (B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[178G   (B[0;7m^F(B[m Forward[29;199H(B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[22;77H[?12l[?25h[?25l[23;35H[?12l[?25h[?25l[24;39H[?12l[?25h[?25l[25;59H[?12l[?25h[?25l[1;229H(B[0;7mModified(B[m[25;58H [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [27d[K[25;36H[?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[42m [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[42m            [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[K[?12l[?25h[?25l[25;13H(B[0;1m[36massert[39m(B[m len(all_data) == n_data_to_gen[26;13Hpb_main.end()[K[24;39H[?12l[?25h[?25l(B[0;1m[31m            assert len(all_data) == n_data_to_gen[25;13H[39m(B[mpb_main.end()[K[26;5H(B[0;1m[36melif[39m(B[m args.mode == NO_SOLUTION_STR:[24d[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[C[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[C[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l(B[0;1m[31men[39m(B[m[K[?12l[?25h[?25l(B[0;1m[31men[39m(B[m[K[?12l[?25h[?25l [?12l[?25h[?25l[28;19H            [37G           [55G     (B[0;7mM-D(B[m DOS Format         [28;91H          [28;109H          (B[0;7mM-A(B[m Append[49X[28;178H(B[0;7mM-B(B[m Backup File[K[29;2H(B[0;7mC(B[m Cancel[29;19H            [37G          [29;55H     (B[0;7mM-M(B[m Mac Format          [91G[28X[29;119H(B[0;7mM-P(B[m Prepend[27X[29;163H        [178G(B[0;7m^T(B[m To Files[K[27d(B[0;7mFile Name to Write: generate_data.py                                                                                                                                                                                                          [27;1H(B[m[27;37H[?12l[?25h[?25l[27;112H[1K (B[0;7m[ Writing... ](B[m[K[1;229H(B[0;7m        (B[m[27;110H(B[0;7m[ Wrote 554 lines ](B[m[28;19H(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is[55G(B[0;7m^K(B[m Cut Text       (B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos[28;109H(B[0;7mM-U(B[m Undo          (B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous      (B[0;7m^B(B[m Back     [199G(B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29;2H(B[0;7mX(B[m Exit  [29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace[29;55H(B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo          (B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[178G   (B[0;7m^F(B[m Forward[29;199H(B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[24;39H[?12l[?25h[?25l[A[?12l[?25h[?25l[Ata, [?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[15;32H[?12l[?25h[?25l[16;39H[?12l[?25h[?25l[17d[?12l[?25h[?25l[18d[?12l[?25h[?25l[19d[?12l[?25h[?25l[20d[?12l[?25h[?25l[21d[?12l[?25h[?25l[A[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[27d[K[20;29H[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[1;229H(B[0;7mModified(B[m[20;20H[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25lb_data = p.starmap(simulate_one_data, arguments)[20;18H[?12l[?25h[?25la_data = p.starmap(simulate_one_data, arguments)[20;19H[?12l[?25h[?25lt_data = p.starmap(simulate_one_data, arguments)[20;20H[?12l[?25h[?25lh_data = p.starmap(simulate_one_data, arguments)[20;21H[?12l[?25h[?25lc_data = p.starmap(simulate_one_data, arguments)[20;22H[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25lb_data = p.starmap(simulate_one_data, arguments)[20;18H[?12l[?25h[?25la_data = p.starmap(simulate_one_data, arguments)[20;19H[?12l[?25h[?25lt_data = p.starmap(simulate_one_data, arguments)[20;20H[?12l[?25h[?25lc_data = p.starmap(simulate_one_data, arguments)[20;21H[?12l[?25h[?25lh_data = p.starmap(simulate_one_data, arguments)[20;22H[?12l[?25h[?25l[21d[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25l[1P[?12l[?25h[?25la)[K[?12l[?25h[?25l)[K[?12l[?25h[?25l[42m                [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[K[?12l[?25h[?25l[21;27r[27;1H
+[1;29r[26;8H(B[0;1m[31m # generate data of scenarios without solution (no info on how to solve[20;69H[39m(B[m[?12l[?25h[?25l[19;61H[?12l[?25h[?25l[A[?12l[?25h[?25l[Aen)[?12l[?25h[?25l[16;45H[?12l[?25h[?25l[15;32H[?12l[?25h[?25l [?12l[?25h[?25l[42m [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l[42m [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[42m                [49m(B[m [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[K[?12l[?25h[?25l[15;27r[27;1H
+[1;29r[26;8H(B[0;1m[31m # collision) for autoencoding.[14;45H[39m(B[m[?12l[?25h[?25l[28;19H            [37G           [55G     (B[0;7mM-D(B[m DOS Format         [28;91H          [28;109H          (B[0;7mM-A(B[m Append[49X[28;178H(B[0;7mM-B(B[m Backup File[K[29;2H(B[0;7mC(B[m Cancel[29;19H            [37G          [29;55H     (B[0;7mM-M(B[m Mac Format          [91G[28X[29;119H(B[0;7mM-P(B[m Prepend[27X[29;163H        [178G(B[0;7m^T(B[m To Files[K[27d(B[0;7mFile Name to Write: generate_data.py                                                                                                                                                                                                          [27;1H(B[m[27;37H[?12l[?25h[?25l[27;112H[1K (B[0;7m[ Writing... ](B[m[K[1;229H(B[0;7m        (B[m[27;110H(B[0;7m[ Wrote 552 lines ](B[m[28;19H(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is[55G(B[0;7m^K(B[m Cut Text       (B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos[28;109H(B[0;7mM-U(B[m Undo          (B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous      (B[0;7m^B(B[m Back     [199G(B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29;2H(B[0;7mX(B[m Exit  [29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace[29;55H(B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo          (B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[178G   (B[0;7m^F(B[m Forward[29;199H(B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[14;45H[?12l[?25h[?25l[15d[?12l[?25h[?25l[16d[?12l[?25h[?25l[17d[?12l[?25h[?25l[18d[?12l[?25h[?25l[19d[?12l[?25h[?25l[20d[?12l[?25h[?25l[50G[?12l[?25h[?25l[56G[?12l[?25h[?25lpkl.[?12l[?25h[?25l[65G[?12l[?25h[?25l[68G[?12l[?25h[?25l[70G[?12l[?25h[?25l[76G[?12l[?25h[?25l[1;229H(B[0;7mModified(B[m[20;76H(B[0;1m[32m02}'[39m(B[m)[?12l[?25h[?25l[28;19H            [37G           [55G     (B[0;7mM-D(B[m DOS Format         [28;91H          [28;109H          (B[0;7mM-A(B[m Append[49X[28;178H(B[0;7mM-B(B[m Backup File[K[29;2H(B[0;7mC(B[m Cancel[29;19H            [37G          [29;55H     (B[0;7mM-M(B[m Mac Format          [91G[28X[29;119H(B[0;7mM-P(B[m Prepend[27X[29;163H        [178G(B[0;7m^T(B[m To Files[K[27d(B[0;7mFile Name to Write: generate_data.py                                                                                                                                                                                                          [27;1H(B[m[27;37H[?12l[?25h[?25l[27;112H[1K (B[0;7m[ Writing... ](B[m[K[1;229H(B[0;7m        (B[m[27;110H(B[0;7m[ Wrote 552 lines ](B[m[28;19H(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is[55G(B[0;7m^K(B[m Cut Text       (B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos[28;109H(B[0;7mM-U(B[m Undo          (B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous      (B[0;7m^B(B[m Back     [199G(B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29;2H(B[0;7mX(B[m Exit  [29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace[29;55H(B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo          (B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[178G   (B[0;7m^F(B[m Forward[29;199H(B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[20;77H[?12l[?25h[?25l[27d[J[29d[?12l[?25h[29;1H[?1049l[23;0;0t[?1l>[?2004lch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ nano generate_data.py ls -h[K./run_all.sh [5Pgit pull./run_all.sh 
+  File "./generate_data.py", line 495
+    start = batch_size * i_batch
+                               ^
+TabError: inconsistent use of tabs and spaces in indentation
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ./run_all.sh [9@nano generate_data.py[C
+[?2004h[?1049h[22;0;0t[1;29r(B[m[4l[?7h[39;49m[?1h=[?1h=[?25l[39;49m(B[m[H[2J[27;113H(B[0;7m[ Reading... ](B[m[27;111H(B[0;7m[ Read 552 lines ](B[m[H(B[0;7m  GNU nano 4.8                                                                                                   generate_data.py                                                                                                             [1;237H(B[m[28d(B[0;7m^G(B[m Get Help[19G(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is[55G(B[0;7m^K(B[m Cut Text[73G(B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos[28;109H(B[0;7mM-U(B[m Undo[28;127H(B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous[181G(B[0;7m^B(B[m Back[28;199H(B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29d(B[0;7m^X(B[m Exit[29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace[29;55H(B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo[29;127H(B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[29;181H(B[0;7m^F(B[m Forward[29;199H(B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[2d(B[0;1m[31m#!/usr/bin/env python3[3d[36mimport[39m(B[m argparse[4d(B[0;1m[36mimport[39m(B[m datetime[5d(B[0;1m[36mimport[39m(B[m logging[6d(B[0;1m[36mimport[39m(B[m math[7d(B[0;1m[36mimport[39m(B[m os[8d(B[0;1m[36mimport[39m(B[m pickle[9d(B[0;1m[36mimport[39m(B[m random[10d(B[0;1m[36mimport[39m(B[m uuid[11d(B[0;1m[36mfrom[39m(B[m multiprocessing (B[0;1m[36mimport[39m(B[m Pool[13d(B[0;1m[36mimport[39m(B[m matplotlib.pyplot (B[0;1m[36mas[39m(B[m plt[14d(B[0;1m[36mimport[39m(B[m numpy (B[0;1m[36mas[39m(B[m np[15d(B[0;1m[36mfrom[39m(B[m definitions (B[0;1m[36mimport[39m(B[m FREE, INVALID[16d(B[0;1m[36mfrom[39m(B[m planner.policylearn.generate_fovs (B[0;1m[36mimport[39m(B[m *[17d(B[0;1m[36mfrom[39m(B[m planner.policylearn.libMultiRobotPlanning.plan_ecbs (B[0;1m[36mimport[39m(B[m BLOCKS_STR[18d(B[0;1m[36mfrom[39m(B[m scenarios.evaluators (B[0;1m[36mimport[39m(B[m cached_ecbs[19d(B[0;1m[36mfrom[39m(B[m scenarios.generators (B[0;1m[36mimport[39m(B[m tracing_pathes_in_the_dark[20d(B[0;1m[36mfrom[39m(B[m sim.decentralized.agent (B[0;1m[36mimport[39m(B[m Agent[21d(B[0;1m[36mfrom[39m(B[m tools (B[0;1m[36mimport[39m(B[m ProgressBar[23dVERTEX_CONSTRAINTS_STR = (B[0;1m[32m'vertexConstraints'[24d[39m(B[mEDGE_CONSTRAINTS_STR = (B[0;1m[32m'edgeConstraints'[25d[39m(B[mSCHEDULE_STR = (B[0;1m[32m'schedule'[26d[39m(B[mINDEP_AGENT_PATHS_STR = (B[0;1m[32m'indepAgentPaths'[2d[39m(B[m[?12l[?25h[?25l[28;19H            [37G           (B[0;7mM-C(B[m Case Sens     [73G          [28;91H    (B[0;7mM-B(B[m Backwards         [28;127H[15X[28;142H(B[0;7m^P(B[m Older[25X[28;181H        (B[0;7m^T(B[m Go To Line[K[29;2H(B[0;7mC(B[m Cancel[29;19H            [37G           (B[0;7mM-R(B[m Regexp[26X[29;91H    (B[0;7m^R(B[m Replace            [29;127H[15X[29;142H(B[0;7m^N(B[m Newer       [163G        [29;181H        (B[0;7mM-J(B[m FullJstify[K[27d(B[0;7mSearch:                                                                                                                                                                                                                                       [27;1H(B[m[27;9H[?12l[?25h[?25l[27;9H[?12l[?25h[?25l[27;112H[1K (B[0;7m[ Cancelled ](B[m[K[28;19H(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is       (B[0;7m^K(B[m Cut Text[73G(B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos        (B[0;7mM-U(B[m Undo[28;127H(B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous[181G(B[0;7m^B(B[m Back           (B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29;2H(B[0;7mX(B[m Exit  [29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace        (B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo[29;127H(B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[29;181H(B[0;7m^F(B[m Forward        (B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[2d[?12l[?25h[?25l[28;19H            [37G           (B[0;7mM-C(B[m Case Sens     [73G          [28;91H    (B[0;7mM-B(B[m Backwards         [28;127H[15X[28;142H(B[0;7m^P(B[m Older[25X[28;181H        (B[0;7m^T(B[m Go To Line[K[29;2H(B[0;7mC(B[m Cancel[29;19H            [37G           (B[0;7mM-R(B[m Regexp[26X[29;91H    (B[0;7m^R(B[m Replace            [29;127H[15X[29;142H(B[0;7m^N(B[m Newer       [163G        [29;181H        (B[0;7mM-J(B[m FullJstify[K[27d(B[0;7mSearch:                                                                                                                                                                                                                                       [27;1H(B[m[27;9H[?12l[?25h[?25l(B[0;7mb(B[m[27;10H[?12l[?25h[?25l(B[0;7ma(B[m[27;11H[?12l[?25h[?25l(B[0;7mt(B[m[27;12H[?12l[?25h[?25l(B[0;7mc(B[m[27;13H[?12l[?25h[?25l[K[28;19H(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is       (B[0;7m^K(B[m Cut Text[73G(B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos        (B[0;7mM-U(B[m Undo[28;127H(B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous[181G(B[0;7m^B(B[m Back           (B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29;2H(B[0;7mX(B[m Exit  [29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace        (B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo[29;127H(B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[29;181H(B[0;7m^F(B[m Forward        (B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[2;8H[1K print(f(B[0;1m[32m'got {len(training_data_we_want)} samples '[3;14H[39m(B[m[1K + f(B[0;1m[32m'from {len(all_data)} simulations'[39m(B[m)[4;8H[1K pb.end()[5d    (B[0;1m[36melif[39m(B[m args.mode == GENERATE_SIM_STR:[6;7H[1K (B[0;1m[31m # scenario paramters[7;8H[39m(B[m[1K width = 8[8;8H[1K height = width[9;8H[1K n_agents = 8[10;8H[1K fill = .4[11;7H[1K (B[0;1m[31m # generation parameters[39m(B[m [12;9Hplot = (B[0;1m[35mFalse[13;8H[39m(B[m[1K n_data_to_gen = int(os.getenv((B[0;1m[32m"N_DATA_TO_GEN"[39m(B[m, 5000))[14;8H[1K batch_size = int(n_data_to_gen / 10)[15;8H[1K n_batches = math.ceil(n_data_to_gen / batch_size)[16;8H[1K logger.info(f(B[0;1m[32m'Generating {n_data_to_gen} data points '[39m(B[m +[17;20H[1K f(B[0;1m[32m'in {n_batches} batches of {batch_size}.'[39m(B[m)[K[18;8H[1K seed = os.getenv((B[0;1m[32m"SEED"[39m(B[m, 0)[K[19;8H[1K random.seed(seed)[K[20;8H[1K logger.info(f(B[0;1m[32m"Using initial seed: {seed}"[39m(B[m)[21;7H[1K (B[0;1m[31m # start[39m(B[m[K[22;9H(B[0;1m[36mwith[39m(B[m Pool(4) (B[0;1m[36mas[39m(B[m p:[23;12H[1K pb_main = ProgressBar(f(B[0;1m[32m'main'[39m(B[m, n_batches)[24;12H[1K (B[0;1m[36mfor[39m(B[m i_batch (B[0;1m[36min[39m(B[m range(n_batches):[25;16H[1K start = batch_size * i_batch[26;16H[1K stop = min(start + batch_size, n_data_to_gen)[14;9H[?12l[?25h[?25l[A[?12l[?25h[?25l[1;229H(B[0;7mModified(B[m[13d[1P[8G[?12l[?25h[?25l[1P[7G[?12l[?25h[?25l[7G n_data_to_gen = int(os.getenv((B[0;1m[32m"N_DATA_TO_GEN"[39m(B[m, 5000))[8G[?12l[?25h[?25l[8G n_data_to_gen = int(os.getenv((B[0;1m[32m"N_DATA_TO_GEN"[39m(B[m, 5000))[13;9H[?12l[?25h[?25l[14d[?12l[?25h[?25l[1P[8G[?12l[?25h[?25l[1P[7G[?12l[?25h[?25l[1P[6G[?12l[?25h[?25l[1P    [?12l[?25h[?25l[1P   [?12l[?25h[?25l[1P  [?12l[?25h[?25l[1P [?12l[?25h[?25l[1P[?12l[?25h[?25l batch_size = int(n_data_to_gen / 10) [?12l[?25h[?25l  batch_size = int(n_data_to_gen / 10)  [?12l[?25h[?25l   batch_size = int(n_data_to_gen / 10)   [?12l[?25h[?25l    batch_size = int(n_data_to_gen / 10)[5G[?12l[?25h[?25l     batch_size = int(n_data_to_gen / 10)[6G[?12l[?25h[?25l      batch_size = int(n_data_to_gen / 10)[7G[?12l[?25h[?25l[7G batch_size = int(n_data_to_gen / 10)[8G[?12l[?25h[?25l[8G batch_size = int(n_data_to_gen / 10)[14;9H[?12l[?25h[?25l[15d[?12l[?25h[?25l[1P[8G[?12l[?25h[?25l[1P[7G[?12l[?25h[?25l[1P[6G[?12l[?25h[?25l[1P    [?12l[?25h[?25l[1P   [?12l[?25h[?25l[1P  [?12l[?25h[?25l[1P [?12l[?25h[?25l[1P[?12l[?25h[?25l n_batches = math.ceil(n_data_to_gen / batch_size) [?12l[?25h[?25l  n_batches = math.ceil(n_data_to_gen / batch_size)  [?12l[?25h[?25l   n_batches = math.ceil(n_data_to_gen / batch_size)   [?12l[?25h[?25l    n_batches = math.ceil(n_data_to_gen / batch_size)[5G[?12l[?25h[?25l     n_batches = math.ceil(n_data_to_gen / batch_size)[6G[?12l[?25h[?25l      n_batches = math.ceil(n_data_to_gen / batch_size)[7G[?12l[?25h[?25l[7G n_batches = math.ceil(n_data_to_gen / batch_size)[8G[?12l[?25h[?25l[8G n_batches = math.ceil(n_data_to_gen / batch_size)[15;9H[?12l[?25h[?25l[16d[?12l[?25h[?25l[17d[?12l[?25h[?25l[18d[?12l[?25h[?25l[19d[?12l[?25h[?25l[20d[?12l[?25h[?25l[21d[?12l[?25h[?25l[22d[?12l[?25h[?25l[23d[?12l[?25h[?25l[24d[?12l[?25h[?25l[25d[?12l[?25h[?25l[26d[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Harguments = [(width, fill, n_agents, seed)[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;30H(B[0;1m[36mfor[39m(B[m seed (B[0;1m[36min[39m(B[m range(start, stop)][26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Hbatch_data = p.starmap(simulate_one_data, arguments)[26;9H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Hsave_data(batch_data, args.fname_write_pkl.name+f(B[0;1m[32m'{i_batch:02}'[39m(B[m)[26;9H[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[21;17H[?12l[?25h[?25ls[?12l[?25h[?25l[?12l[?25h[?25l[8P[21;9H[?12l[?25h[?25l[8P[?12l[?25h[?25l start = batch_size * i_batch [?12l[?25h[?25l  start = batch_size * i_batch  [?12l[?25h[?25l   start = batch_size * i_batch   [?12l[?25h[?25l    start = batch_size * i_batch[5G[?12l[?25h[?25l     start = batch_size * i_batch[6G[?12l[?25h[?25l      start = batch_size * i_batch[7G[?12l[?25h[?25l[7G start = batch_size * i_batch[8G[?12l[?25h[?25l[8G start = batch_size * i_batch[21;9H[?12l[?25h[?25l[21;9H start = batch_size * i_batch[21;10H[?12l[?25h[?25l[21;10H start = batch_size * i_batch[21;11H[?12l[?25h[?25l[21;11H start = batch_size * i_batch[21;12H[?12l[?25h[?25l[21;12H start = batch_size * i_batch[21;13H[?12l[?25h[?25l[21;13H start = batch_size * i_batch[21;14H[?12l[?25h[?25l[21;14H start = batch_size * i_batch[21;15H[?12l[?25h[?25l[21;15H start = batch_size * i_batch[21;16H[?12l[?25h[?25l[21;16H start = batch_size * i_batch[21;17H[?12l[?25h[?25l[22d[?12l[?25h[?25l[1P[22;16H[?12l[?25h[?25l[22;16H stop = min(start + batch_size, n_data_to_gen)[22;17H[?12l[?25h[?25l[23d[?12l[?25h[?25l[1P[23;16H[?12l[?25h[?25l[23;16H arguments = [(width, fill, n_agents, seed)[23;17H[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[1P[20;12H[?12l[?25h[?25l[20;12H (B[0;1m[36mfor[39m(B[m i_batch (B[0;1m[36min[39m(B[m range(n_batches):[20;13H[?12l[?25h[?25l[21d[?12l[?25h[?25l[22d[?12l[?25h[?25l[23d[?12l[?25h[?25l[24d[?12l[?25h[?25l[25d[?12l[?25h[?25l[26d[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;17Hpb_main.progress()[26;13H[?12l[?25h[?25l7[2;27r8[27d
+[1;29r[26;12H(B[0;1m[31m # save in the end for sure[26;13H[39m(B[m[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l [?12l[?25h[?25l[1P[24;16H[?12l[?25h[?25l[24;16H save_data(batch_data, args.fname_write_pkl.name+f(B[0;1m[32m'{i_batch:02}'[39m(B[m)[24;17H[?12l[?25h[?25l[25d[?12l[?25h[?25l[1P[25;16H[?12l[?25h[?25l[25;16H pb_main.progress()[25;17H[?12l[?25h[?25l[A[?12l[?25h[?25l[A[?12l[?25h[?25l[1P[23;16H[?12l[?25h[?25l[23;16H batch_data = p.starmap(simulate_one_data, arguments)[23;17H[?12l[?25h[?25l[A[?12l[?25h[?25l[1P[22;16H[?12l[?25h[?25l[22;29H (B[0;1m[36mfor[39m(B[m seed (B[0;1m[36min[39m(B[m range(start, stop)][22;17H[?12l[?25h[?25l[A[?12l[?25h[?25l[1P[21;16H[?12l[?25h[?25l[21;16H arguments = [(width, fill, n_agents, seed)[21;17H[?12l[?25h[?25l[A[?12l[?25h[?25l[1P[20;16H[?12l[?25h[?25l[20;16H stop = min(start + batch_size, n_data_to_gen)[20;17H[?12l[?25h[?25l[1P[20;16H[?12l[?25h[?25l[20;16H stop = min(start + batch_size, n_data_to_gen)[20;17H[?12l[?25h[?25l[A[?12l[?25h[?25l[1P[19;16H[?12l[?25h[?25l[19;16H start = batch_size * i_batch[19;17H[?12l[?25h[?25l[28;19H            [37G           [55G     (B[0;7mM-D(B[m DOS Format         [28;91H          [28;109H          (B[0;7mM-A(B[m Append[49X[28;178H(B[0;7mM-B(B[m Backup File[K[29;2H(B[0;7mC(B[m Cancel[29;19H            [37G          [29;55H     (B[0;7mM-M(B[m Mac Format          [91G[28X[29;119H(B[0;7mM-P(B[m Prepend[27X[29;163H        [178G(B[0;7m^T(B[m To Files[K[27d(B[0;7mFile Name to Write: generate_data.py                                                                                                                                                                                                          [27;1H(B[m[27;37H[?12l[?25h[?25l[27;112H[1K (B[0;7m[ Writing... ](B[m[K[1;229H(B[0;7m        (B[m[27;110H(B[0;7m[ Wrote 552 lines ](B[m[28;19H(B[0;7m^O(B[m Write Out[37G(B[0;7m^W(B[m Where Is[55G(B[0;7m^K(B[m Cut Text       (B[0;7m^J(B[m Justify[28;91H(B[0;7m^C(B[m Cur Pos[28;109H(B[0;7mM-U(B[m Undo          (B[0;7mM-A(B[m Mark Text     (B[0;7mM-](B[m To Bracket    (B[0;7mM-Q(B[m Previous      (B[0;7m^B(B[m Back     [199G(B[0;7m^◀(B[m Prev Word[217G(B[0;7m^A(B[m Home[29;2H(B[0;7mX(B[m Exit  [29;19H(B[0;7m^R(B[m Read File[37G(B[0;7m^\(B[m Replace[29;55H(B[0;7m^U(B[m Paste Text     (B[0;7m^T(B[m To Spell[91G(B[0;7m^_(B[m Go To Line     (B[0;7mM-E(B[m Redo          (B[0;7mM-6(B[m Copy Text     (B[0;7m^Q(B[m Where Was[163G(B[0;7mM-W(B[m Next[178G   (B[0;7m^F(B[m Forward[29;199H(B[0;7m^▶(B[m Next Word[217G(B[0;7m^E(B[m End[27d[19;17H[?12l[?25h[?25l[27d[J[29d[?12l[?25h[29;1H[?1049l[23;0;0t[?1l>[?2004lch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ nano generate_data.py [9P./run_all.sh[C
+INFO:__main__:Generating 1000000 data points in 10 batches of 100000.
+INFO:__main__:Using initial seed: 0
+[1mmain started.[0m
+main progress: 10%
+ > took: 0:48:35.542397, eta: 7:17:19.881573
+main progress: 20%
+ > took: 1:52:41.960472, eta: 7:30:47.841888
+main progress: 30%
+ > took: 2:55:55.150212, eta: 6:50:28.683828
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+main progress: 40%
+ > took: 6:00:22.810540, eta: 9:00:34.215810
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+main progress: 50%
+ > took: 9:07:13.509331, eta: 9:07:13.509331
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+^[[A^[[A^[[A^[[B^[[B^[[B^[[B^[[B^[[B^[[B^[[B^[[B^[[B^[[B^[[B^[[B^[[B^[[BERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+main progress: 60%
+ > took: 11:29:53.734909, eta: 7:39:55.823273
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+main progress: 70%
+ > took: 14:02:16.985002, eta: 6:00:58.707858
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+main progress: 80%
+ > took: 17:03:18.690918, eta: 4:15:49.672729
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+main progress: 90%
+ > took: 20:01:29.321069, eta: 2:13:29.924563
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not subscriptable
+ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneType' object is not iterable
+main progress: 100%
+ > took: 22:58:06.114922, eta: 0:00:00
+[1mmain finished. elapsed time: 22:58:06.114994[0m
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ./run_all.sh [9@nano generate_data.py[C[9P./run_all.sh[C[9@nano generate_data.py[C[9P./run_all.sh[C[K
