@@ -1518,4 +1518,5 @@ ERROR:planner.policylearn.libMultiRobotPlanning.benchmark_ecbs:TypeError'NoneTyp
 main progress: 100%
  > took: 22:58:06.114922, eta: 0:00:00
 [1mmain finished. elapsed time: 22:58:06.114994[0m
-ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ./run_all.sh [9@nano generate_data.py[C[9P./run_all.sh[C[9@nano generate_data.py[C[9P./run_all.sh[C[K
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m [31m*[0m=)$ ./run_all.sh [9@nano generate_data.py[C[9P./run_all.sh[C[9@nano generate_data.py[C[9P./run_all.sh[C[Kch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m=)$ ^C
+ch@metaverse:~/src/miriam/planner/policylearn ([32mprivate-policylearn[0m=)$ exit
