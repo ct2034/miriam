@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import pickle
 from typing import List
 
@@ -78,11 +79,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'fname_read_pkl', type=argparse.FileType('rb'))
+    parser.add_argument(
+        'model_fname', type=str, default="my_model.h5")
     args = parser.parse_args()
-    validation_split = .1
+    fname_read_pkl: str = args.fname_read_pkl.name
+    model_fname: str = args.model_fname
+    validation_split: float = .1
 
     # data
-    with open(args.fname_read_pkl.name, 'rb') as f:
+    with open(fname_read_pkl, 'rb') as f:
         d = pickle.load(f)
     n = len(d)
     print(f'n: {n}')
@@ -106,14 +111,21 @@ if __name__ == "__main__":
     opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
 
     # model
-    model = construct_model(img_width, img_depth_t, img_depth_frames)
+    print(f"model_fname: {model_fname}")
+    if os.path.isfile(model_fname):
+        print("model exists. going to load and improve it ...")
+        model: keras.Model = keras.models.load_model(
+            model_fname)
+    else:
+        print("model does not exist. going to load make a new one ...")
+        model = construct_model(img_width, img_depth_t, img_depth_frames)
 
     # train
     bcp = BatchHistory()
     history = model.fit([train_images], train_labels,
                         epochs=4, batch_size=4, callbacks=[bcp]
                         )
-    model.save('my_model.h5')
+    model.save(model_fname)
 
     # manual validation
     val_loss, val_acc = model.evaluate([val_images], val_labels)
