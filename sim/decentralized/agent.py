@@ -60,12 +60,17 @@ class Agent():
         return (a, b) not in self.filter_blocked_edges
 
     def gridmap_to_nx(self, env: np.ndarray,
-                      blocked_edges: Union[None, BLOCKED_EDGES_TYPE] = None) -> nx.Graph:
+                      blocked_edges: Union[None, BLOCKED_EDGES_TYPE] = None,
+                      blocked_nodes: Union[None, BLOCKED_NODES_TYPE] = None) -> nx.Graph:
         """convert numpy gridmap into networkx graph."""
         if blocked_edges is None:
             self.filter_blocked_edges = self.blocked_edges
         else:
             self.filter_blocked_edges = blocked_edges
+        if blocked_nodes is None:
+            self.filter_blocked_nodes = self.blocked_nodes
+        else:
+            self.filter_blocked_nodes = blocked_nodes
         nx_base_graph = nx.grid_graph(dim=list(env.shape))
         assert len(env.shape) == 2
         assert nx_base_graph.number_of_nodes() == env.shape[0] * env.shape[1]
@@ -124,7 +129,7 @@ class Agent():
         tmp_edge = (a, b)
         self.filter_blocked_edges = self.blocked_edges.union({tmp_edge})
         tmp_env_nx = self.gridmap_to_nx(
-            self.env, self.blocked_edges.union({tmp_edge}))
+            self.env, self.blocked_edges.union({tmp_edge}), None)
 
         assert not tmp_env_nx.has_edge(a, b)
         path = self.plan_path(tmp_env_nx)
@@ -146,7 +151,7 @@ class Agent():
         assert self.env_nx is not None, "Should have a env_nx"
         self.filter_blocked_nodes = self.blocked_nodes.union({n})
         tmp_env_nx = self.gridmap_to_nx(
-            self.env, self.blocked_nodes.union({n}))
+            self.env, None, self.blocked_nodes.union({n}))
 
         assert not tmp_env_nx.has_node(n)
         path = self.plan_path(tmp_env_nx)
