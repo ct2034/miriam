@@ -10,6 +10,8 @@ from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
 from sim.decentralized.agent import Agent
+from sim.decentralized.iterators import IteratorType
+from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
 
 from scenarios import storage
@@ -106,12 +108,25 @@ def cost_independent(env, starts, goals):
 
 
 def cost_sim_decentralized_random(env, starts, goals):
-    agents = to_agent_objects(env, starts, goals)
+    agents = to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM)
     if agents is INVALID:
         return INVALID
     (average_time, _, _, _, successful
      ) = run_a_scenario(
-        env, agents, plot=False)
+        env, agents, plot=False, iterator=IteratorType.BLOCKING)
+    if successful:
+        return average_time + 1
+    else:
+        return INVALID
+
+
+def cost_sim_decentralized_learned(env, starts, goals):
+    agents = to_agent_objects(env, starts, goals, policy=PolicyType.LEARNED)
+    if agents is INVALID:
+        return INVALID
+    (average_time, _, _, _, successful
+     ) = run_a_scenario(
+        env, agents, plot=False, iterator=IteratorType.BLOCKING)
     if successful:
         return average_time + 1
     else:
