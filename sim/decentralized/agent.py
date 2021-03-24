@@ -185,19 +185,24 @@ class Agent():
             assert self.path_i is not None, "Should have a path index by now"
             return self.path[self.path_i + 1]
 
+    def remove_all_blocks_and_replan(self):
+        # resetting blocks now
+        self.blocked_nodes = set()
+        self.filter_blocked_nodes = set()
+        self.blocked_edges = set()
+        self.filter_blocked_edges = set()
+        path = self.plan_path()
+        assert path is not None, "We must be successful with no blocks"
+
     def make_next_step(self, next_pos_to_check: np.ndarray):
         """Move agent to its next step, pass that pose for clarification."""
         potential_next_pos = self.what_is_next_step()
         assert (potential_next_pos == next_pos_to_check).all(
         ), "Our next position has to be correct."
         if self.is_at_goal():
-            pass  # at goal already
-        else:
+            pass
+        else:  # not at goal yet
             assert self.path_i is not None, "Should have a path_i by now"
             self.path_i += 1
             self.pos = potential_next_pos
-            # resetting blocks now
-            self.blocked_nodes = set()
-            self.filter_blocked_nodes = set()
-            self.blocked_edges = set()
-            self.filter_blocked_edges = set()
+            self.remove_all_blocks_and_replan()
