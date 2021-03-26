@@ -25,9 +25,10 @@ N_AGENTSS = 'n_agentss'
 EVALUATIONS = 'evaluations'
 # -------------------------
 DIFF_INDEP = "diff_indep"
-DIFF_SIM_DECEN = "diff_sim_decen"
 DIFF_SIM_DECEN_LEARNED = "diff_sim_decen_learned"
+DIFF_SIM_DECEN_RANDOM = "diff_sim_decen_random"
 DIFFERENCE_ECBS_EN_MINUS_ICTS_EN = "difference_ecbs_en_-_icts_en"
+DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED = "difference_sim_decen_minus_learned"
 ECBS_COST = "ecbs_cost"
 ECBS_EDGE_BLOCKS = "ecbs_edge_blocks"
 ECBS_EXPANDED_NODES = "ecbs_expanded_nodes"
@@ -41,6 +42,8 @@ N_EDGES = "n_edges"
 N_EDGES_TA = "n_edges_ta"
 N_NODES = "n_nodes"
 N_NODES_TA = "n_nodes_ta"
+SIM_DECEN_LEARNED_SUCCESS = "sim_decen_learned_success"
+SIM_DECEN_RANDOM_SUCCESS = "sim_decen_random_success"
 USEFULLNESS = "usefullness"
 WELL_FORMED = "well_formed"
 
@@ -102,11 +105,11 @@ def add_colums(df1: pd.DataFrame, df2: pd.DataFrame):
 
 def plot_images(
         df: pd.DataFrame, generator_name: str,
-        title: str, normalize_cbars: str = ""):
+        title: str, normalize_cbars_for: Optional[str] = None):
     evaluations = sorted(list(set(df.index.get_level_values('evaluations'))))
-    n_agentss = list(set(df.index.get_level_values('n_agentss')))
+    n_agentss = sorted(list(set(df.index.get_level_values('n_agentss'))))
     n_n_agentss = len(n_agentss)
-    fills = list(set(df.index.get_level_values('fills')))
+    fills = sorted(list(set(df.index.get_level_values('fills'))))
     n_fills = len(fills)
 
     # our cmap with support for over / under
@@ -121,29 +124,26 @@ def plot_images(
     subplot_cols = int(np.ceil(len(evaluations) / 2))
     norm = None
 
-    if normalize_cbars == "expanded":
+    if normalize_cbars_for is not None:
         # same min / max for top bottom plots
-        mins = [0]*subplot_cols
-        maxs = [0]*subplot_cols
+        mins = 99999
+        maxs = 0
         for i, ev in enumerate(evaluations):
-            this_data = df.xs(ev, level=EVALUATIONS).to_numpy()
-            this_min = np.min(this_data[np.logical_not(np.isnan(this_data))])
-            this_max = np.max(this_data[np.logical_not(np.isnan(this_data))])
-            if i < subplot_cols:
-                mins[i] = this_min
-                maxs[i] = this_max
-            else:
-                mins[i-subplot_cols] = min(this_min, mins[i-subplot_cols])
-                maxs[i-subplot_cols] = max(this_max, maxs[i-subplot_cols])
-
-        # same min / max for ecbs and icts expanded nodes
-        for i in [0, 1]:
-            mins[i] = min(mins[0], mins[1])
-            maxs[i] = max(maxs[0], maxs[1])
-        norm = colors.SymLogNorm(1, vmin=mins[i % subplot_cols],
-                                 vmax=maxs[i % subplot_cols])
+            if normalize_cbars_for in ev:
+                this_data = df.xs(ev, level=EVALUATIONS).to_numpy()
+                this_min = np.min(
+                    this_data[np.logical_not(np.isnan(this_data))])
+                this_max = np.max(
+                    this_data[np.logical_not(np.isnan(this_data))])
+                mins = min(this_min, mins)
+                maxs = max(this_max, maxs)
+        norm = colors.Normalize(vmin=mins, vmax=maxs)
 
     for i, ev in enumerate(evaluations):
+        if normalize_cbars_for in ev:
+            this_norm = norm
+        else:
+            this_norm = None
         this_ev_data = df.xs(ev, level=EVALUATIONS)
         r_final = np.full([n_fills, n_n_agentss], np.nan, dtype=float)
         for i_f, i_a in product(range(n_fills),
@@ -160,7 +160,7 @@ def plot_images(
         im = ax.imshow(
             r_final,
             cmap=palette,
-            norm=norm,
+            norm=this_norm,
             origin='lower'
         )
         fig.colorbar(im, extend='both', spacing='uniform',
@@ -250,7 +250,8 @@ def main():
     evaluations = [
         DIFF_INDEP,
         DIFF_SIM_DECEN_LEARNED,
-        DIFF_SIM_DECEN,
+        DIFF_SIM_DECEN_RANDOM,
+        DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED,
         # DIFFERENCE_ECBS_EN_MINUS_ICTS_EN,
         ECBS_COST,
         # ECBS_EDGE_BLOCKS,
@@ -265,6 +266,8 @@ def main():
         # N_EDGES,
         # N_NODES_TA,
         # N_NODES,
+        SIM_DECEN_LEARNED_SUCCESS,
+        SIM_DECEN_RANDOM_SUCCESS,
         # USEFULLNESS,
         # WELL_FORMED,
     ]
@@ -303,7 +306,8 @@ def main():
         plot_images(
             df_results,
             title="full",
-            generator_name=gen
+            generator_name=gen,
+            normalize_cbars_for="diff_"
         )
 
     # compare expanded nodes over graph properties
@@ -464,12 +468,14 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                     df_col.loc[
                         (genstr(gen), fill, n_agentss[i_a], DIFF_INDEP),
                         col_name] = ecbs_cost - indep_cost
-            if DIFF_SIM_DECEN in evaluations:
-                decen_cost = cost_sim_decentralized_random(env, starts, goals)
-                if decen_cost != INVALID:
+            if DIFF_SIM_DECEN_RANDOM in evaluations:
+                decen_cost_r = cost_sim_decentralized_random(
+                    env, starts, goals)
+                if decen_cost_r != INVALID:
                     df_col.loc[
-                        (genstr(gen), fill, n_agentss[i_a], DIFF_SIM_DECEN),
-                        col_name] = decen_cost - ecbs_cost
+                        (genstr(gen), fill,
+                         n_agentss[i_a], DIFF_SIM_DECEN_RANDOM),
+                        col_name] = decen_cost_r - ecbs_cost
                     # if decen_cost < ecbs_cost:
                     #     print(
                     #         '~~ decen_cost < ecbs_cost for ... ~~~' +
@@ -482,6 +488,11 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                     # solutions have lower cost than ecbs, which seems to
                     # be down to decentralized solutions ignoring finished
                     # agents.
+                if SIM_DECEN_RANDOM_SUCCESS in evaluations:
+                    df_col.loc[
+                        (genstr(gen), fill,
+                         n_agentss[i_a], SIM_DECEN_RANDOM_SUCCESS),
+                        col_name] = int(decen_cost_r != INVALID)
             if DIFF_SIM_DECEN_LEARNED in evaluations:
                 decen_cost_l = cost_sim_decentralized_learned(
                     env, starts, goals)
@@ -490,6 +501,18 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                         (genstr(gen), fill,
                          n_agentss[i_a], DIFF_SIM_DECEN_LEARNED),
                         col_name] = decen_cost_l - ecbs_cost
+                if SIM_DECEN_LEARNED_SUCCESS in evaluations:
+                    df_col.loc[
+                        (genstr(gen), fill,
+                         n_agentss[i_a], SIM_DECEN_LEARNED_SUCCESS),
+                        col_name] = int(decen_cost_l != INVALID)
+            if (DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED in evaluations
+                    and decen_cost_r != INVALID and decen_cost_l != INVALID):
+                df_col.loc[
+                    (genstr(gen), fill,
+                     n_agentss[i_a],
+                     DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED),
+                    col_name] = decen_cost_r - decen_cost_l
 
     pb.end()
     return df_col
