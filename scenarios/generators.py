@@ -28,8 +28,11 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
     return starts, goals
 
 
+# random ######################################################################
+
 def like_sim_decentralized(size: int, fill: float,
                            n_agents: int, seed: Any):
+    """Randomly filling spaces in gridmap based on `fill`."""
     random.seed(seed)
     env = sim.decentralized.runner.initialize_environment(
         size, fill, seed=seed)
@@ -39,7 +42,7 @@ def like_sim_decentralized(size: int, fill: float,
 
 # this was previously in planner.policylearn.generate_data
 def generate_random_gridmap(width: int, height: int, fill: float):
-    """making a random gridmap of size (`width`x`height`). It will be filled
+    """Making a random gridmap of size (`width`x`height`). It will be filled
     with stripes until `fill` is exceeded and then single cells are freed until
     `fill` is exactly reached."""
     gridmap = np.zeros((width, height), dtype=np.int8)
@@ -70,6 +73,8 @@ def like_policylearn_gen(size: int, fill: float,
     starts, goals = make_starts_goals_on_env(env, n_agents)
     return env, starts, goals
 
+# tracing pathes in the dark ##################################################
+
 
 def get_random_next_to_free_pose_or_any_if_full(env):
     """If there are free spaces in the map, return a random free pose.
@@ -94,6 +99,8 @@ def get_random_next_to_free_pose_or_any_if_full(env):
 
 def tracing_pathes_in_the_dark(size: int, fill: float,
                                n_agents: int, seed: Any):
+    """Starting with a black map, clearing straight lines through it, making
+    sure map is fully connected."""
     if fill == 0:
         env = np.zeros((size, size), dtype=np.int8)
     else:
@@ -111,6 +118,8 @@ def tracing_pathes_in_the_dark(size: int, fill: float,
     starts, goals = make_starts_goals_on_env(env, n_agents, seed)
     return env, starts, goals
 
+
+# movingai ####################################################################
 
 def movingai_read_mapfile(mapfile: str):
     FREE_CHAR = "."
@@ -183,13 +192,15 @@ def movingai(map_str: str, scene_str: str, scene_nr: int, n_agents: int):
     return grid, starts, goals
 
 
+# building walls ##############################################################
+
 def no_diagonals(area):
-    """make sure this area will produce no diagonal walls"""
+    """Make sure this area will produce no diagonal walls,"""
     return area[0, 1] or area[2, 1] or area[1, 0] or area[1, 2]
 
 
 def can_area_be_set(area):
-    """can the pixel in the middle of this 3x3 are be set as an obstacle
+    """Can the pixel in the middle of this 3x3 are be set as an obstacle
     without making disconnected areas in the map."""
     assert area.shape[0] == 3
     assert area.shape[1] == 3
@@ -204,7 +215,7 @@ def can_area_be_set(area):
 
 
 def can_be_set(env, pos):
-    """can the pixel at pos in env be set without making disconnected areas"""
+    """Can the pixel at pos in env be set without making disconnected areas,"""
     assert len(pos) == 2
     assert pos[0] < env.shape[0]
     assert pos[1] < env.shape[1]
@@ -223,6 +234,8 @@ def can_be_set(env, pos):
 
 def building_walls(size: int, fill: float,
                    n_agents: int, seed: Any):
+    """Starting with an empty map, creating obstacles inline of previous
+    obstacles, ensuring full connectedness."""
     if fill == 0:
         env = np.zeros((size, size), dtype=np.int8)
     else:
