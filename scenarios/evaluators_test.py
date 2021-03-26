@@ -369,11 +369,11 @@ class TestEvaluators(unittest.TestCase):
             scenarios.evaluators.cost_icts(
                 test_helper.env_complicated, test_helper.starts_complicated,
                 test_helper.goals_complicated,
-                timeout=TEST_TIMEOUT, skip_cache=True),
+                timeout=TEST_TIMEOUT*10, skip_cache=True),
             scenarios.evaluators.cost_ecbs(
                 test_helper.env_complicated, test_helper.starts_complicated,
                 test_helper.goals_complicated,
-                timeout=TEST_TIMEOUT, skip_cache=True)
+                timeout=TEST_TIMEOUT*10, skip_cache=True)
         )
 
 

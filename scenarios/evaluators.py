@@ -113,7 +113,7 @@ def cost_sim_decentralized_random(env, starts, goals):
         return INVALID
     (average_time, _, _, _, successful
      ) = run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.BLOCKING)
+        env, agents, plot=False, iterator=IteratorType.WAITING)
     if successful:
         return average_time + 1
     else:
@@ -126,7 +126,7 @@ def cost_sim_decentralized_learned(env, starts, goals):
         return INVALID
     (average_time, _, _, _, successful
      ) = run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.BLOCKING)
+        env, agents, plot=False, iterator=IteratorType.WAITING)
     if successful:
         return average_time + 1
     else:
