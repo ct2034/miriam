@@ -224,10 +224,10 @@ def main():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    (max_fill, n_fills, n_n_agentss, n_runs, size,
-     low_agents, high_agents) = init_values_debug()
     # (max_fill, n_fills, n_n_agentss, n_runs, size,
-    #  low_agents, high_agents) = init_values_main()
+    #  low_agents, high_agents) = init_values_debug()
+    (max_fill, n_fills, n_n_agentss, n_runs, size,
+     low_agents, high_agents) = init_values_main()
     # (max_fill, n_fills, n_n_agentss, n_runs, size,
     #  low_agents, high_agents) = init_values_focus()
 
@@ -470,6 +470,18 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                     df_col.loc[
                         (genstr(gen), fill, n_agentss[i_a], DIFF_SIM_DECEN),
                         col_name] = decen_cost - ecbs_cost
+                    # if decen_cost < ecbs_cost:
+                    #     print(
+                    #         '~~ decen_cost < ecbs_cost for ... ~~~' +
+                    #         f'env: {str(env)}\nstarts: {str(starts)}\n' +
+                    #         f'goals: {str(goals)}\n' +
+                    #         f'~~~~~~~~~~~~\n' +
+                    #         f'{repr((env, starts, goals))}\n' +
+                    #         f'~~~~~~~~~~~~')
+                    # TODO: It is true, that sometimes, decentralized
+                    # solutions have lower cost than ecbs, which seems to
+                    # be down to decentralized solutions ignoring finished
+                    # agents.
             if DIFF_SIM_DECEN_LEARNED in evaluations:
                 decen_cost_l = cost_sim_decentralized_learned(
                     env, starts, goals)
