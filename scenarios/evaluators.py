@@ -57,15 +57,18 @@ def cost_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
                        skip_cache=skip_cache)
     if data == INVALID:
         return data
-    n_agents = starts.shape[0]
-    schedule = data[SCHEDULE]
-    cost_per_agent = []
-    for i_a in range(n_agents):
-        agent_key = 'agent'+str(i_a)
-        assert agent_key in schedule.keys(), "Path for this agent"
-        path = schedule[agent_key]
-        cost_per_agent.append(path[-1]['t'])
-    return float(sum(cost_per_agent)) / n_agents
+    try:
+        n_agents = starts.shape[0]
+        schedule = data[SCHEDULE]
+        cost_per_agent = []
+        for i_a in range(n_agents):
+            agent_key = 'agent'+str(i_a)
+            assert agent_key in schedule.keys(), "Path for this agent"
+            path = schedule[agent_key]
+            cost_per_agent.append(path[-1]['t'])
+        return float(sum(cost_per_agent)) / n_agents
+    except Exception as e:
+        return INVALID
 
 
 def expanded_nodes_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
