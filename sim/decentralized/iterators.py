@@ -224,36 +224,36 @@ def iterate_blocking(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
                 if (agents[i_a1].get_priority(agents[i_a2].id) >
                         agents[i_a2].get_priority(agents[i_a1].id)):
                     # a1 has higher prio
-                    success = agents[i_a2].block_node(pose)
-                    if not success:
-                        success = agents[i_a1].block_node(pose)
-                        if not success:
+                    success2 = agents[i_a2].block_node(pose)
+                    if not success2:
+                        success1 = agents[i_a1].block_node(pose)
+                        if not success1:
                             raise SimIterationException(
                                 "Deadlock by node collision")
                 else:
                     # a2 has higher prio
-                    success = agents[i_a1].block_node(pose)
-                    if not success:
-                        success = agents[i_a2].block_node(pose)
-                        if not success:
+                    success1 = agents[i_a1].block_node(pose)
+                    if not success1:
+                        success2 = agents[i_a2].block_node(pose)
+                        if not success2:
                             raise SimIterationException(
                                 "Deadlock by node collision")
             for edge, [i_a1, i_a2] in edge_colissions.items():
                 if (agents[i_a1].get_priority(agents[i_a2].id) >
                         agents[i_a2].get_priority(agents[i_a1].id)):
                     # a1 has higher prio
-                    success = agents[i_a2].block_edge(edge[1], edge[0])
-                    if not success:
-                        success = agents[i_a1].block_edge(edge[0], edge[1])
-                        if not success:
+                    success2 = agents[i_a2].block_edge(edge[1], edge[0])
+                    if not success2:
+                        success1 = agents[i_a1].block_edge(edge[0], edge[1])
+                        if not success1:
                             raise SimIterationException(
                                 "Deadlock by edge collision")
                 else:
                     # a2 has higher prio
-                    success = agents[i_a1].block_edge(edge[0], edge[1])
-                    if not success:
-                        success = agents[i_a2].block_edge(edge[1], edge[0])
-                        if not success:
+                    success1 = agents[i_a1].block_edge(edge[0], edge[1])
+                    if not success1:
+                        success2 = agents[i_a2].block_edge(edge[1], edge[0])
+                        if not success2:
                             raise SimIterationException(
                                 "Deadlock by edge collision")
 

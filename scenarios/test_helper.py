@@ -129,3 +129,13 @@ goals_complicated = np.array([
     [3, 3],
     [0, 0]
 ])
+
+# two agents to cross over each other in open 3x3 space
+starts_cross = np.array([
+    [0, 0],
+    [2, 0]
+])
+goals_cross = np.array([
+    [2, 2],
+    [0, 2]
+])

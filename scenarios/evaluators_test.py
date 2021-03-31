@@ -3,6 +3,7 @@ import unittest
 
 import numpy as np
 import pytest
+from definitions import INVALID
 
 import scenarios.evaluators
 from scenarios import test_helper
@@ -262,19 +263,23 @@ class TestEvaluators(unittest.TestCase):
                 test_helper.env, starts_invalid, goals_invalid)
         )
 
-    def test_cost_sim_decentralized_random_collision(self):
-        # agents that collide in the middle
-        starts_4_5 = np.array([
-            [0, 0],
-            [0, 2]
-        ])
-        goals_4_5 = np.array([
-            [2, 0],
-            [2, 2]
-        ])
+    def test_cost_sim_decentralized_random_collision_tight(self):
+        # agents that collide in the middle. on tight map ...
+        # with IteratorType.BLOCKING, this will fail, because none of the
+        # agents can find a path with the middle being blocked.
         self.assertAlmostEqual(
-            4.5, scenarios.evaluators.cost_sim_decentralized_random(
-                test_helper.env, starts_4_5, goals_4_5)
+            INVALID, scenarios.evaluators.cost_sim_decentralized_random(
+                test_helper.env, test_helper.starts_collision,
+                test_helper.goals_collision)
+        )
+
+    def test_cost_sim_decentralized_random_collision_open(self):
+        # two agents crossing each other in open space
+        # should find ways to go around each other
+        self.assertAlmostEqual(
+            4.0, scenarios.evaluators.cost_sim_decentralized_random(
+                np.zeros((3, 3)), test_helper.starts_cross,
+                test_helper.goals_cross)
         )
 
     def test_cost_sim_decentralized_random_no_collision(self):
