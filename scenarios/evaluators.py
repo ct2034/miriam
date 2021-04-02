@@ -10,13 +10,11 @@ from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
 from sim.decentralized.agent import Agent
-from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
-from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
+from sim.decentralized.runner import is_environment_well_formed
 
-from scenarios import storage
-from scenarios.solvers import (SCHEDULE, cached_ecbs, cached_icts, indep,
-                               to_agent_objects)
+from scenarios.solvers import (SCHEDULE, cached_decentralized, cached_ecbs,
+                               cached_icts, indep, to_agent_objects)
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
@@ -97,12 +95,11 @@ def cost_independent(env, starts, goals):
 
 
 def cost_sim_decentralized_random(env, starts, goals):
-    agents = to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM)
-    if agents is INVALID:
+    metrics = cached_decentralized(env, starts, goals, PolicyType.RANDOM)
+    if metrics is INVALID:
         return INVALID
     (average_time, _, _, _, successful
-     ) = run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.BLOCKING)
+     ) = metrics
     if successful:
         return average_time + 1
     else:
@@ -110,12 +107,11 @@ def cost_sim_decentralized_random(env, starts, goals):
 
 
 def cost_sim_decentralized_learned(env, starts, goals):
-    agents = to_agent_objects(env, starts, goals, policy=PolicyType.LEARNED)
-    if agents is INVALID:
+    metrics = cached_decentralized(env, starts, goals, PolicyType.LEARNED)
+    if metrics is INVALID:
         return INVALID
     (average_time, _, _, _, successful
-     ) = run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.BLOCKING)
+     ) = metrics
     if successful:
         return average_time + 1
     else:

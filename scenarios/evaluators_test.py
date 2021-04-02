@@ -7,6 +7,7 @@ from definitions import INVALID
 
 import scenarios.evaluators
 from scenarios import test_helper
+from scenarios.solvers import to_agent_objects
 
 TEST_TIMEOUT = 5  # to be used for ecbs and icts calls
 
@@ -33,7 +34,7 @@ class TestEvaluators(unittest.TestCase):
             [2, 0],
             [2, 2]
         ])
-        res_agents = scenarios.evaluators.to_agent_objects(
+        res_agents = to_agent_objects(
             test_helper.env, starts, goals)
         res_starts = list(map(lambda a: tuple(a.pos), res_agents))
         res_goals = list(map(lambda a: tuple(a.goal), res_agents))
@@ -52,7 +53,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         self.assertEqual(
             scenarios.evaluators.INVALID,
-            scenarios.evaluators.to_agent_objects(
+            to_agent_objects(
                 test_helper.env, starts_invalid, goals_invalid)
         )
 

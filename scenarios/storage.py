@@ -20,6 +20,8 @@ class ResultType(Enum):
     ICTS_PATHS = auto()
     ICTS_INFO = auto()
     INDEP_PATHS = auto()
+    DECEN_RANDOM = auto()
+    DECEN_LEARNED = auto()
 
 
 def get_filepath(scenario: SCENARIO_TYPE) -> str:
