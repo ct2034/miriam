@@ -124,7 +124,7 @@ def plot_images(
     fig.suptitle(title+generator_name, fontsize=16)
     subplot_rows = 2
     subplot_cols = int(np.ceil(len(evaluations) / 2))
-    norm = None
+    minmax = (None, None)
 
     if normalize_cbars_for is not None:
         # same min / max for top bottom plots
@@ -139,10 +139,11 @@ def plot_images(
                     n_agents = n_agentss[i_a]
                     this_data = this_ev_data.loc[(
                         generator_name, fill, n_agents)].to_numpy()
-                    this_mean = np.mean(
-                        this_data[np.logical_not(np.isnan(this_data))])
-                    mins = min(this_mean, mins)
-                    maxs = max(this_mean, maxs)
+                    if len(this_data[np.logical_not(np.isnan(this_data))]) > 0:
+                        this_mean = np.mean(
+                            this_data[np.logical_not(np.isnan(this_data))])
+                        mins = min(this_mean, mins)
+                        maxs = max(this_mean, maxs)
         minmax = (mins, maxs)
 
     for i, ev in enumerate(evaluations):
