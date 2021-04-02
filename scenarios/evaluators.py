@@ -15,7 +15,8 @@ from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import is_environment_well_formed, run_a_scenario
 
 from scenarios import storage
-from scenarios.solvers import SCHEDULE, ecbs, icts, indep, to_agent_objects
+from scenarios.solvers import (SCHEDULE, cached_ecbs, cached_icts, indep,
+                               to_agent_objects)
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
@@ -33,21 +34,6 @@ def is_well_formed(env, starts, goals):
     if agents is INVALID:
         return False
     return is_environment_well_formed(tuple(agents))
-
-
-def cached_ecbs(env, starts, goals,
-                timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
-    if skip_cache:
-        data = ecbs(env, starts, goals, timeout=timeout)
-    else:
-        scenario = (env, starts, goals)
-        if storage.has_result(scenario, storage.ResultType.ECBS_DATA):
-            data = storage.get_result(
-                scenario, storage.ResultType.ECBS_DATA)
-        else:
-            data = ecbs(env, starts, goals, timeout=timeout)
-            storage.save_result(scenario, storage.ResultType.ECBS_DATA, data)
-    return data
 
 
 def cost_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
@@ -134,21 +120,6 @@ def cost_sim_decentralized_learned(env, starts, goals):
         return average_time + 1
     else:
         return INVALID
-
-
-def cached_icts(env, starts, goals,
-                timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
-    scenario = (env, starts, goals)
-    if skip_cache:
-        info = icts(env, starts, goals, timeout)
-    else:
-        if storage.has_result(scenario, storage.ResultType.ICTS_INFO):
-            info = storage.get_result(
-                scenario, storage.ResultType.ICTS_INFO)
-        else:
-            info = icts(env, starts, goals, timeout)
-            storage.save_result(scenario, storage.ResultType.ICTS_INFO, info)
-    return info
 
 
 def expanded_nodes_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):

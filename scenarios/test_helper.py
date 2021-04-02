@@ -11,8 +11,6 @@ STORAGE_PATH_TESTING = "/tmp/testing/"
 def make_cache_folder_and_set_envvar(set_envvar=True):
     if not os.path.exists(STORAGE_PATH_TESTING):
         os.mkdir(STORAGE_PATH_TESTING)
-    assert not os.listdir(
-        STORAGE_PATH_TESTING), "testing cache folder is not empty"
     data_path = STORAGE_PATH_TESTING + str(uuid.uuid1())
     assert not os.path.exists(data_path)
     os.mkdir(data_path)

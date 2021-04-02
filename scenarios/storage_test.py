@@ -2,7 +2,6 @@ import os
 import unittest
 
 import numpy as np
-import pytest
 from definitions import INVALID
 
 from scenarios import generators, storage, test_helper

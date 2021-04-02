@@ -5,6 +5,8 @@ from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import PolicyType
 
+from scenarios import storage
+
 SCHEDULE = 'schedule'
 AGENT = 'agent'
 
@@ -33,6 +35,36 @@ def indep(env, starts, goals):
             np.append(p, ts.reshape((le, 1)), axis=1)
         )
     return paths
+
+
+def cached_ecbs(env, starts, goals,
+                timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
+    if skip_cache:
+        data = ecbs(env, starts, goals, timeout=timeout)
+    else:
+        scenario = (env, starts, goals)
+        if storage.has_result(scenario, storage.ResultType.ECBS_DATA):
+            data = storage.get_result(
+                scenario, storage.ResultType.ECBS_DATA)
+        else:
+            data = ecbs(env, starts, goals, timeout=timeout)
+            storage.save_result(scenario, storage.ResultType.ECBS_DATA, data)
+    return data
+
+
+def cached_icts(env, starts, goals,
+                timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
+    scenario = (env, starts, goals)
+    if skip_cache:
+        info = icts(env, starts, goals, timeout)
+    else:
+        if storage.has_result(scenario, storage.ResultType.ICTS_INFO):
+            info = storage.get_result(
+                scenario, storage.ResultType.ICTS_INFO)
+        else:
+            info = icts(env, starts, goals, timeout)
+            storage.save_result(scenario, storage.ResultType.ICTS_INFO, info)
+    return info
 
 
 def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
