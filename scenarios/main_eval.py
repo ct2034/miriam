@@ -5,6 +5,7 @@ from collections import OrderedDict
 from copy import copy
 from functools import lru_cache
 from itertools import product, repeat
+from math import ceil
 from multiprocessing import Pool
 from typing import *
 
@@ -105,7 +106,8 @@ def add_colums(df1: pd.DataFrame, df2: pd.DataFrame):
 
 def plot_images(
         df: pd.DataFrame, generator_name: str,
-        title: str, normalize_cbars_for: Optional[str] = None):
+        title: str, normalize_cbars_for: Optional[str] = None,
+        success_required: float = .2):
     evaluations = sorted(list(set(df.index.get_level_values('evaluations'))))
     n_agentss = sorted(list(set(df.index.get_level_values('n_agentss'))))
     n_n_agentss = len(n_agentss)
@@ -130,20 +132,24 @@ def plot_images(
         maxs = 0
         for i, ev in enumerate(evaluations):
             if normalize_cbars_for in ev:
-                this_data = df.xs(ev, level=EVALUATIONS).to_numpy()
-                this_min = np.min(
-                    this_data[np.logical_not(np.isnan(this_data))])
-                this_max = np.max(
-                    this_data[np.logical_not(np.isnan(this_data))])
-                mins = min(this_min, mins)
-                maxs = max(this_max, maxs)
-        norm = colors.Normalize(vmin=mins, vmax=maxs)
+                this_ev_data = df.xs(ev, level=EVALUATIONS)
+                for i_f, i_a in product(range(n_fills),
+                                        range(n_n_agentss)):
+                    fill = fills[i_f]
+                    n_agents = n_agentss[i_a]
+                    this_data = this_ev_data.loc[(
+                        generator_name, fill, n_agents)].to_numpy()
+                    this_mean = np.mean(
+                        this_data[np.logical_not(np.isnan(this_data))])
+                    mins = min(this_mean, mins)
+                    maxs = max(this_mean, maxs)
+        minmax = (mins, maxs)
 
     for i, ev in enumerate(evaluations):
         if normalize_cbars_for in ev:
-            this_norm = norm
+            this_minmax = minmax
         else:
-            this_norm = None
+            this_minmax = (None, None)
         this_ev_data = df.xs(ev, level=EVALUATIONS)
         r_final = np.full([n_fills, n_n_agentss], np.nan, dtype=float)
         for i_f, i_a in product(range(n_fills),
@@ -152,7 +158,9 @@ def plot_images(
             n_agents = n_agentss[i_a]
             this_data = this_ev_data.loc[(
                 generator_name, fill, n_agents)].to_numpy()
-            if len(this_data[np.logical_not(np.isnan(this_data))]) > 0:
+            n_required = ceil(len(this_data) * success_required)
+            if len(this_data[np.logical_not(np.isnan(this_data))]
+                   ) >= n_required:
                 r_final[i_f, i_a] = np.mean(
                     this_data[np.logical_not(np.isnan(this_data))]
                 )
@@ -160,7 +168,8 @@ def plot_images(
         im = ax.imshow(
             r_final,
             cmap=palette,
-            norm=this_norm,
+            vmin=this_minmax[0],
+            vmax=this_minmax[1],
             origin='lower'
         )
         fig.colorbar(im, extend='both', spacing='uniform',
@@ -286,12 +295,14 @@ def main():
     df_results.sort_index(inplace=True)
     assert len(index_arrays) == df_results.index.lexsort_depth
 
+    pbm = ProgressBar("main", 0)  # timing only
     with Pool(4) as p:
         arguments = [(i_r, idx, generators, fills, n_agentss, size)
                      for i_r in range(n_runs)]
         df_cols = p.starmap(evaluate_full, arguments)
     for df_col in df_cols:
         add_colums(df_results, df_col)
+    pbm.end()
 
     # with pd.option_context('display.max_rows',
     #                        None,
