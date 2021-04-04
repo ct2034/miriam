@@ -68,7 +68,7 @@ def init_values_main():
     size = 8  # size for all scenarios
     n_fills = 8  # how many different fill values there should be
     n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 512  # how many runs per configuration
+    n_runs = 128  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
     low_agents = 1  # lowest number of agents
     high_agents = 16  # highest number of agents
@@ -237,10 +237,10 @@ def make_full_df():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    (max_fill, n_fills, n_n_agentss, n_runs, size,
-     low_agents, high_agents) = init_values_debug()
     # (max_fill, n_fills, n_n_agentss, n_runs, size,
-    #  low_agents, high_agents) = init_values_main()
+    #  low_agents, high_agents) = init_values_debug()
+    (max_fill, n_fills, n_n_agentss, n_runs, size,
+     low_agents, high_agents) = init_values_main()
     # (max_fill, n_fills, n_n_agentss, n_runs, size,
     #  low_agents, high_agents) = init_values_focus()
 
@@ -665,7 +665,9 @@ if __name__ == "__main__":
     else:
         df_results = make_full_df()
 
-    for gen in sorted(list(set(df_results.index.get_level_values(GENERATORS)))):
+    for gen in sorted(list(set(
+        df_results.index.get_level_values(GENERATORS)
+    ))):
         plot_images(
             df_results,
             title="full",
