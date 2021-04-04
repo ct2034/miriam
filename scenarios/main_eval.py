@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import logging
 import pickle
 from collections import OrderedDict
@@ -43,7 +44,9 @@ N_EDGES = "n_edges"
 N_EDGES_TA = "n_edges_ta"
 N_NODES = "n_nodes"
 N_NODES_TA = "n_nodes_ta"
+SIM_DECEN_LEARNED_COST = "sim_decen_learned_cost"
 SIM_DECEN_LEARNED_SUCCESS = "sim_decen_learned_success"
+SIM_DECEN_RANDOM_COST = "sim_decen_random_cost"
 SIM_DECEN_RANDOM_SUCCESS = "sim_decen_random_success"
 USEFULLNESS = "usefullness"
 WELL_FORMED = "well_formed"
@@ -51,8 +54,8 @@ WELL_FORMED = "well_formed"
 
 def init_values_debug():
     size = 8  # size for all scenarios
-    n_fills = 2  # how many different fill values there should be
-    n_n_agentss = 2  # how many different numbers of agents should there be"""
+    n_fills = 3  # how many different fill values there should be
+    n_n_agentss = 3  # how many different numbers of agents should there be"""
     n_runs = 8  # how many runs per configuration
     max_fill = .4  # maximal fill to sample until
     low_agents = 1  # lowest number of agents
@@ -107,7 +110,7 @@ def add_colums(df1: pd.DataFrame, df2: pd.DataFrame):
 def plot_images(
         df: pd.DataFrame, generator_name: str,
         title: str, normalize_cbars_for: Optional[str] = None,
-        success_required: float = .2):
+        success_required: float = .05):
     evaluations = sorted(list(set(df.index.get_level_values('evaluations'))))
     n_agentss = sorted(list(set(df.index.get_level_values('n_agentss'))))
     n_n_agentss = len(n_agentss)
@@ -115,9 +118,9 @@ def plot_images(
     n_fills = len(fills)
 
     # our cmap with support for over / under
-    palette = copy(plt.cm.viridis)
-    palette.set_over('w', 1.0)
-    palette.set_under('k', 1.0)
+    palette = copy(plt.cm.PuOr)
+    palette.set_over('b', 1.0)
+    palette.set_under('r', 1.0)
     palette.set_bad('k', 1.0)
 
     fig = plt.figure(figsize=(20, 10))
@@ -144,7 +147,7 @@ def plot_images(
                             this_data[np.logical_not(np.isnan(this_data))])
                         mins = min(this_mean, mins)
                         maxs = max(this_mean, maxs)
-        minmax = (mins, maxs)
+        minmax = (-1*max(abs(mins), abs(maxs)), max(abs(mins), abs(maxs)))
 
     for i, ev in enumerate(evaluations):
         if normalize_cbars_for in ev:
@@ -230,14 +233,14 @@ def plot_scatter(df, xs, ys, cs, titles, title="scatter"):
     plt.savefig(fname)
 
 
-def main():
+def make_full_df():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    # (max_fill, n_fills, n_n_agentss, n_runs, size,
-    #  low_agents, high_agents) = init_values_debug()
     (max_fill, n_fills, n_n_agentss, n_runs, size,
-     low_agents, high_agents) = init_values_main()
+     low_agents, high_agents) = init_values_debug()
+    # (max_fill, n_fills, n_n_agentss, n_runs, size,
+    #  low_agents, high_agents) = init_values_main()
     # (max_fill, n_fills, n_n_agentss, n_runs, size,
     #  low_agents, high_agents) = init_values_focus()
 
@@ -268,18 +271,20 @@ def main():
         # ECBS_EXPANDED_NODES,
         ECBS_SUCCESS,
         # ECBS_VERTEX_BLOCKS,
-        # ICTS_COST,
+        ICTS_COST,
         # ICTS_EXPANDED_NODES,
         ICTS_SUCCESS,
-        # MEAN_DEGREE,
-        # N_EDGES_TA,
-        # N_EDGES,
-        # N_NODES_TA,
-        # N_NODES,
+        MEAN_DEGREE,
+        N_EDGES_TA,
+        N_EDGES,
+        N_NODES_TA,
+        N_NODES,
+        SIM_DECEN_LEARNED_COST,
         SIM_DECEN_LEARNED_SUCCESS,
+        SIM_DECEN_RANDOM_COST,
         SIM_DECEN_RANDOM_SUCCESS,
         # USEFULLNESS,
-        # WELL_FORMED,
+        WELL_FORMED
     ]
 
     # preparing panda dataframes
@@ -313,21 +318,7 @@ def main():
     print(df_results.info)
 
     df_results.to_pickle(get_fname("full", "_", "pkl"))
-
-    for gen in index_arrays[GENERATORS]:
-        plot_images(
-            df_results,
-            title="full",
-            generator_name=gen,
-            normalize_cbars_for="diff_"
-        )
-
-    # compare expanded nodes over graph properties
-    # xs = [N_NODES, N_EDGES, MEAN_DEGREE, N_NODES_TA, N_EDGES_TA]
-    # ys = [DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]
-    # plot_scatter(df_results, xs, ys, cs=GENERATORS, titles=xs)
-
-    plt.show()
+    return df_results
 
 
 def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
@@ -364,6 +355,12 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
         if MEAN_DEGREE in evaluations:
             df_col.loc[(genstr(gen), fill, n_agents, MEAN_DEGREE), col_name
                        ] = mean_degree(env)
+        # well-formedness .....................................................
+        if WELL_FORMED in evaluations:
+            df_col.loc[
+                (genstr(gen), fill,
+                 n_agents, WELL_FORMED), col_name
+            ] = int(is_well_formed(env, starts, goals))
         # calculating ecbs cost ...............................................
         if ECBS_SUCCESS in evaluations:
             if i_f > 0 and df_col.loc[
@@ -505,6 +502,12 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                         (genstr(gen), fill,
                          n_agentss[i_a], SIM_DECEN_RANDOM_SUCCESS),
                         col_name] = int(decen_cost_r != INVALID)
+                if (SIM_DECEN_RANDOM_COST in evaluations and
+                        decen_cost_r != INVALID):
+                    df_col.loc[
+                        (genstr(gen), fill,
+                         n_agentss[i_a], SIM_DECEN_RANDOM_COST),
+                        col_name] = decen_cost_r
             if DIFF_SIM_DECEN_LEARNED in evaluations:
                 decen_cost_l = cost_sim_decentralized_learned(
                     env, starts, goals)
@@ -518,6 +521,12 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                         (genstr(gen), fill,
                          n_agentss[i_a], SIM_DECEN_LEARNED_SUCCESS),
                         col_name] = int(decen_cost_l != INVALID)
+                if (SIM_DECEN_LEARNED_COST in evaluations and
+                        decen_cost_l != INVALID):
+                    df_col.loc[
+                        (genstr(gen), fill,
+                         n_agentss[i_a], SIM_DECEN_LEARNED_COST),
+                        col_name] = decen_cost_l
             if (DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED in evaluations
                     and decen_cost_r != INVALID and decen_cost_l != INVALID):
                 df_col.loc[
@@ -647,4 +656,26 @@ def evaluate_en_comparison(i_r, idx, generators, fills, n_agentss, size):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("pkl_read", nargs='?')
+    args = parser.parse_args()
+    print(f'args.pkl_read: {args.pkl_read}')
+    if args.pkl_read:
+        df_results = pd.read_pickle(args.pkl_read)
+    else:
+        df_results = make_full_df()
+
+    for gen in sorted(list(set(df_results.index.get_level_values(GENERATORS)))):
+        plot_images(
+            df_results,
+            title="full",
+            generator_name=gen,
+            normalize_cbars_for="diff"
+        )
+
+    # compare expanded nodes over graph properties
+    # xs = [N_NODES, N_EDGES, MEAN_DEGREE, N_NODES_TA, N_EDGES_TA]
+    # ys = [DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]
+    # plot_scatter(df_results, xs, ys, cs=GENERATORS, titles=xs)
+
+    plt.show()
