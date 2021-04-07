@@ -94,8 +94,9 @@ def cost_independent(env, starts, goals):
     return float(sum(map(lambda p: len(p)-1, paths))) / n_agents
 
 
-def cost_sim_decentralized_random(env, starts, goals):
-    metrics = cached_decentralized(env, starts, goals, PolicyType.RANDOM)
+def cost_sim_decentralized_random(env, starts, goals, skip_cache=False):
+    metrics = cached_decentralized(
+        env, starts, goals, PolicyType.RANDOM, skip_cache)
     if metrics is INVALID:
         return INVALID
     (average_time, _, _, _, successful
@@ -106,8 +107,9 @@ def cost_sim_decentralized_random(env, starts, goals):
         return INVALID
 
 
-def cost_sim_decentralized_learned(env, starts, goals):
-    metrics = cached_decentralized(env, starts, goals, PolicyType.LEARNED)
+def cost_sim_decentralized_learned(env, starts, goals, skip_cache=False):
+    metrics = cached_decentralized(
+        env, starts, goals, PolicyType.LEARNED, skip_cache)
     if metrics is INVALID:
         return INVALID
     (average_time, _, _, _, successful

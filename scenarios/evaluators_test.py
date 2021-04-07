@@ -382,6 +382,25 @@ class TestEvaluators(unittest.TestCase):
                 timeout=TEST_TIMEOUT*10, skip_cache=True)
         )
 
+    def test_cost_ecbs_vs_decen_special_scenario(self):
+        denv, dstarts, dgoals = (
+            np.array([[0, 0, 0, 0, 0, 1, 1, 1],
+                      [1, 0, 0, 0, 0, 0, 0, 1],
+                      [0, 0, 0, 0, 0, 0, 0, 1],
+                      [1, 0, 0, 0, 0, 1, 0, 1],
+                      [1, 0, 0, 0, 0, 1, 0, 1],
+                      [1, 0, 0, 0, 0, 0, 0, 1],
+                      [1, 0, 0, 0, 0, 1, 1, 1],
+                      [1, 0, 0, 0, 0, 1, 1, 1]], dtype=int),
+            np.array([[4, 2]]),
+            np.array([[2, 5]]))
+        self.assertAlmostEqual(
+            scenarios.evaluators.cost_sim_decentralized_random(
+                denv, dstarts, dgoals, skip_cache=True),
+            scenarios.evaluators.cost_ecbs(
+                denv, dstarts, dgoals, skip_cache=True)
+        )
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
