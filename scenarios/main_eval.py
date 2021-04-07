@@ -125,9 +125,9 @@ def plot_images(
 
     fig = plt.figure(figsize=(20, 10))
     fig.suptitle(title+generator_name, fontsize=16)
-    subplot_rows = 2
-    subplot_cols = int(np.ceil(len(evaluations) / 2))
-    minmax = (None, None)
+    subplot_rows: int = 2
+    subplot_cols: int = int(np.ceil(len(evaluations) / 2))
+    minmax: Tuple[Optional[float], Optional[float]] = (None, None)
 
     if normalize_cbars_for is not None:
         # same min / max for top bottom plots
@@ -305,7 +305,7 @@ def make_full_df():
     with Pool(4) as p:
         arguments = [(i_r, idx, generators, fills, n_agentss, size)
                      for i_r in range(n_runs)]
-        df_cols = p.starmap(evaluate_full, arguments)
+        df_cols = p.starmap(evaluate_full, arguments, chunksize=1)
     for df_col in df_cols:
         add_colums(df_results, df_col)
     pbm.end()
@@ -324,7 +324,7 @@ def make_full_df():
 def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
     col_name = "seed{}".format(i_r)
     pb = ProgressBar("column >{}<".format(col_name),
-                     (len(generators) * len(fills) * len(n_agentss)), 10)
+                     (len(generators) * len(fills) * len(n_agentss)), 50)
     # Taking care of some little pandas ...........................
     df_col = pd.DataFrame(index=idx, dtype=float)
     df_col[col_name] = [np.nan] * len(df_col.index)
