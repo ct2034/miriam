@@ -36,6 +36,8 @@ class Agent():
         self.id: int = random.randint(0, int(2E14))
         self.blocked_edges = set()
         self.filter_blocked_edges = set()
+        self.blocked_nodes = set()
+        self.filter_blocked_nodes = set()
 
     def __hash__(self):
         return self.id

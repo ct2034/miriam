@@ -146,8 +146,8 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator):
 def run_a_scenario(env, agents, plot, iterator: IteratorType = IteratorType.WAITING):
     n_agents = len(agents)
     # evaluation parameters
-    time_progress = np.zeros([n_agents])
-    space_progress = np.zeros([n_agents])
+    time_progress = np.zeros([n_agents], dtype=float)
+    space_progress = np.zeros([n_agents], dtype=float)
     # iterate
     successful = 0
     try:
