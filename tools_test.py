@@ -1,27 +1,32 @@
-import tools
+import unittest
 
 import numpy as np
-import unittest
+
+import tools
 
 
 class TestTools(unittest.TestCase):
     def test_hasher(self):
         def make_base(): return {"np": np.zeros(
-            [100, 100], dtype=np.int8), "int": 42}
+            [1000, 1000], dtype=int), "int": 42}
         params_base = make_base()
 
         params_same_a = make_base()
-        params_same_a["np"][42, 43] = 99
+        params_same_a["np"][42, 43] = 1
         params_same_b = make_base()
-        params_same_b["np"][42, 43] = 99
+        params_same_b["np"][42, 43] = 1
 
         self.assertEqual(tools.hasher((), params_same_a),
                          tools.hasher((), params_same_b))
+        self.assertEqual(tools.hasher([params_same_a["np"],
+                                       params_same_b["np"]], {}),
+                         tools.hasher([params_same_b["np"],
+                                       params_same_a["np"]], {}))
 
         params_diff_np_a = make_base()
-        params_diff_np_a["np"][42, 43] = 98
+        params_diff_np_a["np"][42, 43] = 1
         params_diff_np_b = make_base()
-        params_diff_np_b["np"][42, 43] = 97
+        params_diff_np_b["np"][42, 431] = 1
 
         self.assertNotEqual(tools.hasher((), params_diff_np_a),
                             tools.hasher((), params_diff_np_b))
@@ -29,6 +34,17 @@ class TestTools(unittest.TestCase):
                             tools.hasher((), params_diff_np_a))
         self.assertNotEqual(tools.hasher((), params_base),
                             tools.hasher((), params_diff_np_b))
+
+        self.assertNotEqual(tools.hasher([params_diff_np_a["np"]], {}),
+                            tools.hasher([params_diff_np_b["np"]], {}))
+        self.assertNotEqual(tools.hasher([params_diff_np_a["np"],
+                                          params_diff_np_b["np"]], {}),
+                            tools.hasher([params_diff_np_b["np"],
+                                          params_diff_np_a["np"]], {}))
+        self.assertNotEqual(tools.hasher([params_base["np"]], {}),
+                            tools.hasher([params_diff_np_a["np"]], {}))
+        self.assertNotEqual(tools.hasher([params_base["np"]], {}),
+                            tools.hasher([params_diff_np_b["np"]], {}))
 
         params_diff_int_a = make_base()
         params_diff_int_a["int"] = 43
