@@ -25,7 +25,7 @@ class Agent():
         assert isinstance(pos, np.ndarray), "Position must be numpy array"
         self.pos: np.ndarray = pos
         self.goal: Union[np.ndarray, None] = None
-        self.path = None
+        self.path: Union[np.ndarray, None] = None
         self.path_i: Union[int, None] = None
         self.policy: Policy = Policy.construct_by_type(policy, self)
         self.id: int = random.randint(0, int(2E14))
