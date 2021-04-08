@@ -14,15 +14,6 @@ BLOCKED_NODES_TYPE = Set[Tuple[int, int]]
 
 
 class Agent():
-    blocked_edges: BLOCKED_EDGES_TYPE = set()
-    filter_blocked_edges: BLOCKED_EDGES_TYPE = set()
-    blocked_nodes: BLOCKED_NODES_TYPE = set()
-    filter_blocked_nodes: BLOCKED_NODES_TYPE = set()
-    env_nx: Union[nx.Graph, None] = None
-    goal: Union[np.ndarray, None] = None
-    path = None
-    path_i: Union[int, None] = None
-
     def __init__(
         self, env: np.ndarray, pos: np.ndarray,
         policy: PolicyType = PolicyType.RANDOM
@@ -30,14 +21,18 @@ class Agent():
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
         self.env: np.ndarray = env
+        self.env_nx: Union[nx.Graph, None] = None
         assert isinstance(pos, np.ndarray), "Position must be numpy array"
         self.pos: np.ndarray = pos
+        self.goal: Union[np.ndarray, None] = None
+        self.path = None
+        self.path_i: Union[int, None] = None
         self.policy: Policy = Policy.construct_by_type(policy, self)
         self.id: int = random.randint(0, int(2E14))
-        self.blocked_edges = set()
-        self.filter_blocked_edges = set()
-        self.blocked_nodes = set()
-        self.filter_blocked_nodes = set()
+        self.blocked_edges: BLOCKED_EDGES_TYPE = set()
+        self.filter_blocked_edges: BLOCKED_EDGES_TYPE = set()
+        self.blocked_nodes: BLOCKED_NODES_TYPE = set()
+        self.filter_blocked_nodes: BLOCKED_NODES_TYPE = set()
 
     def __hash__(self):
         return self.id
