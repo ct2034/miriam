@@ -143,7 +143,8 @@ def plot_images(
                     this_data = this_ev_data.loc[(
                         generator_name, fill, n_agents)].to_numpy()
                     n_required = ceil(len(this_data) * success_required)
-                    if len(this_data[np.logical_not(np.isnan(this_data))]) > n_required:
+                    if len(this_data[np.logical_not(np.isnan(this_data))]
+                           ) > n_required:
                         this_mean = np.mean(
                             this_data[np.logical_not(np.isnan(this_data))])
                         mins = min(this_mean, mins)
