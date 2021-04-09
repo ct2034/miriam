@@ -8,6 +8,11 @@ ENVVAR_STORAGE_PATH_STR = 'SCENARIO_STORAGE_PATH'
 STORAGE_PATH_TESTING = "/tmp/testing/"
 
 
+def unset_envvar():
+    if ENVVAR_STORAGE_PATH_STR in os.environ.keys():
+        del os.environ[ENVVAR_STORAGE_PATH_STR]
+
+
 def make_cache_folder_and_set_envvar(set_envvar=True):
     if not os.path.exists(STORAGE_PATH_TESTING):
         os.mkdir(STORAGE_PATH_TESTING)

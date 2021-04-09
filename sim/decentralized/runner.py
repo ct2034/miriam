@@ -3,7 +3,6 @@
 import itertools
 import logging
 import random
-from functools import lru_cache
 from typing import *
 
 import numpy as np
@@ -107,7 +106,6 @@ def initialize_agents(
     return tuple(agents)  # returning tuple because it can be immutable now
 
 
-@lru_cache(maxsize=512)
 def is_environment_well_formed(agents: Tuple[Agent]) -> bool:
     """Check if the environment is well formed according to Cap2015"""
     for a in agents:

@@ -16,6 +16,7 @@ class TestStorage(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        test_helper.unset_envvar()
         # making the folder to store data for test in.
         cls.data_path = test_helper.make_cache_folder_and_set_envvar(
             set_envvar=False)
@@ -27,6 +28,7 @@ class TestStorage(unittest.TestCase):
 
     def test_get_filepath(self):
         # without envvar this should fail
+        test_helper.unset_envvar()
         self.assertRaises(
             AssertionError, lambda: storage.get_filepath((1, 1, 1)))
         os.environ[test_helper.ENVVAR_STORAGE_PATH_STR] = TestStorage.data_path
@@ -44,7 +46,7 @@ class TestStorage(unittest.TestCase):
         self.assertTrue(path2.startswith(TestStorage.data_path))
         self.assertNotEqual(path1, path2)
 
-    # test has_file
+        # test has_file .......................................................
         # has no been created yet
         self.assertFalse(storage.has_file(self.scenario1))
 
@@ -53,7 +55,7 @@ class TestStorage(unittest.TestCase):
             self.scenario1, ResultType.ECBS_PATHS, self.to_store)
         self.assertTrue(storage.has_file(self.scenario1))
 
-    # test_has_result
+        # test_has_result .....................................................
         storage.save_result(
             self.scenario1, ResultType.INDEP_PATHS, self.to_store2)
 
@@ -65,7 +67,7 @@ class TestStorage(unittest.TestCase):
         self.assertTrue(storage.has_result(
             self.scenario1, ResultType.INDEP_PATHS))
 
-    # test_get_result
+        # test_get_result .....................................................
         storage.save_result(
             self.scenario1, ResultType.ICTS_PATHS, self.to_store2)
 
