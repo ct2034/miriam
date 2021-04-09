@@ -68,7 +68,7 @@ def init_values_main():
     size = 8  # size for all scenarios
     n_fills = 8  # how many different fill values there should be
     n_n_agentss = 8  # how many different numbers of agents should there be"""
-    n_runs = 128  # how many runs per configuration
+    n_runs = 512  # how many runs per configuration
     max_fill = .6  # maximal fill to sample until
     low_agents = 1  # lowest number of agents
     high_agents = 16  # highest number of agents
@@ -109,8 +109,8 @@ def add_colums(df1: pd.DataFrame, df2: pd.DataFrame):
 
 def plot_images(
         df: pd.DataFrame, generator_name: str,
-        title: str, normalize_cbars_for: Optional[str] = None,
-        success_required: float = .05):
+        title: str, normalize_cbars_for: List[str] = [],
+        success_required: float = .2):
     evaluations = sorted(list(set(df.index.get_level_values('evaluations'))))
     n_agentss = sorted(list(set(df.index.get_level_values('n_agentss'))))
     n_n_agentss = len(n_agentss)
@@ -127,14 +127,14 @@ def plot_images(
     fig.suptitle(title+generator_name, fontsize=16)
     subplot_rows: int = 2
     subplot_cols: int = int(np.ceil(len(evaluations) / 2))
-    minmax: Tuple[Optional[float], Optional[float]] = (None, None)
+    normalizations: Dict[str, Tuple[Optional[float], Optional[float]]] = {}
 
-    if normalize_cbars_for is not None:
+    for wildcard in normalize_cbars_for:
         # same min / max for top bottom plots
         mins = 99999
         maxs = 0
         for i, ev in enumerate(evaluations):
-            if normalize_cbars_for in ev:
+            if wildcard in ev:
                 this_ev_data = df.xs(ev, level=EVALUATIONS)
                 for i_f, i_a in product(range(n_fills),
                                         range(n_n_agentss)):
@@ -142,18 +142,20 @@ def plot_images(
                     n_agents = n_agentss[i_a]
                     this_data = this_ev_data.loc[(
                         generator_name, fill, n_agents)].to_numpy()
-                    if len(this_data[np.logical_not(np.isnan(this_data))]) > 0:
+                    n_required = ceil(len(this_data) * success_required)
+                    if len(this_data[np.logical_not(np.isnan(this_data))]) > n_required:
                         this_mean = np.mean(
                             this_data[np.logical_not(np.isnan(this_data))])
                         mins = min(this_mean, mins)
                         maxs = max(this_mean, maxs)
-        minmax = (-1*max(abs(mins), abs(maxs)), max(abs(mins), abs(maxs)))
+        normalizations[wildcard] = (-1*max(abs(mins), abs(maxs)),
+                                    max(abs(mins), abs(maxs)))
 
     for i, ev in enumerate(evaluations):
-        if normalize_cbars_for in ev:
-            this_minmax = minmax
-        else:
-            this_minmax = (None, None)
+        this_minmax: Tuple[Optional[float], Optional[float]] = (None, None)
+        for wildcard in normalize_cbars_for:
+            if wildcard in ev:
+                this_minmax = normalizations[wildcard]
         this_ev_data = df.xs(ev, level=EVALUATIONS)
         r_final = np.full([n_fills, n_n_agentss], np.nan, dtype=float)
         for i_f, i_a in product(range(n_fills),
@@ -301,9 +303,9 @@ def make_full_df():
     df_results.sort_index(inplace=True)
     assert len(index_arrays) == df_results.index.lexsort_depth
 
-    pbm = ProgressBar("main", 0)  # timing only
+    pbm = ProgressBar("main", n_runs)
     with Pool(4) as p:
-        arguments = [(i_r, idx, generators, fills, n_agentss, size)
+        arguments = [(i_r, pbm, idx, generators, fills, n_agentss, size)
                      for i_r in range(n_runs)]
         df_cols = p.starmap(evaluate_full, arguments, chunksize=1)
     for df_col in df_cols:
@@ -315,13 +317,13 @@ def make_full_df():
     #                        'display.max_columns',
     #                        None):  # all rows and columns
     #     print(df_results)
-    print(df_results.info)
+    df_results.info()
 
     df_results.to_pickle(get_fname("full", "_", "pkl"))
     return df_results
 
 
-def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
+def evaluate_full(i_r, pbm, idx, generators, fills, n_agentss, size):
     col_name = "seed{}".format(i_r)
     pb = ProgressBar("column >{}<".format(col_name),
                      (len(generators) * len(fills) * len(n_agentss)), 50)
@@ -464,69 +466,65 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                         col_name
                     ]
                 )
-        # comparing costs to optimal solution #################################
+        # decentralized sim ###################################################
+        if SIM_DECEN_RANDOM_SUCCESS in evaluations:
+            decen_cost_r = cost_sim_decentralized_random(
+                env, starts, goals)
+            df_col.loc[(genstr(gen), fill, n_agentss[i_a],
+                        SIM_DECEN_RANDOM_SUCCESS),
+                       col_name] = int(decen_cost_r != INVALID)
+            if (SIM_DECEN_RANDOM_COST in evaluations and
+                    decen_cost_r != INVALID):
+                df_col.loc[(genstr(gen), fill, n_agentss[i_a],
+                            SIM_DECEN_RANDOM_COST),
+                           col_name] = decen_cost_r
+        if SIM_DECEN_LEARNED_SUCCESS in evaluations:
+            decen_cost_l = cost_sim_decentralized_learned(
+                env, starts, goals)
+            df_col.loc[(genstr(gen), fill, n_agentss[i_a],
+                        SIM_DECEN_LEARNED_SUCCESS),
+                       col_name] = int(decen_cost_l != INVALID)
+            if (SIM_DECEN_LEARNED_COST in evaluations and
+                    decen_cost_l != INVALID):
+                df_col.loc[(genstr(gen), fill, n_agentss[i_a],
+                            SIM_DECEN_LEARNED_COST),
+                           col_name] = decen_cost_l
+        # comparing decentralized to optimal solution #########################
         if df_col.loc[
             (genstr(gen), fill,
              n_agentss[i_a], ECBS_SUCCESS), col_name] == SUCCESS:
             ecbs_cost = df_col.loc[
                 (genstr(gen), fill,
                  n_agentss[i_a], ECBS_COST), col_name]
+            # indep ...........................................................
             if DIFF_INDEP in evaluations:
                 indep_cost = cost_independent(env, starts, goals)
                 if indep_cost != INVALID:
                     df_col.loc[
                         (genstr(gen), fill, n_agentss[i_a], DIFF_INDEP),
                         col_name] = ecbs_cost - indep_cost
-            if DIFF_SIM_DECEN_RANDOM in evaluations:
-                decen_cost_r = cost_sim_decentralized_random(
-                    env, starts, goals)
-                if decen_cost_r != INVALID:
-                    df_col.loc[
-                        (genstr(gen), fill,
-                         n_agentss[i_a], DIFF_SIM_DECEN_RANDOM),
-                        col_name] = decen_cost_r - ecbs_cost
-                    # if decen_cost < ecbs_cost:
-                    #     print(
-                    #         '~~ decen_cost < ecbs_cost for ... ~~~' +
-                    #         f'env: {str(env)}\nstarts: {str(starts)}\n' +
-                    #         f'goals: {str(goals)}\n' +
-                    #         f'~~~~~~~~~~~~\n' +
-                    #         f'{repr((env, starts, goals))}\n' +
-                    #         f'~~~~~~~~~~~~')
-                    # TODO: It is true, that sometimes, decentralized
-                    # solutions have lower cost than ecbs, which seems to
-                    # be down to decentralized solutions ignoring finished
-                    # agents.
-                if SIM_DECEN_RANDOM_SUCCESS in evaluations:
-                    df_col.loc[
-                        (genstr(gen), fill,
-                         n_agentss[i_a], SIM_DECEN_RANDOM_SUCCESS),
-                        col_name] = int(decen_cost_r != INVALID)
-                if (SIM_DECEN_RANDOM_COST in evaluations and
-                        decen_cost_r != INVALID):
-                    df_col.loc[
-                        (genstr(gen), fill,
-                         n_agentss[i_a], SIM_DECEN_RANDOM_COST),
-                        col_name] = decen_cost_r
-            if DIFF_SIM_DECEN_LEARNED in evaluations:
-                decen_cost_l = cost_sim_decentralized_learned(
-                    env, starts, goals)
-                if decen_cost_l != INVALID:
-                    df_col.loc[
-                        (genstr(gen), fill,
-                         n_agentss[i_a], DIFF_SIM_DECEN_LEARNED),
-                        col_name] = decen_cost_l - ecbs_cost
-                if SIM_DECEN_LEARNED_SUCCESS in evaluations:
-                    df_col.loc[
-                        (genstr(gen), fill,
-                         n_agentss[i_a], SIM_DECEN_LEARNED_SUCCESS),
-                        col_name] = int(decen_cost_l != INVALID)
-                if (SIM_DECEN_LEARNED_COST in evaluations and
-                        decen_cost_l != INVALID):
-                    df_col.loc[
-                        (genstr(gen), fill,
-                         n_agentss[i_a], SIM_DECEN_LEARNED_COST),
-                        col_name] = decen_cost_l
+            decen_cost_r = df_col.loc[(genstr(gen), fill, n_agentss[i_a],
+                                       SIM_DECEN_RANDOM_COST), col_name]
+            decen_cost_l = df_col.loc[(genstr(gen), fill, n_agentss[i_a],
+                                       SIM_DECEN_LEARNED_COST), col_name]
+            # decen random ....................................................
+            if (DIFF_SIM_DECEN_RANDOM in evaluations and
+                    decen_cost_r != INVALID):
+                df_col.loc[
+                    (genstr(gen), fill,
+                     n_agentss[i_a], DIFF_SIM_DECEN_RANDOM),
+                    col_name] = decen_cost_r - ecbs_cost
+                # TODO: It is true, that sometimes, decentralized solutions
+                # have lower cost than ecbs, which seems to be down to
+                # decentralized solutions ignoring finished agents.
+            # decen learned ...................................................
+            if (DIFF_SIM_DECEN_LEARNED in evaluations and
+                    decen_cost_l != INVALID):
+                df_col.loc[
+                    (genstr(gen), fill,
+                     n_agentss[i_a], DIFF_SIM_DECEN_LEARNED),
+                    col_name] = decen_cost_l - ecbs_cost
+            # diff random minus learned .......................................
             if (DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED in evaluations
                     and decen_cost_r != INVALID and decen_cost_l != INVALID):
                 df_col.loc[
@@ -535,6 +533,7 @@ def evaluate_full(i_r, idx, generators, fills, n_agentss, size):
                      DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED),
                     col_name] = decen_cost_r - decen_cost_l
 
+    pbm.progress(i_r)
     pb.end()
     return df_col
 
@@ -672,7 +671,7 @@ if __name__ == "__main__":
             df_results,
             title="full",
             generator_name=gen,
-            normalize_cbars_for="diff"
+            normalize_cbars_for=["difference", "diff_"]
         )
 
     # compare expanded nodes over graph properties
