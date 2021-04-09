@@ -19,25 +19,22 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 
-def initialize_environment(size: int, fill: float, seed: Any = random.random()):
+def initialize_environment(size: int, fill: float, seed: Any = random.random()
+                           ) -> np.ndarray:
     """Make a square map with edge length `size` and `fill` (0..1) obstacle
     ratio.
-
     :param size: side length of the square (in pixels)
-    :type size: int
     :param fill: percentage of map to fill
-    :type fill: float
     :return: the environment
-    :rtype: np.ndarray
     """
     random.seed(seed)
-    environent = np.zeros([size, size], dtype=np.int8)
+    environment = np.zeros([size, size], dtype=np.int8)
     n_to_fill = int(fill * size ** 2)
     to_fill = random.sample(
         list(itertools.product(range(size), repeat=2)), k=n_to_fill)
     for cell in to_fill:
-        environent[cell] = 1
-    return environent
+        environment[cell] = 1
+    return environment
 
 
 def initialize_new_agent(
