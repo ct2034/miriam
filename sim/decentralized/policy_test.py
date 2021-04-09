@@ -78,6 +78,7 @@ class TestLearnedPolicy(unittest.TestCase):
             print("call")
             print(call)
             print(dir(call))
+            print(call.__dict__)
             print("call.args")
             print(call.args)
             print("call.args[0]")
