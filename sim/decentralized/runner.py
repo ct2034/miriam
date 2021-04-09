@@ -129,7 +129,8 @@ def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
     return all(map(lambda a: a.is_at_goal(), agents))
 
 
-def check_time_evaluation(time_progress, space_progress):
+def check_time_evaluation(time_progress, space_progress
+                          ) -> Tuple[float, float, float, float]:
     average_time = sum(time_progress) / len(time_progress)
     max_time = max(time_progress)
     average_length = sum(space_progress) / len(space_progress)
@@ -143,13 +144,14 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator):
     return run_a_scenario(env, agents, plot, iterator)
 
 
-def run_a_scenario(env, agents, plot, iterator: IteratorType = IteratorType.WAITING):
+def run_a_scenario(env, agents, plot, iterator: IteratorType = IteratorType.WAITING
+                   ) -> Tuple[float, float, float, float, int]:
     n_agents = len(agents)
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
     space_progress = np.zeros([n_agents], dtype=float)
     # iterate
-    successful = 0
+    successful: int = 0
     try:
         while not are_all_agents_at_their_goals(agents):
             if plot:  # pragma: no cover
