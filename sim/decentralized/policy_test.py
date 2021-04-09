@@ -4,7 +4,6 @@ import unittest
 from unittest.mock import MagicMock
 
 import numpy as np
-from importtf import tf
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import LearnedPolicy, PolicyType
 from sim.decentralized.runner import run_a_scenario
@@ -69,62 +68,44 @@ class TestLearnedPolicy(unittest.TestCase):
         _, _, _, _, success = run_a_scenario(env, [a1, a2], False)
         self.assertEqual(success, 1)
 
-        def hist(x): return np.histogram(x, bins=100, range=(0, 1))[0]
+        def  hist(x): return np.histogram(x, bins=100, range=(0, 1))[0]
         predictMock.assert_called()
-        once = False
-        print("predictMock.call_args_list")
-        print(predictMock.call_args_list)
         for call in predictMock.call_args_list:
-            print("call")
-            print(call)
-            print(dir(call))
-            print(call.__dict__)
-            print("call.args")
-            print(call.args)
-            print("call.args[0]")
-            print(call.args[0])
-            if isinstance(call.args[0], tf.Tensor):
-                once = True
-                model_data = call.args[0].numpy()
-                print("model_data")
-                print(model_data)
-                self.assertEqual(model_data.shape, (1, 7, 7, 3, 5))
-                for t in range(3):
-                    # layer 0 "map" ...............................................
-                    self.assertEqual(model_data[0, 3, 3, t, 0], 0)
+            model_data = call.args[0].numpy()
+            self.assertEqual(model_data.shape, (1, 7, 7, 3, 5))
+            for t in range(3):
+                # layer 0 "map" ...............................................
+                self.assertEqual(model_data[0, 3, 3, t, 0], 0)
 
-                    # layer 1 "poses" .............................................
-                    hist1 = hist(model_data[0, :, :, t, 1])
-                    self.assertEqual(np.argmax(hist1), 0)  # majority black
-                    if t == 2:
-                        self.assertEqual(model_data[0, 3, 3, t, 1], 1)
+                # layer 1 "poses" .............................................
+                hist1 = hist(model_data[0, :, :, t, 1])
+                self.assertEqual(np.argmax(hist1), 0)  # majority black
+                if t == 2:
+                    self.assertEqual(model_data[0, 3, 3, t, 1], 1)
 
-                    # layer 2 "own path" ..........................................
-                    hist2 = hist(model_data[0, :, :, t, 2])
-                    second_highest_value = hist2[hist2.argsort()[-2]]
-                    # only one path with one shade each
-                    self.assertEqual(second_highest_value, 1)
-                    # middle always on path
-                    self.assertLess(model_data[0, 3, 3, t, 2], 1)
-                    self.assertGreater(model_data[0, 3, 3, t, 2], 0)
+                # layer 2 "own path" ..........................................
+                hist2 = hist(model_data[0, :, :, t, 2])
+                second_highest_value = hist2[hist2.argsort()[-2]]
+                # only one path with one shade each
+                self.assertEqual(second_highest_value, 1)
+                # middle always on path
+                self.assertLess(model_data[0, 3, 3, t, 2], 1)
+                self.assertGreater(model_data[0, 3, 3, t, 2], 0)
 
-                    # layer 3 "opponent path" .....................................
-                    hist3 = hist(model_data[0, :, :, t, 3])
-                    second_highest_value = hist3[hist3.argsort()[-2]]
-                    # only one path with one shade each
-                    self.assertEqual(second_highest_value, 1)
-                    if t == 2:
-                        # middle on path
-                        self.assertLess(model_data[0, 3, 3, t, 3], 1)
-                        self.assertGreater(model_data[0, 3, 3, t, 3], 0)
+                # layer 3 "opponent path" .....................................
+                hist3 = hist(model_data[0, :, :, t, 3])
+                second_highest_value = hist3[hist3.argsort()[-2]]
+                # only one path with one shade each
+                self.assertEqual(second_highest_value, 1)
+                if t == 2:
+                    # middle on path
+                    self.assertLess(model_data[0, 3, 3, t, 3], 1)
+                    self.assertGreater(model_data[0, 3, 3, t, 3], 0)
 
-                    # layer 4 "all paths" .........................................
-                    hist4 = hist(model_data[0, :, :, t, 4])
-                    # majority black    tbd: probably not with many many agents
-                    self.assertEqual(np.argmax(hist4), 0)
-            else:
-                print("Who calls my function?")
-        self.assertTrue(once)
+                # layer 4 "all paths" .........................................
+                hist4 = hist(model_data[0, :, :, t, 4])
+                # majority black    tbd: probably not with many many agents
+                self.assertEqual(np.argmax(hist4), 0)
 
 
 if __name__ == "__main__":  # pragma: no cover
