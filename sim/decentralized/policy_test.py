@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 
 import numpy as np
+from importtf import tf
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import LearnedPolicy, PolicyType
 from sim.decentralized.runner import run_a_scenario
@@ -71,13 +72,18 @@ class TestLearnedPolicy(unittest.TestCase):
         def hist(x): return np.histogram(x, bins=100, range=(0, 1))[0]
         predictMock.assert_called()
         for call in predictMock.call_args_list:
+            if isinstance(call, tf.Tensor):
+                model_data = call.numpy()
+            else:
+                model_data = call.args[0].numpy()
             print("call")
             print(call)
             print("call.args")
             print(call.args)
             print("call.args[0]")
             print(call.args[0])
-            model_data = call.args[0].numpy()
+            print("model_data")
+            print(model_data)
             self.assertEqual(model_data.shape, (1, 7, 7, 3, 5))
             for t in range(3):
                 # layer 0 "map" ...............................................
