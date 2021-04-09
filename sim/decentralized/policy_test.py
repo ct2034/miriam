@@ -68,9 +68,15 @@ class TestLearnedPolicy(unittest.TestCase):
         _, _, _, _, success = run_a_scenario(env, [a1, a2], False)
         self.assertEqual(success, 1)
 
-        def  hist(x): return np.histogram(x, bins=100, range=(0, 1))[0]
+        def hist(x): return np.histogram(x, bins=100, range=(0, 1))[0]
         predictMock.assert_called()
         for call in predictMock.call_args_list:
+            print("call")
+            print(call)
+            print("call.args")
+            print(call.args)
+            print("call.args[0]")
+            print(call.args[0])
             model_data = call.args[0].numpy()
             self.assertEqual(model_data.shape, (1, 7, 7, 3, 5))
             for t in range(3):
@@ -109,4 +115,4 @@ class TestLearnedPolicy(unittest.TestCase):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    unittest.main()
+    unittest.main(verbosity=5)

@@ -44,4 +44,4 @@ jobs:
         mypy scenarios sim/decentralized/
     - name: Test with pytest
       run: |
-        pytest
+        pytest -rP
