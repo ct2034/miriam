@@ -121,4 +121,4 @@ class TestLearnedPolicy(unittest.TestCase):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    unittest.main(verbosity=5)
+    unittest.main()
