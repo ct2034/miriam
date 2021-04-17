@@ -181,7 +181,7 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         for i_r in range(runs):
             random.seed(i_r)
             results = sample_and_run_a_scenario(
-                size, n_agents, policy, False, i_r, IteratorType.BLOCKING)
+                size, n_agents, policy, False, i_r, IteratorType.BLOCKING1)
             evaluation_per_policy = np.append(
                 evaluation_per_policy, np.transpose([results]), axis=1)
             pb.progress()

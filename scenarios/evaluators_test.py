@@ -266,7 +266,7 @@ class TestEvaluators(unittest.TestCase):
 
     def test_cost_sim_decentralized_random_collision_tight(self):
         # agents that collide in the middle. on tight map ...
-        # with IteratorType.BLOCKING, this will fail, because none of the
+        # with IteratorType.BLOCKING1, this will fail, because none of the
         # agents can find a path with the middle being blocked.
         self.assertAlmostEqual(
             INVALID, scenarios.evaluators.cost_sim_decentralized_random(

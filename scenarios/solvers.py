@@ -147,4 +147,4 @@ def decentralized(env, starts, goals, policy: PolicyType):
     if agents is INVALID:
         return INVALID
     return run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.BLOCKING)
+        env, agents, plot=False, iterator=IteratorType.BLOCKING1)

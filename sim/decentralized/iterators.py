@@ -9,7 +9,8 @@ OBSERVATION_DISTANCE = 6
 
 class IteratorType(Enum):
     WAITING = auto()
-    BLOCKING = auto()
+    BLOCKING1 = auto()
+    BLOCKING3 = auto()
 
 
 class SimIterationException(Exception):
@@ -177,7 +178,8 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
     return time_slice, space_slice
 
 
-def iterate_blocking(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
+def iterate_blocking(agents: Tuple[Agent], lookahead: int
+                     ) -> Tuple[List[int], List[int]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
     # all that are not at their goals can generally procede. This is therefore
@@ -279,5 +281,7 @@ def iterate_blocking(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
 def get_iterator_fun(type: IteratorType):
     if type is IteratorType.WAITING:
         return iterate_waiting
-    elif type is IteratorType.BLOCKING:
-        return iterate_blocking
+    elif type is IteratorType.BLOCKING1:
+        return lambda x: iterate_blocking(x, 1)
+    elif type is IteratorType.BLOCKING3:
+        return lambda x: iterate_blocking(x, 3)
