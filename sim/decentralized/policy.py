@@ -34,10 +34,6 @@ class Policy(object):
     def __init__(self, agent) -> None:
         super().__init__()
         self.a = agent
-        self.i = 0
-
-    def step(self):
-        self.i += 0
 
     def register_observation(self, id, path, pos, path_i) -> None:
         """we have seen another agent"""

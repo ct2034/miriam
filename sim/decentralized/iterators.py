@@ -103,7 +103,6 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
 
     for i_a in range(len(agents)):
         # who is this agent seeing?
-        agents[i_a].policy.step()
         for i_oa in [i for i in range(len(agents)) if i != i_a]:
             if np.linalg.norm(
                 agents[i_a].pos - agents[i_oa].pos
@@ -196,7 +195,6 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
 
     for i_a in range(len(agents)):
         # who is this agent seeing?
-        agents[i_a].policy.step()
         for i_oa in [i for i in range(len(agents)) if i != i_a]:
             if np.linalg.norm(
                 agents[i_a].pos - agents[i_oa].pos
@@ -221,7 +219,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
             # nothing is blocked. everyone can continue
             there_are_collisions = False
         else:
-            # we need to solve the blocks be not stepping some agents
+            # we need to solve the blocks by blocking some agents
             for pose, [i_a1, i_a2] in node_colissions.items():
                 if (agents[i_a1].get_priority(agents[i_a2].id) >
                         agents[i_a2].get_priority(agents[i_a1].id)):
