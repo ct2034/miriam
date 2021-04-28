@@ -11,8 +11,6 @@ from sim.decentralized.iterators import IteratorType, get_iterator_fun
 from sim.decentralized.policy import PolicyType, RandomPolicy
 from sim.decentralized.runner import SimIterationException
 
-waiting_iterator = get_iterator_fun(IteratorType.WAITING)
-
 
 class TestRunner(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -96,111 +94,100 @@ class TestRunner(unittest.TestCase):
         self.assertFalse(runner.is_environment_well_formed(agents))
 
     def test_iterate_sim_and_are_all_agents_at_their_goals(self):
-        env = np.array([[0, 0], [0, 0]])
-        agents = (
-            Agent(env, np.array([0, 0]), PolicyType.RANDOM),
-            Agent(env, np.array([1, 1]), PolicyType.RANDOM)
-        )
-        agents[0].give_a_goal(np.array([0, 1]))
-        agents[1].give_a_goal(np.array([1, 0]))
+        for iterator_type in IteratorType:
+            iterator_fun = get_iterator_fun(iterator_type)
+            env = np.array([[0, 0], [0, 0]])
+            agents = (
+                Agent(env, np.array([0, 0]), PolicyType.RANDOM),
+                Agent(env, np.array([1, 1]), PolicyType.RANDOM)
+            )
+            agents[0].give_a_goal(np.array([0, 1]))
+            agents[1].give_a_goal(np.array([1, 0]))
 
-        # first we should not be at the goal
-        self.assertFalse(runner.are_all_agents_at_their_goals(agents))
+            # first we should not be at the goal
+            self.assertFalse(runner.are_all_agents_at_their_goals(agents))
 
-        # after one iteration all agents should be at their goal
-        waiting_iterator(agents)
-        self.assertTrue(all(agents[0].pos == np.array([0, 1])))
-        self.assertTrue(all(agents[1].pos == np.array([1, 0])))
-        self.assertTrue(runner.are_all_agents_at_their_goals(agents))
+            # after one iteration all agents should be at their goal
+            iterator_fun(agents)
+            self.assertTrue(all(agents[0].pos == np.array([0, 1])))
+            self.assertTrue(all(agents[1].pos == np.array([1, 0])))
+            self.assertTrue(runner.are_all_agents_at_their_goals(agents))
 
-        # after another iteration they should be still at their goal, raising
-        # an exception for a node deadlock.
-        self.assertRaises(SimIterationException,
-                          lambda: waiting_iterator(agents))
-        self.assertTrue(all(agents[0].pos == np.array([0, 1])))
-        self.assertTrue(all(agents[1].pos == np.array([1, 0])))
-        self.assertTrue(runner.are_all_agents_at_their_goals(agents))
+            # after another iteration they should be still at their goal, raising
+            # an exception for a node deadlock.
+            self.assertRaises(SimIterationException,
+                              lambda: iterator_fun(agents))
+            self.assertTrue(all(agents[0].pos == np.array([0, 1])))
+            self.assertTrue(all(agents[1].pos == np.array([1, 0])))
+            self.assertTrue(runner.are_all_agents_at_their_goals(agents))
 
     def test_iterate_sim_with_node_coll(self):
-        env = np.array([[0, 0], [0, 1]])
-        agents = (
-            Agent(env, np.array([0, 1]), PolicyType.RANDOM),
-            Agent(env, np.array([1, 0]), PolicyType.RANDOM)
-        )
-        agents[0].give_a_goal(np.array([0, 0]))
-        agents[1].give_a_goal(np.array([0, 0]))
+        # as it is now, this only works with waiting
+        waiting_iterator_fun = get_iterator_fun(IteratorType.WAITING)
+        for prio0, prio1 in [(.7, .3), (.3, .7)]:
+            env = np.array([[0, 0], [0, 1]])
+            agents = (
+                Agent(env, np.array([0, 1]), PolicyType.RANDOM),
+                Agent(env, np.array([1, 0]), PolicyType.RANDOM)
+            )
+            agents[0].give_a_goal(np.array([0, 0]))
+            agents[1].give_a_goal(np.array([0, 0]))
 
-        agents[0].get_priority = MagicMock(return_value=.7)
-        agents[1].get_priority = MagicMock(return_value=.3)
+            agents[0].get_priority = MagicMock(return_value=prio0)
+            agents[1].get_priority = MagicMock(return_value=prio1)
 
-        # both agents want to go to `(0,0)` only the first should get there
-        waiting_iterator(agents)
-        self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # goal
-        self.assertTrue(all(agents[1].pos == np.array([1, 0])))  # start
+            waiting_iterator_fun(agents)
+            if prio0 > prio1:
+                # both want to go to `(0,0)` only the first (`0`) should do
+                self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # g
+                self.assertTrue(all(agents[1].pos == np.array([1, 0])))  # s
+            else:
+                # both want to go to `(0,0)` only the second (`1`) should do
+                self.assertTrue(all(agents[0].pos == np.array([0, 1])))  # s
+                self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # g
 
-        # after another iteration both should be there and finished
-        waiting_iterator(agents)
-        self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # goal
-        self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
-        self.assertTrue(runner.are_all_agents_at_their_goals(agents))
-
-    def test_iterate_sim_with_node_coll_reverse(self):
-        # new agents for reverse prios
-        env = np.array([[0, 0], [0, 1]])
-        agents = (
-            Agent(env, np.array([0, 1]), PolicyType.RANDOM),
-            Agent(env, np.array([1, 0]), PolicyType.RANDOM)
-        )
-        agents[0].give_a_goal(np.array([0, 0]))
-        agents[1].give_a_goal(np.array([0, 0]))
-
-        # inverse priorities
-        agents[0].get_priority = MagicMock(return_value=0)
-        agents[1].get_priority = MagicMock(return_value=.9)
-
-        # both agents want to go to `(0,0)` only the second should get there
-        waiting_iterator(agents)
-        self.assertTrue(all(agents[0].pos == np.array([0, 1])))  # start
-        self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
-
-        # after another iteration both should be there and finished
-        waiting_iterator(agents)
-        self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # goal
-        self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
-        self.assertTrue(runner.are_all_agents_at_their_goals(agents))
+            # after another iteration both should be there and finished
+            waiting_iterator_fun(agents)
+            self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # goal
+            self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
+            self.assertTrue(runner.are_all_agents_at_their_goals(agents))
 
     def test_iterate_sim_with_node_coll_deadlock(self):
-        env = np.array([[0, 0, 1], [0, 0, 1], [0, 1, 1]])
-        agents = (
-            Agent(env, np.array([0, 0]), PolicyType.RANDOM),
-            Agent(env, np.array([0, 1]), PolicyType.RANDOM),
-            Agent(env, np.array([1, 1]), PolicyType.RANDOM),
-            Agent(env, np.array([1, 0]), PolicyType.RANDOM),
-            Agent(env, np.array([2, 0]), PolicyType.RANDOM)
-        )
-        agents[0].give_a_goal(np.array([0, 1]))
-        agents[1].give_a_goal(np.array([1, 1]))
-        agents[2].give_a_goal(np.array([1, 0]))
-        agents[3].give_a_goal(np.array([0, 0]))
-        agents[4].give_a_goal(np.array([1, 0]))
-        agents[4].get_priority = MagicMock(return_value=1)
+        for iterator_type in IteratorType:
+            iterator_fun = get_iterator_fun(iterator_type)
+            env = np.array([[0, 0, 1], [0, 0, 1], [0, 1, 1]])
+            agents = (
+                Agent(env, np.array([0, 0]), PolicyType.RANDOM),
+                Agent(env, np.array([0, 1]), PolicyType.RANDOM),
+                Agent(env, np.array([1, 1]), PolicyType.RANDOM),
+                Agent(env, np.array([1, 0]), PolicyType.RANDOM),
+                Agent(env, np.array([2, 0]), PolicyType.RANDOM)
+            )
+            agents[0].give_a_goal(np.array([0, 1]))
+            agents[1].give_a_goal(np.array([1, 1]))
+            agents[2].give_a_goal(np.array([1, 0]))
+            agents[3].give_a_goal(np.array([0, 0]))
+            agents[4].give_a_goal(np.array([1, 0]))
+            agents[4].get_priority = MagicMock(return_value=1)
 
-        self.assertRaises(runner.SimIterationException,
-                          lambda: waiting_iterator(agents))
+            self.assertRaises(runner.SimIterationException,
+                              lambda: iterator_fun(agents))
 
     def test_iterate_sim_with_edge_coll(self):
-        env = np.array([[0, 0, 0, 0], [1, 1, 1, 1],
-                        [1, 1, 1, 1], [1, 1, 1, 1]])
-        agents = (
-            Agent(env, np.array([0, 0]), PolicyType.RANDOM),
-            Agent(env, np.array([0, 3]), PolicyType.RANDOM)
-        )
-        agents[0].give_a_goal(np.array([0, 3]))
-        agents[1].give_a_goal(np.array([0, 0]))
-        waiting_iterator(agents)
-        for _ in range(10):
-            self.assertRaises(runner.SimIterationException,
-                              lambda: waiting_iterator(agents))
+        for iterator_type in IteratorType:
+            iterator_fun = get_iterator_fun(iterator_type)
+            env = np.array([[0, 0, 0, 0], [1, 1, 1, 1],
+                            [1, 1, 1, 1], [1, 1, 1, 1]])
+            agents = (
+                Agent(env, np.array([0, 0]), PolicyType.RANDOM),
+                Agent(env, np.array([0, 3]), PolicyType.RANDOM)
+            )
+            agents[0].give_a_goal(np.array([0, 3]))
+            agents[1].give_a_goal(np.array([0, 0]))
+            iterator_fun(agents)
+            for _ in range(10):
+                self.assertRaises(runner.SimIterationException,
+                                  lambda: iterator_fun(agents))
 
     def test_evaluate_policies(self):
         n_runs = 4
