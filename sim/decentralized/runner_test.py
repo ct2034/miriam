@@ -196,7 +196,7 @@ class TestRunner(unittest.TestCase):
 
     def test_evaluate_policies(self):
         n_runs = 3
-        for agents in [2, 3]:
+        for agents in [2, 3, 4]:
             data, names = runner.evaluate_policies(10, agents, n_runs, False)
             assert len(data) == len(PolicyType)
             for p in data.keys():
