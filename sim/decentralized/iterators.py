@@ -213,12 +213,11 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
                 if np.linalg.norm(
                     agents[i_a].pos - agents[i_oa].pos
                 ) < OBSERVATION_DISTANCE:
-                    assert agents[i_oa].path_i is not None
                     agents[i_a].policy.register_observation(
                         agents[i_oa].id,
                         agents[i_oa].path,
                         poses_at_dt[i_oa],
-                        agents[i_oa].path_i + dt
+                        agents[i_oa].get_path_i_not_none()
                     )  # observation regarding agent i_oa
 
         while(there_are_collisions):
