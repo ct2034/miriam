@@ -1,1 +1,1 @@
-pytest_plugins = ("coverage", "timeout", "xdist", "nbval")
+pytest_plugins = ("coverage", "timeout")

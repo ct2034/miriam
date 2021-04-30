@@ -10,7 +10,6 @@ keras
 matplotlib
 munkres
 mypy
-nbval
 networkx
 numpy
 psutil
@@ -23,7 +22,6 @@ pypng
 pytest
 pytest-cov
 pytest-timeout
-pytest-xdist
 scipy
 timeout-decorator
 tensorflow
