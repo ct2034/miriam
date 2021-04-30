@@ -166,16 +166,17 @@ class Agent():
 
     def is_at_goal(self, dt: Optional[int] = None):
         """returns true iff the agent is at its goal at delta time `dt` from now."""
+        if all(self.pos == self.goal):
+            return True
+        if self.path_i is None or self.path is None:
+            return False
         if dt is None:
-            return all(self.pos == self.goal) or self.path is None
+            dt = 0
+        i = self.path_i + dt
+        if i >= len(self.path):
+            return True
         else:
-            assert self.path_i is not None
-            assert self.path is not None
-            i = self.path_i + dt
-            if i >= len(self.path):
-                return True
-            else:
-                return all(self.path[i] == self.goal)
+            return all(self.path[i] == self.goal)
 
     def get_priority(self, other_id) -> float:
         """Based on the selected policy, this will give the priority of this

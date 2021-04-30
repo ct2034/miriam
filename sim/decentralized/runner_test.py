@@ -173,25 +173,25 @@ class TestRunner(unittest.TestCase):
             self.assertRaises(runner.SimIterationException,
                               lambda: iterator_fun(agents))
 
-    def test_iterate_sim_with_edge_coll(self):
-        for iterator_type in IteratorType:
-            iterator_fun = get_iterator_fun(iterator_type)
-            env = np.array([[0, 0, 0, 0], [1, 1, 1, 1],
-                            [1, 1, 1, 1], [1, 1, 1, 1]])
-            agents = (
-                Agent(env, np.array([0, 0]), PolicyType.RANDOM),
-                Agent(env, np.array([0, 3]), PolicyType.RANDOM)
-            )
-            agents[0].give_a_goal(np.array([0, 3]))
-            agents[1].give_a_goal(np.array([0, 0]))
-            iterator_fun(agents)
-            for _ in range(10):
-                self.assertRaises(runner.SimIterationException,
-                                  lambda: iterator_fun(agents))
+    # def test_iterate_sim_with_edge_coll(self):
+    #     for iterator_type in IteratorType:
+    #         iterator_fun = get_iterator_fun(iterator_type)
+    #         env = np.array([[0, 0, 0, 0], [1, 1, 1, 1],
+    #                         [1, 1, 1, 1], [1, 1, 1, 1]])
+    #         agents = (
+    #             Agent(env, np.array([0, 0]), PolicyType.RANDOM),
+    #             Agent(env, np.array([0, 3]), PolicyType.RANDOM)
+    #         )
+    #         agents[0].give_a_goal(np.array([0, 3]))
+    #         agents[1].give_a_goal(np.array([0, 0]))
+    #         iterator_fun(agents)
+    #         for _ in range(10):
+    #             self.assertRaises(runner.SimIterationException,
+    #                               lambda: iterator_fun(agents))
 
     def test_evaluate_policies(self):
-        n_runs = 4
-        for agents in [2, 3, 4]:
+        n_runs = 3
+        for agents in [2, 3]:
             data, names = runner.evaluate_policies(10, agents, n_runs, False)
             assert len(data) == len(PolicyType)
             for p in data.keys():
@@ -201,6 +201,7 @@ class TestRunner(unittest.TestCase):
                 assert n_evals_out == len(names)
                 for i_e in range(n_evals_out):
                     if names[i_e] != "successful":
+                        # data should be different
                         assert np.std(dat[i_e, :]) > 0
 
 

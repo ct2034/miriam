@@ -32,6 +32,19 @@ def get_possible_next_agent_poses(
     return possible_next_agent_poses
 
 
+def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> np.ndarray:
+    """Get poses at time dt from now in the future, so `dt=0` is now."""
+    poses: np.ndarray = np.zeros((len(agents), 2), dtype=int)
+    for i_a, a in enumerate(agents):
+        assert a.path is not None
+        assert a.path_i is not None
+        if a.is_at_goal(dt):
+            poses[i_a] = a.goal
+        else:
+            poses[i_a] = a.path[a.path_i + dt]
+    return poses
+
+
 def check_for_colissions(
         agents: Tuple[Agent],
         nxt_poses: np.ndarray) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
@@ -181,86 +194,91 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
                      ) -> Tuple[List[int], List[int]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
-    # all that are not at their goals can generally procede. This is therefore
-    # invariant of agents becoming finished in the iteration.
-    can_proceed: List[bool] = list(map(lambda a: not a.is_at_goal(), agents))
-    # assuming there are collisions
-    there_are_collisions: bool = True
 
-    time_slice = [0] * len(agents)
-    space_slice = [0] * len(agents)
+    for dt in range(lookahead - 1, -1, -1):
+        # all that are not at their goals can generally procede. This is therefore
+        # invariant of agents becoming finished in the iteration.
+        can_proceed: List[bool] = list(
+            map(lambda a: not a.is_at_goal(dt), agents))
+        # assuming there are collisions
+        there_are_collisions: bool = True
 
-    # how do agents look like at beginning?
-    agents_at_beginning = tuple(map(lambda a: a.pos, agents))
+        # how do agents look like at beginning?
+        poses_at_beginning = tuple(map(lambda a: a.pos, agents))
+        poses_at_dt = get_poses_in_dt(agents, dt)
 
-    for i_a in range(len(agents)):
-        # who is this agent seeing?
-        for i_oa in [i for i in range(len(agents)) if i != i_a]:
-            if np.linalg.norm(
-                agents[i_a].pos - agents[i_oa].pos
-            ) < OBSERVATION_DISTANCE:
-                agents[i_a].policy.register_observation(
-                    agents[i_oa].id,
-                    agents[i_oa].path,
-                    agents[i_oa].pos,
-                    agents[i_oa].path_i
-                )
+        for i_a in range(len(agents)):
+            # who is this agent seeing?
+            for i_oa in [i for i in range(len(agents)) if i != i_a]:
+                if np.linalg.norm(
+                    agents[i_a].pos - agents[i_oa].pos
+                ) < OBSERVATION_DISTANCE:
+                    assert agents[i_oa].path_i is not None
+                    agents[i_a].policy.register_observation(
+                        agents[i_oa].id,
+                        agents[i_oa].path,
+                        poses_at_dt[i_oa],
+                        agents[i_oa].path_i + dt
+                    )  # observation regarding agent i_oa
 
-    while(there_are_collisions):
-        possible_next_agent_poses = get_possible_next_agent_poses(
-            agents, can_proceed)
+        while(there_are_collisions):
+            possible_next_agent_poses = get_poses_in_dt(agents, dt + 1)
 
-        # check collisions
-        node_colissions, edge_colissions = check_for_colissions(
-            agents, possible_next_agent_poses)
+            # check collisions
+            node_colissions, edge_colissions = check_for_colissions(
+                agents, possible_next_agent_poses)
 
-        if (len(node_colissions.keys()) == 0 and
-                len(edge_colissions.keys()) == 0):
-            # nothing is blocked. everyone can continue
-            there_are_collisions = False
-        else:
-            # we need to solve the blocks by blocking some agents
-            for pose, [i_a1, i_a2] in node_colissions.items():
-                if (agents[i_a1].get_priority(agents[i_a2].id) >
-                        agents[i_a2].get_priority(agents[i_a1].id)):
-                    # a1 has higher prio
-                    success2 = agents[i_a2].block_node(pose)
-                    if not success2:
-                        success1 = agents[i_a1].block_node(pose)
-                        if not success1:
-                            raise SimIterationException(
-                                "Deadlock by node collision")
-                else:
-                    # a2 has higher prio
-                    success1 = agents[i_a1].block_node(pose)
-                    if not success1:
+            if (len(node_colissions.keys()) == 0 and
+                    len(edge_colissions.keys()) == 0):
+                # nothing is blocked. everyone can continue
+                there_are_collisions = False
+            else:
+                # we need to solve the blocks by blocking some agents
+                for pose, [i_a1, i_a2] in node_colissions.items():
+                    if (agents[i_a1].get_priority(agents[i_a2].id) >
+                            agents[i_a2].get_priority(agents[i_a1].id)):
+                        # a1 has higher prio
                         success2 = agents[i_a2].block_node(pose)
                         if not success2:
-                            raise SimIterationException(
-                                "Deadlock by node collision")
-            for edge, [i_a1, i_a2] in edge_colissions.items():
-                if (agents[i_a1].get_priority(agents[i_a2].id) >
-                        agents[i_a2].get_priority(agents[i_a1].id)):
-                    # a1 has higher prio
-                    success2 = agents[i_a2].block_edge(edge[1], edge[0])
-                    if not success2:
-                        success1 = agents[i_a1].block_edge(edge[0], edge[1])
+                            success1 = agents[i_a1].block_node(pose)
+                            if not success1:
+                                raise SimIterationException(
+                                    "Deadlock by node collision")
+                    else:
+                        # a2 has higher prio
+                        success1 = agents[i_a1].block_node(pose)
                         if not success1:
-                            raise SimIterationException(
-                                "Deadlock by edge collision")
-                else:
-                    # a2 has higher prio
-                    success1 = agents[i_a1].block_edge(edge[0], edge[1])
-                    if not success1:
+                            success2 = agents[i_a2].block_node(pose)
+                            if not success2:
+                                raise SimIterationException(
+                                    "Deadlock by node collision")
+                for edge, [i_a1, i_a2] in edge_colissions.items():
+                    if (agents[i_a1].get_priority(agents[i_a2].id) >
+                            agents[i_a2].get_priority(agents[i_a1].id)):
+                        # a1 has higher prio
                         success2 = agents[i_a2].block_edge(edge[1], edge[0])
                         if not success2:
-                            raise SimIterationException(
-                                "Deadlock by edge collision")
+                            success1 = agents[i_a1].block_edge(
+                                edge[0], edge[1])
+                            if not success1:
+                                raise SimIterationException(
+                                    "Deadlock by edge collision")
+                    else:
+                        # a2 has higher prio
+                        success1 = agents[i_a1].block_edge(edge[0], edge[1])
+                        if not success1:
+                            success2 = agents[i_a2].block_edge(
+                                edge[1], edge[0])
+                            if not success2:
+                                raise SimIterationException(
+                                    "Deadlock by edge collision")
 
-        if not any(can_proceed):
-            # there is not one agent that can move
-            raise SimIterationException("Deadlock from unresolvable collision")
+    if not any(can_proceed):
+        # there is not one agent that can move
+        raise SimIterationException("Deadlock from unresolvable collision")
 
+    time_slice: List[int] = [0] * len(agents)
+    space_slice: List[int] = [0] * len(agents)
     for i_a in range(len(agents)):
         if can_proceed[i_a] and not agents[i_a].is_at_goal():
             agents[i_a].make_next_step(possible_next_agent_poses[i_a, :])
@@ -270,7 +288,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
 
     make_sure_agents_are_safe(agents)
     assert has_at_least_one_agent_moved(
-        agents, agents_at_beginning), "no agent has changed"
+        agents, poses_at_beginning), "no agent has changed"
 
     return time_slice, space_slice
 
