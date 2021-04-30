@@ -40,7 +40,7 @@ class TestIterators(unittest.TestCase):
 
         # checking for collisions
         node_colissions, edge_colissions = check_for_colissions(
-            agents, possible_next_agent_poses)
+            agents)
         self.assertListEqual(list(node_colissions.keys()), [(0, 0)])
         self.assertIn(1, node_colissions[(0, 0)])
         self.assertIn(2, node_colissions[(0, 0)])

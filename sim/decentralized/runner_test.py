@@ -173,22 +173,26 @@ class TestRunner(unittest.TestCase):
             self.assertRaises(runner.SimIterationException,
                               lambda: iterator_fun(agents))
 
-    # todo: fix this test
-    # def test_iterate_sim_with_edge_coll(self):
-    #     for iterator_type in IteratorType:
-    #         iterator_fun = get_iterator_fun(iterator_type)
-    #         env = np.array([[0, 0, 0, 0], [1, 1, 1, 1],
-    #                         [1, 1, 1, 1], [1, 1, 1, 1]])
-    #         agents = (
-    #             Agent(env, np.array([0, 0]), PolicyType.RANDOM),
-    #             Agent(env, np.array([0, 3]), PolicyType.RANDOM)
-    #         )
-    #         agents[0].give_a_goal(np.array([0, 3]))
-    #         agents[1].give_a_goal(np.array([0, 0]))
-    #         iterator_fun(agents)
-    #         for _ in range(10):
-    #             self.assertRaises(runner.SimIterationException,
-    #                               lambda: iterator_fun(agents))
+    def test_iterate_sim_with_edge_coll(self):
+        for iterator_type in IteratorType:
+            iterator_fun = get_iterator_fun(iterator_type)
+            env = np.ones((8, 8), dtype=int)
+            env[0, :] = 0
+            agents = (
+                Agent(env, np.array([0, 0]), PolicyType.RANDOM),
+                Agent(env, np.array([0, 7]), PolicyType.RANDOM)
+            )
+            agents[0].give_a_goal(np.array([0, 7]))
+            agents[1].give_a_goal(np.array([0, 0]))
+            iterator_fun(agents)
+            # BLOCKING3 will see the edge collision after first iteration,
+            # the others not.
+            if iterator_type != IteratorType.BLOCKING3:
+                iterator_fun(agents)
+                iterator_fun(agents)
+            for _ in range(10):
+                self.assertRaises(runner.SimIterationException,
+                                  lambda: iterator_fun(agents))
 
     def test_evaluate_policies(self):
         n_runs = 3

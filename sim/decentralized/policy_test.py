@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 from sim.decentralized.agent import Agent
+from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import LearnedPolicy, PolicyType
 from sim.decentralized.runner import run_a_scenario
 
@@ -65,10 +66,11 @@ class TestLearnedPolicy(unittest.TestCase):
         a2 = Agent(env, np.array([0, 2]), PolicyType.LEARNED)
         a2.give_a_goal(np.array([2, 0]))
         a2.policy.model.predict = predictMock
-        _, _, _, _, success = run_a_scenario(env, [a1, a2], False)
+        _, _, _, _, success = run_a_scenario(
+            env, [a1, a2], False, IteratorType.WAITING)
         self.assertEqual(success, 1)
 
-        def  hist(x): return np.histogram(x, bins=100, range=(0, 1))[0]
+        def hist(x): return np.histogram(x, bins=100, range=(0, 1))[0]
         predictMock.assert_called()
         for call in predictMock.call_args_list:
             model_data = call.args[0].numpy()

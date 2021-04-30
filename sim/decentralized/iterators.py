@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from sim.decentralized.agent import Agent
@@ -47,23 +47,29 @@ def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> np.ndarray:
 
 def check_for_colissions(
         agents: Tuple[Agent],
-        nxt_poses: np.ndarray) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
+        dt: int = 0,
+        possible_next_agent_poses: Optional[np.ndarray] = None) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
     """check for two agents going to meet at one vertex or two agents using
     the same edge."""
     node_colissions = {}
     edge_colissions = {}
+    if possible_next_agent_poses is not None:
+        next_poses = possible_next_agent_poses
+    else:
+        next_poses = get_poses_in_dt(agents, 1 + dt)
+    current_poses = get_poses_in_dt(agents, dt)
     # ignoring finished agents
     for i_a in range(len(agents)):
-        if not agents[i_a].is_at_goal():
+        if not agents[i_a].is_at_goal(dt):
             for i_oa in [i for i in range(len(agents)) if i > i_a]:
-                if not agents[i_oa].is_at_goal():
-                    if (nxt_poses[i_a] ==
-                            nxt_poses[i_oa]).all():
-                        node_colissions[tuple(nxt_poses[i_a])] = [i_a, i_oa]
-                    if ((nxt_poses[i_a] == agents[i_oa].pos).all() and
-                            (nxt_poses[i_oa] == agents[i_a].pos).all()):
-                        edge = [tuple(agents[i_a].pos),
-                                tuple(nxt_poses[i_a])]
+                if not agents[i_oa].is_at_goal(dt):
+                    if (next_poses[i_a] ==
+                            next_poses[i_oa]).all():
+                        node_colissions[tuple(next_poses[i_a])] = [i_a, i_oa]
+                    if ((next_poses[i_a] == current_poses[i_oa]).all() and
+                            (next_poses[i_oa] == current_poses[i_a]).all()):
+                        edge = [tuple(current_poses[i_a]),
+                                tuple(next_poses[i_a])]
                         edge_colissions[tuple(edge)] = [i_a, i_oa]
                         #####################################################
                         #                                                   #
@@ -133,7 +139,7 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
 
         # check collisions
         node_colissions, edge_colissions = check_for_colissions(
-            agents, possible_next_agent_poses)
+            agents, 0, possible_next_agent_poses)
 
         if (len(node_colissions.keys()) == 0 and
                 len(edge_colissions.keys()) == 0):
@@ -142,17 +148,17 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
         else:
             # we need to solve the blocks be not stepping some agents
             for pose, [i_a1, i_a2] in node_colissions.items():
-                if not can_proceed[i_a1]:  # already blocked
-                    can_proceed[i_a1] = True
-                    can_proceed[i_a2] = False  # block other agent
-                elif not can_proceed[i_a2]:  # already blocked
-                    can_proceed[i_a1] = True
-                    can_proceed[i_a1] = False  # block other agent
-                elif (agents[i_a1].get_priority(agents[i_a2].id) >
+                if (agents[i_a1].get_priority(agents[i_a2].id) >
                         agents[i_a2].get_priority(agents[i_a1].id)):
-                    can_proceed[i_a2] = False  # has lower prio
+                    # a2 has lower prio
+                    if not can_proceed[i_a2]:  # already blocked
+                        can_proceed[i_a1] = False
+                    can_proceed[i_a2] = False
                 else:
-                    can_proceed[i_a1] = False  # has lower prio
+                    # a1 has lower prio
+                    if not can_proceed[i_a1]:  # already blocked
+                        can_proceed[i_a2] = False
+                    can_proceed[i_a1] = False
             for edge, [i_a1, i_a2] in edge_colissions.items():
                 if (agents[i_a1].get_priority(agents[i_a2].id) >
                         agents[i_a2].get_priority(agents[i_a1].id)):
@@ -220,12 +226,12 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
                         agents[i_oa].get_path_i_not_none()
                     )  # observation regarding agent i_oa
 
-        while(there_are_collisions):
-            possible_next_agent_poses = get_poses_in_dt(agents, dt + 1)
+        while(there_are_collisions and any(can_proceed) or
+              there_are_collisions and dt == 0):
 
             # check collisions
             node_colissions, edge_colissions = check_for_colissions(
-                agents, possible_next_agent_poses)
+                agents, dt)
 
             if (len(node_colissions.keys()) == 0 and
                     len(edge_colissions.keys()) == 0):
@@ -276,6 +282,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
         # there is not one agent that can move
         raise SimIterationException("Deadlock from unresolvable collision")
 
+    possible_next_agent_poses = get_poses_in_dt(agents, 1)
     time_slice: List[int] = [0] * len(agents)
     space_slice: List[int] = [0] * len(agents)
     for i_a in range(len(agents)):
