@@ -173,6 +173,7 @@ class TestRunner(unittest.TestCase):
             self.assertRaises(runner.SimIterationException,
                               lambda: iterator_fun(agents))
 
+    # todo: fix this test
     # def test_iterate_sim_with_edge_coll(self):
     #     for iterator_type in IteratorType:
     #         iterator_fun = get_iterator_fun(iterator_type)
