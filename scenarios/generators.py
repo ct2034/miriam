@@ -86,8 +86,8 @@ def get_random_next_to_free_pose_or_any_if_full(env):
         samples = np.where(env == OBSTACLE)
     else:
         samples = np.where(env == FREE)
-    n_smpl = len(samples[1])
-    r = random.randrange(n_smpl)
+    n_samples = len(samples[1])
+    r = random.randrange(n_samples)
     basic_pos = np.array(samples)[:, r]
     r_step = random.choice([[0, 1], [0, -1], [1, 0], [-1, 0]])
     step_pos = basic_pos + r_step
@@ -147,8 +147,8 @@ def movingai(map_str: str, scene_str: str, scene_nr: int, n_agents: int):
 
     assert (scene_str == "even" or scene_str == "random"
             ), "scene_str may be either >even< or >random<"
-    scenfiles: List[str] = []
-    scen_nr_str = "{}-{:d}.".format(scene_str, scene_nr+1)
+    scene_files: List[str] = []
+    scene_nr_str = "{}-{:d}.".format(scene_str, scene_nr+1)
     for subdir, dirs, files in os.walk(MOVINGAI_PATH):
         for filename in files:
             filepath = subdir + os.sep + filename
@@ -156,21 +156,21 @@ def movingai(map_str: str, scene_str: str, scene_nr: int, n_agents: int):
                 mapfile = filepath
             if (filepath.endswith(".scen") and
                 map_str in filepath and
-                    scen_nr_str in filepath):
-                scenfiles.append(filepath)
-    print("\n".join(scenfiles))
+                    scene_nr_str in filepath):
+                scene_files.append(filepath)
+    print("\n".join(scene_files))
 
     # reading mapfile
     print(mapfile)
     grid = movingai_read_mapfile(mapfile)
 
-    # reading scenfile
-    assert len(scenfiles) == 1
-    print(scenfiles[0])
-    with open(scenfiles[0], 'r') as f:
-        scenfile_content = f.read().split("\n")
-    assert scenfile_content[0] == "version 1"
-    max_n_jobs = len(scenfile_content) - 2
+    # reading scene_file
+    assert len(scene_files) == 1
+    print(scene_files[0])
+    with open(scene_files[0], 'r') as f:
+        scene_file_content = f.read().split("\n")
+    assert scene_file_content[0] == "version 1"
+    max_n_jobs = len(scene_file_content) - 2
     assert max_n_jobs >= n_agents
     jobs = np.zeros((n_agents, 4), dtype=np.int32)
 
@@ -178,7 +178,7 @@ def movingai(map_str: str, scene_str: str, scene_nr: int, n_agents: int):
     goals = []
     LINES_OFFSET = 1
     for i_l in range(n_agents):
-        line = scenfile_content[i_l + LINES_OFFSET]
+        line = scene_file_content[i_l + LINES_OFFSET]
         elem = line.split("\t")
         assert map_str in elem[1]
         # start
@@ -222,14 +222,14 @@ def can_be_set(env, pos):
     assert pos[1] < env.shape[1]
     area = np.full((3, 3), OBSTACLE)
     for x, y in product(range(3), repeat=2):
-        penv = np.array(pos) + [x, y] + [-1, -1]
+        padded_env = np.array(pos) + [x, y] + [-1, -1]
         if (
-                penv[0] < 0 or penv[0] >= env.shape[0] or
-                penv[1] < 0 or penv[1] >= env.shape[1]
+                padded_env[0] < 0 or padded_env[0] >= env.shape[0] or
+                padded_env[1] < 0 or padded_env[1] >= env.shape[1]
         ):
             area[x, y] = OBSTACLE
         else:
-            area[x, y] = env[tuple(penv)]
+            area[x, y] = env[tuple(padded_env)]
     return can_area_be_set(area)
 
 
