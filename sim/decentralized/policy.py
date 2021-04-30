@@ -131,6 +131,9 @@ class LearnedPolicy(Policy):
         paths_until_col = [self._path_until_coll(
             self.a.path, self.a.path_i, N_T)]  # self always first
         ids = sorted(self.paths.keys())
+        if id_coll not in ids:
+            print(f"{id_coll} not in {ids}")
+            return .5
         i_oa = ids.index(id_coll) + 1
         for i_id in ids:
             paths_full.append(self.paths[i_id])
