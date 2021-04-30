@@ -209,4 +209,4 @@ if __name__ == "__main__":  # pragma: no cover
     logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)
     logging.getLogger("__main__").setLevel(logging.ERROR)
     logging.getLogger("root").setLevel(logging.ERROR)
-    evaluate_policies(16, 16, 8)
+    evaluate_policies(10, 8, 1000)
