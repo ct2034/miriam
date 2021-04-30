@@ -21,6 +21,7 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
     agents = sim.decentralized.runner.initialize_agents(
         env, n_agents, PolicyType.RANDOM,
         tight_placement=True, seed=seed)
+    assert agents is not None
     starts = np.array([a.pos for a in agents])
     assert starts.shape == (n_agents, 2)
     goals = np.array([a.goal for a in agents])
