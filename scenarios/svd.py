@@ -93,13 +93,14 @@ if __name__ == "__main__":
     var_explained = S/np.sum(S)
     var_explained = var_explained[:20]
 
+    plt.figure()
     sns.barplot(x=list(range(1, len(var_explained)+1)),
-                y=var_explained, color="limegreen")
+                y=var_explained)
     plt.xlabel('SVs', fontsize=16)
     plt.ylabel('Percent Variance Explained', fontsize=16)
-    plt.show()
 
     # visualizing matrices ####################################################
+    plt.figure()
     sns.heatmap(U, cmap="RdBu")
     plt.title("U")
     plt.yticks(
@@ -107,8 +108,49 @@ if __name__ == "__main__":
         new_idx,
         rotation='horizontal')
     plt.savefig("heatmap_u.png")
-    plt.show()
 
+    plt.figure()
     sns.heatmap(V[:, :20], cmap="RdBu")
     plt.title("V")
+
+    # is there something? #####################################################
+    plt.figure()
+    df_svd_t = df_svd.transpose()
+    sns.scatterplot(
+        x='mean_degree',
+        y='fills',
+        hue='ecbs_cost',
+        data=df_svd_t,
+        palette="viridis",
+        s=10)
+
+    plt.figure()
+    df_svd_t = df_svd.transpose()
+    sns.scatterplot(
+        x='mean_degree',
+        y='diff_indep',
+        hue='ecbs_cost',
+        data=df_svd_t,
+        palette="viridis",
+        s=10)
+
+    plt.figure()
+    df_svd_t = df_svd.transpose()
+    sns.scatterplot(
+        x='n_agentss',
+        y='diff_indep',
+        hue='mean_degree',
+        data=df_svd_t,
+        palette="viridis",
+        s=10)
+
+    plt.figure()
+    df_svd_t = df_svd.transpose()
+    sns.scatterplot(
+        x='diff_sim_decen_learned',
+        y='fills',
+        hue='n_agentss',
+        data=df_svd_t,
+        palette="viridis",
+        s=10)
     plt.show()
