@@ -21,6 +21,9 @@ if __name__ == "__main__":
     # changing dataframe ######################################################
     if "svd" in args.pkl_read:  # was already transformed
         df_svd = df_results
+        df_svd.sort_index(inplace=True)
+        new_idx = list(set(df_svd.index))
+        new_idx.sort()
     else:  # transforming dataframe into more columns
         idx = df_results.index
         print(idx.names)
@@ -81,4 +84,17 @@ if __name__ == "__main__":
                 y=var_explained, color="limegreen")
     plt.xlabel('SVs', fontsize=16)
     plt.ylabel('Percent Variance Explained', fontsize=16)
+    plt.show()
+
+    # visualizing matrizes ####################################################
+    sns.heatmap(U, cmap="PiYG")
+    plt.title("U")
+    plt.yticks(
+        list(map(lambda x: x+.5, range(len(new_idx)))),
+        new_idx,
+        rotation='horizontal')
+    plt.show()
+
+    sns.heatmap(V[:, :20], cmap="PiYG")
+    plt.title("V")
     plt.show()
