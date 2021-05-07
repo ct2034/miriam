@@ -3,6 +3,7 @@ bintrees
 cherrypy
 coloredlogs
 flask
+git+https://github.com/scottgs/pyflann.git@1e06ec23ea99385920ad3554cf06451ce44cf442
 gitpython
 ipykernel
 iso8601
@@ -14,7 +15,6 @@ networkx
 numpy
 psutil
 pycodestyle
-git+https://github.com/scottgs/pyflann.git@1e06ec23ea99385920ad3554cf06451ce44cf442
 PyMC3
 pymongo
 pyomo==5.2
@@ -23,7 +23,8 @@ pytest
 pytest-cov
 pytest-timeout
 scipy
-timeout-decorator
+seaborn
 tensorflow
+timeout-decorator
 unittest2
 ws4py
