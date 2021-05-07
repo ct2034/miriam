@@ -18,12 +18,20 @@ if __name__ == "__main__":
     print(df_results.head())
     print(df_results.shape)
 
+    ignored_evaluations = [
+        "n_edges",
+        "n_edges_ta",
+        "n_nodes",
+        "n_nodes_ta"
+    ]
+
     # changing dataframe ######################################################
     if "svd" in args.pkl_read:  # was already transformed
         df_svd = df_results
         df_svd.sort_index(inplace=True)
         new_idx = list(set(df_svd.index))
         new_idx.sort()
+        print(new_idx)
     else:  # transforming dataframe into more columns
         idx = df_results.index
         print(idx.names)
@@ -54,6 +62,11 @@ if __name__ == "__main__":
 
     # sns.heatmap(df_svd)
     # plt.show()
+
+    # dropping ignored rows ###################################################
+    df_svd.drop(labels=ignored_evaluations, axis=0, inplace=True)
+    for ev in ignored_evaluations:
+        new_idx.pop(new_idx.index(ev))
 
     # preparation #############################################################
     print("Dropping all nan rows ...")
@@ -86,15 +99,16 @@ if __name__ == "__main__":
     plt.ylabel('Percent Variance Explained', fontsize=16)
     plt.show()
 
-    # visualizing matrizes ####################################################
-    sns.heatmap(U, cmap="PiYG")
+    # visualizing matrices ####################################################
+    sns.heatmap(U, cmap="RdBu")
     plt.title("U")
     plt.yticks(
         list(map(lambda x: x+.5, range(len(new_idx)))),
         new_idx,
         rotation='horizontal')
+    plt.savefig("heatmap_u.png")
     plt.show()
 
-    sns.heatmap(V[:, :20], cmap="PiYG")
+    sns.heatmap(V[:, :20], cmap="RdBu")
     plt.title("V")
     plt.show()
