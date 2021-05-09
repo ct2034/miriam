@@ -147,8 +147,8 @@ if __name__ == "__main__":
     plt.figure()
     df_svd_t = df_svd.transpose()
     sns.scatterplot(
-        x='diff_sim_decen_learned',
-        y='fills',
+        x='mean_degree',
+        y='diff_sim_decen_learned',
         hue='n_agentss',
         data=df_svd_t,
         palette="viridis",
