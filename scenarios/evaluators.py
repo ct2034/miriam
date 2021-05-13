@@ -3,9 +3,11 @@ from functools import lru_cache
 from os import EX_OSFILE
 from typing import Tuple
 
+import networkx as nx
 import numpy as np
 import tools
 from definitions import DEFAULT_TIMEOUT_S, FREE, INVALID
+from networkx.algorithms import approximation
 from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
@@ -26,6 +28,7 @@ LOWLEVELEXPANDED = 'lowLevelExpanded'
 STATISTICS = 'statistics'
 
 
+# static problem analysis ####################################################
 def is_well_formed(env, starts, goals):
     """Check if the environment is well formed according to Cap2015"""
     agents = to_agent_objects(env, starts, goals)
@@ -34,6 +37,31 @@ def is_well_formed(env, starts, goals):
     return is_environment_well_formed(tuple(agents))
 
 
+def cost_independent(env, starts, goals):
+    """what would be the average agent cost if the agents would be independent
+    of each other"""
+    n_agents = starts.shape[0]
+    paths = indep(env, starts, goals)
+    if paths is INVALID:
+        return INVALID
+    return float(sum(map(lambda p: len(p)-1, paths))) / n_agents
+
+
+def connectivity(env, starts, goals) -> float:
+    """connectivity of start and goal pairs"""
+    g = _gridmap_to_nx(env)
+    cons = []
+    for i_a in range(len(starts)):
+        if all(starts[i_a] == goals[i_a]):
+            con = 5  # must theoretically be inf, probably
+        else:
+            con = approximation.node_connectivity(
+                g, tuple(starts[i_a]), tuple(goals[i_a]))
+        cons.append(con)
+    return np.mean(cons)
+
+
+# ecbs ########################################################################
 def cost_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
     """get the average agent cost of this from ecbs
     returns: `float` and `-1` if planning was unsuccessful."""
@@ -84,16 +112,7 @@ def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
     return (n_vertex_blocks, n_edge_blocks)
 
 
-def cost_independent(env, starts, goals):
-    """what would be the average agent cost if the agents would be independent
-    of each other"""
-    n_agents = starts.shape[0]
-    paths = indep(env, starts, goals)
-    if paths is INVALID:
-        return INVALID
-    return float(sum(map(lambda p: len(p)-1, paths))) / n_agents
-
-
+# decen #######################################################################
 def cost_sim_decentralized_random(env, starts, goals, skip_cache=False):
     metrics = cached_decentralized(
         env, starts, goals, PolicyType.RANDOM, skip_cache)
@@ -120,6 +139,7 @@ def cost_sim_decentralized_learned(env, starts, goals, skip_cache=False):
         return INVALID
 
 
+# icts ########################################################################
 def expanded_nodes_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
     info = cached_icts(env, starts, goals, timeout=timeout)
     if is_info_valid(info):
@@ -138,6 +158,7 @@ def cost_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
         return INVALID
 
 
+# only dependant on graph #####################################################
 def n_nodes(env):
     return np.count_nonzero(env == FREE)
 
@@ -158,3 +179,24 @@ def mean_degree(env):
     for n in g.nodes:
         degrees.append(g.degree(n))
     return np.mean(degrees)
+
+
+def tree_width(env):
+    g = _gridmap_to_nx(env)
+    w, _ = approximation.treewidth_min_degree(g)
+    return w
+
+
+def small_world_sigma(env):
+    g = _gridmap_to_nx(env)
+    return nx.sigma(g)
+
+
+def small_world_omega(env):
+    g = _gridmap_to_nx(env)
+    return nx.omega(g)
+
+
+def bridges(env):
+    g = _gridmap_to_nx(env)
+    return len(list(nx.bridges(g)))

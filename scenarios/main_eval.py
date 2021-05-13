@@ -26,6 +26,8 @@ FILLS = 'fills'
 N_AGENTSS = 'n_agentss'
 EVALUATIONS = 'evaluations'
 # -------------------------
+BRIDGES = "bridges"
+CONNECTIVITY = "connectivity"
 DIFF_INDEP = "diff_indep"
 DIFF_SIM_DECEN_LEARNED = "diff_sim_decen_learned"
 DIFF_SIM_DECEN_RANDOM = "diff_sim_decen_random"
@@ -48,6 +50,9 @@ SIM_DECEN_LEARNED_COST = "sim_decen_learned_cost"
 SIM_DECEN_LEARNED_SUCCESS = "sim_decen_learned_success"
 SIM_DECEN_RANDOM_COST = "sim_decen_random_cost"
 SIM_DECEN_RANDOM_SUCCESS = "sim_decen_random_success"
+SMALL_WORLD_OMEGA = "small_world_omega"
+SMALL_WORLD_SIGMA = "small_world_sigma"
+TREE_WIDTH = "tree_width"
 USEFULLNESS = "usefullness"
 WELL_FORMED = "well_formed"
 
@@ -224,10 +229,13 @@ def plot_scatter(df, xs, ys, cs, titles, title="scatter"):
             marker="."
         )
         i_nn = np.isfinite(dx) & np.isfinite(dy)
-        coeff = np.polyfit(dx[i_nn], dy[i_nn], 1)
-        poly = np.poly1d(coeff)
-        plt.plot(dx[i_nn], poly(dx[i_nn]), "r--")
-        print("%s y=%.6fx+(%.6f)" % (x, coeff[0], coeff[1]))
+        try:
+            coeff = np.polyfit(dx[i_nn], dy[i_nn], 1)
+            poly = np.poly1d(coeff)
+            plt.plot(dx[i_nn], poly(dx[i_nn]), "r--")
+            print("%s y=%.6fx+(%.6f)" % (x, coeff[0], coeff[1]))
+        except Exception as e:
+            print(e)
         plt.title(titles[i_xs])
         plt.xlabel(x)
         plt.ylabel(y)
@@ -240,10 +248,10 @@ def make_full_df():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    # (max_fill, n_fills, n_n_agentss, n_runs, size,
-    #  low_agents, high_agents) = init_values_debug()
     (max_fill, n_fills, n_n_agentss, n_runs, size,
-     low_agents, high_agents) = init_values_main()
+     low_agents, high_agents) = init_values_debug()
+    # (max_fill, n_fills, n_n_agentss, n_runs, size,
+    #  low_agents, high_agents) = init_values_main()
     # (max_fill, n_fills, n_n_agentss, n_runs, size,
     #  low_agents, high_agents) = init_values_focus()
 
@@ -264,6 +272,8 @@ def make_full_df():
                             )  # list of different numbers of agents we want
 
     evaluations = [
+        BRIDGES,
+        CONNECTIVITY,
         DIFF_INDEP,
         DIFF_SIM_DECEN_LEARNED,
         DIFF_SIM_DECEN_RANDOM,
@@ -286,6 +296,9 @@ def make_full_df():
         SIM_DECEN_LEARNED_SUCCESS,
         SIM_DECEN_RANDOM_COST,
         SIM_DECEN_RANDOM_SUCCESS,
+        TREE_WIDTH,
+        # SMALL_WORLD_OMEGA,
+        # SMALL_WORLD_SIGMA,
         # USEFULLNESS,
         WELL_FORMED
     ]
@@ -320,7 +333,7 @@ def make_full_df():
     #     print(df_results)
     df_results.info()
 
-    df_results.to_pickle(get_fname("full", "_", "pkl"))
+    df_results.to_pickle(get_fname("full", "yo", "pkl"))
     return df_results
 
 
@@ -358,12 +371,27 @@ def evaluate_full(i_r, pbm, idx, generators, fills, n_agentss, size):
         if MEAN_DEGREE in evaluations:
             df_col.loc[(genstr(gen), fill, n_agents, MEAN_DEGREE), col_name
                        ] = mean_degree(env)
-        # well-formedness .....................................................
+        if TREE_WIDTH in evaluations:
+            df_col.loc[(genstr(gen), fill, n_agents, TREE_WIDTH), col_name
+                       ] = tree_width(env)
+        if SMALL_WORLD_OMEGA in evaluations:
+            df_col.loc[(genstr(gen), fill, n_agents, SMALL_WORLD_OMEGA), col_name
+                       ] = small_world_omega(env)
+        if SMALL_WORLD_SIGMA in evaluations:
+            df_col.loc[(genstr(gen), fill, n_agents, SMALL_WORLD_SIGMA), col_name
+                       ] = small_world_sigma(env)
+        if BRIDGES in evaluations:
+            df_col.loc[(genstr(gen), fill, n_agents, BRIDGES), col_name
+                       ] = bridges(env)
+        # static problem analysis .............................................
         if WELL_FORMED in evaluations:
             df_col.loc[
                 (genstr(gen), fill,
                  n_agents, WELL_FORMED), col_name
             ] = int(is_well_formed(env, starts, goals))
+        if CONNECTIVITY in evaluations:
+            df_col.loc[(genstr(gen), fill, n_agents, CONNECTIVITY), col_name
+                       ] = connectivity(env, starts, goals)
         # calculating ecbs cost ...............................................
         if ECBS_SUCCESS in evaluations:
             if i_f > 0 and df_col.loc[
@@ -676,8 +704,8 @@ if __name__ == "__main__":
         )
 
     # compare expanded nodes over graph properties
-    # xs = [N_NODES, N_EDGES, MEAN_DEGREE, N_NODES_TA, N_EDGES_TA]
-    # ys = [DIFFERENCE_ECBS_EN_MINUS_ICTS_EN]
-    # plot_scatter(df_results, xs, ys, cs=GENERATORS, titles=xs)
+    xs = [MEAN_DEGREE, TREE_WIDTH, CONNECTIVITY, BRIDGES]
+    ys = [DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED]
+    plot_scatter(df_results, xs, ys, cs=GENERATORS, titles=xs)
 
     plt.show()
