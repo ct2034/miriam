@@ -48,17 +48,36 @@ def cost_independent(env, starts, goals):
 
 
 def connectivity(env, starts, goals) -> float:
-    """connectivity of start and goal pairs"""
+    """sum of inverse connectivities of start and goal pairs.
+    Inverse is here `1/connectivity`, because we want to penalize low
+    connectivity."""
     g = _gridmap_to_nx(env)
     cons = []
     for i_a in range(len(starts)):
         if all(starts[i_a] == goals[i_a]):
-            con = 5  # must theoretically be inf, probably
+            cons.append(0)
         else:
             con = approximation.node_connectivity(
                 g, tuple(starts[i_a]), tuple(goals[i_a]))
-        cons.append(con)
-    return np.mean(cons)
+            cons.append(1 / con)
+    return sum(cons)
+
+
+def _eigenvector_centrality_dict(env):
+    g = _gridmap_to_nx(env)
+    ec = nx.eigenvector_centrality_numpy(g, max_iter=100)
+    return ec
+
+
+def uncentrality(env, starts, goals) -> float:
+    """Hand crafted score that sums up eigenvector uncentralities for start and
+    goal positions. Uncentrality is `1-centrality`"""
+    ec = _eigenvector_centrality_dict(env)
+    score = 0
+    for i_a in range(len(starts)):
+        score += 1 - ec[tuple(starts[i_a])]
+        score += 1 - ec[tuple(goals[i_a])]
+    return score
 
 
 # ecbs ########################################################################

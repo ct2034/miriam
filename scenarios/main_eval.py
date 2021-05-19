@@ -53,6 +53,7 @@ SIM_DECEN_RANDOM_SUCCESS = "sim_decen_random_success"
 SMALL_WORLD_OMEGA = "small_world_omega"
 SMALL_WORLD_SIGMA = "small_world_sigma"
 TREE_WIDTH = "tree_width"
+UNCENTRALITY = "uncentrality"
 USEFULLNESS = "usefullness"
 WELL_FORMED = "well_formed"
 
@@ -248,10 +249,10 @@ def make_full_df():
     # no warnings pls
     logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
-    (max_fill, n_fills, n_n_agentss, n_runs, size,
-     low_agents, high_agents) = init_values_debug()
     # (max_fill, n_fills, n_n_agentss, n_runs, size,
-    #  low_agents, high_agents) = init_values_main()
+    #  low_agents, high_agents) = init_values_debug()
+    (max_fill, n_fills, n_n_agentss, n_runs, size,
+     low_agents, high_agents) = init_values_main()
     # (max_fill, n_fills, n_n_agentss, n_runs, size,
     #  low_agents, high_agents) = init_values_focus()
 
@@ -299,6 +300,7 @@ def make_full_df():
         TREE_WIDTH,
         # SMALL_WORLD_OMEGA,
         # SMALL_WORLD_SIGMA,
+        UNCENTRALITY,
         # USEFULLNESS,
         WELL_FORMED
     ]
@@ -392,6 +394,9 @@ def evaluate_full(i_r, pbm, idx, generators, fills, n_agentss, size):
         if CONNECTIVITY in evaluations:
             df_col.loc[(genstr(gen), fill, n_agents, CONNECTIVITY), col_name
                        ] = connectivity(env, starts, goals)
+        if UNCENTRALITY in evaluations:
+            df_col.loc[(genstr(gen), fill, n_agents, UNCENTRALITY), col_name
+                       ] = uncentrality(env, starts, goals)
         # calculating ecbs cost ...............................................
         if ECBS_SUCCESS in evaluations:
             if i_f > 0 and df_col.loc[
