@@ -72,11 +72,13 @@ def _eigenvector_centrality_dict(env):
 def uncentrality(env, starts, goals) -> float:
     """Hand crafted score that sums up eigenvector uncentralities for start and
     goal positions. Uncentrality is `1-centrality`"""
+    # how much more to value uncentrality over number of agents
+    SCALE_UNCENTRALITY: float = 3.
     ec = _eigenvector_centrality_dict(env)
     score = 0
     for i_a in range(len(starts)):
-        score += 1 - ec[tuple(starts[i_a])]
-        score += 1 - ec[tuple(goals[i_a])]
+        score += 1 - ec[tuple(starts[i_a])] * SCALE_UNCENTRALITY
+        score += 1 - ec[tuple(goals[i_a])] * SCALE_UNCENTRALITY
     return score
 
 
