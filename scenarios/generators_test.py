@@ -176,6 +176,15 @@ class TestGenerators(unittest.TestCase):
             10, 0, 10, 0)
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
+    def test_tracing_pathes_in_the_dark_radomism(self):
+        """tests if generator makes actually random changes between agents"""
+        (env, starts, goals
+         ) = tracing_pathes_in_the_dark(
+            10, 0, 10, 0)
+        problematic = np.array(starts)[1:, :]
+        self.assertFalse(all(problematic[:, 1] == np.arange(9)))
+        self.assertFalse(all(problematic[:, 0] == 5))
+
     # movingai ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def test_movingai_read_mapfile(self):
         for mapname in self.MAPS_WE_CARE_ABOUT.keys():

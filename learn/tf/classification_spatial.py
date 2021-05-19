@@ -25,7 +25,7 @@ from tools import hasher
 @cachier.cachier(hash_params=hasher)
 def make_sample(size, fill_scale, seed):
     random.seed(seed)
-    np.random.seed(seed)
+    np.random.seed(int(seed*1000))
     fill = random.random() * fill_scale
     env = sim.decentralized.runner.initialize_environment(size, fill)
     free = np.array(np.where(env == FREE))

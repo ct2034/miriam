@@ -16,7 +16,7 @@ logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 
 def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
-                             seed: Any = random.random()):
+                             seed: float = random.random()):
     random.seed(seed)
     agents = sim.decentralized.runner.initialize_agents(
         env, n_agents, PolicyType.RANDOM,
@@ -32,7 +32,7 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
 # random ######################################################################
 
 def like_sim_decentralized(size: int, fill: float,
-                           n_agents: int, seed: Any):
+                           n_agents: int, seed: float):
     """Randomly filling spaces in gridmap based on `fill`."""
     random.seed(seed)
     env = sim.decentralized.runner.initialize_environment(
@@ -67,7 +67,7 @@ def generate_random_gridmap(width: int, height: int, fill: float):
 
 
 def like_policylearn_gen(size: int, fill: float,
-                         n_agents: int, seed: Any):
+                         n_agents: int, seed: float):
     random.seed(seed)
     env = generate_random_gridmap(
         size, size, fill)
@@ -99,14 +99,14 @@ def get_random_next_to_free_pose_or_any_if_full(env):
 
 
 def tracing_pathes_in_the_dark(size: int, fill: float,
-                               n_agents: int, seed: Any):
+                               n_agents: int, seed: float):
     """Starting with a black map, clearing straight lines through it, making
     sure map is fully connected."""
     if fill == 0:
         env = np.zeros((size, size), dtype=np.int8)
     else:
         random.seed(seed)
-        np.random.seed(seed)
+        np.random.seed(int(seed*1000))
         env = np.ones((size, size), dtype=np.int8)
         to_clear_start = int((1. - fill) * size * size)
         to_clear = to_clear_start
@@ -234,14 +234,14 @@ def can_be_set(env, pos):
 
 
 def building_walls(size: int, fill: float,
-                   n_agents: int, seed: Any):
+                   n_agents: int, seed: float):
     """Starting with an empty map, creating obstacles inline of previous
     obstacles, ensuring full connectedness."""
     if fill == 0:
         env = np.zeros((size, size), dtype=np.int8)
     else:
         random.seed(seed)
-        np.random.seed(seed)
+        np.random.seed(int(seed*1000))
         env = np.full((size, size), FREE, dtype=np.int8)
         to_fill = int(fill * size ** 2)
         while np.sum(env == OBSTACLE) < to_fill:

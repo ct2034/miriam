@@ -18,7 +18,7 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 
-def initialize_environment(size: int, fill: float, seed: Any = random.random()
+def initialize_environment(size: int, fill: float, seed: float = random.random()
                            ) -> np.ndarray:
     """Make a square map with edge length `size` and `fill` (0..1) obstacle
     ratio.
@@ -38,7 +38,7 @@ def initialize_environment(size: int, fill: float, seed: Any = random.random()
 
 def initialize_new_agent(
         env: np.ndarray, agents: List[Agent], policy: PolicyType,
-        tight_placement: bool = False, seed: Any = random.random()) -> Optional[Agent]:
+        tight_placement: bool = False, seed: float = random.random()) -> Optional[Agent]:
     """Place new agent in the environment, where no obstacle or other agent
     is.
 
@@ -47,8 +47,8 @@ def initialize_new_agent(
     :raises AssertionError if no space is left
     :return: the agent
     """
-    random.seed(int(seed))
-    np.random.seed(int(seed))
+    random.seed(seed)
+    np.random.seed(int(seed*1000))
     if tight_placement:  # starts can be at other goals
         env_with_agents = env.copy()
         env_with_goals = env.copy()
@@ -97,17 +97,18 @@ def initialize_new_agent(
 
 def initialize_agents(
         env: np.ndarray, n_agents: int, policy: PolicyType,
-        tight_placement: bool = False, seed: Any = random.random()
+        tight_placement: bool = False, seed: float = random.random()
 ) -> Optional[Tuple[Agent, ...]]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other). Returns None if one agent
     could not find a path to its goal."""
     random.seed(seed)
-    np.random.seed(int(seed))
+    np.random.seed(int(seed*1000))
     agents: List[Agent] = []  # starting with a list for easy inserting
     for _ in range(n_agents):
+        agent_seed = random.random()
         agent = initialize_new_agent(
-            env, agents, policy, tight_placement, seed)
+            env, agents, policy, tight_placement, agent_seed)
         if agent is None:
             return None
         agents.append(agent)
@@ -191,7 +192,7 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):
             random.seed(i_r)
-            np.random.seed(i_r)
+            np.random.seed(int(i_r*1000))
             results = sample_and_run_a_scenario(
                 size, n_agents, policy, False, i_r, IteratorType.BLOCKING3)
             evaluation_per_policy = np.append(
