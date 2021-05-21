@@ -94,13 +94,6 @@ if __name__ == "__main__":
         markers=["o", "s", "D"],
         plot_kws={"s": 3},
         x_vars=[
-            "ecbs_cost",
-            "icts_cost",
-            "diff_indep",
-            "diff_sim_decen_learned",
-            # "difference_sim_decen_minus_learned"
-        ],
-        y_vars=[
             "mean_degree",
             "n_nodes_ta",
             "n_edges_ta",
@@ -109,8 +102,15 @@ if __name__ == "__main__":
             "tree_width",
             "uncentrality"
         ],
+        y_vars=[
+            "ecbs_cost",
+            "icts_cost",
+            "diff_indep",
+            "diff_sim_decen_learned",
+            "difference_sim_decen_random_minus_learned"
+        ],
     )
-    plt.savefig("scenarios/plots/pairplot.png")
+    plt.savefig("scenarios/plots/pairplot.png", dpi=500)
 
     # is there something? #####################################################
     # plt.figure()
