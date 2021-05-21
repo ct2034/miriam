@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import argparse
+from typing import List
 
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
-from numpy.core.fromnumeric import var
-from tools import ProgressBar
 
 if __name__ == "__main__":
     """Load pandas results from pkl file and perform a svd on the data"""
@@ -18,7 +17,7 @@ if __name__ == "__main__":
     print(df_results.head())
     print(df_results.shape)
 
-    ignored_evaluations = [
+    ignored_evaluations: List[str] = [
         # "n_edges",
         # "n_edges_ta",
         # "n_nodes",
