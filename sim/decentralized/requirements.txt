@@ -8,4 +8,4 @@ pytest-mypy
 pycodestyle
 pytest-pycodestyle
 pytest-cov
-tensorflow
+tensorflow==2.1.0  # https://stackoverflow.com/questions/61137954/attributeerror-module-tensorflow-python-keras-utils-generic-utils-has-no-attr
