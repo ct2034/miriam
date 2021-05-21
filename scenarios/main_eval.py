@@ -31,7 +31,8 @@ DIFF_INDEP = "diff_indep"
 DIFF_SIM_DECEN_LEARNED = "diff_sim_decen_learned"
 DIFF_SIM_DECEN_RANDOM = "diff_sim_decen_random"
 DIFFERENCE_ECBS_EN_MINUS_ICTS_EN = "difference_ecbs_en_-_icts_en"
-DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED = "difference_sim_decen_minus_learned"
+DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED = (
+    "difference_sim_decen_random_minus_learned")
 ECBS_COST = "ecbs_cost"
 ECBS_EDGE_BLOCKS = "ecbs_edge_blocks"
 ECBS_EXPANDED_NODES = "ecbs_expanded_nodes"
@@ -320,7 +321,7 @@ def evaluate_full_run(size, i_r, cols, experiment_matrix, pbm):
                     decen_cost_r != INVALID):
                 df_rows.loc[row_name, SIM_DECEN_RANDOM_COST] = decen_cost_r
         if SIM_DECEN_LEARNED_SUCCESS in cols:
-            decen_cost_l = cost_sim_decentralized_random(
+            decen_cost_l = cost_sim_decentralized_learned(
                 env, starts, goals)
             df_rows.loc[row_name, SIM_DECEN_LEARNED_SUCCESS] = int(
                 decen_cost_l != INVALID)

@@ -58,7 +58,7 @@ if __name__ == "__main__":
     print(df_results_scaled.head())
 
     # svd #####################################################################
-    U, S, V = np.linalg.svd(df_results_scaled, full_matrices=False)
+    U, S, V = np.linalg.svd(df_results_scaled.transpose(), full_matrices=False)
 
     # analyzing explained variance ############################################
     var_explained = S/np.sum(S)
@@ -73,6 +73,7 @@ if __name__ == "__main__":
 
     # visualizing matrices ####################################################
     plt.figure()
+    print(f"U.shape {U.shape}")
     sns.heatmap(U[:len(numeric_var_cols), :], cmap="RdBu")
     plt.title("U")
     plt.yticks(
