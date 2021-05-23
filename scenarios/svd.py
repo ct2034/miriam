@@ -23,12 +23,17 @@ if __name__ == "__main__":
         # "n_nodes",
         # "n_nodes_ta"
     ]
+    generators = list(set(df_results["generator"]))
 
     # changing dataframe ######################################################
     df_results.sort_index(inplace=True)
     cols = list(df_results.columns)
     cols.sort()
     print(cols)
+    text_cols = ["generator"]
+    for c in cols:
+        if c not in text_cols:
+            df_results[c] = df_results[c].astype(float)
 
     # dropping ignored rows ###################################################
     df_results_clean = df_results.drop(labels=ignored_evaluations, axis=1)
@@ -88,39 +93,63 @@ if __name__ == "__main__":
     plt.savefig("scenarios/plots/heatmap_v.png")
 
     # what a (over)view #######################################################
-    sns.pairplot(
-        df_results,
-        hue="generator",
-        markers=["o", "s", "D"],
-        plot_kws={"s": 3},
-        x_vars=[
-            "mean_degree",
-            "n_nodes_ta",
-            "n_edges_ta",
-            "bridges",
-            "connectivity",
-            "tree_width",
-            "uncentrality"
-        ],
-        y_vars=[
-            "ecbs_cost",
-            "icts_cost",
-            "diff_indep",
-            "diff_sim_decen_learned",
-            "difference_sim_decen_random_minus_learned"
-        ],
-    )
-    plt.savefig("scenarios/plots/pairplot.png", dpi=500)
+    for g in generators:
+        sns.pairplot(
+            df_results[df_results["generator"] == g],
+            # hue="generator",
+            # markers=["o", "s", "D"],
+            kind="kde",
+            # plot_kws={"s": 3},
+            x_vars=[
+                "mean_degree",
+                "n_nodes_ta",
+                "n_edges_ta",
+                "bridges",
+                "connectivity",
+                "tree_width",
+                "uncentrality"
+            ],
+            y_vars=[
+                "ecbs_cost",
+                "icts_cost",
+                "diff_indep",
+                "diff_sim_decen_learned",
+                "difference_sim_decen_random_minus_learned"
+            ],
+        )
+        plt.savefig(f"scenarios/plots/pairplot-{g}.png", dpi=500)
 
     # is there something? #####################################################
-    # plt.figure()
-    # sns.scatterplot(
-    #     x='mean_degree',
-    #     y='fill',
-    #     hue='ecbs_cost',
-    #     data=df_results,
-    #     palette="viridis",
-    #     s=10)
+    plt.figure()
+    sns.set_theme(color_codes=True)
+    sns.lmplot(
+        x="mean_degree",
+        y="ecbs_cost",
+        hue="generator",
+        markers=["o", "s", "D"],
+        # hue='ecbs_cost',
+        data=df_results,
+        palette="viridis",
+        scatter_kws={"s": 3}
+    )
+    plt.savefig(
+        "scenarios/plots/mean_degree-ecbs_cost.png", dpi=500)
+
+    plt.figure()
+    sns.set_theme(color_codes=True)
+    sns.displot(
+        kind="kde",
+        # sns.lmplot(
+        x="uncentrality",
+        y="diff_indep",
+        # hue="generator",
+        # markers=["o", "s", "D"],
+        data=df_results,
+        palette="viridis",
+        # scatter_kws={"s": 3}
+    )
+    plt.savefig(
+        "scenarios/plots/uncentrality-diff_indep.png", dpi=500)
 
     # plt.figure()
     # sns.scatterplot(
