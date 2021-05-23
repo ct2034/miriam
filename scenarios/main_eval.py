@@ -27,6 +27,17 @@ N_AGENTS = 'n_agents'
 # -------------------------
 BRIDGES = "bridges"
 CONNECTIVITY = "connectivity"
+MEAN_DEGREE = "mean_degree"
+N_EDGES = "n_edges"
+N_EDGES_TA = "n_edges_ta"
+N_NODES = "n_nodes"
+N_NODES_TA = "n_nodes_ta"
+SMALL_WORLD_OMEGA = "small_world_omega"
+SMALL_WORLD_SIGMA = "small_world_sigma"
+TREE_WIDTH = "tree_width"
+UNCENTRALITY = "uncentrality"
+WELL_FORMED = "well_formed"
+# -------------------------
 DIFF_INDEP = "diff_indep"
 DIFF_SIM_DECEN_LEARNED = "diff_sim_decen_learned"
 DIFF_SIM_DECEN_RANDOM = "diff_sim_decen_random"
@@ -41,21 +52,56 @@ ECBS_VERTEX_BLOCKS = "ecbs_vertex_blocks"
 ICTS_COST = "icts_cost"
 ICTS_EXPANDED_NODES = "icts_expanded_nodes"
 ICTS_SUCCESS = "icts_success"
-MEAN_DEGREE = "mean_degree"
-N_EDGES = "n_edges"
-N_EDGES_TA = "n_edges_ta"
-N_NODES = "n_nodes"
-N_NODES_TA = "n_nodes_ta"
 SIM_DECEN_LEARNED_COST = "sim_decen_learned_cost"
 SIM_DECEN_LEARNED_SUCCESS = "sim_decen_learned_success"
 SIM_DECEN_RANDOM_COST = "sim_decen_random_cost"
 SIM_DECEN_RANDOM_SUCCESS = "sim_decen_random_success"
-SMALL_WORLD_OMEGA = "small_world_omega"
-SMALL_WORLD_SIGMA = "small_world_sigma"
-TREE_WIDTH = "tree_width"
-UNCENTRALITY = "uncentrality"
 USEFULLNESS = "usefullness"
-WELL_FORMED = "well_formed"
+
+# params for the generation of scenarios
+scenario_params = [
+    GENERATOR,
+    FILL,
+    N_AGENTS
+]
+
+# evaluations from static analysis of the scenario or graph
+evaluations_pre = [
+    BRIDGES,
+    CONNECTIVITY,
+    MEAN_DEGREE,
+    N_EDGES_TA,
+    N_EDGES,
+    N_NODES_TA,
+    N_NODES,
+    # SMALL_WORLD_OMEGA,
+    # SMALL_WORLD_SIGMA,
+    TREE_WIDTH,
+    UNCENTRALITY,
+    WELL_FORMED
+]
+
+# evaluations after performing solving algorithms
+evaluations_post = [
+    DIFF_INDEP,
+    DIFF_SIM_DECEN_LEARNED,
+    DIFF_SIM_DECEN_RANDOM,
+    DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED,
+    # DIFFERENCE_ECBS_EN_MINUS_ICTS_EN,
+    ECBS_COST,
+    # ECBS_EDGE_BLOCKS,
+    # ECBS_EXPANDED_NODES,
+    ECBS_SUCCESS,
+    # ECBS_VERTEX_BLOCKS,
+    ICTS_COST,
+    # ICTS_EXPANDED_NODES,
+    ICTS_SUCCESS,
+    SIM_DECEN_LEARNED_COST,
+    SIM_DECEN_LEARNED_SUCCESS,
+    SIM_DECEN_RANDOM_COST,
+    SIM_DECEN_RANDOM_SUCCESS,
+    # USEFULLNESS,
+]
 
 
 def init_values_debug():
@@ -146,38 +192,7 @@ def make_full_df():
     n_agentss = np.linspace(low_agents, high_agents, n_n_agentss, dtype=int
                             )  # list of different numbers of agents we want
 
-    evaluations = [
-        BRIDGES,
-        CONNECTIVITY,
-        DIFF_INDEP,
-        DIFF_SIM_DECEN_LEARNED,
-        DIFF_SIM_DECEN_RANDOM,
-        DIFFERENCE_SIM_DECEN_RADOM_MINUS_LEARNED,
-        # DIFFERENCE_ECBS_EN_MINUS_ICTS_EN,
-        ECBS_COST,
-        # ECBS_EDGE_BLOCKS,
-        # ECBS_EXPANDED_NODES,
-        ECBS_SUCCESS,
-        # ECBS_VERTEX_BLOCKS,
-        ICTS_COST,
-        # ICTS_EXPANDED_NODES,
-        ICTS_SUCCESS,
-        MEAN_DEGREE,
-        N_EDGES_TA,
-        N_EDGES,
-        N_NODES_TA,
-        N_NODES,
-        SIM_DECEN_LEARNED_COST,
-        SIM_DECEN_LEARNED_SUCCESS,
-        SIM_DECEN_RANDOM_COST,
-        SIM_DECEN_RANDOM_SUCCESS,
-        TREE_WIDTH,
-        # SMALL_WORLD_OMEGA,
-        # SMALL_WORLD_SIGMA,
-        UNCENTRALITY,
-        # USEFULLNESS,
-        WELL_FORMED
-    ]
+    evaluations = evaluations_pre + evaluations_post
 
     experiment_matrix = {
         GENERATOR: generators,

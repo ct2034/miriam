@@ -7,6 +7,31 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 
+from scenarios.main_eval import (evaluations_post, evaluations_pre,
+                                 scenario_params)
+
+
+def sort_cols_based_on_pre_post(cols):
+    cols_scen = []
+    cols_pre = []
+    cols_post = []
+    for c in cols:
+        if c in scenario_params:
+            cols_scen.append(c)
+        elif c in evaluations_pre:
+            cols_pre.append(c)
+        elif c in evaluations_post:
+            cols_post.append(c)
+        else:
+            assert False, "column must be in a list"
+    assert (len(cols) == len(cols_scen) + len(cols_pre) +
+            len(cols_post)), "All columns must end up somewhere"
+    cols_scen.sort()
+    cols_pre.sort()
+    cols_post.sort()
+    return cols_scen + cols_pre + cols_post
+
+
 if __name__ == "__main__":
     """Load pandas results from pkl file and perform a svd on the data"""
     parser = argparse.ArgumentParser()
@@ -28,12 +53,15 @@ if __name__ == "__main__":
     # changing dataframe ######################################################
     df_results.sort_index(inplace=True)
     cols = list(df_results.columns)
-    cols.sort()
+    cols = sort_cols_based_on_pre_post(cols)
     print(cols)
     text_cols = ["generator"]
     for c in cols:
         if c not in text_cols:
             df_results[c] = df_results[c].astype(float)
+    df_results = df_results[df_results.columns[list(map(
+        lambda c: list(df_results.columns).index(c), cols
+    ))]]
 
     # dropping ignored rows ###################################################
     df_results_clean = df_results.drop(labels=ignored_evaluations, axis=1)
