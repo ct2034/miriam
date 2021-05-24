@@ -15,7 +15,9 @@ from definitions import FREE, INVALID
 from planner.policylearn.generate_fovs import *
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import BLOCKS_STR
 from scenarios.evaluators import cached_ecbs
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import (building_walls, like_sim_decentralized,
+                                  tracing_pathes_in_the_dark)
+from scenarios.main_eval import GENERATOR
 from sim.decentralized.agent import Agent
 from tools import ProgressBar
 
@@ -36,6 +38,9 @@ LSTM_FOV_RADIUS = 2  # self plus x in all 4 directions
 CLASSIFICATION_POS_TIMESTEPS = 3
 CLASSIFICATION_FOV_RADIUS = 3  # self plus x in all 4 directions
 DTYPE_SAMPLES = np.int8
+
+GENERATORS = [building_walls, like_sim_decentralized,
+              tracing_pathes_in_the_dark]
 
 
 def show_map(x):
@@ -209,8 +214,8 @@ def blocks_from_data_to_lists(data):
             blocks_pa = []
             if VERTEX_CONSTRAINTS_STR in data_blocks_pa.keys():
                 for db in data_blocks_pa[VERTEX_CONSTRAINTS_STR]:
-                    if ('v.x' in db.keys() and 'v.y' in db.keys() 
-                        and 't' in db.keys()):
+                    if ('v.x' in db.keys() and 'v.y' in db.keys()
+                            and 't' in db.keys()):
                         block = (
                             db['v.x'],
                             db['v.y'],
@@ -221,7 +226,7 @@ def blocks_from_data_to_lists(data):
                 for db in data_blocks_pa[EDGE_CONSTRAINTS_STR]:
                     if ('v1.x' in db.keys() and 'v1.y' in db.keys()
                         and 'v2.x' in db.keys() and 'v2.y' in db.keys()
-                        and 't' in db.keys()):
+                            and 't' in db.keys()):
                         block = ((
                             db['v1.x'],
                             db['v1.y'],
@@ -424,10 +429,12 @@ def simulate_one_data(width, fill, n_agents, base_seed):
     while not data_ok:
         do_collide = False
         while not do_collide:
-            gridmap, starts, goals = tracing_pathes_in_the_dark(
-                width, fill, n_agents, seed
+            gen = random.choice(GENERATORS)
+            gridmap, starts, goals = gen(
+                width, fill, n_agents, float(seed / 10000)
             )
             seed += random.randint(0, 10E6)
+            seed = seed % (2E32-1)
             do_collide, indep_agent_paths = will_they_collide(
                 gridmap, starts, goals)
 
@@ -513,7 +520,8 @@ if __name__ == "__main__":
                 arguments = [(width, fill, n_agents, seed)
                              for seed in range(start, stop)]
                 batch_data = p.starmap(simulate_one_data, arguments)
-                save_data(batch_data, insert_str_before_extension(args.fname_write_pkl.name, f'{i_batch:02}'))
+                save_data(batch_data, insert_str_before_extension(
+                    args.fname_write_pkl.name, f'{i_batch:02}'))
                 pb_main.progress()
             # save in the end for sure
             pb_main.end()
