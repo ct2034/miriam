@@ -123,7 +123,7 @@ if __name__ == "__main__":
     # train
     bcp = BatchHistory()
     history = model.fit([train_images], train_labels,
-                        epochs=4, batch_size=4, callbacks=[bcp]
+                        epochs=8, batch_size=4, callbacks=[bcp]
                         )
     model.save(model_fname)
 

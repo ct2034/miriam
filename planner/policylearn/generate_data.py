@@ -29,10 +29,13 @@ COLLISIONS_STR = 'collisions'
 GRIDMAP_STR = 'gridmap'
 OWN_STR = 'own'
 OTHERS_STR = 'others'
+
+# input options ---------------------------
 TRANSFER_LSTM_STR = 'transfer_lstm'
 TRANSFER_CLASSIFICATION_STR = 'transfer_classification'
 GENERATE_SIM_STR = 'generate_simulation'
 NO_SOLUTION_STR = 'no_solution'
+MERGE_FILES = 'merge_files'
 
 LSTM_FOV_RADIUS = 2  # self plus x in all 4 directions
 CLASSIFICATION_POS_TIMESTEPS = 3
@@ -468,11 +471,14 @@ if __name__ == "__main__":
         TRANSFER_LSTM_STR,
         TRANSFER_CLASSIFICATION_STR,
         GENERATE_SIM_STR,
-        NO_SOLUTION_STR))
+        NO_SOLUTION_STR,
+        MERGE_FILES))
     parser.add_argument('fname_write_pkl',
                         type=argparse.FileType('wb'), nargs='?')
     parser.add_argument(
         'fname_read_pkl', type=argparse.FileType('rb'), nargs='?')
+    parser.add_argument(
+        '-m', type=str, nargs='*')
     args = parser.parse_args()
 
     start_time = datetime.datetime.now()
@@ -570,6 +576,19 @@ if __name__ == "__main__":
                 save_data(all_data, fname)
             if plot:
                 plot_map_and_paths(gridmap, {}, data, n_agents)
+    elif args.mode == MERGE_FILES:
+        assert args.fname_read_pkl is None, "only pass -m param"
+        assert args.fname_write_pkl is None, "only pass -m param"
+        print(args.m)
+        fname_out = args.m[0].replace("00", "").replace("01", "")
+        print(f"fname_out: {fname_out}")
+        all_data = []
+        for fname in args.m:
+            with open(fname, 'rb') as f:
+                this_data = pickle.load(f)
+            all_data.extend(this_data)
+        with open(fname_out, 'wb') as f:
+            pickle.dump(all_data, f)
 
     else:
         raise NotImplementedError(

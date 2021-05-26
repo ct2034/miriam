@@ -1,8 +1,12 @@
 # How to use
 First, generate data by solving environments
-
 ```
 ./generate_data.py generate_simulation data.pkl
+```
+
+Merge the files
+```
+./generate_data.py merge_files -m data*.pkl
 ```
 
 Then transfer to classification samples
@@ -17,7 +21,7 @@ Have a look at the data with ...
 
 Train the model
 ```
-./train_model_classification.py data_class.pkl
+./train_model_classification.py data_class.pkl my_model.h5
 ```
 
 Evaluate the model with ..
