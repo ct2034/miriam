@@ -37,12 +37,12 @@ class Agent():
         self.filter_blocked_nodes: BLOCKED_NODES_TYPE = set()
 
     def __hash__(self):
-        return hash(
-            f"start: {self.start}\n" +
-            f"goal: {self.goal}\n" +
-            f"policy: {self.policy}\n" +
+        return hash(hasher([
+            f"start: {self.start}\n",
+            f"goal: {self.goal}\n",
+            f"policy: {self.policy}\n",
             f"hash(env): {hasher(self.env)}"
-        )  # should not change over time
+        ]))  # should not change over time
 
     def __eq__(self, other):
         return hash(self) == hash(other)

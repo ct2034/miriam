@@ -22,17 +22,18 @@ class TestAgent(unittest.TestCase):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
         a1 = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
         a2 = Agent(env, np.array([0, 2]), PolicyType.RANDOM)  # same
-        self.assertTrue(a1 != a2)
+        self.assertTrue(a1 == a2)
 
         a3 = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
-        self.assertTrue(a1 != a3)
+        self.assertTrue(a1 == a3)
         a3.give_a_goal(np.array([0, 0]))  # setting goal
         self.assertTrue(a1 != a3)  # not same any more
 
         a4 = Agent(env, np.array([0, 2]), PolicyType.RANDOM)
         a4.give_a_goal(np.array([0, 1]))  # different goal
         self.assertTrue(a1 != a4)
-        self.assertTrue(a3 != a4)
+        a4.give_a_goal(np.array([0, 0]))  # same goal
+        self.assertTrue(a3 == a4)
 
         a5 = Agent(env, np.array([0, 1]), PolicyType.RANDOM)  # different pos
         self.assertTrue(a1 != a5)
