@@ -45,7 +45,7 @@ def plot_env_agents(environent: np.ndarray,
         # path
         ax.plot(a.path[:, 0], a.path[:, 1], color=colormap[i_a])
         # position
-        if a.pos[0] != a.goals[0] or a.pos[1] != a.goals[1]:  # not at goal
+        if a.pos[0] != a.goal[0] or a.pos[1] != a.goal[1]:  # not at goal
             ax.plot(a.pos[0], a.pos[1], markersize=10,
                     marker='o', color=colormap[i_a])
         # goal

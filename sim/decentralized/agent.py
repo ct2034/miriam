@@ -5,6 +5,7 @@ from typing import *
 import networkx as nx
 import numpy as np
 from sim.decentralized.policy import Policy, PolicyType
+from tools import hasher
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ class Agent():
         self.env_nx: Union[nx.Graph, None] = None
         assert isinstance(pos, np.ndarray), "Position must be numpy array"
         self.pos: np.ndarray = pos
+        self.start: np.ndarray = pos
         self.goal: Union[np.ndarray, None] = None
         self.path: Union[np.ndarray, None] = None
         self.path_i: Union[int, None] = None
@@ -35,18 +37,25 @@ class Agent():
         self.filter_blocked_nodes: BLOCKED_NODES_TYPE = set()
 
     def __hash__(self):
-        return self.id
+        return hash(
+            f"start: {self.start}\n" +
+            f"goal: {self.goal}\n" +
+            f"policy: {self.policy}\n" +
+            f"hash(env): {hasher(self.env)}"
+        )  # should not change over time
 
     def __eq__(self, other):
         return hash(self) == hash(other)
 
     def __str__(self):
-        return "".join(map(str, [
-            self.env,
-            self.pos,
-            self.goal,
-            self.policy,
-            self.id]))
+        return (
+            f"id: {self.id}\n" +
+            f"start: {self.start}\n" +
+            f"goal: {self.goal}\n" +
+            f"pos: {self.pos}\n" +
+            f"policy: {self.policy}\n" +
+            f"hash(env): {hasher(self.env)}"
+        )
 
     def filter_node(self, n):
         """node filter for gridmap_to_nx"""

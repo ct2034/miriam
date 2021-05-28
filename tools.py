@@ -4,7 +4,6 @@ import multiprocessing
 import os
 import signal
 import subprocess
-import time
 from contextlib import contextmanager
 from datetime import datetime
 from hashlib import sha256
@@ -268,7 +267,7 @@ def run_command(bashCommand, timeout=None) -> Tuple[str, str, int]:
             process.returncode)
 
 
-def hasher(args, kwargs):
+def hasher(args, kwargs={}):
     """Hash args that are hashable or np.ndarrays"""
     hashstr = ""
     for i, arg in enumerate(list(args) + list(kwargs.values())):

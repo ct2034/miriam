@@ -145,7 +145,7 @@ def check_time_evaluation(time_progress, space_progress
 def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
                               ) -> Tuple[float, float, float, float, int]:
     env = initialize_environment(size, .4, seed)
-    agents = initialize_agents(env, n_agents, policy, seed)
+    agents = initialize_agents(env, n_agents, policy, seed=seed)
     if agents is None:
         return (0, 0, 0, 0, 0)
     return run_a_scenario(env, agents, plot, iterator)

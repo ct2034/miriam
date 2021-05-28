@@ -35,6 +35,9 @@ class Policy(object):
         super().__init__()
         self.a = agent
 
+    def __str__(self):
+        return type(self).__name__
+
     def register_observation(self, id, path, pos, path_i) -> None:
         """we have seen another agent"""
         pass
