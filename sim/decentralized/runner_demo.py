@@ -15,7 +15,7 @@ if __name__ == "__main__":  # pragma: no cover
     size = 8
     n_agents = 8
     policy = PolicyType.LEARNED
-    it = IteratorType.WAITING
+    it = IteratorType.BLOCKING3
     env, starts, goals = tracing_pathes_in_the_dark(size, .5, n_agents, 1)
     # in this scenario, I think agent 3 (? the green one) makes a weird decision.
 
