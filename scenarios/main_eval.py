@@ -376,4 +376,5 @@ def evaluate_full_run(size, i_r, cols, experiment_matrix, pbm):
 
 
 if __name__ == "__main__":
+    logging.getLogger("sim.decentralized.policy").setLevel(logging.ERROR)
     df_results = make_full_df()
