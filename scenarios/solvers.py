@@ -99,7 +99,7 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM):
     n_agents = starts.shape[0]
     agents = []
     for i_a in range(n_agents):
-        a = Agent(env, starts[i_a])
+        a = Agent(env, starts[i_a], policy=policy)
         if not a.give_a_goal(goals[i_a]):
             return INVALID
         agents.append(a)
@@ -147,4 +147,4 @@ def decentralized(env, starts, goals, policy: PolicyType):
     if agents is INVALID:
         return INVALID
     return run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.BLOCKING1)
+        env, agents, plot=False, iterator=IteratorType.BLOCKING3)
