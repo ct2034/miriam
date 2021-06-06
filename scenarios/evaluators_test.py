@@ -4,6 +4,7 @@ import unittest
 import numpy as np
 import pytest
 from definitions import INVALID
+from sim.decentralized.policy import LearnedPolicy, PolicyType, RandomPolicy
 
 import scenarios.evaluators
 from scenarios import test_helper
@@ -38,10 +39,10 @@ class TestEvaluators(unittest.TestCase):
             test_helper.env, starts, goals)
         res_starts = list(map(lambda a: tuple(a.pos), res_agents))
         res_goals = list(map(lambda a: tuple(a.goal), res_agents))
-        self.assertIn((0, 0), res_starts)
-        self.assertIn((0, 2), res_starts)
-        self.assertIn((2, 0), res_goals)
-        self.assertIn((2, 2), res_goals)
+        self.assertEqual((0, 0), res_starts[0])
+        self.assertEqual((0, 2), res_starts[1])
+        self.assertEqual((2, 0), res_goals[0])
+        self.assertEqual((2, 2), res_goals[1])
         # returns invalid when one path is not possible
         starts_invalid = np.array([
             [0, 0],
@@ -56,6 +57,14 @@ class TestEvaluators(unittest.TestCase):
             to_agent_objects(
                 test_helper.env, starts_invalid, goals_invalid)
         )
+
+        # checking setting of policy
+        for a in res_agents:
+            self.assertIsInstance(a.policy, RandomPolicy)  # default
+        res_agents_learned = to_agent_objects(
+            test_helper.env, starts, goals, policy=PolicyType.LEARNED)
+        for a in res_agents_learned:
+            self.assertIsInstance(a.policy, LearnedPolicy)
 
     def test_is_well_formed(self):
         # well formed
