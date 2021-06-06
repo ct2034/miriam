@@ -186,9 +186,10 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         "max_length",
         "successful"
     ]
-    pb = ProgressBar("evaluate_policies", len(PolicyType)*runs, 5)
+    policies = PolicyType
+    pb = ProgressBar("evaluate_policies", len(policies)*runs, 5)
 
-    for policy in PolicyType:
+    for policy in policies:
         logger.info(f"policy: {policy.name}")
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):

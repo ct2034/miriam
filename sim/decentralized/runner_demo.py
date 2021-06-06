@@ -6,6 +6,8 @@ from scenarios.evaluators import (cost_ecbs, cost_independent,
                                   cost_sim_decentralized_learned,
                                   to_agent_objects)
 from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.solvers import ecbs
+from scenarios.visualization import plot_with_paths
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import *
@@ -36,6 +38,11 @@ if __name__ == "__main__":  # pragma: no cover
             interesting = c_decen > c_ecbs
         seed += 1
 
+    res_ecbs = ecbs(env, starts, goals, return_paths=False)
+    print(res_ecbs)
+    paths_ecbs = ecbs(env, starts, goals, return_paths=True)
+    plot_with_paths(env, paths_ecbs)
+
     logging.getLogger("sim.decentralized.policy").setLevel(logging.DEBUG)
-    res = run_a_scenario(env, agents, plot=True, iterator=it)
-    print(res)
+    res_decen = run_a_scenario(env, agents, plot=True, iterator=it)
+    print(res_decen)
