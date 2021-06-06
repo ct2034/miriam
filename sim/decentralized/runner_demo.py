@@ -17,8 +17,6 @@ if __name__ == "__main__":  # pragma: no cover
     policy = PolicyType.LEARNED
     it = IteratorType.BLOCKING3
     env, starts, goals = tracing_pathes_in_the_dark(size, .5, n_agents, 1)
-    # in this scenario, I think agent 3 (? the green one) makes a weird decision.
-
     agents = to_agent_objects(env, starts, goals, policy)
     res = run_a_scenario(env, agents, plot=True,
                          iterator=it)
