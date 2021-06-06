@@ -221,7 +221,6 @@ class Agent():
             assert self.path_i is not None, "Should have a path_i by now"
             self.path_i += 1
             self.pos = potential_next_pos
-            self.remove_all_blocks_and_replan()
 
     def get_path_i_not_none(self) -> int:
         assert self.path_i is not None

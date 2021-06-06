@@ -1,4 +1,4 @@
-
+import logging
 import random
 from collections import OrderedDict
 from enum import Enum, auto
@@ -10,6 +10,8 @@ from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+logger = logging.getLogger(__name__)
 
 
 class PolicyType(Enum):
@@ -128,6 +130,8 @@ class LearnedPolicy(Policy):
         :param id: which agent are we meeting
         :return: priority
         """
+        logger.debug(
+            f"get_priority, self_agent: {self.a}, other_id: {id_coll}")
         N_T = 3
         i_oa = None
         paths_full = [self.a.path]  # self always first
@@ -135,7 +139,7 @@ class LearnedPolicy(Policy):
             self.a.path, self.a.path_i, N_T)]  # self always first
         ids = sorted(self.paths.keys())
         if id_coll not in ids:
-            print(f"{id_coll} not in {ids}")
+            logger.warn(f"{id_coll} not in {ids}")
             return .5
         i_oa = ids.index(id_coll) + 1
         for i_id in ids:
@@ -154,7 +158,7 @@ class LearnedPolicy(Policy):
         )
         x_tensor = tf.constant(np.array([x]))
         y = self.model.predict(x_tensor)[0][0]
+        logger.debug(f"y: {y}")
         # from planner.policylearn.generate_data_demo import plot_fovs
         # plot_fovs(x, y)
-        # print(y)
         return y

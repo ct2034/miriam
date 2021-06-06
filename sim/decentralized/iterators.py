@@ -202,6 +202,8 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
                      ) -> Tuple[List[int], List[int]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
+    # how do agents look like at beginning?
+    poses_at_beginning = tuple(map(lambda a: a.pos, agents))
 
     for dt in range(lookahead - 1, -1, -1):
         # all that are not at their goals can generally procede. This is therefore
@@ -211,10 +213,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
         # assuming there are collisions
         there_are_collisions: bool = True
 
-        # how do agents look like at beginning?
-        poses_at_beginning = tuple(map(lambda a: a.pos, agents))
         poses_at_dt = get_poses_in_dt(agents, dt)
-
         for i_a in range(len(agents)):
             # who is this agent seeing?
             for i_oa in [i for i in range(len(agents)) if i != i_a]:
@@ -293,6 +292,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
             space_slice[i_a] = 1
         if not agents[i_a].is_at_goal():
             time_slice[i_a] = 1
+        agents[i_a].remove_all_blocks_and_replan()
 
     make_sure_agents_are_safe(agents)
     assert has_at_least_one_agent_moved(
