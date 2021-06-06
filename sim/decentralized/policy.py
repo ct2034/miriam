@@ -19,6 +19,7 @@ class PolicyType(Enum):
     CLOSEST = auto()
     FILL = auto()
     LEARNED = auto()
+    INV_LEARNED = auto()
 
 
 class Policy(object):
@@ -32,6 +33,8 @@ class Policy(object):
             return FillPolicy(agent)
         elif type == PolicyType.LEARNED:
             return LearnedPolicy(agent)
+        elif type == PolicyType.INV_LEARNED:
+            return InverseLearnedPolicy(agent)
 
     def __init__(self, agent) -> None:
         super().__init__()
@@ -162,3 +165,21 @@ class LearnedPolicy(Policy):
         # from planner.policylearn.generate_data_demo import plot_fovs
         # plot_fovs(x, y)
         return y
+
+
+class InverseLearnedPolicy(Policy):
+    # For demonstration purposes: What if we do the exact opposite?
+    def __init__(self, agent) -> None:
+        self.po = LearnedPolicy(agent)
+
+    def step(self):
+        self.po.step()
+
+    def register_observation(self, id, path, pos, path_i) -> None:
+        self.po.register_observation(id, path, pos, path_i)
+
+    def get_priority(self, id_coll) -> float:
+        prio = 1 - self.po.get_priority(id_coll)
+        assert prio >= 0
+        assert prio <= 1
+        return prio
