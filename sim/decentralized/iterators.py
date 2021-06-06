@@ -160,6 +160,8 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
                         can_proceed[i_a2] = False
                     can_proceed[i_a1] = False
             for edge, [i_a1, i_a2] in edge_colissions.items():
+                # edge collisions can not be solved by waiting. This is why we
+                # block edges here. This makes this policy not strictly waiting.
                 if (agents[i_a1].get_priority(agents[i_a2].id) >
                         agents[i_a2].get_priority(agents[i_a1].id)):
                     # a1 has higher prio
