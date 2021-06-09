@@ -186,7 +186,8 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         "max_length",
         "successful"
     ]
-    policies = PolicyType
+    # policies = PolicyType
+    policies = [PolicyType.LEARNED, PolicyType.INV_LEARNED]
     pb = ProgressBar("evaluate_policies", len(policies)*runs, 5)
 
     for policy in policies:
@@ -210,6 +211,7 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
 
 if __name__ == "__main__":  # pragma: no cover
     logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)
+    logging.getLogger("sim.decentralized.policy").setLevel(logging.ERROR)
     logging.getLogger("__main__").setLevel(logging.ERROR)
     logging.getLogger("root").setLevel(logging.ERROR)
-    evaluate_policies(8, 8, 1000)
+    evaluate_policies(8, 8, 100)
