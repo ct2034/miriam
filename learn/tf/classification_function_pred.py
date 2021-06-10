@@ -36,7 +36,7 @@ def get_poly_with_res(res, model, t, t_pred):
     while True:
         poly = make_random_poly()
         X, Y = get_sample(poly, t, t_pred)
-        pred = model.predict_classes(np.array([X]))[0][0]
+        pred = int(model.predict(np.array([X]))[0][0] > .5)
         if (pred == Y) == res:
             return poly
 
@@ -50,6 +50,10 @@ def train(n, learn_res, sample_end, t_pred):
         X, Y = get_sample(poly, t, t_pred)
         x.append(X)
         y.append(Y)
+    x = np.array(x)
+    y = np.array(y)
+    print(f"x.shape {x.shape}")
+    print(f"y.shape {y.shape}")
 
     # model
     layer_width = 64
@@ -64,9 +68,9 @@ def train(n, learn_res, sample_end, t_pred):
     model.summary()
 
     # train
-    history = model.fit([x], y,
-                        validation_split=0.3, epochs=16,
-                        batch_size=256, verbose=0)
+    history = model.fit(x, y,
+                        validation_split=0.3, epochs=8,
+                        batch_size=128, verbose=1)
     return model, history
 
 
@@ -78,16 +82,16 @@ def run_an_example_and_plot_info():
 
     model, history = train(n, learn_res, sample_end, t_pred)
 
-    plt.subplot(211)
+    plt.subplot(2, 1, 1)
     # Plot training & validation accuracy values
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
     plt.title('Model accuracy')
     plt.ylabel('Accuracy')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Test'], loc='upper left')
 
-    plt.subplot(212)
+    plt.subplot(2, 1, 2)
     # Plot training & validation loss values
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -105,8 +109,8 @@ def run_an_example_and_plot_info():
     for i in range(n):
         poly = get_poly_with_res(i % 2, model, t_sample, t_pred)
         X, Y = get_sample(poly, t_sample, t_pred)
-        pred = model.predict_classes(np.array([X]))[0][0]
-        plt.subplot(100 * n / 2 + 20 + i)
+        pred = int(model.predict(np.array([X]))[0][0] > .5)
+        plt.subplot(int(n/2), 2, i+1)
         plt.plot(t_plot, poly(t_plot), 'k--')
         if pred == Y:
             col = 'g'
@@ -132,12 +136,12 @@ def see_accuracy_per_learn_res():
     res = [list()] * n_res
     for i_n, learn_res in product(range(n_res), learn_resolutions):
         model, history = train(n, learn_res, sample_end, t_pred)
-        acc = history.history['val_acc'][-1]
+        acc = history.history['val_accuracy'][-1]
         res[i_n].append(acc)
     plt.violinplot(res)
     plt.show()
 
 
 if __name__ == "__main__":
-    run_an_example_and_plot_info()
-    # see_accuracy_per_learn_res()
+    # run_an_example_and_plot_info()
+    see_accuracy_per_learn_res()
