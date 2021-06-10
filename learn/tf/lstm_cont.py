@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ Recurrent Neural Network.
 A Recurrent Neural Network (LSTM) implementation example using TensorFlow
 library. This example is using the MNIST database of handwritten digits
@@ -11,12 +12,14 @@ Project: https://github.com/aymericdamien/TensorFlow-Examples/
 """
 
 from __future__ import print_function
-from tensorflow.examples.tutorials.mnist import input_data
+
+from datetime import datetime
+
+import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import rnn
-import numpy as np
-import matplotlib.pyplot as plt
-from datetime import datetime
+from tensorflow.examples.tutorials.mnist import input_data
 
 # Logging
 logdir = "learn/tf/logs/"+datetime.now().strftime("%Y%m%d-%H%M%S")
