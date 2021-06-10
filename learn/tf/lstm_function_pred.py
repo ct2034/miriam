@@ -8,8 +8,7 @@ from itertools import product
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
-from tensorflow.keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D,
-                                     Dropout, Flatten, MaxPooling2D, Reshape)
+from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.models import Sequential
 
 # data
@@ -36,6 +35,7 @@ def get_poly_with_res(res, model, t, t_pred):
     while True:
         poly = make_random_poly()
         X, Y = get_sample(poly, t, t_pred)
+        X = np.reshape(X, (learn_res, 1))
         pred = int(model.predict(np.array([X]))[0][0] > .5)
         if (pred == Y) == res:
             return poly
@@ -48,6 +48,7 @@ def train(n, learn_res, sample_end, t_pred):
     for _ in range(n):
         poly = make_random_poly()
         X, Y = get_sample(poly, t, t_pred)
+        X = np.reshape(X, (learn_res, 1))
         x.append(X)
         y.append(Y)
     x = np.array(x)
@@ -56,10 +57,13 @@ def train(n, learn_res, sample_end, t_pred):
     print(f"y.shape {y.shape}")
 
     # model
-    layer_width = 64
-    n_layers = 16
-    layers = [Dense(layer_width, activation='relu') for _ in range(n_layers)]
-    layers[0] = Dense(layer_width, activation='relu', input_shape=x[0].shape)
+    units = 8
+    n_layers = 4
+    layers = [LSTM(units, activation='relu', return_sequences=True)
+              for _ in range(n_layers)]
+    layers[0] = LSTM(units, activation='relu', return_sequences=True,
+                     input_shape=(learn_res, 1))  # (timesteps, features)
+    layers[-1] = LSTM(units, activation='relu', return_sequences=False)
     layers.append(Dense(1, activation='sigmoid'))
     model = Sequential(layers)
     model.compile(optimizer='adam',
@@ -109,6 +113,7 @@ def run_an_example_and_plot_info():
     for i in range(n):
         poly = get_poly_with_res(i % 2, model, t_sample, t_pred)
         X, Y = get_sample(poly, t_sample, t_pred)
+        X = np.reshape(X, (learn_res, 1))
         pred = int(model.predict(np.array([X]))[0][0] > .5)
         plt.subplot(int(n/2), 2, i+1)
         plt.plot(t_plot, poly(t_plot), 'k--')
@@ -143,5 +148,5 @@ def see_accuracy_per_learn_res():
 
 
 if __name__ == "__main__":
-    # run_an_example_and_plot_info()
-    see_accuracy_per_learn_res()
+    run_an_example_and_plot_info()
+    # see_accuracy_per_learn_res()
