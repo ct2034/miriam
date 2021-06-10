@@ -35,7 +35,7 @@ def get_poly_with_res(res, model, t, t_pred):
     while True:
         poly = make_random_poly()
         X, Y = get_sample(poly, t, t_pred)
-        X = np.reshape(X, (learn_res, 1))
+        X = np.reshape(X, (X.shape[0], 1))
         pred = int(model.predict(np.array([X]))[0][0] > .5)
         if (pred == Y) == res:
             return poly
