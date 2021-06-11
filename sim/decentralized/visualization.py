@@ -68,10 +68,19 @@ def plot_env_agents(environent: np.ndarray,
 
 
 def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
-                     evaluation_names: List[str]):  # pragma: no cover
+                     evaluation_names: List[str], subtract_for_policy=None
+                     ):  # pragma: no cover
     """Plot violinplots to compare values of different evaluations for 
-    differnet policies."""
-    n_policies = len(evaluations.keys())
+    differnet policies.
+    If `subtract_for_policy ` is defined, that policies result on all 
+    evaluations will be substracted from all other policies values
+    (for comparison)."""
+    if subtract_for_policy is not None:
+        policies = [p for p in evaluations.keys(
+        ) if p != subtract_for_policy]
+    else:
+        policies = list(evaluations.keys())
+    n_policies = len(policies)
     colormap = cm.tab10.colors
     data_shape = (n_policies, ) + list(evaluations.values())[0].shape
     data = np.empty(data_shape)
@@ -80,8 +89,14 @@ def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
     policy_names = []
     subplot_basenr = 100 + 10 * len(evaluation_names) + 1
     all_successfull = [True] * data_shape[2]
-    for i_p, policy in enumerate(evaluations.keys()):
-        data[i_p, :, :] = evaluations[policy]
+    for i_p, policy in enumerate(policies):
+        if subtract_for_policy is not None:
+            data[i_p, :, :] = (evaluations[policy] -
+                               evaluations[subtract_for_policy])
+        else:
+            data[i_p, :, :] = evaluations[policy]
+        # overwrite success data:
+        data[i_p, i_success, :] = evaluations[policy][i_success]
         all_successfull = np.logical_and(
             all_successfull,
             data[i_p, i_success, :])
@@ -95,13 +110,16 @@ def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
             run_choice = [True] * data_shape[2]
         else:
             run_choice = all_successfull
-        parts = ax.violinplot(np.transpose(
-            data[:, i_e, run_choice]), showmeans=True)
-        for i_pc, pc in enumerate(parts['bodies']):
-            pc.set_facecolor(colormap[i_pc])
-        for partname in ('cbars', 'cmins', 'cmaxes', 'cmeans'):
-            vp = parts[partname]
-            vp.set_edgecolor('k')
+        try:
+            parts = ax.violinplot(np.transpose(
+                data[:, i_e, run_choice]), showmeans=True)
+            for i_pc, pc in enumerate(parts['bodies']):
+                pc.set_facecolor(colormap[i_pc])
+            for partname in ('cbars', 'cmins', 'cmaxes', 'cmeans'):
+                vp = parts[partname]
+                vp.set_edgecolor('k')
+        except ValueError:
+            pass
         ax.set_title(evaluation_name)
         plt.xticks(range(1, n_policies + 1), policy_names)
 

@@ -39,9 +39,10 @@ if __name__ == "__main__":  # pragma: no cover
         seed += 1
 
     res_ecbs = ecbs(env, starts, goals, return_paths=False)
-    print(res_ecbs)
+    print(res_ecbs['blocks'])
     paths_ecbs = ecbs(env, starts, goals, return_paths=True)
     plot_with_paths(env, paths_ecbs)
+    plt.show()
 
     logging.getLogger("sim.decentralized.policy").setLevel(logging.DEBUG)
     res_decen = run_a_scenario(env, agents, plot=True, iterator=it)
