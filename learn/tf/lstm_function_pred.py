@@ -8,7 +8,7 @@ from itertools import product
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
-from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.models import Sequential
 
 # data
@@ -57,14 +57,20 @@ def train(n, learn_res, sample_end, t_pred):
     print(f"y.shape {y.shape}")
 
     # model
-    units = 8
+    units = 128
     n_layers = 4
-    layers = [LSTM(units, activation='relu', return_sequences=True)
-              for _ in range(n_layers)]
-    layers[0] = LSTM(units, activation='relu', return_sequences=True,
-                     input_shape=(learn_res, 1))  # (timesteps, features)
-    layers[-1] = LSTM(units, activation='relu', return_sequences=False)
-    layers.append(Dense(1, activation='sigmoid'))
+    layers = [
+        LSTM(units, activation='relu', return_sequences=True,
+             input_shape=(learn_res, 1)),  # (timesteps, features)
+        Dropout(.2),
+        LSTM(units, activation='relu', return_sequences=True),
+        Dropout(.2),
+        LSTM(units, activation='relu', return_sequences=False),
+        Dropout(.2),
+        Dense(32, activation='relu'),
+        Dropout(.2),
+        Dense(1, activation='sigmoid')
+    ]
     model = Sequential(layers)
     model.compile(optimizer='adam',
                   loss='binary_crossentropy',
@@ -73,7 +79,7 @@ def train(n, learn_res, sample_end, t_pred):
 
     # train
     history = model.fit(x, y,
-                        validation_split=0.3, epochs=8,
+                        validation_split=0.3, epochs=16,
                         batch_size=128, verbose=1)
     return model, history
 
