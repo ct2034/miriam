@@ -63,7 +63,7 @@ planner.policylearn.train\_model module
 planner.policylearn.train\_model\_classification module
 -------------------------------------------------------
 
-.. automodule:: planner.policylearn.train_model_classification
+.. automodule:: planner.policylearn.train_model
    :members:
    :undoc-members:
    :show-inheritance:

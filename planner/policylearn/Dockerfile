@@ -4,4 +4,4 @@ COPY . /policylearn
 WORKDIR /policylearn
 RUN pip install -r requirements.txt
 
-CMD ["./train_model_classification.py", "training_data_class.pkl"]
+CMD ["./train_model.py", "training_data_class.pkl"]

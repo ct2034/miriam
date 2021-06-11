@@ -1,7 +1,7 @@
 import unittest
 
 import numpy as np
-from planner.policylearn.train_model_classification import augment_data
+from planner.policylearn.train_model import augment_data
 
 
 class TrainModelClassTest(unittest.TestCase):

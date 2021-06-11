@@ -1,160 +1,141 @@
 #!/usr/bin/env python3
 
-import logging
+import argparse
+import os
 import pickle
-import sys
-from datetime import datetime
+from typing import List
 
-import tensorflow as tf
-from tensorflow.contrib import rnn
 import numpy as np
+from importtf import keras, tf
+from keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D, Flatten,
+                          MaxPooling2D, Reshape)
+from keras.models import Sequential
+from matplotlib import pyplot as plt
+from numpy.core.shape_base import _concatenate_shapes
 
-from generate_data import OTHERS_STR, OWN_STR
-from gaussian_map_layer import GaussianMapLayer
+tf.compat.v1.GPUOptions(allow_growth=True)
 
 
-def get_training_steps(training_data, start_step, batch_size, num_input,
-                       num_timesteps):
-    xy_batch = training_data[start_step:(start_step+batch_size)]
-    X_out = []
-    Y_out = []
-    timesteps = []
-    for i_b in range(batch_size):
-        timesteps.append(len(xy_batch[i_b][0][OWN_STR]))
-    assert num_timesteps > max(timesteps),  "must have at least the timesteps"
-    for i_b in range(batch_size):
-        x = []
-        this_timesteps = len(xy_batch[i_b][0][OWN_STR])
-        # padding, tipp by
-        # https://github.com/keras-team/keras/issues/85#issuecomment-96425996
-        pad = num_timesteps - this_timesteps
-        for i_t in range(pad):
-            x.append(np.zeros(num_input))
-        for i_t in range(this_timesteps):
-            xt = xy_batch[i_b][0][OWN_STR][i_t]
-            for i_a in range(len(xy_batch[i_b][0][OTHERS_STR])):
-                xt = np.append(xt, xy_batch[i_b][0][OTHERS_STR][i_a][i_t])
-            x.append(xt)
-        X_out.append(x)
-        Y_out.append([xy_batch[i_b][1], ])
-    return X_out, Y_out
+class BatchHistory(tf.keras.callbacks.Callback):
+    """Collection of history per batch,
+    src: https://stackoverflow.com/a/66401457/1493204"""
+    batch_accuracy: List[float] = []  # accuracy at given batch
+    batch_loss: List[float] = []  # loss at given batch
+
+    def __init__(self):
+        super(BatchHistory, self).__init__()
+
+    def on_train_batch_end(self, batch, logs=None):
+        BatchHistory.batch_accuracy.append(logs.get('accuracy'))
+        BatchHistory.batch_loss.append(logs.get('loss'))
+
+
+def construct_model(img_width, img_depth_t, img_depth_frames):
+    CONV3D_FILTERS = 8
+    CONV2D_FILTERS = 8
+    model = Sequential([
+        Conv3D(CONV3D_FILTERS, (5, 5, 3), padding='same', activation='relu',
+               input_shape=(img_width, img_width, img_depth_t, img_depth_frames)),
+        Reshape((img_width, img_width, img_depth_t * CONV3D_FILTERS)),
+        Conv2D(CONV2D_FILTERS, 3, padding='same', activation='relu'),
+        Flatten(),
+        Dense(32, activation='relu'),
+        Dense(1, activation='sigmoid')
+    ])
+    model.compile(optimizer=opt, loss='binary_crossentropy',
+                  metrics=['accuracy'])
+    model.summary()
+    return model
+
+
+def augment_data(images_in, labels_in):
+    assert len(images_in) == len(images_in)
+    n = len(images_in)
+    shape = images_in.shape
+    augmentations = [
+        lambda x: x,
+        lambda x: np.rot90(x, k=1),
+        lambda x: np.rot90(x, k=2),
+        lambda x: np.rot90(x, k=3),
+        lambda x: np.flip(x, axis=0),
+        lambda x: np.flip(np.rot90(x, k=1), axis=0),
+        lambda x: np.flip(np.rot90(x, k=2), axis=0),
+        lambda x: np.flip(np.rot90(x, k=3), axis=0)
+    ]
+    shape_out = list(shape)
+    shape_out[0] = shape_out[0] * len(augmentations)
+    images_out = np.zeros(shape=shape_out)
+    labels_out = np.zeros(shape=len(augmentations)*n)
+    for i_d in range(n):
+        for i_a, aug in enumerate(augmentations):
+            i_out = i_d * len(augmentations) + i_a
+            images_out[i_out] = aug(images_in[i_d])
+            labels_out[i_out] = labels_in[i_d]
+    return images_out, labels_out
 
 
 if __name__ == "__main__":
-    logging.basicConfig()
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    # tf Logging
-    logdir = datetime.now().strftime("logs/%Y%m%d-%H%M%S")
+    # arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'fname_read_pkl', type=argparse.FileType('rb'))
+    parser.add_argument(
+        'model_fname', type=str, default="my_model.h5")
+    args = parser.parse_args()
+    fname_read_pkl: str = args.fname_read_pkl.name
+    model_fname: str = args.model_fname
+    validation_split: float = .1
 
-    fname_pkl = sys.argv[-1]
-    assert fname_pkl.endswith(".pkl"), "to read the training data,\
-        give filname of pickle file as argument"
+    # data
+    with open(fname_read_pkl, 'rb') as f:
+        d = pickle.load(f)
+    n = len(d)
+    print(f'n: {n}')
+    n_train = int(n * (1-validation_split))
+    print(f'n_train: {n_train}')
+    train_images = np.array([d[i][0] for i in range(n_train)])
+    train_labels = np.array([d[i][1] for i in range(n_train)])
+    assert train_images.shape[0] == n_train, "We must have all data."
+    val_images = np.array([d[i][0] for i in range(n_train+1, n)])
+    val_labels = np.array([d[i][1] for i in range(n_train+1, n)])
+    print(f"train_images.shape: {train_images.shape}")
+    (_, img_width, img_height, img_depth_t, img_depth_frames) = train_images.shape
+    assert img_width == img_height, "Images must be square."
 
-    training_data = []
-    with open(fname_pkl, 'rb') as f:
-        training_data = pickle.load(f)
+    # data augmentation
+    # train_images_augmented, train_labels_augmented = augment_data(train_images, train_labels,
+    #                                                               )
+    # print(f"train_images_augmented.shape: {train_images_augmented.shape}")
 
-    assert len(training_data), "No training data loaded"
-    logger.info("Training Data len: {}".format(len(training_data)))
+    # optimizer
+    opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
 
-    # --------------------------------------------------------------------------------
     # model
-    learning_rate = 0.01
-    training_precentage = .9
-    training_steps = int(len(training_data) * training_precentage)
-    test_steps = len(training_data) - training_steps
-    batch_size = 100
-    display_step = 1
+    print(f"model_fname: {model_fname}")
+    if os.path.isfile(model_fname):
+        print("model exists. going to load and improve it ...")
+        model: keras.Model = keras.models.load_model(
+            model_fname)
+    else:
+        print("model does not exist. going to load make a new one ...")
+        model = construct_model(img_width, img_depth_t, img_depth_frames)
 
-    num_inputs_other = training_data[0][0][OTHERS_STR][0][0].shape[0]
-    num_others = len(training_data[0][0][OTHERS_STR])
-    num_inputs_self = training_data[0][0][OWN_STR][0].shape[0]
-    num_com_channels = 3  # how many colors has the image  TODO: use blurmap
-    num_hidden = num_inputs_self * 2  # hidden layers other and self
-    num_classes = 1  # one class for 0. .. 1.
-    num_timesteps = 20  # TODO: get from generated data
-    num_input = num_inputs_self + num_others * num_inputs_other
+    # train
+    bcp = BatchHistory()
+    history = model.fit([train_images], train_labels,
+                        epochs=8, batch_size=4, callbacks=[bcp]
+                        )
+    model.save(model_fname)
 
-    # blurmap size
-    map_width = 10
-    map_height = 10  # TODO: read from somewhere
+    # manual validation
+    val_loss, val_acc = model.evaluate([val_images], val_labels)
+    print(f"val_loss: {val_loss}")
+    print(f"val_acc: {val_acc}")
 
-    # setting up tf
-    tf.reset_default_graph()
-    # tf.enable_eager_execution()
-
-    X = tf.compat.v1.placeholder(
-        tf.float32, [batch_size, num_timesteps, num_input], name="X")
-    Y = tf.compat.v1.placeholder(
-        tf.float32, [batch_size, num_classes], name="Y")
-
-    def LSTM(x):
-        # Define a lstm cell with tensorflow
-        map_layer = GaussianMapLayer(
-            num_inputs_other,
-            num_inputs_self,
-            num_others,
-            num_com_channels,
-            num_hidden,
-            map_width,
-            map_height)
-
-        # Get lstm cell output
-        # outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
-        rnn_layer = tf.keras.layers.RNN(map_layer)
-
-        inputs = map_layer.data_to_nested_input(x)
-        outputs, state = rnn_layer.call(inputs)
-
-        # returning simply the last output
-        return outputs[-1]
-
-    pred_cont = LSTM(X)  # continous variable predicted
-    pred_disc = tf.math.round(pred_cont)  # discrete prediction
-
-    # Define loss and optimizer
-    loss_op = tf.reduce_mean(tf.square(Y - pred_cont))
-    optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
-    train_op = optimizer.minimize(loss_op)
-
-    # Evaluate model (with test logits, for dropout to be disabled)
-    correct_pred = tf.equal(pred_disc, Y)
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-
-    # Initialize the variables (i.e. assign their default value)
-    init = tf.compat.v1.global_variables_initializer()
-
-    # Start training
-    with tf.Session() as sess:
-        # Run the initializer
-        sess.run(init)
-        file_writer = tf.compat.v1.summary.FileWriter(logdir, sess.graph)
-
-        assert 0 == training_steps % batch_size, ("training steps must be " +
-                                                  "divisible by batch size")
-        for batch_step in range(int(training_steps / batch_size)):
-            start_step = batch_step * batch_size
-            batch_x, batch_y = get_training_steps(
-                training_data, start_step, batch_size,
-                num_input, num_timesteps)
-            # Run optimization op (backprop)
-            sess.run(train_op, feed_dict={X: batch_x,
-                                          Y: batch_y})
-            if batch_step % display_step == 0 or batch_step == 1:
-                # Calculate batch loss and accuracy
-                loss, acc = sess.run([loss_op, accuracy],
-                                     feed_dict={X: batch_x,
-                                                Y: batch_y})
-                print("Step " + str(batch_step) + ", Minibatch Loss= " +
-                      "{:.4f}".format(loss) + ", Training Accuracy= " +
-                      "{:.3f}".format(acc))
-
-        print("Optimization Finished!")
-
-        # Calculate accuracy
-        test_x, test_y = get_training_steps(
-            training_data, training_steps, batch_size,
-            num_input, num_timesteps)
-        print("Testing Accuracy:",
-              sess.run(accuracy, feed_dict={X: test_x, Y: test_y}))
+    # print history
+    plt.plot(bcp.batch_accuracy, label="accuracy")
+    plt.plot(bcp.batch_loss, label="loss")
+    plt.legend(loc='lower left')
+    plt.xlabel('Batch')
+    plt.savefig("training_history.png")
+    plt.show()
