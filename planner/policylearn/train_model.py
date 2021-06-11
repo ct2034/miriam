@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import argparse
 import os
 import pickle
@@ -7,14 +6,13 @@ from typing import List
 
 import numpy as np
 from importtf import keras, tf
-from keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D, Flatten, Dropout,
-                          MaxPooling2D, Reshape, ConvLSTM2D, Activation, MaxPooling3D)
+from keras.layers import (Activation, BatchNormalization, Conv2D, Conv3D,
+                          ConvLSTM2D, Dense, DepthwiseConv2D, Dropout, Flatten,
+                          MaxPooling2D, MaxPooling3D, Reshape)
 from keras.models import Sequential
 from matplotlib import pyplot as plt
 from numpy.core.shape_base import _concatenate_shapes
-
-from tensorflow.compat.v1 import ConfigProto
-from tensorflow.compat.v1 import InteractiveSession
+from tensorflow.compat.v1 import ConfigProto, InteractiveSession
 
 # workaround, src https://github.com/tensorflow/tensorflow/issues/43174
 config = ConfigProto()
@@ -206,7 +204,8 @@ if __name__ == "__main__":
                             )
     elif model_type == CONVRNN_STR:
         history = model.fit([train_images], train_labels,
-                            epochs=16, batch_size=256  # , callbacks=[bcp]
+                            epochs=8, batch_size=512, callbacks=[bcp],
+                            validation_split=.1
                             )
     model.save(model_fname)
 
