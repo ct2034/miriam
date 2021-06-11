@@ -13,7 +13,13 @@ from keras.models import Sequential
 from matplotlib import pyplot as plt
 from numpy.core.shape_base import _concatenate_shapes
 
-tf.compat.v1.GPUOptions(allow_growth=True)
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+
+# workaround, src https://github.com/tensorflow/tensorflow/issues/43174
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
 
 
 class BatchHistory(tf.keras.callbacks.Callback):
@@ -99,8 +105,13 @@ if __name__ == "__main__":
     val_images = np.array([d[i][0] for i in range(n_train+1, n)])
     val_labels = np.array([d[i][1] for i in range(n_train+1, n)])
     print(f"train_images.shape: {train_images.shape}")
-    (_, img_width, img_height, img_depth_t, img_depth_frames) = train_images.shape
+    (_, img_width, img_height, img_depth_t,
+     img_depth_channels) = train_images.shape
     assert img_width == img_height, "Images must be square."
+    print(f"img_width: {img_width}")
+    print(f"img_height: {img_height}")
+    print(f"img_depth_t: {img_depth_t}")
+    print(f"img_depth_channels: {img_depth_channels}")
 
     # data augmentation
     # train_images_augmented, train_labels_augmented = augment_data(train_images, train_labels,
@@ -118,7 +129,7 @@ if __name__ == "__main__":
             model_fname)
     else:
         print("model does not exist. going to load make a new one ...")
-        model = construct_model(img_width, img_depth_t, img_depth_frames)
+        model = construct_model(img_width, img_depth_t, img_depth_channels)
 
     # train
     bcp = BatchHistory()

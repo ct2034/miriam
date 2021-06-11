@@ -1,12 +1,12 @@
 # How to use
 First, generate data by solving environments
 ```
-./generate_data.py generate_simulation data.pkl
+N_DATA_TO_GEN=1000000 ./generate_data.py generate_simulation data/data.pkl
 ```
 
 Merge the files
 ```
-./generate_data.py merge_files -m data*.pkl
+./generate_data.py merge_files -m data/data*.pkl
 ```
 
 Then transfer to classification samples
