@@ -7,8 +7,8 @@ from typing import List
 
 import numpy as np
 from importtf import keras, tf
-from keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D, Flatten,
-                          MaxPooling2D, Reshape)
+from keras.layers import (Conv2D, Conv3D, Dense, DepthwiseConv2D, Flatten, Dropout,
+                          MaxPooling2D, Reshape, ConvLSTM2D, Activation, MaxPooling3D)
 from keras.models import Sequential
 from matplotlib import pyplot as plt
 from numpy.core.shape_base import _concatenate_shapes
@@ -20,6 +20,10 @@ from tensorflow.compat.v1 import InteractiveSession
 config = ConfigProto()
 config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
+
+# choices of model type
+CLASSIFICATION_STR = "classification"
+CONVRNN_STR = "convrnn"
 
 
 class BatchHistory(tf.keras.callbacks.Callback):
@@ -36,7 +40,7 @@ class BatchHistory(tf.keras.callbacks.Callback):
         BatchHistory.batch_loss.append(logs.get('loss'))
 
 
-def construct_model(img_width, img_depth_t, img_depth_frames):
+def construct_model_classification(img_width, img_depth_t, img_depth_frames):
     CONV3D_FILTERS = 8
     CONV2D_FILTERS = 8
     model = Sequential([
@@ -46,6 +50,38 @@ def construct_model(img_width, img_depth_t, img_depth_frames):
         Conv2D(CONV2D_FILTERS, 3, padding='same', activation='relu'),
         Flatten(),
         Dense(32, activation='relu'),
+        Dense(1, activation='sigmoid')
+    ])
+    model.compile(optimizer=opt, loss='binary_crossentropy',
+                  metrics=['accuracy'])
+    model.summary()
+    return model
+
+
+def construct_model_convrnn(img_width, img_depth_t, img_depth_frames):
+    model = Sequential([
+        ConvLSTM2D(64, kernel_size=(3, 3),
+                   padding='valid',
+                   return_sequences=True,
+                   activation='relu',
+                   input_shape=(
+            img_depth_t, img_width, img_width, img_depth_frames)
+        ),
+        # Dropout(.2),
+        # ConvLSTM2D(64, kernel_size=(3,3),
+        #            padding='valid',
+        #            return_sequences=True,
+        #            activation='relu'
+        #            ),
+        Dropout(.2),
+        ConvLSTM2D(64, kernel_size=(3, 3),
+                   padding='valid',
+                   return_sequences=False,
+                   activation='relu'
+                   ),
+        Dropout(.2),
+        Flatten(),
+        Dense(256, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer=opt, loss='binary_crossentropy',
@@ -87,9 +123,15 @@ if __name__ == "__main__":
         'fname_read_pkl', type=argparse.FileType('rb'))
     parser.add_argument(
         'model_fname', type=str, default="my_model.h5")
+    parser.add_argument(
+        'model_type', choices=[
+            CLASSIFICATION_STR,
+            CONVRNN_STR
+        ])
     args = parser.parse_args()
     fname_read_pkl: str = args.fname_read_pkl.name
     model_fname: str = args.model_fname
+    model_type: str = args.model_type
     validation_split: float = .1
 
     # data
@@ -104,10 +146,27 @@ if __name__ == "__main__":
     assert train_images.shape[0] == n_train, "We must have all data."
     val_images = np.array([d[i][0] for i in range(n_train+1, n)])
     val_labels = np.array([d[i][1] for i in range(n_train+1, n)])
+
+    if model_type == CLASSIFICATION_STR:
+        (n_samples, img_width, img_height, img_depth_t,
+         img_depth_channels) = train_images.shape
+    elif model_type == CONVRNN_STR:
+        print("fixing data for "+CONVRNN_STR)
+        train_images = np.moveaxis(train_images,
+                                   [1, 2, 3],
+                                   [-3, -2, -4]
+                                   )
+        val_images = np.moveaxis(val_images,
+                                 [1, 2, 3],
+                                 [-3, -2, -4]
+                                 )
+        (n_samples, img_depth_t, img_width, img_height,
+         img_depth_channels) = train_images.shape
+
+    # info on data shape
     print(f"train_images.shape: {train_images.shape}")
-    (_, img_width, img_height, img_depth_t,
-     img_depth_channels) = train_images.shape
     assert img_width == img_height, "Images must be square."
+    print(f"n_samples: {n_samples}")
     print(f"img_width: {img_width}")
     print(f"img_height: {img_height}")
     print(f"img_depth_t: {img_depth_t}")
@@ -119,23 +178,36 @@ if __name__ == "__main__":
     # print(f"train_images_augmented.shape: {train_images_augmented.shape}")
 
     # optimizer
-    opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
+    if model_type == CLASSIFICATION_STR:
+        opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
+    elif model_type == CONVRNN_STR:
+        opt = tf.keras.optimizers.Adam()
 
-    # model
+        # model
     print(f"model_fname: {model_fname}")
     if os.path.isfile(model_fname):
         print("model exists. going to load and improve it ...")
         model: keras.Model = keras.models.load_model(
             model_fname)
     else:
-        print("model does not exist. going to load make a new one ...")
-        model = construct_model(img_width, img_depth_t, img_depth_channels)
+        print("model does not exist. going to load make a new one ... of type "+model_type)
+        if model_type == CLASSIFICATION_STR:
+            model = construct_model_classification(
+                img_width, img_depth_t, img_depth_channels)
+        elif model_type == CONVRNN_STR:
+            model = construct_model_convrnn(
+                img_width, img_depth_t, img_depth_channels)
 
     # train
     bcp = BatchHistory()
-    history = model.fit([train_images], train_labels,
-                        epochs=8, batch_size=4, callbacks=[bcp]
-                        )
+    if model_type == CLASSIFICATION_STR:
+        history = model.fit([train_images], train_labels,
+                            epochs=8, batch_size=4, callbacks=[bcp]
+                            )
+    elif model_type == CONVRNN_STR:
+        history = model.fit([train_images], train_labels,
+                            epochs=16, batch_size=256  # , callbacks=[bcp]
+                            )
     model.save(model_fname)
 
     # manual validation
