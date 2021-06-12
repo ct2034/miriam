@@ -14,6 +14,7 @@ from matplotlib import pyplot as plt
 from numpy.core.shape_base import _concatenate_shapes
 from tensorflow.compat.v1 import ConfigProto, InteractiveSession
 from tensorflow.python.keras.backend import dropout
+from tools import ProgressBar
 
 # workaround, src https://github.com/tensorflow/tensorflow/issues/43174
 config = ConfigProto()
@@ -150,6 +151,7 @@ if __name__ == "__main__":
         print("Running on CPU.")
 
     # data
+    pb = ProgressBar("files", len(fnames_read_pkl))
     for fname_read_pkl in fnames_read_pkl:
         print(
             f"reading file {fnames_read_pkl.index(fname_read_pkl) + 1} of " +
@@ -244,7 +246,9 @@ if __name__ == "__main__":
             loss.extend(history.history['loss'])
             assert val_loss is not None
             val_loss.extend(history.history['val_loss'])
+        pb.progress()
     model.save(model_fname)
+    pb.end()
 
     # manual validation
     val_loss, val_acc = model.evaluate([val_images], val_labels)
