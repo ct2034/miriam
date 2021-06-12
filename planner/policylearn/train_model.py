@@ -2,7 +2,7 @@
 import argparse
 import os
 import pickle
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from importtf import keras, tf
@@ -13,6 +13,7 @@ from keras.models import Sequential
 from matplotlib import pyplot as plt
 from numpy.core.shape_base import _concatenate_shapes
 from tensorflow.compat.v1 import ConfigProto, InteractiveSession
+from tensorflow.python.keras.backend import dropout
 
 # workaround, src https://github.com/tensorflow/tensorflow/issues/43174
 config = ConfigProto()
@@ -57,28 +58,36 @@ def construct_model_classification(img_width, img_depth_t, img_depth_frames):
 
 
 def construct_model_convrnn(img_width, img_depth_t, img_depth_frames):
+    dropout = .3
+    convlstm2d_filters = 64
     model = Sequential([
-        ConvLSTM2D(64, kernel_size=(3, 3),
+        ConvLSTM2D(convlstm2d_filters, kernel_size=(3, 3),
                    padding='valid',
                    return_sequences=True,
-                   activation='relu',
+                   activation='tanh',
                    input_shape=(
             img_depth_t, img_width, img_width, img_depth_frames)
         ),
-        # Dropout(.2),
-        # ConvLSTM2D(64, kernel_size=(3,3),
+        BatchNormalization(),
+        Dropout(dropout),
+        # ConvLSTM2D(convlstm2d_filters, kernel_size=(3, 3),
         #            padding='valid',
         #            return_sequences=True,
-        #            activation='relu'
+        #            activation='tanh'
         #            ),
-        Dropout(.2),
-        ConvLSTM2D(64, kernel_size=(3, 3),
+        # BatchNormalization(),
+        # Dropout(dropout),
+        ConvLSTM2D(convlstm2d_filters, kernel_size=(3, 3),
                    padding='valid',
                    return_sequences=False,
-                   activation='relu'
+                   activation='tanh'
                    ),
-        Dropout(.2),
+        BatchNormalization(),
+        Dropout(dropout),
         Flatten(),
+        # Dense(256, activation='relu'),
+        # BatchNormalization(),
+        # Dropout(dropout),
         Dense(256, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
@@ -118,95 +127,123 @@ if __name__ == "__main__":
     # arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'fname_read_pkl', type=argparse.FileType('rb'))
+        '-m', '--model_fname', type=str, default="my_model.h5", )
     parser.add_argument(
-        'model_fname', type=str, default="my_model.h5")
-    parser.add_argument(
-        'model_type', choices=[
+        '-t', '--model_type', choices=[
             CLASSIFICATION_STR,
             CONVRNN_STR
         ])
+    parser.add_argument(
+        'fnames_read_pkl', type=str, nargs='+')
     args = parser.parse_args()
-    fname_read_pkl: str = args.fname_read_pkl.name
+    fnames_read_pkl: List[str] = args.fnames_read_pkl
+    print(f'fnames_read_pkl: {fnames_read_pkl}')
     model_fname: str = args.model_fname
+    print(f'model_fname: {model_fname}')
     model_type: str = args.model_type
+    print(f'model_type: {model_type}')
     validation_split: float = .1
 
-    # data
-    with open(fname_read_pkl, 'rb') as f:
-        d = pickle.load(f)
-    n = len(d)
-    print(f'n: {n}')
-    n_train = int(n * (1-validation_split))
-    print(f'n_train: {n_train}')
-    train_images = np.array([d[i][0] for i in range(n_train)])
-    train_labels = np.array([d[i][1] for i in range(n_train)])
-    assert train_images.shape[0] == n_train, "We must have all data."
-    val_images = np.array([d[i][0] for i in range(n_train+1, n)])
-    val_labels = np.array([d[i][1] for i in range(n_train+1, n)])
-
-    if model_type == CLASSIFICATION_STR:
-        (n_samples, img_width, img_height, img_depth_t,
-         img_depth_channels) = train_images.shape
-    elif model_type == CONVRNN_STR:
-        print("fixing data for "+CONVRNN_STR)
-        train_images = np.moveaxis(train_images,
-                                   [1, 2, 3],
-                                   [-3, -2, -4]
-                                   )
-        val_images = np.moveaxis(val_images,
-                                 [1, 2, 3],
-                                 [-3, -2, -4]
-                                 )
-        (n_samples, img_depth_t, img_width, img_height,
-         img_depth_channels) = train_images.shape
-
-    # info on data shape
-    print(f"train_images.shape: {train_images.shape}")
-    assert img_width == img_height, "Images must be square."
-    print(f"n_samples: {n_samples}")
-    print(f"img_width: {img_width}")
-    print(f"img_height: {img_height}")
-    print(f"img_depth_t: {img_depth_t}")
-    print(f"img_depth_channels: {img_depth_channels}")
-
-    # data augmentation
-    # train_images_augmented, train_labels_augmented = augment_data(train_images, train_labels,
-    #                                                               )
-    # print(f"train_images_augmented.shape: {train_images_augmented.shape}")
-
-    # optimizer
-    if model_type == CLASSIFICATION_STR:
-        opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
-    elif model_type == CONVRNN_STR:
-        opt = tf.keras.optimizers.Adam()
-
-        # model
-    print(f"model_fname: {model_fname}")
-    if os.path.isfile(model_fname):
-        print("model exists. going to load and improve it ...")
-        model: keras.Model = keras.models.load_model(
-            model_fname)
+    if tf.test.gpu_device_name():
+        print('GPU Device: {}'.format(tf.test.gpu_device_name()))
     else:
-        print("model does not exist. going to load make a new one ... of type "+model_type)
-        if model_type == CLASSIFICATION_STR:
-            model = construct_model_classification(
-                img_width, img_depth_t, img_depth_channels)
-        elif model_type == CONVRNN_STR:
-            model = construct_model_convrnn(
-                img_width, img_depth_t, img_depth_channels)
+        print("Running on CPU.")
 
-    # train
-    bcp = BatchHistory()
-    if model_type == CLASSIFICATION_STR:
-        history = model.fit([train_images], train_labels,
-                            epochs=8, batch_size=4, callbacks=[bcp]
-                            )
-    elif model_type == CONVRNN_STR:
-        history = model.fit([train_images], train_labels,
-                            epochs=8, batch_size=512, callbacks=[bcp],
-                            validation_split=.1
-                            )
+    # data
+    for fname_read_pkl in fnames_read_pkl:
+        print(
+            f"reading file {fnames_read_pkl.index(fname_read_pkl) + 1} of " +
+            f"{len(fnames_read_pkl)} : " +
+            f"{fname_read_pkl}")
+        with open(fname_read_pkl, 'rb') as f:
+            d = pickle.load(f)
+        n = len(d)
+        print(f'n: {n}')
+        n_train = int(n * (1-validation_split))
+        print(f'n_train: {n_train}')
+        train_images = np.array([d[i][0] for i in range(n_train)])
+        train_labels = np.array([d[i][1] for i in range(n_train)])
+        assert train_images.shape[0] == n_train, "We must have all data."
+        val_images = np.array([d[i][0] for i in range(n_train+1, n)])
+        val_labels = np.array([d[i][1] for i in range(n_train+1, n)])
+
+        if model_type == CLASSIFICATION_STR:
+            (n_samples, img_width, img_height, img_depth_t,
+             img_depth_channels) = train_images.shape
+        elif model_type == CONVRNN_STR:
+            print("fixing data for "+CONVRNN_STR)
+            train_images = np.moveaxis(train_images,
+                                       [1, 2, 3],
+                                       [-3, -2, -4]
+                                       )
+            val_images = np.moveaxis(val_images,
+                                     [1, 2, 3],
+                                     [-3, -2, -4]
+                                     )
+            (n_samples, img_depth_t, img_width, img_height,
+             img_depth_channels) = train_images.shape
+
+        if fname_read_pkl == fnames_read_pkl[0]:  # on first file only
+            # info on data shape
+            print(f"train_images.shape: {train_images.shape}")
+            assert img_width == img_height, "Images must be square."
+            print(f"n_samples: {n_samples}")
+            print(f"img_width: {img_width}")
+            print(f"img_height: {img_height}")
+            print(f"img_depth_t: {img_depth_t}")
+            print(f"img_depth_channels: {img_depth_channels}")
+
+            # optimizer
+            if model_type == CLASSIFICATION_STR:
+                opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
+            elif model_type == CONVRNN_STR:
+                opt = tf.keras.optimizers.Adam()
+
+            # model
+            print(f"model_fname: {model_fname}")
+            if os.path.isfile(model_fname):
+                print("model exists. going to load and improve it ...")
+                model: keras.Model = keras.models.load_model(
+                    model_fname)
+            else:
+                print(
+                    "model does not exist. going to load make a new one ... of type "+model_type)
+                if model_type == CLASSIFICATION_STR:
+                    model = construct_model_classification(
+                        img_width, img_depth_t, img_depth_channels)
+                elif model_type == CONVRNN_STR:
+                    model = construct_model_convrnn(
+                        img_width, img_depth_t, img_depth_channels)
+
+            # train
+            accuracy: List[float] = []
+            val_accuracy: Optional[List[float]] = []
+            loss: List[float] = []
+            val_loss: Optional[List[float]] = []
+        # (if) on first file only
+
+        if model_type == CLASSIFICATION_STR:
+            bcp = BatchHistory()
+            history = model.fit([train_images], train_labels,
+                                epochs=8, batch_size=4, callbacks=[bcp]
+                                )
+            # stats from bcp
+            accuracy.extend(bcp.batch_accuracy)
+            val_accuracy = None
+            loss.extend(bcp.batch_loss)
+            val_loss = None
+        elif model_type == CONVRNN_STR:
+            history = model.fit([train_images], train_labels,
+                                epochs=8, batch_size=512,
+                                validation_split=validation_split
+                                )
+            # normal stats
+            accuracy.extend(history.history['accuracy'])
+            assert val_accuracy is not None
+            val_accuracy.extend(history.history['val_accuracy'])
+            loss.extend(history.history['loss'])
+            assert val_loss is not None
+            val_loss.extend(history.history['val_loss'])
     model.save(model_fname)
 
     # manual validation
@@ -215,8 +252,12 @@ if __name__ == "__main__":
     print(f"val_acc: {val_acc}")
 
     # print history
-    plt.plot(bcp.batch_accuracy, label="accuracy")
-    plt.plot(bcp.batch_loss, label="loss")
+    plt.plot(accuracy, label="accuracy")
+    plt.plot(loss, label="loss")
+    if val_accuracy is not None:
+        plt.plot(val_accuracy, label="val_accuracy")
+    if val_loss is not None:
+        plt.plot(val_loss, label="val_loss")
     plt.legend(loc='lower left')
     plt.xlabel('Batch')
     plt.savefig("training_history.png")

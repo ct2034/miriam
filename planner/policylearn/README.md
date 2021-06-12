@@ -21,7 +21,7 @@ Have a look at the data with ...
 
 Train the model
 ```
-./train_model.py data_class.pkl my_model.h5
+./train_model.py -t=convrnn data_class*.pkl
 ```
 
 Evaluate the model with ..
