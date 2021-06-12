@@ -40,13 +40,13 @@ class BatchHistory(tf.keras.callbacks.Callback):
         BatchHistory.batch_loss.append(logs.get('loss'))
 
 
-def construct_model_classification(img_width, img_depth_t, img_depth_frames):
+def construct_model_classification(img_width, img_len_t, img_depth_frames):
     CONV3D_FILTERS = 8
     CONV2D_FILTERS = 8
     model = Sequential([
         Conv3D(CONV3D_FILTERS, (5, 5, 3), padding='same', activation='relu',
-               input_shape=(img_width, img_width, img_depth_t, img_depth_frames)),
-        Reshape((img_width, img_width, img_depth_t * CONV3D_FILTERS)),
+               input_shape=(img_width, img_width, img_len_t, img_depth_frames)),
+        Reshape((img_width, img_width, img_len_t * CONV3D_FILTERS)),
         Conv2D(CONV2D_FILTERS, 3, padding='same', activation='relu'),
         Flatten(),
         Dense(32, activation='relu'),
@@ -58,7 +58,7 @@ def construct_model_classification(img_width, img_depth_t, img_depth_frames):
     return model
 
 
-def construct_model_convrnn(img_width, img_depth_t, img_depth_frames):
+def construct_model_convrnn(img_width, img_len_t, img_depth_frames):
     dropout = .3
     convlstm2d_filters = 64
     model = Sequential([
@@ -67,7 +67,7 @@ def construct_model_convrnn(img_width, img_depth_t, img_depth_frames):
                    return_sequences=True,
                    activation='tanh',
                    input_shape=(
-            img_depth_t, img_width, img_width, img_depth_frames)
+            img_len_t, img_width, img_width, img_depth_frames)
         ),
         BatchNormalization(),
         Dropout(dropout),
@@ -86,9 +86,9 @@ def construct_model_convrnn(img_width, img_depth_t, img_depth_frames):
         BatchNormalization(),
         Dropout(dropout),
         Flatten(),
-        # Dense(256, activation='relu'),
-        # BatchNormalization(),
-        # Dropout(dropout),
+        Dense(256, activation='relu'),
+        BatchNormalization(),
+        Dropout(dropout),
         Dense(256, activation='relu'),
         Dense(1, activation='sigmoid')
     ])
@@ -144,6 +144,7 @@ if __name__ == "__main__":
     model_type: str = args.model_type
     print(f'model_type: {model_type}')
     validation_split: float = .1
+    test_split: float = .1
 
     if tf.test.gpu_device_name():
         print('GPU Device: {}'.format(tf.test.gpu_device_name()))
@@ -160,30 +161,36 @@ if __name__ == "__main__":
         with open(fname_read_pkl, 'rb') as f:
             d = pickle.load(f)
         n = len(d)
-        print(f'n: {n}')
-        n_train = int(n * (1-validation_split))
-        print(f'n_train: {n_train}')
-        train_images = np.array([d[i][0] for i in range(n_train)])
-        train_labels = np.array([d[i][1] for i in range(n_train)])
-        assert train_images.shape[0] == n_train, "We must have all data."
-        val_images = np.array([d[i][0] for i in range(n_train+1, n)])
-        val_labels = np.array([d[i][1] for i in range(n_train+1, n)])
+        if fname_read_pkl == fnames_read_pkl[0]:  # on first file only
+            print(f'n: {n}')
+            n_train = int(n * (1-test_split))
+            print(f'n_train: {n_train}')
+            train_images = np.array([d[i][0] for i in range(n_train)])
+            train_labels = np.array([d[i][1] for i in range(n_train)])
+            assert train_images.shape[0] == n_train, "We must have all data."
+            test_images = np.array([d[i][0] for i in range(n_train+1, n)])
+            test_labels = np.array([d[i][1] for i in range(n_train+1, n)])
+        else:
+            n_train = n
+            print(f'n_train: {n_train}')
+            train_images = np.array([d[i][0] for i in range(n_train)])
+            train_labels = np.array([d[i][1] for i in range(n_train)])
 
         if model_type == CLASSIFICATION_STR:
-            (n_samples, img_width, img_height, img_depth_t,
-             img_depth_channels) = train_images.shape
+            (n_samples, img_width, img_height, img_len_t,
+             img_channels) = train_images.shape
         elif model_type == CONVRNN_STR:
             print("fixing data for "+CONVRNN_STR)
             train_images = np.moveaxis(train_images,
                                        [1, 2, 3],
                                        [-3, -2, -4]
                                        )
-            val_images = np.moveaxis(val_images,
-                                     [1, 2, 3],
-                                     [-3, -2, -4]
-                                     )
-            (n_samples, img_depth_t, img_width, img_height,
-             img_depth_channels) = train_images.shape
+            test_images = np.moveaxis(test_images,
+                                      [1, 2, 3],
+                                      [-3, -2, -4]
+                                      )
+            (n_samples, img_len_t, img_width, img_height,
+             img_channels) = train_images.shape
 
         if fname_read_pkl == fnames_read_pkl[0]:  # on first file only
             # info on data shape
@@ -192,8 +199,8 @@ if __name__ == "__main__":
             print(f"n_samples: {n_samples}")
             print(f"img_width: {img_width}")
             print(f"img_height: {img_height}")
-            print(f"img_depth_t: {img_depth_t}")
-            print(f"img_depth_channels: {img_depth_channels}")
+            print(f"img_len_t: {img_len_t}")
+            print(f"img_channels: {img_channels}")
 
             # optimizer
             if model_type == CLASSIFICATION_STR:
@@ -212,10 +219,10 @@ if __name__ == "__main__":
                     "model does not exist. going to load make a new one ... of type "+model_type)
                 if model_type == CLASSIFICATION_STR:
                     model = construct_model_classification(
-                        img_width, img_depth_t, img_depth_channels)
+                        img_width, img_len_t, img_channels)
                 elif model_type == CONVRNN_STR:
                     model = construct_model_convrnn(
-                        img_width, img_depth_t, img_depth_channels)
+                        img_width, img_len_t, img_channels)
 
             # train
             accuracy: List[float] = []
@@ -250,10 +257,10 @@ if __name__ == "__main__":
     model.save(model_fname)
     pb.end()
 
-    # manual validation
-    val_loss, val_acc = model.evaluate([val_images], val_labels)
-    print(f"val_loss: {val_loss}")
-    print(f"val_acc: {val_acc}")
+    # manual validation (testing)
+    test_loss, test_acc = model.evaluate([test_images], test_labels)
+    print(f"test_loss: {test_loss}")
+    print(f"test_acc: {test_acc}")
 
     # print history
     plt.plot(accuracy, label="accuracy")
