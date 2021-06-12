@@ -185,10 +185,11 @@ if __name__ == "__main__":
                                        [1, 2, 3],
                                        [-3, -2, -4]
                                        )
-            test_images = np.moveaxis(test_images,
-                                      [1, 2, 3],
-                                      [-3, -2, -4]
-                                      )
+            if fname_read_pkl == fnames_read_pkl[0]:  # on first file only
+                test_images = np.moveaxis(test_images,
+                                          [1, 2, 3],
+                                          [-3, -2, -4]
+                                          )
             (n_samples, img_len_t, img_width, img_height,
              img_channels) = train_images.shape
 
@@ -227,8 +228,20 @@ if __name__ == "__main__":
             # train
             accuracy: List[float] = []
             val_accuracy: Optional[List[float]] = []
+            test_accuracy: List[float] = []
             loss: List[float] = []
             val_loss: Optional[List[float]] = []
+            test_loss: List[float] = []
+            test_x: List[float] = []
+
+            # evaluating untrained model
+            pretrain_test_loss, pretrain_test_accuracy = model.evaluate(
+                [test_images], test_labels)
+            print(f"pretrain_test_loss: {pretrain_test_loss}")
+            print(f"pretrain_test_accuracy: {pretrain_test_accuracy}")
+            test_x.append(0)
+            test_accuracy.append(pretrain_test_accuracy)
+            test_loss.append(pretrain_test_loss)
         # (if) on first file only
 
         if model_type == CLASSIFICATION_STR:
@@ -253,14 +266,19 @@ if __name__ == "__main__":
             loss.extend(history.history['loss'])
             assert val_loss is not None
             val_loss.extend(history.history['val_loss'])
+
+        # manual validation (testing)
+        one_test_loss, one_test_accuracy = model.evaluate(
+            [test_images], test_labels)
+        print(f"one_test_loss: {one_test_loss}")
+        print(f"one_test_accuracy: {one_test_accuracy}")
+        test_x.append(len(accuracy)-1)
+        test_accuracy.append(one_test_accuracy)
+        test_loss.append(one_test_loss)
+
         pb.progress()
     model.save(model_fname)
     pb.end()
-
-    # manual validation (testing)
-    test_loss, test_acc = model.evaluate([test_images], test_labels)
-    print(f"test_loss: {test_loss}")
-    print(f"test_acc: {test_acc}")
 
     # print history
     plt.plot(accuracy, label="accuracy")
@@ -269,6 +287,8 @@ if __name__ == "__main__":
         plt.plot(val_accuracy, label="val_accuracy")
     if val_loss is not None:
         plt.plot(val_loss, label="val_loss")
+    plt.plot(test_x, test_accuracy, label="test_accuracy")
+    plt.plot(test_x, test_loss, label="test_loss")
     plt.legend(loc='lower left')
     plt.xlabel('Batch')
     plt.savefig("training_history.png")
