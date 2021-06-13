@@ -64,8 +64,11 @@ def construct_model_convrnn(img_width, img_len_t, img_depth_frames):
     model = Sequential([
         ConvLSTM2D(convlstm2d_filters, kernel_size=(3, 3),
                    padding='valid',
-                   return_sequences=True,
+                   return_sequences=False,
                    activation='tanh',
+                   #    kernel_regularizer='l2',
+                   #    recurrent_regularizer='l2',
+                   #    bias_regularizer='l2',
                    input_shape=(
             img_len_t, img_width, img_width, img_depth_frames)
         ),
@@ -75,21 +78,37 @@ def construct_model_convrnn(img_width, img_len_t, img_depth_frames):
         #            padding='valid',
         #            return_sequences=True,
         #            activation='tanh'
+        #            kernel_regularizer='l2',
+        #            recurrent_regularizer='l2',
+        #            bias_regularizer='l2',
+        #            ),
+        # BatchNormalization(),
+        # # Dropout(dropout),
+        # ConvLSTM2D(convlstm2d_filters, kernel_size=(3, 3),
+        #            padding='valid',
+        #            return_sequences=False,
+        #            activation='tanh',
+        #            kernel_regularizer='l2',
+        #            #    recurrent_regularizer='l2',
+        #            #    bias_regularizer='l2'
         #            ),
         # BatchNormalization(),
         # Dropout(dropout),
-        ConvLSTM2D(convlstm2d_filters, kernel_size=(3, 3),
-                   padding='valid',
-                   return_sequences=False,
-                   activation='tanh'
-                   ),
-        BatchNormalization(),
-        Dropout(dropout),
         Flatten(),
-        Dense(256, activation='relu'),
+        Dense(256,
+              activation='relu',
+              kernel_regularizer='l2',
+              bias_regularizer='l2'
+              ),
         BatchNormalization(),
         Dropout(dropout),
-        Dense(256, activation='relu'),
+        Dense(256,
+              activation='relu',
+              kernel_regularizer='l2',
+              bias_regularizer='l2'
+              ),
+        BatchNormalization(),
+        Dropout(dropout),
         Dense(1, activation='sigmoid')
     ])
     model.compile(optimizer=opt, loss='binary_crossentropy',
@@ -207,7 +226,7 @@ if __name__ == "__main__":
             if model_type == CLASSIFICATION_STR:
                 opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
             elif model_type == CONVRNN_STR:
-                opt = tf.keras.optimizers.Adam()
+                opt = tf.keras.optimizers.Adam(learning_rate=0.005)
 
             # model
             print(f"model_fname: {model_fname}")
@@ -281,15 +300,18 @@ if __name__ == "__main__":
     pb.end()
 
     # print history
-    plt.plot(accuracy, label="accuracy")
-    plt.plot(loss, label="loss")
+    fig, axs = plt.subplots(2)
+    axs[0].plot(accuracy, label="accuracy")
+    axs[1].plot(loss, label="loss")
     if val_accuracy is not None:
-        plt.plot(val_accuracy, label="val_accuracy")
+        axs[0].plot(val_accuracy, label="val_accuracy")
     if val_loss is not None:
-        plt.plot(val_loss, label="val_loss")
-    plt.plot(test_x, test_accuracy, label="test_accuracy")
-    plt.plot(test_x, test_loss, label="test_loss")
-    plt.legend(loc='lower left')
-    plt.xlabel('Batch')
-    plt.savefig("training_history.png")
-    plt.show()
+        axs[1].plot(val_loss, label="val_loss")
+    axs[0].plot(test_x, test_accuracy, label="test_accuracy")
+    axs[1].plot(test_x, test_loss, label="test_loss")
+    axs[0].legend(loc='lower left')
+    axs[0].set_xlabel('Batch')
+    axs[1].legend(loc='lower left')
+    axs[1].set_xlabel('Batch')
+    fig.savefig("training_history.png")
+    fig.show()
