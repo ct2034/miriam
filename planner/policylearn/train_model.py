@@ -117,7 +117,7 @@ def construct_model_convrnn(img_width, img_len_t, img_depth_frames):
     return model
 
 
-def fix_data_convrnn(image):
+def fix_data_convrnn(images):
     return np.moveaxis(images,
                        [1, 2, 3],
                        [-3, -2, -4]
@@ -212,8 +212,8 @@ if __name__ == "__main__":
                     [d[i][0] for i in range(n_train+n_test, n)])
                 val_labels = np.array(
                     [d[i][1] for i in range(n_train+n_test, n)])
-                assert len(d) == len(train_images) +
-                len(test_images) + len(val_images)
+                assert len(d) == len(train_images) + \
+                    len(test_images) + len(val_images)
             else:
                 n_train = n - n_val
                 print(f'n_train: {n_train}')

@@ -8,6 +8,9 @@ from importtf import keras, tf
 from numpy.core.fromnumeric import shape
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
+from planner.policylearn.train_model import (CLASSIFICATION_STR, CONVRNN_STR,
+                                             fix_data_convrnn)
+from tensorflow.python.ops.variables import model_variables
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -104,6 +107,14 @@ class LearnedPolicy(Policy):
         self.t = 0
         self.model: keras.Model = keras.models.load_model(
             "planner/policylearn/my_model.h5")
+        model_input_shape = list(self.model.layers[0].input_spec[0].shape)
+        if model_input_shape[-3:] == [7, 7, 5]:
+            self.model_type = CONVRNN_STR
+        else:
+            self.model_type = None
+            logging.error("can not determine model type")
+            raise NotImplementedError("see how this data looks")
+        logging.info(f"model_type: {self.model_type}")
 
     def _path_until_coll(self, path, path_i, n_t):
         path_until_pos = []
@@ -150,16 +161,20 @@ class LearnedPolicy(Policy):
             paths_until_col.append(self._path_until_coll(
                 self.paths[i_id], self.path_is[i_id], N_T))
         assert i_oa is not None
-        x = extract_all_fovs(
-            t=N_T-1,
-            paths_until_col=np.array(paths_until_col),
-            paths_full=paths_full,
-            padded_gridmap=self.padded_gridmap,
-            i_a=0,  # self always first
-            i_oa=i_oa,
-            radius=self.radius
+        x = np.array(
+            [extract_all_fovs(
+                t=N_T-1,
+                paths_until_col=np.array(paths_until_col),
+                paths_full=paths_full,
+                padded_gridmap=self.padded_gridmap,
+                i_a=0,  # self always first
+                i_oa=i_oa,
+                radius=self.radius
+            )]
         )
-        x_tensor = tf.constant(np.array([x]))
+        if self.model_type == CONVRNN_STR:
+            x = fix_data_convrnn(x)
+        x_tensor = tf.constant(x)
         y = self.model.predict(x_tensor)[0][0]
         logger.debug(f"y: {y}")
         # from planner.policylearn.generate_data_demo import plot_fovs
