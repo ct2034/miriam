@@ -117,6 +117,13 @@ def construct_model_convrnn(img_width, img_len_t, img_depth_frames):
     return model
 
 
+def fix_data_convrnn(image):
+    return np.moveaxis(images,
+                       [1, 2, 3],
+                       [-3, -2, -4]
+                       )
+
+
 def augment_data(images_in, labels_in):
     assert len(images_in) == len(images_in)
     n = len(images_in)
@@ -170,123 +177,149 @@ if __name__ == "__main__":
     else:
         print("Running on CPU.")
 
+    epochs = 10
+
     # data
-    pb = ProgressBar("files", len(fnames_read_pkl))
-    for fname_read_pkl in fnames_read_pkl:
-        print(
-            f"reading file {fnames_read_pkl.index(fname_read_pkl) + 1} of " +
-            f"{len(fnames_read_pkl)} : " +
-            f"{fname_read_pkl}")
-        with open(fname_read_pkl, 'rb') as f:
-            d = pickle.load(f)
-        n = len(d)
-        if fname_read_pkl == fnames_read_pkl[0]:  # on first file only
-            print(f'n: {n}')
-            n_train = int(n * (1-test_split))
-            print(f'n_train: {n_train}')
-            train_images = np.array([d[i][0] for i in range(n_train)])
-            train_labels = np.array([d[i][1] for i in range(n_train)])
-            assert train_images.shape[0] == n_train, "We must have all data."
-            test_images = np.array([d[i][0] for i in range(n_train+1, n)])
-            test_labels = np.array([d[i][1] for i in range(n_train+1, n)])
-        else:
-            n_train = n
-            print(f'n_train: {n_train}')
-            train_images = np.array([d[i][0] for i in range(n_train)])
-            train_labels = np.array([d[i][1] for i in range(n_train)])
-
-        if model_type == CLASSIFICATION_STR:
-            (n_samples, img_width, img_height, img_len_t,
-             img_channels) = train_images.shape
-        elif model_type == CONVRNN_STR:
-            print("fixing data for "+CONVRNN_STR)
-            train_images = np.moveaxis(train_images,
-                                       [1, 2, 3],
-                                       [-3, -2, -4]
-                                       )
-            if fname_read_pkl == fnames_read_pkl[0]:  # on first file only
-                test_images = np.moveaxis(test_images,
-                                          [1, 2, 3],
-                                          [-3, -2, -4]
-                                          )
-            (n_samples, img_len_t, img_width, img_height,
-             img_channels) = train_images.shape
-
-        if fname_read_pkl == fnames_read_pkl[0]:  # on first file only
-            # info on data shape
-            print(f"train_images.shape: {train_images.shape}")
-            assert img_width == img_height, "Images must be square."
-            print(f"n_samples: {n_samples}")
-            print(f"img_width: {img_width}")
-            print(f"img_height: {img_height}")
-            print(f"img_len_t: {img_len_t}")
-            print(f"img_channels: {img_channels}")
-
-            # optimizer
-            if model_type == CLASSIFICATION_STR:
-                opt = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=1)
-            elif model_type == CONVRNN_STR:
-                opt = tf.keras.optimizers.Adam(learning_rate=0.005)
-
-            # model
-            print(f"model_fname: {model_fname}")
-            if os.path.isfile(model_fname):
-                print("model exists. going to load and improve it ...")
-                model: keras.Model = keras.models.load_model(
-                    model_fname)
+    pb = ProgressBar("epochs * files", len(fnames_read_pkl)*epochs)
+    for i_e in range(epochs):
+        for fname_read_pkl in fnames_read_pkl:
+            print("~"*60)
+            print(f"epoch {i_e+1} of {epochs}")
+            print(
+                f"reading file {fnames_read_pkl.index(fname_read_pkl) + 1} of " +
+                f"{len(fnames_read_pkl)} : " +
+                f"{fname_read_pkl}")
+            with open(fname_read_pkl, 'rb') as f:
+                d = pickle.load(f)
+            n = len(d)
+            n_val = int(n * validation_split)
+            print(f'n_val: {n_val}')
+            # on first file only
+            if fname_read_pkl == fnames_read_pkl[0] and i_e == 0:
+                print(f'n: {n}')
+                n_test = int(n*test_split)
+                print(f'n_test: {n_test}')
+                n_train = n - n_val - n_test
+                print(f'n_train: {n_train}')
+                train_images = np.array([d[i][0] for i in range(n_train)])
+                train_labels = np.array([d[i][1] for i in range(n_train)])
+                assert train_images.shape[0] == n_train, "We must have all data."
+                test_images = np.array(
+                    [d[i][0] for i in range(n_train, n_train+n_test)])
+                test_labels = np.array(
+                    [d[i][1] for i in range(n_train, n_train+n_test)])
+                val_images = np.array(
+                    [d[i][0] for i in range(n_train+n_test, n)])
+                val_labels = np.array(
+                    [d[i][1] for i in range(n_train+n_test, n)])
+                assert len(d) == len(train_images) +
+                len(test_images) + len(val_images)
             else:
-                print(
-                    "model does not exist. going to load make a new one ... of type "+model_type)
+                n_train = n - n_val
+                print(f'n_train: {n_train}')
+                train_images = np.array([d[i][0] for i in range(n_train)])
+                train_labels = np.array([d[i][1] for i in range(n_train)])
+                val_images = np.array([d[i][0] for i in range(n_train, n)])
+                val_labels = np.array([d[i][1] for i in range(n_train, n)])
+                assert len(d) == len(train_images) + len(val_images)
+
+            if model_type == CLASSIFICATION_STR:
+                (n_samples, img_width, img_height, img_len_t,
+                 img_channels) = train_images.shape
+            elif model_type == CONVRNN_STR:
+                print("fixing data for "+CONVRNN_STR)
+                train_images = fix_data_convrnn(train_images)
+                val_images = fix_data_convrnn(val_images)
+                # on first file only
+                if fname_read_pkl == fnames_read_pkl[0] and i_e == 0:
+                    test_images = fix_data_convrnn(val_images)
+                (n_samples, img_len_t, img_width, img_height,
+                 img_channels) = train_images.shape
+
+            # on first file only
+            if fname_read_pkl == fnames_read_pkl[0] and i_e == 0:
+                # info on data shape
+                print(f"train_images.shape: {train_images.shape}")
+                assert img_width == img_height, "Images must be square."
+                print(f"n_samples: {n_samples}")
+                print(f"img_width: {img_width}")
+                print(f"img_height: {img_height}")
+                print(f"img_len_t: {img_len_t}")
+                print(f"img_channels: {img_channels}")
+
+                # optimizer
                 if model_type == CLASSIFICATION_STR:
-                    model = construct_model_classification(
-                        img_width, img_len_t, img_channels)
+                    opt = tf.keras.optimizers.Adam(
+                        learning_rate=0.05, epsilon=1)
                 elif model_type == CONVRNN_STR:
-                    model = construct_model_convrnn(
-                        img_width, img_len_t, img_channels)
+                    opt = tf.keras.optimizers.Adam(learning_rate=0.005)
 
-            # train
-            accuracy: List[float] = []
-            val_accuracy: Optional[List[float]] = []
-            test_accuracy: List[float] = []
-            loss: List[float] = []
-            val_loss: Optional[List[float]] = []
-            test_loss: List[float] = []
-            test_x: List[float] = []
+                # model
+                print(f"model_fname: {model_fname}")
+                if os.path.isfile(model_fname):
+                    print("model exists. going to load and improve it ...")
+                    model: keras.Model = keras.models.load_model(
+                        model_fname)
+                else:
+                    print(
+                        "model does not exist. going to make a new one ... of type "+model_type)
+                    if model_type == CLASSIFICATION_STR:
+                        model = construct_model_classification(
+                            img_width, img_len_t, img_channels)
+                    elif model_type == CONVRNN_STR:
+                        model = construct_model_convrnn(
+                            img_width, img_len_t, img_channels)
 
-            # evaluating untrained model
-            pretrain_test_loss, pretrain_test_accuracy = model.evaluate(
-                [test_images], test_labels)
-            print(f"pretrain_test_loss: {pretrain_test_loss}")
-            print(f"pretrain_test_accuracy: {pretrain_test_accuracy}")
-            test_x.append(0)
-            test_accuracy.append(pretrain_test_accuracy)
-            test_loss.append(pretrain_test_loss)
-        # (if) on first file only
+                # train
+                accuracy: List[float] = []
+                val_accuracy: Optional[List[float]] = []
+                test_accuracy: List[float] = []
+                loss: List[float] = []
+                val_loss: Optional[List[float]] = []
+                test_loss: List[float] = []
+                test_x: List[float] = []
 
-        if model_type == CLASSIFICATION_STR:
-            bcp = BatchHistory()
-            history = model.fit([train_images], train_labels,
-                                epochs=8, batch_size=4, callbacks=[bcp]
-                                )
-            # stats from bcp
-            accuracy.extend(bcp.batch_accuracy)
-            val_accuracy = None
-            loss.extend(bcp.batch_loss)
-            val_loss = None
-        elif model_type == CONVRNN_STR:
-            history = model.fit([train_images], train_labels,
-                                epochs=8, batch_size=512,
-                                validation_split=validation_split
-                                )
-            # normal stats
-            accuracy.extend(history.history['accuracy'])
-            assert val_accuracy is not None
-            val_accuracy.extend(history.history['val_accuracy'])
-            loss.extend(history.history['loss'])
-            assert val_loss is not None
-            val_loss.extend(history.history['val_loss'])
+                # evaluating untrained model
+                pretrain_test_loss, pretrain_test_accuracy = model.evaluate(
+                    [test_images], test_labels)
+                print(f"pretrain_test_loss: {pretrain_test_loss}")
+                print(f"pretrain_test_accuracy: {pretrain_test_accuracy}")
+                test_x.append(0)
+                test_accuracy.append(pretrain_test_accuracy)
+                test_loss.append(pretrain_test_loss)
+            # (if) on first file only
 
-        # manual validation (testing)
+            if model_type == CLASSIFICATION_STR:
+                bcp = BatchHistory()
+                history = model.fit([train_images], train_labels,
+                                    epochs=1, batch_size=4, callbacks=[bcp]
+                                    )
+                # stats from bcp
+                accuracy.extend(bcp.batch_accuracy)
+                val_accuracy = None
+                loss.extend(bcp.batch_loss)
+                val_loss = None
+            elif model_type == CONVRNN_STR:
+                history = model.fit([train_images], train_labels,
+                                    epochs=1, batch_size=512,
+                                    validation_data=([val_images], val_labels)
+                                    )
+                # normal stats
+                accuracy.extend(history.history['accuracy'])
+                assert val_accuracy is not None
+                val_accuracy.extend(history.history['val_accuracy'])
+                loss.extend(history.history['loss'])
+                assert val_loss is not None
+                val_loss.extend(history.history['val_loss'])
+
+            del d
+            del train_images
+            del train_labels
+            del val_images
+            del val_labels
+            pb.progress()
+
+        # manual validation (testing) after each epoch
         one_test_loss, one_test_accuracy = model.evaluate(
             [test_images], test_labels)
         print(f"one_test_loss: {one_test_loss}")
@@ -295,7 +328,6 @@ if __name__ == "__main__":
         test_accuracy.append(one_test_accuracy)
         test_loss.append(one_test_loss)
 
-        pb.progress()
     model.save(model_fname)
     pb.end()
 
