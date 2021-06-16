@@ -59,12 +59,14 @@ def train(n, learn_res, sample_end, t_pred):
     # model
     units = 64
     n_layers = 4
-    layers = [LSTM(units, activation='relu', return_sequences=True)
-              for _ in range(n_layers)]
-    layers[0] = LSTM(units, activation='relu', return_sequences=True,
-                     input_shape=(learn_res, 1))  # (timesteps, features)
-    layers[-1] = LSTM(units, activation='relu', return_sequences=False)
-    layers.append(Dense(1, activation='sigmoid'))
+    layers = (
+        [LSTM(units, activation='relu', return_sequences=True,
+              input_shape=(learn_res, 1))]  # (timesteps, features)
+        + [LSTM(units, activation='relu', return_sequences=True)
+           for _ in range(n_layers-2)]
+        + [LSTM(units, activation='relu', return_sequences=False),
+           Dense(1, activation='sigmoid')]
+    )
     model = Sequential(layers)
     model.compile(optimizer='adam',
                   loss='binary_crossentropy',
