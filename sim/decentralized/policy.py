@@ -2,6 +2,7 @@ import logging
 import random
 from collections import OrderedDict
 from enum import Enum, auto
+from typing import Optional
 
 import numpy as np
 from importtf import keras, tf
@@ -108,10 +109,10 @@ class LearnedPolicy(Policy):
         self.model: keras.Model = keras.models.load_model(
             "planner/policylearn/my_model.h5")
         model_input_shape = list(self.model.layers[0].input_spec[0].shape)
+        self.model_type: Optional[str] = None
         if model_input_shape[-3:] == [7, 7, 5]:
             self.model_type = CONVRNN_STR
         else:
-            self.model_type = None
             logging.error("can not determine model type")
             raise NotImplementedError("see how this data looks")
         logging.info(f"model_type: {self.model_type}")
