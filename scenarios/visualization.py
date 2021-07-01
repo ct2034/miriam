@@ -66,7 +66,7 @@ def plot_with_paths(env, paths):
     legend_str = []
     i = 0
     prop_cycle = plt.rcParams['axes.prop_cycle']
-    assert paths, "Paths have not been set"
+    assert paths is not None, "Paths have not been set"
     for p in paths:  # pathset per agent
         ax.plot(xs=p[:, 0] + .5,
                 ys=p[:, 1] + .5,
@@ -79,3 +79,19 @@ def plot_with_paths(env, paths):
 
     # plt.legend(legend_str, bbox_to_anchor=(1, .95))
     plt.tight_layout()
+
+
+def plot_schedule(data: dict):
+    n_agents = len(data['indepAgentPaths'])
+    colors = get_colors(n_agents)
+    schedule = data['schedule']
+    paths = []
+    for i in range(n_agents):
+        agent_str = 'agent'+str(i)
+        assert agent_str in schedule.keys()
+        path = np.array(list(
+            map(lambda s: [s['x'], s['y'], s['t']],
+                schedule[agent_str])
+        ))
+        paths.append(path)
+    plot_with_paths(data['gridmap'], paths)

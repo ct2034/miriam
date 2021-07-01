@@ -5,8 +5,11 @@ import logging
 import pickle
 
 from matplotlib import pyplot as plt
+from scenarios.visualization import plot_env, plot_schedule, plot_with_paths
 
 PLOT_FOVS_STR = "plot_fovs"
+PLOT_SCENARIO_STR = "plot_scenario"
+N_TO_PLOT = 6
 
 
 def plot_fovs(X, Y):
@@ -35,7 +38,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', help='mode', choices=[
-        PLOT_FOVS_STR, ])
+        PLOT_FOVS_STR, PLOT_SCENARIO_STR])
     parser.add_argument(
         'fname_read_pkl', type=argparse.FileType('rb'))
     args = parser.parse_args()
@@ -44,5 +47,15 @@ if __name__ == "__main__":
         d = pickle.load(f)
 
     if args.mode == PLOT_FOVS_STR:
-        for i in range(6):
+        for i in range(N_TO_PLOT):
             plot_fovs(*d[i])
+    elif args.mode == PLOT_SCENARIO_STR:
+        for i in range(N_TO_PLOT):
+            env = d[i]['gridmap']
+            paths = d[i]['indepAgentPaths']
+            ax = plt.subplot()
+            plot_env(ax, env)
+            plot_with_paths(env, paths)
+            plot_schedule(d[i])
+            plt.show()
+            print(d[i])
