@@ -45,11 +45,14 @@ def plot_with_paths(env, paths):
     ax.set_facecolor('white')
     ax.set_proj_type('ortho')
 
+    assert env.shape[0] == env.shape[1], "assuming square map"
+    width = env.shape[0] + 1
+
     # MAP
     xx, yy = np.meshgrid(
-        np.arange(env.shape[0]),
-        np.arange(env.shape[1]))
-    zeros = np.zeros(env.shape)
+        np.arange(width),
+        np.arange(width))
+    zeros = np.zeros((width, width))
 
     facecolors = cm.Greys(np.array(np.swapaxes(env, 0, 1), dtype=float))
     # ax.contourf(xx, yy, np.swapaxes(env, 0, 1),
@@ -58,8 +61,8 @@ def plot_with_paths(env, paths):
     ax.plot_surface(xx, yy, zeros, rstride=1, cstride=1,
                     facecolors=facecolors, shade=False)
 
-    # ax.set_xlim(0, env.shape[0])
-    # ax.set_ylim(0, env.shape[1])
+    ax.set_xlim(0, env.shape[0])
+    ax.set_ylim(0, env.shape[1])
 
     # Paths
     colors = get_colors(len(paths))
