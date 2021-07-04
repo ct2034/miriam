@@ -112,13 +112,6 @@ if __name__ == "__main__":
     env = np.array(np.random.random((size, size)) < .2, dtype=int)
     g = env_to_nx(env)
 
-    start = (
-        np.where(env == 0)[0][0],
-        np.where(env == 0)[1][0])
-    goal = (
-        np.where(env == 0)[0][-1],
-        np.where(env == 0)[1][-1])
-
     node_blocks: Set[Tuple[int, int, int]] = set()
     edge_blocks: Set[
         Tuple[Tuple[int, int],
@@ -128,19 +121,27 @@ if __name__ == "__main__":
     success = True
     i = 0
     while success and i < 10:
+        it = np.random.randint(np.count_nonzero(env == 0))
+        ig = np.random.randint(np.count_nonzero(env == 0))
+        start = (
+            np.where(env == 0)[0][it],
+            np.where(env == 0)[1][it])
+        goal = (
+            np.where(env == 0)[0][ig],
+            np.where(env == 0)[1][ig])
         try:
             path = plan_timed(g, start, goal, node_blocks, edge_blocks)
             paths.append(path)
-            i_n = np.random.randint(1, len(path)-1)
-            node_blocks.add((
-                path[i_n, 0],
-                path[i_n, 1],
-                path[i_n, 2]))
-            i_e = np.random.randint(1, len(path)-2)
-            edge_blocks.add((
-                tuple(path[i_e, :2]),
-                tuple(path[i_e+1, :2]),
-                int(path[i_e, 2])))
+            for ip in range(len(path)):
+                node_blocks.add((
+                    path[ip, 0],
+                    path[ip, 1],
+                    path[ip, 2]))
+                if ip < len(path) - 1:
+                    edge_blocks.add((
+                        tuple(path[ip, :2]),
+                        tuple(path[ip+1, :2]),
+                        int(path[ip, 2])))
         except nx.NetworkXNoPath as e:
             print(e)
             success = False
