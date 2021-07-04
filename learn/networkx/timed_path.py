@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 from itertools import product
+from typing import Set, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scenarios.visualization import plot_with_paths
 
 import networkx as nx
-from networkx.classes.graphviews import subgraph_view
-from networkx.convert import to_dict_of_dicts
 
 
 def env_to_nx(env):
@@ -37,10 +36,18 @@ def env_to_nx(env):
     return nx.subgraph_view(g, filter_node, filter_edge)
 
 
-def plan_timed(g, start, goal, blocks):
+def plan_timed(g: np.ndarray,
+               start: Tuple[int, int],
+               goal: Tuple[int, int],
+               node_blocks: Set[Tuple[int, int, int]],
+               edge_blocks: Set[
+                   Tuple[Tuple[int, int],
+                         Tuple[int, int],
+                         int]]):
     print(f"start: {start}")
     print(f"goal: {goal}")
-    blocks = set(map(lambda b: tuple(b), blocks))
+    print(f"node_blocks: {node_blocks}")
+    print(f"edge_blocks: {edge_blocks}")
 
     def cost(e):
         if (
@@ -56,7 +63,7 @@ def plan_timed(g, start, goal, blocks):
             e[0][1] == e[1][1]
         ):
             # waiting generally is a little cheaper
-            return .9999
+            return 1. - 1E-9
         else:
             # normal cost
             return 1
@@ -64,9 +71,16 @@ def plan_timed(g, start, goal, blocks):
     nx.set_edge_attributes(g, {e: cost(e) for e in g.edges()}, "cost")
 
     def filter_node(n):
-        return n not in blocks
+        return n not in node_blocks
 
-    g_blocks = nx.subgraph_view(g, filter_node=filter_node)
+    def filter_edge(n1, n2):
+        return (
+            (n1[:2], n2[:2], n1[2]) not in edge_blocks and
+            (n2[:2], n1[:2], n1[2]) not in edge_blocks
+        )
+
+    g_blocks = nx.subgraph_view(
+        g, filter_node=filter_node, filter_edge=filter_edge)
 
     t_max = np.max(np.array(g.nodes())[:, 2])
 
@@ -93,8 +107,9 @@ def plan_timed(g, start, goal, blocks):
 
 
 if __name__ == "__main__":
-    size = 10
-    env = np.array(np.random.random((size, size)) < .1, dtype=int)
+    np.random.seed(0)
+    size = 16
+    env = np.array(np.random.random((size, size)) < .2, dtype=int)
     g = env_to_nx(env)
 
     start = (
@@ -104,18 +119,32 @@ if __name__ == "__main__":
         np.where(env == 0)[0][-1],
         np.where(env == 0)[1][-1])
 
-    blocks = []
+    node_blocks: Set[Tuple[int, int, int]] = set()
+    edge_blocks: Set[
+        Tuple[Tuple[int, int],
+              Tuple[int, int],
+              int]] = set()
     paths = []
     success = True
-    while success:
+    i = 0
+    while success and i < 10:
         try:
-            path = plan_timed(g, start, goal, blocks)
+            path = plan_timed(g, start, goal, node_blocks, edge_blocks)
             paths.append(path)
-            i_r = np.random.randint(1, len(path)-1)
-            blocks.append(path[i_r])
+            i_n = np.random.randint(1, len(path)-1)
+            node_blocks.add((
+                path[i_n, 0],
+                path[i_n, 1],
+                path[i_n, 2]))
+            i_e = np.random.randint(1, len(path)-2)
+            edge_blocks.add((
+                tuple(path[i_e, :2]),
+                tuple(path[i_e+1, :2]),
+                int(path[i_e, 2])))
         except nx.NetworkXNoPath as e:
             print(e)
             success = False
+        i += 1
 
     plot_with_paths(env, paths)
     plt.show()
