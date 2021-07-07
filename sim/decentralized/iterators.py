@@ -302,8 +302,9 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
         agents[i_a].remove_all_blocks_and_replan()
 
     make_sure_agents_are_safe(agents)
-    assert has_at_least_one_agent_moved(
-        agents, poses_at_beginning), "no agent has changed"
+    if not has_at_least_one_agent_moved(
+            agents, poses_at_beginning):
+        raise SimIterationException("Deadlock by waiting")
 
     return time_slice, space_slice
 

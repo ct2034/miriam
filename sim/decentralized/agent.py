@@ -25,7 +25,7 @@ class Agent():
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
         self.env: np.ndarray = env
-        self.env_nx: Union[nx.Graph, None] = None
+        self.env_nx: nx.Graph = self.gridmap_to_nx(self.env)
         assert isinstance(pos, np.ndarray), "Position must be numpy array"
         self.pos: np.ndarray = pos
         self.start: np.ndarray = pos
@@ -60,7 +60,6 @@ class Agent():
 
     def gridmap_to_nx(self, env: np.ndarray) -> nx.Graph:
         """convert numpy gridmap into networkx graph."""
-
         t = env.shape[0] * env.shape[1]
         dim = (t,) + env.shape
         g = nx.DiGraph(nx.grid_graph(dim, periodic=False))
@@ -84,13 +83,13 @@ class Agent():
 
         def filter_edge(n1, n2):
             return n2[2] > n1[2]
-        return nx.subgraph_view(g, filter_node, filter_edge)
+        return nx.DiGraph(
+            nx.subgraph_view(g, filter_node, filter_edge))
 
     def give_a_goal(self, goal: np.ndarray) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
         if (self.goal != goal).any():  # goal is new
-            self.env_nx = self.gridmap_to_nx(self.env)
             path = self.plan_timed_path(
                 g=self.env_nx,
                 start=(self.pos[0], self.pos[1]),

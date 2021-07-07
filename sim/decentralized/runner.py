@@ -144,7 +144,7 @@ def check_time_evaluation(time_progress, space_progress
 
 def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
                               ) -> Tuple[float, float, float, float, int]:
-    env = initialize_environment(size, .3, seed)
+    env = initialize_environment(size, .1, seed)
     agents = initialize_agents(env, n_agents, policy, seed=seed)
     if agents is None:
         logger.warning("Could not initialize agents")
@@ -214,4 +214,4 @@ if __name__ == "__main__":  # pragma: no cover
     logging.getLogger("sim.decentralized.policy").setLevel(logging.ERROR)
     logging.getLogger("__main__").setLevel(logging.ERROR)
     logging.getLogger("root").setLevel(logging.ERROR)
-    evaluate_policies(8, 8, 10)
+    evaluate_policies(8, 8, 2)
