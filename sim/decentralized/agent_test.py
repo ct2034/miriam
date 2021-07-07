@@ -101,6 +101,35 @@ class TestAgent(unittest.TestCase):
         self.assertTrue(a.give_a_goal(np.array([1, 0])))
         self.assertEqual(len(a.path), 2)
 
+    def test_block_node(self):
+        env = np.array([[0, 0, 1], [0, 0, 0], [1, 0, 0]])
+        node_to_block = (1, 1, 2)
+        a = Agent(env, np.array([0, 0]), PolicyType.RANDOM)
+        self.assertTrue(a.give_a_goal(np.array([2, 2])))
+        self.assertEqual(len(a.path), 5)  # quick path
+
+        # trying to block a non existant node
+        self.assertRaises(nx.exception.NetworkXError), lambda: a.block_node(
+            (0, 1), (0, 2), 0)
+
+        # blocking it, path should still be possible
+        self.assertTrue(a.block_node(node_to_block))
+        self.assertEqual(len(a.path), 6)  # waiting
+
+        # blocking the same node again should not be a problem
+        self.assertTrue(a.block_node(node_to_block))
+
+        # and we should also be able to give another goal
+        self.assertTrue(a.give_a_goal(np.array([1, 2])))
+        self.assertEqual(len(a.path), 5)
+
+        # removing block
+        a.blocked_nodes = set()
+
+        # and we should also be able to give another goal
+        self.assertTrue(a.give_a_goal(np.array([1, 2])))
+        self.assertEqual(len(a.path), 4)
+
     def test_is_at_goal(self):
         env = np.array([[0, 0], [0, 0]])
         a = Agent(env, np.array([0, 0]), PolicyType.RANDOM)

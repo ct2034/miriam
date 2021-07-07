@@ -78,32 +78,43 @@ class Agent():
                     if n_to in g.nodes():
                         g.add_edge((x, y, t_from), n_to)
 
+        def cost(e):
+            if (
+                e[0][0] == e[1][0] and
+                e[0][1] == e[1][1]
+            ):
+                # waiting generally is a little cheaper
+                return 1. - 1E-9
+            else:
+                # normal cost
+                return 1
+
+        nx.set_edge_attributes(g, {e: cost(e) for e in g.edges()}, "cost")
+
         def filter_node(n):
             return env[n[0], n[1]] == free
 
         def filter_edge(n1, n2):
             return n2[2] > n1[2]
+
         return nx.DiGraph(
             nx.subgraph_view(g, filter_node, filter_edge))
 
     def give_a_goal(self, goal: np.ndarray) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
-        if (self.goal != goal).any():  # goal is new
-            path = self.plan_timed_path(
-                g=self.env_nx,
-                start=(self.pos[0], self.pos[1]),
-                goal=(goal[0], goal[1])
-            )
-            if path is not None:
-                self.goal = goal
-                self.path = path
-                self.path_i = 0
-                return True
-            else:
-                return False  # there is no path to this goal
-        else:  # still have old goal and path
+        path = self.plan_timed_path(
+            g=self.env_nx,
+            start=(self.pos[0], self.pos[1]),
+            goal=(goal[0], goal[1])
+        )
+        if path is not None:
+            self.goal = goal
+            self.path = path
+            self.path_i = 0
             return True
+        else:
+            return False  # there is no path to this goal
 
     def plan_timed_path(self,
                         g: np.ndarray,
@@ -123,31 +134,17 @@ class Agent():
         else:
             blocked_nodes = _blocked_nodes
 
+        t_max = np.max(np.array(g.nodes())[:, 2])
+
         logger.debug(f"start: {start}")
         logger.debug(f"goal: {goal}")
         logger.debug(f"blocked_nodes: {blocked_nodes}")
         logger.debug(f"blocked_edges: {blocked_edges}")
 
-        def cost(e):
-            if (
-                e[0][0] == goal[0] and
-                e[0][1] == goal[1] and
-                e[1][0] == goal[0] and
-                e[1][1] == goal[1]
-            ):
-                # waiting at goal is free
-                return 0
-            if (
-                e[0][0] == e[1][0] and
-                e[0][1] == e[1][1]
-            ):
-                # waiting generally is a little cheaper
-                return 1. - 1E-9
-            else:
-                # normal cost
-                return 1
+        goal_waiting_edges = [
+            ((goal[0], goal[1], i), (goal[0], goal[1], i+1)) for i in range(t_max-1)]
 
-        nx.set_edge_attributes(g, {e: cost(e) for e in g.edges()}, "cost")
+        nx.set_edge_attributes(g, {e: 0 for e in goal_waiting_edges}, "cost")
 
         def filter_node(n):
             return n not in blocked_nodes
@@ -160,8 +157,6 @@ class Agent():
 
         g_blocks = nx.subgraph_view(
             g, filter_node=filter_node, filter_edge=filter_edge)
-
-        t_max = np.max(np.array(g.nodes())[:, 2])
 
         def dist(a, b):
             (x1, y1, _) = a
@@ -230,8 +225,8 @@ class Agent():
         """this will make the agent block this node. It will return `True`
         if there still is a path to the current goal. `False` otherwise."""
         assert self.env_nx is not None, "Should have a env_nx"
+        assert len(n) == 3
         tmp_blocked_nodes = self.blocked_nodes.union({n})
-
         assert self.goal is not None
         path = self.plan_timed_path(
             g=self.env_nx,
