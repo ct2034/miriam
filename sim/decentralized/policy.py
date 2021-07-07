@@ -135,7 +135,7 @@ class LearnedPolicy(Policy):
             self.paths[id] = np.array([pos] * self.ts)
             self.path_is[id] = 0
         else:
-            self.paths[id] = path
+            self.paths[id] = path[:, :2]
             self.path_is[id] = path_i
         self.poss[id] = pos
 
@@ -149,9 +149,9 @@ class LearnedPolicy(Policy):
             f"get_priority, self_agent: {self.a}, other_id: {id_coll}")
         N_T = 3
         i_oa = None
-        paths_full = [self.a.path]  # self always first
+        paths_full = [self.a.path[:, :2]]  # self always first
         paths_until_col = [self._path_until_coll(
-            self.a.path, self.a.path_i, N_T)]  # self always first
+            self.a.path[:, :2], self.a.path_i, N_T)]  # self always first
         ids = sorted(self.paths.keys())
         if id_coll not in ids:
             logger.warn(f"{id_coll} not in {ids}")

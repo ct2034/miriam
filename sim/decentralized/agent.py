@@ -1,5 +1,6 @@
 import logging
 import random
+from itertools import product
 from typing import *
 
 import networkx as nx
@@ -10,8 +11,10 @@ from tools import hasher
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
-BLOCKED_EDGES_TYPE = Set[Tuple[Tuple[int, int], Tuple[int, int]]]
-BLOCKED_NODES_TYPE = Set[Tuple[int, int]]
+EDGE_TYPE = Tuple[Tuple[int, int], Tuple[int, int], int]
+BLOCKED_EDGES_TYPE = Set[EDGE_TYPE]
+NODE_TYPE = Tuple[int, int, int]
+BLOCKED_NODES_TYPE = Set[NODE_TYPE]
 
 
 class Agent():
@@ -32,9 +35,7 @@ class Agent():
         self.policy: Policy = Policy.construct_by_type(policy, self)
         self.id: int = random.randint(0, int(2E14))
         self.blocked_edges: BLOCKED_EDGES_TYPE = set()
-        self.filter_blocked_edges: BLOCKED_EDGES_TYPE = set()
         self.blocked_nodes: BLOCKED_NODES_TYPE = set()
-        self.filter_blocked_nodes: BLOCKED_NODES_TYPE = set()
 
     def __hash__(self):
         return hash(hasher([
@@ -57,41 +58,46 @@ class Agent():
             f"hash(env): {hasher(self.env)}"
         )
 
-    def filter_node(self, n):
-        """node filter for gridmap_to_nx"""
-        return self.env[n] == 0 and n not in self.filter_blocked_nodes
-
-    def filter_edge(self, a, b):
-        """edge filter for gridmap_to_nx"""
-        return (a, b) not in self.filter_blocked_edges
-
-    def gridmap_to_nx(self, env: np.ndarray,
-                      blocked_edges: Union[None, BLOCKED_EDGES_TYPE] = None,
-                      blocked_nodes: Union[None, BLOCKED_NODES_TYPE] = None) -> nx.Graph:
+    def gridmap_to_nx(self, env: np.ndarray) -> nx.Graph:
         """convert numpy gridmap into networkx graph."""
-        if blocked_edges is None:
-            self.filter_blocked_edges = self.blocked_edges
-        else:
-            self.filter_blocked_edges = blocked_edges
-        if blocked_nodes is None:
-            self.filter_blocked_nodes = self.blocked_nodes
-        else:
-            self.filter_blocked_nodes = blocked_nodes
-        nx_base_graph = nx.grid_graph(dim=list(env.shape))
-        assert len(env.shape) == 2
-        assert nx_base_graph.number_of_nodes() == env.shape[0] * env.shape[1]
-        view = nx.subgraph_view(
-            nx_base_graph, filter_node=self.filter_node, filter_edge=self.filter_edge)
-        return view
+
+        t = env.shape[0] * env.shape[1]
+        dim = (t,) + env.shape
+        g = nx.DiGraph(nx.grid_graph(dim, periodic=False))
+        free = np.min(env)
+
+        for i_t in range(t-1):
+            t_from = i_t
+            t_to = i_t + 1
+            for x, y in product(range(env.shape[0]), range(env.shape[1])):
+                for x_to in [x-1, x+1]:
+                    n_to = (x_to, y, t_to)
+                    if n_to in g.nodes():
+                        g.add_edge((x, y, t_from), n_to)
+                for y_to in [y-1, y+1]:
+                    n_to = (x, y_to, t_to)
+                    if n_to in g.nodes():
+                        g.add_edge((x, y, t_from), n_to)
+
+        def filter_node(n):
+            return env[n[0], n[1]] == free
+
+        def filter_edge(n1, n2):
+            return n2[2] > n1[2]
+        return nx.subgraph_view(g, filter_node, filter_edge)
 
     def give_a_goal(self, goal: np.ndarray) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
         if (self.goal != goal).any():  # goal is new
-            self.goal = goal
             self.env_nx = self.gridmap_to_nx(self.env)
-            path = self.plan_path()
+            path = self.plan_timed_path(
+                g=self.env_nx,
+                start=(self.pos[0], self.pos[1]),
+                goal=(goal[0], goal[1])
+            )
             if path is not None:
+                self.goal = goal
                 self.path = path
                 self.path_i = 0
                 return True
@@ -100,23 +106,90 @@ class Agent():
         else:  # still have old goal and path
             return True
 
-    def plan_path(self, env_nx: Union[nx.Graph, None] = None
-                  ) -> Union[np.ndarray, None]:
-        """Plan path from currently set `pos` to current `goal` and save it
-        in `path`."""
-        if env_nx is None:
-            env_nx = self.env_nx
+    def plan_timed_path(self,
+                        g: np.ndarray,
+                        start: Tuple[int, int],
+                        goal: Tuple[int, int],
+                        _blocked_nodes: Set[Tuple[int, int, int]] = None,
+                        _blocked_edges: Set[
+                            Tuple[Tuple[int, int],
+                                  Tuple[int, int],
+                                  int]] = None):
+        if _blocked_edges is None:  # give these values
+            blocked_edges = self.blocked_edges
+        else:
+            blocked_edges = _blocked_edges
+        if _blocked_nodes is None:
+            blocked_nodes = self.blocked_nodes
+        else:
+            blocked_nodes = _blocked_nodes
+
+        logger.debug(f"start: {start}")
+        logger.debug(f"goal: {goal}")
+        logger.debug(f"blocked_nodes: {blocked_nodes}")
+        logger.debug(f"blocked_edges: {blocked_edges}")
+
+        def cost(e):
+            if (
+                e[0][0] == goal[0] and
+                e[0][1] == goal[1] and
+                e[1][0] == goal[0] and
+                e[1][1] == goal[1]
+            ):
+                # waiting at goal is free
+                return 0
+            if (
+                e[0][0] == e[1][0] and
+                e[0][1] == e[1][1]
+            ):
+                # waiting generally is a little cheaper
+                return 1. - 1E-9
+            else:
+                # normal cost
+                return 1
+
+        nx.set_edge_attributes(g, {e: cost(e) for e in g.edges()}, "cost")
+
+        def filter_node(n):
+            return n not in blocked_nodes
+
+        def filter_edge(n1, n2):
+            return (
+                (n1[:2], n2[:2], n1[2]) not in blocked_edges and
+                (n2[:2], n1[:2], n1[2]) not in blocked_edges
+            )
+
+        g_blocks = nx.subgraph_view(
+            g, filter_node=filter_node, filter_edge=filter_edge)
+
+        t_max = np.max(np.array(g.nodes())[:, 2])
+
+        def dist(a, b):
+            (x1, y1, _) = a
+            (x2, y2, _) = b
+            return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+
         try:
-            assert self.goal is not None, "Should have a goal"
-            tuple_path = nx.astar_path(
-                env_nx, tuple(self.pos), tuple(self.goal))
-        except nx.exception.NetworkXNoPath as e:
+            p = np.array(nx.astar_path(
+                g_blocks,
+                start + (0,),
+                goal + (t_max,),
+                heuristic=dist,
+                weight="cost"))
+        except nx.NetworkXNoPath as e:
             logger.warning(e)
             return None
-        except nx.exception.NodeNotFound as e:
-            logger.warning(e)
-            return None
-        return np.array(tuple_path)
+
+        # check end to only return useful part of path
+        end = None
+        assert all(p[-1][:2] == goal)
+        i = len(p) - 1
+        while i > 0 or end is None:
+            if all(p[i][:2] == goal):
+                end = i+1
+            i -= 1
+        assert end is not None
+        return p[0:end]
 
     def is_there_path_with_node_blocks(self, blocks: List[Tuple[Any, ...]]
                                        ) -> bool:
@@ -125,52 +198,55 @@ class Agent():
         assert self.env_nx is not None, "Should have a env_nx"
         tmp_env = self.env_nx.copy()
         tmp_env.remove_nodes_from(blocks)
-        path = self.plan_path(tmp_env)
+        assert self.goal is not None
+        path = self.plan_timed_path(
+            g=tmp_env,
+            start=(self.pos[0], self.pos[1]),
+            goal=(self.goal[0], self.goal[1]))
         return path is not None
 
-    def block_edge(self, a: Tuple[int, int], b: Tuple[int, int]) -> bool:
+    def block_edge(self, e: EDGE_TYPE) -> bool:
         """this will make the agent block this edge. It will return `True`
         if there still is a path to the current goal. `False` otherwise."""
         assert self.env_nx is not None, "Should have a env_nx"
-        tmp_edge = (a, b)
-        self.filter_blocked_edges = self.blocked_edges.union({tmp_edge})
-        tmp_env_nx = self.gridmap_to_nx(
-            self.env, self.blocked_edges.union({tmp_edge}), None)
+        tmp_blocked_edges = self.blocked_edges.union({e})
 
-        assert not tmp_env_nx.has_edge(a, b)
-        path = self.plan_path(tmp_env_nx)
+        assert self.goal is not None
+        path = self.plan_timed_path(
+            g=self.env_nx,
+            start=(self.pos[0], self.pos[1]),
+            goal=(self.goal[0], self.goal[1]),
+            _blocked_nodes=None,
+            _blocked_edges=tmp_blocked_edges)
         if path is not None:
             # all good, and we have a new path now
             self.path = path
             self.path_i = 0
-            self.blocked_edges.add(tmp_edge)
-            self.env_nx = self.gridmap_to_nx(self.env)
+            self.blocked_edges.add(e)
             return True
         else:
-            # forget changes
-            self.filter_blocked_edges = self.blocked_edges
             return False
 
-    def block_node(self, n: Tuple[int, int]) -> bool:
+    def block_node(self, n: NODE_TYPE) -> bool:
         """this will make the agent block this node. It will return `True`
         if there still is a path to the current goal. `False` otherwise."""
         assert self.env_nx is not None, "Should have a env_nx"
-        self.filter_blocked_nodes = self.blocked_nodes.union({n})
-        tmp_env_nx = self.gridmap_to_nx(
-            self.env, None, self.blocked_nodes.union({n}))
+        tmp_blocked_nodes = self.blocked_nodes.union({n})
 
-        assert not tmp_env_nx.has_node(n)
-        path = self.plan_path(tmp_env_nx)
+        assert self.goal is not None
+        path = self.plan_timed_path(
+            g=self.env_nx,
+            start=(self.pos[0], self.pos[1]),
+            goal=(self.goal[0], self.goal[1]),
+            _blocked_nodes=tmp_blocked_nodes,
+            _blocked_edges=None)
         if path is not None:
             # all good, and we have a new path now
             self.path = path
             self.path_i = 0
             self.blocked_nodes.add(n)
-            self.env_nx = self.gridmap_to_nx(self.env)
             return True
         else:
-            # forget changes
-            self.filter_blocked_nodes = self.blocked_nodes
             return False
 
     def is_at_goal(self, dt: Optional[int] = None):
@@ -185,7 +261,7 @@ class Agent():
         if i >= len(self.path):
             return True
         else:
-            return all(self.path[i] == self.goal)
+            return all(self.path[i, :2] == self.goal)
 
     def get_priority(self, other_id) -> float:
         """Based on the selected policy, this will give the priority of this
@@ -199,15 +275,17 @@ class Agent():
         else:
             assert self.path is not None, "Should have a path by now"
             assert self.path_i is not None, "Should have a path index by now"
-            return self.path[self.path_i + 1]
+            return self.path[self.path_i + 1, :2]
 
     def remove_all_blocks_and_replan(self):
         # resetting blocks now
         self.blocked_nodes = set()
-        self.filter_blocked_nodes = set()
         self.blocked_edges = set()
-        self.filter_blocked_edges = set()
-        path = self.plan_path()
+        path = self.plan_timed_path(
+            g=self.env_nx,
+            start=(self.pos[0], self.pos[1]),
+            goal=(self.goal[0], self.goal[1])
+        )
         assert path is not None, "We must be successful with no blocks"
 
     def make_next_step(self, next_pos_to_check: np.ndarray):

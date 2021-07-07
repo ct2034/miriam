@@ -214,4 +214,4 @@ if __name__ == "__main__":  # pragma: no cover
     logging.getLogger("sim.decentralized.policy").setLevel(logging.ERROR)
     logging.getLogger("__main__").setLevel(logging.ERROR)
     logging.getLogger("root").setLevel(logging.ERROR)
-    evaluate_policies(8, 8, 100)
+    evaluate_policies(8, 8, 10)

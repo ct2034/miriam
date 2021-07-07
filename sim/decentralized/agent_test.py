@@ -48,11 +48,21 @@ class TestAgent(unittest.TestCase):
         self.assertTrue(a4 != a7)
 
     def test_gridmap_to_nx(self):
-        env = np.array([[0, 1], [1, 1]])
+        env = np.array([[0, 0], [1, 1]])
         a = Agent(env, np.array([0, 0]))
         a.give_a_goal(np.array([0, 0]))
-        self.assertEqual(len(a.env_nx), 1)
-        self.assertTrue((0, 0) in a.env_nx)
+
+        self.assertEqual(len(a.env_nx), 8)
+        for i in range(4):
+            self.assertTrue((0, 0, i) in a.env_nx)
+            self.assertTrue((0, 1, i) in a.env_nx)
+
+        self.assertEqual(len(a.env_nx.edges), 12)
+        for i in range(3):
+            self.assertTrue(((0, 0, i), (0, 0, i+1)) in a.env_nx.edges)
+            self.assertTrue(((0, 1, i), (0, 1, i+1)) in a.env_nx.edges)
+            self.assertTrue(((0, 0, i), (0, 1, i+1)) in a.env_nx.edges)
+            self.assertTrue(((0, 1, i), (0, 0, i+1)) in a.env_nx.edges)
 
     def test_give_a_goal_and_plan_path(self):
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 0, 0]])
@@ -60,9 +70,9 @@ class TestAgent(unittest.TestCase):
         self.assertTrue(a.give_a_goal(np.array([2, 2])))
         p = a.path
         self.assertEqual(len(p), 7)
-        self.assertTrue((p[1] == [0, 1]).all())
-        self.assertTrue((p[3] == [1, 0]).all())
-        self.assertTrue((p[5] == [2, 1]).all())
+        self.assertTrue((p[1] == [0, 1, 1]).all())
+        self.assertTrue((p[3] == [1, 0, 3]).all())
+        self.assertTrue((p[5] == [2, 1, 5]).all())
 
         # if no path can be found
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 0]])
@@ -71,43 +81,25 @@ class TestAgent(unittest.TestCase):
 
     def test_block_edge(self):
         env = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
-        edge_to_block = ((0, 0), (0, 1))
+        edge_to_block = ((0, 0), (0, 1), 0)
         a = Agent(env, np.array([0, 0]), PolicyType.RANDOM)
         self.assertTrue(a.give_a_goal(np.array([0, 2])))
         self.assertEqual(len(a.path), 3)  # quick path
 
         # trying to block a non existant edge
         self.assertRaises(nx.exception.NetworkXError), lambda: a.block_edge(
-            (0, 1), (1, 1))
+            (0, 1), (1, 1), 0)
 
-        # blocking edge
-        # should still be in there
-        self.assertTrue(a.env_nx.has_edge(*edge_to_block))
         # blocking it, path should still be possible
-        self.assertTrue(a.block_edge(*edge_to_block))
-        self.assertFalse(a.env_nx.has_edge(*edge_to_block)
-                         )  # should not be in there any more
-        self.assertEqual(len(a.path), 7)  # going the long way
+        self.assertTrue(a.block_edge(edge_to_block))
+        self.assertEqual(len(a.path), 4)  # waiting
 
         # removing the same edge again should not be a problem
-        self.assertTrue(a.block_edge(*edge_to_block))
-
-        # removing a necessary edge should return false
-        self.assertFalse(a.block_edge((2, 0), (2, 1)))
-
-        # but path should still be there
-        self.assertEqual(len(a.path), 7)
+        self.assertTrue(a.block_edge(edge_to_block))
 
         # and we should also be able to give another goal
         self.assertTrue(a.give_a_goal(np.array([1, 0])))
         self.assertEqual(len(a.path), 2)
-
-        # should not be able to block a necessary edge
-        self.assertFalse(a.block_edge((0, 0), (1, 0)))
-
-        # and we should still be able to give another goal
-        self.assertTrue(a.give_a_goal(np.array([1, 0])))
-        self.assertEqual(len(a.path), 2)  # and have path
 
     def test_is_at_goal(self):
         env = np.array([[0, 0], [0, 0]])
@@ -166,7 +158,7 @@ class TestAgent(unittest.TestCase):
 
         # what is the next step
         next_step = a.what_is_next_step()
-        self.assertTrue(all(next_step == np.array([0, 0])))
+        self.assertTrue(all(next_step[:2] == np.array([0, 0])))
 
         # can we move to the wrong next step
         self.assertRaises(

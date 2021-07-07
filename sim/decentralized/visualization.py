@@ -49,7 +49,7 @@ def plot_env_agents(environent: np.ndarray,
         # path
         line, = ax.plot(a.path[:, 0] + d_a,
                         a.path[:, 1] + d_a, color=colormap[i_a])
-        line.set_label(str(a.id))
+        line.set_label(str(i_a))
         # position
         if a.pos[0] != a.goal[0] or a.pos[1] != a.goal[1]:  # not at goal
             ax.plot(a.pos[0] + d_a, a.pos[1] + d_a, markersize=10,
@@ -58,7 +58,7 @@ def plot_env_agents(environent: np.ndarray,
         ax.plot(a.goal[0] + d_a, a.goal[1] + d_a, markersize=10,
                 marker='.', color=colormap[i_a])
         # blocked nodes
-        blocks = np.array(list(a.filter_blocked_nodes), dtype=int)
+        blocks = np.array(list(a.blocked_nodes), dtype=int)
         if len(blocks) > 0:
             ax.plot(blocks[:, 0], blocks[:, 1], markersize=10,
                     marker='s', color=colormap[i_a], linewidth=0)

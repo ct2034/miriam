@@ -41,7 +41,7 @@ def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> np.ndarray:
         if a.is_at_goal(dt):
             poses[i_a] = a.goal
         else:
-            poses[i_a] = a.path[a.path_i + dt]
+            poses[i_a] = a.path[a.path_i + dt, :2]
     return poses
 
 
@@ -165,18 +165,22 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
                 if (agents[i_a1].get_priority(agents[i_a2].id) >
                         agents[i_a2].get_priority(agents[i_a1].id)):
                     # a1 has higher prio
-                    success = agents[i_a2].block_edge(edge[1], edge[0])
-                    if not success:
-                        success = agents[i_a1].block_edge(edge[0], edge[1])
-                        if not success:
+                    success2 = agents[i_a2].block_edge(
+                        (edge[1], edge[0], 0))
+                    if not success2:
+                        success1 = agents[i_a1].block_edge(
+                            (edge[0], edge[1], 0))
+                        if not success1:
                             raise SimIterationException(
                                 "Deadlock by edge collision")
                 else:
                     # a2 has higher prio
-                    success = agents[i_a1].block_edge(edge[0], edge[1])
-                    if not success:
-                        success = agents[i_a2].block_edge(edge[1], edge[0])
-                        if not success:
+                    success1 = agents[i_a1].block_edge(
+                        (edge[0], edge[1], 0))
+                    if not success1:
+                        success2 = agents[i_a2].block_edge(
+                            (edge[1], edge[0], 0))
+                        if not success2:
                             raise SimIterationException(
                                 "Deadlock by edge collision")
 
@@ -241,20 +245,21 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
             else:
                 # we need to solve the blocks by blocking some agents
                 for pose, [i_a1, i_a2] in node_colissions.items():
+                    pose_to_block = (pose[0], pose[1], dt+1)
                     if (agents[i_a1].get_priority(agents[i_a2].id) >
                             agents[i_a2].get_priority(agents[i_a1].id)):
                         # a1 has higher prio
-                        success2 = agents[i_a2].block_node(pose)
+                        success2 = agents[i_a2].block_node(pose_to_block)
                         if not success2:
-                            success1 = agents[i_a1].block_node(pose)
+                            success1 = agents[i_a1].block_node(pose_to_block)
                             if not success1:
                                 raise SimIterationException(
                                     "Deadlock by node collision")
                     else:
                         # a2 has higher prio
-                        success1 = agents[i_a1].block_node(pose)
+                        success1 = agents[i_a1].block_node(pose_to_block)
                         if not success1:
-                            success2 = agents[i_a2].block_node(pose)
+                            success2 = agents[i_a2].block_node(pose_to_block)
                             if not success2:
                                 raise SimIterationException(
                                     "Deadlock by node collision")
@@ -262,19 +267,21 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
                     if (agents[i_a1].get_priority(agents[i_a2].id) >
                             agents[i_a2].get_priority(agents[i_a1].id)):
                         # a1 has higher prio
-                        success2 = agents[i_a2].block_edge(edge[1], edge[0])
+                        success2 = agents[i_a2].block_edge(
+                            (edge[1], edge[0], dt))
                         if not success2:
                             success1 = agents[i_a1].block_edge(
-                                edge[0], edge[1])
+                                (edge[0], edge[1], dt))
                             if not success1:
                                 raise SimIterationException(
                                     "Deadlock by edge collision")
                     else:
                         # a2 has higher prio
-                        success1 = agents[i_a1].block_edge(edge[0], edge[1])
+                        success1 = agents[i_a1].block_edge(
+                            (edge[0], edge[1], dt))
                         if not success1:
                             success2 = agents[i_a2].block_edge(
-                                edge[1], edge[0])
+                                (edge[1], edge[0], dt))
                             if not success2:
                                 raise SimIterationException(
                                     "Deadlock by edge collision")
