@@ -290,12 +290,12 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
         # there is not one agent that can move
         raise SimIterationException("Deadlock from unresolvable collision")
 
-    possible_next_agent_poses = get_poses_in_dt(agents, 1)
     time_slice: List[int] = [0] * len(agents)
     space_slice: List[int] = [0] * len(agents)
+    possible_next_poses = get_poses_in_dt(agents, 1)
     for i_a in range(len(agents)):
         if can_proceed[i_a] and not agents[i_a].is_at_goal():
-            agents[i_a].make_next_step(possible_next_agent_poses[i_a, :])
+            agents[i_a].make_next_step(possible_next_poses[i_a])
             space_slice[i_a] = 1
         if not agents[i_a].is_at_goal():
             time_slice[i_a] = 1

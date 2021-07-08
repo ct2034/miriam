@@ -104,7 +104,6 @@ class Agent():
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
         path = self.plan_timed_path(
-            g=self.env_nx,
             start=(self.pos[0], self.pos[1]),
             goal=(goal[0], goal[1])
         )
@@ -117,7 +116,6 @@ class Agent():
             return False  # there is no path to this goal
 
     def plan_timed_path(self,
-                        g: np.ndarray,
                         start: Tuple[int, int],
                         goal: Tuple[int, int],
                         _blocked_nodes: Set[Tuple[int, int, int]] = None,
@@ -134,6 +132,7 @@ class Agent():
         else:
             blocked_nodes = _blocked_nodes
 
+        g = self.env_nx
         t_max = np.max(np.array(g.nodes())[:, 2])
 
         logger.debug(f"start: {start}")
@@ -173,6 +172,9 @@ class Agent():
         except nx.NetworkXNoPath as e:
             logger.warning(e)
             return None
+        except nx.NodeNotFound as e:
+            logger.warning(e)
+            return None
 
         # check end to only return useful part of path
         end = None
@@ -190,11 +192,11 @@ class Agent():
         """check if the agent can find a path to his goal with given
         n blocks [2, n]"""
         assert self.env_nx is not None, "Should have a env_nx"
-        tmp_env = self.env_nx.copy()
-        tmp_env.remove_nodes_from(blocks)
+        for b in blocks:
+            self.env[b] = 1
+        self.env_nx = self.gridmap_to_nx(self.env)
         assert self.goal is not None
         path = self.plan_timed_path(
-            g=tmp_env,
             start=(self.pos[0], self.pos[1]),
             goal=(self.goal[0], self.goal[1]))
         return path is not None
@@ -207,7 +209,6 @@ class Agent():
 
         assert self.goal is not None
         path = self.plan_timed_path(
-            g=self.env_nx,
             start=(self.pos[0], self.pos[1]),
             goal=(self.goal[0], self.goal[1]),
             _blocked_nodes=None,
@@ -229,7 +230,6 @@ class Agent():
         tmp_blocked_nodes = self.blocked_nodes.union({n})
         assert self.goal is not None
         path = self.plan_timed_path(
-            g=self.env_nx,
             start=(self.pos[0], self.pos[1]),
             goal=(self.goal[0], self.goal[1]),
             _blocked_nodes=tmp_blocked_nodes,
@@ -275,12 +275,12 @@ class Agent():
         # resetting blocks now
         self.blocked_nodes = set()
         self.blocked_edges = set()
-        path = self.plan_timed_path(
-            g=self.env_nx,
+        self.path = self.plan_timed_path(  # TODO: only replan if we actually cleared lists
             start=(self.pos[0], self.pos[1]),
             goal=(self.goal[0], self.goal[1])
         )
-        assert path is not None, "We must be successful with no blocks"
+        self.path_i = 0
+        assert self.path is not None, "We must be successful with no blocks"
 
     def make_next_step(self, next_pos_to_check: np.ndarray):
         """Move agent to its next step, pass that pose for clarification."""
