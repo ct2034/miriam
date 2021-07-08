@@ -272,15 +272,19 @@ class Agent():
             return self.path[self.path_i + 1, :2]
 
     def remove_all_blocks_and_replan(self):
-        # resetting blocks now
-        self.blocked_nodes = set()
-        self.blocked_edges = set()
-        self.path = self.plan_timed_path(  # TODO: only replan if we actually cleared lists
-            start=(self.pos[0], self.pos[1]),
-            goal=(self.goal[0], self.goal[1])
-        )
-        self.path_i = 0
-        assert self.path is not None, "We must be successful with no blocks"
+        if (  # there were blocks
+            len(self.blocked_edges) > 0 or
+            len(self.blocked_nodes) > 0
+        ):
+            # resetting blocks now
+            self.blocked_nodes = set()
+            self.blocked_edges = set()
+            self.path = self.plan_timed_path(  # TODO: only replan if we actually cleared lists
+                start=(self.pos[0], self.pos[1]),
+                goal=(self.goal[0], self.goal[1])
+            )
+            self.path_i = 0
+            assert self.path is not None, "We must be successful with no blocks"
 
     def make_next_step(self, next_pos_to_check: np.ndarray):
         """Move agent to its next step, pass that pose for clarification."""
