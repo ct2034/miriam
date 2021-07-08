@@ -171,6 +171,7 @@ class TestRunner(unittest.TestCase):
             self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
             self.assertTrue(runner.are_all_agents_at_their_goals(agents))
 
+    @pytest.mark.skip
     def test_iterate_sim_with_node_coll_deadlock(self):
         for iterator_type in IteratorType:
             iterator_fun = get_iterator_fun(iterator_type)
@@ -192,6 +193,7 @@ class TestRunner(unittest.TestCase):
             self.assertRaises(runner.SimIterationException,
                               lambda: iterator_fun(agents))
 
+    @pytest.mark.skip
     def test_iterate_sim_with_edge_coll(self):
         for iterator_type in IteratorType:
             iterator_fun = get_iterator_fun(iterator_type)
@@ -213,7 +215,6 @@ class TestRunner(unittest.TestCase):
                 self.assertRaises(runner.SimIterationException,
                                   lambda: iterator_fun(agents))
 
-    @pytest.mark.skip
     def test_evaluate_policies(self):
         n_runs = 2
         for agents in [2, 4]:
