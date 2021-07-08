@@ -118,6 +118,7 @@ def initialize_agents(
 def is_environment_well_formed(agents: Tuple[Agent]) -> bool:
     """Check if the environment is well formed according to Cap2015"""
     for a in agents:
+        a.env = a.env.copy()
         blocks: List[Tuple[Any, ...]] = []
         for other_a in [ia for ia in agents if ia != a]:
             blocks.append(tuple(other_a.pos))
