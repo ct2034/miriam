@@ -99,7 +99,7 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM):
     n_agents = starts.shape[0]
     agents = []
     for i_a in range(n_agents):
-        a = Agent(env.copy(), starts[i_a], policy=policy)
+        a = Agent(env, starts[i_a], policy=policy)
         if not a.give_a_goal(goals[i_a]):
             return INVALID
         agents.append(a)
@@ -110,14 +110,7 @@ def indep(env, starts, goals):
     agents = to_agent_objects(env, starts, goals)
     if agents is INVALID:
         return INVALID
-    paths = []
-    for a in agents:
-        p = a.path
-        le = p.shape[0]
-        ts = np.arange(le)
-        paths.append(
-            np.append(p, ts.reshape((le, 1)), axis=1)
-        )
+    paths = [a.path for a in agents]
     return paths
 
 
