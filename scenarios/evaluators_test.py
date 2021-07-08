@@ -37,6 +37,7 @@ class TestEvaluators(unittest.TestCase):
         ])
         res_agents = to_agent_objects(
             test_helper.env, starts, goals)
+        self.assertNotEqual(INVALID, res_agents)
         res_starts = list(map(lambda a: tuple(a.pos), res_agents))
         res_goals = list(map(lambda a: tuple(a.goal), res_agents))
         self.assertEqual((0, 0), res_starts[0])
