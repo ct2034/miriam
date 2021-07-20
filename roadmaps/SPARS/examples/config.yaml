@@ -1,0 +1,10 @@
+spars:
+  sampler: "uniform" # one of "halton", "uniform"
+  denseDelta: 1
+  sparseDelta: 50
+  stretchFactor: 1.01
+  maxFailures: 500
+  maxIter: 500000
+connection:
+  maxNeighbors: 6
+  maxRadius: 0.6
