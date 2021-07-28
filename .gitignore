@@ -35,3 +35,6 @@ htmlcov/
 *.pkl
 miriam_env/
 planner/policylearn/data/
+
+# pytorch datasets
+learn/pytorch/data/

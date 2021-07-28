@@ -21,7 +21,7 @@ e = torch.randn((), device=device, dtype=dtype) * .01
 
 learning_rate = 1e-7
 y_preds = []
-for t in range(int(1e4)):
+for t in range(int(3e4)):
     # Forward pass: compute predicted y
     y_pred = a + b * x + c * x ** 2 + d * x ** 3 + e * x ** 4
 
