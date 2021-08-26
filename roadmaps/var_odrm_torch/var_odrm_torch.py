@@ -111,7 +111,7 @@ def make_paths(g, pos, n_paths, seed=random.randint(0, 10E6)):
 
 
 def get_path_len(pos, path):
-    TAIL_WEIGHT = 4
+    TAIL_WEIGHT = 3
     (start, goal, path_vs) = path
     sections = torch.zeros(len(path_vs)+1)
     for i in range(len(path_vs)-1):
@@ -139,9 +139,9 @@ def get_paths_len(pos, paths):
 
 if __name__ == "__main__":
     n = 100
-    batches = 1000
-    learning_rate = 1e-3
-    stats_every = 100
+    batches = 3000
+    learning_rate = 1e-4
+    stats_every = int(batches / 50)
 
     pos = sample_points(n)
     g = make_graph(pos)
