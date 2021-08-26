@@ -6,6 +6,7 @@ import numpy as np
 import torch
 from networkx.exception import NetworkXNoPath, NodeNotFound
 from pyflann import FLANN
+from scenarios.visualization import get_colors
 from scipy.spatial import Delaunay
 from tools import ProgressBar
 
@@ -63,38 +64,43 @@ def draw_graph(g, pos, paths=[]):
     pos_dict = {i: pos_np[i] for i in range(N)}
     nx.draw_networkx(g, pos_dict, **options)
 
-    style = 'y--'
-    for p in paths:
+    colors = get_colors(len(paths))
+    style = '--'
+    for i_p, p in enumerate(paths):
         (start, goal, path_vs) = p
         for i in range(len(path_vs)-1):
             j = i+1
             ax.plot(
                 [pos_np[path_vs[i], 0], pos_np[path_vs[j], 0]],  # x
                 [pos_np[path_vs[i], 1], pos_np[path_vs[j], 1]],  # y
-                style)
+                style,
+                color=colors[i_p])
         ax.plot(
             [start[0], pos_np[path_vs[0], 0]],  # x
             [start[1], pos_np[path_vs[0], 1]],  # y
-            style)
+            style,
+            color=colors[i_p])
         ax.plot(
             [goal[0], pos_np[path_vs[-1], 0]],  # x
             [goal[1], pos_np[path_vs[-1], 1]],  # y
-            style)
+            style,
+            color=colors[i_p])
         ax.set_xlim([0., 1.])
         ax.set_ylim([0., 1.])
 
 
 def make_paths(g, pos, n_paths, seed=random.randint(0, 10E6)):
     nn = 1
-    np.random.seed(seed)
     pos_np = pos.detach().numpy()
     flann = FLANN()
     flann.build_index(np.array(pos_np))
     paths = []
-    for _ in range(n_paths):
+    for i in range(n_paths):
+        np.random.seed(seed+i)
         [start, goal] = np.random.random((2, 2))
         result, dists = flann.nn_index(
-            np.array([start, goal], dtype=pos_np.dtype), nn)
+            np.array([start, goal], dtype=pos_np.dtype), nn,
+            random_seed=seed)
         start_v, goal_v = result
         try:
             paths.append(
@@ -135,7 +141,7 @@ if __name__ == "__main__":
     n = 100
     batches = 1000
     learning_rate = 1e-3
-    stats_every = 10
+    stats_every = 100
 
     pos = sample_points(n)
     g = make_graph(pos)
@@ -144,7 +150,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam([pos], lr=learning_rate)
     test_costs = []
 
-    draw_graph(g, pos, [test_paths[0]])
+    draw_graph(g, pos, test_paths[:4])
     plt.savefig("pre_training.png")
     pb = ProgressBar("Training", batches)
     for i_b in range(batches):
@@ -153,7 +159,7 @@ if __name__ == "__main__":
         test_length = get_paths_len(pos, test_paths)
         training_paths = make_paths(g, pos, 10, i_b)
         training_length = get_paths_len(pos, training_paths)
-        backward = training_length.backward(create_graph=True)
+        backward = training_length.backward()
         optimizer.step()
         g = make_graph(pos)
         if i_b % stats_every == stats_every-1:
@@ -163,7 +169,7 @@ if __name__ == "__main__":
             pb.progress(i_b)
     pb.end()
 
-    draw_graph(g, pos, [test_paths[0]])
+    draw_graph(g, pos, test_paths[:4])
     plt.savefig("post_training.png")
 
     plt.figure()
