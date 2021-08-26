@@ -139,9 +139,9 @@ def get_paths_len(pos, paths):
 
 if __name__ == "__main__":
     n = 100
-    batches = 3000
+    epochs = 3000
     learning_rate = 1e-4
-    stats_every = int(batches / 50)
+    stats_every = int(epochs / 50)
 
     pos = sample_points(n)
     g = make_graph(pos)
@@ -152,21 +152,21 @@ if __name__ == "__main__":
 
     draw_graph(g, pos, test_paths[:4])
     plt.savefig("pre_training.png")
-    pb = ProgressBar("Training", batches)
-    for i_b in range(batches):
+    pb = ProgressBar("Training", epochs)
+    for i_e in range(epochs):
         optimizer.zero_grad()
         test_paths = make_paths(g, pos, 20, 0)
         test_length = get_paths_len(pos, test_paths)
-        training_paths = make_paths(g, pos, 10, i_b)
+        training_paths = make_paths(g, pos, 10, i_e)
         training_length = get_paths_len(pos, training_paths)
         backward = training_length.backward()
         optimizer.step()
         g = make_graph(pos)
-        if i_b % stats_every == stats_every-1:
+        if i_e % stats_every == stats_every-1:
             print(f"test_length: {test_length}")
             print(f"training_length: {training_length}")
             test_costs.append(test_length.detach().numpy())
-            pb.progress(i_b)
+            pb.progress(i_e)
     pb.end()
 
     draw_graph(g, pos, test_paths[:4])
