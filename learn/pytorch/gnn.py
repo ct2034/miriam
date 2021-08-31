@@ -1,6 +1,8 @@
 # Install required packages.
-# !pip install -q torch-scatter -f https://pytorch-geometric.com/whl/torch-1.9.0+cu102.html
-# !pip install -q torch-sparse -f https://pytorch-geometric.com/whl/torch-1.9.0+cu102.html
+# !pip install -q torch-scatter -f \
+# https://pytorch-geometric.com/whl/torch-1.9.0+cu102.html
+# !pip install -q torch-sparse -f \
+# https://pytorch-geometric.com/whl/torch-1.9.0+cu102.html
 # !pip install -q git+https://github.com/rusty1s/pytorch_geometric.git
 
 import time
@@ -34,14 +36,14 @@ print(f'data.y: {data.y}')  # classes
 print(f'Number of edges: {data.num_edges}')
 print(f'Average node degree: {data.num_edges / data.num_nodes:.2f}')
 print(f'Number of training nodes: {data.train_mask.sum()}')
-print(
-    f'Training node label rate: {int(data.train_mask.sum()) / data.num_nodes:.2f}')
+label_rate = int(data.train_mask.sum()) / data.num_nodes
+print(f'Training node label rate: {label_rate:.2f}')
 print(f'Contains isolated nodes: {data.contains_isolated_nodes()}')
 print(f'Contains self-loops: {data.contains_self_loops()}')
 print(f'Is undirected: {data.is_undirected()}')
 
 edge_index = data.edge_index
-print(edge_index.t())
+print(edge_index.t()[:20])
 
 # looking at the graph with nx ------------------------------------------------
 
@@ -57,9 +59,8 @@ def visualize(h, color, epoch=None, loss=None):
         if epoch is not None and loss is not None:
             plt.xlabel(f'Epoch: {epoch}, Loss: {loss.item():.4f}', fontsize=16)
     else:
-        nx.draw_networkx(G, pos=nx.spring_layout(G, seed=42), with_labels=False,
-                         node_color=color, cmap="Set2")
-    plt.show()
+        nx.draw_networkx(G, pos=nx.spring_layout(G, seed=42),
+                         with_labels=False, node_color=color, cmap="Set2")
 
 
 G = to_networkx(data, to_undirected=True)
@@ -114,6 +115,7 @@ def train(data):
 
 for epoch in range(401):
     loss, h = train(data)
-    if epoch % 10 == 0:
+    if epoch % 100 == 0:
         visualize(h, color=data.y, epoch=epoch, loss=loss)
-        time.sleep(0.3)
+
+plt.show()
