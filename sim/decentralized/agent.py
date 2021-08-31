@@ -169,10 +169,7 @@ class Agent():
                 goal + (t_max,),
                 heuristic=dist,
                 weight="cost"))
-        except nx.NetworkXNoPath as e:
-            logger.warning(e)
-            return None
-        except nx.NodeNotFound as e:
+        except (nx.NetworkXNoPath, nx.NodeNotFound) as e:
             logger.warning(e)
             return None
 

@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from definitions import FREE, INVALID
 from planner.policylearn.generate_fovs import *
+from planner.policylearn.generate_graph import *
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import BLOCKS_STR
 from scenarios.evaluators import cached_ecbs
 from scenarios.generators import (building_walls, like_sim_decentralized,
@@ -33,6 +34,7 @@ OTHERS_STR = 'others'
 # input options ---------------------------
 TRANSFER_LSTM_STR = 'transfer_lstm'
 TRANSFER_CLASSIFICATION_STR = 'transfer_classification'
+TRANSFER_GCN_STR = 'transfer_gcn'
 GENERATE_SIM_STR = 'generate_simulation'
 NO_SOLUTION_STR = 'no_solution'
 MERGE_FILES = 'merge_files'
@@ -138,11 +140,6 @@ def get_agent_paths_from_data(data, timed=False):
     return agent_paths
 
 
-def time_path(path: np.ndarray):
-    nrs = np.array([np.arange(path.shape[0])]).transpose()
-    return np.append(path, nrs, axis=1)
-
-
 def will_they_collide(gridmap, starts, goals):
     """checks if for a given set of starts and goals the agents travelling
     between may collide on the given gridmap."""
@@ -152,9 +149,8 @@ def will_they_collide(gridmap, starts, goals):
     for i_a, _ in enumerate(starts):
         a = Agent(gridmap, starts[i_a])
         success = a.give_a_goal(goals[i_a])
-        tp = time_path(a.path)
-        agent_paths.append(tp)
-        for pos in tp:
+        agent_paths.append(a.path)
+        for pos in a.path:
             if not do_collide:  # only need to do this if no collision was found
                 if tuple(pos) in seen:
                     do_collide = True
@@ -276,7 +272,7 @@ def training_samples_from_data(data, mode):
                 else:
                     pos = collision[0]
                 t = pos[2]
-                if pos in paths[i_a] or collision in paths[i_oa]:
+                if pos in paths[i_a] or pos in paths[i_oa]:
                     if is_collision_in_blocks(collision, bs[i_a]):
                         unblocked_agent = i_a
                     elif is_collision_in_blocks(collision, bs[i_oa]):
@@ -289,6 +285,11 @@ def training_samples_from_data(data, mode):
                 elif mode == TRANSFER_CLASSIFICATION_STR:
                     training_samples.extend(classification_samples(
                         n_agents, data, t, col_agents, unblocked_agent))
+                elif mode == TRANSFER_GCN_STR:
+                    training_samples.extend(gcn_samples(
+                        n_agents, data, t, col_agents, unblocked_agent))
+            else:
+                print("unblocked_agent is None")
     except Exception as e:
         print(e)
     finally:
@@ -366,6 +367,45 @@ def classification_samples(n_agents, data, t, col_agents,
     return training_samples
 
 
+def gcn_samples(n_agents, data, t, col_agents,
+                unblocked_agent):
+    """specifically construct training data for the gcn model."""
+    training_samples = []
+    paths_until_col = []
+    paths_full = []
+    gridmap = data[GRIDMAP_STR]
+    data_edge_index, data_pos = gridmap_to_graph(gridmap)
+    n_nodes = data_pos.shape[0]
+
+    for i_a in range(n_agents):
+        path_until_col = get_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
+        if len(path_until_col) < CLASSIFICATION_POS_TIMESTEPS:
+            padded_path = np.zeros([CLASSIFICATION_POS_TIMESTEPS, 2])
+            for i in range(
+                0, CLASSIFICATION_POS_TIMESTEPS - len(path_until_col)
+            ):
+                padded_path[i] = path_until_col[0]
+            padded_path[i+1:] = path_until_col
+            path_until_col = padded_path
+        paths_until_col.append(path_until_col[-CLASSIFICATION_POS_TIMESTEPS:])
+        # full path:
+        path_full = get_path(data[INDEP_AGENT_PATHS_STR][i_a], -1)
+        paths_full.append(path_full)
+    t = CLASSIFICATION_POS_TIMESTEPS-1
+    assert len(col_agents) == 2, "assuming two agent in colission here"
+    for i_ca, i_a in enumerate(col_agents):
+        i_oa = col_agents[(i_ca+1) % 2]
+        data_x = torch.zeros((n_nodes, 1))
+        pos_oa = paths_until_col[i_oa][0]
+        data_x[pos_to_node(data_pos, pos_oa)] = 1
+        training_samples.append(to_data_obj(
+            data_x,
+            data_edge_index,
+            data_pos,
+            1 if i_a == unblocked_agent else 0))
+    return training_samples
+
+
 def make_target_deltas(path, t):
     """along the path, construct the deltas between each current position and
     the end of the path until (including) time t."""
@@ -421,11 +461,12 @@ def insert_str_before_extension(fname: str, to_insert: str):
 
 def save_data(data_dict, fname_pkl):
     """save the current data dict in the given pickle file."""
+    print(f"Saving data under {fname_pkl}")
     with open(fname_pkl, 'wb') as f:
         pickle.dump(data_dict, f)
 
 
-def simulate_one_data(width, fill, n_agents, base_seed):
+def simulate_one_data(width, fill, n_agents, base_seed, pb, i):
     data_ok = False
     random.seed(base_seed)
     seed = base_seed
@@ -458,6 +499,7 @@ def simulate_one_data(width, fill, n_agents, base_seed):
                 GRIDMAP_STR: gridmap,
                 BLOCKS_STR: data[BLOCKS_STR]
             })
+    pb.progress(i)
     return data
 
 
@@ -470,13 +512,14 @@ if __name__ == "__main__":
     parser.add_argument('mode', help='mode', choices=(
         TRANSFER_LSTM_STR,
         TRANSFER_CLASSIFICATION_STR,
+        TRANSFER_GCN_STR,
         GENERATE_SIM_STR,
         NO_SOLUTION_STR,
         MERGE_FILES))
     parser.add_argument('fname_write_pkl',
-                        type=argparse.FileType('wb'), nargs='?')
+                        type=str, nargs='?')
     parser.add_argument(
-        'fname_read_pkl', type=argparse.FileType('rb'), nargs='?')
+        'fname_read_pkl', type=str, nargs='?')
     parser.add_argument(
         '-m', type=str, nargs='*')
     args = parser.parse_args()
@@ -484,20 +527,22 @@ if __name__ == "__main__":
     start_time = datetime.datetime.now()
 
     if (args.mode == TRANSFER_LSTM_STR or
-            args.mode == TRANSFER_CLASSIFICATION_STR):
-        # transfer mode lstm
+            args.mode == TRANSFER_CLASSIFICATION_STR or
+            args.mode == TRANSFER_GCN_STR):
+        # transfer modes
         training_data_we_want = []
-        with open(args.fname_read_pkl.name, 'rb') as f:
+        with open(args.fname_read_pkl, 'rb') as f:
             all_data = pickle.load(f)
         data_len = len(all_data)
+        print(f"data_len {data_len}")
         i = 0
-        pb = ProgressBar("main", data_len, 1)
+        pb = ProgressBar("Transfer", data_len, 1)
         for d in all_data:
             i += 1
-            pb.progress()
             training_data_we_want.extend(
                 training_samples_from_data(d, args.mode))
-        save_data(training_data_we_want, args.fname_write_pkl.name)
+            pb.progress()
+        save_data(training_data_we_want, args.fname_write_pkl)
         print(f'got {len(training_data_we_want)} samples '
               + f'from {len(all_data)} simulations')
         pb.end()
@@ -519,16 +564,15 @@ if __name__ == "__main__":
         logger.info(f"Using initial seed: {seed}")
         # start
         with Pool(4) as p:
-            pb_main = ProgressBar(f'main', n_batches)
+            pb_main = ProgressBar(f'Generation', batch_size * n_batches, 1)
             for i_batch in range(n_batches):
                 start = batch_size * i_batch
                 stop = min(start + batch_size, n_data_to_gen)
-                arguments = [(width, fill, n_agents, seed)
+                arguments = [(width, fill, n_agents, seed, pb_main, seed)
                              for seed in range(start, stop)]
                 batch_data = p.starmap(simulate_one_data, arguments)
                 save_data(batch_data, insert_str_before_extension(
-                    args.fname_write_pkl.name, f'{i_batch:02}'))
-                pb_main.progress()
+                    args.fname_write_pkl, f'{i_batch:02}'))
             # save in the end for sure
             pb_main.end()
     elif args.mode == NO_SOLUTION_STR:
@@ -554,7 +598,7 @@ if __name__ == "__main__":
             fname = "/data/" + str(my_uuid) + ".pkl"
             logger.warn("No filename provided.")
         else:
-            fname = args.fname_write_pkl.name
+            fname = args.fname_write_pkl
         logger.warn("Our filename will be: {}".format(fname))
         # start
         while len(all_data) < n_data_to_gen:
