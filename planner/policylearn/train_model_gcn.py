@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 from tools import ProgressBar
 from torch.nn import Linear
 from torch.special import expit
+from torch_geometric.data import DataLoader
 from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
                                 global_mean_pool)
 
@@ -25,10 +26,7 @@ class GCN(torch.nn.Module):
         # self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels*3, 1)
 
-    def forward(self, x, edge_index, pos):
-        # all in the same network
-        # TODO: work woth actual batches
-        batch = torch.zeros(x.shape[0], dtype=torch.int64)
+    def forward(self, x, edge_index, pos, batch):
         # 1. Obtain node embeddings
         x = self.conv1(x, edge_index)
         x = x.relu()
@@ -44,7 +42,7 @@ class GCN(torch.nn.Module):
         ), 1)
 
         # 3. Apply a final classifier
-        x = F.dropout(x, p=0.1, training=self.training)
+        x = F.dropout(x, p=0.2, training=self.training)
         x = self.lin(x)
         x = expit(x)  # logistics function
 
@@ -53,31 +51,33 @@ class GCN(torch.nn.Module):
 
 def train(model, datas, optimizer):
     model.train()
-    accuracy = torch.zeros(len(datas))
-    losss = torch.zeros(len(datas))
+    dl = DataLoader(dataset=datas, batch_size=50)
+    accuracy = torch.zeros(len(dl))
+    losss = torch.zeros(len(dl))
     # Iterate in batches over the training/test dataset.
-    for i_d, data in enumerate(datas):
-        out = model(data.x, data.edge_index, data.pos)
-        accuracy[i_d] = torch.round(out) == data.y
-        loss = torch.pow(out - data.y, 2)
-        losss[i_d] = loss
+    for i_d, data in enumerate(dl):
+        out = model(data.x, data.edge_index, data.pos, data.batch)
+        accuracy[i_d] = torch.mean(torch.abs(torch.round(out) - data.y))
+        loss = torch.sum((out - data.y) ** 2)
+        losss[i_d] = loss / len(dl)
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
     loss_overall = torch.mean(losss)
-    loss_overall.backward()
-    optimizer.step()
-    optimizer.zero_grad()
     return float(torch.mean(accuracy)), float(loss_overall)
 
 
 def test(model, datas):
     model.eval()
-    accuracy = torch.zeros(len(datas))
-    loss = torch.zeros(len(datas))
+    dl = DataLoader(dataset=datas, batch_size=1)
+    accuracy = torch.zeros(len(dl))
+    losss = torch.zeros(len(dl))
     # Iterate in batches over the training/test dataset.
-    for i_d, data in enumerate(datas):
-        out = model(data.x, data.edge_index, data.pos)
-        accuracy[i_d] = torch.round(out) == data.y
-        loss[i_d] = torch.pow(out - data.y, 2)
-    return float(torch.mean(accuracy)), float(torch.mean(loss))
+    for i_d, data in enumerate(dl):
+        out = model(data.x, data.edge_index, data.pos, data.batch)
+        accuracy[i_d] = torch.abs(torch.round(out) - data.y)
+        losss[i_d] = (out - data.y) ** 2
+    return float(torch.mean(accuracy)), float(torch.mean(losss))
 
 
 if __name__ == "__main__":
@@ -157,7 +157,7 @@ if __name__ == "__main__":
                     hidden_channels=8,
                     num_node_features=num_node_features
                 )
-                optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
+                optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
                 # train
                 training_accuracy: List[float] = []
