@@ -2,6 +2,7 @@
 import argparse
 import os
 import pickle
+import random
 from typing import List, Optional
 
 import numpy as np
@@ -178,6 +179,7 @@ if __name__ == "__main__":
                 test_accuracy.append(pretrain_test_accuracy)
                 test_loss.append(pretrain_test_loss)
             # (if) on first file only
+            random.shuffle(train_graphs)
             one_training_accuracy, one_training_loss = train(
                 model, train_graphs, optimizer, lossfn)
             training_accuracy.append(one_training_accuracy)
