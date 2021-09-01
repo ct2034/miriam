@@ -5,11 +5,13 @@ import logging
 import pickle
 
 from matplotlib import pyplot as plt
-from scenarios.visualization import plot_env, plot_schedule, plot_with_paths
+from scenarios.visualization import (get_colors, plot_env, plot_schedule,
+                                     plot_with_paths)
 
 PLOT_FOVS_STR = "plot_fovs"
 PLOT_SCENARIO_STR = "plot_scenario"
-N_TO_PLOT = 6
+PLOT_GRAPH_STR = "plot_graph"
+N_TO_PLOT = 8
 
 
 def plot_fovs(X, Y):
@@ -31,6 +33,38 @@ def plot_fovs(X, Y):
     plt.show()
 
 
+def plot_graph(ax, data_edge_index, data_pos, data_x):
+    # edges
+    n_edges = data_edge_index.shape[1]
+    for i_e in range(n_edges):
+        ax.plot(
+            [data_pos[data_edge_index[0, i_e], 0],
+                data_pos[data_edge_index[1, i_e], 0]],  # x
+            [data_pos[data_edge_index[0, i_e], 1],
+                data_pos[data_edge_index[1, i_e], 1]],  # y
+            'k'
+        )
+    # nodes
+    ax.scatter(data_pos[:, 0], data_pos[:, 1], color='k')
+    n_node_features = data_x.shape[1]
+    n_nodes = data_x.shape[0]
+    colors = get_colors(n_node_features)
+    dp = 1./(n_node_features+2)
+    for i_x in range(n_node_features):
+        color = colors[i_x]
+        ax.scatter(
+            data_pos[:, 0] + dp*(i_x+1),
+            data_pos[:, 1] + dp*(i_x+1),
+            color=color,
+            alpha=.1)
+        for i_n in range(n_nodes):
+            if data_x[i_n, i_x]:
+                ax.scatter(
+                    data_pos[i_n, 0] + dp*(i_x+1),
+                    data_pos[i_n, 1] + dp*(i_x+1),
+                    color=color)
+
+
 if __name__ == "__main__":
     logging.basicConfig()
     logger = logging.getLogger(__name__)
@@ -38,7 +72,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', help='mode', choices=[
-        PLOT_FOVS_STR, PLOT_SCENARIO_STR])
+        PLOT_FOVS_STR, PLOT_SCENARIO_STR, PLOT_GRAPH_STR])
     parser.add_argument(
         'fname_read_pkl', type=argparse.FileType('rb'))
     args = parser.parse_args()
@@ -59,3 +93,13 @@ if __name__ == "__main__":
             plot_schedule(d[i])
             plt.show()
             print(d[i])
+    elif args.mode == PLOT_GRAPH_STR:
+        fig = plt.figure()
+        for i in range(N_TO_PLOT):
+            ax = fig.add_subplot(2, int(N_TO_PLOT/2), i+1)
+            data_pos = d[i].pos
+            data_x = d[i].x
+            data_edge_index = d[i].edge_index
+            plot_graph(ax, data_edge_index, data_pos, data_x)
+            ax.set_title(f"y = {d[i].y}")
+        plt.show()

@@ -291,7 +291,7 @@ def training_samples_from_data(data, mode):
             # else:
             #     print("unblocked_agent is None")
     except Exception as e:
-        print(e)
+        print(f"Exception: {str(e)}")
     finally:
         return training_samples
 
@@ -395,19 +395,19 @@ def gcn_samples(n_agents, data, t, col_agents,
     for i_ca, i_a in enumerate(col_agents):
         i_oa = col_agents[(i_ca+1) % 2]
         data_x = torch.cat((
-            get_other_agent_pos_layer(data_pos, paths_until_col, i_oa),
-            get_other_agent_pos_layer(data_pos, paths_until_col, i_a),
-            get_agent_path_layer(data_pos, paths_until_col, i_oa),
+            get_agent_pos_layer(data_pos, paths_until_col, i_a),
             get_agent_path_layer(data_pos, paths_until_col, i_a),
-            get_agent_path_layer(data_pos, paths_full, i_oa),
             get_agent_path_layer(data_pos, paths_full, i_a),
+            get_agent_pos_layer(data_pos, paths_until_col, i_oa),
+            get_agent_path_layer(data_pos, paths_until_col, i_oa),
+            get_agent_path_layer(data_pos, paths_full, i_oa),
         ), 1)
 
         training_samples.append(to_data_obj(
             data_x,
             data_edge_index,
             data_pos,
-            1 if i_a == unblocked_agent else 0))
+            1. if i_a == unblocked_agent else 0.))
     return training_samples
 
 
