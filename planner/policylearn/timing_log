@@ -1,0 +1,4 @@
+cmd:
+  N_DATA_TO_GEN=1000 ./generate_data.py generate_simulation data/data.pk 
+took: 
+  2:25:46.798217

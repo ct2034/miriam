@@ -54,7 +54,7 @@ def train(model, datas, optimizer):
     for i_d, data in enumerate(datas):
         out = model(data.x, data.edge_index, data.pos)
         accuracy[i_d] = torch.round(out) == data.y
-        loss = torch.abs(out - data.y)
+        loss = torch.pow(out - data.y, 2)
         losss[i_d] = loss
         loss.backward()
         optimizer.step()
@@ -70,7 +70,7 @@ def test(model, datas):
     for i_d, data in enumerate(datas):
         out = model(data.x, data.edge_index, data.pos)
         accuracy[i_d] = torch.round(out) == data.y
-        loss[i_d] = torch.abs(out - data.y)
+        loss[i_d] = torch.pow(out - data.y, 2)
     return float(torch.mean(accuracy)), float(torch.mean(loss))
 
 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
                 optimizer = torch.optim.Adam(model.parameters())
 
                 # train
-                accuracy: List[float] = []
+                training_accuracy: List[float] = []
                 val_accuracy: Optional[List[float]] = []
                 test_accuracy: List[float] = []
                 loss: List[float] = []
@@ -171,11 +171,11 @@ if __name__ == "__main__":
                 test_accuracy.append(pretrain_test_accuracy)
                 test_loss.append(pretrain_test_loss)
             # (if) on first file only
-            training_accuracy, training_loss = train(
+            one_training_accuracy, one_training_loss = train(
                 model, train_graphs, optimizer)
-            accuracy.append(training_accuracy)
+            training_accuracy.append(one_training_accuracy)
             val_accuracy = None
-            loss.append(training_loss)
+            loss.append(one_training_loss)
             val_loss = None
 
             del d
@@ -188,7 +188,7 @@ if __name__ == "__main__":
             model, test_graphs)
         print(f"one_test_loss: {one_test_loss}")
         print(f"one_test_accuracy: {one_test_accuracy}")
-        test_x.append(len(accuracy)-1)
+        test_x.append(len(training_accuracy)-1)
         test_accuracy.append(one_test_accuracy)
         test_loss.append(one_test_loss)
 
@@ -197,8 +197,8 @@ if __name__ == "__main__":
 
     # print history
     fig, axs = plt.subplots(2)
-    axs[0].plot(accuracy, label="accuracy")
-    axs[1].plot(loss, label="loss")
+    axs[0].plot(training_accuracy, label="training_accuracy")
+    axs[1].plot(loss, label="training_loss")
     if val_accuracy is not None:
         axs[0].plot(val_accuracy, label="val_accuracy")
     if val_loss is not None:
