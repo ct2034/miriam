@@ -22,9 +22,9 @@ class GCN(torch.nn.Module):
     def __init__(self, hidden_channels, num_node_features):
         super(GCN, self).__init__()
         torch.manual_seed(0)
-        self.conv1 = ChebConv(num_node_features, hidden_channels, K=2)
-        self.conv2 = ChebConv(hidden_channels, hidden_channels, K=2)
-        self.conv3 = ChebConv(hidden_channels, hidden_channels, K=2)
+        self.conv1 = GCNConv(num_node_features, hidden_channels)
+        self.conv2 = GCNConv(hidden_channels, hidden_channels)
+        self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels*3, 1)
 
     def forward(self, x, edge_index, pos, batch):
@@ -33,7 +33,8 @@ class GCN(torch.nn.Module):
         x = x.relu()
         x = self.conv2(x, edge_index)
         x = x.relu()
-        x = self.conv3(x, edge_index)
+        # x = self.conv3(x, edge_index)
+        x = F.dropout(x, p=0.2, training=self.training)
 
         # 2. Readout layer
         x = torch.cat((
@@ -43,7 +44,7 @@ class GCN(torch.nn.Module):
         ), 1)
 
         # 3. Apply a final classifier
-        x = F.dropout(x, p=0.6, training=self.training)
+        x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
         x = expit(x)  # logistics function
 
@@ -102,14 +103,14 @@ if __name__ == "__main__":
     # print(f'model_type: {model_type}')
 
     # meta params
-    validation_split: float = .1
-    test_split: float = .1
+    validation_split: float = .3  # of first file
+    test_split: float = .3
     epochs = 100
 
     # data
     pb = ProgressBar("epochs * files", len(fnames_read_pkl)*epochs, 1)
-    for i_e in range(epochs):
-        for fname_read_pkl in fnames_read_pkl:
+    for fname_read_pkl in fnames_read_pkl:
+        for i_e in range(epochs):
             # print("~"*60)
             # print(f"epoch {i_e+1} of {epochs}")
             # print(
@@ -120,10 +121,10 @@ if __name__ == "__main__":
                 d = pickle.load(f)
             n = len(d)
             n_val = int(n * validation_split)
-            # print(f'n_val: {n_val}')
             # on first file only
             if fname_read_pkl == fnames_read_pkl[0] and i_e == 0:
                 print(f'n: {n}')
+                print(f'n_val: {n_val}')
                 n_test = int(n*test_split)
                 print(f'n_test: {n_test}')
                 n_train = n - n_val - n_test
@@ -155,7 +156,7 @@ if __name__ == "__main__":
 
                 # create model
                 model = GCN(
-                    hidden_channels=16,
+                    hidden_channels=128,
                     num_node_features=num_node_features
                 )
                 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
