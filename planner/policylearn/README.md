@@ -14,10 +14,10 @@ Then transfer to gcn samples
 ./run_conversion.sh
 ```
 
-<!-- Have a look at the data with ...
+Have a look at the data with ...
 ```
-./generate_data_demo.py plot_fovs data/data_gcn02.pkl
-``` -->
+./generate_data_demo.py plot_graph data/data_gcn02.pkl
+```
 
 Train the model
 ```

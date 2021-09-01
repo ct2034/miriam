@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 from matplotlib import pyplot as plt
 from tools import ProgressBar
-from torch.nn import Linear
+from torch.nn import Linear, MSELoss
 from torch.special import expit
 from torch_geometric.data import DataLoader
 from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
@@ -49,7 +49,7 @@ class GCN(torch.nn.Module):
         return x
 
 
-def train(model, datas, optimizer):
+def train(model, datas, optimizer, lossfn):
     model.train()
     dl = DataLoader(dataset=datas, batch_size=50)
     accuracy = torch.zeros(len(dl))
@@ -58,8 +58,8 @@ def train(model, datas, optimizer):
     for i_d, data in enumerate(dl):
         out = model(data.x, data.edge_index, data.pos, data.batch)
         accuracy[i_d] = torch.mean(torch.abs(torch.round(out) - data.y))
-        loss = torch.sum((out - data.y) ** 2)
-        losss[i_d] = loss / len(dl)
+        loss = lossfn(out.flatten(), data.y)
+        losss[i_d] = loss
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
@@ -67,7 +67,7 @@ def train(model, datas, optimizer):
     return float(torch.mean(accuracy)), float(loss_overall)
 
 
-def test(model, datas):
+def test(model, datas, lossfn):
     model.eval()
     dl = DataLoader(dataset=datas, batch_size=1)
     accuracy = torch.zeros(len(dl))
@@ -76,7 +76,7 @@ def test(model, datas):
     for i_d, data in enumerate(dl):
         out = model(data.x, data.edge_index, data.pos, data.batch)
         accuracy[i_d] = torch.abs(torch.round(out) - data.y)
-        losss[i_d] = (out - data.y) ** 2
+        losss[i_d] = lossfn(out.flatten(), data.y)
     return float(torch.mean(accuracy)), float(torch.mean(losss))
 
 
@@ -158,6 +158,7 @@ if __name__ == "__main__":
                     num_node_features=num_node_features
                 )
                 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+                lossfn = MSELoss()
 
                 # train
                 training_accuracy: List[float] = []
@@ -170,34 +171,32 @@ if __name__ == "__main__":
 
                 # evaluating untrained model
                 pretrain_test_accuracy, pretrain_test_loss = test(
-                    model, [train_graphs[0]])
+                    model, test_graphs, lossfn)
                 print(f"pretrain_test_loss: {pretrain_test_loss}")
                 print(f"pretrain_test_accuracy: {pretrain_test_accuracy}")
-                # test_x.append(0)
-                # test_accuracy.append(pretrain_test_accuracy)
-                # test_loss.append(pretrain_test_loss)
+                test_x.append(0)
+                test_accuracy.append(pretrain_test_accuracy)
+                test_loss.append(pretrain_test_loss)
             # (if) on first file only
             one_training_accuracy, one_training_loss = train(
-                model, train_graphs, optimizer)
+                model, train_graphs, optimizer, lossfn)
             training_accuracy.append(one_training_accuracy)
-            val_accuracy = None
             loss.append(one_training_loss)
-            val_loss = None
-
-            del d
-            del train_graphs
-            del val_graphs
             pb.progress()
 
         # manual validation (testing) after each epoch
         one_test_accuracy, one_test_loss = test(
-            model, test_graphs)
+            model, test_graphs, lossfn)
         print(f"one_test_loss: {one_test_loss}")
         print(f"one_test_accuracy: {one_test_accuracy}")
         test_x.append(len(training_accuracy)-1)
         test_accuracy.append(one_test_accuracy)
         test_loss.append(one_test_loss)
 
+    val_accuracy, val_loss = test(
+        model, val_graphs, lossfn)
+    print(f"val_loss: {val_loss}")
+    print(f"val_accuracy: {val_accuracy}")
     torch.save(model.state_dict(), model_fname)
     pb.end()
 
