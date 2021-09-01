@@ -56,10 +56,11 @@ def train(model, datas, optimizer):
         accuracy[i_d] = torch.round(out) == data.y
         loss = torch.pow(out - data.y, 2)
         losss[i_d] = loss
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
-    return float(torch.mean(accuracy)), float(torch.mean(loss))
+    loss_overall = torch.mean(losss)
+    loss_overall.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+    return float(torch.mean(accuracy)), float(loss_overall)
 
 
 def test(model, datas):
@@ -97,23 +98,23 @@ if __name__ == "__main__":
     # meta params
     validation_split: float = .1
     test_split: float = .1
-    epochs = 10
+    epochs = 100
 
     # data
-    pb = ProgressBar("epochs * files", len(fnames_read_pkl)*epochs)
+    pb = ProgressBar("epochs * files", len(fnames_read_pkl)*epochs, 1)
     for i_e in range(epochs):
         for fname_read_pkl in fnames_read_pkl:
-            print("~"*60)
-            print(f"epoch {i_e+1} of {epochs}")
-            print(
-                f"reading file {fnames_read_pkl.index(fname_read_pkl) + 1} of " +
-                f"{len(fnames_read_pkl)} : " +
-                f"{fname_read_pkl}")
+            # print("~"*60)
+            # print(f"epoch {i_e+1} of {epochs}")
+            # print(
+            #     f"reading file {fnames_read_pkl.index(fname_read_pkl) + 1} of " +
+            #     f"{len(fnames_read_pkl)} : " +
+            #     f"{fname_read_pkl}")
             with open(fname_read_pkl, 'rb') as f:
                 d = pickle.load(f)
             n = len(d)
             n_val = int(n * validation_split)
-            print(f'n_val: {n_val}')
+            # print(f'n_val: {n_val}')
             # on first file only
             if fname_read_pkl == fnames_read_pkl[0] and i_e == 0:
                 print(f'n: {n}')
@@ -129,7 +130,7 @@ if __name__ == "__main__":
                     len(test_graphs) + len(val_graphs)
             else:
                 n_train = n - n_val
-                print(f'n_train: {n_train}')
+                # print(f'n_train: {n_train}')
                 train_graphs = [d[i] for i in range(n_train)]
                 val_graphs = [d[i] for i in range(n_train, n)]
                 assert len(d) == len(train_graphs) + len(val_graphs)
@@ -148,7 +149,7 @@ if __name__ == "__main__":
 
                 # create model
                 model = GCN(
-                    hidden_channels=32,
+                    hidden_channels=4,
                     num_node_features=num_node_features
                 )
                 optimizer = torch.optim.Adam(model.parameters())

@@ -288,8 +288,8 @@ def training_samples_from_data(data, mode):
                 elif mode == TRANSFER_GCN_STR:
                     training_samples.extend(gcn_samples(
                         n_agents, data, t, col_agents, unblocked_agent))
-            else:
-                print("unblocked_agent is None")
+            # else:
+            #     print("unblocked_agent is None")
     except Exception as e:
         print(e)
     finally:
@@ -375,7 +375,6 @@ def gcn_samples(n_agents, data, t, col_agents,
     paths_full = []
     gridmap = data[GRIDMAP_STR]
     data_edge_index, data_pos = gridmap_to_graph(gridmap)
-    n_nodes = data_pos.shape[0]
 
     for i_a in range(n_agents):
         path_until_col = get_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
@@ -395,9 +394,15 @@ def gcn_samples(n_agents, data, t, col_agents,
     assert len(col_agents) == 2, "assuming two agent in colission here"
     for i_ca, i_a in enumerate(col_agents):
         i_oa = col_agents[(i_ca+1) % 2]
-        data_x = torch.zeros((n_nodes, 1))
-        pos_oa = paths_until_col[i_oa][0]
-        data_x[pos_to_node(data_pos, pos_oa)] = 1
+        data_x = torch.cat((
+            get_other_agent_pos_layer(data_pos, paths_until_col, i_oa),
+            get_other_agent_pos_layer(data_pos, paths_until_col, i_a),
+            get_agent_path_layer(data_pos, paths_until_col, i_oa),
+            get_agent_path_layer(data_pos, paths_until_col, i_a),
+            get_agent_path_layer(data_pos, paths_full, i_oa),
+            get_agent_path_layer(data_pos, paths_full, i_a),
+        ), 1)
+
         training_samples.append(to_data_obj(
             data_x,
             data_edge_index,
@@ -536,7 +541,7 @@ if __name__ == "__main__":
         data_len = len(all_data)
         print(f"data_len {data_len}")
         i = 0
-        pb = ProgressBar("Transfer", data_len, 1)
+        pb = ProgressBar("Transfer", data_len, 5)
         for d in all_data:
             i += 1
             training_data_we_want.extend(

@@ -49,6 +49,22 @@ def gridmap_to_graph(gridmap):
     return data_edge_index, data_pos
 
 
+def get_other_agent_pos_layer(data_pos, paths_until_col, i_oa):
+    n_nodes = data_pos.shape[0]
+    data_x_slice = torch.zeros((n_nodes, 1))
+    pos_oa = paths_until_col[i_oa][0]
+    data_x_slice[pos_to_node(data_pos, pos_oa), 0] = 1
+    return data_x_slice
+
+
+def get_agent_path_layer(data_pos, paths_full, i_a):
+    n_nodes = data_pos.shape[0]
+    data_x_slice = torch.zeros((n_nodes, 1))
+    for pos in paths_full[i_a]:
+        data_x_slice[pos_to_node(data_pos, pos), 0] = 1
+    return data_x_slice
+
+
 def to_data_obj(data_x, data_edge_index, data_pos, y):
     return Data(
         x=data_x,
