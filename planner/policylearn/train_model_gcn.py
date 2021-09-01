@@ -11,7 +11,8 @@ from matplotlib import pyplot as plt
 from tools import ProgressBar
 from torch.nn import Linear
 from torch.special import expit
-from torch_geometric.nn import GCNConv, global_mean_pool
+from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
+                                global_mean_pool)
 
 
 # src: https://colab.research.google.com/drive/1I8a0DfQ3fI7Njc62__mVXUlcAleUclnb?usp=sharing
@@ -21,8 +22,8 @@ class GCN(torch.nn.Module):
         torch.manual_seed(0)
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.conv3 = GCNConv(hidden_channels, hidden_channels)
-        self.lin = Linear(hidden_channels, 1)
+        # self.conv3 = GCNConv(hidden_channels, hidden_channels)
+        self.lin = Linear(hidden_channels*3, 1)
 
     def forward(self, x, edge_index, pos):
         # all in the same network
@@ -32,14 +33,18 @@ class GCN(torch.nn.Module):
         x = self.conv1(x, edge_index)
         x = x.relu()
         x = self.conv2(x, edge_index)
-        x = x.relu()
-        x = self.conv3(x, edge_index)
+        # x = x.relu()
+        # x = self.conv3(x, edge_index)
 
         # 2. Readout layer
-        x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
+        x = torch.cat((
+            global_mean_pool(x, batch),
+            global_max_pool(x, batch),
+            global_add_pool(x, batch)
+        ), 1)
 
         # 3. Apply a final classifier
-        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.dropout(x, p=0.1, training=self.training)
         x = self.lin(x)
         x = expit(x)  # logistics function
 
@@ -149,10 +154,10 @@ if __name__ == "__main__":
 
                 # create model
                 model = GCN(
-                    hidden_channels=4,
+                    hidden_channels=8,
                     num_node_features=num_node_features
                 )
-                optimizer = torch.optim.Adam(model.parameters())
+                optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
 
                 # train
                 training_accuracy: List[float] = []
@@ -168,9 +173,9 @@ if __name__ == "__main__":
                     model, [train_graphs[0]])
                 print(f"pretrain_test_loss: {pretrain_test_loss}")
                 print(f"pretrain_test_accuracy: {pretrain_test_accuracy}")
-                test_x.append(0)
-                test_accuracy.append(pretrain_test_accuracy)
-                test_loss.append(pretrain_test_loss)
+                # test_x.append(0)
+                # test_accuracy.append(pretrain_test_accuracy)
+                # test_loss.append(pretrain_test_loss)
             # (if) on first file only
             one_training_accuracy, one_training_loss = train(
                 model, train_graphs, optimizer)
