@@ -33,7 +33,7 @@ class GCN(torch.nn.Module):
         x = x.relu()
         x = self.conv2(x, edge_index)
         x = x.relu()
-        # x = self.conv3(x, edge_index)
+        x = self.conv3(x, edge_index)
         x = F.dropout(x, p=0.2, training=self.training)
 
         # 2. Readout layer
@@ -59,7 +59,7 @@ def train(model, datas, optimizer, lossfn):
     # Iterate in batches over the training/test dataset.
     for i_d, data in enumerate(dl):
         out = model(data.x, data.edge_index, data.pos, data.batch)
-        accuracy[i_d] = torch.mean(torch.abs(torch.round(out) - data.y))
+        accuracy[i_d] = torch.mean(1 - torch.abs(torch.round(out) - data.y))
         loss = lossfn(out.flatten(), data.y)
         losss[i_d] = loss
         loss.backward()
@@ -77,7 +77,7 @@ def test(model, datas, lossfn):
     # Iterate in batches over the training/test dataset.
     for i_d, data in enumerate(dl):
         out = model(data.x, data.edge_index, data.pos, data.batch)
-        accuracy[i_d] = torch.abs(torch.round(out) - data.y)
+        accuracy[i_d] = 1 - torch.abs(torch.round(out) - data.y)
         losss[i_d] = lossfn(out.flatten(), data.y)
     return float(torch.mean(accuracy)), float(torch.mean(losss))
 
@@ -103,14 +103,14 @@ if __name__ == "__main__":
     # print(f'model_type: {model_type}')
 
     # meta params
-    validation_split: float = .3  # of first file
-    test_split: float = .3
-    epochs = 100
+    validation_split: float = .1  # of first file
+    test_split: float = .1
+    epochs = 20
 
     # data
     pb = ProgressBar("epochs * files", len(fnames_read_pkl)*epochs, 1)
-    for fname_read_pkl in fnames_read_pkl:
-        for i_e in range(epochs):
+    for i_e in range(epochs):
+        for fname_read_pkl in fnames_read_pkl:
             # print("~"*60)
             # print(f"epoch {i_e+1} of {epochs}")
             # print(

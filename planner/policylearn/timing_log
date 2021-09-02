@@ -4,3 +4,10 @@ took:
   2:25:46.798217
 filesize data00.pkl:
   289K
+
+cmd:
+  N_DATA_TO_GEN=10000 ./generate_data.py generate_simulation data/data.pkl
+took:
+  1 day, 2:54:18.960788
+filesize data00.pkl:
+  2,9M
