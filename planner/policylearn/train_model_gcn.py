@@ -24,7 +24,6 @@ class GCN(torch.nn.Module):
         torch.manual_seed(0)
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels*3, 1)
 
     def forward(self, x, edge_index, pos, batch):
@@ -33,8 +32,6 @@ class GCN(torch.nn.Module):
         x = x.relu()
         x = self.conv2(x, edge_index)
         x = x.relu()
-        x = self.conv3(x, edge_index)
-        x = F.dropout(x, p=0.2, training=self.training)
 
         # 2. Readout layer
         x = torch.cat((
@@ -44,7 +41,7 @@ class GCN(torch.nn.Module):
         ), 1)
 
         # 3. Apply a final classifier
-        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.dropout(x, p=0.6, training=self.training)
         x = self.lin(x)
         x = expit(x)  # logistics function
 
@@ -156,7 +153,7 @@ if __name__ == "__main__":
 
                 # create model
                 model = GCN(
-                    hidden_channels=128,
+                    hidden_channels=64,
                     num_node_features=num_node_features
                 )
                 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -211,11 +208,13 @@ if __name__ == "__main__":
         axs[0].plot(
             [min(test_x), max(test_x)],
             [val_accuracy]*2,
+            "--",
             label="val_accuracy")
     if val_loss is not None:
         axs[1].plot(
             [min(test_x), max(test_x)],
             [val_loss]*2,
+            "--",
             label="val_loss")
     axs[0].plot(test_x, test_accuracy, label="test_accuracy")
     axs[1].plot(test_x, test_loss, label="test_loss")
@@ -224,4 +223,4 @@ if __name__ == "__main__":
     axs[1].legend(loc='upper right')
     axs[1].set_xlabel('Batch')
     fig.savefig("training_history.png")
-    fig.show()
+    plt.show()
