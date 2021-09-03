@@ -19,12 +19,13 @@ from torch_geometric.nn import (ChebConv, GCNConv, global_add_pool,
 
 # src: https://colab.research.google.com/drive/1I8a0DfQ3fI7Njc62__mVXUlcAleUclnb?usp=sharing
 class GCN(torch.nn.Module):
-    def __init__(self, hidden_channels, num_node_features):
+    def __init__(self, conv_channels, class_channels, num_node_features):
         super(GCN, self).__init__()
         torch.manual_seed(0)
-        self.conv1 = GCNConv(num_node_features, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.lin = Linear(hidden_channels*3, 1)
+        self.conv1 = GCNConv(num_node_features, conv_channels)
+        self.conv2 = GCNConv(conv_channels, conv_channels)
+        self.lin = Linear(conv_channels*3, class_channels)
+        self.lin2 = Linear(class_channels, 1)
 
     def forward(self, x, edge_index, pos, batch):
         # 1. Obtain node embeddings
@@ -43,6 +44,9 @@ class GCN(torch.nn.Module):
         # 3. Apply a final classifier
         x = F.dropout(x, p=0.6, training=self.training)
         x = self.lin(x)
+        x = x.relu()
+        x = F.dropout(x, p=0.3, training=self.training)
+        x = self.lin2(x)
         x = expit(x)  # logistics function
 
         return x
@@ -102,7 +106,7 @@ if __name__ == "__main__":
     # meta params
     validation_split: float = .1  # of first file
     test_split: float = .1
-    epochs = 20
+    epochs = 100
 
     # data
     pb = ProgressBar("epochs * files", len(fnames_read_pkl)*epochs, 1)
@@ -153,7 +157,8 @@ if __name__ == "__main__":
 
                 # create model
                 model = GCN(
-                    hidden_channels=64,
+                    conv_channels=32,
+                    class_channels=64,
                     num_node_features=num_node_features
                 )
                 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
