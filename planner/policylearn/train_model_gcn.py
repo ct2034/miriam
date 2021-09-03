@@ -45,7 +45,7 @@ class GCN(torch.nn.Module):
         x = F.dropout(x, p=0.6, training=self.training)
         x = self.lin(x)
         x = x.relu()
-        x = F.dropout(x, p=0.3, training=self.training)
+        x = F.dropout(x, p=0.4, training=self.training)
         x = self.lin2(x)
         x = expit(x)  # logistics function
 
@@ -157,8 +157,8 @@ if __name__ == "__main__":
 
                 # create model
                 model = GCN(
-                    conv_channels=32,
-                    class_channels=64,
+                    conv_channels=50,
+                    class_channels=100,
                     num_node_features=num_node_features
                 )
                 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
