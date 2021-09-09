@@ -6,13 +6,13 @@ from typing import List, Optional
 
 import numpy as np
 from importtf import keras, tf
-from keras.layers import (Activation, BatchNormalization, Conv2D, Conv3D,
-                          ConvLSTM2D, Dense, DepthwiseConv2D, Dropout, Flatten,
-                          MaxPooling2D, MaxPooling3D, Reshape)
-from keras.models import Sequential
 from matplotlib import pyplot as plt
-from numpy.core.shape_base import _concatenate_shapes
 from tensorflow.compat.v1 import ConfigProto, InteractiveSession
+from tensorflow.keras.layers import (Activation, BatchNormalization, Conv2D,
+                                     Conv3D, ConvLSTM2D, Dense,
+                                     DepthwiseConv2D, Dropout, Flatten,
+                                     MaxPooling2D, MaxPooling3D, Reshape)
+from tensorflow.keras.models import Sequential
 from tensorflow.python.keras.backend import dropout
 from tools import ProgressBar
 
