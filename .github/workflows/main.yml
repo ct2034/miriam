@@ -25,6 +25,7 @@ jobs:
         pip install -r requirements.txt
         pip install -r planner/policylearn/libMultiRobotPlanning/requirements.txt
         pip install -r sim/decentralized/requirements.txt
+        pip install -r learn/pytorch/requirements.txt
     # - name: Build cobra
     #   run: |
     #     cd planner/cobra/external
