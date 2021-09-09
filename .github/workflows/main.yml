@@ -25,7 +25,7 @@ jobs:
         pip install -r requirements.txt
         pip install -r planner/policylearn/libMultiRobotPlanning/requirements.txt
         pip install -r sim/decentralized/requirements.txt
-        pip install -r learn/pytorch/requirements.txt
+        pip install -r learn/pytorch/requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
     # - name: Build cobra
     #   run: |
     #     cd planner/cobra/external
