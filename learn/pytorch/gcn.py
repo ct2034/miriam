@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Node Classification on large Knowledge Graphs
-# Based on [this exercise](https://colab.research.google.com/drive/14OvFnAXggxB8vM4e8vSURUp1TaKnovzX?usp=sharing#scrollTo=paMH3_7ejSg4).
+# Based on [this exercise](https://colab.research.google.com/drive/14OvFnAXggxB8vM4e8vSURUp1TaKnovzX?usp=sharing#scrollTo=paMH3_7ejSg4).  # nopep8
 
 import warnings
 
@@ -20,7 +20,7 @@ from torch_geometric.transforms import NormalizeFeatures
 dataset = Planetoid(root='data/ ', name='Cora',
                     transform=NormalizeFeatures())
 
-# PyTorch Geometric provides different functions to investigate the dataset (e.g. node degrees, self-loops ect.) - You can find more of them in the documentation or in [this notebook](https://colab.research.google.com/drive/14OvFnAXggxB8vM4e8vSURUp1TaKnovzX?usp=sharing#scrollTo=eqWR0j_kIx67).
+# PyTorch Geometric provides different functions to investigate the dataset (e.g. node degrees, self-loops ect.) - You can find more of them in the documentation or in [this notebook](https://colab.research.google.com/drive/14OvFnAXggxB8vM4e8vSURUp1TaKnovzX?usp=sharing#scrollTo=eqWR0j_kIx67).  # nopep8
 
 # Get some basic info about the dataset
 print(f'Number of graphs: {len(dataset)}')
@@ -37,12 +37,12 @@ print(f'Number of nodes: {data.num_nodes}')
 print(f'Number of edges: {data.num_edges}')
 print(f'Number of training nodes: {data.train_mask.sum()}')
 print(
-    f'Training node label rate: {int(data.train_mask.sum()) / data.num_nodes:.2f}')
+    f'Training node label rate: {int(data.train_mask.sum()) / data.num_nodes:.2f}')  # nopep8
 print(f'Is undirected: {data.is_undirected()}')
 
 # Observations:
 # - We only have a relatively small set of training nodes (20 nodes per class)
-# - There are binary test, train and validation masks of the size #nodes (they tell use which node can be used for which task)
+# - There are binary test, train and validation masks of the size #nodes (they tell use which node can be used for which task)  # nopep8
 
 print(f'data.x.shape: {data.x.shape} [No. Nodes x Features]')
 
@@ -51,7 +51,7 @@ data.x[0][:50]
 
 # Why do we even use the graph structure - aren't the features enough?
 
-# - Apparently, simple MLP models perform a lot worse than GNNs on this type of task, as the citation information is crucial for a correct classification
+# - Apparently, simple MLP models perform a lot worse than GNNs on this type of task, as the citation information is crucial for a correct classification  # nopep8
 
 # How do the labels look like?
 # - They are encoded as numeric value between 0-6
@@ -175,7 +175,7 @@ plt.figure()
 plt.title(f'prediction for sample = {sample}')
 sns.set_theme(style="whitegrid")
 print(
-    f'model(data.x, data.edge_index).shape: {model(data.x, data.edge_index).shape}')
+    f'model(data.x, data.edge_index).shape: {model(data.x, data.edge_index).shape}')  # nopep8
 pred = model(data.x, data.edge_index)
 sns.barplot(x=np.array(range(7)), y=pred[sample].detach().cpu().numpy())
 plt.show()
@@ -246,6 +246,6 @@ with open('embeddings.gif', 'rb') as f:
 # # Improving the model
 # - Cross-Validation
 # - Hyperparameter Optimization
-# - Different layer types GCN, GAT... ([here](hhttps: // pytorch-geometric.readthedocs.io/en/latest/modules/nn.html))
-# - Including edge features([here](https: // wiki.tum.de/display/dlma/Exploiting+Edge+Features+in+Graph+Neural+Networks))
-# - -> The best performance is currently[at around 0.9](https: // paperswithcode.com/sota/node-classification-on-cora)
+# - Different layer types GCN, GAT... ([here](hhttps: // pytorch-geometric.readthedocs.io/en/latest/modules/nn.html))  # nopep8
+# - Including edge features([here](https: // wiki.tum.de/display/dlma/Exploiting+Edge+Features+in+Graph+Neural+Networks))  # nopep8
+# - -> The best performance is currently[at around 0.9](https: // paperswithcode.com/sota/node-classification-on-cora)  # nopep8
