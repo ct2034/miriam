@@ -5,7 +5,7 @@ from enum import Enum, auto
 from typing import Optional
 
 import numpy as np
-from importtf import tf
+from importtf import keras, tf
 from numpy.core.fromnumeric import shape
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
