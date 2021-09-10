@@ -82,7 +82,7 @@ def initialize_new_agent(
         a = Agent(env, pos, policy)  # we have the agent
 
         # now finding the goal ...
-        env_with_agents_and_goals[tuple(pos)] = 1
+        env_with_agents_and_goals[pos] = 1
         no_obstacle_nor_agent_or_goal = np.where(
             env_with_agents_and_goals == 0)
         assert len(no_obstacle_nor_agent_or_goal[0]
