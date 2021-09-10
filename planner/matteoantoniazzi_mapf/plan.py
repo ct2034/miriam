@@ -49,7 +49,7 @@ def sum_of_costs_from_info(info: INFO_TYPE) -> int:
     return soc
 
 
-def paths_from_info(info: INFO_TYPE) -> List[np.array]:
+def paths_from_info(info: INFO_TYPE) -> List[np.ndarray]:
     paths = []
     for pt in info[0]:
         p = np.array(pt)

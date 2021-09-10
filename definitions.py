@@ -12,4 +12,4 @@ SUCCESS = 1
 # the time ecbs and icts etc are allowed to run for
 DEFAULT_TIMEOUT_S = 30  # seconds;
 
-SCENARIO_TYPE = Tuple[np.array, np.array, np.array]
+SCENARIO_TYPE = Tuple[np.ndarray, np.ndarray, np.ndarray]

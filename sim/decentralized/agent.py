@@ -5,6 +5,9 @@ from typing import *
 
 import networkx as nx
 import numpy as np
+import torch
+from roadmaps.var_odrm_torch.var_odrm_torch import make_graph
+from scenarios.types import is_gridmap, is_roadmap
 from sim.decentralized.policy import Policy, PolicyType
 from tools import hasher
 
@@ -19,17 +22,29 @@ BLOCKED_NODES_TYPE = Set[NODE_TYPE]
 
 class Agent():
     def __init__(
-        self, env: np.ndarray, pos: np.ndarray,
+        self, env: Union[np.ndarray, torch.Tensor], pos: Union[np.ndarray, int],
         policy: PolicyType = PolicyType.RANDOM
     ):
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
-        self.env: np.ndarray = env
-        self.env_nx: nx.Graph = self.gridmap_to_nx(self.env)
-        assert isinstance(pos, np.ndarray), "Position must be numpy array"
-        self.pos: np.ndarray = pos
-        self.start: np.ndarray = pos
-        self.goal: Union[np.ndarray, None] = None
+        self.env: Union[np.ndarray, torch.Tensor] = env
+        if is_roadmap(env):
+            self.has_roadmap: bool = True
+            self.has_gridmap: bool = False
+            self.n_nodes = env.shape[0]
+            assert isinstance(pos, int), "Position must be an int"
+            self.env_nx: nx.Graph = make_graph(env)
+            # todo: make graph of roadmap positions
+            assert pos < self.n_nodes, "Position must be a node index"
+        elif is_gridmap(env):
+            self.has_roadmap = True
+            self.has_gridmap = False
+            assert isinstance(pos, np.ndarray), "Position must be numpy array"
+            assert isinstance(self.env, np.ndarray), "Env must be numpy array"
+            self.env_nx = self.gridmap_to_nx(self.env)
+            self.pos: np.ndarray = pos
+            self.start: np.ndarray = pos
+            self.goal: Union[np.ndarray, None] = None
         self.path: Union[np.ndarray, None] = None
         self.path_i: Union[int, None] = None
         self.policy: Policy = Policy.construct_by_type(policy, self)
@@ -191,6 +206,7 @@ class Agent():
         assert self.env_nx is not None, "Should have a env_nx"
         for b in blocks:
             self.env[b] = 1
+        assert isinstance(self.env, np.ndarray), "Env must be numpy array"
         self.env_nx = self.gridmap_to_nx(self.env)
         assert self.goal is not None
         path = self.plan_timed_path(

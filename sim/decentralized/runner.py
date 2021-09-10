@@ -62,7 +62,7 @@ def initialize_new_agent(
                    ) > 0, "Possible poses should be left"
         assert len(no_obstacle_nor_goal[0]
                    ) > 0, "Possible poses should be left"
-        pos = random.choice(np.transpose(no_obstacle_nor_agent))
+        pos: int = random.choice(list(np.transpose(no_obstacle_nor_agent)))
         a = Agent(env, pos, policy)  # we have the agent
 
         # now finding the goal ...
@@ -77,7 +77,8 @@ def initialize_new_agent(
             env_with_agents_and_goals == 0)
         assert len(no_obstacle_nor_agent_or_goal[0]
                    ) > 0, "Possible poses should be left"
-        pos = random.choice(np.transpose(no_obstacle_nor_agent_or_goal))
+        pos = random.choice(np.transpose(
+            no_obstacle_nor_agent_or_goal))  # type: ignore
         a = Agent(env, pos, policy)  # we have the agent
 
         # now finding the goal ...
@@ -118,7 +119,8 @@ def initialize_agents(
 def is_environment_well_formed(agents: Tuple[Agent]) -> bool:
     """Check if the environment is well formed according to Cap2015"""
     for a in agents:
-        a.env = a.env.copy()
+        if isinstance(a.env, np.ndarray):
+            a.env = a.env.copy()
         blocks: List[Tuple[Any, ...]] = []
         for other_a in [ia for ia in agents if ia != a]:
             blocks.append(tuple(other_a.pos))

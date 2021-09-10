@@ -21,6 +21,7 @@ def sample_points(n):
 
 
 def make_graph(pos):
+    """Convert array of node positions into graph by Delaunay Triangulation."""
     N = pos.shape[0]
     g = nx.Graph()
     pos_np = pos.detach().numpy()
@@ -89,8 +90,27 @@ def draw_graph(g, pos, paths=[]):
         ax.set_ylim([0., 1.])
 
 
-def make_paths(g, pos, n_paths, seed=random.randint(0, 10E6)):
+def plan_path_between_nodes(g, start, goal):
+    try:
+        return nx.shortest_path(g, start, goal, 'distance')
+    except (NetworkXNoPath, nx.NodeNotFound):
+        return None
+
+
+def plan_path_between_coordinates(g, flann, start, goal):
     nn = 1
+    result, _ = flann.nn_index(
+        np.array([start, goal], dtype="float32"), nn,
+        random_seed=0)
+    start_v, goal_v = result
+    node_path = plan_path_between_nodes(g, start_v, goal_v)
+    if node_path is not None:
+        return (start, goal, node_path)
+    else:
+        return None
+
+
+def make_paths(g, pos, n_paths, seed=random.randint(0, 10E6)):
     pos_np = pos.detach().numpy()
     flann = FLANN()
     flann.build_index(np.array(pos_np))
@@ -98,15 +118,9 @@ def make_paths(g, pos, n_paths, seed=random.randint(0, 10E6)):
     for i in range(n_paths):
         np.random.seed(seed+i)
         [start, goal] = np.random.random((2, 2))
-        result, dists = flann.nn_index(
-            np.array([start, goal], dtype=pos_np.dtype), nn,
-            random_seed=seed)
-        start_v, goal_v = result
-        try:
-            paths.append(
-                (start, goal, nx.shortest_path(g, start_v, goal_v, 'distance')))
-        except (NetworkXNoPath, nx.NodeNotFound):
-            pass
+        path = plan_path_between_coordinates(g, flann, start, goal)
+        if path is not None:
+            paths.append(path)
     return paths
 
 

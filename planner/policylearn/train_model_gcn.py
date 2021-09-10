@@ -16,6 +16,8 @@ from torch_geometric.data import DataLoader
 from torch_geometric.nn import (ChebConv, GCNConv, global_add_pool,
                                 global_max_pool, global_mean_pool)
 
+LOSSFN = MSELoss()
+
 
 # src: https://colab.research.google.com/drive/1I8a0DfQ3fI7Njc62__mVXUlcAleUclnb?usp=sharing
 class GCN(torch.nn.Module):
@@ -52,7 +54,7 @@ class GCN(torch.nn.Module):
         return x
 
 
-def train(model, datas, optimizer, lossfn):
+def train(model, datas, optimizer):
     model.train()
     dl = DataLoader(dataset=datas, batch_size=50)
     accuracy = torch.zeros(len(dl))
@@ -61,7 +63,7 @@ def train(model, datas, optimizer, lossfn):
     for i_d, data in enumerate(dl):
         out = model(data.x, data.edge_index, data.pos, data.batch)
         accuracy[i_d] = torch.mean(1 - torch.abs(torch.round(out) - data.y))
-        loss = lossfn(out.flatten(), data.y)
+        loss = LOSSFN(out.flatten(), data.y)
         losss[i_d] = loss
         loss.backward()
         optimizer.step()
@@ -70,7 +72,7 @@ def train(model, datas, optimizer, lossfn):
     return float(torch.mean(accuracy)), float(loss_overall)
 
 
-def test(model, datas, lossfn):
+def test(model, datas):
     model.eval()
     dl = DataLoader(dataset=datas, batch_size=1)
     accuracy = torch.zeros(len(dl))
@@ -79,7 +81,7 @@ def test(model, datas, lossfn):
     for i_d, data in enumerate(dl):
         out = model(data.x, data.edge_index, data.pos, data.batch)
         accuracy[i_d] = 1 - torch.abs(torch.round(out) - data.y)
-        losss[i_d] = lossfn(out.flatten(), data.y)
+        losss[i_d] = LOSSFN(out.flatten(), data.y)
     return float(torch.mean(accuracy)), float(torch.mean(losss))
 
 
@@ -162,7 +164,6 @@ if __name__ == "__main__":
                     num_node_features=num_node_features
                 )
                 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-                lossfn = MSELoss()
 
                 # train
                 training_accuracy: List[float] = []
@@ -175,7 +176,7 @@ if __name__ == "__main__":
 
                 # evaluating untrained model
                 pretrain_test_accuracy, pretrain_test_loss = test(
-                    model, test_graphs, lossfn)
+                    model, test_graphs)
                 print(f"pretrain_test_loss: {pretrain_test_loss}")
                 print(f"pretrain_test_accuracy: {pretrain_test_accuracy}")
                 test_x.append(0)
@@ -184,14 +185,14 @@ if __name__ == "__main__":
             # (if) on first file only
             random.shuffle(train_graphs)
             one_training_accuracy, one_training_loss = train(
-                model, train_graphs, optimizer, lossfn)
+                model, train_graphs, optimizer)
             training_accuracy.append(one_training_accuracy)
             loss.append(one_training_loss)
             pb.progress()
 
         # test after each epoch
         one_test_accuracy, one_test_loss = test(
-            model, test_graphs, lossfn)
+            model, test_graphs)
         print(f"one_test_loss: {one_test_loss}")
         print(f"one_test_accuracy: {one_test_accuracy}")
         test_x.append(len(training_accuracy)-1)
@@ -199,7 +200,7 @@ if __name__ == "__main__":
         test_loss.append(one_test_loss)
 
     val_accuracy, val_loss = test(
-        model, val_graphs, lossfn)
+        model, val_graphs)
     print(f"val_loss: {val_loss}")
     print(f"val_accuracy: {val_accuracy}")
     torch.save(model.state_dict(), model_fname)

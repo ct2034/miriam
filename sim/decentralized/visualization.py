@@ -17,7 +17,7 @@ def plot_env_agents(environent: np.ndarray,
     fig, ax = plt.subplots()
     c = ax.imshow(image, cmap='gray', vmin=0, vmax=1)
     ax.set_aspect('equal')
-    baserange = np.arange(environent.shape[0], step=2)
+    baserange = np.arange(environent.shape[0], step=2)  # type: ignore
     ax.set_xticks(baserange)
     ax.set_xticklabels(map(str, baserange))
     ax.set_yticks(baserange)
@@ -99,7 +99,7 @@ def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
         data[i_p, i_success, :] = evaluations[policy][i_success]
         all_successfull = np.logical_and(
             all_successfull,
-            data[i_p, i_success, :])
+            data[i_p, i_success, :])  # type: ignore
         policy_names.append(str(policy).replace('PolicyType.', ''))
 
     plt.figure(figsize=[16, 9])
