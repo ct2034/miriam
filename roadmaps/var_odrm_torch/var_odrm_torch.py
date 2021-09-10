@@ -151,9 +151,21 @@ def get_paths_len(pos, paths):
     return torch.sum(all_lens)
 
 
+def optimize_poses(g, pose, optimizer):
+    test_paths = make_paths(g, pos, 20, 0)
+    test_length = get_paths_len(pos, test_paths)
+    training_paths = make_paths(g, pos, 10, i_e)
+    training_length = get_paths_len(pos, training_paths)
+    backward = training_length.backward()
+    optimizer.step()
+    g = make_graph(pos)
+    optimizer.zero_grad()
+    return g, pose, test_length, training_length
+
+
 if __name__ == "__main__":
     n = 100
-    epochs = 3000
+    epochs = 300
     learning_rate = 1e-4
     stats_every = int(epochs / 50)
 
@@ -168,14 +180,8 @@ if __name__ == "__main__":
     plt.savefig("pre_training.png")
     pb = ProgressBar("Training", epochs)
     for i_e in range(epochs):
-        optimizer.zero_grad()
-        test_paths = make_paths(g, pos, 20, 0)
-        test_length = get_paths_len(pos, test_paths)
-        training_paths = make_paths(g, pos, 10, i_e)
-        training_length = get_paths_len(pos, training_paths)
-        backward = training_length.backward()
-        optimizer.step()
-        g = make_graph(pos)
+        g, pos, test_length, training_length = optimize_poses(
+            g, pos, optimizer)
         if i_e % stats_every == stats_every-1:
             print(f"test_length: {test_length}")
             print(f"training_length: {training_length}")
