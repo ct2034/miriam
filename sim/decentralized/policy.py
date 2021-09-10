@@ -11,6 +11,7 @@ from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
 from planner.policylearn.train_model import (CLASSIFICATION_STR, CONVRNN_STR,
                                              fix_data_convrnn)
+from tensorflow.keras.models import load_model
 from tensorflow.python.ops.variables import model_variables
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -106,7 +107,7 @@ class LearnedPolicy(Policy):
         self.poss: OrderedDict = OrderedDict()
         self.path_is: OrderedDict = OrderedDict()
         self.t = 0
-        self.model: keras.Model = keras.models.load_model(
+        self.model: tf.keras.Model = load_model(
             "planner/policylearn/my_model.h5")
         model_input_shape = list(self.model.layers[0].input_spec[0].shape)
         self.model_type: Optional[str] = None

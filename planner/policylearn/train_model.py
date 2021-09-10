@@ -168,6 +168,7 @@ if __name__ == "__main__":
     model_fname: str = args.model_fname
     print(f'model_fname: {model_fname}')
     model_type: str = args.model_type
+    assert model_type is not None
     print(f'model_type: {model_type}')
     validation_split: float = .1
     test_split: float = .1
