@@ -22,7 +22,10 @@ def get_possible_next_agent_poses(
         can_proceed: List[bool]) -> np.ndarray:
     """Where would the agents be if they would be allowed to move to the next
     step in their paths if they have a true in `can_proceed`."""
-    possible_next_agent_poses = np.zeros((len(agents), 2), dtype=int)
+    if agents[0].has_gridmap:
+        possible_next_agent_poses = np.zeros((len(agents), 2), dtype=int)
+    elif agents[0].has_roadmap:
+        possible_next_agent_poses = np.zeros((len(agents), 1), dtype=int)
     # prepare step
     for i_a in range(len(agents)):
         if can_proceed[i_a]:
@@ -34,14 +37,20 @@ def get_possible_next_agent_poses(
 
 def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> np.ndarray:
     """Get poses at time dt from now in the future, so `dt=0` is now."""
-    poses: np.ndarray = np.zeros((len(agents), 2), dtype=int)
+    if agents[0].has_gridmap:
+        poses = np.zeros((len(agents), 2), dtype=int)
+    elif agents[0].has_roadmap:
+        poses = np.zeros((len(agents), 1), dtype=int)
     for i_a, a in enumerate(agents):
         assert a.path is not None
         assert a.path_i is not None
         if a.is_at_goal(dt):
             poses[i_a] = a.goal
         else:
-            poses[i_a] = a.path[a.path_i + dt, :2]
+            if a.has_gridmap:
+                poses[i_a] = a.path[a.path_i + dt, :2]
+            elif a.has_roadmap:
+                poses[i_a] = a.path[a.path_i + dt]
     return poses
 
 
@@ -91,17 +100,26 @@ def make_sure_agents_are_safe(agents: Tuple[Agent]):
     poses = set()
     for a in agents:
         if not a.is_at_goal():
-            assert tuple(a.pos) not in poses, "Two agents at the same place."
-            poses.add(tuple(a.pos))
+            if a.has_gridmap:
+                assert (tuple(a.pos) not in poses
+                        ), "Two agents at the same place."
+                poses.add(tuple(a.pos))
+            elif a.has_roadmap:
+                assert a.pos not in poses, "Two agents at the same place."
+                poses.add(a.pos)
 
 
 def has_at_least_one_agent_moved(
-        agents: Tuple[Agent], agents_at_beginning: Tuple[Tuple[Any, ...], ...]
+        agents: Tuple[Agent], agents_at_beginning: Tuple[Any, ...]
 ) -> bool:
     """given the set of agents from the start, have they changed now?"""
     for i_a in range(len(agents)):
-        if any(agents[i_a].pos != agents_at_beginning[i_a]):
-            return True
+        if agents[i_a].has_gridmap:
+            if any(agents[i_a].pos != agents_at_beginning[i_a]):
+                return True
+        elif agents[i_a].has_roadmap:
+            if agents[i_a].pos != agents_at_beginning[i_a]:
+                return True
     return False
 
 
@@ -118,7 +136,7 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
     space_slice = [0] * len(agents)
 
     # how do agents look like at beginning?
-    agents_at_beginning = tuple(map(lambda a: tuple(a.pos), agents))
+    agents_at_beginning = tuple(map(lambda a: a.pos, agents))
 
     for i_a in range(len(agents)):
         # who is this agent seeing?

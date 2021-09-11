@@ -23,28 +23,36 @@ BLOCKED_NODES_TYPE = Set[NODE_TYPE]
 class Agent():
     def __init__(
         self, env: Union[np.ndarray, torch.Tensor], pos: Union[np.ndarray, int],
-        policy: PolicyType = PolicyType.RANDOM
+        policy: PolicyType = PolicyType.RANDOM, env_nx: Optional[nx.Graph] = None
     ):
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
         self.env: Union[np.ndarray, torch.Tensor] = env
-        if is_roadmap(env):
-            self.has_roadmap: bool = True
-            self.has_gridmap: bool = False
-            self.n_nodes = env.shape[0]
-            assert isinstance(pos, int), "Position must be an int"
-            self.env_nx: nx.Graph = make_graph(env)
-            # todo: make graph of roadmap positions
-            assert pos < self.n_nodes, "Position must be a node index"
-        elif is_gridmap(env):
-            self.has_roadmap = True
-            self.has_gridmap = False
+        if is_gridmap(env):
+            self.has_roadmap: bool = False
+            self.has_gridmap: bool = True
             assert isinstance(pos, np.ndarray), "Position must be numpy array"
             assert isinstance(self.env, np.ndarray), "Env must be numpy array"
-            self.env_nx = self.gridmap_to_nx(self.env)
-            self.pos: np.ndarray = pos
-            self.start: np.ndarray = pos
-            self.goal: Union[np.ndarray, None] = None
+            if env_nx is None:
+                self.env_nx: nx.Graph = self.gridmap_to_nx(self.env)
+            else:
+                self.env_nx = env_nx
+            self.pos: Union[np.ndarray, int, None] = pos
+            self.start: Union[np.ndarray, int, None] = pos
+        elif is_roadmap(env):
+            self.has_roadmap = True
+            self.has_gridmap = False
+            self.n_nodes = env.shape[0]
+            assert isinstance(pos, int), "Position must be an int"
+            if env_nx is None:
+                self.env_nx = make_graph(env)
+            else:
+                self.env_nx = env_nx
+            # todo: make graph of roadmap positions
+            assert pos < self.n_nodes, "Position must be a node index"
+            self.pos = pos
+            self.start = pos
+        self.goal: Union[np.ndarray, int, None] = None
         self.path: Union[np.ndarray, None] = None
         self.path_i: Union[int, None] = None
         self.policy: Policy = Policy.construct_by_type(policy, self)
@@ -115,20 +123,33 @@ class Agent():
         return nx.DiGraph(
             nx.subgraph_view(g, filter_node, filter_edge))
 
-    def give_a_goal(self, goal: np.ndarray) -> bool:
+    def give_a_goal(self, goal: Union[np.ndarray, int]) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
-        path = self.plan_timed_path(
-            start=(self.pos[0], self.pos[1]),
-            goal=(goal[0], goal[1])
-        )
-        if path is not None:
-            self.goal = goal
-            self.path = path
-            self.path_i = 0
-            return True
-        else:
-            return False  # there is no path to this goal
+        if self.has_gridmap:
+            assert isinstance(goal, np.ndarray)
+            path = self.plan_timed_path(
+                start=(self.pos[0], self.pos[1]),
+                goal=(goal[0], goal[1])
+            )
+            if path is not None:
+                self.goal = goal
+                self.path = path
+                self.path_i = 0
+                return True
+            else:
+                return False  # there is no path to this goal
+        elif self.has_roadmap:
+            assert isinstance(goal, int)
+            try:
+                path = nx.shortest_path(
+                    self.env_nx, self.pos, goal, weight='distance')
+                self.goal = goal
+                self.path = path
+                self.path_i = 0
+                return True
+            except nx.NetworkXNoPath:
+                return False
 
     def plan_timed_path(self,
                         start: Tuple[int, int],
@@ -258,8 +279,12 @@ class Agent():
 
     def is_at_goal(self, dt: Optional[int] = None):
         """returns true iff the agent is at its goal at delta time `dt` from now."""
-        if all(self.pos == self.goal):
-            return True
+        if self.has_gridmap:
+            if all(self.pos == self.goal):
+                return True
+        elif self.has_roadmap:
+            if self.pos == self.goal:
+                return True
         if self.path_i is None or self.path is None:
             return False
         if dt is None:
@@ -268,21 +293,29 @@ class Agent():
         if i >= len(self.path):
             return True
         else:
-            return all(self.path[i, :2] == self.goal)
+            if self.has_gridmap:
+                return all(self.path[i, :2] == self.goal)
+            elif self.has_roadmap:
+                return self.path[i] == self.goal
+            else:
+                pass
 
     def get_priority(self, other_id) -> float:
         """Based on the selected policy, this will give the priority of this
         agent."""
         return self.policy.get_priority(other_id)
 
-    def what_is_next_step(self) -> np.ndarray:
+    def what_is_next_step(self) -> Union[int, np.ndarray]:
         """Return the position where this agent would like to go next."""
         if self.is_at_goal():
             return self.pos  # stay at final pose
         else:
             assert self.path is not None, "Should have a path by now"
             assert self.path_i is not None, "Should have a path index by now"
-            return self.path[self.path_i + 1, :2]
+            if self.has_gridmap:
+                return self.path[self.path_i + 1, :2]
+            elif self.has_roadmap:
+                return int(self.path[self.path_i + 1])
 
     def remove_all_blocks_and_replan(self):
         if (  # there were blocks

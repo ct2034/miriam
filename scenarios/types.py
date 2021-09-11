@@ -22,7 +22,7 @@ def _get_type(env: POTENTIAL_ENV_TYPE) -> EnvType:
     elif(
         isinstance(env, torch.Tensor) and
         env.shape[0] != env.shape[1] and
-        env.shape[0] == 2
+        env.shape[1] == 2
     ):
         return EnvType.ROADMAP
     else:

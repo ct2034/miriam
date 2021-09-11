@@ -159,8 +159,8 @@ def will_they_collide(gridmap, starts, goals):
 
 
 def where_will_they_collide(agent_paths, starts):
-    """checks if for a given set of starts and goals the agents travelling
-    between may collide on the given gridmap."""
+    """checks if for a given set of starts and paths the agents 
+    may collide and where."""
     collisions = {}
     seen_pos = set()
     seen_edge = set()
