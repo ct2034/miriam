@@ -82,7 +82,10 @@ def initialize_new_agent(
         a = Agent(env, pos, policy)  # we have the agent
 
         # now finding the goal ...
-        env_with_agents_and_goals[pos] = 1
+        if a.has_gridmap:
+            env_with_agents_and_goals[tuple(pos)] = 1
+        elif a.has_roadmap:
+            env_with_agents_and_goals[pos] = 1
         no_obstacle_nor_agent_or_goal = np.where(
             env_with_agents_and_goals == 0)
         assert len(no_obstacle_nor_agent_or_goal[0]
@@ -198,7 +201,7 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for i_r in range(runs):
             random.seed(i_r)
-            np.random.seed(int(i_r*1000))
+            np.random.seed(i_r)
             results = sample_and_run_a_scenario(
                 size, n_agents, policy, False, i_r, IteratorType.BLOCKING3)
             evaluation_per_policy = np.append(
