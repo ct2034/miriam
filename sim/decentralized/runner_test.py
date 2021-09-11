@@ -216,9 +216,10 @@ class TestRunner(unittest.TestCase):
                                   lambda: iterator_fun(agents))
 
     def test_evaluate_policies(self):
-        n_runs = 2
-        for agents in [2, 3]:
-            data, names = runner.evaluate_policies(8, agents, n_runs, False)
+        n_runs = 3
+        for agents in [2, 4]:
+            size = 5
+            data, names = runner.evaluate_policies(size, agents, n_runs, False)
             assert len(data) == len(PolicyType)
             for p in data.keys():
                 dat = data[p]
