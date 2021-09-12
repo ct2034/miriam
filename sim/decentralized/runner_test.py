@@ -34,17 +34,17 @@ class TestRunner(unittest.TestCase):
         env_zz = np.array([[0, 0], [1, 1]])
         zero_zero = runner.initialize_new_agent(
             env_zz, [], PolicyType.RANDOM, False)
-        self.assertTrue((zero_zero.pos == [0, 0]).all() or
-                        (zero_zero.goal == [0, 0]).all())
-        self.assertTrue((zero_zero.pos == [0, 1]).all() or
-                        (zero_zero.goal == [0, 1]).all())
+        self.assertTrue((zero_zero.pos == (0, 0)) or
+                        (zero_zero.goal == (0, 0)))
+        self.assertTrue((zero_zero.pos == (0, 1)) or
+                        (zero_zero.goal == (0, 1)))
         self.assertIsInstance(zero_zero.policy, RandomPolicy)
 
         env_zo = np.array([[1, 0], [1, 1]])
         zero_one = runner.initialize_new_agent(env_zo, [],
                                                PolicyType.RANDOM, True)
-        self.assertTrue((zero_one.pos == [0, 1]).all())
-        self.assertTrue((zero_one.goal == [0, 1]).all())
+        self.assertTrue((zero_one.pos == (0, 1)))
+        self.assertTrue((zero_one.goal == (0, 1)))
         self.assertIsInstance(zero_one.policy, RandomPolicy)
 
     def test_initialize_agents(self):

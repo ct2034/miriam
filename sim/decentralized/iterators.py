@@ -2,6 +2,7 @@ from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+from definitions import C
 from sim.decentralized.agent import Agent
 
 OBSERVATION_DISTANCE = 6
@@ -19,51 +20,43 @@ class SimIterationException(Exception):
 
 def get_possible_next_agent_poses(
         agents: Tuple[Agent],
-        can_proceed: List[bool]) -> np.ndarray:
+        can_proceed: List[bool]) -> List[C]:
     """Where would the agents be if they would be allowed to move to the next
     step in their paths if they have a true in `can_proceed`."""
-    if agents[0].has_gridmap:
-        possible_next_agent_poses = np.zeros((len(agents), 2), dtype=int)
-    elif agents[0].has_roadmap:
-        possible_next_agent_poses = np.zeros((len(agents), 1), dtype=int)
+    possible_next_agent_poses: List[C] = []
     # prepare step
     for i_a in range(len(agents)):
         if can_proceed[i_a]:
-            possible_next_agent_poses[i_a, :] = agents[i_a].what_is_next_step()
+            possible_next_agent_poses.append(agents[i_a].what_is_next_step())
         else:
-            possible_next_agent_poses[i_a, :] = agents[i_a].pos
+            possible_next_agent_poses.append(agents[i_a].pos)
     return possible_next_agent_poses
 
 
-def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> np.ndarray:
+def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> List[C]:
     """Get poses at time dt from now in the future, so `dt=0` is now."""
-    if agents[0].has_gridmap:
-        poses = np.zeros((len(agents), 2), dtype=int)
-    elif agents[0].has_roadmap:
-        poses = np.zeros((len(agents), 1), dtype=int)
-    for i_a, a in enumerate(agents):
-        assert a.path is not None
-        assert a.path_i is not None
+    poses: List[C] = []
+    for a in agents:
         if a.is_at_goal(dt):
-            poses[i_a] = a.goal
+            assert a.goal is not None
+            poses.append(a.goal)
         else:
-            if a.has_gridmap:
-                poses[i_a] = a.path[a.path_i + dt, :2]
-            elif a.has_roadmap:
-                poses[i_a] = a.path[a.path_i + dt]
+            assert a.path is not None
+            assert a.path_i is not None
+            poses.append(a.path[a.path_i + dt][:-1])
     return poses
 
 
 def check_for_colissions(
         agents: Tuple[Agent],
         dt: int = 0,
-        possible_next_agent_poses: Optional[np.ndarray] = None) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
+        possible_next_agent_poses: Optional[List[C]] = None) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
     """check for two agents going to meet at one vertex or two agents using
     the same edge."""
     node_colissions = {}
     edge_colissions = {}
     if possible_next_agent_poses is not None:
-        next_poses = possible_next_agent_poses
+        next_poses: List[C] = possible_next_agent_poses
     else:
         next_poses = get_poses_in_dt(agents, 1 + dt)
     current_poses = get_poses_in_dt(agents, dt)
@@ -72,11 +65,10 @@ def check_for_colissions(
         if not agents[i_a].is_at_goal(dt):
             for i_oa in [i for i in range(len(agents)) if i > i_a]:
                 if not agents[i_oa].is_at_goal(dt):
-                    if (next_poses[i_a] ==
-                            next_poses[i_oa]).all():
+                    if next_poses[i_a] == next_poses[i_oa]:
                         node_colissions[tuple(next_poses[i_a])] = [i_a, i_oa]
-                    if ((next_poses[i_a] == current_poses[i_oa]).all() and
-                            (next_poses[i_oa] == current_poses[i_a]).all()):
+                    if ((next_poses[i_a] == current_poses[i_oa]) and
+                            (next_poses[i_oa] == current_poses[i_a])):
                         edge = [tuple(current_poses[i_a]),
                                 tuple(next_poses[i_a])]
                         edge_colissions[tuple(edge)] = [i_a, i_oa]
@@ -115,7 +107,7 @@ def has_at_least_one_agent_moved(
     """given the set of agents from the start, have they changed now?"""
     for i_a in range(len(agents)):
         if agents[i_a].has_gridmap:
-            if any(agents[i_a].pos != agents_at_beginning[i_a]):
+            if agents[i_a].pos != agents_at_beginning[i_a]:
                 return True
         elif agents[i_a].has_roadmap:
             if agents[i_a].pos != agents_at_beginning[i_a]:
@@ -142,7 +134,7 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
         # who is this agent seeing?
         for i_oa in [i for i in range(len(agents)) if i != i_a]:
             if np.linalg.norm(
-                agents[i_a].pos - agents[i_oa].pos
+                np.array(agents[i_a].pos) - np.array(agents[i_oa].pos)
             ) < OBSERVATION_DISTANCE:
                 agents[i_a].policy.register_observation(
                     agents[i_oa].id,
@@ -208,7 +200,7 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
 
     for i_a in range(len(agents)):
         if can_proceed[i_a] and not agents[i_a].is_at_goal():
-            agents[i_a].make_next_step(possible_next_agent_poses[i_a, :])
+            agents[i_a].make_next_step(possible_next_agent_poses[i_a])
             space_slice[i_a] = 1
         if not agents[i_a].is_at_goal():
             time_slice[i_a] = 1
@@ -221,7 +213,7 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
 
 
 def iterate_blocking(agents: Tuple[Agent], lookahead: int
-                     ) -> Tuple[List[int], List[int]]:
+                     ) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
     # how do agents look like at beginning?
@@ -240,7 +232,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
             # who is this agent seeing?
             for i_oa in [i for i in range(len(agents)) if i != i_a]:
                 if np.linalg.norm(
-                    agents[i_a].pos - agents[i_oa].pos
+                    np.array(agents[i_a].pos) - np.array(agents[i_oa].pos)
                 ) < OBSERVATION_DISTANCE:
                     agents[i_a].policy.register_observation(
                         agents[i_oa].id,
@@ -309,15 +301,22 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
         raise SimIterationException("Deadlock from unresolvable collision")
 
     time_slice: List[int] = [0] * len(agents)
-    space_slice: List[int] = [0] * len(agents)
+    space_slice: List[float] = [0.] * len(agents)
     possible_next_poses = get_poses_in_dt(agents, 1)
-    for i_a in range(len(agents)):
-        if can_proceed[i_a] and not agents[i_a].is_at_goal():
-            agents[i_a].make_next_step(possible_next_poses[i_a])
-            space_slice[i_a] = 1
-        if not agents[i_a].is_at_goal():
+    for i_a, a in enumerate(agents):
+        if can_proceed[i_a] and not a.is_at_goal():
+            if a.has_gridmap:
+                dx = 1.
+            elif a.has_roadmap:
+                dx = np.linalg.norm(
+                    np.array(a.pos) -
+                    np.array(possible_next_poses[i_a])
+                )
+            a.make_next_step(possible_next_poses[i_a])
+            space_slice[i_a] = dx
+        if not a.is_at_goal():
             time_slice[i_a] = 1
-        agents[i_a].remove_all_blocks_and_replan()
+        a.remove_all_blocks_and_replan()
 
     make_sure_agents_are_safe(agents)
     if not has_at_least_one_agent_moved(

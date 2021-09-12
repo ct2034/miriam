@@ -52,7 +52,7 @@ class Policy(object):
         """we have seen another agent"""
         pass
 
-    def get_priority(self, id) -> float:
+    def get_priority(self, id: int) -> float:
         raise NotImplementedError()
 
 
@@ -72,7 +72,7 @@ class ClosestPolicy(Policy):
         super().__init__(agent)
 
     def get_priority(self, _) -> float:
-        return 1. / np.linalg.norm(self.a.goal - self.a.pos)
+        return 1. / np.linalg.norm(np.array(self.a.goal) - np.array(self.a.pos))
 
 
 class FillPolicy(Policy):
@@ -122,7 +122,7 @@ class LearnedPolicy(Policy):
         path_until_pos = []
         for t in range(n_t):
             i_t = min(max(0, path_i - 1 + t), len(path) - 1)
-            path_until_pos.append(path[i_t])
+            path_until_pos.append(path[i_t, :])
         return path_until_pos
 
     def step(self):
@@ -136,11 +136,12 @@ class LearnedPolicy(Policy):
             self.paths[id] = np.array([pos] * self.ts)
             self.path_is[id] = 0
         else:
-            self.paths[id] = path[:, :2]
+            path = np.array(path)
+            self.paths[id] = path[:,:-1]
             self.path_is[id] = path_i
         self.poss[id] = pos
 
-    def get_priority(self, id_coll) -> float:
+    def get_priority(self, id_coll: int) -> float:
         """[summary]
 
         :param id: which agent are we meeting
@@ -150,9 +151,10 @@ class LearnedPolicy(Policy):
             f"get_priority, self_agent: {self.a}, other_id: {id_coll}")
         N_T = 3
         i_oa = None
-        paths_full = [self.a.path[:, :2]]  # self always first
+        path = np.array(self.a.path)
+        paths_full = [path[:, :-1]]  # self always first
         paths_until_col = [self._path_until_coll(
-            self.a.path[:, :2], self.a.path_i, N_T)]  # self always first
+            path[:, :-1], self.a.path_i, N_T)]  # self always first
         ids = sorted(self.paths.keys())
         if id_coll not in ids:
             logger.warn(f"{id_coll} not in {ids}")
@@ -195,7 +197,7 @@ class InverseLearnedPolicy(Policy):
     def register_observation(self, id, path, pos, path_i) -> None:
         self.po.register_observation(id, path, pos, path_i)
 
-    def get_priority(self, id_coll) -> float:
+    def get_priority(self, id_coll: int) -> float:
         prio = 1 - self.po.get_priority(id_coll)
         assert prio >= 0
         assert prio <= 1

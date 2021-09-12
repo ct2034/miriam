@@ -70,9 +70,9 @@ class TestAgent(unittest.TestCase):
         self.assertTrue(a.give_a_goal(np.array([2, 2])))
         p = a.path
         self.assertEqual(len(p), 7)
-        self.assertTrue((p[1] == [0, 1, 1]).all())
-        self.assertTrue((p[3] == [1, 0, 3]).all())
-        self.assertTrue((p[5] == [2, 1, 5]).all())
+        self.assertTrue(p[1] == (0, 1, 1))
+        self.assertTrue(p[3] == (1, 0, 3))
+        self.assertTrue(p[5] == (2, 1, 5))
 
         # if no path can be found
         env = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 0]])
@@ -83,7 +83,7 @@ class TestAgent(unittest.TestCase):
         env = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
         edge_to_block = ((0, 0), (0, 1), 0)
         a = Agent(env, np.array([0, 0]), PolicyType.RANDOM)
-        self.assertTrue(a.give_a_goal(np.array([0, 2])))
+        self.assertTrue(a.give_a_goal((0, 2)))
         self.assertEqual(len(a.path), 3)  # quick path
 
         # trying to block a non existant edge
@@ -191,7 +191,7 @@ class TestAgent(unittest.TestCase):
 
         # can we move to the wrong next step
         self.assertRaises(
-            AssertionError, lambda: a.make_next_step(np.array([99, 99])))
+            AssertionError, lambda: a.make_next_step((99, 99)))
         self.assertTrue(all(a.pos == np.array([0, 1])))
 
         # move to correct next step

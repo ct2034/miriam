@@ -22,10 +22,11 @@ class TestIterators(unittest.TestCase):
         possible_next_agent_poses = get_possible_next_agent_poses(
             agents, [True] * 3
         )
-        self.assertEqual(possible_next_agent_poses.shape, (3, 2))
-        self.assertTrue(all(possible_next_agent_poses[0] == np.array([0, 1])))
-        self.assertTrue(all(possible_next_agent_poses[1] == np.array([0, 0])))
-        self.assertTrue(all(possible_next_agent_poses[2] == np.array([0, 0])))
+        self.assertEqual(len(possible_next_agent_poses), 3)
+        self.assertEqual(len(possible_next_agent_poses[0]), 2)
+        self.assertTrue(possible_next_agent_poses[0] == (0, 1))
+        self.assertTrue(possible_next_agent_poses[1] == (0, 0))
+        self.assertTrue(possible_next_agent_poses[2] == (0, 0))
 
         # getting next steps when none are allowed
         other_possible_next_agent_poses = get_possible_next_agent_poses(

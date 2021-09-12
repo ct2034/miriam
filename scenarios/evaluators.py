@@ -186,7 +186,7 @@ def n_nodes(env):
 
 def _gridmap_to_nx(env):
     a = Agent(env, np.array([0, 0]))
-    return a.gridmap_to_nx(env, None)
+    return a.env_to_nx(env, None)
 
 
 def n_edges(env):
