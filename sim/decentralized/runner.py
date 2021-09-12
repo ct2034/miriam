@@ -6,6 +6,7 @@ import random
 from typing import *
 
 import numpy as np
+from definitions import BLOCKED_NODES_TYPE
 from sim.decentralized import iterators
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
@@ -124,11 +125,13 @@ def is_environment_well_formed(agents: Tuple[Agent]) -> bool:
     for a in agents:
         if isinstance(a.env, np.ndarray):
             a.env = a.env.copy()
-        blocks: List[Tuple[Any, ...]] = []
+        t_max = np.max(np.array(a.env_nx.nodes)[:, -1])
+        blocks: BLOCKED_NODES_TYPE = set()
         for other_a in [ia for ia in agents if ia != a]:
-            blocks.append(tuple(other_a.pos))
             assert other_a.goal is not None, "Other agent should have a goal"
-            blocks.append(tuple(other_a.goal))
+            for t in range(t_max):
+                blocks.add(other_a.pos+(t,))
+                blocks.add(other_a.goal+(t,))
         if not a.is_there_path_with_node_blocks(blocks):
             return False
     return True

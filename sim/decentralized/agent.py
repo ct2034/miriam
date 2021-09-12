@@ -129,6 +129,7 @@ class Agent(Generic[C, N]):
                 timed_graph, {e: move_cost(e) for e in timed_graph.edges()}, COST)
         elif self.has_roadmap:
             HIGH_COST = 99
+
             def move_cost(e):
                 a, b = e
                 if a[:-1] != b[:-1]:  # moving
@@ -189,7 +190,7 @@ class Agent(Generic[C, N]):
         else:
             blocked_nodes = _blocked_nodes
 
-        g = self.env_nx
+        g = self.env_nx.copy()
         t_max = np.max(np.array(g.nodes())[:, -1])
 
         logger.debug(f"start: {start}")
@@ -199,8 +200,8 @@ class Agent(Generic[C, N]):
 
         goal_waiting_edges = [
             (goal + (i,), goal + (i+1,)) for i in range(t_max-1)]
-
-        nx.set_edge_attributes(g, {e: 0. for e in goal_waiting_edges}, COST)
+        for e in goal_waiting_edges:
+            g.edges[e][COST] = 0.
 
         def filter_node(n):
             return n not in blocked_nodes
@@ -221,9 +222,10 @@ class Agent(Generic[C, N]):
                 return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
         elif self.has_roadmap:
             def dist(a, b):
-                x1, y1 = self.env[a[0]]
-                x2, y2 = self.env[b[0]]
-                return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+                # geometric distance
+                return torch.linalg.vector_norm(
+                    self.env[a[:-1]] - self.env[b[:-1]]
+                )
 
         try:
             p = list(nx.astar_path(
@@ -287,7 +289,10 @@ class Agent(Generic[C, N]):
         """this will make the agent block this node. It will return `True`
         if there still is a path to the current goal. `False` otherwise."""
         assert self.env_nx is not None, "Should have a env_nx"
-        assert len(n) == 3
+        if self.has_gridmap:
+            assert len(n) == 3
+        elif self.has_roadmap:
+            assert len(n) == 2
         tmp_blocked_nodes = self.blocked_nodes.union({n})
         assert self.goal is not None
         path = self.plan_timed_path(
@@ -330,7 +335,7 @@ class Agent(Generic[C, N]):
         else:
             assert self.path is not None, "Should have a path by now"
             assert self.path_i is not None, "Should have a path index by now"
-            return self.path[self.path_i + 1][:-1]
+            return self.path[self.path_i + 1][:-1]  # type: ignore
 
     def remove_all_blocks_and_replan(self):
         if (  # there were blocks
@@ -340,7 +345,7 @@ class Agent(Generic[C, N]):
             # resetting blocks now
             self.blocked_nodes = set()
             self.blocked_edges = set()
-            self.path = self.plan_timed_path(  # TODO: only replan if we actually cleared lists
+            self.path = self.plan_timed_path(
                 start=self.goal,
                 goal=self.goal
             )
