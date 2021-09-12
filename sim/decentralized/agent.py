@@ -15,6 +15,7 @@ from tools import hasher
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+COST = "cost"
 
 
 class Agent(Generic[C, N]):
@@ -115,31 +116,41 @@ class Agent(Generic[C, N]):
                     n + (t_to,)
                 )
         if self.has_gridmap:
-            def cost(e):
+            def move_cost(e):
                 if (
                     e[0][:-1] == e[1][:-1]
                 ):
                     # waiting generally is a little cheaper
                     return 1. - 1E-9
                 else:
-                    # normal cost
+                    # unit cost
                     return 1
+            nx.set_edge_attributes(
+                timed_graph, {e: move_cost(e) for e in timed_graph.edges()}, COST)
         elif self.has_roadmap:
-            def cost(e):
+            HIGH_COST = 99
+            def move_cost(e):
                 a, b = e
-                if (
-                    a[:-1] == b[:-1]
-                ):
-                    # waiting generally cheap
-                    return 1E-8  # TODO: is this a problem?
+                if a[:-1] != b[:-1]:  # moving
+                    # geometric distance
+                    return torch.linalg.vector_norm(
+                        self.env[a[:-1]] - self.env[b[:-1]]
+                    )
                 else:
-                    # normal distance
-                    x1, y1 = self.env[a[0]]
-                    x2, y2 = self.env[b[0]]
-                    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
-
-        nx.set_edge_attributes(
-            timed_graph, {e: cost(e) for e in timed_graph.edges()}, "cost")
+                    return HIGH_COST
+            nx.set_edge_attributes(
+                timed_graph, {e: move_cost(e) for e in timed_graph.edges()}, COST)
+            edge_costs = list(nx.get_edge_attributes(
+                timed_graph, COST).values())
+            min_edge_cost = torch.min(torch.Tensor(edge_costs))
+            for e in timed_graph.edges:
+                a, b = e
+                if a[:-1] == b[:-1]:  # waiting
+                    timed_graph.edges[e][COST] = min_edge_cost*.9
+            edge_costs = list(nx.get_edge_attributes(
+                timed_graph, COST).values())
+            max_edge_cost = torch.max(torch.Tensor(edge_costs))
+            assert max_edge_cost < HIGH_COST
         return timed_graph
 
     def give_a_goal(self, goal: C) -> bool:
@@ -189,7 +200,7 @@ class Agent(Generic[C, N]):
         goal_waiting_edges = [
             (goal + (i,), goal + (i+1,)) for i in range(t_max-1)]
 
-        nx.set_edge_attributes(g, {e: 0. for e in goal_waiting_edges}, "cost")
+        nx.set_edge_attributes(g, {e: 0. for e in goal_waiting_edges}, COST)
 
         def filter_node(n):
             return n not in blocked_nodes
@@ -220,7 +231,7 @@ class Agent(Generic[C, N]):
                 start + (0,),
                 goal + (t_max,),
                 heuristic=dist,
-                weight="cost"))
+                weight=COST))
         except (nx.NetworkXNoPath, nx.NodeNotFound) as e:
             logger.warning(e)
             return None

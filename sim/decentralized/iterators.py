@@ -115,7 +115,7 @@ def has_at_least_one_agent_moved(
     return False
 
 
-def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
+def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
     # all that are not at their goals can generally procede. This is therefore
@@ -125,7 +125,7 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
     there_are_collisions: bool = True
 
     time_slice = [0] * len(agents)
-    space_slice = [0] * len(agents)
+    space_slice = [0.] * len(agents)
 
     # how do agents look like at beginning?
     agents_at_beginning = tuple(map(lambda a: a.pos, agents))
@@ -198,11 +198,18 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[int]]:
             # there is not one agent that can move
             raise SimIterationException("Deadlock by node collisions")
 
-    for i_a in range(len(agents)):
-        if can_proceed[i_a] and not agents[i_a].is_at_goal():
-            agents[i_a].make_next_step(possible_next_agent_poses[i_a])
-            space_slice[i_a] = 1
-        if not agents[i_a].is_at_goal():
+    for i_a, a in enumerate(agents):
+        if can_proceed[i_a] and not a.is_at_goal():
+            if a.has_gridmap:
+                dx = 1.
+            elif a.has_roadmap:
+                dx = np.linalg.norm(
+                    np.array(a.pos) -
+                    np.array(possible_next_agent_poses[i_a])
+                )
+            a.make_next_step(possible_next_agent_poses[i_a])
+            space_slice[i_a] = dx
+        if not a.is_at_goal():
             time_slice[i_a] = 1
 
     make_sure_agents_are_safe(agents)
