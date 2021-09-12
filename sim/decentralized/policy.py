@@ -25,6 +25,8 @@ class PolicyType(Enum):
     FILL = auto()
     LEARNED = auto()
     INV_LEARNED = auto()
+    ONE_THEN_RANDOM = auto()
+    ZERO_THEN_RANDOM = auto()
 
 
 class Policy(object):
@@ -40,6 +42,10 @@ class Policy(object):
             return LearnedPolicy(agent)
         elif type == PolicyType.INV_LEARNED:
             return InverseLearnedPolicy(agent)
+        elif type == PolicyType.ONE_THEN_RANDOM:
+            return FirstThenRandomPolicy(agent, 1.)
+        elif type == PolicyType.ZERO_THEN_RANDOM:
+            return FirstThenRandomPolicy(agent, 0.)
 
     def __init__(self, agent) -> None:
         super().__init__()
@@ -137,7 +143,7 @@ class LearnedPolicy(Policy):
             self.path_is[id] = 0
         else:
             path = np.array(path)
-            self.paths[id] = path[:,:-1]
+            self.paths[id] = path[:, :-1]
             self.path_is[id] = path_i
         self.poss[id] = pos
 
@@ -202,3 +208,16 @@ class InverseLearnedPolicy(Policy):
         assert prio >= 0
         assert prio <= 1
         return prio
+
+
+class FirstThenRandomPolicy(Policy):
+    def __init__(self, agent, first_return_value) -> None:
+        super().__init__(agent)
+        self.first_call = True
+        self.first_return_value = first_return_value
+
+    def get_priority(self, _) -> float:
+        if self.first_call:
+            self.first_call = False
+            return self.first_return_value
+        return random.random()
