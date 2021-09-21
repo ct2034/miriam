@@ -190,7 +190,7 @@ class Agent(Generic[C, N]):
         else:
             blocked_nodes = _blocked_nodes
 
-        g = self.env_nx.copy()
+        g = nx.subgraph_view(self.env_nx)
         t_max = np.max(np.array(g.nodes())[:, -1])
 
         logger.debug(f"start: {start}")
