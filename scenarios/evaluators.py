@@ -13,10 +13,10 @@ from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 sum_of_costs_from_info)
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import PolicyType
-from sim.decentralized.runner import is_environment_well_formed
+from sim.decentralized.runner import is_environment_well_formed, to_agent_objects
 
 from scenarios.solvers import (SCHEDULE, cached_decentralized, cached_ecbs,
-                               cached_icts, indep, to_agent_objects)
+                               cached_icts, indep)
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)

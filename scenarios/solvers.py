@@ -95,15 +95,6 @@ def icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
 # decentralized ###############################################################
 
 
-def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM):
-    n_agents = starts.shape[0]
-    agents = []
-    for i_a in range(n_agents):
-        a = Agent(env, starts[i_a], policy=policy)
-        if not a.give_a_goal(goals[i_a]):
-            return INVALID
-        agents.append(a)
-    return agents
 
 
 def indep(env, starts, goals):

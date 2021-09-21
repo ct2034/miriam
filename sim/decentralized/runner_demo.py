@@ -2,15 +2,15 @@
 import logging
 
 from definitions import INVALID
+from matplotlib import pyplot as plt
 from scenarios.evaluators import (cost_ecbs, cost_independent,
-                                  cost_sim_decentralized_learned,
-                                  to_agent_objects)
+                                  cost_sim_decentralized_learned)
 from scenarios.generators import tracing_pathes_in_the_dark
 from scenarios.solvers import ecbs
 from scenarios.visualization import plot_with_paths
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
-from sim.decentralized.runner import *
+from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 if __name__ == "__main__":  # pragma: no cover
     logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)

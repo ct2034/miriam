@@ -6,8 +6,7 @@ import random
 from typing import *
 
 import numpy as np
-from definitions import BLOCKED_NODES_TYPE
-from sim.decentralized import iterators
+from definitions import BLOCKED_NODES_TYPE, INVALID
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
@@ -98,6 +97,17 @@ def initialize_new_agent(
         if a.give_a_goal(g):  # success
             return a
     return None
+
+
+def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM):
+    n_agents = starts.shape[0]
+    agents = []
+    for i_a in range(n_agents):
+        a = Agent(env, starts[i_a], policy=policy)
+        if not a.give_a_goal(goals[i_a]):
+            return INVALID
+        agents.append(a)
+    return agents
 
 
 def initialize_agents(

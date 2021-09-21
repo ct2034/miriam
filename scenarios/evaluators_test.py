@@ -5,10 +5,10 @@ import numpy as np
 import pytest
 from definitions import INVALID
 from sim.decentralized.policy import LearnedPolicy, PolicyType, RandomPolicy
+from sim.decentralized.runner import to_agent_objects
 
 import scenarios.evaluators
 from scenarios import test_helper
-from scenarios.solvers import to_agent_objects
 
 TEST_TIMEOUT = 5  # to be used for ecbs and icts calls
 
