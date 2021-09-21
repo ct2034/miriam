@@ -83,6 +83,7 @@ def initialize_new_agent(
 
         # now finding the goal ...
         if a.has_gridmap:
+            assert isinstance(pos, Iterable)
             env_with_agents_and_goals[tuple(pos)] = 1
         elif a.has_roadmap:
             env_with_agents_and_goals[pos] = 1
@@ -171,7 +172,9 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
     return run_a_scenario(env, agents, plot, iterator)
 
 
-def run_a_scenario(env, agents, plot, iterator: IteratorType = IteratorType.WAITING
+def run_a_scenario(env, agents, plot,
+                   iterator: IteratorType = IteratorType.WAITING,
+                   pause_on: Optional[Exception] = None
                    ) -> Tuple[float, float, float, float, int]:
     n_agents = len(agents)
     # evaluation parameters
