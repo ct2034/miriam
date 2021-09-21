@@ -3,8 +3,11 @@ from typing import Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
+import png
 import torch
-from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, optimize_poses,
+from matplotlib import pyplot as plt
+from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
+                                                    optimize_poses, read_map,
                                                     sample_points)
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
@@ -81,7 +84,8 @@ def optimize_policy(g: nx.Graph, pos, n_agents, rng):
         (average_time, max_time, average_length,  max_length, successful
          ) = r
         print(f" average_time: {average_time}, max_time: {max_time},\n" +
-              f" average_length: {average_length}, max_length: {max_length},\n" +
+              f" average_length: {average_length}," +
+              f" max_length: {max_length},\n" +
               f" successful: {successful}")
 
 
@@ -89,10 +93,15 @@ def run_optimization(
         n_nodes: int = 64,
         n_runs: int = 16,
         lr_pos: float = 1e-4,
-        n_agents: int = 4):
-    pos = sample_points(n_nodes)
+        n_agents: int = 4,
+        map_fname: str = "roadmaps/odrm_eval/maps/z.png"):
+    map_img = read_map(map_fname)
+    pos = sample_points(n_nodes, map_img)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g = make_graph(pos)
+
+    draw_graph(g, pos)
+    plt.show()
 
     pb = ProgressBar("Optimization", n_runs)
     for i_r in range(n_runs):
@@ -106,6 +115,9 @@ def run_optimization(
         pb.progress()
 
     pb.end()
+
+    draw_graph(g, pos)
+    plt.show()
 
 
 if __name__ == "__main__":

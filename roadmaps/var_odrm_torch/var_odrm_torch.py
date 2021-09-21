@@ -1,9 +1,12 @@
 import random
+from functools import lru_cache
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+import png
 import torch
+from bresenham import bresenham
 from networkx.exception import NetworkXNoPath, NodeNotFound
 from pyflann import FLANN
 from scenarios.visualization import get_colors
@@ -14,15 +17,60 @@ dtype = torch.float
 device = torch.device("cpu")
 
 
-def sample_points(n):
-    points = np.random.random((n, 2))
+def read_map(fname: str):
+    r = png.Reader(filename=fname)
+    width, height, rows, info = r.read()
+    assert width == height
+    data = []
+    for i, row in enumerate(rows):
+        data.append(tuple(row[::4]))
+    return tuple(data)
+
+
+@lru_cache
+def is_coord_free(map_img, point):
+    size = len(map_img)
+    return map_img[
+        int(point[0] * size)
+    ][
+        int(point[1] * size)
+    ] >= 255
+
+
+@lru_cache
+def is_pixel_free(map_img, point):
+    return map_img[
+        int(point[0])
+    ][
+        int(point[1])
+    ] >= 255
+
+
+def check_edge(pos, map_img, a, b):
+    size = len(map_img)
+    line = bresenham(
+        int(pos[a][0]*size),
+        int(pos[a][1]*size),
+        int(pos[b][0]*size),
+        int(pos[b][1]*size)
+    )
+    # print(list(line))
+    return all([is_pixel_free(map_img, tuple(x)) for x in line])
+
+
+def sample_points(n, map_img):
+    points = np.empty(shape=(0, 2))
+    while points.shape[0] < n:
+        point = np.random.random([2])
+        if is_coord_free(map_img, tuple(point)):
+            points = np.append(points, [point.T], axis=0)
     return torch.tensor(points, device=device,
                         dtype=dtype, requires_grad=True)
 
 
-def make_graph(pos):
+def make_graph(pos, map_img):
     """Convert array of node positions into graph by Delaunay Triangulation."""
-    N = pos.shape[0]
+    n_nodes = pos.shape[0]
     g = nx.Graph()
     pos_np = pos.detach().numpy()
     # to discourage too many edges parallel to walls,
@@ -38,13 +86,14 @@ def make_graph(pos):
     pos_np = np.append(pos_np, fake_nodes, axis=0)
     tri = Delaunay(pos_np)
     (indptr, indices) = tri.vertex_neighbor_vertices
-    for i in range(N):
+    for i in range(n_nodes):
         neighbors = indices[indptr[i]:indptr[i+1]]
         for n in neighbors:
-            if n >= N:
+            if n >= n_nodes:
                 continue  # ignoring fake nodes form above
-            g.add_edge(i, n,
-                       distance=np.linalg.norm(pos_np[i] - pos_np[n]))
+            if check_edge(pos, map_img, i, n):
+                g.add_edge(i, n,
+                           distance=np.linalg.norm(pos_np[i] - pos_np[n]))
     return g
 
 
@@ -151,14 +200,14 @@ def get_paths_len(pos, paths):
     return torch.sum(all_lens)
 
 
-def optimize_poses(g, pos, optimizer):
+def optimize_poses(g, pos, map_img, optimizer):
     test_paths = make_paths(g, pos, 20, 0)
     test_length = get_paths_len(pos, test_paths)
     training_paths = make_paths(g, pos, 10)
     training_length = get_paths_len(pos, training_paths)
     backward = training_length.backward()
     optimizer.step()
-    g = make_graph(pos)
+    g = make_graph(pos, map_img)
     optimizer.zero_grad()
     return g, pos, test_length, training_length
 
@@ -168,11 +217,12 @@ if __name__ == "__main__":
     epochs = 300
     learning_rate = 1e-4
     stats_every = int(epochs / 50)
+    map_fname: str = "../odrm_eval/maps/z.png"
 
     random.seed(0)
-
-    pos = sample_points(n)
-    g = make_graph(pos)
+    map_img = read_map(map_fname)
+    pos = sample_points(n, map_img)
+    g = make_graph(pos, map_img)
     test_paths = make_paths(g, pos, 20, 0)
 
     optimizer = torch.optim.Adam([pos], lr=learning_rate)
@@ -183,7 +233,7 @@ if __name__ == "__main__":
     pb = ProgressBar("Training", epochs)
     for i_e in range(epochs):
         g, pos, test_length, training_length = optimize_poses(
-            g, pos, optimizer)
+            g, pos, map_img, optimizer)
         if i_e % stats_every == stats_every-1:
             print(f"test_length: {test_length}")
             print(f"training_length: {training_length}")
