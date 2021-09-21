@@ -5,7 +5,7 @@ from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
-from sim.decentralized.runner import run_a_scenario
+from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 from scenarios import storage
 
@@ -93,8 +93,6 @@ def icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
         return info
 
 # decentralized ###############################################################
-
-
 
 
 def indep(env, starts, goals):
