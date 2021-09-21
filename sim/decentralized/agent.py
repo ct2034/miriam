@@ -27,7 +27,7 @@ class Agent(Generic[C, N]):
         `policy` for resolution of errors."""
         self.env: POTENTIAL_ENV_TYPE = env
         if isinstance(pos, np.ndarray):
-            pos = tuple(pos)
+            pos = tuple(pos)  # type: ignore  # dirty fix for some tests
         if is_gridmap(env):
             self.has_roadmap: bool = False
             self.has_gridmap: bool = True
@@ -158,7 +158,7 @@ class Agent(Generic[C, N]):
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
         if isinstance(goal, np.ndarray):
-            goal = tuple(goal)
+            goal = tuple(goal)  # type: ignore  # dirty fix for some tests
         if self.has_gridmap:
             assert len(goal) == 2  # (x, y)
         elif self.has_roadmap:
