@@ -240,8 +240,8 @@ clip = ImageSequenceClip(images, fps=fps)
 clip.write_gif(filename, fps=fps)
 
 
-with open('embeddings.gif', 'rb') as f:
-    display(Image(data=f.read(), format='png'))
+# with open('embeddings.gif', 'rb') as f:
+#     display(Image(data=f.read(), format='png'))
 
 # # Improving the model
 # - Cross-Validation

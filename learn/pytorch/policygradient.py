@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 import argparse
-import gym
-import numpy as np
 from itertools import count
 
+import gym
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.distributions import Categorical
-
 
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
 parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
@@ -96,11 +95,13 @@ def main():
         running_reward = 0.05 * ep_reward + (1 - 0.05) * running_reward
         finish_episode()
         if i_episode % args.log_interval == 0:
-            print('Episode {}\tLast reward: {:.2f}\tAverage reward: {:.2f}'.format(
-                  i_episode, ep_reward, running_reward))
+            print('Episode {}\tLast reward: '
+                  '{:.2f}\tAverage reward: {:.2f}'.format(
+                      i_episode, ep_reward, running_reward))
         if running_reward > env.spec.reward_threshold:
             print("Solved! Running reward is now {} and "
-                  "the last episode runs to {} time steps!".format(running_reward, t))
+                  "the last episode runs to {} time steps"
+                  "!".format(running_reward, t))
             break
 
 
