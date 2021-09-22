@@ -136,13 +136,11 @@ def is_environment_well_formed(agents: Tuple[Agent]) -> bool:
     for a in agents:
         if isinstance(a.env, np.ndarray):
             a.env = a.env.copy()
-        t_max = np.max(np.array(a.env_nx.nodes)[:, -1])
         blocks: BLOCKED_NODES_TYPE = set()
         for other_a in [ia for ia in agents if ia != a]:
             assert other_a.goal is not None, "Other agent should have a goal"
-            for t in range(t_max):
-                blocks.add(other_a.pos+(t,))
-                blocks.add(other_a.goal+(t,))
+            blocks.add(other_a.pos)
+            blocks.add(other_a.goal)
         if not a.is_there_path_with_node_blocks(blocks):
             return False
     return True
@@ -190,8 +188,11 @@ def run_a_scenario(env, agents, plot,
             time_progress += time_slice
             space_progress += space_slice
         successful = 1
-    except SimIterationException as e:  # pragma: no cover
-        logger.warning(e)
+    except Exception as e:  # pragma: no cover
+        if isinstance(e, SimIterationException):
+            logger.warning(e)
+        if pause_on is not None and isinstance(e, pause_on):
+            return e
 
     return check_time_evaluation(
         time_progress,
