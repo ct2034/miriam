@@ -6,17 +6,21 @@ from typing import Optional
 
 import numpy as np
 from importtf import keras, tf
-from numpy.core.fromnumeric import shape
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
 from planner.policylearn.train_model import (CLASSIFICATION_STR, CONVRNN_STR,
                                              fix_data_convrnn)
 from tensorflow.keras.models import load_model
-from tensorflow.python.ops.variables import model_variables
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 logger = logging.getLogger(__name__)
+
+
+class PolicyCalledException(Exception):
+    def __init__(self, policy) -> None:
+        super().__init__()
+        print("PolicyCalledException")
 
 
 class PolicyType(Enum):
@@ -24,6 +28,7 @@ class PolicyType(Enum):
     CLOSEST = auto()
     FILL = auto()
     LEARNED = auto()
+    LEARNED_RAISING = auto()
     INV_LEARNED = auto()
     ONE_THEN_RANDOM = auto()
     ZERO_THEN_RANDOM = auto()
@@ -40,6 +45,8 @@ class Policy(object):
             return FillPolicy(agent)
         elif type == PolicyType.LEARNED:
             return LearnedPolicy(agent)
+        elif type == PolicyType.LEARNED_RAISING:
+            return LearnedPolicyRaising(agent)
         elif type == PolicyType.INV_LEARNED:
             return InverseLearnedPolicy(agent)
         elif type == PolicyType.ONE_THEN_RANDOM:
@@ -190,6 +197,15 @@ class LearnedPolicy(Policy):
         # from planner.policylearn.generate_data_demo import plot_fovs
         # plot_fovs(x, y)
         return y
+
+
+class LearnedPolicyRaising(LearnedPolicy):
+    def __init__(self, agent) -> None:
+        super().__init__(agent)
+
+    def get_priority(self, id_coll: int) -> float:
+        raise PolicyCalledException(self)
+        return
 
 
 class InverseLearnedPolicy(Policy):
