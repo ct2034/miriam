@@ -190,7 +190,7 @@ class Agent(Generic[C, N]):
         else:
             blocked_nodes = _blocked_nodes
 
-        g = nx.subgraph_view(self.env_nx)
+        g: nx.Graph = nx.subgraph_view(self.env_nx)
         t_max = np.max(np.array(g.nodes())[:, -1])
 
         logger.debug(f"start: {start}")
@@ -198,10 +198,15 @@ class Agent(Generic[C, N]):
         logger.debug(f"blocked_nodes: {blocked_nodes}")
         logger.debug(f"blocked_edges: {blocked_edges}")
 
+        any_goal_edge_existed = False
         goal_waiting_edges = [
             (goal + (i,), goal + (i+1,)) for i in range(t_max-1)]
         for e in goal_waiting_edges:
-            g.edges[e][COST] = 0.
+            if g.has_edge(e[0], e[1]):
+                g.edges[e][COST] = 0.
+                any_goal_edge_existed = True
+        if not any_goal_edge_existed:
+            return None
 
         def filter_node(n):
             return n not in blocked_nodes

@@ -168,13 +168,15 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
     if agents is None:
         logger.warning("Could not initialize agents")
         return (0, 0, 0, 0, 0)
-    return run_a_scenario(env, agents, plot, iterator)
+    res = run_a_scenario(env, agents, plot, iterator)
+    assert not isinstance(res, PolicyCalledException)
+    return res
 
 
 def run_a_scenario(env, agents, plot,
                    iterator: IteratorType = IteratorType.WAITING,
                    pause_on: Optional[Exception] = None
-                   ) -> Any[SCENARIO_RESULT, PolicyCalledException]:
+                   ) -> Union[SCENARIO_RESULT, PolicyCalledException]:
     n_agents = len(agents)
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
