@@ -279,8 +279,10 @@ class TestEvaluators(unittest.TestCase):
         # one agent will have to wait.
         self.assertAlmostEqual(
             4.5, scenarios.evaluators.cost_sim_decentralized_random(
-                test_helper.env, test_helper.starts_collision,
-                test_helper.goals_collision)
+                test_helper.env,
+                test_helper.starts_collision,
+                test_helper.goals_collision,
+                skip_cache=True)
         )
 
     def test_cost_sim_decentralized_random_collision_open(self):
@@ -288,16 +290,20 @@ class TestEvaluators(unittest.TestCase):
         # should find ways to go around each other
         self.assertAlmostEqual(
             4.0, scenarios.evaluators.cost_sim_decentralized_random(
-                np.zeros((3, 3)), test_helper.starts_cross,
-                test_helper.goals_cross)
+                np.zeros((3, 3)),
+                test_helper.starts_cross,
+                test_helper.goals_cross,
+                skip_cache=True)
         )
 
     def test_cost_sim_decentralized_random_no_collision(self):
         # agents that don't collide
         self.assertAlmostEqual(
             2, scenarios.evaluators.cost_sim_decentralized_random(
-                test_helper.env, test_helper.starts_no_collision,
-                test_helper.goals_no_collision)
+                test_helper.env,
+                test_helper.starts_no_collision,
+                test_helper.goals_no_collision,
+                skip_cache=True)
         )
 
     def test_cost_sim_decentralized_random_unsolvable(self):

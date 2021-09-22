@@ -47,8 +47,8 @@ def plot_env_agents(environent: np.ndarray,
         d_a = - span / 2 + i_a * span / (len(agents) - 1)
 
         # path
-        line, = ax.plot(a.path[:, 0] + d_a,
-                        a.path[:, 1] + d_a, color=colormap[i_a])
+        line, = ax.plot(np.array(a.path)[:, 0] + d_a,
+                        np.array(a.path)[:, 1] + d_a, color=colormap[i_a])
         line.set_label(str(i_a))
         # position
         if a.pos[0] != a.goal[0] or a.pos[1] != a.goal[1]:  # not at goal

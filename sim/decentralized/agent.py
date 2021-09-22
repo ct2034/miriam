@@ -346,7 +346,7 @@ class Agent(Generic[C, N]):
             self.blocked_nodes = set()
             self.blocked_edges = set()
             self.path = self.plan_timed_path(
-                start=self.goal,
+                start=self.pos,
                 goal=self.goal
             )
             self.path_i = 0

@@ -191,9 +191,10 @@ def run_a_scenario(env, agents, plot,
     except Exception as e:  # pragma: no cover
         if isinstance(e, SimIterationException):
             logger.warning(e)
-        if pause_on is not None and isinstance(e, pause_on):
+        elif pause_on is not None and isinstance(e, pause_on):
             return e
-
+        else:
+            raise e
     return check_time_evaluation(
         time_progress,
         space_progress) + (successful, )
