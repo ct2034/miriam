@@ -217,8 +217,8 @@ class TestRunner(unittest.TestCase):
 
     def test_evaluate_policies(self):
         n_runs = 3
-        for agents in [2, 4]:
-            size = 5
+        for agents in [3, 4]:
+            size = 4
             data, names = runner.evaluate_policies(size, agents, n_runs, False)
             assert len(data) == len(PolicyType)
             for p in data.keys():

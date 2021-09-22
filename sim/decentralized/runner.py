@@ -200,7 +200,7 @@ def run_a_scenario(env, agents, plot,
 
 
 def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
-    """run the simulation with all policies"""
+    """run the simulation with some policies"""
     evaluations = {}
     evaluation_names = [
         "average_time",
@@ -209,8 +209,12 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         "max_length",
         "successful"
     ]
-    policies = PolicyType
-    # policies = [PolicyType.RANDOM, PolicyType.LEARNED, PolicyType.INV_LEARNED]
+    # policies = PolicyType
+    policies = [PolicyType.CLOSEST,
+                PolicyType.FILL,
+                PolicyType.RANDOM,
+                PolicyType.LEARNED,
+                PolicyType.INV_LEARNED]
     pb = ProgressBar("evaluate_policies", len(policies)*runs, 5)
 
     for policy in policies:
