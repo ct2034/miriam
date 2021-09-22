@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-from definitions import C, N
+from definitions import C
 from sim.decentralized.agent import Agent
 
 OBSERVATION_DISTANCE = 6
@@ -263,7 +263,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
             else:
                 # we need to solve the blocks by blocking some agents
                 for pose, [i_a1, i_a2] in node_colissions.items():
-                    pose_to_block: N = pose + (dt+1,)
+                    pose_to_block = pose + (dt+1,)
                     if (agents[i_a1].get_priority(agents[i_a2].id) >
                             agents[i_a2].get_priority(agents[i_a1].id)):
                         # a1 has higher prio

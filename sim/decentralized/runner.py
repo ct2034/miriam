@@ -10,12 +10,13 @@ from definitions import BLOCKED_NODES_TYPE, INVALID
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
-from sim.decentralized.policy import PolicyType
+from sim.decentralized.policy import PolicyCalledException, PolicyType
 from sim.decentralized.visualization import *
 from tools import ProgressBar
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+SCENARIO_RESULT = Tuple[float, float, float, float, int]
 
 
 def initialize_environment(size: int, fill: float, seed: float = random.random()
@@ -161,7 +162,7 @@ def check_time_evaluation(time_progress, space_progress
 
 
 def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
-                              ) -> Tuple[float, float, float, float, int]:
+                              ) -> SCENARIO_RESULT:
     env = initialize_environment(size, .1, seed)
     agents = initialize_agents(env, n_agents, policy, seed=seed)
     if agents is None:
@@ -173,7 +174,7 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
 def run_a_scenario(env, agents, plot,
                    iterator: IteratorType = IteratorType.WAITING,
                    pause_on: Optional[Exception] = None
-                   ) -> Tuple[float, float, float, float, int]:
+                   ) -> Any[SCENARIO_RESULT, PolicyCalledException]:
     n_agents = len(agents)
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
@@ -191,7 +192,9 @@ def run_a_scenario(env, agents, plot,
     except Exception as e:  # pragma: no cover
         if isinstance(e, SimIterationException):
             logger.warning(e)
-        elif pause_on is not None and isinstance(e, pause_on):
+        elif pause_on is not None and isinstance(e, pause_on.__class__):
+            # only this makes sense to return
+            assert isinstance(e, PolicyCalledException)
             return e
         else:
             raise e
