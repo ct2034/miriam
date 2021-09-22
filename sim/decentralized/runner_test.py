@@ -216,11 +216,11 @@ class TestRunner(unittest.TestCase):
                                   lambda: iterator_fun(agents))
 
     def test_evaluate_policies(self):
-        n_runs = 3
-        for agents in [3, 4]:
+        n_runs = 5
+        for agents in [2, 3]:
             size = 4
             data, names = runner.evaluate_policies(size, agents, n_runs, False)
-            assert len(data) == len(PolicyType)
+            # assert len(data) == len(PolicyType)  # not testing all policies
             for p in data.keys():
                 dat = data[p]
                 (n_evals_out, n_runs_out) = dat.shape
