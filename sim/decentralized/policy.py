@@ -142,7 +142,7 @@ class LearnedPolicy(Policy):
         logging.info(f"model_type: {self.model_type}")
 
     def _path_until_coll(self, path, path_i, n_t):
-        """Make subpath only until collision ocurrs. n_t is the number of steps to produce, will give all if None"""
+        """Make subpath only until collision happens. n_t is the number of steps to produce, will give all if None"""
         path_until_pos = []
         if n_t is None:
             n_t = len(path)
