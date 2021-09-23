@@ -10,7 +10,8 @@ from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
-from sim.decentralized.policy import PolicyCalledException, PolicyType
+from sim.decentralized.policy import (LearnedPolicyRaising,
+                                      PolicyCalledException, PolicyType)
 from sim.decentralized.visualization import *
 from tools import ProgressBar
 
@@ -160,6 +161,27 @@ def check_time_evaluation(time_progress, space_progress
     return average_time, max_time, average_length, max_length
 
 
+def will_they_collide_in_scen(env, starts, goals):
+    """checks if for a given set of starts and goals the agents travelling
+    between may collide on the given env."""
+    return will_agents_collide(to_agent_objects(env, starts, goals))
+
+
+def will_agents_collide(agents):
+    """Checks agents in list if they will collide."""
+    do_collide = False
+    seen = set()
+    agent_paths = []
+    for i_a, a in enumerate(agents):
+        agent_paths.append(a.path)
+        for pos in a.path:
+            if not do_collide:  # only need to do this if no collision was found
+                if tuple(pos) in seen:
+                    do_collide = True
+                seen.add(tuple(pos))
+    return do_collide, agent_paths
+
+
 def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
                               ) -> SCENARIO_RESULT:
     env = initialize_environment(size, .1, seed)
@@ -175,7 +197,7 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
 def run_a_scenario(env, agents, plot,
                    iterator: IteratorType = IteratorType.WAITING,
                    pause_on: Optional[Exception] = None
-                   ) -> Union[SCENARIO_RESULT, PolicyCalledException]:
+                   ) -> Union[SCENARIO_RESULT, LearnedPolicyRaising]:
     n_agents = len(agents)
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
@@ -193,8 +215,7 @@ def run_a_scenario(env, agents, plot,
     except Exception as e:  # pragma: no cover
         if isinstance(e, SimIterationException):
             logger.warning(e)
-        elif pause_on is not None and isinstance(e, pause_on.__class__):
-            # only this makes sense to return
+        elif pause_on is not None and isinstance(e, pause_on):
             assert isinstance(e, PolicyCalledException)
             return e
         else:

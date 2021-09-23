@@ -19,7 +19,7 @@ from scenarios.evaluators import cached_ecbs
 from scenarios.generators import (building_walls, like_sim_decentralized,
                                   tracing_pathes_in_the_dark)
 from scenarios.main_eval import GENERATOR
-from sim.decentralized.agent import Agent
+from sim.decentralized.runner import will_they_collide_in_scen
 from tools import ProgressBar
 
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
@@ -138,24 +138,6 @@ def get_agent_paths_from_data(data, timed=False):
                     ])
             agent_paths.append(np.array(path_pa, dtype=DTYPE_SAMPLES))
     return agent_paths
-
-
-def will_they_collide(gridmap, starts, goals):
-    """checks if for a given set of starts and goals the agents travelling
-    between may collide on the given gridmap."""
-    do_collide = False
-    seen = set()
-    agent_paths = []
-    for i_a, _ in enumerate(starts):
-        a = Agent(gridmap, starts[i_a])
-        success = a.give_a_goal(goals[i_a])
-        agent_paths.append(a.path)
-        for pos in a.path:
-            if not do_collide:  # only need to do this if no collision was found
-                if tuple(pos) in seen:
-                    do_collide = True
-                seen.add(tuple(pos))
-    return do_collide, agent_paths
 
 
 def where_will_they_collide(agent_paths, starts):

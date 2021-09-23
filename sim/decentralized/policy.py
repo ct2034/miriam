@@ -5,12 +5,17 @@ from enum import Enum, auto
 from typing import Optional
 
 import numpy as np
+import torch
 from importtf import keras, tf
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
+from planner.policylearn.generate_graph import (get_agent_path_layer,
+                                                get_agent_pos_layer,
+                                                gridmap_to_graph)
 from planner.policylearn.train_model import (CLASSIFICATION_STR, CONVRNN_STR,
                                              fix_data_convrnn)
 from tensorflow.keras.models import load_model
+from torch_geometric.data import Data
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -18,9 +23,14 @@ logger = logging.getLogger(__name__)
 
 
 class PolicyCalledException(Exception):
-    def __init__(self, policy) -> None:
+    def __init__(self, policy, id_coll: int) -> None:
         super().__init__()
         print("PolicyCalledException")
+        self.policy: LearnedPolicyRaising = policy
+        self.id_coll = id_coll
+
+    def get_agent_state(self):
+        return self.policy.get_state(self.id_coll)
 
 
 class PolicyType(Enum):
@@ -56,7 +66,7 @@ class Policy(object):
 
     def __init__(self, agent) -> None:
         super().__init__()
-        self.a = agent
+        self.a = agent  # type: sim.decentralized.Agent
 
     def __str__(self):
         return type(self).__name__
@@ -132,7 +142,11 @@ class LearnedPolicy(Policy):
         logging.info(f"model_type: {self.model_type}")
 
     def _path_until_coll(self, path, path_i, n_t):
+        """Make subpath only until collision ocurrs. n_t is the number of steps to produce, will give all if None"""
         path_until_pos = []
+        if n_t is None:
+            n_t = len(path)
+        path = np.array(path)
         for t in range(n_t):
             i_t = min(max(0, path_i - 1 + t), len(path) - 1)
             path_until_pos.append(path[i_t, :])
@@ -199,15 +213,6 @@ class LearnedPolicy(Policy):
         return y
 
 
-class LearnedPolicyRaising(LearnedPolicy):
-    def __init__(self, agent) -> None:
-        super().__init__(agent)
-
-    def get_priority(self, id_coll: int) -> float:
-        raise PolicyCalledException(self)
-        return
-
-
 class InverseLearnedPolicy(Policy):
     # For demonstration purposes: What if we do the exact opposite?
     def __init__(self, agent) -> None:
@@ -224,6 +229,43 @@ class InverseLearnedPolicy(Policy):
         assert prio >= 0
         assert prio <= 1
         return prio
+
+
+class LearnedPolicyRaising(LearnedPolicy):
+    def __init__(self, agent) -> None:
+        super().__init__(agent)
+
+    def get_priority(self, id_coll: int) -> float:
+        raise PolicyCalledException(self, id_coll)
+
+    def get_state(self, id_coll: int):
+        if self.a.has_gridmap:
+            data_edge_index, data_pos = gridmap_to_graph(self.a.env)
+        elif self.a.has_roadmap:
+            raise NotImplementedError()
+        ids = ([self.a.id]+list(self.paths.keys()))
+        i_a = 0
+        i_oa = ids.index(id_coll)
+        self.path_is[self.a.id] = self.a.path_i
+        paths_full = ([self.a.path] +
+                      list(self.paths.values()))
+        paths_until_col = []
+        for i_id, id in enumerate(ids):
+            paths_until_col.append(self._path_until_coll(
+                paths_full[i_id], self.path_is[id], None))
+        data_x = torch.cat((
+            get_agent_pos_layer(data_pos, paths_until_col, i_a),
+            get_agent_path_layer(data_pos, paths_until_col, i_a),
+            get_agent_path_layer(data_pos, paths_full, i_a),
+            get_agent_pos_layer(data_pos, paths_until_col, i_oa),
+            get_agent_path_layer(data_pos, paths_until_col, i_oa),
+            get_agent_path_layer(data_pos, paths_full, i_oa),
+        ), 1)
+        return Data(
+            x=data_x,
+            edge_index=data_edge_index,
+            pos=data_pos
+        )
 
 
 class FirstThenRandomPolicy(Policy):

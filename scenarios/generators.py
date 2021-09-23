@@ -99,14 +99,17 @@ def get_random_next_to_free_pose_or_any_if_full(env):
 
 
 def tracing_pathes_in_the_dark(size: int, fill: float,
-                               n_agents: int, seed: float):
+                               n_agents: int, seed: Union[float, int]):
     """Starting with a black map, clearing straight lines through it, making
     sure map is fully connected."""
     if fill == 0:
         env = np.zeros((size, size), dtype=np.int8)
     else:
         random.seed(seed)
-        np.random.seed(int(seed*1000))
+        if isinstance(seed, float):
+            np.random.seed(int(seed*1000))
+        else:
+            np.random.seed(seed)
         env = np.ones((size, size), dtype=np.int8)
         to_clear_start = int((1. - fill) * size * size)
         to_clear = to_clear_start
