@@ -34,7 +34,8 @@ if __name__ == "__main__":
             a.give_a_goal(goals[i_a])
             agents.append(a)
         (average_time, max_time, average_length,
-         max_length, successful) = run_a_scenario(gridmap, agents, False)
+         max_length, successful) = run_a_scenario(
+             gridmap, agents, False)  # type: ignore
         print(p.name)
         print((average_time, max_time, average_length,
                max_length, successful))
