@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-from typing import List, Optional
+from typing import List, Optional, Tuple, Type, Union
 
 import numpy as np
 import torch
-from definitions import INVALID, SCENARIO_TYPE
+from definitions import INVALID, SCENARIO_RESULT, SCENARIO_TYPE
 from matplotlib import pyplot as plt
 from scenarios.generators import tracing_pathes_in_the_dark
 from scenarios.solvers import ecbs
@@ -13,6 +13,7 @@ from sim.decentralized.runner import (run_a_scenario, to_agent_objects,
                                       will_they_collide_in_scen)
 from tools import ProgressBar
 from torch.nn import Linear
+from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv
 
 
@@ -41,13 +42,23 @@ class Scenario(object):
         # agent that the above was in collision with
         self.agent_in_collision: Optional[int] = None
 
-    def start(self):
+    def start(self) -> Data:
         active_agent_exception = run_a_scenario(
             self.env, self.agents, False,
             IteratorType.BLOCKING1,
-            pause_on=PolicyCalledException)
+            pause_on=PolicyCalledException)  # type: ignore
+        assert isinstance(active_agent_exception, PolicyCalledException)
         state = active_agent_exception.get_agent_state()
         return state
+
+    def step(self, action: bool) -> Tuple[Data, float]:
+        """based on current state of the scenario, take this action and
+        continue to run it until the next policy call or finish"""
+        # take step also on other agent
+
+        # continue to run
+
+        # return either new state or results
 
 
 def make_useful_scenarios(n: int, seed) -> List[Scenario]:
@@ -96,9 +107,15 @@ def deep_q_learning(n_data: int, time_limit: int,
         [scenario] = make_useful_scenarios(1, i_e * 10)
         epsilon = epsilon * (1-eps_decay)
         state = scenario.start()
+        qfun = Qfunction(6, 2, 32)
+        action: bool = qfun(state)
         print(state)
         for i_t in range(time_limit):
-            scenario.step()
+            state, reward = scenario.step(action)
+            if reward > 0.:  # agents reached their goals
+                break
+            action = qfun(state)
+            print(state)
         pb.progress()
     pb.end()
 

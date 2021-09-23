@@ -66,7 +66,7 @@ class Policy(object):
 
     def __init__(self, agent) -> None:
         super().__init__()
-        self.a = agent  # type: sim.decentralized.Agent
+        self.a = agent  # type: ignore
 
     def __str__(self):
         return type(self).__name__

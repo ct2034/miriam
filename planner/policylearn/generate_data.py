@@ -466,7 +466,7 @@ def simulate_one_data(width, fill, n_agents, base_seed, pb, i):
             )
             seed += random.randint(0, 10E6)
             seed = seed % (2E32-1)
-            do_collide, indep_agent_paths = will_they_collide(
+            do_collide, indep_agent_paths = will_they_collide_in_scen(
                 gridmap, starts, goals)
 
         data = cached_ecbs(
@@ -595,7 +595,7 @@ if __name__ == "__main__":
                     width, fill, n_agents, seed
                 )
                 seed += 1
-                do_collide, indep_agent_paths = will_they_collide(
+                do_collide, indep_agent_paths = will_they_collide_in_scen(
                     gridmap, starts, goals)
 
             data = {

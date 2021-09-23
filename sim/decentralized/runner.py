@@ -197,7 +197,7 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
 def run_a_scenario(env, agents, plot,
                    iterator: IteratorType = IteratorType.WAITING,
                    pause_on: Optional[Exception] = None
-                   ) -> Union[SCENARIO_RESULT, LearnedPolicyRaising]:
+                   ) -> Union[SCENARIO_RESULT, PolicyCalledException]:
     n_agents = len(agents)
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
@@ -215,7 +215,7 @@ def run_a_scenario(env, agents, plot,
     except Exception as e:  # pragma: no cover
         if isinstance(e, SimIterationException):
             logger.warning(e)
-        elif pause_on is not None and isinstance(e, pause_on):
+        elif pause_on is not None and isinstance(e, pause_on):  # type: ignore
             assert isinstance(e, PolicyCalledException)
             return e
         else:
