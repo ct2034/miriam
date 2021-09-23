@@ -13,6 +13,7 @@ SUCCESS = 1
 DEFAULT_TIMEOUT_S = 30  # seconds;
 
 SCENARIO_TYPE = Tuple[np.ndarray, np.ndarray, np.ndarray]
+SCENARIO_RESULT = Tuple[float, float, float, float, int]
 
 C = TypeVar('C', Tuple[int, int], Tuple[int])  # location coordinate
 N = TypeVar('N', Tuple[int, int, int], Tuple[int, int])  # planning node

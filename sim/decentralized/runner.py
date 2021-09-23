@@ -6,7 +6,7 @@ import random
 from typing import *
 
 import numpy as np
-from definitions import BLOCKED_NODES_TYPE, INVALID
+from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
@@ -16,7 +16,6 @@ from tools import ProgressBar
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-SCENARIO_RESULT = Tuple[float, float, float, float, int]
 
 
 def initialize_environment(size: int, fill: float, seed: float = random.random()

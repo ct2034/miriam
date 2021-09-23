@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 
+import numpy as np
 from definitions import INVALID
 from matplotlib import pyplot as plt
 from scenarios.evaluators import (cost_ecbs, cost_independent,
@@ -13,6 +14,21 @@ from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 if __name__ == "__main__":  # pragma: no cover
+    env = np.zeros((3, 3))
+    starts = np.array([
+        [0, 0],
+        [2, 0]
+    ])
+    goals = np.array([
+        [2, 2],
+        [0, 2]
+    ])
+    agents = to_agent_objects(env, starts, goals)
+    paths_ecbs = ecbs(env, starts, goals, return_paths=True)
+    plot_with_paths(env, paths_ecbs)
+    res = run_a_scenario(env, agents, True, IteratorType.BLOCKING3)
+    print(res)
+
     logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)
     logging.getLogger("__main__").setLevel(logging.ERROR)
     logging.getLogger("root").setLevel(logging.ERROR)
