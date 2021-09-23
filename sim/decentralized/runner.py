@@ -10,7 +10,7 @@ from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
-from sim.decentralized.policy import (LearnedPolicyRaising,
+from sim.decentralized.policy import (LearnedRaisingPolicy,
                                       PolicyCalledException, PolicyType)
 from sim.decentralized.visualization import *
 from tools import ProgressBar

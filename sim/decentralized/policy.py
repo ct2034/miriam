@@ -26,7 +26,7 @@ class PolicyCalledException(Exception):
     def __init__(self, policy, id_coll: int) -> None:
         super().__init__()
         print("PolicyCalledException")
-        self.policy: LearnedPolicyRaising = policy
+        self.policy: LearnedRaisingPolicy = policy
         self.id_coll = id_coll
 
     def get_agent_state(self):
@@ -56,7 +56,7 @@ class Policy(object):
         elif type == PolicyType.LEARNED:
             return LearnedPolicy(agent)
         elif type == PolicyType.LEARNED_RAISING:
-            return LearnedPolicyRaising(agent)
+            return LearnedRaisingPolicy(agent)
         elif type == PolicyType.INV_LEARNED:
             return InverseLearnedPolicy(agent)
         elif type == PolicyType.ONE_THEN_RANDOM:
@@ -231,7 +231,7 @@ class InverseLearnedPolicy(Policy):
         return prio
 
 
-class LearnedPolicyRaising(LearnedPolicy):
+class LearnedRaisingPolicy(LearnedPolicy):
     def __init__(self, agent) -> None:
         super().__init__(agent)
 
@@ -266,6 +266,19 @@ class LearnedPolicyRaising(LearnedPolicy):
             edge_index=data_edge_index,
             pos=data_pos
         )
+
+
+class FirstThenRaisingPolicy(LearnedRaisingPolicy):
+    def __init__(self, agent, first_return_value) -> None:
+        super().__init__(agent)
+        self.first_call = True
+        self.first_return_value = first_return_value
+
+    def get_priority(self, id_coll: int) -> float:
+        if self.first_call:
+            self.first_call = False
+            return self.first_return_value
+        return super().get_state(id_coll)
 
 
 class FirstThenRandomPolicy(Policy):

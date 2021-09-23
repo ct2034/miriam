@@ -1,6 +1,5 @@
 import logging
 from functools import lru_cache
-from os import EX_OSFILE
 from typing import Tuple
 
 import networkx as nx

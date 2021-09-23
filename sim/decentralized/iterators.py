@@ -63,6 +63,7 @@ def check_for_colissions(
     current_poses = get_poses_in_dt(agents, dt)
     # ignoring finished agents
     for i_a in range(len(agents)):
+        # TODO switch to NOT ignore agents at goal
         if not agents[i_a].is_at_goal(dt):
             for i_oa in [i for i in range(len(agents)) if i > i_a]:
                 if not agents[i_oa].is_at_goal(dt):

@@ -5,10 +5,13 @@ import numpy as np
 import torch
 from definitions import INVALID, SCENARIO_RESULT, SCENARIO_TYPE
 from matplotlib import pyplot as plt
+from scenarios.evaluators import cost_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark
 from scenarios.solvers import ecbs
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import PolicyCalledException, PolicyType
+from sim.decentralized.policy import (FirstThenRaisingPolicy,
+                                      LearnedRaisingPolicy, Policy,
+                                      PolicyCalledException, PolicyType)
 from sim.decentralized.runner import (run_a_scenario, to_agent_objects,
                                       will_they_collide_in_scen)
 from tools import ProgressBar
@@ -22,13 +25,11 @@ class Scenario(object):
         super().__init__()
         self.env, self.starts, self.goals = this_data
         # trying to solve with ecbs
-        ecbs_data = ecbs(self.env, self.starts, self.goals, timeout=5)
+        self.ecbs_cost = cost_ecbs(
+            self.env, self.starts, self.goals, timeout=5)
         self.useful = False
-        if ecbs_data != INVALID:
-            for agent in ecbs_data['blocks'].keys():
-                if ecbs_data['blocks'][agent] != 0:
-                    self.useful = True
-                    break
+        if self.ecbs_cost != INVALID:
+            self.useful = True
         if not self.useful:
             return
         # if useful, we go on
@@ -36,11 +37,12 @@ class Scenario(object):
             self.env, self.starts, self.goals,
             policy=PolicyType.LEARNED_RAISING)
         # initialization to save state
-
         # the agent that got its policy called first
         self.agent_first_raised: Optional[int] = None
         # agent that the above was in collision with
         self.agent_in_collision: Optional[int] = None
+        # agents own ids related to their index, here
+        self.ids = list(map(lambda a: a.id, self.agents))
 
     def start(self) -> Data:
         active_agent_exception = run_a_scenario(
@@ -48,17 +50,66 @@ class Scenario(object):
             IteratorType.BLOCKING1,
             pause_on=PolicyCalledException)  # type: ignore
         assert isinstance(active_agent_exception, PolicyCalledException)
+        self.agent_first_raised = self.ids.index(
+            active_agent_exception.policy.a.id)
+        self.agent_in_collision = self.ids.index(
+            active_agent_exception.id_coll)
         state = active_agent_exception.get_agent_state()
         return state
 
-    def step(self, action: bool) -> Tuple[Data, float]:
+    def step(self, action: bool) -> Tuple[Optional[Data], float]:
         """based on current state of the scenario, take this action and
         continue to run it until the next policy call or finish"""
+        # cost if simulation was unsuccessfull:
+        UNSUCCESSFUL_COST = -10.
         # take step also on other agent
-
+        # TODO: for double the data we would need to also get the state of the
+        # other agent, here
+        first_raised_policy: Policy = FirstThenRaisingPolicy(
+            self.agents[self.agent_first_raised], int(action))
+        in_collision_policy: Policy = FirstThenRaisingPolicy(
+            self.agents[self.agent_in_collision], int(not action))
+        self.agents[self.agent_first_raised].policy = first_raised_policy
+        self.agents[self.agent_in_collision].policy = in_collision_policy
         # continue to run
-
+        active_agent_exception_or_result = run_a_scenario(
+            self.env, self.agents, False,
+            IteratorType.BLOCKING1,
+            pause_on=PolicyCalledException)  # type: ignore
         # return either new state or results
+        if isinstance(active_agent_exception_or_result, PolicyCalledException
+                      ):  # not done
+            # reset policies
+            first_raised_policy = LearnedRaisingPolicy(
+                self.agents[self.agent_first_raised])
+            in_collision_policy = LearnedRaisingPolicy(
+                self.agents[self.agent_in_collision])
+            self.agents[self.agent_first_raised].policy = first_raised_policy
+            self.agents[self.agent_in_collision].policy = in_collision_policy
+            # record new agent ids
+            self.agent_first_raised = self.ids.index(
+                active_agent_exception_or_result.policy.a.id)
+            self.agent_in_collision = self.ids.index(
+                active_agent_exception_or_result.id_coll)
+            # record current state
+            state: Optional[Data] = (
+                active_agent_exception_or_result.get_agent_state())
+            reward = 0.
+        elif isinstance(active_agent_exception_or_result, tuple
+                        ):  # done
+            (average_time, _, _, _, successful
+             ) = active_agent_exception_or_result
+            if successful:
+                cost_decen = average_time + 1
+                reward = self.ecbs_cost - cost_decen
+            else:
+                reward = UNSUCCESSFUL_COST
+            # state does not matter now
+            print(f'reward: {reward}')
+            state = None
+        else:
+            raise RuntimeError()
+        return state, reward
 
 
 def make_useful_scenarios(n: int, seed) -> List[Scenario]:
@@ -92,6 +143,9 @@ class Qfunction(torch.nn.Module):
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
         self.out = Linear(hidden_channels, num_actions)
 
+    def forward(self, data: Data) -> torch.float:
+        return .5
+
 
 def deep_q_learning(n_data: int, time_limit: int,
                     eps_start: float, eps_decay: float):
@@ -108,7 +162,7 @@ def deep_q_learning(n_data: int, time_limit: int,
         epsilon = epsilon * (1-eps_decay)
         state = scenario.start()
         qfun = Qfunction(6, 2, 32)
-        action: bool = qfun(state)
+        action: float = qfun(state)
         print(state)
         for i_t in range(time_limit):
             state, reward = scenario.step(action)
