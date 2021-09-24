@@ -2,6 +2,7 @@ import logging
 import random
 from collections import OrderedDict
 from enum import Enum, auto
+from math import mean
 from typing import Optional
 
 import numpy as np
@@ -266,6 +267,28 @@ class LearnedRaisingPolicy(LearnedPolicy):
             edge_index=data_edge_index,
             pos=data_pos
         )
+
+
+class QLearningPolicy(LearnedRaisingPolicy):
+    def __init__(self, agent) -> None:
+        super().__init__(agent)
+        self.model: Optional[torch.nn.Module] = None
+
+    def set_model(self, model):
+        self.model = model
+
+    def get_priority(self, id_coll: int) -> float:
+        assert self.model is not None
+        data: Data = self.get_state(id_coll)
+        self.model.eval()
+        # this will be two values for [0, 1]
+        out = self.model(data)
+        # now values are between [0, 1]
+        logit = torch.special.logit(out)
+        return mean([
+            1 - logit[0],  # would indicate 0 prio
+            logit[1]  # for 1 prio
+        ])
 
 
 class FirstThenRaisingPolicy(LearnedRaisingPolicy):

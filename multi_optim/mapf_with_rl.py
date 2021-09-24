@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-from typing import List, Optional, Tuple, Type, Union
+import random
+from typing import Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_RESULT, SCENARIO_TYPE
 from matplotlib import pyplot as plt
 from scenarios.evaluators import cost_ecbs
@@ -16,8 +18,10 @@ from sim.decentralized.runner import (run_a_scenario, to_agent_objects,
                                       will_they_collide_in_scen)
 from tools import ProgressBar
 from torch.nn import Linear
+from torch.special import expit
 from torch_geometric.data import Data
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
+                                global_mean_pool)
 
 
 class Scenario(object):
@@ -137,42 +141,123 @@ def make_useful_scenarios(n: int, seed) -> List[Scenario]:
 
 
 class Qfunction(torch.nn.Module):
-    def __init__(self, num_features, num_actions, hidden_channels) -> None:
+    def __init__(self, num_node_features, num_actions,
+                 hidden_channels) -> None:
         super().__init__()
-        self.conv1 = GCNConv(num_features, hidden_channels)
+        torch.manual_seed(0)
+        self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.out = Linear(hidden_channels, num_actions)
+        self.lin = Linear(hidden_channels*3, num_actions)
 
-    def forward(self, data: Data) -> torch.float:
-        return .5
+    def forward(self, data: Data):
+        x = data.x
+        edge_index = data.edge_index
+        pos = data.pos
+        # everything is one batch
+        batch = [0 for _ in range(x.shape[0])]
+
+        # 1. Obtain node embeddings
+        x = self.conv1(x, edge_index)
+        x = x.relu()
+        x = self.conv2(x, edge_index)
+        x = x.relu()
+
+        # 2. Readout layer
+        x = torch.cat((
+            global_mean_pool(x, batch),
+            global_max_pool(x, batch),
+            global_add_pool(x, batch)
+        ), 1)
+
+        # 3. Apply a final classifier
+        x = F.dropout(x, p=0.6, training=self.training)
+        x = self.lin(x)
+        return x
+
+    def get_action_and_q_value_training(self, state: Data):
+        self.train()
+        q = self.forward(state)
+        action = torch.argmax(q)
+        return action, q
+
+    def copy_to(self, other_fn: Qfunction):
+        return other_fn.load_state_dict(self.state_dict())
 
 
-def deep_q_learning(n_data: int, time_limit: int,
-                    eps_start: float, eps_decay: float):
+def q_learning(n_episodes: int, time_limit: int,
+               eps_start: float, eps_decay: float, c: int):
+    """Q-learning with experience replay
+    pseudocode from https://github.com/diegoalejogm/deep-q-learning
+    :param n_episodes: how many episodes to simulate
+    :param time_limit: max runtime per episode
+    :param eps_start: initial epsilon value
+    :param eps_decay: epsilon decay factor per episode
+    :param c: reset qfun_hat every c episodes
+    """
     epsilon = eps_start
     test_split = .1
 
-    n_data_test = int(test_split * n_data)
-    n_data_train = n_data - n_data_test
-    data_test = make_useful_scenarios(n_data_test, n_data_train * 11)
+    n_data_test = int(test_split * n_episodes)
+    data_test = make_useful_scenarios(n_data_test, n_episodes * 11)
 
-    pb = ProgressBar("Epochs", n_data_train, 5)
-    for i_e in range(n_data_train):
+    qfun = Qfunction(6, 2, 32)
+    qfun_hat = Qfunction(6, 2, 32)
+    qfun.copy_to(qfun_hat)
+
+    # replay memory
+    # (state, action, reward, next state)
+    d: List[Tuple[Data, bool, float, Data]]
+
+    # stats
+    epsilons = []
+    rewards = []
+
+    pb = ProgressBar("Epochs", n_episodes, 5)
+    # 1
+    for i_e in range(n_episodes):
+        # 2
         [scenario] = make_useful_scenarios(1, i_e * 10)
         epsilon = epsilon * (1-eps_decay)
+        epsilons.append(epsilon)
         state = scenario.start()
-        qfun = Qfunction(6, 2, 32)
-        action: float = qfun(state)
-        print(state)
+        # 3
         for i_t in range(time_limit):
-            state, reward = scenario.step(action)
-            if reward > 0.:  # agents reached their goals
+            rand = random.random()
+            if rand > epsilon:  # exploration
+                # 4
+                action: bool = bool(int(random.random()))
+            else:  # exploitation
+                # 5
+                action, qval = qfun.get_action_and_q_value_training(state)
+            # 6
+            next_state, reward = scenario.step(action)
+            # 7
+            if next_state is None:  # agents reached their goals
+                assert next_state is None
+                rewards.append(reward)
                 break
-            action = qfun(state)
-            print(state)
+            # 8 store in replay memory
+            d.append((
+                state,
+                action,
+                reward,
+                next_state
+            ))
+
+            # 14
+            if i_t % c == 0:
+                qfun.copy_to(qfun_hat)
         pb.progress()
     pb.end()
 
+    # print stats
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(epsilons, label="epsilon")
+    ax1.legend()
+    ax2.plot(rewards, label="reward")
+    ax2.legend()
+    plt.show()
+
 
 if __name__ == "__main__":
-    deep_q_learning(10, 1000, .9, .01)
+    q_learning(50, 1000, .9, .1)
