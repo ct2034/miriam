@@ -295,7 +295,7 @@ class ProgressBar(object):
         self.name = name
         self.total = total
         self.step_perc = step_perc / 100.
-        self.last_print = 0
+        self.last_print = 0.
         self.i = 0
         self.start_time = datetime.now()
         self.t_format = "%H:%M:%S"
@@ -313,7 +313,7 @@ class ProgressBar(object):
         elapsed_time: datetime.timedelta = datetime.now() - self.start_time
         eta_time = (elapsed_time / progress) - elapsed_time
         if progress-self.last_print >= self.step_perc:
-            self.last_print = progress
+            self.last_print += self.step_perc
             print("{} progress: {:.0f}%\n > took: {}, eta: {}".format(
                 self.name,
                 progress * 100,

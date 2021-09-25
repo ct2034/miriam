@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import random
+from math import exp, log
 from typing import Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -16,7 +17,8 @@ from sim.decentralized.policy import (FirstThenRaisingPolicy,
                                       PolicyCalledException, PolicyType)
 from sim.decentralized.runner import (run_a_scenario, to_agent_objects,
                                       will_they_collide_in_scen)
-from tools import ProgressBar
+from tools import ProgressBar, time_limit
+from torch._C import dtype
 from torch.nn import Linear
 from torch.special import expit
 from torch_geometric.data import Data
@@ -53,7 +55,8 @@ class Scenario(object):
             self.env, self.agents, False,
             IteratorType.BLOCKING1,
             pause_on=PolicyCalledException)  # type: ignore
-        assert isinstance(active_agent_exception, PolicyCalledException)
+        if not isinstance(active_agent_exception, PolicyCalledException):
+            return None  # already finished
         self.agent_first_raised = self.ids.index(
             active_agent_exception.policy.a.id)
         self.agent_in_collision = self.ids.index(
@@ -61,7 +64,7 @@ class Scenario(object):
         state = active_agent_exception.get_agent_state()
         return state
 
-    def step(self, action: bool) -> Tuple[Optional[Data], float]:
+    def step(self, action) -> Tuple[Optional[Data], float]:
         """based on current state of the scenario, take this action and
         continue to run it until the next policy call or finish"""
         # cost if simulation was unsuccessfull:
@@ -72,7 +75,7 @@ class Scenario(object):
         first_raised_policy: Policy = FirstThenRaisingPolicy(
             self.agents[self.agent_first_raised], int(action))
         in_collision_policy: Policy = FirstThenRaisingPolicy(
-            self.agents[self.agent_in_collision], int(not action))
+            self.agents[self.agent_in_collision], int(not bool(action)))
         self.agents[self.agent_first_raised].policy = first_raised_policy
         self.agents[self.agent_in_collision].policy = in_collision_policy
         # continue to run
@@ -109,7 +112,6 @@ class Scenario(object):
             else:
                 reward = UNSUCCESSFUL_COST
             # state does not matter now
-            print(f'reward: {reward}')
             state = None
         else:
             raise RuntimeError()
@@ -154,7 +156,7 @@ class Qfunction(torch.nn.Module):
         edge_index = data.edge_index
         pos = data.pos
         # everything is one batch
-        batch = [0 for _ in range(x.shape[0])]
+        batch = torch.tensor([0 for _ in range(x.shape[0])], dtype=torch.int64)
 
         # 1. Obtain node embeddings
         x = self.conv1(x, edge_index)
@@ -180,22 +182,60 @@ class Qfunction(torch.nn.Module):
         action = torch.argmax(q)
         return action, q
 
-    def copy_to(self, other_fn: Qfunction):
+    def copy_to(self, other_fn):
         return other_fn.load_state_dict(self.state_dict())
 
 
-def q_learning(n_episodes: int, time_limit: int,
-               eps_start: float, eps_decay: float, c: int):
+def sample_random_minibatch(n: int, d, qfun_hat, gamma: float):
+    n = min(n, len(d))
+    memory_tuples = random.choices(d, k=n)
+    training_batch = []
+    for mt in memory_tuples:
+        (state, action, reward, next_state) = mt
+        if next_state is not None:  # not the end
+            # 11
+            assert reward == 0.
+            qvals = qfun_hat(next_state)
+            y = gamma * torch.max(qvals)
+        else:
+            # 10
+            y = reward
+        training_sample = (state, action, y)
+        training_batch.append(training_sample)
+    return training_batch
+
+
+def train(training_batch, qfun, optimizer):
+    qfun.train()
+    losss = torch.zeros(len(training_batch))
+    for i_b, tb in enumerate(training_batch):
+        optimizer.zero_grad()
+        (state, action, y) = tb
+        qvals = qfun(state)
+        loss = (y - qvals[0, action]) ** 2
+        loss.backward()
+        optimizer.step()
+        losss[i_b] = loss
+    return torch.mean(losss)
+
+
+def q_learning(n_episodes: int, eps_start: float,
+               c: int, gamma: float, n_training_batch: int):
     """Q-learning with experience replay
     pseudocode from https://github.com/diegoalejogm/deep-q-learning
     :param n_episodes: how many episodes to simulate
-    :param time_limit: max runtime per episode
     :param eps_start: initial epsilon value
     :param eps_decay: epsilon decay factor per episode
     :param c: reset qfun_hat every c episodes
+    :param gamma: discout factor for future rewards
+    :param n_training_batch: size of training minibatch
     """
-    epsilon = eps_start
-    test_split = .1
+    test_split = .01
+    time_limit = 100
+
+    # epsilon paramters
+    eps_end = .01
+    eps_alpha = -1 * log(eps_end / eps_start) / n_episodes
 
     n_data_test = int(test_split * n_episodes)
     data_test = make_useful_scenarios(n_data_test, n_episodes * 11)
@@ -206,58 +246,84 @@ def q_learning(n_episodes: int, time_limit: int,
 
     # replay memory
     # (state, action, reward, next state)
-    d: List[Tuple[Data, bool, float, Data]]
+    d: List[Tuple[Data, int, float, Optional[Data]]] = []
+    d_max_len = 200
+
+    # optimizer
+    optimizer = torch.optim.Adam(qfun.parameters())
 
     # stats
     epsilons = []
     rewards = []
+    losss = []
 
     pb = ProgressBar("Epochs", n_episodes, 5)
     # 1
     for i_e in range(n_episodes):
         # 2
         [scenario] = make_useful_scenarios(1, i_e * 10)
-        epsilon = epsilon * (1-eps_decay)
+        epsilon = eps_start * exp(-eps_alpha * i_e)
         epsilons.append(epsilon)
         state = scenario.start()
         # 3
         for i_t in range(time_limit):
-            rand = random.random()
-            if rand > epsilon:  # exploration
-                # 4
-                action: bool = bool(int(random.random()))
-            else:  # exploitation
-                # 5
-                action, qval = qfun.get_action_and_q_value_training(state)
-            # 6
-            next_state, reward = scenario.step(action)
-            # 7
-            if next_state is None:  # agents reached their goals
-                assert next_state is None
-                rewards.append(reward)
+            if state is not None:
+                rand = random.random()
+                if rand > epsilon:  # exploration
+                    # 4
+                    action = int(random.random())
+                else:  # exploitation
+                    # 5
+                    action, qvals = qfun.get_action_and_q_value_training(state)
+                # 6
+                next_state, reward = scenario.step(action)
+                # 7
+                if next_state is None:  # agents reached their goals
+                    rewards.append(reward)
+                # 8 store in replay memory
+                memory_tuple = (
+                    state,
+                    action,
+                    reward,
+                    next_state
+                )
+                if len(d) < d_max_len:
+                    d.append(memory_tuple)
+                else:
+                    d[random.randint(0, d_max_len-1)] = memory_tuple
+                # 9
+                training_batch = sample_random_minibatch(
+                    n_training_batch, d, qfun_hat, gamma)
+                # 12
+                loss = train(training_batch, qfun, optimizer)
+                losss.append(loss)
+                # 13
+                if i_t % c == 0:
+                    qfun.copy_to(qfun_hat)
+                # for next round
+                state = next_state
+            else:
                 break
-            # 8 store in replay memory
-            d.append((
-                state,
-                action,
-                reward,
-                next_state
-            ))
-
-            # 14
-            if i_t % c == 0:
-                qfun.copy_to(qfun_hat)
         pb.progress()
     pb.end()
 
     # print stats
-    fig, (ax1, ax2) = plt.subplots(2, 1)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
     ax1.plot(epsilons, label="epsilon")
     ax1.legend()
     ax2.plot(rewards, label="reward")
     ax2.legend()
+    ax3.plot(losss, label="loss")
+    ax3.legend()
+    plt.savefig('statistics.png')
     plt.show()
 
 
 if __name__ == "__main__":
-    q_learning(50, 1000, .9, .1)
+    q_learning(
+        n_episodes=1000,
+        eps_start=.9,
+        c=10,
+        gamma=.9,
+        n_training_batch=50
+    )

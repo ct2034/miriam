@@ -2,7 +2,6 @@ import logging
 import random
 from collections import OrderedDict
 from enum import Enum, auto
-from math import mean
 from typing import Optional
 
 import numpy as np
@@ -26,7 +25,6 @@ logger = logging.getLogger(__name__)
 class PolicyCalledException(Exception):
     def __init__(self, policy, id_coll: int) -> None:
         super().__init__()
-        print("PolicyCalledException")
         self.policy: LearnedRaisingPolicy = policy
         self.id_coll = id_coll
 
@@ -234,7 +232,10 @@ class InverseLearnedPolicy(Policy):
 
 class LearnedRaisingPolicy(LearnedPolicy):
     def __init__(self, agent) -> None:
-        super().__init__(agent)
+        self.a = agent  # type: ignore
+        self.paths: OrderedDict = OrderedDict()
+        self.poss: OrderedDict = OrderedDict()
+        self.path_is: OrderedDict = OrderedDict()
 
     def get_priority(self, id_coll: int) -> float:
         raise PolicyCalledException(self, id_coll)
@@ -285,10 +286,10 @@ class QLearningPolicy(LearnedRaisingPolicy):
         out = self.model(data)
         # now values are between [0, 1]
         logit = torch.special.logit(out)
-        return mean([
+        return float(torch.mean(torch.tensor([
             1 - logit[0],  # would indicate 0 prio
             logit[1]  # for 1 prio
-        ])
+        ])))
 
 
 class FirstThenRaisingPolicy(LearnedRaisingPolicy):
@@ -301,7 +302,7 @@ class FirstThenRaisingPolicy(LearnedRaisingPolicy):
         if self.first_call:
             self.first_call = False
             return self.first_return_value
-        return super().get_state(id_coll)
+        return super().get_priority(id_coll)
 
 
 class FirstThenRandomPolicy(Policy):
