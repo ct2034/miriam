@@ -68,7 +68,7 @@ class Scenario(object):
         """based on current state of the scenario, take this action and
         continue to run it until the next policy call or finish"""
         # cost if simulation was unsuccessfull:
-        UNSUCCESSFUL_COST = -10.
+        UNSUCCESSFUL_COST = -5.
         # take step also on other agent
         # TODO: for double the data we would need to also get the state of the
         # other agent, here
@@ -256,6 +256,8 @@ def q_learning(n_episodes: int, eps_start: float,
     epsilons = []
     rewards = []
     losss = []
+    stat_every = int(n_episodes / 100)
+    i_o = 0  # count optimizations
 
     pb = ProgressBar("Epochs", n_episodes, 5)
     # 1
@@ -263,8 +265,8 @@ def q_learning(n_episodes: int, eps_start: float,
         # 2
         [scenario] = make_useful_scenarios(1, i_e * 10)
         epsilon = eps_start * exp(-eps_alpha * i_e)
-        epsilons.append(epsilon)
         state = scenario.start()
+        next_state = None
         # 3
         for i_t in range(time_limit):
             if state is not None:
@@ -278,8 +280,7 @@ def q_learning(n_episodes: int, eps_start: float,
                 # 6
                 next_state, reward = scenario.step(action)
                 # 7
-                if next_state is None:  # agents reached their goals
-                    rewards.append(reward)
+                # if next_state is None:  # agents reached their goals
                 # 8 store in replay memory
                 memory_tuple = (
                     state,
@@ -296,14 +297,22 @@ def q_learning(n_episodes: int, eps_start: float,
                     n_training_batch, d, qfun_hat, gamma)
                 # 12
                 loss = train(training_batch, qfun, optimizer)
-                losss.append(loss)
+                i_o += 1
                 # 13
-                if i_t % c == 0:
+                if i_o % c == 0:
                     qfun.copy_to(qfun_hat)
                 # for next round
+                del state
                 state = next_state
             else:
                 break
+        if i_e % stat_every == 0:
+            rewards.append(reward)
+            losss.append(loss)
+            epsilons.append(epsilon)
+        del scenario
+        del state
+        del next_state
         pb.progress()
     pb.end()
 
@@ -321,9 +330,9 @@ def q_learning(n_episodes: int, eps_start: float,
 
 if __name__ == "__main__":
     q_learning(
-        n_episodes=1000,
+        n_episodes=10000,
         eps_start=.9,
-        c=10,
-        gamma=.9,
-        n_training_batch=50
+        c=100,
+        gamma=.95,
+        n_training_batch=100
     )
