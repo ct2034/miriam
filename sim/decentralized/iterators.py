@@ -51,7 +51,8 @@ def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> List[C]:
 def check_for_colissions(
         agents: Tuple[Agent],
         dt: int = 0,
-        possible_next_agent_poses: Optional[List[C]] = None) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
+        possible_next_agent_poses: Optional[List[C]] = None,
+        ignore_finished_agents: bool = True) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
     """check for two agents going to meet at one vertex or two agents using
     the same edge."""
     node_colissions = {}
@@ -63,10 +64,9 @@ def check_for_colissions(
     current_poses = get_poses_in_dt(agents, dt)
     # ignoring finished agents
     for i_a in range(len(agents)):
-        # TODO switch to NOT ignore agents at goal
-        if not agents[i_a].is_at_goal(dt):
+        if not agents[i_a].is_at_goal(dt) or not ignore_finished_agents:
             for i_oa in [i for i in range(len(agents)) if i > i_a]:
-                if not agents[i_oa].is_at_goal(dt):
+                if not agents[i_oa].is_at_goal(dt) or not ignore_finished_agents:
                     if next_poses[i_a] == next_poses[i_oa]:
                         node_colissions[tuple(next_poses[i_a])] = [i_a, i_oa]
                     if ((next_poses[i_a] == current_poses[i_oa]) and
@@ -117,7 +117,7 @@ def has_at_least_one_agent_moved(
     return False
 
 
-def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[float]]:
+def iterate_waiting(agents: Tuple[Agent], ignore_finished_agents) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
     # all that are not at their goals can generally procede. This is therefore
@@ -151,7 +151,7 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[float]]:
 
         # check collisions
         node_colissions, edge_colissions = check_for_colissions(
-            agents, 0, possible_next_agent_poses)
+            agents, 0, possible_next_agent_poses, ignore_finished_agents)
 
         if (len(node_colissions.keys()) == 0 and
                 len(edge_colissions.keys()) == 0):
@@ -221,7 +221,7 @@ def iterate_waiting(agents: Tuple[Agent]) -> Tuple[List[int], List[float]]:
     return time_slice, space_slice
 
 
-def iterate_blocking(agents: Tuple[Agent], lookahead: int
+def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agents
                      ) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
@@ -255,7 +255,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
 
             # check collisions
             node_colissions, edge_colissions = check_for_colissions(
-                agents, dt)
+                agents, dt, ignore_finished_agents=ignore_finished_agents)
 
             if (len(node_colissions.keys()) == 0 and
                     len(edge_colissions.keys()) == 0):
@@ -335,11 +335,11 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int
     return time_slice, space_slice
 
 
-# -> ((Tuple[Agent]) -> Tuple[List[int], List[int]]):
+# -> ((Tuple[Agent], bool) -> Tuple[List[int], List[int]]):
 def get_iterator_fun(type: IteratorType):
     if type is IteratorType.WAITING:
         return iterate_waiting
     elif type is IteratorType.BLOCKING1:
-        return lambda x: iterate_blocking(x, 1)
+        return lambda agents, ignor_fa: iterate_blocking(agents, 1, ignor_fa)
     elif type is IteratorType.BLOCKING3:
-        return lambda x: iterate_blocking(x, 3)
+        return lambda agents, ignor_fa: iterate_blocking(agents, 3, ignor_fa)

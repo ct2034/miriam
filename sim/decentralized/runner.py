@@ -196,7 +196,8 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
 
 def run_a_scenario(env, agents, plot,
                    iterator: IteratorType = IteratorType.WAITING,
-                   pause_on: Optional[Exception] = None
+                   pause_on: Optional[Exception] = None,
+                   ignore_finished_agents=True
                    ) -> Union[SCENARIO_RESULT, PolicyCalledException]:
     n_agents = len(agents)
     # evaluation parameters
@@ -208,7 +209,8 @@ def run_a_scenario(env, agents, plot,
         while not are_all_agents_at_their_goals(agents):
             if plot:  # pragma: no cover
                 plot_env_agents(env, agents)
-            time_slice, space_slice = get_iterator_fun(iterator)(agents)
+            time_slice, space_slice = get_iterator_fun(
+                iterator)(agents, ignore_finished_agents)
             time_progress += time_slice
             space_progress += space_slice
         successful = 1

@@ -127,7 +127,7 @@ class TestRunner(unittest.TestCase):
             self.assertFalse(runner.are_all_agents_at_their_goals(agents))
 
             # after one iteration all agents should be at their goal
-            iterator_fun(agents)
+            iterator_fun(agents, True)
             self.assertTrue(all(agents[0].pos == np.array([0, 1])))
             self.assertTrue(all(agents[1].pos == np.array([1, 0])))
             self.assertTrue(runner.are_all_agents_at_their_goals(agents))
@@ -135,7 +135,7 @@ class TestRunner(unittest.TestCase):
             # after another iteration they should be still at their goal, raising
             # an exception for a node deadlock.
             self.assertRaises(SimIterationException,
-                              lambda: iterator_fun(agents))
+                              lambda: iterator_fun(agents, True))
             self.assertTrue(all(agents[0].pos == np.array([0, 1])))
             self.assertTrue(all(agents[1].pos == np.array([1, 0])))
             self.assertTrue(runner.are_all_agents_at_their_goals(agents))
@@ -155,7 +155,7 @@ class TestRunner(unittest.TestCase):
             agents[0].get_priority = MagicMock(return_value=prio0)
             agents[1].get_priority = MagicMock(return_value=prio1)
 
-            waiting_iterator_fun(agents)
+            waiting_iterator_fun(agents, True)
             if prio0 > prio1:
                 # both want to go to `(0,0)` only the first (`0`) should do
                 self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # g
@@ -166,7 +166,7 @@ class TestRunner(unittest.TestCase):
                 self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # g
 
             # after another iteration both should be there and finished
-            waiting_iterator_fun(agents)
+            waiting_iterator_fun(agents, True)
             self.assertTrue(all(agents[0].pos == np.array([0, 0])))  # goal
             self.assertTrue(all(agents[1].pos == np.array([0, 0])))  # goal
             self.assertTrue(runner.are_all_agents_at_their_goals(agents))
@@ -191,7 +191,7 @@ class TestRunner(unittest.TestCase):
             agents[4].get_priority = MagicMock(return_value=1)
 
             self.assertRaises(runner.SimIterationException,
-                              lambda: iterator_fun(agents))
+                              lambda: iterator_fun(agents, True))
 
     @pytest.mark.skip
     def test_iterate_sim_with_edge_coll(self):
@@ -205,7 +205,7 @@ class TestRunner(unittest.TestCase):
             )
             agents[0].give_a_goal(np.array([0, 7]))
             agents[1].give_a_goal(np.array([0, 0]))
-            iterator_fun(agents)
+            iterator_fun(agents, True)
             # BLOCKING3 will see the edge collision after first iteration,
             # the others not.
             if iterator_type != IteratorType.BLOCKING3:
@@ -213,7 +213,7 @@ class TestRunner(unittest.TestCase):
                 iterator_fun(agents)
             for _ in range(10):
                 self.assertRaises(runner.SimIterationException,
-                                  lambda: iterator_fun(agents))
+                                  lambda: iterator_fun(agents, True))
 
     def test_evaluate_policies(self):
         n_runs = 5
