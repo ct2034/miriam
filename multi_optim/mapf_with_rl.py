@@ -54,8 +54,8 @@ class Scenario(object):
         active_agent_exception = run_a_scenario(
             self.env, self.agents, False,
             IteratorType.BLOCKING1,
-            pause_on=PolicyCalledException,
-            ignore_finished_agents=False)  # type: ignore
+            pause_on=PolicyCalledException,  # type: ignore
+            ignore_finished_agents=False)
         if not isinstance(active_agent_exception, PolicyCalledException):
             return None  # already finished
         self.agent_first_raised = self.ids.index(
@@ -83,8 +83,8 @@ class Scenario(object):
         active_agent_exception_or_result = run_a_scenario(
             self.env, self.agents, False,
             IteratorType.BLOCKING1,
-            pause_on=PolicyCalledException,
-            ignore_finished_agents=False)  # type: ignore
+            pause_on=PolicyCalledException,  # type: ignore
+            ignore_finished_agents=False)
         # return either new state or results
         if isinstance(active_agent_exception_or_result, PolicyCalledException
                       ):  # not done
@@ -332,7 +332,7 @@ def q_learning(n_episodes: int, eps_start: float,
 
 if __name__ == "__main__":
     q_learning(
-        n_episodes=100,
+        n_episodes=10000,
         eps_start=.9,
         c=100,
         gamma=.95,
