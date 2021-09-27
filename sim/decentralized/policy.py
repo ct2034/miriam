@@ -275,7 +275,7 @@ class QLearningPolicy(LearnedRaisingPolicy):
         super().__init__(agent)
         self.model: Optional[torch.nn.Module] = None
 
-    def set_model(self, model):
+    def set_qfun(self, model):
         self.model = model
 
     def get_priority(self, id_coll: int) -> float:
@@ -283,7 +283,7 @@ class QLearningPolicy(LearnedRaisingPolicy):
         data: Data = self.get_state(id_coll)
         self.model.eval()
         # this will be two values for [0, 1]
-        out = self.model(data)
+        out = self.model(data)[0]
         # now values are between [0, 1]
         logit = torch.special.logit(out)
         return float(torch.mean(torch.tensor([

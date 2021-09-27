@@ -14,7 +14,8 @@ from scenarios.solvers import ecbs
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import (FirstThenRaisingPolicy,
                                       LearnedRaisingPolicy, Policy,
-                                      PolicyCalledException, PolicyType)
+                                      PolicyCalledException, PolicyType,
+                                      QLearningPolicy)
 from sim.decentralized.runner import (run_a_scenario, to_agent_objects,
                                       will_they_collide_in_scen)
 from tools import ProgressBar, time_limit
@@ -226,6 +227,23 @@ def train(training_batch, qfun, optimizer):
     return torch.mean(losss)
 
 
+def evaluate(data_test: List[Scenario], qfun):
+    average_times = []
+    successfuls = []
+    for scenario in data_test:
+        for a in scenario.agents:
+            a.policy = QLearningPolicy(a)
+            a.policy.set_qfun(qfun)
+        res = run_a_scenario(a.env, scenario.agents,
+                             False, IteratorType.BLOCKING1)
+        assert not isinstance(res, PolicyCalledException)
+        (average_time, _, _, _, successful) = res
+        average_times.append(average_time)
+        successfuls.append(successful)
+    return (np.mean(np.array(average_times)),
+            np.mean(np.array(successfuls)))
+
+
 def q_learning(n_episodes: int, eps_start: float,
                c: int, gamma: float, n_training_batch: int):
     """Q-learning with experience replay
@@ -263,6 +281,8 @@ def q_learning(n_episodes: int, eps_start: float,
     epsilons = []
     rewards = []
     losss = []
+    eval_succ = []
+    eval_time = []
     stat_every = int(n_episodes / 100)
     i_o = 0  # count optimizations
 
@@ -317,6 +337,10 @@ def q_learning(n_episodes: int, eps_start: float,
             rewards.append(reward)
             losss.append(loss)
             epsilons.append(epsilon)
+            # evaluation
+            time, succ = evaluate(data_test, qfun)
+            eval_time.append(time)
+            eval_succ.append(succ)
         del scenario
         del state
         del next_state
@@ -328,8 +352,10 @@ def q_learning(n_episodes: int, eps_start: float,
     ax1.plot(epsilons, label="epsilon")
     ax1.legend()
     ax2.plot(rewards, label="reward")
+    ax2.plot(losss, label="loss")
     ax2.legend()
-    ax3.plot(losss, label="loss")
+    ax3.plot(eval_time, label="eval_time")
+    ax3.plot(eval_succ, label="eval_succ")
     ax3.legend()
     plt.savefig('statistics.png')
     plt.show()
