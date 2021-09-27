@@ -123,7 +123,7 @@ class Scenario(object):
 def make_useful_scenarios(n: int, seed) -> List[Scenario]:
     scenarios: List[Scenario] = []
     if n > 1:
-        pb = ProgressBar("Data Generation", n, 1)
+        pb = ProgressBar("Data Generation", n, 5)
     while len(scenarios) < n:
         scen_data: SCENARIO_TYPE = tracing_pathes_in_the_dark(
             size=4,
@@ -151,6 +151,7 @@ class Qfunction(torch.nn.Module):
         torch.manual_seed(0)
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
+        self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels*3, num_actions)
 
     def forward(self, data: Data):
@@ -163,7 +164,11 @@ class Qfunction(torch.nn.Module):
         # 1. Obtain node embeddings
         x = self.conv1(x, edge_index)
         x = x.relu()
+        x = F.dropout(x, p=0.4, training=self.training)
         x = self.conv2(x, edge_index)
+        x = x.relu()
+        x = F.dropout(x, p=0.4, training=self.training)
+        x = self.conv3(x, edge_index)
         x = x.relu()
 
         # 2. Readout layer
@@ -242,8 +247,8 @@ def q_learning(n_episodes: int, eps_start: float,
     n_data_test = int(test_split * n_episodes)
     data_test = make_useful_scenarios(n_data_test, n_episodes * 11)
 
-    qfun = Qfunction(6, 2, 32)
-    qfun_hat = Qfunction(6, 2, 32)
+    qfun = Qfunction(6, 2, 16)
+    qfun_hat = Qfunction(6, 2, 16)
     qfun.copy_to(qfun_hat)
 
     # replay memory
@@ -332,7 +337,7 @@ def q_learning(n_episodes: int, eps_start: float,
 
 if __name__ == "__main__":
     q_learning(
-        n_episodes=10000,
+        n_episodes=1000,
         eps_start=.9,
         c=100,
         gamma=.95,
