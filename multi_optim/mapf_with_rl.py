@@ -232,6 +232,8 @@ def evaluate(data_test: List[Scenario], qfun):
     successfuls = []
     for scenario in data_test:
         for a in scenario.agents:
+            # reset all agents
+            a.back_to_the_start()
             a.policy = QLearningPolicy(a)
             a.policy.set_qfun(qfun)
         res = run_a_scenario(a.env, scenario.agents,
@@ -255,14 +257,13 @@ def q_learning(n_episodes: int, eps_start: float,
     :param gamma: discout factor for future rewards
     :param n_training_batch: size of training minibatch
     """
-    test_split = .01
     time_limit = 100
 
     # epsilon paramters
     eps_end = .01
     eps_alpha = -1 * log(eps_end / eps_start) / n_episodes
 
-    n_data_test = int(test_split * n_episodes)
+    n_data_test = 100
     data_test = make_useful_scenarios(n_data_test, n_episodes * 11)
 
     qfun = Qfunction(6, 2, 16)

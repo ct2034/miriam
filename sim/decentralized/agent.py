@@ -357,6 +357,13 @@ class Agent(Generic[C, N]):
             self.path_i = 0
             assert self.path is not None, "We must be successful with no blocks"
 
+    def back_to_the_start(self):
+        """Reset current progress and place agent at its start as if nothing ever 
+        happened."""
+        self.pos = self.start
+        self.path_i = 0
+        self.remove_all_blocks_and_replan()
+
     def make_next_step(self, next_pos_to_check: C):
         """Move agent to its next step, pass that pose for clarification."""
         potential_next_pos = self.what_is_next_step()
