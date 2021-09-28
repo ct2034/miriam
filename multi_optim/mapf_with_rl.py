@@ -230,6 +230,7 @@ def train(training_batch, qfun, optimizer):
 def evaluate(data_test: List[Scenario], qfun):
     average_times = []
     successfuls = []
+    suboptimalities = []
     for scenario in data_test:
         for a in scenario.agents:
             # reset all agents
@@ -242,8 +243,11 @@ def evaluate(data_test: List[Scenario], qfun):
         (average_time, _, _, _, successful) = res
         average_times.append(average_time)
         successfuls.append(successful)
+        suboptimality = average_time + 1 - scenario.ecbs_cost
+        suboptimalities.append(suboptimality)
     return (np.mean(np.array(average_times)),
-            np.mean(np.array(successfuls)))
+            np.mean(np.array(successfuls)),
+            np.mean(np.array(suboptimalities)))
 
 
 def q_learning(n_episodes: int, eps_start: float,
@@ -284,6 +288,7 @@ def q_learning(n_episodes: int, eps_start: float,
     losss = []
     eval_succ = []
     eval_time = []
+    eval_subopt = []
     stat_every = int(n_episodes / 100)
     i_o = 0  # count optimizations
 
@@ -339,9 +344,10 @@ def q_learning(n_episodes: int, eps_start: float,
             losss.append(loss)
             epsilons.append(epsilon)
             # evaluation
-            time, succ = evaluate(data_test, qfun)
+            time, succ, subopt = evaluate(data_test, qfun)
             eval_time.append(time)
             eval_succ.append(succ)
+            eval_subopt.append(subopt)
         del scenario
         del state
         del next_state
@@ -357,6 +363,7 @@ def q_learning(n_episodes: int, eps_start: float,
     ax2.legend()
     ax3.plot(eval_time, label="eval_time")
     ax3.plot(eval_succ, label="eval_succ")
+    ax3.plot(eval_subopt, label="eval_subopt")
     ax3.legend()
     plt.savefig('statistics.png')
     plt.show()
@@ -364,7 +371,7 @@ def q_learning(n_episodes: int, eps_start: float,
 
 if __name__ == "__main__":
     q_learning(
-        n_episodes=1000,
+        n_episodes=200,
         eps_start=.9,
         c=100,
         gamma=.95,

@@ -14,6 +14,20 @@ from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 if __name__ == "__main__":  # pragma: no cover
+    # this does not look good at the moment ...
+    env = np.array([[0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [1, 1, 0, 0],
+                    [1, 1, 0, 0]], dtype=np.int8)
+    goals = np.array([[3, 3], [1, 2], [0, 2]])
+    starts = np.array([[0, 0], [1, 1], [2, 2]])
+    agents = to_agent_objects(env, starts, goals)
+    paths_ecbs = ecbs(env, starts, goals, return_paths=True)
+    plot_with_paths(env, paths_ecbs)
+    res = run_a_scenario(
+        env, agents, True, IteratorType.BLOCKING1, ignore_finished_agents=False)
+    print(res)
+
     env = np.zeros((3, 3))
     starts = np.array([
         [0, 0],
