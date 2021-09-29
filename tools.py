@@ -314,9 +314,9 @@ class ProgressBar(object):
         eta_time = (elapsed_time / progress) - elapsed_time
         if progress-self.last_print >= self.step_perc:
             self.last_print += self.step_perc
-            print("{} progress: {:.0f}%\n > took: {}, eta: {}".format(
+            print("{} progress: {}%\n > took: {}, eta: {}".format(
                 self.name,
-                progress * 100,
+                int(round(progress * 100 - 1E-6)),
                 str(elapsed_time),
                 str(eta_time)))
 
