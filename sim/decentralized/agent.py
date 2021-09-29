@@ -298,6 +298,10 @@ class Agent(Generic[C, N]):
             assert len(n) == 3
         elif self.has_roadmap:
             assert len(n) == 2
+        # agent at goal can not block this node:
+        if self.is_at_goal():
+            if self.goal == n[:-1]:
+                return False
         tmp_blocked_nodes = self.blocked_nodes.union({n})
         assert self.goal is not None
         path = self.plan_timed_path(
@@ -361,8 +365,13 @@ class Agent(Generic[C, N]):
         """Reset current progress and place agent at its start as if nothing ever 
         happened."""
         self.pos = self.start
+        self.blocked_nodes = set()
+        self.blocked_edges = set()
+        self.path = self.plan_timed_path(
+            start=self.pos,
+            goal=self.goal
+        )
         self.path_i = 0
-        self.remove_all_blocks_and_replan()
 
     def make_next_step(self, next_pos_to_check: C):
         """Move agent to its next step, pass that pose for clarification."""

@@ -17,6 +17,7 @@ from tools import ProgressBar
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+TIME_LIMIT = 100
 
 
 def initialize_environment(size: int, fill: float, seed: float = random.random()
@@ -213,6 +214,8 @@ def run_a_scenario(env, agents, plot,
                 iterator)(agents, ignore_finished_agents)
             time_progress += time_slice
             space_progress += space_slice
+            if any(time_progress > TIME_LIMIT):
+                raise SimIterationException("timeout")
         successful = 1
     except Exception as e:  # pragma: no cover
         if isinstance(e, SimIterationException):

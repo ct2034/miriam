@@ -45,6 +45,8 @@ def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> List[C]:
             assert a.path is not None
             assert a.path_i is not None
             poses.append(a.path[a.path_i + dt][:-1])
+        if np.linalg.norm(np.array(poses[-1]) - np.array(a.pos)) > 1:
+            assert False
     return poses
 
 

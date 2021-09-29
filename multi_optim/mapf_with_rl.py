@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import random
-from math import exp, log
+from math import exp, isclose, log
 from typing import Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -110,7 +110,7 @@ class Scenario(object):
             (average_time, _, _, _, successful
              ) = active_agent_exception_or_result
             if successful:
-                cost_decen = average_time + 1
+                cost_decen = average_time
                 reward = self.ecbs_cost - cost_decen
             else:
                 reward = UNSUCCESSFUL_COST
@@ -127,9 +127,9 @@ def make_useful_scenarios(n: int, seed) -> List[Scenario]:
         pb = ProgressBar("Data Generation", n, 5)
     while len(scenarios) < n:
         scen_data: SCENARIO_TYPE = tracing_pathes_in_the_dark(
-            size=8,
-            fill=.4,
-            n_agents=4,
+            size=4,
+            fill=.2,
+            n_agents=3,
             seed=seed)
         seed += 1
         (env, starts, goals) = scen_data
@@ -238,13 +238,18 @@ def evaluate(data_test: List[Scenario], qfun):
             a.policy = QLearningPolicy(a)
             a.policy.set_qfun(qfun)
         res = run_a_scenario(a.env, scenario.agents,
-                             False, IteratorType.BLOCKING1)
+                             False, IteratorType.BLOCKING1,
+                             ignore_finished_agents=False)
         assert not isinstance(res, PolicyCalledException)
         (average_time, _, _, _, successful) = res
-        average_times.append(average_time)
         successfuls.append(successful)
-        suboptimality = average_time + 1 - scenario.ecbs_cost
-        suboptimalities.append(suboptimality)
+        if successful:
+            average_times.append(average_time)
+            suboptimality = average_time - scenario.ecbs_cost
+            suboptimalities.append(suboptimality)
+            if (suboptimality < 0 and
+                    not isclose(suboptimality, 0, abs_tol=1E-5)):
+                assert suboptimality >= 0
     return (np.mean(np.array(average_times)),
             np.mean(np.array(successfuls)),
             np.mean(np.array(suboptimalities)))
@@ -267,7 +272,7 @@ def q_learning(n_episodes: int, eps_start: float,
     eps_end = .01
     eps_alpha = -1 * log(eps_end / eps_start) / n_episodes
 
-    n_data_test = 100
+    n_data_test = 10
     data_test = make_useful_scenarios(n_data_test, n_episodes * 11)
 
     qfun = Qfunction(6, 2, 16)
