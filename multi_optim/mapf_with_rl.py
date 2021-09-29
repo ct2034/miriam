@@ -127,9 +127,9 @@ def make_useful_scenarios(n: int, seed) -> List[Scenario]:
         pb = ProgressBar("Data Generation", n, 5)
     while len(scenarios) < n:
         scen_data: SCENARIO_TYPE = tracing_pathes_in_the_dark(
-            size=4,
-            fill=.2,
-            n_agents=3,
+            size=8,
+            fill=.4,
+            n_agents=4,
             seed=seed)
         seed += 1
         (env, starts, goals) = scen_data
