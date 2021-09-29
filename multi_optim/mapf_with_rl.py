@@ -272,11 +272,11 @@ def q_learning(n_episodes: int, eps_start: float,
     eps_end = .01
     eps_alpha = -1 * log(eps_end / eps_start) / n_episodes
 
-    n_data_test = 10
+    n_data_test = 50
     data_test = make_useful_scenarios(n_data_test, n_episodes * 11)
 
-    qfun = Qfunction(6, 2, 16)
-    qfun_hat = Qfunction(6, 2, 16)
+    qfun = Qfunction(6, 2, 64)
+    qfun_hat = Qfunction(6, 2, 64)
     qfun.copy_to(qfun_hat)
 
     # replay memory
@@ -294,7 +294,7 @@ def q_learning(n_episodes: int, eps_start: float,
     eval_succ = []
     eval_time = []
     eval_subopt = []
-    stat_every = int(n_episodes / 100)
+    stat_every = max(1, int(n_episodes / 100))
     i_o = 0  # count optimizations
 
     pb = ProgressBar("Epochs", n_episodes, 5)
@@ -376,9 +376,9 @@ def q_learning(n_episodes: int, eps_start: float,
 
 if __name__ == "__main__":
     q_learning(
-        n_episodes=200,
+        n_episodes=1000,
         eps_start=.9,
         c=100,
-        gamma=.95,
+        gamma=.99,
         n_training_batch=100
     )
