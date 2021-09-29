@@ -321,10 +321,10 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
                     a.env[a.pos] -
                     a.env[possible_next_poses[i_a]]
                 ))
-            a.make_next_step(possible_next_poses[i_a])
             space_slice[i_a] = dx
         if not a.is_at_goal():
             time_slice[i_a] = 1
+        a.make_next_step(possible_next_poses[i_a])
         a.remove_all_blocks_and_replan()
 
     make_sure_agents_are_safe(agents)

@@ -142,7 +142,7 @@ def cost_sim_decentralized_random(env, starts, goals, skip_cache=False):
     (average_time, _, _, _, successful
      ) = metrics
     if successful:
-        return average_time + 1
+        return average_time
     else:
         return INVALID
 
@@ -155,7 +155,7 @@ def cost_sim_decentralized_learned(env, starts, goals, skip_cache=False):
     (average_time, _, _, _, successful
      ) = metrics
     if successful:
-        return average_time + 1
+        return average_time
     else:
         return INVALID
 
