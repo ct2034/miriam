@@ -16,7 +16,7 @@ from planner.policylearn.generate_fovs import *
 from planner.policylearn.generate_graph import *
 from planner.policylearn.libMultiRobotPlanning.plan_ecbs import BLOCKS_STR
 from scenarios.evaluators import cached_ecbs
-from scenarios.generators import (building_walls, like_sim_decentralized,
+from scenarios.generators import (building_walls, random_fill,
                                   tracing_pathes_in_the_dark)
 from scenarios.main_eval import GENERATOR
 from sim.decentralized.runner import will_they_collide_in_scen
@@ -44,7 +44,7 @@ CLASSIFICATION_POS_TIMESTEPS = 3
 CLASSIFICATION_FOV_RADIUS = 3  # self plus x in all 4 directions
 DTYPE_SAMPLES = np.int8
 
-GENERATORS = [building_walls, like_sim_decentralized,
+GENERATORS = [building_walls, random_fill,
               tracing_pathes_in_the_dark]
 
 

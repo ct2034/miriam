@@ -31,8 +31,8 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
 
 # random ######################################################################
 
-def like_sim_decentralized(size: int, fill: float,
-                           n_agents: int, seed: float):
+def random_fill(size: int, fill: float,
+                n_agents: int, seed: float):
     """Randomly filling spaces in gridmap based on `fill`."""
     random.seed(seed)
     env = sim.decentralized.runner.initialize_environment(
@@ -66,8 +66,8 @@ def generate_random_gridmap(width: int, height: int, fill: float):
     return gridmap
 
 
-def like_policylearn_gen(size: int, fill: float,
-                         n_agents: int, seed: float):
+def stripes(size: int, fill: float,
+            n_agents: int, seed: float):
     random.seed(seed)
     env = generate_random_gridmap(
         size, size, fill)

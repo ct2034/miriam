@@ -178,8 +178,7 @@ def make_full_df():
 
     # parameters to evaluate against
     generators = [
-        # like_policylearn_gen,
-        like_sim_decentralized,
+        random_fill,
         tracing_pathes_in_the_dark,
         building_walls
     ]

@@ -31,13 +31,13 @@ class TestGenerators(unittest.TestCase):
 
     def test_generate_like_sim_decentralized_determinism(self):
         (base_env, base_starts, base_goals
-         ) = like_sim_decentralized(
+         ) = random_fill(
             10, .5, 10, 0)
         # --------
 
         # everything the same
         (same_env, same_starts, same_goals
-         ) = like_sim_decentralized(
+         ) = random_fill(
             10, .5, 10, 0)
         self.assertTrue(np.all(base_env == same_env))
         self.assertTrue(np.all(base_starts == same_starts))
@@ -46,7 +46,7 @@ class TestGenerators(unittest.TestCase):
 
         # everything different
         (other_env, other_starts, other_goals
-         ) = like_sim_decentralized(
+         ) = random_fill(
             10, .5, 10, 1)
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -55,7 +55,7 @@ class TestGenerators(unittest.TestCase):
 
         # only env different -> all different
         (other_env, other_starts, other_goals
-         ) = like_sim_decentralized(
+         ) = random_fill(
             10, .4, 10, 0)
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -63,13 +63,13 @@ class TestGenerators(unittest.TestCase):
 
     def test_generate_like_policylearn_gen_determinism(self):
         (base_env, base_starts, base_goals
-         ) = like_policylearn_gen(
+         ) = stripes(
             10, .5, 10, 0)
         # --------
 
         # everything the same
         (same_env, same_starts, same_goals
-         ) = like_policylearn_gen(
+         ) = stripes(
             10, .5, 10, 0)
         self.assertTrue(np.all(base_env == same_env))
         self.assertTrue(np.all(base_starts == same_starts))
@@ -78,7 +78,7 @@ class TestGenerators(unittest.TestCase):
 
         # everything different
         (other_env, other_starts, other_goals
-         ) = like_policylearn_gen(
+         ) = stripes(
             10, .5, 10, 1)
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -87,7 +87,7 @@ class TestGenerators(unittest.TestCase):
 
         # only env different -> all different
         (other_env, other_starts, other_goals
-         ) = like_policylearn_gen(
+         ) = stripes(
             10, .4, 10, 0)
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -96,12 +96,12 @@ class TestGenerators(unittest.TestCase):
     def test_generate_like_policylearn_gen_low_fills(self):
         """tests if generator handles low fill numbers correctly"""
         (env, starts, goals
-         ) = like_policylearn_gen(
+         ) = stripes(
             10, .1, 10, 0)
         self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
 
         (env, starts, goals
-         ) = like_policylearn_gen(
+         ) = stripes(
             10, 0, 10, 0)
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
