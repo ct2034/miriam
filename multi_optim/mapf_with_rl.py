@@ -250,9 +250,13 @@ def evaluate(data_test: List[Scenario], qfun):
             if (suboptimality < 0 and
                     not isclose(suboptimality, 0, abs_tol=1E-5)):
                 assert suboptimality >= 0
-    return (np.mean(np.array(average_times)),
-            np.mean(np.array(successfuls)),
-            np.mean(np.array(suboptimalities)))
+    mean_average_time = np.mean(np.array(average_times))
+    mean_successful = np.mean(np.array(successfuls))
+    mean_suboptimality = np.mean(np.array(suboptimalities))
+    print(f"average_time: {mean_average_time:.2f}, " +
+          f"successful: {mean_successful:.2f}, " +
+          f"suboptimality: {mean_suboptimality:.2f}")
+    return (mean_average_time, mean_successful, mean_suboptimality)
 
 
 def q_learning(n_episodes: int, eps_start: float,
