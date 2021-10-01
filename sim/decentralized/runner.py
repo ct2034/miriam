@@ -10,8 +10,7 @@ from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
-from sim.decentralized.policy import (LearnedRaisingPolicy,
-                                      PolicyCalledException, PolicyType)
+from sim.decentralized.policy import PolicyCalledException, PolicyType
 from sim.decentralized.visualization import *
 from tools import ProgressBar
 
@@ -191,7 +190,7 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
         logger.warning("Could not initialize agents")
         return (0, 0, 0, 0, 0)
     res = run_a_scenario(env, agents, plot, iterator)
-    assert not isinstance(res, PolicyCalledException)
+    assert not has_exception(res)
     return res
 
 
@@ -199,7 +198,7 @@ def run_a_scenario(env, agents, plot,
                    iterator: IteratorType = IteratorType.WAITING,
                    pause_on: Optional[Exception] = None,
                    ignore_finished_agents=True
-                   ) -> Union[SCENARIO_RESULT, PolicyCalledException]:
+                   ) -> SCENARIO_RESULT:
     n_agents = len(agents)
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
@@ -222,12 +221,18 @@ def run_a_scenario(env, agents, plot,
             logger.warning(e)
         elif pause_on is not None and isinstance(e, pause_on):  # type: ignore
             assert isinstance(e, PolicyCalledException)
-            return e
+            return check_time_evaluation(
+                time_progress,
+                space_progress) + (e, )
         else:
             raise e
     return check_time_evaluation(
         time_progress,
         space_progress) + (successful, )
+
+
+def has_exception(res: SCENARIO_RESULT):
+    return isinstance(res[-1], PolicyCalledException)
 
 
 def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
