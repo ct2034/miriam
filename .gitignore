@@ -25,6 +25,7 @@ venv/
 logs/
 cache/
 .coverage
+.mypy_cache
 
 # sphinx build folder
 docs/sphinx/build

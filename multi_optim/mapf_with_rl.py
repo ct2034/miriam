@@ -1,27 +1,25 @@
 #!/usr/bin/env python3
 import random
 from math import exp, isclose, log
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple
 
 import numpy as np
 import torch
 import torch.nn.functional as F
-from definitions import INVALID, SCENARIO_RESULT, SCENARIO_TYPE
+from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
 from scenarios.evaluators import cost_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark
-from scenarios.solvers import ecbs
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import (FirstThenRaisingPolicy,
                                       LearnedRaisingPolicy, Policy,
                                       PolicyCalledException, PolicyType,
                                       QLearningPolicy)
-from sim.decentralized.runner import (run_a_scenario, to_agent_objects,
+from sim.decentralized.runner import (has_exception, run_a_scenario,
+                                      to_agent_objects,
                                       will_they_collide_in_scen)
-from tools import ProgressBar, time_limit
-from torch._C import dtype
+from tools import ProgressBar
 from torch.nn import Linear
-from torch.special import expit
 from torch_geometric.data import Data
 from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
                                 global_mean_pool)
@@ -50,27 +48,32 @@ class Scenario(object):
         self.agent_in_collision: Optional[int] = None
         # agents own ids related to their index, here
         self.ids = list(map(lambda a: a.id, self.agents))
+        # accumulate costs between sim steps
+        self.costs_so_far = 0.
 
     def start(self) -> Data:
-        active_agent_exception = run_a_scenario(
+        scenario_result = run_a_scenario(
             self.env, self.agents, False,
             IteratorType.BLOCKING1,
             pause_on=PolicyCalledException,  # type: ignore
             ignore_finished_agents=False)
-        if not isinstance(active_agent_exception, PolicyCalledException):
+        if not has_exception(scenario_result):
             return None  # already finished
+        (average_time, _, _, _, exception
+         ) = scenario_result
         self.agent_first_raised = self.ids.index(
-            active_agent_exception.policy.a.id)
+            exception.policy.a.id)
         self.agent_in_collision = self.ids.index(
-            active_agent_exception.id_coll)
-        state = active_agent_exception.get_agent_state()
+            exception.id_coll)
+        self.costs_so_far += average_time
+        state = exception.get_agent_state()
         return state
 
     def step(self, action) -> Tuple[Optional[Data], float]:
         """based on current state of the scenario, take this action and
         continue to run it until the next policy call or finish"""
         # cost if simulation was unsuccessfull:
-        UNSUCCESSFUL_COST = -5.
+        UNSUCCESSFUL_COST = -2.
         # take step also on other agent
         # TODO: for double the data we would need to also get the state of the
         # other agent, here
@@ -81,14 +84,15 @@ class Scenario(object):
         self.agents[self.agent_first_raised].policy = first_raised_policy
         self.agents[self.agent_in_collision].policy = in_collision_policy
         # continue to run
-        active_agent_exception_or_result = run_a_scenario(
+        scenario_result = run_a_scenario(
             self.env, self.agents, False,
             IteratorType.BLOCKING1,
             pause_on=PolicyCalledException,  # type: ignore
             ignore_finished_agents=False)
         # return either new state or results
-        if isinstance(active_agent_exception_or_result, PolicyCalledException
-                      ):  # not done
+        if has_exception(scenario_result):  # not done
+            (average_time, _, _, _, exception
+             ) = scenario_result
             # reset policies
             first_raised_policy = LearnedRaisingPolicy(
                 self.agents[self.agent_first_raised])
@@ -98,19 +102,19 @@ class Scenario(object):
             self.agents[self.agent_in_collision].policy = in_collision_policy
             # record new agent ids
             self.agent_first_raised = self.ids.index(
-                active_agent_exception_or_result.policy.a.id)
+                exception.policy.a.id)
             self.agent_in_collision = self.ids.index(
-                active_agent_exception_or_result.id_coll)
+                exception.id_coll)
             # record current state
             state: Optional[Data] = (
-                active_agent_exception_or_result.get_agent_state())
+                exception.get_agent_state())
+            self.costs_so_far += average_time
             reward = 0.
-        elif isinstance(active_agent_exception_or_result, tuple
-                        ):  # done
+        elif not has_exception(scenario_result):  # done
             (average_time, _, _, _, successful
-             ) = active_agent_exception_or_result
+             ) = scenario_result
             if successful:
-                cost_decen = average_time
+                cost_decen = self.costs_so_far + average_time
                 reward = self.ecbs_cost - cost_decen
             else:
                 reward = UNSUCCESSFUL_COST
@@ -187,7 +191,7 @@ class Qfunction(torch.nn.Module):
     def get_action_and_q_value_training(self, state: Data):
         self.train()
         q = self.forward(state)
-        action = torch.argmax(q)
+        action = int(torch.argmax(q))
         return action, q
 
     def copy_to(self, other_fn):
@@ -240,7 +244,7 @@ def evaluate(data_test: List[Scenario], qfun):
         res = run_a_scenario(a.env, scenario.agents,
                              False, IteratorType.BLOCKING1,
                              ignore_finished_agents=False)
-        assert not isinstance(res, PolicyCalledException)
+        assert not has_exception(res)
         (average_time, _, _, _, successful) = res
         successfuls.append(successful)
         if successful:
@@ -275,8 +279,8 @@ def q_learning(n_episodes: int, eps_start: float,
     n_data_test = 50
     data_test = make_useful_scenarios(n_data_test, n_episodes * 11)
 
-    qfun = Qfunction(6, 2, 64)
-    qfun_hat = Qfunction(6, 2, 64)
+    qfun = Qfunction(6, 2, 16)
+    qfun_hat = Qfunction(6, 2, 16)
     qfun.copy_to(qfun_hat)
 
     # replay memory
@@ -307,14 +311,14 @@ def q_learning(n_episodes: int, eps_start: float,
         next_state = None
         # 3
         for i_t in range(time_limit):
-            if state is not None:
+            if state is not None:  # episode has not ended
                 rand = random.random()
                 if rand > epsilon:  # exploration
                     # 4
                     action = int(random.random())
                 else:  # exploitation
                     # 5
-                    action, qvals = qfun.get_action_and_q_value_training(state)
+                    action, _ = qfun.get_action_and_q_value_training(state)
                 # 6
                 next_state, reward = scenario.step(action)
                 # 7
@@ -342,11 +346,11 @@ def q_learning(n_episodes: int, eps_start: float,
                 # for next round
                 del state
                 state = next_state
-            else:
+            else:  # episode has ended
                 break
         if i_e % stat_every == 0:
             rewards.append(reward)
-            losss.append(loss)
+            losss.append(float(loss))
             epsilons.append(epsilon)
             # evaluation
             time, succ, subopt = evaluate(data_test, qfun)

@@ -1,4 +1,4 @@
-from typing import List, Set, Tuple, TypeVar
+from typing import Any, List, Set, Tuple, TypeVar
 
 import numpy as np
 
@@ -13,7 +13,7 @@ SUCCESS = 1
 DEFAULT_TIMEOUT_S = 30  # seconds;
 
 SCENARIO_TYPE = Tuple[np.ndarray, np.ndarray, np.ndarray]
-SCENARIO_RESULT = Tuple[float, float, float, float, int]
+SCENARIO_RESULT = Tuple[float, float, float, float, Any]
 
 C = TypeVar('C', Tuple[int, int], Tuple[int])  # location coordinate
 N = TypeVar('N', Tuple[int, int, int], Tuple[int, int])  # planning node
