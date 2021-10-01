@@ -235,6 +235,7 @@ def evaluate(data_test: List[Scenario], qfun):
     average_times = []
     successfuls = []
     suboptimalities = []
+    qfun.eval()
     for scenario in data_test:
         for a in scenario.agents:
             # reset all agents
@@ -384,9 +385,9 @@ def q_learning(n_episodes: int, eps_start: float,
 
 if __name__ == "__main__":
     q_learning(
-        n_episodes=1000,
+        n_episodes=100,
         eps_start=.9,
-        c=100,
+        c=20,
         gamma=.99,
         n_training_batch=100
     )
