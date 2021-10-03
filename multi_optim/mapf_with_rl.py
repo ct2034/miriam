@@ -64,9 +64,9 @@ class Scenario(object):
         # take step also on other agent
         # TODO: for double the data we would need to also get the state of the
         # other agent, here
-        first_raised_policy: FirstThenRandomPolicy = FirstThenRaisingPolicy(
+        first_raised_policy = FirstThenRaisingPolicy(
             self.agents[self.agent_first_raised], int(action))
-        in_collision_policy: FirstThenRandomPolicy = FirstThenRaisingPolicy(
+        in_collision_policy = FirstThenRaisingPolicy(
             self.agents[self.agent_in_collision], int(not bool(action)))
         assert (first_raised_policy.first_return_value !=
                 in_collision_policy.first_return_value)
@@ -79,7 +79,7 @@ class Scenario(object):
 
     def _run(self):
         # cost if simulation was unsuccessfull:
-        UNSUCCESSFUL_COST = -10.
+        UNSUCCESSFUL_COST = -.5
         # continue to run
         scenario_result = run_a_scenario(
             self.env, self.agents, False,
