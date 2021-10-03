@@ -285,11 +285,25 @@ class QLearningPolicy(LearnedRaisingPolicy):
         # this will be two values for [0, 1]
         out = self.model(data)[0]
         # now values are between [0, 1]
-        logit = torch.special.logit(out)
-        return float(torch.mean(torch.tensor([
-            1 - logit[0],  # would indicate 0 prio
-            logit[1]  # for 1 prio
+        expit = torch.special.expit(out)
+        prio = float(torch.mean(torch.tensor([
+            1 - expit[0],  # would indicate 0 prio
+            expit[1]  # for 1 prio
         ])))
+        if out[0] > out[1]:
+            assert prio < .5
+        else:
+            assert prio > .5
+        return prio
+
+
+class InverseQLearningPolicy(QLearningPolicy):
+    # For demonstration purposes: What if we do the exact opposite?
+    def get_priority(self, id_coll: int) -> float:
+        prio = 1 - super().get_priority(id_coll)
+        assert prio >= 0
+        assert prio <= 1
+        return prio
 
 
 class FirstThenRaisingPolicy(LearnedRaisingPolicy):
