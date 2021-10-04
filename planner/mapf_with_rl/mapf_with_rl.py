@@ -12,9 +12,7 @@ from scenarios.evaluators import cost_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import (FirstThenRaisingPolicy,
-                                      FirstThenRandomPolicy,
                                       InverseQLearningPolicy,
-                                      LearnedRaisingPolicy, Policy,
                                       PolicyCalledException, PolicyType,
                                       QLearningPolicy)
 from sim.decentralized.runner import (has_exception, run_a_scenario,
@@ -28,7 +26,7 @@ from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
 
 
 class Scenario(object):
-    def __init__(self, this_data) -> None:
+    def __init__(self, this_data: SCENARIO_TYPE) -> None:
         super().__init__()
         self.env, self.starts, self.goals = this_data
         # trying to solve with ecbs
@@ -52,6 +50,8 @@ class Scenario(object):
         self.ids = list(map(lambda a: a.id, self.agents))
         # accumulate costs between sim steps
         self.costs_so_far = 0.
+        # cost if simulation was unsuccessful:
+        self.UNSUCCESSFUL_COST = -.5
 
     def start(self) -> Data:
         state, reward = self._run()
@@ -78,8 +78,6 @@ class Scenario(object):
         return state, reward
 
     def _run(self):
-        # cost if simulation was unsuccessfull:
-        UNSUCCESSFUL_COST = -.5
         # continue to run
         scenario_result = run_a_scenario(
             self.env, self.agents, False,
@@ -107,7 +105,7 @@ class Scenario(object):
                 cost_decen = self.costs_so_far + average_time
                 reward = self.ecbs_cost - cost_decen
             else:
-                reward = UNSUCCESSFUL_COST
+                reward = self.UNSUCCESSFUL_COST
             # state does not matter now
             state = None
         else:
@@ -143,7 +141,6 @@ class Qfunction(torch.nn.Module):
     def __init__(self, num_node_features, num_actions,
                  hidden_channels) -> None:
         super().__init__()
-        torch.manual_seed(0)
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
         # self.conv3 = GCNConv(hidden_channels, hidden_channels)
@@ -417,13 +414,14 @@ def q_learning(n_episodes: int, eps_start: float,
     ax3.plot(eval_subopt, label="eval_subopt")
     ax3.plot(eval_subopt_inv, label="eval_subopt_inv")
     ax3.legend()
-    plt.savefig('multi_optim/mapf_with_rl.png')
+    plt.savefig('planner/mapf_with_rl/mapf_with_rl.png')
     plt.show()
 
 
 if __name__ == "__main__":
+    torch.manual_seed(0)
     q_learning(
-        n_episodes=1000,
+        n_episodes=2000,
         eps_start=.9,
         c=10,
         gamma=.99,
