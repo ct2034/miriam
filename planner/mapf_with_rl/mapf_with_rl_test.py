@@ -4,10 +4,24 @@ import numpy as np
 import torch
 from planner.mapf_with_rl.mapf_with_rl import (Qfunction, Scenario,
                                                make_useful_scenarios)
+from scenarios import test_helper
 from torch_geometric.data import Data
 
 
 class TestMapfWithRl(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        test_helper.unset_envvar()
+        # making the folder to store cache during test in.
+        cls.data_path = test_helper.make_cache_folder_and_set_envvar(
+            set_envvar=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        # remove the folder that the test stored data in.
+        test_helper.remove_cache_folder_and_unset_envvar()
+
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName=methodName)
         self.env = np.array([
