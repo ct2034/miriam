@@ -3,12 +3,11 @@
 import logging
 import random
 from datetime import datetime
-import unittest2 as unittest
 
 import numpy as np
+import pytest
 from sim.simple.mod_cbsextension import Cbsext
 from sim.simple.mod_nearest import Nearest
-
 from sim.simple.mod_random import Random
 from sim.simple.simulation import SimpSim
 from tools import is_travis
@@ -26,6 +25,7 @@ else:
     flow_lenght = 2
     products_todo = 3
 logging.info("We will use products_todo = %d" % products_todo)
+
 
 def run(agv_sim, stations, flow, products_todo):
     print("START")
@@ -49,7 +49,8 @@ def run(agv_sim, stations, flow, products_todo):
                 elif state[p] < len(flow) - 1:  # running
                     if (t_left[p] <= 0) & (blocked[int(state[p])] == p):
                         agv_sim.new_job(tuple(stations[flow[int(state[p])][0]]),
-                                        tuple(stations[flow[int(state[p]) + 1][0]]),
+                                        tuple(
+                                            stations[flow[int(state[p]) + 1][0]]),
                                         hash(p + 100 * state[p]))
                         blocked[int(state[p])] = -1
                         state[p] += .5
@@ -61,12 +62,12 @@ def run(agv_sim, stations, flow, products_todo):
     logging.debug("run END")
     return (datetime.now() - t_start).total_seconds()
 
+
 x_res = 10
 y_res = 10
 _map = np.zeros([x_res, y_res, 51])
 
 
-@unittest.skip("Runs literally forever")
 def test_process_cbsext():
     mod = Cbsext(_map)
     t = run_with_sim(SimpSim(False, mod),
@@ -76,43 +77,45 @@ def test_process_cbsext():
     return t
 
 
-@unittest.skip("Runs literally forever")
-def test_process_random():
-    mod = Random(_map)
-    t = run_with_sim(SimpSim(False, mod),
-                     products_todo=products_todo,
-                     n_agv=4,
-                     flow_lenght=flow_lenght)
-    return t
+# skipping seems not to work
+
+# @pytest.mark.skip
+# def test_process_random():
+#     mod = Random(_map)
+#     t = run_with_sim(SimpSim(False, mod),
+#                      products_todo=products_todo,
+#                      n_agv=4,
+#                      flow_lenght=flow_lenght)
+#     return t
 
 
-@unittest.skip("Runs literally forever")
-def test_process_nearest():
-    mod = Nearest(_map)
-    t = run_with_sim(SimpSim(False, mod),
-                     products_todo=products_todo,
-                     n_agv=4,
-                     flow_lenght=flow_lenght)
-    return t
+# @pytest.mark.skip
+# def test_process_nearest():
+#     mod = Nearest(_map)
+#     t = run_with_sim(SimpSim(False, mod),
+#                      products_todo=products_todo,
+#                      n_agv=4,
+#                      flow_lenght=flow_lenght)
+#     return t
 
 
-@unittest.skip("Runs literally forever")
-def test_benchmark():
-    modules = [Random(_map), Nearest(_map), Cbsext(_map)]
-    durations = np.zeros(len(modules))
-    for i_mod in range(len(modules)):
-        try:
-            durations[i_mod] = run_with_sim(SimpSim(False, modules[i_mod]),
-                                            products_todo=3,
-                                            n_agv=2,
-                                            flow_lenght=flow_lenght)
-        except Exception as e:
-            logging.error("Exception on simulation level\n" + str(e))
-            raise e
+# @pytest.mark.skip
+# def test_benchmark():
+#     modules = [Random(_map), Nearest(_map), Cbsext(_map)]
+#     durations = np.zeros(len(modules))
+#     for i_mod in range(len(modules)):
+#         try:
+#             durations[i_mod] = run_with_sim(SimpSim(False, modules[i_mod]),
+#                                             products_todo=3,
+#                                             n_agv=2,
+#                                             flow_lenght=flow_lenght)
+#         except Exception as e:
+#             logging.error("Exception on simulation level\n" + str(e))
+#             raise e
 
-    print("RESULT:\n for ..")
-    print("modules: " + str(modules))
-    print(durations)
+#     print("RESULT:\n for ..")
+#     print("modules: " + str(modules))
+#     print(durations)
 
 
 def run_with_sim(agv_sim, products_todo=3, n_agv=2, flow_lenght=7):
@@ -144,7 +147,8 @@ def run_with_sim(agv_sim, products_todo=3, n_agv=2, flow_lenght=7):
             [5, 3],
             [6, 2]
             ]
-    assert len(flow) >= flow_lenght, "Can only select max lenght of flow %d" % len(flow)
+    assert len(
+        flow) >= flow_lenght, "Can only select max lenght of flow %d" % len(flow)
     flow = flow[:(flow_lenght)]
     n = run(agv_sim, stations, flow, products_todo)
     agv_sim.stop_sim()
