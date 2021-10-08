@@ -37,4 +37,4 @@ htmlcov/
 # for this
 .git/
 learn/
-planner/policylearn/libMultiRobotPlanning/build/
+planner/policylearn/mapf_implementations /libMultiRobotPlanning/build/

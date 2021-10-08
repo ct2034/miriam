@@ -19,8 +19,7 @@ class GenerateDataTest(unittest.TestCase):
         self.assertIn(a_free_pose2[1], [0, 1])
 
     def test_calling_benchmark_ecbs(self):
-        from planner.policylearn.libMultiRobotPlanning.plan_ecbs import \
-            plan_in_gridmap
+        from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
         timeout = 30
         suboptimality = 1.5
 

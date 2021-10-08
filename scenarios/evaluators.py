@@ -21,7 +21,7 @@ from scenarios.solvers import (SCHEDULE, cached_decentralized, cached_ecbs,
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
 logging.getLogger(
-    'planner.policylearn.libMultiRobotPlanning').setLevel(logging.ERROR)
+    'planner.mapf_implementations').setLevel(logging.ERROR)
 
 HIGHLEVELEXPANDED = 'highLevelExpanded'
 LOWLEVELEXPANDED = 'lowLevelExpanded'

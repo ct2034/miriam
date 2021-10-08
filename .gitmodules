@@ -1,9 +1,6 @@
 [submodule "elemel_python-astar"]
 	path = astar/elemel_python-astar
 	url = https://github.com/ct2034/python-astar.git
-[submodule "libMultiRobotPlanning"]
-	path = planner/policylearn/libMultiRobotPlanning
-	url = https://github.com/ct2034/libMultiRobotPlanning.git
 [submodule "planner/matteoantoniazzi-mapf/external"]
 	path = planner/matteoantoniazzi_mapf/external
 	url = https://github.com/MatteoAntoniazzi/MAPF.git
@@ -13,3 +10,6 @@
 [submodule "roadmaps/SPARS/lodepng"]
 	path = roadmaps/SPARS/lodepng
 	url = https://github.com/lvandeve/lodepng.git
+[submodule "planner/mapf_implementations/libMultiRobotPlanning"]
+	path = planner/mapf_implementations/libMultiRobotPlanning
+	url = https://github.com/whoenig/libMultiRobotPlanning.git

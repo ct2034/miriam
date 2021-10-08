@@ -18,7 +18,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install -r planner/policylearn/libMultiRobotPlanning/requirements.txt
+        pip install -r planner/mapf_implementations/libMultiRobotPlanning/requirements.txt
         pip install -r sim/decentralized/requirements.txt
         pip install -r learn/pytorch/requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
     # - name: Build cobra
@@ -28,7 +28,7 @@ jobs:
     - name: Build ecbs
       run: |
         sudo apt install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
-        mkdir planner/policylearn/libMultiRobotPlanning/build
+        mkdir planner/mapf_implementations/libMultiRobotPlanning/build
         cd planner/policylearn/libMultiRobotPlanning/build
         cmake ..
         make ecbs

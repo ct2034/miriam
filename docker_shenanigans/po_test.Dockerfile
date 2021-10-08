@@ -6,15 +6,15 @@ COPY . /
 
 # planner
 RUN pip3 install -r /planner/policylearn/requirements.txt
-RUN pip3 install -r /planner/policylearn/libMultiRobotPlanning/requirements.txt
+RUN pip3 install -r /planner/mapf_implementations/libMultiRobotPlanning/requirements.txt
 RUN pip3 install -r /sim/decentralized/requirements.txt
 RUN pip3 install -r requirements.txt
 RUN mkdir cache
 
 # ecbs
 RUN apt-get install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
-RUN mkdir /planner/policylearn/libMultiRobotPlanning/build
-WORKDIR /planner/policylearn/libMultiRobotPlanning/build
+RUN mkdir /planner/mapf_implementations/libMultiRobotPlanning/build
+WORKDIR /planner/mapf_implementations/libMultiRobotPlanning/build
 RUN cmake ..
 RUN make ecbs
 

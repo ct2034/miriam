@@ -1,7 +1,7 @@
 import numpy as np
 from definitions import DEFAULT_TIMEOUT_S, INVALID
+from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
 from planner.matteoantoniazzi_mapf.plan import icts_plan, paths_from_info
-from planner.policylearn.libMultiRobotPlanning.plan_ecbs import plan_in_gridmap
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType

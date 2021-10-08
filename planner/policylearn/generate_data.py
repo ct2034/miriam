@@ -12,9 +12,9 @@ from multiprocessing import Pool
 import matplotlib.pyplot as plt
 import numpy as np
 from definitions import FREE, INVALID
+from planner.mapf_implementations.plan_ecbs import BLOCKS_STR
 from planner.policylearn.generate_fovs import *
 from planner.policylearn.generate_graph import *
-from planner.policylearn.libMultiRobotPlanning.plan_ecbs import BLOCKS_STR
 from scenarios.evaluators import cached_ecbs
 from scenarios.generators import (building_walls, random_fill,
                                   tracing_pathes_in_the_dark)
