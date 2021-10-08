@@ -68,16 +68,16 @@ y_res = 10
 _map = np.zeros([x_res, y_res, 51])
 
 
-def test_process_cbsext():
-    mod = Cbsext(_map)
-    t = run_with_sim(SimpSim(False, mod),
-                     products_todo=products_todo,
-                     n_agv=4,
-                     flow_lenght=flow_lenght)
-    return t
-
-
 # skipping seems not to work
+
+# def test_process_cbsext():
+#     mod = Cbsext(_map)
+#     t = run_with_sim(SimpSim(False, mod),
+#                      products_todo=products_todo,
+#                      n_agv=4,
+#                      flow_lenght=flow_lenght)
+#     return t
+
 
 # @pytest.mark.skip
 # def test_process_random():
