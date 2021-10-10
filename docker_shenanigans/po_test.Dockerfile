@@ -6,7 +6,7 @@ COPY . /
 
 # planner
 RUN pip3 install -r /planner/policylearn/requirements.txt
-RUN pip3 install -r /planner/mapf_implementations/libMultiRobotPlanning/requirements.txt
+RUN pip3 install -r /planner/mapf_implementations/requirements.txt
 RUN pip3 install -r /sim/decentralized/requirements.txt
 RUN pip3 install -r requirements.txt
 RUN mkdir cache

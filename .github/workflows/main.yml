@@ -18,7 +18,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install -r planner/mapf_implementations/libMultiRobotPlanning/requirements.txt
+        pip install -r planner/mapf_implementations/requirements.txt
         pip install -r sim/decentralized/requirements.txt
         pip install -r learn/pytorch/requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
     # - name: Build cobra

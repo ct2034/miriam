@@ -12,4 +12,4 @@
 	url = https://github.com/lvandeve/lodepng.git
 [submodule "planner/mapf_implementations/libMultiRobotPlanning"]
 	path = planner/mapf_implementations/libMultiRobotPlanning
-	url = https://github.com/whoenig/libMultiRobotPlanning.git
+	url = git@github.com:ct2034/libMultiRobotPlanning

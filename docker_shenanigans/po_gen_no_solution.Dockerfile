@@ -5,8 +5,8 @@ RUN apt-get install -y python3 python3-pip python3-tk python3-pytest git
 # planner
 COPY /planner/policylearn/requirements.txt /planner/policylearn/requirements.txt
 RUN pip3 install -r /planner/policylearn/requirements.txt
-COPY /planner/mapf_implementations/libMultiRobotPlanning/requirements.txt /planner/mapf_implementations/libMultiRobotPlanning/requirements.txt
-RUN pip3 install -r /planner/mapf_implementations/libMultiRobotPlanning/requirements.txt
+COPY /planner/mapf_implementations/requirements.txt /planner/mapf_implementations/requirements.txt
+RUN pip3 install -r /planner/mapf_implementations/requirements.txt
 COPY /sim/decentralized/requirements.txt /sim/decentralized/requirements.txt
 RUN pip3 install -r /sim/decentralized/requirements.txt
 COPY requirements.txt requirements.txt
