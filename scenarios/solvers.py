@@ -37,7 +37,7 @@ def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
             goals), suboptimality=1.0, timeout=timeout)  # OPTIMAL !
     except KeyError:  # happens when start or goal is not in map
         return INVALID
-    if data is None:
+    if data is None or data is INVALID:
         return INVALID
     n_agents = starts.shape[0]
     if SCHEDULE not in data.keys():
