@@ -18,7 +18,7 @@ class GenerateDataTest(unittest.TestCase):
         self.assertEqual(a_free_pose2[0], 0)
         self.assertIn(a_free_pose2[1], [0, 1])
 
-    def test_calling_benchmark_ecbs(self):
+    def test_calling_plan_ecbs(self):
         from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
         timeout = 30
         suboptimality = 1.5

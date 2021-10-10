@@ -13,6 +13,7 @@ class TestSolvers(unittest.TestCase):
         res = ecbs(
             test_helper.env, test_helper.starts_collision,
             test_helper.goals_collision)
+        self.assertNotEqual(res, INVALID)  # successful
         self.assertTrue(len(res.keys()) != 0)
 
     def test_ecbs_paths_no_collision(self):
@@ -20,6 +21,7 @@ class TestSolvers(unittest.TestCase):
         paths = ecbs(
             test_helper.env, test_helper.starts_no_collision,
             test_helper.goals_no_collision, return_paths=True)
+        self.assertNotEqual(paths, INVALID)  # successful
         test_helper.assert_path_equality(
             self, test_helper.paths_no_collision, paths)
 
