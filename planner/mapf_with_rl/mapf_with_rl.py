@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import logging
 import random
 from math import exp, isclose, log
 from typing import List, Optional, Tuple
@@ -8,6 +9,7 @@ import torch
 import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
+from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
 from scenarios.evaluators import cost_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark
 from sim.decentralized.iterators import IteratorType
@@ -25,13 +27,23 @@ from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
                                 global_mean_pool)
 
 
+def get_ecbs_cost(scen: SCENARIO_TYPE, ignore_finished_agents: bool):
+    env, starts, goals = scen
+    data = plan_in_gridmap(env, starts, goals, 1.2, 5, ignore_finished_agents)
+    if data is INVALID:
+        return INVALID
+    cost = data['statistics']['cost']
+    return cost / len(starts)
+
+
 class Scenario(object):
-    def __init__(self, this_data: SCENARIO_TYPE) -> None:
+    def __init__(self, this_data: SCENARIO_TYPE, ignore_finished_agents: bool) -> None:
         super().__init__()
         self.env, self.starts, self.goals = this_data
+        self.ignore_finished_agents = ignore_finished_agents
         # trying to solve with ecbs
-        self.ecbs_cost = cost_ecbs(
-            self.env, self.starts, self.goals, timeout=5)
+        self.ecbs_cost = get_ecbs_cost(
+            this_data, ignore_finished_agents)
         self.useful = False
         if self.ecbs_cost != INVALID:
             self.useful = True
@@ -83,7 +95,7 @@ class Scenario(object):
             self.env, self.agents, False,
             IteratorType.BLOCKING1,
             pause_on=PolicyCalledException,  # type: ignore
-            ignore_finished_agents=False)
+            ignore_finished_agents=self.ignore_finished_agents)
         # return either new state or results
         if has_exception(scenario_result):  # not done
             (average_time, _, _, _, exception
@@ -113,7 +125,7 @@ class Scenario(object):
         return state, reward
 
 
-def make_useful_scenarios(n: int, seed) -> List[Scenario]:
+def make_useful_scenarios(n: int, seed, ignore_finished_agents) -> List[Scenario]:
     scenarios: List[Scenario] = []
     if n > 1:
         pb = ProgressBar("Data Generation", n, 5)
@@ -127,7 +139,7 @@ def make_useful_scenarios(n: int, seed) -> List[Scenario]:
         (env, starts, goals) = scen_data
         collide, _ = will_they_collide_in_scen(env, starts, goals)
         if collide:
-            scen = Scenario(scen_data)
+            scen = Scenario(scen_data, ignore_finished_agents)
             if scen.useful:
                 if n > 1:
                     pb.progress()
@@ -219,7 +231,7 @@ def train(training_batch, qfun, optimizer):
     return mean_loss
 
 
-def evaluate(data_test: List[Scenario], qfun):
+def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
     successfuls = []
     suboptimalities = []
     qfun.eval()
@@ -227,11 +239,14 @@ def evaluate(data_test: List[Scenario], qfun):
         for a in scenario.agents:
             # reset all agents
             a.back_to_the_start()
-            a.policy = QLearningPolicy(a)
+            if inverse:
+                a.policy = InverseQLearningPolicy(a)
+            else:
+                a.policy = QLearningPolicy(a)
             a.policy.set_qfun(qfun)
         res = run_a_scenario(a.env, scenario.agents,
                              False, IteratorType.BLOCKING1,
-                             ignore_finished_agents=False)
+                             ignore_finished_agents=ignore_finished_agents)
         assert not has_exception(res)
         (average_time, _, _, _, successful) = res
         successfuls.append(successful)
@@ -240,45 +255,18 @@ def evaluate(data_test: List[Scenario], qfun):
             suboptimalities.append(suboptimality)
             if (suboptimality < 0 and
                     not isclose(suboptimality, 0, abs_tol=1E-5)):
-                assert suboptimality >= 0
+                logging.warning(f"suboptimality: {suboptimality}")
     mean_successful = np.mean(np.array(successfuls))
     mean_suboptimality = np.mean(np.array(suboptimalities))
     print(f"successful: {mean_successful:.2f}, " +
-          f"suboptimality: {mean_suboptimality:.2f}")
-    return (mean_successful, mean_suboptimality)
-
-
-def evaluate_inverse(data_test: List[Scenario], qfun):
-    successfuls = []
-    suboptimalities = []
-    qfun.eval()
-    for scenario in data_test:
-        for a in scenario.agents:
-            # reset all agents
-            a.back_to_the_start()
-            a.policy = InverseQLearningPolicy(a)
-            a.policy.set_qfun(qfun)
-        res = run_a_scenario(a.env, scenario.agents,
-                             False, IteratorType.BLOCKING1,
-                             ignore_finished_agents=False)
-        assert not has_exception(res)
-        (average_time, _, _, _, successful) = res
-        successfuls.append(successful)
-        if successful:
-            suboptimality = average_time - scenario.ecbs_cost
-            suboptimalities.append(suboptimality)
-            if (suboptimality < 0 and
-                    not isclose(suboptimality, 0, abs_tol=1E-5)):
-                assert suboptimality >= 0
-    mean_successful = np.mean(np.array(successfuls))
-    mean_suboptimality = np.mean(np.array(suboptimalities))
-    print(f"(inv) successful: {mean_successful:.2f}, " +
-          f"suboptimality: {mean_suboptimality:.2f}")
+          f"suboptimality: {mean_suboptimality:.2f}, " +
+          f"inv: {inverse}")
     return (mean_successful, mean_suboptimality)
 
 
 def q_learning(n_episodes: int, eps_start: float,
-               c: int, gamma: float, n_training_batch: int):
+               c: int, gamma: float, n_training_batch: int,
+               ignore_finished_agents: bool):
     """Q-learning with experience replay
     pseudocode from https://github.com/diegoalejogm/deep-q-learning
     :param n_episodes: how many episodes to simulate
@@ -295,7 +283,8 @@ def q_learning(n_episodes: int, eps_start: float,
     eps_alpha = -1 * log(eps_end / eps_start) / n_episodes
 
     n_data_test = 100
-    data_test = make_useful_scenarios(n_data_test, n_episodes * 11)
+    data_test = make_useful_scenarios(
+        n_data_test, n_episodes * 11, ignore_finished_agents)
 
     qfun = Qfunction(6, 2, 16)
     qfun_hat = Qfunction(6, 2, 16)
@@ -331,7 +320,7 @@ def q_learning(n_episodes: int, eps_start: float,
     # 1
     for i_e in range(n_episodes):
         # 2
-        [scenario] = make_useful_scenarios(1, i_e * 10)
+        [scenario] = make_useful_scenarios(1, i_e * 10, ignore_finished_agents)
         epsilon = eps_start * exp(-eps_alpha * i_e)
         state = scenario.start()
         next_state = None
@@ -380,22 +369,16 @@ def q_learning(n_episodes: int, eps_start: float,
             epsilons.append(epsilon)
         if i_e % eval_every == 0:
             # evaluation qfun
-            succ, subopt = evaluate(data_test, qfun)
+            succ, subopt = evaluate(
+                data_test, qfun, ignore_finished_agents,
+                inverse=False)
             eval_succ.append(succ)
             eval_subopt.append(subopt)
-            # evaluation qfun_hat
-            # succ_hat, subopt_hat = evaluate(data_test, qfun_hat)
-            # eval_hat_succ.append(succ_hat)
-            # eval_hat_subopt.append(subopt_hat)
-            # evaluation qfun with inverted policy
-            succ_inv, subopt_inv = evaluate_inverse(data_test, qfun)
+            succ_inv, subopt_inv = evaluate(
+                data_test, qfun, ignore_finished_agents,
+                inverse=True)
             eval_succ_inv.append(succ_inv)
             eval_subopt_inv.append(subopt_inv)
-            # evaluation qfun_hat with inverted policy
-            # succ_hat_inv, subopt_hat_inv = evaluate_inverse(
-            #     data_test, qfun_hat)
-            # eval_hat_succ_inv.append(succ_hat_inv)
-            # eval_hat_subopt_inv.append(subopt_hat_inv)
         del scenario
         del state
         del next_state
@@ -419,11 +402,15 @@ def q_learning(n_episodes: int, eps_start: float,
 
 
 if __name__ == "__main__":
+    # ignoring errors in libMultiRobotPlanning
+    logging.getLogger(
+        'planner.mapf_implementations.plan_ecbs').setLevel(logging.FATAL)
     torch.manual_seed(0)
     q_learning(
         n_episodes=2000,
         eps_start=.9,
         c=10,
         gamma=.99,
-        n_training_batch=100
+        n_training_batch=100,
+        ignore_finished_agents=True
     )

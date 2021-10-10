@@ -37,15 +37,18 @@ class PolicyType(Enum):
     CLOSEST = auto()
     FILL = auto()
     LEARNED = auto()
+    INVERSE_LEARNED = auto()
     LEARNED_RAISING = auto()
-    INV_LEARNED = auto()
+    Q_LEARNING_POLICY = auto()
+    INVERSE_Q_LEARNING_POLICY = auto()
     ONE_THEN_RANDOM = auto()
     ZERO_THEN_RANDOM = auto()
+    FIRST_THEN_RAISING = auto()
 
 
 class Policy(object):
     @classmethod
-    def construct_by_type(cls, type: PolicyType, agent):
+    def construct_by_type(cls, type: PolicyType, agent, **kwargs):
         if type == PolicyType.RANDOM:
             return RandomPolicy(agent)
         elif type == PolicyType.CLOSEST:
@@ -54,14 +57,20 @@ class Policy(object):
             return FillPolicy(agent)
         elif type == PolicyType.LEARNED:
             return LearnedPolicy(agent)
+        elif type == PolicyType.INVERSE_LEARNED:
+            return InverseLearnedPolicy(agent)
         elif type == PolicyType.LEARNED_RAISING:
             return LearnedRaisingPolicy(agent)
-        elif type == PolicyType.INV_LEARNED:
-            return InverseLearnedPolicy(agent)
+        elif type == PolicyType.Q_LEARNING_POLICY:
+            return QLearningPolicy(agent)
+        elif type == PolicyType.INVERSE_Q_LEARNING_POLICY:
+            return InverseQLearningPolicy(agent)
         elif type == PolicyType.ONE_THEN_RANDOM:
             return FirstThenRandomPolicy(agent, 1.)
         elif type == PolicyType.ZERO_THEN_RANDOM:
             return FirstThenRandomPolicy(agent, 0.)
+        elif type == PolicyType.FIRST_THEN_RAISING:
+            return FirstThenRaisingPolicy(agent, **kwargs)
 
     def __init__(self, agent) -> None:
         super().__init__()

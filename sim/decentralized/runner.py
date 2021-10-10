@@ -250,7 +250,7 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
                 PolicyType.FILL,
                 PolicyType.RANDOM,
                 PolicyType.LEARNED,
-                PolicyType.INV_LEARNED]
+                PolicyType.INVERSE_LEARNED]
     pb = ProgressBar("evaluate_policies", len(policies)*runs, 5)
 
     for policy in policies:

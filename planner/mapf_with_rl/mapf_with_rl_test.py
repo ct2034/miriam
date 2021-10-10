@@ -36,13 +36,13 @@ class TestMapfWithRl(unittest.TestCase):
             [2, 1]])  # this will block
 
     def test_scenario_init_useful(self):
-        s = Scenario((self.env, self.starts, self.goals))
+        s = Scenario((self.env, self.starts, self.goals), True)
         self.assertTrue(s.useful)
 
     def test_scenario_init_not_useful(self):
         env_blocked = self.env.copy()
         env_blocked[1, 1] = 1
-        s = Scenario((env_blocked, self.starts, self.goals))
+        s = Scenario((env_blocked, self.starts, self.goals), True)
         self.assertFalse(s.useful)
 
     def _data_equality(self, a: Data, b: Data):
@@ -57,12 +57,12 @@ class TestMapfWithRl(unittest.TestCase):
 
     def test_scenario_running(self):
         # Different actions lead to different results.
-        s0 = Scenario((self.env, self.starts, self.goals))
+        s0 = Scenario((self.env, self.starts, self.goals), False)
         first_state_0 = s0.start()
         second_state_action_0, reward_0 = s0.step(0)
         self.assertEqual(reward_0, 0)
 
-        s1 = Scenario((self.env, self.starts, self.goals))
+        s1 = Scenario((self.env, self.starts, self.goals), False)
         self.assertEqual(s1.agent_first_raised, None)
         first_state_1 = s1.start()
         self.assertEqual(s1.agent_first_raised, 0)
@@ -84,9 +84,9 @@ class TestMapfWithRl(unittest.TestCase):
         self.assertEqual(reward_0, s0.UNSUCCESSFUL_COST)
 
     def test_make_useful_scenarios(self):
-        scenarios_0 = make_useful_scenarios(3, 0)
+        scenarios_0 = make_useful_scenarios(3, 0, True)
         self.assertEqual(len(scenarios_0), 3)
-        scenarios_1 = make_useful_scenarios(3, 1)
+        scenarios_1 = make_useful_scenarios(3, 1, True)
         self.assertEqual(len(scenarios_1), 3)
 
         for s in scenarios_0 + scenarios_1:

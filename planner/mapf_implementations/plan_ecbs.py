@@ -44,7 +44,6 @@ def to_inputfile(gridmap, starts, goals, fname):
 def read_outfile(fname):
     with open(fname, 'r') as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
-    print(data)
     return data
 
 
@@ -117,20 +116,35 @@ def plan_in_gridmap(gridmap: np.ndarray, starts, goals,
 
 
 if __name__ == "__main__":
+    # gridmap = np.array([
+    #     [0, 0, 1, 0],
+    #     [0, 0, 1, 0],
+    #     [0, 0, 0, 0],
+    #     [0, 0, 1, 0],
+    #     [0, 0, 1, 0],
+    # ])
+    # starts = [
+    #     [0, 1],
+    #     [4, 1]
+    # ]
+    # goals = [
+    #     [0, 3],
+    #     [4, 3]
+    # ]
+    # res = plan_in_gridmap(gridmap, starts, goals, 1.5, 10, True)
+    # print(res)
+
     gridmap = np.array([
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
+        [0, 0, 1, 1],
+        [0, 0, 0, 1],
         [0, 0, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
+        [0, 0, 0, 1]
     ])
-    starts = [
-        [0, 1],
-        [4, 1]
-    ]
-    goals = [
-        [0, 3],
-        [4, 3]
-    ]
+    starts = [[1, 2],
+              [3, 2],
+              [2, 1]]
+    goals = [[3, 0],
+             [2, 2],
+             [0, 0]]
     res = plan_in_gridmap(gridmap, starts, goals, 1.5, 10, True)
     print(res)
