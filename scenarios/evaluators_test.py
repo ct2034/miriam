@@ -173,6 +173,7 @@ class TestEvaluators(unittest.TestCase):
                 timeout=TEST_TIMEOUT/2)
         )
 
+    @pytest.mark.skip  # current version does not return blocks
     def test_blocks_ecbs(self):
         # agents that collide on vertex
         starts_vertex = np.array([

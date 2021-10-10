@@ -51,15 +51,15 @@ def read_outfile(fname):
 def call_subprocess(fname_infile, fname_outfile,
                     suboptimality, timeout, disappear_at_goal):
     start_time = time.time()
-    cost = INVALID
-    out_data = None
+    out_data = INVALID
     t = 0
     cmd = [
         os.path.dirname(__file__) + "/libMultiRobotPlanning/build/ecbs",
         "-i", fname_infile,
         "-o", fname_outfile,
-        "-w", str(suboptimality),
-        "--disappear-at-goal"]
+        "-w", str(suboptimality)]
+    if disappear_at_goal:
+        cmd.append("--disappear-at-goal")
     logger.info(" ".join(cmd))
     try:
         process = subprocess.Popen(
