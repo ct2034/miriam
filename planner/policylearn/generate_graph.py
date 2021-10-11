@@ -49,23 +49,25 @@ def gridmap_to_graph(gridmap):
     return data_edge_index, data_pos
 
 
-def get_agent_pos_layer(data_pos, paths_until_col, i_a):
+def get_agent_pos_layer(data_pos, paths_until_col, i_as):
     n_nodes = data_pos.shape[0]
     data_x_slice = torch.zeros((n_nodes, 1))
-    pos = paths_until_col[i_a][0]
-    node = pos_to_node(data_pos, pos)
-    assert node is not None
-    data_x_slice[node, 0] = 1
-    return data_x_slice
-
-
-def get_agent_path_layer(data_pos, paths_full, i_a):
-    n_nodes = data_pos.shape[0]
-    data_x_slice = torch.zeros((n_nodes, 1))
-    for pos in paths_full[i_a]:
+    for i_a in i_as:
+        pos = paths_until_col[i_a][0]
         node = pos_to_node(data_pos, pos)
         assert node is not None
         data_x_slice[node, 0] = 1
+    return data_x_slice
+
+
+def get_agent_path_layer(data_pos, paths_full, i_as):
+    n_nodes = data_pos.shape[0]
+    data_x_slice = torch.zeros((n_nodes, 1))
+    for i_a in i_as:
+        for pos in paths_full[i_a]:
+            node = pos_to_node(data_pos, pos)
+            assert node is not None
+            data_x_slice[node, 0] = 1
     return data_x_slice
 
 

@@ -255,8 +255,14 @@ class LearnedRaisingPolicy(LearnedPolicy):
         elif self.a.has_roadmap:
             raise NotImplementedError()
         ids = ([self.a.id]+list(self.paths.keys()))
+        # this agent
         i_a = 0
-        i_oa = ids.index(id_coll)
+        # colliding agent
+        i_ca = ids.index(id_coll)
+        # other agents
+        i_oas = [i for i in range(len(ids)) if (
+            i != 0 and i != i_ca
+        )]
         self.path_is[self.a.id] = self.a.path_i
         paths_full = ([self.a.path] +
                       list(self.paths.values()))
@@ -265,12 +271,15 @@ class LearnedRaisingPolicy(LearnedPolicy):
             paths_until_col.append(self._path_until_coll(
                 paths_full[i_id], self.path_is[id], None))
         data_x = torch.cat((
-            get_agent_pos_layer(data_pos, paths_until_col, i_a),
-            get_agent_path_layer(data_pos, paths_until_col, i_a),
-            get_agent_path_layer(data_pos, paths_full, i_a),
-            get_agent_pos_layer(data_pos, paths_until_col, i_oa),
-            get_agent_path_layer(data_pos, paths_until_col, i_oa),
-            get_agent_path_layer(data_pos, paths_full, i_oa),
+            get_agent_pos_layer(data_pos, paths_until_col, [i_a]),
+            get_agent_path_layer(data_pos, paths_until_col, [i_a]),
+            get_agent_path_layer(data_pos, paths_full, [i_a]),
+            get_agent_pos_layer(data_pos, paths_until_col, [i_ca]),
+            get_agent_path_layer(data_pos, paths_until_col, [i_ca]),
+            get_agent_path_layer(data_pos, paths_full, [i_ca]),
+            get_agent_pos_layer(data_pos, paths_until_col, i_oas),
+            get_agent_path_layer(data_pos, paths_until_col, i_oas),
+            get_agent_path_layer(data_pos, paths_full, i_oas),
         ), 1)
         return Data(
             x=data_x,

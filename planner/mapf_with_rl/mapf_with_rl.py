@@ -288,8 +288,8 @@ def q_learning(n_episodes: int, eps_start: float,
     data_test = make_useful_scenarios(
         n_data_test, n_episodes * 11, ignore_finished_agents)
 
-    qfun = Qfunction(6, 2, 16)
-    qfun_hat = Qfunction(6, 2, 16)
+    qfun = Qfunction(9, 2, 16)
+    qfun_hat = Qfunction(9, 2, 16)
     qfun.copy_to(qfun_hat)
 
     # replay memory
