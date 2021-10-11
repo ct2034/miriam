@@ -253,9 +253,9 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
         if successful:
             suboptimality = average_time - scenario.ecbs_cost
             suboptimalities.append(suboptimality)
-            if (suboptimality < 0 and
-                    not isclose(suboptimality, 0, abs_tol=1E-5)):
-                logging.warning(f"suboptimality: {suboptimality}")
+            # if (suboptimality < 0 and
+            #         not isclose(suboptimality, 0, abs_tol=1E-5)):
+            #     logging.warning(f"suboptimality: {suboptimality}")
     mean_successful = np.mean(np.array(successfuls))
     mean_suboptimality = np.mean(np.array(suboptimalities))
     print(f"successful: {mean_successful:.2f}, " +
@@ -275,6 +275,8 @@ def q_learning(n_episodes: int, eps_start: float,
     :param c: reset qfun_hat every c episodes
     :param gamma: discout factor for future rewards
     :param n_training_batch: size of training minibatch
+    :param ignore_finished_agents: wether or not to ignore agents at their 
+           goal pose
     """
     time_limit = 100
 
