@@ -404,9 +404,6 @@ def q_learning(n_episodes: int, eps_start: float,
 
 
 if __name__ == "__main__":
-    # ignoring errors in libMultiRobotPlanning
-    logging.getLogger(
-        'planner.mapf_implementations.plan_ecbs').setLevel(logging.FATAL)
     torch.manual_seed(0)
     q_learning(
         n_episodes=2000,
