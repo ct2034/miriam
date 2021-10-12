@@ -125,15 +125,15 @@ class Scenario(object):
         return state, reward
 
 
-def make_useful_scenarios(n: int, seed, ignore_finished_agents) -> List[Scenario]:
+def make_useful_scenarios(n: int, seed, ignore_finished_agents, size, n_agents) -> List[Scenario]:
     scenarios: List[Scenario] = []
     if n > 1:
         pb = ProgressBar("Data Generation", n, 5)
     while len(scenarios) < n:
         scen_data: SCENARIO_TYPE = tracing_pathes_in_the_dark(
-            size=4,
-            fill=.2,
-            n_agents=3,
+            size=size,
+            fill=.4,
+            n_agents=n_agents,
             seed=seed)
         seed += 1
         (env, starts, goals) = scen_data
@@ -284,10 +284,14 @@ def q_learning(n_episodes: int, eps_start: float,
     eps_end = .01
     eps_alpha = -1 * log(eps_end / eps_start) / n_episodes
 
+    # testing scenarios
     n_data_test = 100
     data_test = make_useful_scenarios(
-        n_data_test, n_episodes * 11, ignore_finished_agents)
+        n_data_test, n_episodes * 11, ignore_finished_agents, 4, 3)
+    data_test_bigger = make_useful_scenarios(
+        n_data_test, n_episodes * 11, ignore_finished_agents, 8, 6)
 
+    # init qfun
     qfun = Qfunction(9, 2, 16)
     qfun_hat = Qfunction(9, 2, 16)
     qfun.copy_to(qfun_hat)
@@ -302,27 +306,39 @@ def q_learning(n_episodes: int, eps_start: float,
         qfun.parameters(),
         lr=1e-3)  # default
 
+    # size changes
+    training_sizes = {
+        .0: (4, 3),
+        .5: (5, 4),
+        .75: (5, 5),
+        .8: (8, 6)
+    }
+
     # stats
     epsilons = []
     rewards = []
     loss_s = []
     eval_success = []
     eval_subopt = []
-    # eval_hat_success = []
-    # eval_hat_subopt = []
     eval_success_inv = []
     eval_subopt_inv = []
-    # eval_hat_success_inv = []
-    # eval_hat_subopt_inv = []
+    eval_success_bigger = []
+    eval_subopt_bigger = []
+    eval_success_inv_bigger = []
+    eval_subopt_inv_bigger = []
     stat_every = max(1, int(n_episodes / 100))
-    eval_every = max(1, int(n_episodes / 20))
+    eval_every = max(1, int(n_episodes / 50))
     i_o = 0  # count optimizations
 
     pb = ProgressBar("Epochs", n_episodes, 5)
     # 1
     for i_e in range(n_episodes):
         # 2
-        [scenario] = make_useful_scenarios(1, i_e * 10, ignore_finished_agents)
+        for progress in sorted(training_sizes.keys()):
+            if i_e >= int(n_episodes * progress):
+                size, n_agents = training_sizes[progress]
+        [scenario] = make_useful_scenarios(
+            1, i_e * 10, ignore_finished_agents, size, n_agents)
         epsilon = eps_start * exp(-eps_alpha * i_e)
         state = scenario.start()
         next_state = None
@@ -381,6 +397,16 @@ def q_learning(n_episodes: int, eps_start: float,
                 inverse=True)
             eval_success_inv.append(success_inv)
             eval_subopt_inv.append(subopt_inv)
+            success_bigger, subopt_bigger = evaluate(
+                data_test_bigger, qfun, ignore_finished_agents,
+                inverse=False)
+            eval_success_bigger.append(success_bigger)
+            eval_subopt_bigger.append(subopt_bigger)
+            success_inv_bigger, subopt_inv_bigger = evaluate(
+                data_test_bigger, qfun, ignore_finished_agents,
+                inverse=True)
+            eval_success_inv_bigger.append(success_inv_bigger)
+            eval_subopt_inv_bigger.append(subopt_inv_bigger)
         del scenario
         del state
         del next_state
@@ -395,9 +421,13 @@ def q_learning(n_episodes: int, eps_start: float,
     ax1.legend()
     ax2.plot(eval_success, label="eval_success")
     ax2.plot(eval_success_inv, label="eval_success_inv")
+    ax2.plot(eval_success_bigger, label="eval_success_bigger")
+    ax2.plot(eval_success_inv_bigger, label="eval_success_inv_bigger")
     ax2.legend()
     ax3.plot(eval_subopt, label="eval_subopt")
     ax3.plot(eval_subopt_inv, label="eval_subopt_inv")
+    ax3.plot(eval_subopt_bigger, label="eval_subopt_bigger")
+    ax3.plot(eval_subopt_inv_bigger, label="eval_subopt_inv_bigger")
     ax3.legend()
     plt.savefig('planner/mapf_with_rl/mapf_with_rl.png')
     plt.show()
