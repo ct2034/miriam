@@ -218,13 +218,13 @@ def sample_random_minibatch(n: int, d, qfun_hat, gamma: float):
 
 def train(training_batch, qfun, optimizer):
     qfun.train()
-    losss = torch.zeros(len(training_batch))
+    loss_s = torch.zeros(len(training_batch))
     for i_b, tb in enumerate(training_batch):
         (state, action, y) = tb
         qvals = qfun(state)
         loss = (y - qvals[0, action]) ** 2
-        losss[i_b] = loss
-    mean_loss = torch.mean(losss)
+        loss_s[i_b] = loss
+    mean_loss = torch.mean(loss_s)
     optimizer.zero_grad()
     mean_loss.backward()
     optimizer.step()
@@ -232,8 +232,8 @@ def train(training_batch, qfun, optimizer):
 
 
 def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
-    successfuls = []
-    suboptimalities = []
+    successful_s = []
+    suboptimality_s = []
     qfun.eval()
     for scenario in data_test:
         for a in scenario.agents:
@@ -249,15 +249,15 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
                              ignore_finished_agents=ignore_finished_agents)
         assert not has_exception(res)
         (average_time, _, _, _, successful) = res
-        successfuls.append(successful)
+        successful_s.append(successful)
         if successful:
             suboptimality = average_time - scenario.ecbs_cost
-            suboptimalities.append(suboptimality)
+            suboptimality_s.append(suboptimality)
             # if (suboptimality < 0 and
             #         not isclose(suboptimality, 0, abs_tol=1E-5)):
             #     logging.warning(f"suboptimality: {suboptimality}")
-    mean_successful = np.mean(np.array(successfuls))
-    mean_suboptimality = np.mean(np.array(suboptimalities))
+    mean_successful = np.mean(np.array(successful_s))
+    mean_suboptimality = np.mean(np.array(suboptimality_s))
     print(f"successful: {mean_successful:.2f}, " +
           f"suboptimality: {mean_suboptimality:.2f}, " +
           f"inv: {inverse}")
@@ -305,14 +305,14 @@ def q_learning(n_episodes: int, eps_start: float,
     # stats
     epsilons = []
     rewards = []
-    losss = []
-    eval_succ = []
+    loss_s = []
+    eval_success = []
     eval_subopt = []
-    # eval_hat_succ = []
+    # eval_hat_success = []
     # eval_hat_subopt = []
-    eval_succ_inv = []
+    eval_success_inv = []
     eval_subopt_inv = []
-    # eval_hat_succ_inv = []
+    # eval_hat_success_inv = []
     # eval_hat_subopt_inv = []
     stat_every = max(1, int(n_episodes / 100))
     eval_every = max(1, int(n_episodes / 20))
@@ -367,19 +367,19 @@ def q_learning(n_episodes: int, eps_start: float,
             qfun.copy_to(qfun_hat)
         if i_e % stat_every == 0:
             rewards.append(reward)
-            losss.append(float(loss))
+            loss_s.append(float(loss))
             epsilons.append(epsilon)
         if i_e % eval_every == 0:
             # evaluation qfun
-            succ, subopt = evaluate(
+            success, subopt = evaluate(
                 data_test, qfun, ignore_finished_agents,
                 inverse=False)
-            eval_succ.append(succ)
+            eval_success.append(success)
             eval_subopt.append(subopt)
-            succ_inv, subopt_inv = evaluate(
+            success_inv, subopt_inv = evaluate(
                 data_test, qfun, ignore_finished_agents,
                 inverse=True)
-            eval_succ_inv.append(succ_inv)
+            eval_success_inv.append(success_inv)
             eval_subopt_inv.append(subopt_inv)
         del scenario
         del state
@@ -391,10 +391,10 @@ def q_learning(n_episodes: int, eps_start: float,
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
     ax1.plot(epsilons, label="epsilon")
     ax1.plot(rewards, label="reward")
-    ax1.plot(losss, label="loss")
+    ax1.plot(loss_s, label="loss")
     ax1.legend()
-    ax2.plot(eval_succ, label="eval_succ")
-    ax2.plot(eval_succ_inv, label="eval_succ_inv")
+    ax2.plot(eval_success, label="eval_success")
+    ax2.plot(eval_success_inv, label="eval_success_inv")
     ax2.legend()
     ax3.plot(eval_subopt, label="eval_subopt")
     ax3.plot(eval_subopt_inv, label="eval_subopt_inv")
