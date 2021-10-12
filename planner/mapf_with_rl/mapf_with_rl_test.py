@@ -84,9 +84,9 @@ class TestMapfWithRl(unittest.TestCase):
         self.assertEqual(reward_0, s0.UNSUCCESSFUL_COST)
 
     def test_make_useful_scenarios(self):
-        scenarios_0 = make_useful_scenarios(3, 0, True)
+        scenarios_0 = make_useful_scenarios(3, 0, True, 10, 10)
         self.assertEqual(len(scenarios_0), 3)
-        scenarios_1 = make_useful_scenarios(3, 1, True)
+        scenarios_1 = make_useful_scenarios(3, 1, True, 10, 10)
         self.assertEqual(len(scenarios_1), 3)
 
         for s in scenarios_0 + scenarios_1:
