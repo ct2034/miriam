@@ -29,7 +29,7 @@ from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
 
 def get_ecbs_cost(scen: SCENARIO_TYPE, ignore_finished_agents: bool):
     env, starts, goals = scen
-    data = plan_in_gridmap(env, starts, goals, 1.2, 5, ignore_finished_agents)
+    data = plan_in_gridmap(env, starts, goals, 1.0, 5, ignore_finished_agents)
     if data is INVALID:
         return INVALID
     cost = data['statistics']['cost']
@@ -286,7 +286,7 @@ def q_learning(n_episodes: int, eps_start: float,
 
     # testing scenarios
     n_data_test = 100
-    data_test = make_useful_scenarios(
+    data_test_small = make_useful_scenarios(
         n_data_test, n_episodes * 11, ignore_finished_agents, 4, 3)
     data_test_bigger = make_useful_scenarios(
         n_data_test, n_episodes * 11, ignore_finished_agents, 8, 6)
@@ -309,9 +309,9 @@ def q_learning(n_episodes: int, eps_start: float,
     # size changes
     training_sizes = {
         .0: (4, 3),
-        .5: (5, 4),
-        .75: (5, 5),
-        .8: (8, 6)
+        .7: (5, 4),
+        .8: (5, 5),
+        .9: (8, 6)
     }
 
     # stats
@@ -387,16 +387,18 @@ def q_learning(n_episodes: int, eps_start: float,
             epsilons.append(epsilon)
         if i_e % eval_every == 0:
             # evaluation qfun
+            print("small")
             success, subopt = evaluate(
-                data_test, qfun, ignore_finished_agents,
+                data_test_small, qfun, ignore_finished_agents,
                 inverse=False)
             eval_success.append(success)
             eval_subopt.append(subopt)
             success_inv, subopt_inv = evaluate(
-                data_test, qfun, ignore_finished_agents,
+                data_test_small, qfun, ignore_finished_agents,
                 inverse=True)
             eval_success_inv.append(success_inv)
             eval_subopt_inv.append(subopt_inv)
+            print("big")
             success_bigger, subopt_bigger = evaluate(
                 data_test_bigger, qfun, ignore_finished_agents,
                 inverse=False)
@@ -436,7 +438,7 @@ def q_learning(n_episodes: int, eps_start: float,
 if __name__ == "__main__":
     torch.manual_seed(0)
     q_learning(
-        n_episodes=2000,
+        n_episodes=500,
         eps_start=.9,
         c=10,
         gamma=.99,
