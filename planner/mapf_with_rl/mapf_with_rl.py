@@ -67,7 +67,8 @@ class Scenario(object):
 
     def start(self) -> Data:
         state, reward = self._run()
-        assert reward == 0
+        if state is None:
+            print("state is None right after start")
         return state
 
     def step(self, action) -> Tuple[Optional[Data], float]:
@@ -137,7 +138,7 @@ def make_useful_scenarios(n: int, seed, ignore_finished_agents, size, n_agents) 
             seed=seed)
         seed += 1
         (env, starts, goals) = scen_data
-        collide, _ = will_they_collide_in_scen(env, starts, goals)
+        collide, _ = will_they_collide_in_scen(env, starts, goals, ignore_finished_agents)
         if collide:
             scen = Scenario(scen_data, ignore_finished_agents)
             if scen.useful:

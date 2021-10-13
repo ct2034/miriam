@@ -1,11 +1,12 @@
 import gym
+from gym.spaces import Discrete
+from planner.mapf_with_rl.gym_mapf_gcn_policy import GcnPolicy
 from stable_baselines3 import DQN
 from stable_baselines3.dqn.policies import MlpPolicy
 
 env = gym.make("gym_mapf:mapf-v0")
 
-policy = MlpPolicy()
-model = DQN(policy, env, verbose=1)
+model = DQN(GcnPolicy, env, verbose=1)
 model.learn(total_timesteps=10000, log_interval=4)
 
 obs = env.reset()
