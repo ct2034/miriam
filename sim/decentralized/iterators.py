@@ -342,6 +342,6 @@ def get_iterator_fun(type: IteratorType):
     if type is IteratorType.WAITING:
         return iterate_waiting
     elif type is IteratorType.BLOCKING1:
-        return lambda agents, ignor_fa: iterate_blocking(agents, 1, ignor_fa)
+        return lambda agents, ignore_fa: iterate_blocking(agents, 1, ignore_fa)
     elif type is IteratorType.BLOCKING3:
-        return lambda agents, ignor_fa: iterate_blocking(agents, 3, ignor_fa)
+        return lambda agents, ignore_fa: iterate_blocking(agents, 3, ignore_fa)

@@ -153,10 +153,15 @@ class Qfunction(torch.nn.Module):
     def __init__(self, num_node_features, num_actions,
                  hidden_channels) -> None:
         super().__init__()
+        INIT_STD = .01
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
         # self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels*3, num_actions)
+
+        for net in [self.conv1, self.conv2, self.lin]:
+            torch.nn.init.normal_(net.weight, 0, INIT_STD)
+            torch.nn.init.normal_(net.bias, 0, INIT_STD)
 
     def forward(self, data: Data):
         x = data.x
@@ -288,8 +293,8 @@ def q_learning(n_episodes: int, eps_start: float,
     n_data_test = 100
     data_test_small = make_useful_scenarios(
         n_data_test, n_episodes * 11, ignore_finished_agents, 4, 3)
-    data_test_bigger = make_useful_scenarios(
-        n_data_test, n_episodes * 11, ignore_finished_agents, 8, 6)
+    # data_test_bigger = make_useful_scenarios(
+    #     n_data_test, n_episodes * 11, ignore_finished_agents, 8, 6)
 
     # init qfun
     qfun = Qfunction(9, 2, 16)
@@ -299,7 +304,7 @@ def q_learning(n_episodes: int, eps_start: float,
     # replay memory
     # (state, action, reward, next state)
     d: List[Tuple[Data, int, float, Optional[Data]]] = []
-    d_max_len = 200
+    d_max_len = n_training_batch * 3
 
     # optimizer
     optimizer = torch.optim.Adam(
@@ -309,23 +314,25 @@ def q_learning(n_episodes: int, eps_start: float,
     # size changes
     training_sizes = {
         .0: (4, 3),
-        .7: (5, 4),
-        .8: (5, 5),
-        .9: (8, 6)
+        # .7: (5, 4),
+        # .8: (5, 5),
+        # .9: (8, 6)
     }
 
     # stats
     epsilons = []
     rewards = []
     loss_s = []
+    max_q = []
+    min_q = []
     eval_success = []
     eval_subopt = []
     eval_success_inv = []
     eval_subopt_inv = []
-    eval_success_bigger = []
-    eval_subopt_bigger = []
-    eval_success_inv_bigger = []
-    eval_subopt_inv_bigger = []
+    # eval_success_bigger = []
+    # eval_subopt_bigger = []
+    # eval_success_inv_bigger = []
+    # eval_subopt_inv_bigger = []
     stat_every = max(1, int(n_episodes / 100))
     eval_every = max(1, int(n_episodes / 50))
     i_o = 0  # count optimizations
@@ -351,7 +358,8 @@ def q_learning(n_episodes: int, eps_start: float,
                     action = int(random.random())
                 else:  # exploitation
                     # 5
-                    action, _ = qfun.get_action_and_q_value_training(state)
+                    action, [qvals] = qfun.get_action_and_q_value_training(
+                        state)
                 # 6
                 next_state, reward = scenario.step(action)
                 # 7
@@ -385,6 +393,8 @@ def q_learning(n_episodes: int, eps_start: float,
             rewards.append(reward)
             loss_s.append(float(loss))
             epsilons.append(epsilon)
+            max_q.append(float(max(qvals)))
+            min_q.append(float(min(qvals)))
         if i_e % eval_every == 0:
             # evaluation qfun
             print("small")
@@ -398,17 +408,17 @@ def q_learning(n_episodes: int, eps_start: float,
                 inverse=True)
             eval_success_inv.append(success_inv)
             eval_subopt_inv.append(subopt_inv)
-            print("big")
-            success_bigger, subopt_bigger = evaluate(
-                data_test_bigger, qfun, ignore_finished_agents,
-                inverse=False)
-            eval_success_bigger.append(success_bigger)
-            eval_subopt_bigger.append(subopt_bigger)
-            success_inv_bigger, subopt_inv_bigger = evaluate(
-                data_test_bigger, qfun, ignore_finished_agents,
-                inverse=True)
-            eval_success_inv_bigger.append(success_inv_bigger)
-            eval_subopt_inv_bigger.append(subopt_inv_bigger)
+            # print("big")
+            # success_bigger, subopt_bigger = evaluate(
+            #     data_test_bigger, qfun, ignore_finished_agents,
+            #     inverse=False)
+            # eval_success_bigger.append(success_bigger)
+            # eval_subopt_bigger.append(subopt_bigger)
+            # success_inv_bigger, subopt_inv_bigger = evaluate(
+            #     data_test_bigger, qfun, ignore_finished_agents,
+            #     inverse=True)
+            # eval_success_inv_bigger.append(success_inv_bigger)
+            # eval_subopt_inv_bigger.append(subopt_inv_bigger)
         del scenario
         del state
         del next_state
@@ -417,19 +427,24 @@ def q_learning(n_episodes: int, eps_start: float,
 
     # print stats
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    ax1.plot(epsilons, label="epsilon")
-    ax1.plot(rewards, label="reward")
-    ax1.plot(loss_s, label="loss")
+    ax1.plot(epsilons, label="epsilon", linewidth=1)
+    ax1.plot(rewards, label="reward", linewidth=1)
+    ax1.plot(loss_s, label="loss", linewidth=1)
+    ax1.plot(max_q, label="max_q", linewidth=1)
+    ax1.plot(min_q, label="min_q", linewidth=1)
+    ax1.set_ylim(bottom=-1)
+    ax1.spines.bottom.set_position('zero')
+    ax1.spines.top.set_color('none')
     ax1.legend()
-    ax2.plot(eval_success, label="eval_success")
-    ax2.plot(eval_success_inv, label="eval_success_inv")
-    ax2.plot(eval_success_bigger, label="eval_success_bigger")
-    ax2.plot(eval_success_inv_bigger, label="eval_success_inv_bigger")
+    ax2.plot(eval_success, label="eval_success", linewidth=1)
+    ax2.plot(eval_success_inv, label="eval_success_inv", linewidth=1)
+    # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=1)
+    # ax2.plot(eval_success_inv_bigger, label="eval_success_inv_bigger", linewidth=1)
     ax2.legend()
-    ax3.plot(eval_subopt, label="eval_subopt")
-    ax3.plot(eval_subopt_inv, label="eval_subopt_inv")
-    ax3.plot(eval_subopt_bigger, label="eval_subopt_bigger")
-    ax3.plot(eval_subopt_inv_bigger, label="eval_subopt_inv_bigger")
+    ax3.plot(eval_subopt, label="eval_subopt", linewidth=1)
+    ax3.plot(eval_subopt_inv, label="eval_subopt_inv", linewidth=1)
+    # ax3.plot(eval_subopt_bigger, label="eval_subopt_bigger", linewidth=1)
+    # ax3.plot(eval_subopt_inv_bigger, label="eval_subopt_inv_bigger", linewidth=1)
     ax3.legend()
     plt.savefig('planner/mapf_with_rl/mapf_with_rl.png')
     plt.show()
@@ -438,7 +453,7 @@ def q_learning(n_episodes: int, eps_start: float,
 if __name__ == "__main__":
     torch.manual_seed(0)
     q_learning(
-        n_episodes=500,
+        n_episodes=2000,
         eps_start=.9,
         c=10,
         gamma=.99,
