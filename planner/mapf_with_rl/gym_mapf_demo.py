@@ -7,7 +7,12 @@ from stable_baselines3.dqn.policies import MlpPolicy
 
 env = gym.make("gym_mapf:mapf-v0")
 
-model = DQN(GcnPolicy, env, verbose=1)
+model = DQN(
+    GcnPolicy,
+    env,
+    verbose=1,
+    learning_starts=100,
+    buffer_size=1000)
 model.learn(total_timesteps=10000, log_interval=100)
 
 # testing this
