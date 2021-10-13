@@ -161,14 +161,16 @@ def check_time_evaluation(time_progress, space_progress
     return average_time, max_time, average_length, max_length
 
 
-def will_they_collide_in_scen(env, starts, goals):
+def will_they_collide_in_scen(env, starts, goals, ignore_finished_agents):
     """checks if for a given set of starts and goals the agents travelling
     between may collide on the given env."""
-    return will_agents_collide(to_agent_objects(env, starts, goals))
+    return will_agents_collide(to_agent_objects(env, starts, goals), ignore_finished_agents)
 
 
-def will_agents_collide(agents):
+def will_agents_collide(agents, ignore_finished_agents):
     """Checks agents in list if they will collide."""
+    if ignore_finished_agents == False:
+        raise NotImplementedError()
     do_collide = False
     seen = set()
     agent_paths = []

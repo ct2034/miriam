@@ -213,6 +213,13 @@ class TestAgent(unittest.TestCase):
         self.assertTrue(all(a.pos == np.array(next_step)))
         self.assertTrue(a.is_at_goal())
 
+    def test_same_start_and_goal(self):
+        """if agents have same start and goal, the path should only be one long."""
+        a = Agent(np.zeros((5, 5)), (2, 3))
+        a.give_a_goal((2, 3))
+        self.assertTrue(a.is_at_goal())
+        self.assertEqual(len(a.path), 1)
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

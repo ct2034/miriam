@@ -247,7 +247,7 @@ class Agent(Generic[C, N]):
         end = None
         assert p[-1][:-1] == goal
         i = len(p) - 1
-        while i > 0 or end is None:
+        while i >= 0 or end is None:
             if p[i][:-1] == goal:
                 end = i+1
             i -= 1
