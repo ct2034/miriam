@@ -17,6 +17,11 @@ class GcnPolicy(MlpPolicy):
         print(f"{kwargs}")
         self.q_net = Qfunction(9, 2, 16)
         self.q_net_target = Qfunction(9, 2, 16)
+        assert self.q_net is not None
+        self.optimizer = torch.optim.Adam(
+            self.q_net.parameters(),
+            lr=1e-3)  # default
+        self.q_net._predict = lambda a: print(a)
 
     def forward(self, obs: tn.Tensor, deterministic: bool = True) -> tn.Tensor:
         return torch.zeros(2)
