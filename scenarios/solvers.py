@@ -11,10 +11,10 @@ from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 from scenarios import storage
 
+# ecbs ########################################################################
+
 SCHEDULE = 'schedule'
 AGENT = 'agent'
-
-# ecbs ########################################################################
 
 
 def cached_ecbs(env, starts, goals,
