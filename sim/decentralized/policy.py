@@ -1,5 +1,4 @@
 import logging
-import random
 from collections import OrderedDict
 from enum import Enum, auto
 from typing import Optional
@@ -93,7 +92,7 @@ class RandomPolicy(Policy):
         super().__init__(agent)
 
     def get_priority(self, _) -> float:
-        return random.random()
+        return self.a.rng.random()
 
 
 class ClosestPolicy(Policy):
@@ -347,4 +346,4 @@ class FirstThenRandomPolicy(Policy):
         if self.first_call:
             self.first_call = False
             return self.first_return_value
-        return random.random()
+        return self.a.rng.random()

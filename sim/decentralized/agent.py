@@ -21,7 +21,9 @@ COST = "cost"
 class Agent(Generic[C, N]):
     def __init__(
         self, env: POTENTIAL_ENV_TYPE, pos: C,
-        policy: PolicyType = PolicyType.RANDOM, env_nx: Optional[nx.Graph] = None
+        policy: PolicyType = PolicyType.RANDOM,
+        env_nx: Optional[nx.Graph] = None,
+        rng: random.Random = random.Random()
     ):
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
@@ -50,7 +52,8 @@ class Agent(Generic[C, N]):
         self.path: Union[List[N], None] = None
         self.path_i: Union[int, None] = None
         self.policy: Policy = Policy.construct_by_type(policy, self)
-        self.id: int = random.randint(0, int(2E14))
+        self.rng = rng
+        self.id: int = self.rng.randint(0, int(2E14))
         self.blocked_edges: BLOCKED_EDGES_TYPE = set()
         self.blocked_nodes: BLOCKED_NODES_TYPE = set()
 

@@ -16,11 +16,10 @@ logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 
 def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
-                             seed: float = random.random()):
-    random.seed(seed)
+                             rng: random.Random):
     agents = sim.decentralized.runner.initialize_agents(
         env, n_agents, PolicyType.RANDOM,
-        tight_placement=True, seed=seed)
+        tight_placement=True, rng=rng)
     assert agents is not None
     starts = np.array([a.pos for a in agents])
     assert starts.shape == (n_agents, 2)
@@ -32,52 +31,52 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
 # random ######################################################################
 
 def random_fill(size: int, fill: float,
-                n_agents: int, seed: float):
+                n_agents: int, rng: random.Random):
     """Randomly filling spaces in gridmap based on `fill`."""
-    random.seed(seed)
     env = sim.decentralized.runner.initialize_environment(
-        size, fill, seed=seed)
-    starts, goals = make_starts_goals_on_env(env, n_agents, seed=seed)
+        size, fill, rng=rng)
+    starts, goals = make_starts_goals_on_env(env, n_agents, rng=rng)
     return env, starts, goals
 
 
 # this was previously in planner.policylearn.generate_data
-def generate_random_gridmap(width: int, height: int, fill: float):
+def generate_random_gridmap(
+        width: int, height: int, fill: float, rng: random.Random):
     """Making a random gridmap of size (`width`x`height`). It will be filled
     with stripes until `fill` is exceeded and then single cells are freed until
     `fill` is exactly reached."""
     gridmap = np.zeros((width, height), dtype=np.int8)
     while np.count_nonzero(gridmap) < fill * width * height:
-        direction = random.randint(0, 1)
+        direction = rng.randint(0, 1)
         start = (
-            random.randint(0, width-1),
-            random.randint(0, height-1)
+            rng.randint(0, width-1),
+            rng.randint(0, height-1)
         )
         if direction:  # x
-            gridmap[start[0]:random.randint(0, width-1), start[1]] = OBSTACLE
+            gridmap[start[0]:rng.randint(0, width-1), start[1]] = OBSTACLE
         else:  # y
-            gridmap[start[0], start[1]:random.randint(0, height-1)] = OBSTACLE
+            gridmap[start[0], start[1]:rng.randint(0, height-1)] = OBSTACLE
     while np.count_nonzero(gridmap) > fill * width * height:
         make_free = (
-            random.randint(0, width-1),
-            random.randint(0, height-1)
+            rng.randint(0, width-1),
+            rng.randint(0, height-1)
         )
         gridmap[make_free] = FREE
     return gridmap
 
 
 def stripes(size: int, fill: float,
-            n_agents: int, seed: float):
-    random.seed(seed)
+            n_agents: int, rng: random.Random):
     env = generate_random_gridmap(
-        size, size, fill)
-    starts, goals = make_starts_goals_on_env(env, n_agents)
+        size, size, fill, rng)
+    starts, goals = make_starts_goals_on_env(env, n_agents, rng)
     return env, starts, goals
 
 # tracing pathes in the dark ##################################################
 
 
-def get_random_next_to_free_pose_or_any_if_full(env):
+def get_random_next_to_free_pose_or_any_if_full(
+        env: np.ndarray, rng: random.Random):
     """If there are free spaces in the map, return a random free pose.
     From that we step in a random direction.
     If map is fully black, return any pose."""
@@ -87,9 +86,9 @@ def get_random_next_to_free_pose_or_any_if_full(env):
     else:
         samples = np.where(env == FREE)
     n_samples = len(samples[1])
-    r = random.randrange(n_samples)
+    r = rng.randrange(n_samples)
     basic_pos = np.array(samples)[:, r]
-    r_step = random.choice([[0, 1], [0, -1], [1, 0], [-1, 0]])
+    r_step = rng.choice([[0, 1], [0, -1], [1, 0], [-1, 0]])
     step_pos = basic_pos + r_step
     if (step_pos[0] < 0 or step_pos[1] < 0 or
             step_pos[0] >= size or step_pos[1] >= size):
@@ -99,27 +98,22 @@ def get_random_next_to_free_pose_or_any_if_full(env):
 
 
 def tracing_pathes_in_the_dark(size: int, fill: float,
-                               n_agents: int, seed: Union[float, int]):
+                               n_agents: int, rng: random.Random):
     """Starting with a black map, clearing straight lines through it, making
     sure map is fully connected."""
     if fill == 0:
         env = np.zeros((size, size), dtype=np.int8)
     else:
-        random.seed(seed)
-        if isinstance(seed, float):
-            np.random.seed(int(seed*1000))
-        else:
-            np.random.seed(seed)
         env = np.ones((size, size), dtype=np.int8)
         to_clear_start = int((1. - fill) * size * size)
         to_clear = to_clear_start
         while to_clear > 0:
             env = np.rot90(env)
-            start = get_random_next_to_free_pose_or_any_if_full(env)
-            dist = min(random.randrange(size), to_clear)
+            start = get_random_next_to_free_pose_or_any_if_full(env, rng)
+            dist = min(rng.randrange(size), to_clear)
             env[start[0]:dist, start[1]] = FREE
             to_clear = to_clear_start - np.sum(env == FREE)
-    starts, goals = make_starts_goals_on_env(env, n_agents, seed)
+    starts, goals = make_starts_goals_on_env(env, n_agents, rng)
     return env, starts, goals
 
 
@@ -237,14 +231,12 @@ def can_be_set(env, pos):
 
 
 def building_walls(size: int, fill: float,
-                   n_agents: int, seed: float):
+                   n_agents: int, rng: random.Random):
     """Starting with an empty map, creating obstacles inline of previous
     obstacles, ensuring full connectedness."""
     if fill == 0:
         env = np.zeros((size, size), dtype=np.int8)
     else:
-        random.seed(seed)
-        np.random.seed(int(seed*1000))
         env = np.full((size, size), FREE, dtype=np.int8)
         to_fill = int(fill * size ** 2)
         while np.sum(env == OBSTACLE) < to_fill:
@@ -252,10 +244,10 @@ def building_walls(size: int, fill: float,
             can_fill = False
             pos = [0, 0]
             while not can_fill:
-                i_f = random.randrange(len(free[0]))
+                i_f = rng.randrange(len(free[0]))
                 pos[0] = free[0][i_f]
                 pos[1] = free[1][i_f]
                 can_fill = can_be_set(env, pos)
             env[tuple(pos)] = OBSTACLE
-    starts, goals = make_starts_goals_on_env(env, n_agents, seed)
+    starts, goals = make_starts_goals_on_env(env, n_agents, rng)
     return env, starts, goals

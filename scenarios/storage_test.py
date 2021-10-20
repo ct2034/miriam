@@ -1,4 +1,5 @@
 import os
+import random
 import unittest
 
 import numpy as np
@@ -9,8 +10,10 @@ from scenarios.storage import ResultType
 
 
 class TestStorage(unittest.TestCase):
-    scenario1 = generators.tracing_pathes_in_the_dark(2, .5, 1, seed=1)
-    scenario2 = generators.tracing_pathes_in_the_dark(2, .5, 1, seed=2)
+    scenario1 = generators.tracing_pathes_in_the_dark(
+        2, .5, 1, rng=random.Random(1))
+    scenario2 = generators.tracing_pathes_in_the_dark(
+        2, .5, 1, rng=random.Random(2))
     to_store = 42
     to_store2 = 42.5
 
@@ -36,7 +39,8 @@ class TestStorage(unittest.TestCase):
         # same paths for same scenarios
         path1 = storage.get_filepath(self.scenario1)
         self.assertTrue(path1.startswith(TestStorage.data_path))
-        scenario1_2 = generators.tracing_pathes_in_the_dark(2, .5, 1, seed=1)
+        scenario1_2 = generators.tracing_pathes_in_the_dark(
+            2, .5, 1, rng=random.Random(1))
         path1_2 = storage.get_filepath(scenario1_2)
         self.assertTrue(path1_2.startswith(TestStorage.data_path))
         self.assertEqual(path1, path1_2)

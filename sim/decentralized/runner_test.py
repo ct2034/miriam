@@ -24,9 +24,12 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(np.count_nonzero(env), 50)
 
     def test_initialize_environment_determinism(self):
-        env = runner.initialize_environment(10, .5, 0)
-        env_same_seed = runner.initialize_environment(10, .5, 0)
-        env_different_seed = runner.initialize_environment(10, .5, 1)
+        rng = random.Random(0)
+        env = runner.initialize_environment(10, .5, rng)
+        rng = random.Random(0)
+        env_same_seed = runner.initialize_environment(10, .5, rng)
+        rng = random.Random(1)
+        env_different_seed = runner.initialize_environment(10, .5, rng)
         self.assertEqual(hasher([env]), hasher([env_same_seed]))
         self.assertNotEqual(hasher([env]), hasher([env_different_seed]))
 
@@ -63,11 +66,11 @@ class TestRunner(unittest.TestCase):
     def test_initialize_agents_determinism(self):
         env = runner.initialize_environment(10, .5)
         agents = runner.initialize_agents(
-            env, 5, PolicyType.LEARNED, True, 0)
+            env, 5, PolicyType.LEARNED, True, random.Random(0))
         agents_same_seed = runner.initialize_agents(
-            env, 5, PolicyType.LEARNED, True, 0)
+            env, 5, PolicyType.LEARNED, True, random.Random(0))
         agents_different_seed = runner.initialize_agents(
-            env, 5, PolicyType.LEARNED, True, 1)
+            env, 5, PolicyType.LEARNED, True, random.Random(1))
         self.assertEqual(hasher(agents), hasher(agents_same_seed))
         self.assertNotEqual(hasher(agents), hasher(agents_different_seed))
 

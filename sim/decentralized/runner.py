@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 TIME_LIMIT = 100
 
 
-def initialize_environment(size: int, fill: float, seed: float = random.random()
+def initialize_environment(size: int, fill: float, rng: random.Random = random.Random()
                            ) -> np.ndarray:
     """Make a square map with edge length `size` and `fill` (0..1) obstacle
     ratio.
@@ -27,10 +27,9 @@ def initialize_environment(size: int, fill: float, seed: float = random.random()
     :param fill: percentage of map to fill
     :return: the environment
     """
-    random.seed(seed)
     environment = np.zeros([size, size], dtype=np.int8)
     n_to_fill = int(fill * size ** 2)
-    to_fill = random.sample(
+    to_fill = rng.sample(
         list(itertools.product(range(size), repeat=2)), k=n_to_fill)
     for cell in to_fill:
         environment[cell] = 1
@@ -39,7 +38,8 @@ def initialize_environment(size: int, fill: float, seed: float = random.random()
 
 def initialize_new_agent(
         env: np.ndarray, agents: List[Agent], policy: PolicyType,
-        tight_placement: bool = False, seed: float = random.random()) -> Optional[Agent]:
+        tight_placement: bool = False,
+        rng: random.Random = random.Random()) -> Optional[Agent]:
     """Place new agent in the environment, where no obstacle or other agent
     is.
 
@@ -48,8 +48,6 @@ def initialize_new_agent(
     :raises AssertionError if no space is left
     :return: the agent
     """
-    random.seed(seed)
-    np.random.seed(int(seed*1000))
     if tight_placement:  # starts can be at other goals
         env_with_agents = env.copy()
         env_with_goals = env.copy()
@@ -63,8 +61,8 @@ def initialize_new_agent(
                    ) > 0, "Possible poses should be left"
         assert len(no_obstacle_nor_goal[0]
                    ) > 0, "Possible poses should be left"
-        pos: int = random.choice(list(np.transpose(no_obstacle_nor_agent)))
-        a = Agent(env, pos, policy)  # we have the agent
+        pos: int = rng.choice(list(np.transpose(no_obstacle_nor_agent)))
+        a = Agent(env, pos, policy, rng=rng)  # we have the agent
 
         # now finding the goal ...
         goals = np.transpose(no_obstacle_nor_goal)
@@ -78,9 +76,9 @@ def initialize_new_agent(
             env_with_agents_and_goals == 0)
         assert len(no_obstacle_nor_agent_or_goal[0]
                    ) > 0, "Possible poses should be left"
-        pos = random.choice(np.transpose(
+        pos = rng.choice(np.transpose(
             no_obstacle_nor_agent_or_goal))  # type: ignore
-        a = Agent(env, pos, policy)  # we have the agent
+        a = Agent(env, pos, policy, rng=rng)  # we have the agent
 
         # now finding the goal ...
         if a.has_gridmap:
@@ -94,7 +92,8 @@ def initialize_new_agent(
                    ) > 0, "Possible poses should be left"
         goals = np.transpose(no_obstacle_nor_agent_or_goal)
 
-    np.random.shuffle(goals)
+    goals = list(goals)
+    rng.shuffle(goals)
     for g in goals:
         if a.give_a_goal(g):  # success
             return a
@@ -114,18 +113,15 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM):
 
 def initialize_agents(
         env: np.ndarray, n_agents: int, policy: PolicyType,
-        tight_placement: bool = False, seed: float = random.random()
+        tight_placement: bool = False, rng: random.Random = random.Random()
 ) -> Optional[Tuple[Agent, ...]]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other). Returns None if one agent
     could not find a path to its goal."""
-    random.seed(seed)
-    np.random.seed(int(seed*1000))
     agents: List[Agent] = []  # starting with a list for easy inserting
     for _ in range(n_agents):
-        agent_seed = random.random()
         agent = initialize_new_agent(
-            env, agents, policy, tight_placement, agent_seed)
+            env, agents, policy, tight_placement, rng)
         if agent is None:
             return None
         agents.append(agent)
@@ -184,10 +180,10 @@ def will_agents_collide(agents, ignore_finished_agents):
     return do_collide, agent_paths
 
 
-def sample_and_run_a_scenario(size, n_agents, policy, plot, seed, iterator
+def sample_and_run_a_scenario(size, n_agents, policy, plot, rng: random.Random, iterator
                               ) -> SCENARIO_RESULT:
-    env = initialize_environment(size, .1, seed)
-    agents = initialize_agents(env, n_agents, policy, seed=seed)
+    env = initialize_environment(size, .1, rng)
+    agents = initialize_agents(env, n_agents, policy, rng=rng)
     if agents is None:
         logger.warning("Could not initialize agents")
         return (0, 0, 0, 0, 0)
@@ -239,6 +235,7 @@ def has_exception(res: SCENARIO_RESULT):
 
 def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
     """run the simulation with some policies"""
+    rng = random.Random(0)
     evaluations = {}
     evaluation_names = [
         "average_time",
@@ -258,11 +255,9 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
     for policy in policies:
         logger.info(f"policy: {policy.name}")
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
-        for i_r in range(runs):
-            random.seed(i_r)
-            np.random.seed(i_r)
+        for _ in range(runs):
             results = sample_and_run_a_scenario(
-                size, n_agents, policy, False, i_r, IteratorType.BLOCKING3)
+                size, n_agents, policy, False, rng, IteratorType.BLOCKING3)
             evaluation_per_policy = np.append(
                 evaluation_per_policy, np.transpose([results]), axis=1)
             pb.progress()

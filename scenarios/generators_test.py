@@ -15,14 +15,15 @@ class TestGenerators(unittest.TestCase):
     def test_generate_random_gridmap(self):
         w = 999
         h = 100
-        gridmap_empty = generate_random_gridmap(w, h, 0)
+        rng = random.Random(0)
+        gridmap_empty = generate_random_gridmap(w, h, 0, rng)
 
         assert gridmap_empty.shape[0] == w
         assert gridmap_empty.shape[1] == h
         assert np.max(gridmap_empty) == 0
         assert np.min(gridmap_empty) == 0
 
-        gridmap_half = generate_random_gridmap(w, h, 0.5)
+        gridmap_half = generate_random_gridmap(w, h, 0.5, rng)
 
         assert gridmap_half.shape[0] == w
         assert gridmap_half.shape[1] == h
@@ -32,13 +33,13 @@ class TestGenerators(unittest.TestCase):
     def test_generate_like_sim_decentralized_determinism(self):
         (base_env, base_starts, base_goals
          ) = random_fill(
-            10, .5, 10, 0)
+            10, .5, 10, random.Random(0))
         # --------
 
         # everything the same
         (same_env, same_starts, same_goals
          ) = random_fill(
-            10, .5, 10, 0)
+            10, .5, 10, random.Random(0))
         self.assertTrue(np.all(base_env == same_env))
         self.assertTrue(np.all(base_starts == same_starts))
         self.assertTrue(np.all(base_goals == same_goals))
@@ -47,7 +48,7 @@ class TestGenerators(unittest.TestCase):
         # everything different
         (other_env, other_starts, other_goals
          ) = random_fill(
-            10, .5, 10, 1)
+            10, .5, 10, random.Random(1))
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
         self.assertFalse(np.all(base_goals == other_goals))
@@ -56,7 +57,7 @@ class TestGenerators(unittest.TestCase):
         # only env different -> all different
         (other_env, other_starts, other_goals
          ) = random_fill(
-            10, .4, 10, 0)
+            10, .4, 10, random.Random(0))
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
         self.assertFalse(np.all(base_goals == other_goals))
@@ -64,13 +65,13 @@ class TestGenerators(unittest.TestCase):
     def test_generate_like_policylearn_gen_determinism(self):
         (base_env, base_starts, base_goals
          ) = stripes(
-            10, .5, 10, 0)
+            10, .5, 10, random.Random(0))
         # --------
 
         # everything the same
         (same_env, same_starts, same_goals
          ) = stripes(
-            10, .5, 10, 0)
+            10, .5, 10, random.Random(0))
         self.assertTrue(np.all(base_env == same_env))
         self.assertTrue(np.all(base_starts == same_starts))
         self.assertTrue(np.all(base_goals == same_goals))
@@ -79,7 +80,7 @@ class TestGenerators(unittest.TestCase):
         # everything different
         (other_env, other_starts, other_goals
          ) = stripes(
-            10, .5, 10, 1)
+            10, .5, 10, random.Random(1))
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
         self.assertFalse(np.all(base_goals == other_goals))
@@ -88,7 +89,7 @@ class TestGenerators(unittest.TestCase):
         # only env different -> all different
         (other_env, other_starts, other_goals
          ) = stripes(
-            10, .4, 10, 0)
+            10, .4, 10, random.Random(0))
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
         self.assertFalse(np.all(base_goals == other_goals))
@@ -97,19 +98,20 @@ class TestGenerators(unittest.TestCase):
         """tests if generator handles low fill numbers correctly"""
         (env, starts, goals
          ) = stripes(
-            10, .1, 10, 0)
+            10, .1, 10, random.Random(0))
         self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
 
         (env, starts, goals
          ) = stripes(
-            10, 0, 10, 0)
+            10, 0, 10, random.Random(0))
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
     def test_get_random_next_to_free_pose_or_any_if_full_empty(self):
         # empty map should give any cell
-        env_empty = generate_random_gridmap(2, 2, 0)
+        rng = random.Random(0)
+        env_empty = generate_random_gridmap(2, 2, 0, rng)
         pos_empty = get_random_next_to_free_pose_or_any_if_full(
-            env_empty)
+            env_empty, rng)
         self.assertIn(pos_empty[0], [0, 1])
         self.assertIn(pos_empty[1], [0, 1])
 
@@ -117,7 +119,7 @@ class TestGenerators(unittest.TestCase):
         # full map should also give any cell
         env_full = np.full((2, 2), OBSTACLE)
         pos_full = get_random_next_to_free_pose_or_any_if_full(
-            env_full)
+            env_full, random.Random(0))
         self.assertIn(pos_full[0], [0, 1])
         self.assertIn(pos_full[1], [0, 1])
 
@@ -125,7 +127,8 @@ class TestGenerators(unittest.TestCase):
         # checking for the 'next_to' options around center piece
         env_next = np.full((3, 3), OBSTACLE)
         env_next[1, 1] = 0
-        pos_next = get_random_next_to_free_pose_or_any_if_full(env_next)
+        pos_next = get_random_next_to_free_pose_or_any_if_full(
+            env_next, random.Random(0))
         self.assertIn(tuple(pos_next), [
             (1, 0),
             (2, 1),
@@ -136,13 +139,13 @@ class TestGenerators(unittest.TestCase):
     def test_tracing_pathes_in_the_dark_determinism(self):
         (base_env, base_starts, base_goals
          ) = tracing_pathes_in_the_dark(
-            10, .5, 10, 0)
+            10, .5, 10, random.Random(0))
         # --------
 
         # everything the same
         (same_env, same_starts, same_goals
          ) = tracing_pathes_in_the_dark(
-            10, .5, 10, 0)
+            10, .5, 10, random.Random(0))
         self.assertTrue(np.all(base_env == same_env))
         self.assertTrue(np.all(base_starts == same_starts))
         self.assertTrue(np.all(base_goals == same_goals))
@@ -150,7 +153,7 @@ class TestGenerators(unittest.TestCase):
         # everything different
         (other_env, other_starts, other_goals
          ) = tracing_pathes_in_the_dark(
-            10, .5, 10, 1)
+            10, .5, 10, random.Random(1))
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
         self.assertFalse(np.all(base_goals == other_goals))
@@ -159,7 +162,7 @@ class TestGenerators(unittest.TestCase):
         # only env different -> all different
         (other_env, other_starts, other_goals
          ) = tracing_pathes_in_the_dark(
-            10, .4, 10, 0)
+            10, .4, 10, random.Random(0))
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
         self.assertFalse(np.all(base_goals == other_goals))
@@ -168,19 +171,19 @@ class TestGenerators(unittest.TestCase):
         """tests if generator handles low fill numbers correctly"""
         (env, starts, goals
          ) = tracing_pathes_in_the_dark(
-            10, .1, 10, 0)
+            10, .1, 10, random.Random(0))
         self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
 
         (env, starts, goals
          ) = tracing_pathes_in_the_dark(
-            10, 0, 10, 0)
+            10, 0, 10, random.Random(0))
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
     def test_tracing_pathes_in_the_dark_radomism(self):
         """tests if generator makes actually random changes between agents"""
         (env, starts, goals
          ) = tracing_pathes_in_the_dark(
-            10, 0, 10, 0)
+            10, 0, 10, random.Random(0))
         problematic = np.array(starts)[1:, :]
         self.assertFalse(all(problematic[:, 1] == np.arange(9)))
         self.assertFalse(all(problematic[:, 0] == 5))
