@@ -313,7 +313,7 @@ def q_learning(n_episodes: int, eps_start: float,
     # replay memory
     # (state, action, reward, next state)
     d: List[Tuple[Data, int, float, Optional[Data]]] = []
-    d_max_len = n_training_batch * 3
+    d_max_len = n_training_batch * 10
 
     # optimizer
     optimizer = torch.optim.Adam(
@@ -334,6 +334,7 @@ def q_learning(n_episodes: int, eps_start: float,
     loss_s = []
     max_q = []
     min_q = []
+    d_fill = []
     eval_success = []
     eval_regret = []
     eval_success_inv = []
@@ -384,6 +385,7 @@ def q_learning(n_episodes: int, eps_start: float,
                     d.append(memory_tuple)
                 else:
                     d[random.randint(0, d_max_len-1)] = memory_tuple
+                d_fill.append(float(len(d))/d_max_len)
                 # 9
                 training_batch = sample_random_minibatch(
                     n_training_batch, d, qfun_hat, gamma)
@@ -441,6 +443,7 @@ def q_learning(n_episodes: int, eps_start: float,
     ax1.plot(loss_s, label="loss", linewidth=1)
     ax1.plot(max_q, label="max_q", linewidth=1)
     ax1.plot(min_q, label="min_q", linewidth=1)
+    ax1.plot(d_fill, label="d_fill", linewidth=1)
     ax1.set_ylim(bottom=-1)
     ax1.spines.bottom.set_position('zero')
     ax1.spines.top.set_color('none')
