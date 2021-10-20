@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+import random
 
 import numpy as np
 from definitions import INVALID
@@ -56,7 +57,7 @@ if __name__ == "__main__":  # pragma: no cover
 
     while(not interesting):
         env, starts, goals = tracing_pathes_in_the_dark(
-            size, .5, n_agents, seed)
+            size, .5, n_agents, random.Random(seed))
         agents = to_agent_objects(env, starts, goals, policy)
         c_ecbs = cost_ecbs(env, starts, goals)
         c_indep = cost_independent(env, starts, goals)

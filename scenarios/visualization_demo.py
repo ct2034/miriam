@@ -1,15 +1,17 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
+import os
+import random
+import sys
+
+from IPython import get_ipython
+from matplotlib import pyplot as plt
+
+import scenarios.generators
 import solvers
 import visualization
-import scenarios.generators
-from IPython import get_ipython
 
-# %%
-import os
-import sys
-from matplotlib import pyplot as plt
 cwd = os.getcwd()
 assert "miriam" in cwd
 sys.path.append(cwd + "/..")
@@ -17,7 +19,7 @@ sys.path.append(cwd + "/..")
 
 # %%
 env, starts, goals = scenarios.generators.tracing_pathes_in_the_dark(
-    50, .6, 8, 0)
+    50, .6, 8, random.Random(0))
 
 
 # %%
