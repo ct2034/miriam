@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from definitions import DEFAULT_TIMEOUT_S, INVALID
 from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
@@ -125,8 +127,9 @@ def cached_decentralized(env, starts, goals,
 
 
 def decentralized(env, starts, goals, policy: PolicyType):
-    agents = to_agent_objects(env, starts, goals, policy)
+    agents = to_agent_objects(env, starts, goals, policy, rng=random.Random(0))
     if agents is INVALID:
         return INVALID
     return run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.BLOCKING3)
+        env, agents, plot=False, iterator=IteratorType.BLOCKING3,
+        ignore_finished_agents=False)

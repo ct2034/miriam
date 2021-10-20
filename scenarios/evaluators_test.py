@@ -322,7 +322,6 @@ class TestEvaluators(unittest.TestCase):
 
     def test_cost_sim_decentralized_random_deadlocks(self):
         # trying to make deadlocks ...
-        random.seed(1)  # this some times times out on total random
         starts_deadlocks = np.array([
             [0, 0],
             [0, 1],
@@ -338,7 +337,7 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_sim_decentralized_random(
-                test_helper.env, starts_deadlocks, goals_deadlocks)
+                test_helper.env, starts_deadlocks, goals_deadlocks, skip_cache=True)
         )
 
     def test_expanded_nodes_icts_no_collision(self):

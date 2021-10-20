@@ -160,9 +160,13 @@ class Qfunction(torch.nn.Module):
         # self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels*3, num_actions)
 
-        for net in [self.conv1, self.conv2, self.lin]:
-            torch.nn.init.normal_(net.weight, 0, INIT_STD)
+        for net in [self.conv1, self.conv2]:
             torch.nn.init.normal_(net.bias, 0, INIT_STD)
+
+        for net in [self.conv1.lin, self.conv2.lin, self.lin]:
+            torch.nn.init.normal_(net.weight, 0, INIT_STD)
+            if net.bias is not None:
+                torch.nn.init.normal_(net.bias, 0, INIT_STD)
 
     def forward(self, data: Data):
         x = data.x
@@ -456,6 +460,7 @@ def q_learning(n_episodes: int, eps_start: float,
 
 
 if __name__ == "__main__":
+    qf = Qfunction(10, 2, 55)
     q_learning(
         n_episodes=2000,
         eps_start=.9,
