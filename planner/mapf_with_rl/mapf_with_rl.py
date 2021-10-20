@@ -243,7 +243,7 @@ def train(training_batch, qfun, optimizer):
 
 def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
     successful_s = []
-    suboptimality_s = []
+    regret_s = []
     qfun.eval()
     for scenario in data_test:
         for a in scenario.agents:
@@ -261,17 +261,17 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
         (average_time, _, _, _, successful) = res
         successful_s.append(successful)
         if successful:
-            suboptimality = average_time - scenario.ecbs_cost
-            suboptimality_s.append(suboptimality)
-            # if (suboptimality < 0 and
-            #         not isclose(suboptimality, 0, abs_tol=1E-5)):
-            #     logging.warning(f"suboptimality: {suboptimality}")
+            regret = average_time - scenario.ecbs_cost
+            regret_s.append(regret)
+            # if (regret < 0 and
+            #         not isclose(regret, 0, abs_tol=1E-5)):
+            #     logging.warning(f"regret: {regret}")
     mean_successful = np.mean(np.array(successful_s))
-    mean_suboptimality = np.mean(np.array(suboptimality_s))
+    mean_regret = np.mean(np.array(regret_s))
     print(f"successful: {mean_successful:.2f}, " +
-          f"suboptimality: {mean_suboptimality:.2f}, " +
+          f"regret: {mean_regret:.2f}, " +
           f"inv: {inverse}")
-    return (mean_successful, mean_suboptimality)
+    return (mean_successful, mean_regret)
 
 
 def q_learning(n_episodes: int, eps_start: float,
@@ -335,13 +335,13 @@ def q_learning(n_episodes: int, eps_start: float,
     max_q = []
     min_q = []
     eval_success = []
-    eval_subopt = []
+    eval_regret = []
     eval_success_inv = []
-    eval_subopt_inv = []
+    eval_regret_inv = []
     # eval_success_bigger = []
-    # eval_subopt_bigger = []
+    # eval_regret_bigger = []
     # eval_success_inv_bigger = []
-    # eval_subopt_inv_bigger = []
+    # eval_regret_inv_bigger = []
     stat_every = max(1, int(n_episodes / 100))
     eval_every = max(1, int(n_episodes / 50))
     i_o = 0  # count optimizations
@@ -407,27 +407,27 @@ def q_learning(n_episodes: int, eps_start: float,
         if i_e % eval_every == 0:
             # evaluation qfun
             print("small")
-            success, subopt = evaluate(
+            success, regret = evaluate(
                 data_test_small, qfun, ignore_finished_agents,
                 inverse=False)
             eval_success.append(success)
-            eval_subopt.append(subopt)
-            success_inv, subopt_inv = evaluate(
+            eval_regret.append(regret)
+            success_inv, regret_inv = evaluate(
                 data_test_small, qfun, ignore_finished_agents,
                 inverse=True)
             eval_success_inv.append(success_inv)
-            eval_subopt_inv.append(subopt_inv)
+            eval_regret_inv.append(regret_inv)
             # print("big")
-            # success_bigger, subopt_bigger = evaluate(
+            # success_bigger, regret_bigger = evaluate(
             #     data_test_bigger, qfun, ignore_finished_agents,
             #     inverse=False)
             # eval_success_bigger.append(success_bigger)
-            # eval_subopt_bigger.append(subopt_bigger)
-            # success_inv_bigger, subopt_inv_bigger = evaluate(
+            # eval_regret_bigger.append(regret_bigger)
+            # success_inv_bigger, regret_inv_bigger = evaluate(
             #     data_test_bigger, qfun, ignore_finished_agents,
             #     inverse=True)
             # eval_success_inv_bigger.append(success_inv_bigger)
-            # eval_subopt_inv_bigger.append(subopt_inv_bigger)
+            # eval_regret_inv_bigger.append(regret_inv_bigger)
         del scenario
         del state
         del next_state
@@ -450,10 +450,10 @@ def q_learning(n_episodes: int, eps_start: float,
     # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=1)
     # ax2.plot(eval_success_inv_bigger, label="eval_success_inv_bigger", linewidth=1)
     ax2.legend()
-    ax3.plot(eval_subopt, label="eval_subopt", linewidth=1)
-    ax3.plot(eval_subopt_inv, label="eval_subopt_inv", linewidth=1)
-    # ax3.plot(eval_subopt_bigger, label="eval_subopt_bigger", linewidth=1)
-    # ax3.plot(eval_subopt_inv_bigger, label="eval_subopt_inv_bigger", linewidth=1)
+    ax3.plot(eval_regret, label="eval_regret", linewidth=1)
+    ax3.plot(eval_regret_inv, label="eval_regret_inv", linewidth=1)
+    # ax3.plot(eval_regret_bigger, label="eval_regret_bigger", linewidth=1)
+    # ax3.plot(eval_regret_inv_bigger, label="eval_regret_inv_bigger", linewidth=1)
     ax3.legend()
     plt.savefig('planner/mapf_with_rl/mapf_with_rl.png')
     plt.show()
