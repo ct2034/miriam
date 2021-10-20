@@ -399,7 +399,7 @@ class TestEvaluators(unittest.TestCase):
         )
 
     def test_cost_ecbs_vs_decen_special_scenario(self):
-        denv, dstarts, dgoals = (
+        special_env, special_starts, special_goals = (
             np.array([[0, 0, 0, 0, 0, 1, 1, 1],
                       [1, 0, 0, 0, 0, 0, 0, 1],
                       [0, 0, 0, 0, 0, 0, 0, 1],
@@ -412,9 +412,9 @@ class TestEvaluators(unittest.TestCase):
             np.array([[2, 5]]))
         self.assertAlmostEqual(
             scenarios.evaluators.cost_sim_decentralized_random(
-                denv, dstarts, dgoals, skip_cache=True),
+                special_env, special_starts, special_goals, skip_cache=True),
             scenarios.evaluators.cost_ecbs(
-                denv, dstarts, dgoals, skip_cache=True)
+                special_env, special_starts, special_goals, skip_cache=True)
         )
 
 
