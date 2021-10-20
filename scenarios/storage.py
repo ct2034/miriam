@@ -1,7 +1,7 @@
 import os
 import pickle as pkl
 from enum import Enum, auto
-from typing import Any
+from typing import Any, Dict, OrderedDict
 
 from definitions import SCENARIO_TYPE
 from numpy.core.numerictypes import ScalarType
@@ -40,35 +40,52 @@ def has_file(scenario: SCENARIO_TYPE) -> bool:
     return os.path.isfile(get_filepath(scenario))
 
 
-def has_result(scenario: SCENARIO_TYPE, result_type: ResultType) -> bool:
+def to_key_string(result_type: ResultType, solver_params: Dict[str, Any]) -> str:
+    key_str: str = str(result_type.name).upper()
+    solver_param_keys = sorted(solver_params.keys())
+    for k in solver_param_keys:
+        key_str += "_"
+        key_str += str(k)
+        key_str += "="
+        key_str += str(solver_params[k])
+    return key_str
+
+
+def has_result(scenario: SCENARIO_TYPE, result_type: ResultType,
+               solver_params: Dict[str, Any]) -> bool:
     # For this `scenario` is there a `result` in storage?
+    key_str = to_key_string(result_type, solver_params)
     if has_file(scenario):
         with open(get_filepath(scenario), 'rb') as f:
             data = pkl.load(f)
             assert isinstance(data, dict)
-            return result_type.name in data.keys()
+            return key_str in data.keys()
     else:
         return False
 
 
-def get_result(scenario: SCENARIO_TYPE, result_type: ResultType) -> Any:
+def get_result(scenario: SCENARIO_TYPE, result_type: ResultType,
+               solver_params: Dict[str, Any]) -> Any:
     # Retrieve `result` for `scenario`.
-    assert has_result(scenario, result_type)
+    key_str = to_key_string(result_type, solver_params)
+    assert has_result(scenario, result_type, solver_params)
     with open(get_filepath(scenario), 'rb') as f:
         data = pkl.load(f)
-        return data[result_type.name]
+        return data[key_str]
 
 
-def save_result(scenario: SCENARIO_TYPE, result_type: ResultType, result: Any):
+def save_result(scenario: SCENARIO_TYPE, result_type: ResultType,
+                solver_params: Dict[str, Any], result: Any):
     # Save a `result` for `scenario`.
+    key_str = to_key_string(result_type, solver_params)
     if has_file(scenario):
         with open(get_filepath(scenario), 'rb') as f:
             data: dict = pkl.load(f)
-            assert result_type.name not in data.keys()  # was not there before
-        data[result_type.name] = result
+            assert key_str not in data.keys()  # was not there before
+        data[key_str] = result
         with open(get_filepath(scenario), 'wb') as f:
             pkl.dump(data, f)
     else:
         with open(get_filepath(scenario), 'wb') as f:
-            data = {result_type.name: result}
+            data = {key_str: result}
             pkl.dump(data, f)

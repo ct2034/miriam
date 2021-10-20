@@ -10,8 +10,8 @@ import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
 from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
-from scenarios.evaluators import cost_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.solvers import cached_ecbs
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import (FirstThenRaisingPolicy,
                                       InverseQLearningPolicy,
@@ -29,7 +29,13 @@ from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
 
 def get_ecbs_cost(scen: SCENARIO_TYPE, ignore_finished_agents: bool):
     env, starts, goals = scen
-    data = plan_in_gridmap(env, starts, goals, 1.0, 5, ignore_finished_agents)
+    data = cached_ecbs(
+        env=env,
+        starts=starts,
+        goals=goals,
+        suboptimality=1.0,
+        timeout=5,
+        disappear_at_goal=ignore_finished_agents)
     if data is INVALID:
         return INVALID
     cost = data['statistics']['cost']
@@ -302,8 +308,8 @@ def q_learning(n_episodes: int, eps_start: float,
     n_data_test = 100
     data_test_small = make_useful_scenarios(
         n_data_test, ignore_finished_agents, 4, 3, rng)
-    # data_test_bigger = make_useful_scenarios(
-    #     n_data_test, ignore_finished_agents, 8, 6, rng)
+    data_test_bigger = make_useful_scenarios(
+        n_data_test, ignore_finished_agents, 8, 6, rng)
 
     # init qfun
     qfun = Qfunction(9, 2, 16)
@@ -463,6 +469,8 @@ def q_learning(n_episodes: int, eps_start: float,
 
 
 if __name__ == "__main__":
+    logging.getLogger(
+        "WARNING:sim.decentralized.runner").setLevel(logging.ERROR)
     q_learning(
         n_episodes=2000,
         eps_start=.9,

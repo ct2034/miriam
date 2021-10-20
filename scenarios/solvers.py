@@ -18,25 +18,35 @@ AGENT = 'agent'
 
 
 def cached_ecbs(env, starts, goals,
-                timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
+                timeout=DEFAULT_TIMEOUT_S, suboptimality=1.0,
+                disappear_at_goal=True, skip_cache=False):
     if skip_cache:
         data = ecbs(env, starts, goals, timeout=timeout)
     else:
         scenario = (env, starts, goals)
-        if storage.has_result(scenario, storage.ResultType.ECBS_DATA):
+        solver_params = {
+            "timeout": timeout,
+            "suboptimality": suboptimality,
+            "disappear_at_goal": disappear_at_goal
+        }
+        if storage.has_result(scenario, storage.ResultType.ECBS_DATA,
+                              solver_params):
             data = storage.get_result(
-                scenario, storage.ResultType.ECBS_DATA)
+                scenario, storage.ResultType.ECBS_DATA, solver_params)
         else:
             data = ecbs(env, starts, goals, timeout=timeout)
-            storage.save_result(scenario, storage.ResultType.ECBS_DATA, data)
+            storage.save_result(scenario, storage.ResultType.ECBS_DATA,
+                                solver_params, data)
     return data
 
 
-def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
+def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, suboptimality=1.0,
+         disappear_at_goal=True, return_paths=False):
     """Plan scenario using ecbs returning results data"""
     try:
         data = plan_in_gridmap(env, list(starts), list(
-            goals), suboptimality=1.0, timeout=timeout)  # OPTIMAL !
+            goals), suboptimality=suboptimality, timeout=timeout,
+            disappear_at_goal=disappear_at_goal)
     except KeyError:  # happens when start or goal is not in map
         return INVALID
     if data is None or data is INVALID:
