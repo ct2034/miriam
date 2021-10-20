@@ -460,7 +460,6 @@ def q_learning(n_episodes: int, eps_start: float,
 
 
 if __name__ == "__main__":
-    qf = Qfunction(10, 2, 55)
     q_learning(
         n_episodes=2000,
         eps_start=.9,
