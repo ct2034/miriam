@@ -337,7 +337,8 @@ class TestEvaluators(unittest.TestCase):
         self.assertEqual(
             scenarios.evaluators.INVALID,
             scenarios.evaluators.cost_sim_decentralized_random(
-                test_helper.env, starts_deadlocks, goals_deadlocks, skip_cache=True)
+                test_helper.env, starts_deadlocks,
+                goals_deadlocks, skip_cache=True)
         )
 
     def test_expanded_nodes_icts_no_collision(self):
