@@ -20,8 +20,7 @@ class ResultType(Enum):
     ICTS_PATHS = auto()
     ICTS_INFO = auto()
     INDEP_PATHS = auto()
-    DECEN_RANDOM = auto()
-    DECEN_LEARNED = auto()
+    DECEN = auto()
 
 
 def get_filepath(scenario: SCENARIO_TYPE) -> str:
@@ -40,7 +39,8 @@ def has_file(scenario: SCENARIO_TYPE) -> bool:
     return os.path.isfile(get_filepath(scenario))
 
 
-def to_key_string(result_type: ResultType, solver_params: Dict[str, Any]) -> str:
+def to_key_string(
+        result_type: ResultType, solver_params: Dict[str, Any]) -> str:
     key_str: str = str(result_type.name).upper()
     solver_param_keys = sorted(solver_params.keys())
     for k in solver_param_keys:

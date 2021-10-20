@@ -4,12 +4,12 @@ import numpy as np
 from definitions import DEFAULT_TIMEOUT_S, INVALID
 from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
 from planner.matteoantoniazzi_mapf.plan import icts_plan, paths_from_info
-from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 from scenarios import storage
+from scenarios.storage import ResultType
 
 # ecbs ########################################################################
 
@@ -29,13 +29,13 @@ def cached_ecbs(env, starts, goals,
             "suboptimality": suboptimality,
             "disappear_at_goal": disappear_at_goal
         }
-        if storage.has_result(scenario, storage.ResultType.ECBS_DATA,
+        if storage.has_result(scenario, ResultType.ECBS_DATA,
                               solver_params):
             data = storage.get_result(
-                scenario, storage.ResultType.ECBS_DATA, solver_params)
+                scenario, ResultType.ECBS_DATA, solver_params)
         else:
             data = ecbs(env, starts, goals, timeout=timeout)
-            storage.save_result(scenario, storage.ResultType.ECBS_DATA,
+            storage.save_result(scenario, ResultType.ECBS_DATA,
                                 solver_params, data)
     return data
 
@@ -88,12 +88,12 @@ def cached_icts(env, starts, goals,
     if skip_cache:
         info = icts(env, starts, goals, timeout)
     else:
-        if storage.has_result(scenario, storage.ResultType.ICTS_INFO):
+        if storage.has_result(scenario, ResultType.ICTS_INFO, {}):
             info = storage.get_result(
-                scenario, storage.ResultType.ICTS_INFO)
+                scenario, ResultType.ICTS_INFO, {})
         else:
             info = icts(env, starts, goals, timeout)
-            storage.save_result(scenario, storage.ResultType.ICTS_INFO, info)
+            storage.save_result(scenario, ResultType.ICTS_INFO, {}, info)
     return info
 
 
@@ -115,31 +115,34 @@ def indep(env, starts, goals):
     return paths
 
 
-def cached_decentralized(env, starts, goals,
-                         policy: PolicyType, skip_cache=False):
-    if policy == PolicyType.RANDOM:
-        result_type = storage.ResultType.DECEN_RANDOM
-    elif policy == PolicyType.LEARNED:
-        result_type = storage.ResultType.DECEN_LEARNED
-    else:
-        raise NotImplementedError("only random or learned policies supported")
+def cached_decentralized(env, starts, goals, policy: PolicyType,
+                         ignore_finished_agents, skip_cache=False):
+    solver_params = {
+        "policy": policy.name,
+        "ignore_finished_agents": ignore_finished_agents
+    }
     scenario = (env, starts, goals)
     if skip_cache:
-        metrics = decentralized(env, starts, goals, policy)
+        metrics = decentralized(
+            env, starts, goals, policy, ignore_finished_agents)
     else:
-        if storage.has_result(scenario, result_type):
+        if storage.has_result(scenario, ResultType.DECEN, solver_params):
             metrics = storage.get_result(
-                scenario, result_type)
+                scenario, ResultType.DECEN, solver_params)
         else:
-            metrics = decentralized(env, starts, goals, policy)
-            storage.save_result(scenario, result_type, metrics)
+            metrics = decentralized(
+                env, starts, goals, policy, ignore_finished_agents)
+            storage.save_result(scenario, ResultType.DECEN,
+                                solver_params, metrics)
     return metrics
 
 
-def decentralized(env, starts, goals, policy: PolicyType):
-    agents = to_agent_objects(env, starts, goals, policy, rng=random.Random(0))
+def decentralized(env, starts, goals,
+                  policy: PolicyType, ignore_finished_agents):
+    agents = to_agent_objects(
+        env, starts, goals, policy, rng=random.Random(0))
     if agents is INVALID:
         return INVALID
     return run_a_scenario(
         env, agents, plot=False, iterator=IteratorType.BLOCKING3,
-        ignore_finished_agents=False)
+        ignore_finished_agents=ignore_finished_agents)
