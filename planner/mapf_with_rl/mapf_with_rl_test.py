@@ -38,13 +38,15 @@ class TestMapfWithRl(unittest.TestCase):
             [2, 1]])  # this will block
 
     def test_scenario_init_useful(self):
-        s = Scenario((self.env, self.starts, self.goals), True)
+        s = Scenario((self.env, self.starts, self.goals),
+                     True, random.Random(0))
         self.assertTrue(s.useful)
 
     def test_scenario_init_not_useful(self):
         env_blocked = self.env.copy()
         env_blocked[1, 1] = 1
-        s = Scenario((env_blocked, self.starts, self.goals), True)
+        s = Scenario((env_blocked, self.starts, self.goals),
+                     True, random.Random(0))
         self.assertFalse(s.useful)
 
     def _data_equality(self, a: Data, b: Data):
@@ -59,12 +61,14 @@ class TestMapfWithRl(unittest.TestCase):
 
     def test_scenario_running(self):
         # Different actions lead to different results.
-        s0 = Scenario((self.env, self.starts, self.goals), False)
+        s0 = Scenario((self.env, self.starts, self.goals),
+                      False, random.Random(0))
         first_state_0 = s0.start()
         second_state_action_0, reward_0 = s0.step(0)
         self.assertEqual(reward_0, 0)
 
-        s1 = Scenario((self.env, self.starts, self.goals), False)
+        s1 = Scenario((self.env, self.starts, self.goals),
+                      False, random.Random(0))
         self.assertEqual(s1.agent_first_raised, None)
         first_state_1 = s1.start()
         self.assertEqual(s1.agent_first_raised, 0)
@@ -86,9 +90,9 @@ class TestMapfWithRl(unittest.TestCase):
         self.assertEqual(reward_0, s0.UNSUCCESSFUL_COST)
 
     def test_make_useful_scenarios(self):
-        scenarios_0 = make_useful_scenarios(3, True, 10, 10, random.Random(0))
+        scenarios_0 = make_useful_scenarios(3, True, 4, 2, random.Random(0))
         self.assertEqual(len(scenarios_0), 3)
-        scenarios_1 = make_useful_scenarios(3, True, 10, 10, random.Random(1))
+        scenarios_1 = make_useful_scenarios(3, True, 4, 2, random.Random(1))
         self.assertEqual(len(scenarios_1), 3)
 
         for s in scenarios_0 + scenarios_1:
@@ -97,21 +101,24 @@ class TestMapfWithRl(unittest.TestCase):
 
     def test_make_useful_scenarios_determinism(self):
         scenarios_base = make_useful_scenarios(
-            5, True, 4, 8, random.Random(0))
+            5, True, 3, 2, random.Random(0))
         scenarios_same_seed = make_useful_scenarios(
-            5, True, 4, 8, random.Random(0))
+            5, True, 3, 2, random.Random(0))
         scenarios_different_seed = make_useful_scenarios(
-            5, True, 4, 8, random.Random(1))
+            5, True, 3, 2, random.Random(1))
 
-        self.assertEqual(
-            hasher(map(lambda s: s.agents, scenarios_base)),
-            hasher(map(lambda s: s.agents, scenarios_same_seed))
-        )
-
-        self.assertNotEqual(
-            hasher(map(lambda s: s.agents, scenarios_base)),
-            hasher(map(lambda s: s.agents, scenarios_different_seed))
-        )
+        for i_s in range(len(scenarios_base)):
+            for i_a in range(len(scenarios_base[i_s].agents)):
+                self.assertEqual(
+                    str(scenarios_base[i_s].agents[i_a]),
+                    str(scenarios_same_seed[i_s].agents[i_a])
+                )
+        for i_s in range(len(scenarios_base)):
+            for i_a in range(len(scenarios_base[i_s].agents)):
+                self.assertNotEqual(
+                    str(scenarios_base[i_s].agents[i_a]),
+                    str(scenarios_different_seed[i_s].agents[i_a])
+                )
 
     def test_qfunction(self):
         # seeing if different qfuns give different results on different data
