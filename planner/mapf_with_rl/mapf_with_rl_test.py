@@ -1,3 +1,4 @@
+import random
 import unittest
 
 import numpy as np
@@ -5,6 +6,7 @@ import torch
 from planner.mapf_with_rl.mapf_with_rl import (Qfunction, Scenario,
                                                make_useful_scenarios)
 from scenarios import test_helper
+from tools import hasher
 from torch_geometric.data import Data
 
 
@@ -84,14 +86,32 @@ class TestMapfWithRl(unittest.TestCase):
         self.assertEqual(reward_0, s0.UNSUCCESSFUL_COST)
 
     def test_make_useful_scenarios(self):
-        scenarios_0 = make_useful_scenarios(3, 0, True, 10, 10)
+        scenarios_0 = make_useful_scenarios(3, True, 10, 10, random.Random(0))
         self.assertEqual(len(scenarios_0), 3)
-        scenarios_1 = make_useful_scenarios(3, 1, True, 10, 10)
+        scenarios_1 = make_useful_scenarios(3, True, 10, 10, random.Random(1))
         self.assertEqual(len(scenarios_1), 3)
 
         for s in scenarios_0 + scenarios_1:
             self.assertTrue(s.useful)
             s.start()
+
+    def test_make_useful_scenarios_determinism(self):
+        scenarios_base = make_useful_scenarios(
+            5, True, 4, 8, random.Random(0))
+        scenarios_same_seed = make_useful_scenarios(
+            5, True, 4, 8, random.Random(0))
+        scenarios_different_seed = make_useful_scenarios(
+            5, True, 4, 8, random.Random(1))
+
+        self.assertEqual(
+            hasher(map(lambda s: s.agents, scenarios_base)),
+            hasher(map(lambda s: s.agents, scenarios_same_seed))
+        )
+
+        self.assertNotEqual(
+            hasher(map(lambda s: s.agents, scenarios_base)),
+            hasher(map(lambda s: s.agents, scenarios_different_seed))
+        )
 
     def test_qfunction(self):
         # seeing if different qfuns give different results on different data

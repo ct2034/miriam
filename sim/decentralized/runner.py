@@ -100,11 +100,12 @@ def initialize_new_agent(
     return None
 
 
-def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM):
+def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
+                     rng: random.Random = random.Random()):
     n_agents = starts.shape[0]
     agents = []
     for i_a in range(n_agents):
-        a = Agent(env, starts[i_a], policy=policy)
+        a = Agent(env, starts[i_a], policy=policy, rng=rng)
         if not a.give_a_goal(goals[i_a]):
             return INVALID
         agents.append(a)

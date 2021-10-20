@@ -37,7 +37,7 @@ def get_ecbs_cost(scen: SCENARIO_TYPE, ignore_finished_agents: bool):
 
 
 class Scenario(object):
-    def __init__(self, this_data: SCENARIO_TYPE, ignore_finished_agents: bool) -> None:
+    def __init__(self, this_data: SCENARIO_TYPE, ignore_finished_agents: bool, rng: random.Random) -> None:
         super().__init__()
         self.env, self.starts, self.goals = this_data
         self.ignore_finished_agents = ignore_finished_agents
@@ -52,7 +52,7 @@ class Scenario(object):
         # if useful, we go on
         self.agents = to_agent_objects(
             self.env, self.starts, self.goals,
-            policy=PolicyType.LEARNED_RAISING)
+            policy=PolicyType.LEARNED_RAISING, rng=rng)
         # initialization to save state
         # the agent that got its policy called first
         self.agent_first_raised: Optional[int] = None
@@ -126,7 +126,7 @@ class Scenario(object):
         return state, reward
 
 
-def make_useful_scenarios(n: int, seed, ignore_finished_agents, size, n_agents) -> List[Scenario]:
+def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents, rng: random.Random) -> List[Scenario]:
     scenarios: List[Scenario] = []
     if n > 1:
         pb = ProgressBar("Data Generation", n, 5)
@@ -135,12 +135,12 @@ def make_useful_scenarios(n: int, seed, ignore_finished_agents, size, n_agents) 
             size=size,
             fill=.4,
             n_agents=n_agents,
-            seed=seed)
-        seed += 1
+            rng=rng)
         (env, starts, goals) = scen_data
-        collide, _ = will_they_collide_in_scen(env, starts, goals, ignore_finished_agents)
+        collide, _ = will_they_collide_in_scen(
+            env, starts, goals, ignore_finished_agents)
         if collide:
-            scen = Scenario(scen_data, ignore_finished_agents)
+            scen = Scenario(scen_data, ignore_finished_agents, rng)
             if scen.useful:
                 if n > 1:
                     pb.progress()
@@ -272,7 +272,7 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
 
 def q_learning(n_episodes: int, eps_start: float,
                c: int, gamma: float, n_training_batch: int,
-               ignore_finished_agents: bool):
+               ignore_finished_agents: bool, seed: int):
     """Q-learning with experience replay
     pseudocode from https://github.com/diegoalejogm/deep-q-learning
     :param n_episodes: how many episodes to simulate
@@ -281,10 +281,14 @@ def q_learning(n_episodes: int, eps_start: float,
     :param c: reset qfun_hat every c episodes
     :param gamma: discout factor for future rewards
     :param n_training_batch: size of training minibatch
-    :param ignore_finished_agents: wether or not to ignore agents at their 
+    :param ignore_finished_agents: wether or not to ignore agents at their
            goal pose
     """
     time_limit = 100
+
+    # random number generator
+    rng = random.Random(seed)
+    torch.manual_seed(seed)
 
     # epsilon paramters
     eps_end = .01
@@ -293,9 +297,9 @@ def q_learning(n_episodes: int, eps_start: float,
     # testing scenarios
     n_data_test = 100
     data_test_small = make_useful_scenarios(
-        n_data_test, n_episodes * 11, ignore_finished_agents, 4, 3)
+        n_data_test, ignore_finished_agents, 4, 3, rng)
     # data_test_bigger = make_useful_scenarios(
-    #     n_data_test, n_episodes * 11, ignore_finished_agents, 8, 6)
+    #     n_data_test, ignore_finished_agents, 8, 6, rng)
 
     # init qfun
     qfun = Qfunction(9, 2, 16)
@@ -346,7 +350,7 @@ def q_learning(n_episodes: int, eps_start: float,
             if i_e >= int(n_episodes * progress):
                 size, n_agents = training_sizes[progress]
         [scenario] = make_useful_scenarios(
-            1, i_e * 10, ignore_finished_agents, size, n_agents)
+            1, ignore_finished_agents, size, n_agents, rng)
         epsilon = eps_start * exp(-eps_alpha * i_e)
         state = scenario.start()
         next_state = None
@@ -452,12 +456,12 @@ def q_learning(n_episodes: int, eps_start: float,
 
 
 if __name__ == "__main__":
-    torch.manual_seed(0)
     q_learning(
         n_episodes=2000,
         eps_start=.9,
         c=10,
-        gamma=.99,
+        gamma=.99,  # TODO: Maybe smaller
         n_training_batch=100,
-        ignore_finished_agents=True
+        ignore_finished_agents=True,
+        seed=0
     )
