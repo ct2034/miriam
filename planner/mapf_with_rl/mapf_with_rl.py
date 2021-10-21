@@ -282,7 +282,7 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
 
 def q_learning(n_episodes: int, eps_start: float,
                c: int, gamma: float, n_training_batch: int,
-               ignore_finished_agents: bool, seed: int):
+               ignore_finished_agents: bool, seed: int, name: str):
     """Q-learning with experience replay
     pseudocode from https://github.com/diegoalejogm/deep-q-learning
     :param n_episodes: how many episodes to simulate
@@ -353,7 +353,7 @@ def q_learning(n_episodes: int, eps_start: float,
     eval_every = max(1, int(n_episodes / 50))
     i_o = 0  # count optimizations
 
-    pb = ProgressBar("Epochs", n_episodes, 5)
+    pb = ProgressBar(f"Run {name}", n_episodes, 5)
     # 1
     for i_e in range(n_episodes):
         # 2
@@ -391,7 +391,6 @@ def q_learning(n_episodes: int, eps_start: float,
                     d.append(memory_tuple)
                 else:
                     d[random.randint(0, d_max_len-1)] = memory_tuple
-                d_fill.append(float(len(d))/d_max_len)
                 # 9
                 training_batch = sample_random_minibatch(
                     n_training_batch, d, qfun_hat, gamma)
@@ -407,6 +406,7 @@ def q_learning(n_episodes: int, eps_start: float,
         if i_e % c == 0:
             qfun.copy_to(qfun_hat)
         if i_e % stat_every == 0:
+            d_fill.append(float(len(d))/d_max_len)
             rewards.append(reward)
             loss_s.append(float(loss))
             epsilons.append(epsilon)
@@ -464,19 +464,23 @@ def q_learning(n_episodes: int, eps_start: float,
     # ax3.plot(eval_regret_bigger, label="eval_regret_bigger", linewidth=1)
     # ax3.plot(eval_regret_inv_bigger, label="eval_regret_inv_bigger", linewidth=1)
     ax3.legend()
-    plt.savefig('planner/mapf_with_rl/mapf_with_rl.png')
-    plt.show()
+    plt.savefig(f'planner/mapf_with_rl/results/{name}.png')
 
 
 if __name__ == "__main__":
     logging.getLogger(
-        "WARNING:sim.decentralized.runner").setLevel(logging.ERROR)
-    q_learning(
-        n_episodes=2000,
-        eps_start=.9,
-        c=10,
-        gamma=.99,  # TODO: Maybe smaller
-        n_training_batch=100,
-        ignore_finished_agents=True,
-        seed=0
-    )
+        "sim.decentralized.runner").setLevel(logging.ERROR)
+    runs = 4
+    for i_r in range(runs):
+        for gamma in [.8, .95, .99]:
+            q_learning(
+                n_episodes=3000,
+                eps_start=.9,
+                c=100,
+                gamma=gamma,
+                n_training_batch=32,
+                ignore_finished_agents=True,
+                seed=i_r,
+                name=f"run{i_r}_gamma{gamma}"
+            )
+    plt.show()
