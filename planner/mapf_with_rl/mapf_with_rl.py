@@ -43,7 +43,8 @@ def get_ecbs_cost(scen: SCENARIO_TYPE, ignore_finished_agents: bool):
 
 
 class Scenario(object):
-    def __init__(self, this_data: SCENARIO_TYPE, ignore_finished_agents: bool, rng: random.Random) -> None:
+    def __init__(self, this_data: SCENARIO_TYPE,
+                 ignore_finished_agents: bool, rng: random.Random) -> None:
         super().__init__()
         self.env, self.starts, self.goals = this_data
         self.ignore_finished_agents = ignore_finished_agents
@@ -132,7 +133,8 @@ class Scenario(object):
         return state, reward
 
 
-def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents, rng: random.Random) -> List[Scenario]:
+def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents,
+                          rng: random.Random) -> List[Scenario]:
     scenarios: List[Scenario] = []
     if n > 1:
         pb = ProgressBar("Data Generation", n, 5)
@@ -213,9 +215,9 @@ class Qfunction(torch.nn.Module):
         return other_fn.load_state_dict(self.state_dict())
 
 
-def sample_random_minibatch(n: int, d, qfun_hat, gamma: float):
+def sample_random_minibatch(n: int, d, qfun_hat, gamma: float, rng: random.Random):
     n = min(n, len(d))
-    memory_tuples = random.choices(d, k=n)
+    memory_tuples = rng.choices(d, k=n)
     training_batch = []
     for mt in memory_tuples:
         (state, action, reward, next_state) = mt
@@ -368,10 +370,10 @@ def q_learning(n_episodes: int, eps_start: float,
         # 3
         for i_t in range(time_limit):
             if state is not None:  # episode has not ended
-                rand = random.random()
+                rand = rng.random()
                 if rand > epsilon:  # exploration
                     # 4
-                    action = int(random.random())
+                    action = int(rng.random())
                 else:  # exploitation
                     # 5
                     action, [qvals] = qfun.get_action_and_q_value_training(
@@ -390,10 +392,10 @@ def q_learning(n_episodes: int, eps_start: float,
                 if len(d) < d_max_len:
                     d.append(memory_tuple)
                 else:
-                    d[random.randint(0, d_max_len-1)] = memory_tuple
+                    d[rng.randint(0, d_max_len-1)] = memory_tuple
                 # 9
                 training_batch = sample_random_minibatch(
-                    n_training_batch, d, qfun_hat, gamma)
+                    n_training_batch, d, qfun_hat, gamma, rng)
                 # 12
                 loss = train(training_batch, qfun, optimizer)
                 i_o += 1
