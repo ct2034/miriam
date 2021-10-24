@@ -9,7 +9,6 @@ import torch
 import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
-from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
 from scenarios.generators import tracing_pathes_in_the_dark
 from scenarios.solvers import cached_ecbs
 from sim.decentralized.iterators import IteratorType
@@ -310,8 +309,8 @@ def q_learning(n_episodes: int, eps_start: float,
     n_data_test = 100
     data_test_small = make_useful_scenarios(
         n_data_test, ignore_finished_agents, 4, 3, rng)
-    data_test_bigger = make_useful_scenarios(
-        n_data_test, ignore_finished_agents, 8, 6, rng)
+    # data_test_bigger = make_useful_scenarios(
+    #     n_data_test, ignore_finished_agents, 8, 6, rng)
 
     # init qfun
     qfun = Qfunction(9, 2, 16)
@@ -321,7 +320,9 @@ def q_learning(n_episodes: int, eps_start: float,
     # replay memory
     # (state, action, reward, next state)
     d: List[Tuple[Data, int, float, Optional[Data]]] = []
-    d_max_len = n_training_batch * 10
+    d_max_len = n_training_batch * 100
+
+    learn_start = d_max_len/2
 
     # optimizer
     optimizer = torch.optim.Adam(
@@ -340,6 +341,7 @@ def q_learning(n_episodes: int, eps_start: float,
     epsilons = []
     rewards = []
     loss_s = []
+    loss = 0
     max_q = []
     min_q = []
     d_fill = []
@@ -392,13 +394,15 @@ def q_learning(n_episodes: int, eps_start: float,
                 if len(d) < d_max_len:
                     d.append(memory_tuple)
                 else:
+                    # TODO: maybe easier with mod ..
                     d[rng.randint(0, d_max_len-1)] = memory_tuple
-                # 9
-                training_batch = sample_random_minibatch(
-                    n_training_batch, d, qfun_hat, gamma, rng)
-                # 12
-                loss = train(training_batch, qfun, optimizer)
-                i_o += 1
+                if len(d) > learn_start:
+                    # 9
+                    training_batch = sample_random_minibatch(
+                        n_training_batch, d, qfun_hat, gamma, rng)
+                    # 12
+                    loss = train(training_batch, qfun, optimizer)
+                    i_o += 1
                 # for next round
                 del state
                 state = next_state
@@ -476,11 +480,11 @@ if __name__ == "__main__":
     for i_r in range(runs):
         for gamma in [.8, .95, .99]:
             q_learning(
-                n_episodes=3000,
+                n_episodes=10000,
                 eps_start=.9,
                 c=100,
                 gamma=gamma,
-                n_training_batch=32,
+                n_training_batch=64,
                 ignore_finished_agents=True,
                 seed=i_r,
                 name=f"run{i_r}_gamma{gamma}"
