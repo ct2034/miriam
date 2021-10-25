@@ -114,7 +114,7 @@ class Scenario(object):
                 exception.id_coll)
             # record current state
             state: Optional[Data] = (
-                exception.get_agent_state())
+                exception.get_agent_state(hop_dist))
             self.costs_so_far += average_time
             reward = 0.
         elif not has_exception(scenario_result):  # done
@@ -248,7 +248,8 @@ def train(training_batch, qfun, optimizer):
     return mean_loss
 
 
-def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
+def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents: bool,
+             inverse: bool, hop_dist: int):
     successful_s = []
     regret_s = []
     qfun.eval()
@@ -257,9 +258,9 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
             # reset all agents
             a.back_to_the_start()
             if inverse:
-                a.policy = InverseQLearningPolicy(a)
+                a.policy = InverseQLearningPolicy(a, hop_dist)
             else:
-                a.policy = QLearningPolicy(a)
+                a.policy = QLearningPolicy(a, hop_dist)
             a.policy.set_qfun(qfun)
         res = run_a_scenario(a.env, scenario.agents,
                              False, IteratorType.BLOCKING1,
@@ -283,7 +284,7 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents, inverse):
 
 def q_learning(n_episodes: int, eps_start: float,
                c: int, gamma: float, n_training_batch: int,
-               ignore_finished_agents: bool, seed: int, name: str):
+               ignore_finished_agents: bool, hop_dist: int, seed: int, name: str):
     """Q-learning with experience replay
     pseudocode from https://github.com/diegoalejogm/deep-q-learning
     :param n_episodes: how many episodes to simulate
@@ -294,6 +295,9 @@ def q_learning(n_episodes: int, eps_start: float,
     :param n_training_batch: size of training minibatch
     :param ignore_finished_agents: wether or not to ignore agents at their
            goal pose
+    :param hop_dist: how big the agent state graph is (from current pos)
+    :param seed: for the random number generator
+    :param name: to save the final plot under ({name}.png)
     """
     time_limit = 100
 
@@ -322,7 +326,7 @@ def q_learning(n_episodes: int, eps_start: float,
     d: List[Tuple[Data, int, float, Optional[Data]]] = []
     d_max_len = n_training_batch * 100
 
-    learn_start = d_max_len/2
+    training_start = d_max_len/2
 
     # optimizer
     optimizer = torch.optim.Adam(
@@ -366,6 +370,7 @@ def q_learning(n_episodes: int, eps_start: float,
                 size, n_agents = training_sizes[progress]
         [scenario] = make_useful_scenarios(
             1, ignore_finished_agents, size, n_agents, rng)
+        # TODO only decrease after training_start
         epsilon = eps_start * exp(-eps_alpha * i_e)
         state = scenario.start()
         next_state = None
@@ -396,7 +401,7 @@ def q_learning(n_episodes: int, eps_start: float,
                 else:
                     # TODO: maybe easier with mod ..
                     d[rng.randint(0, d_max_len-1)] = memory_tuple
-                if len(d) > learn_start:
+                if len(d) > training_start:
                     # 9
                     training_batch = sample_random_minibatch(
                         n_training_batch, d, qfun_hat, gamma, rng)
@@ -423,12 +428,12 @@ def q_learning(n_episodes: int, eps_start: float,
             print("small")
             success, regret = evaluate(
                 data_test_small, qfun, ignore_finished_agents,
-                inverse=False)
+                inverse=False, hop_dist=hop_dist)
             eval_success.append(success)
             eval_regret.append(regret)
             success_inv, regret_inv = evaluate(
                 data_test_small, qfun, ignore_finished_agents,
-                inverse=True)
+                inverse=True, hop_dist=hop_dist)
             eval_success_inv.append(success_inv)
             eval_regret_inv.append(regret_inv)
             # print("big")
@@ -450,43 +455,44 @@ def q_learning(n_episodes: int, eps_start: float,
 
     # print stats
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    ax1.plot(epsilons, label="epsilon", linewidth=1)
-    ax1.plot(rewards, label="reward", linewidth=1)
-    ax1.plot(loss_s, label="loss", linewidth=1)
-    ax1.plot(max_q, label="max_q", linewidth=1)
-    ax1.plot(min_q, label="min_q", linewidth=1)
-    ax1.plot(d_fill, label="d_fill", linewidth=1)
+    ax1.plot(epsilons, label="epsilon", linewidth=.5)
+    ax1.plot(rewards, label="reward", linewidth=.5)
+    ax1.plot(loss_s, label="loss", linewidth=.5)
+    ax1.plot(max_q, label="max_q", linewidth=.5)
+    ax1.plot(min_q, label="min_q", linewidth=.5)
+    ax1.plot(d_fill, label="d_fill", linewidth=.5)
     ax1.set_ylim(bottom=-1)
     ax1.spines.bottom.set_position('zero')
     ax1.spines.top.set_color('none')
     ax1.legend()
-    ax2.plot(eval_success, label="eval_success", linewidth=1)
-    ax2.plot(eval_success_inv, label="eval_success_inv", linewidth=1)
-    # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=1)
-    # ax2.plot(eval_success_inv_bigger, label="eval_success_inv_bigger", linewidth=1)
+    ax2.plot(eval_success, label="eval_success", linewidth=.5)
+    ax2.plot(eval_success_inv, label="eval_success_inv", linewidth=.5)
+    # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=.5)
+    # ax2.plot(eval_success_inv_bigger, label="eval_success_inv_bigger", linewidth=.5)
     ax2.legend()
-    ax3.plot(eval_regret, label="eval_regret", linewidth=1)
-    ax3.plot(eval_regret_inv, label="eval_regret_inv", linewidth=1)
-    # ax3.plot(eval_regret_bigger, label="eval_regret_bigger", linewidth=1)
-    # ax3.plot(eval_regret_inv_bigger, label="eval_regret_inv_bigger", linewidth=1)
+    ax3.plot(eval_regret, label="eval_regret", linewidth=.5)
+    ax3.plot(eval_regret_inv, label="eval_regret_inv", linewidth=.5)
+    # ax3.plot(eval_regret_bigger, label="eval_regret_bigger", linewidth=.5)
+    # ax3.plot(eval_regret_inv_bigger, label="eval_regret_inv_bigger", linewidth=.5)
     ax3.legend()
-    plt.savefig(f'planner/mapf_with_rl/results/{name}.png')
+    plt.savefig(f'planner/mapf_with_rl/results/{name}.png', dpi=300)
 
 
 if __name__ == "__main__":
     logging.getLogger(
         "sim.decentralized.runner").setLevel(logging.ERROR)
     runs = 4
-    for i_r in range(runs):
-        for gamma in [.8, .95, .99]:
+    for hop_dist in [np.inf, 4, 3, 2]:
+        for i_r in range(runs):
             q_learning(
-                n_episodes=10000,
+                n_episodes=5000,
                 eps_start=.9,
                 c=100,
-                gamma=gamma,
+                gamma=.9,
                 n_training_batch=64,
                 ignore_finished_agents=True,
+                hop_dist=hop_dist,
                 seed=i_r,
-                name=f"run{i_r}_gamma{gamma}"
+                name=f"run{i_r}_hop_dist{hop_dist}"
             )
     plt.show()

@@ -1,8 +1,10 @@
 from itertools import product
+from typing import Tuple
 
+import networkx as nx
 import numpy as np
 import torch
-from definitions import FREE
+from definitions import FREE, C
 from torch_geometric.data import Data
 
 
@@ -13,33 +15,26 @@ def node_to_pos(data_pos, n):
 def pos_to_node(data_pos, pos):
     n_nodes = data_pos.shape[0]
     for i in range(n_nodes):
-        if data_pos[i, 0] == pos[1] and data_pos[i, 1] == pos[0]:
+        if data_pos[i, 0] == pos[0] and data_pos[i, 1] == pos[1]:
             return i
     return None
 
 
-def gridmap_to_graph(gridmap):
+def gridmap_to_graph(gridmap: np.ndarray, hop_dist: int,
+                     own_pos: C):
     width, height = gridmap.shape
-    nodes = []
+    g = nx.grid_2d_graph(width, height)
+    g = g.to_undirected(as_view=True)
+    if hop_dist < np.inf:
+        g = nx.ego_graph(g, tuple(own_pos), radius=hop_dist)
+
+    def filter_node(n):
+        return gridmap[n] == FREE
+    g = nx.subgraph_view(g, filter_node=filter_node)
+    nodes = list(g.nodes)
     edges = []
-    for x, y in product(range(width), range(height)):
-        node = (x, y)
-        if gridmap[y, x] == FREE:
-            nodes.append(node)
-            if x > 0:
-                left_n = (x - 1, y)
-                if left_n in nodes:
-                    edges.append([
-                        nodes.index(node),
-                        nodes.index(left_n)
-                    ])
-            if y > 0:
-                above_n = (x, y - 1)
-                if above_n in nodes:
-                    edges.append([
-                        nodes.index(node),
-                        nodes.index(above_n)
-                    ])
+    for a, b in g.edges:
+        edges.append((nodes.index(a), nodes.index(b)))
     data_edge_index = torch.tensor(edges).T
     data_pos = torch.tensor(nodes)
     assert(data_edge_index.shape[0] == 2)
@@ -53,10 +48,10 @@ def get_agent_pos_layer(data_pos, paths_until_col, i_as):
     n_nodes = data_pos.shape[0]
     data_x_slice = torch.zeros((n_nodes, 1))
     for i_a in i_as:
-        pos = paths_until_col[i_a][0]
+        pos = paths_until_col[i_a][0]  # TODO: why?
         node = pos_to_node(data_pos, pos)
-        assert node is not None
-        data_x_slice[node, 0] = 1
+        if node is not None:
+            data_x_slice[node, 0] = 1
     return data_x_slice
 
 
@@ -66,8 +61,8 @@ def get_agent_path_layer(data_pos, paths_full, i_as):
     for i_a in i_as:
         for pos in paths_full[i_a]:
             node = pos_to_node(data_pos, pos)
-            assert node is not None
-            data_x_slice[node, 0] = 1
+            if node is not None:
+                data_x_slice[node, 0] = 1
     return data_x_slice
 
 
