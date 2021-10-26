@@ -69,7 +69,7 @@ class Scenario(object):
         # accumulate costs between sim steps
         self.costs_so_far = 0.
         # cost if simulation was unsuccessful:
-        self.UNSUCCESSFUL_COST = -.5
+        self.UNSUCCESSFUL_COST = -.6
 
     def start(self) -> Data:
         state, reward = self._run()
@@ -295,7 +295,7 @@ def q_learning(n_episodes: int, eps_start: float,
     :param ignore_finished_agents: wether or not to ignore agents at their
            goal pose
     """
-    time_limit = 100
+    time_limit = 10
 
     # random number generator
     rng = random.Random(seed)
@@ -382,6 +382,8 @@ def q_learning(n_episodes: int, eps_start: float,
                         state)
                 # 6
                 next_state, reward = scenario.step(action)
+                if i_t == time_limit-1 and next_state is None:  # time out
+                    reward = scenario.UNSUCCESSFUL_COST
                 # 7
                 # if next_state is None:  # agents reached their goals
                 # 8 store in replay memory
@@ -394,8 +396,7 @@ def q_learning(n_episodes: int, eps_start: float,
                 if len(d) < d_max_len:
                     d.append(memory_tuple)
                 else:
-                    # TODO: maybe easier with mod ..
-                    d[rng.randint(0, d_max_len-1)] = memory_tuple
+                    d[i_e % d_max_len] = memory_tuple
                 if len(d) > learn_start:
                     # 9
                     training_batch = sample_random_minibatch(
@@ -478,15 +479,14 @@ if __name__ == "__main__":
         "sim.decentralized.runner").setLevel(logging.ERROR)
     runs = 4
     for i_r in range(runs):
-        for gamma in [.8, .95, .99]:
-            q_learning(
-                n_episodes=10000,
-                eps_start=.9,
-                c=100,
-                gamma=gamma,
-                n_training_batch=64,
-                ignore_finished_agents=True,
-                seed=i_r,
-                name=f"run{i_r}_gamma{gamma}"
-            )
+        q_learning(
+            n_episodes=10000,
+            eps_start=.9,
+            c=100,
+            gamma=.9,
+            n_training_batch=64,
+            ignore_finished_agents=True,
+            seed=i_r,
+            name=f"run{i_r}"
+        )
     plt.show()
