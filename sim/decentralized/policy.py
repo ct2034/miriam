@@ -5,6 +5,7 @@ from typing import Optional
 
 import numpy as np
 import torch
+from definitions import C
 from importtf import keras, tf
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
@@ -27,8 +28,8 @@ class PolicyCalledException(Exception):
         self.policy: LearnedRaisingPolicy = policy
         self.id_coll = id_coll
 
-    def get_agent_state(self):
-        return self.policy.get_state(self.id_coll)
+    def get_agent_state(self, hop_dist: int):
+        return self.policy.get_state(self.id_coll, hop_dist)
 
 
 class PolicyType(Enum):
@@ -61,9 +62,9 @@ class Policy(object):
         elif type == PolicyType.LEARNED_RAISING:
             return LearnedRaisingPolicy(agent)
         elif type == PolicyType.Q_LEARNING_POLICY:
-            return QLearningPolicy(agent)
+            return QLearningPolicy(agent, **kwargs)
         elif type == PolicyType.INVERSE_Q_LEARNING_POLICY:
-            return InverseQLearningPolicy(agent)
+            return InverseQLearningPolicy(agent, **kwargs)
         elif type == PolicyType.ONE_THEN_RANDOM:
             return FirstThenRandomPolicy(agent, 1.)
         elif type == PolicyType.ZERO_THEN_RANDOM:
@@ -248,27 +249,37 @@ class LearnedRaisingPolicy(LearnedPolicy):
     def get_priority(self, id_coll: int) -> float:
         raise PolicyCalledException(self, id_coll)
 
-    def get_state(self, id_coll: int):
-        if self.a.has_gridmap:
-            data_edge_index, data_pos = gridmap_to_graph(self.a.env)
-        elif self.a.has_roadmap:
-            raise NotImplementedError()
+    def get_state(self, id_coll: int, hop_dist: int) -> Data:
+        """return a data object of the state when this collision happens
+        :param id_coll: id of the agent in *self* perspective
+        :param hop_dist: how big the view range is (in hop distance)
+        :return: data object containing graph info for learning
+        """
+        # indices for relevant agents
         ids = ([self.a.id]+list(self.paths.keys()))
-        # this agent
         i_a = 0
-        # colliding agent
         i_ca = ids.index(id_coll)
-        # other agents
         i_oas = [i for i in range(len(ids)) if (
             i != 0 and i != i_ca
         )]
+        # paths
         self.path_is[self.a.id] = self.a.path_i
-        paths_full = ([self.a.path] +
+        own_path = np.array(self.a.path)[:, :-1]
+        paths_full = ([own_path] +
                       list(self.paths.values()))
         paths_until_col = []
         for i_id, id in enumerate(ids):
             paths_until_col.append(self._path_until_coll(
                 paths_full[i_id], self.path_is[id], None))
+        # making basic graph info
+        own_pos: C = tuple(paths_until_col[i_a][-1])
+        assert own_pos == self.a.pos
+        if self.a.has_gridmap:
+            data_edge_index, data_pos = gridmap_to_graph(
+                self.a.env, hop_dist, own_pos)
+        elif self.a.has_roadmap:
+            raise NotImplementedError()
+        # node features
         data_x = torch.cat((
             get_agent_pos_layer(data_pos, paths_until_col, [i_a]),
             get_agent_path_layer(data_pos, paths_until_col, [i_a]),
@@ -288,16 +299,17 @@ class LearnedRaisingPolicy(LearnedPolicy):
 
 
 class QLearningPolicy(LearnedRaisingPolicy):
-    def __init__(self, agent) -> None:
+    def __init__(self, agent, hop_dist: int) -> None:
         super().__init__(agent)
         self.model: Optional[torch.nn.Module] = None
+        self.hop_dist = hop_dist
 
     def set_qfun(self, model):
         self.model = model
 
     def get_priority(self, id_coll: int) -> float:
         assert self.model is not None
-        data: Data = self.get_state(id_coll)
+        data: Data = self.get_state(id_coll, self.hop_dist)
         self.model.eval()
         # this will be two values for [0, 1]
         out = self.model(data)[0]
