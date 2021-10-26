@@ -460,7 +460,7 @@ def q_learning(n_episodes: int, eps_start: float,
     ax1.set_ylim(bottom=-1)
     ax1.spines.bottom.set_position('zero')
     ax1.spines.top.set_color('none')
-    ax1.legend()
+    ax1.legend('lower left')
     ax2.plot(eval_success, label="eval_success", linewidth=.5)
     ax2.plot(eval_success_inv, label="eval_success_inv", linewidth=.5)
     # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=.5)
