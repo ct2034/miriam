@@ -2,10 +2,12 @@
 from functools import reduce
 from itertools import product
 
+import networkx as nx
 import numpy as np
 from matplotlib import cm
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from torch_geometric.data import Data
 
 _ = Axes3D
 
@@ -98,3 +100,26 @@ def plot_schedule(data: dict):
         ))
         paths.append(path)
     plot_with_paths(data['gridmap'], paths)
+
+
+def plot_state(data: Data):
+    """display state of GCN data with pos, edges and node features"""
+    data_x = data.x
+    data_edge_index = data.edge_index
+    data_pos = data.pos
+
+    n_nodes = data_x.shape[0]
+    g = nx.Graph()
+    for i_e in range(data_edge_index.shape[1]):
+        g.add_edge(data_edge_index[0, i_e], data_edge_index[1, i_e])
+
+    label_dict = {}
+    for i_n in range(n_nodes):
+        data = list(map(int, data_x[i_n, :]))
+        label = f"{data[0:3]}\n{data[3:6]}\n{data[6:9]}"
+        label_dict[i_n] = label.replace("0", " ")
+
+    plt.figure()
+    nx.draw(g, pos=data_pos.tolist())
+    nx.draw_networkx_labels(g, pos=data_pos.tolist(),
+                            labels=label_dict, font_family='monospace')
