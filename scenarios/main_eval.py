@@ -357,9 +357,6 @@ def evaluate_full_run(size, i_r, cols, experiment_matrix, pbm):
                     decen_cost_r != INVALID):
                 df_rows.loc[row_name, DIFF_SIM_DECEN_RANDOM
                             ] = decen_cost_r - ecbs_cost
-                # TODO: It is true, that sometimes, decentralized solutions
-                # have lower cost than ecbs, which seems to be down to
-                # decentralized solutions ignoring finished agents.
             # decen learned ...................................................
             if (DIFF_SIM_DECEN_LEARNED in cols and
                     decen_cost_l != INVALID):
