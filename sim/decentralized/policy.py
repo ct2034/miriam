@@ -275,8 +275,7 @@ class LearnedRaisingPolicy(LearnedPolicy):
             paths_until_col.append(self._path_until_coll(
                 paths_full[i_id], self.path_is[id], None))
         # making basic graph info
-        own_pos: C = tuple(paths_until_col[i_a][-1])  # type: ignore
-        assert own_pos == self.a.pos
+        own_pos = self.a.pos
         if self.a.has_gridmap:
             data_edge_index, data_pos = gridmap_to_graph(
                 self.a.env, hop_dist, own_pos)
