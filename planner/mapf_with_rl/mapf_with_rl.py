@@ -42,11 +42,14 @@ def get_ecbs_cost(scen: SCENARIO_TYPE, ignore_finished_agents: bool):
 
 
 class Scenario(object):
-    def __init__(self, this_data: SCENARIO_TYPE,
-                 ignore_finished_agents: bool, rng: random.Random) -> None:
+    def __init__(self, this_data: SCENARIO_TYPE, ignore_finished_agents: bool,
+                 hop_dist: int, rng: random.Random) -> None:
         super().__init__()
+        # the scenario
         self.env, self.starts, self.goals = this_data
+        # configuration
         self.ignore_finished_agents = ignore_finished_agents
+        self.hop_dist = hop_dist
         # trying to solve with ecbs
         self.ecbs_cost = get_ecbs_cost(
             this_data, ignore_finished_agents)
@@ -114,7 +117,7 @@ class Scenario(object):
                 exception.id_coll)
             # record current state
             state: Optional[Data] = (
-                exception.get_agent_state(hop_dist))
+                exception.get_agent_state(self.hop_dist))
             self.costs_so_far += average_time
             reward = 0.
         elif not has_exception(scenario_result):  # done
@@ -132,7 +135,7 @@ class Scenario(object):
         return state, reward
 
 
-def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents,
+def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents, hop_dist,
                           rng: random.Random) -> List[Scenario]:
     scenarios: List[Scenario] = []
     if n > 1:
@@ -147,7 +150,7 @@ def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents,
         collide, _ = will_they_collide_in_scen(
             env, starts, goals, ignore_finished_agents)
         if collide:
-            scen = Scenario(scen_data, ignore_finished_agents, rng)
+            scen = Scenario(scen_data, ignore_finished_agents, hop_dist, rng)
             if scen.useful:
                 if n > 1:
                     pb.progress()
@@ -283,7 +286,7 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents: bool,
 
 
 def q_learning(n_episodes: int, eps_start: float,
-               c: int, gamma: float, n_training_batch: int,
+               c: int, gamma: float, n_training_batch: int, n_data_test: int,
                ignore_finished_agents: bool, hop_dist: int, seed: int, name: str):
     """Q-learning with experience replay
     pseudocode from https://github.com/diegoalejogm/deep-q-learning
@@ -293,6 +296,7 @@ def q_learning(n_episodes: int, eps_start: float,
     :param c: reset qfun_hat every c episodes
     :param gamma: discout factor for future rewards
     :param n_training_batch: size of training minibatch
+    :param n_data_test: how many testing scenarios to make
     :param ignore_finished_agents: wether or not to ignore agents at their
            goal pose
     :param hop_dist: how big the agent state graph is (from current pos)
@@ -310,11 +314,10 @@ def q_learning(n_episodes: int, eps_start: float,
     eps_alpha = -1 * log(eps_end / eps_start) / n_episodes
 
     # testing scenarios
-    n_data_test = 100
     data_test_small = make_useful_scenarios(
-        n_data_test, ignore_finished_agents, 4, 3, rng)
+        n_data_test, ignore_finished_agents, 4, 3, hop_dist, rng)
     # data_test_bigger = make_useful_scenarios(
-    #     n_data_test, ignore_finished_agents, 8, 6, rng)
+    #     n_data_test, ignore_finished_agents, 8, 6, hop_dist, rng)
 
     # init qfun
     qfun = Qfunction(9, 2, 16)
@@ -369,7 +372,7 @@ def q_learning(n_episodes: int, eps_start: float,
             if i_e >= int(n_episodes * progress):
                 size, n_agents = training_sizes[progress]
         [scenario] = make_useful_scenarios(
-            1, ignore_finished_agents, size, n_agents, rng)
+            1, ignore_finished_agents, size, n_agents, hop_dist, rng)
         # TODO only decrease after training_start
         epsilon = eps_start * exp(-eps_alpha * i_e)
         state = scenario.start()
@@ -465,7 +468,7 @@ def q_learning(n_episodes: int, eps_start: float,
     ax1.set_ylim(bottom=-1)
     ax1.spines.bottom.set_position('zero')
     ax1.spines.top.set_color('none')
-    ax1.legend('lower left')
+    ax1.legend(loc='lower left')
     ax2.plot(eval_success, label="eval_success", linewidth=.5)
     ax2.plot(eval_success_inv, label="eval_success_inv", linewidth=.5)
     # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=.5)
@@ -483,7 +486,7 @@ if __name__ == "__main__":
     logging.getLogger(
         "sim.decentralized.runner").setLevel(logging.ERROR)
     runs = 4
-    for hop_dist in [np.inf, 4, 3, 2]:
+    for hop_dist in [3, 4, np.inf]:
         for i_r in range(runs):
             q_learning(
                 n_episodes=10000,
@@ -491,6 +494,7 @@ if __name__ == "__main__":
                 c=100,
                 gamma=.9,
                 n_training_batch=64,
+                n_data_test=100,
                 ignore_finished_agents=True,
                 hop_dist=hop_dist,
                 seed=i_r,

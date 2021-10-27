@@ -27,6 +27,7 @@ if __name__ == "__main__":
     s = Scenario(
         (env, starts, goals),
         ignore_finished_agents=True,
+        hop_dist=3,
         rng=random.Random(0)
     )
     assert s.useful
