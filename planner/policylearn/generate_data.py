@@ -592,11 +592,11 @@ if __name__ == "__main__":
             do_collide = False
             while not do_collide:
                 gridmap, starts, goals = tracing_pathes_in_the_dark(
-                    width, fill, n_agents, seed
+                    width, fill, n_agents, random.Random(seed)
                 )
                 seed += 1
                 do_collide, indep_agent_paths = will_they_collide_in_scen(
-                    gridmap, starts, goals)
+                    gridmap, starts, goals, ignore_finished_agents=False)
 
             data = {
                 INDEP_AGENT_PATHS_STR: indep_agent_paths,
