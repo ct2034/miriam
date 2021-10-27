@@ -25,9 +25,10 @@ class TestLearnedPolicy(unittest.TestCase):
         ])
 
         path_until_coll = lp._path_until_coll(path, 3, 3)
-        assert(max(path_until_coll[0]) == 1)
-        assert(max(path_until_coll[1]) == 2)
-        assert(max(path_until_coll[2]) == 3)
+        self.assertEqual(len(path_until_coll), 3)
+        self.assertEqual(max(path_until_coll[0]), 1)
+        self.assertEqual(max(path_until_coll[1]), 2)
+        self.assertEqual(max(path_until_coll[2]), 3)
 
     def test_learned_path_until_coll_short(self):
         lp = LearnedPolicy(Agent(np.array([[0, ]]), np.array([0, 0])))
@@ -40,9 +41,10 @@ class TestLearnedPolicy(unittest.TestCase):
         ])
 
         path_until_coll = lp._path_until_coll(path, 0, 3)
-        assert(max(path_until_coll[0]) == 2)
-        assert(max(path_until_coll[1]) == 2)
-        assert(max(path_until_coll[2]) == 3)
+        self.assertEqual(len(path_until_coll), 3)
+        self.assertEqual(max(path_until_coll[0]), 2)
+        self.assertEqual(max(path_until_coll[1]), 2)
+        self.assertEqual(max(path_until_coll[2]), 3)
 
     def test_learned_path_until_coll_shortest(self):
         lp = LearnedPolicy(Agent(np.array([[0, ]]), np.array([0, 0])))
@@ -52,9 +54,10 @@ class TestLearnedPolicy(unittest.TestCase):
         ])
 
         path_until_coll = lp._path_until_coll(path, 0, 3)
-        assert(max(path_until_coll[0]) == 2)
-        assert(max(path_until_coll[1]) == 2)
-        assert(max(path_until_coll[2]) == 2)
+        self.assertEqual(len(path_until_coll), 3)
+        self.assertEqual(max(path_until_coll[0]), 2)
+        self.assertEqual(max(path_until_coll[1]), 2)
+        self.assertEqual(max(path_until_coll[2]), 2)
 
     def test_learned_get_priority_calling_model(self):
         predictMock = MagicMock(return_value=[[.5, ], ])

@@ -155,9 +155,12 @@ class LearnedPolicy(Policy):
         if n_t is None:
             n_t = len(path)
         path = np.array(path)
-        start = max(0, path_i - n_t)
-        for t in range(start, path_i+1):
+        start = max(0, path_i - n_t + 2)
+        end = min(path_i+2, len(path))
+        for t in range(start, end):
             path_until_pos.append(path[t, :])
+        while len(path_until_pos) < n_t:
+            path_until_pos = [path[0]] + path_until_pos
         return path_until_pos
 
     def step(self):
