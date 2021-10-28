@@ -322,15 +322,9 @@ class QLearningPolicy(LearnedRaisingPolicy):
             expit[1]  # for 1 prio
         ])))
         if out[0] > out[1]:
-            if not prio < .5:
-                print(out)
-                print(expit)
-                print(prio)
+            assert prio <= .5
         else:
-            if not prio > .5:
-                print(out)
-                print(expit)
-                print(prio)
+            assert prio >= .5
         return prio
 
 
