@@ -48,7 +48,10 @@ def get_agent_pos_layer(data_pos, paths_until_col, i_as):
     n_nodes = data_pos.shape[0]
     data_x_slice = torch.zeros((n_nodes, 1))
     for i_a in i_as:
-        pos = paths_until_col[i_a][-1]
+        if len(paths_until_col[i_a]) >= 2:
+            pos = paths_until_col[i_a][-2]
+        else:
+            pos = paths_until_col[i_a][0]
         node = pos_to_node(data_pos, pos)
         if node is not None:
             data_x_slice[node, 0] = 1
