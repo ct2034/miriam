@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 TIME_LIMIT = 100
 
 
-def initialize_environment(size: int, fill: float, rng: random.Random = random.Random()
-                           ) -> np.ndarray:
+def initialize_environment_random_fill(size: int, fill: float, rng: random.Random = random.Random()
+                                       ) -> np.ndarray:
     """Make a square map with edge length `size` and `fill` (0..1) obstacle
     ratio.
     :param size: side length of the square (in pixels)
@@ -183,7 +183,7 @@ def will_agents_collide(agents, ignore_finished_agents):
 
 def sample_and_run_a_scenario(size, n_agents, policy, plot, rng: random.Random, iterator
                               ) -> SCENARIO_RESULT:
-    env = initialize_environment(size, .1, rng)
+    env = initialize_environment_random_fill(size, .1, rng)
     agents = initialize_agents(env, n_agents, policy, rng=rng)
     if agents is None:
         logger.warning("Could not initialize agents")

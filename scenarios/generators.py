@@ -33,17 +33,17 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
 def random_fill(size: int, fill: float,
                 n_agents: int, rng: random.Random):
     """Randomly filling spaces in gridmap based on `fill`."""
-    env = sim.decentralized.runner.initialize_environment(
+    env = sim.decentralized.runner.initialize_environment_random_fill(
         size, fill, rng=rng)
     starts, goals = make_starts_goals_on_env(env, n_agents, rng=rng)
     return env, starts, goals
 
 
 # this was previously in planner.policylearn.generate_data
-def generate_random_gridmap(
+def generate_walls_gridmap(
         width: int, height: int, fill: float, rng: random.Random):
     """Making a random gridmap of size (`width`x`height`). It will be filled
-    with stripes until `fill` is exceeded and then single cells are freed until
+    with walls until `fill` is exceeded and then single cells are freed until
     `fill` is exactly reached."""
     gridmap = np.zeros((width, height), dtype=np.int8)
     while np.count_nonzero(gridmap) < fill * width * height:
@@ -65,9 +65,9 @@ def generate_random_gridmap(
     return gridmap
 
 
-def stripes(size: int, fill: float,
-            n_agents: int, rng: random.Random):
-    env = generate_random_gridmap(
+def walls(size: int, fill: float,
+          n_agents: int, rng: random.Random):
+    env = generate_walls_gridmap(
         size, size, fill, rng)
     starts, goals = make_starts_goals_on_env(env, n_agents, rng)
     return env, starts, goals

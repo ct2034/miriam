@@ -16,14 +16,14 @@ class TestGenerators(unittest.TestCase):
         w = 999
         h = 100
         rng = random.Random(0)
-        gridmap_empty = generate_random_gridmap(w, h, 0, rng)
+        gridmap_empty = generate_walls_gridmap(w, h, 0, rng)
 
         assert gridmap_empty.shape[0] == w
         assert gridmap_empty.shape[1] == h
         assert np.max(gridmap_empty) == 0
         assert np.min(gridmap_empty) == 0
 
-        gridmap_half = generate_random_gridmap(w, h, 0.5, rng)
+        gridmap_half = generate_walls_gridmap(w, h, 0.5, rng)
 
         assert gridmap_half.shape[0] == w
         assert gridmap_half.shape[1] == h
@@ -64,13 +64,13 @@ class TestGenerators(unittest.TestCase):
 
     def test_generate_like_policylearn_gen_determinism(self):
         (base_env, base_starts, base_goals
-         ) = stripes(
+         ) = walls(
             10, .5, 10, random.Random(0))
         # --------
 
         # everything the same
         (same_env, same_starts, same_goals
-         ) = stripes(
+         ) = walls(
             10, .5, 10, random.Random(0))
         self.assertTrue(np.all(base_env == same_env))
         self.assertTrue(np.all(base_starts == same_starts))
@@ -79,7 +79,7 @@ class TestGenerators(unittest.TestCase):
 
         # everything different
         (other_env, other_starts, other_goals
-         ) = stripes(
+         ) = walls(
             10, .5, 10, random.Random(1))
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -88,7 +88,7 @@ class TestGenerators(unittest.TestCase):
 
         # only env different -> all different
         (other_env, other_starts, other_goals
-         ) = stripes(
+         ) = walls(
             10, .4, 10, random.Random(0))
         self.assertFalse(np.all(base_env == other_env))
         self.assertFalse(np.all(base_starts == other_starts))
@@ -97,19 +97,19 @@ class TestGenerators(unittest.TestCase):
     def test_generate_like_policylearn_gen_low_fills(self):
         """tests if generator handles low fill numbers correctly"""
         (env, starts, goals
-         ) = stripes(
+         ) = walls(
             10, .1, 10, random.Random(0))
         self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
 
         (env, starts, goals
-         ) = stripes(
+         ) = walls(
             10, 0, 10, random.Random(0))
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
     def test_get_random_next_to_free_pose_or_any_if_full_empty(self):
         # empty map should give any cell
         rng = random.Random(0)
-        env_empty = generate_random_gridmap(2, 2, 0, rng)
+        env_empty = generate_walls_gridmap(2, 2, 0, rng)
         pos_empty = get_random_next_to_free_pose_or_any_if_full(
             env_empty, rng)
         self.assertIn(pos_empty[0], [0, 1])

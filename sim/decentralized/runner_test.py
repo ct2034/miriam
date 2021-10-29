@@ -19,17 +19,17 @@ class TestRunner(unittest.TestCase):
         random.seed(0)
 
     def test_initialize_environment(self):
-        env = runner.initialize_environment(10, .5)
+        env = runner.initialize_environment_random_fill(10, .5)
         self.assertEqual(env.shape, (10, 10))
         self.assertEqual(np.count_nonzero(env), 50)
 
     def test_initialize_environment_determinism(self):
         rng = random.Random(0)
-        env = runner.initialize_environment(10, .5, rng)
+        env = runner.initialize_environment_random_fill(10, .5, rng)
         rng = random.Random(0)
-        env_same_seed = runner.initialize_environment(10, .5, rng)
+        env_same_seed = runner.initialize_environment_random_fill(10, .5, rng)
         rng = random.Random(1)
-        env_different_seed = runner.initialize_environment(10, .5, rng)
+        env_different_seed = runner.initialize_environment_random_fill(10, .5, rng)
         self.assertEqual(hasher([env]), hasher([env_same_seed]))
         self.assertNotEqual(hasher([env]), hasher([env_different_seed]))
 
@@ -64,7 +64,7 @@ class TestRunner(unittest.TestCase):
                         (1, 1) in map(lambda a: tuple(a.goal), agents))
 
     def test_initialize_agents_determinism(self):
-        env = runner.initialize_environment(10, .5)
+        env = runner.initialize_environment_random_fill(10, .5)
         agents = runner.initialize_agents(
             env, 5, PolicyType.LEARNED, True, random.Random(0))
         agents_same_seed = runner.initialize_agents(

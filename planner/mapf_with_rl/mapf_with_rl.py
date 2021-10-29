@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import random_fill
 from scenarios.solvers import cached_ecbs
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import (FirstThenRaisingPolicy,
@@ -141,7 +141,7 @@ def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents, hop_di
     if n > 1:
         pb = ProgressBar("Data Generation", n, 5)
     while len(scenarios) < n:
-        scen_data: SCENARIO_TYPE = tracing_pathes_in_the_dark(
+        scen_data: SCENARIO_TYPE = random_fill(
             size=size,
             fill=.4,
             n_agents=n_agents,
