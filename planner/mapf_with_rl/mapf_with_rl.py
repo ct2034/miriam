@@ -166,7 +166,7 @@ class Qfunction(torch.nn.Module):
     def __init__(self, num_node_features, num_actions,
                  hidden_channels) -> None:
         super().__init__()
-        INIT_STD = .1
+        INIT_STD = .03
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
         # self.conv3 = GCNConv(hidden_channels, hidden_channels)
