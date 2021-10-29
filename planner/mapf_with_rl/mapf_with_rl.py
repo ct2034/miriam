@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import json
 import logging
 import random
 from math import exp, isclose, log
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -316,8 +317,8 @@ def q_learning(n_episodes: int, eps_start: float,
     # testing scenarios
     data_test_small = make_useful_scenarios(
         n_data_test, ignore_finished_agents, 4, 3, hop_dist, rng)
-    # data_test_bigger = make_useful_scenarios(
-    #     n_data_test, ignore_finished_agents, 8, 6, hop_dist, rng)
+    data_test_bigger = make_useful_scenarios(
+        n_data_test, ignore_finished_agents, 8, 6, hop_dist, rng)
 
     # init qfun
     qfun = Qfunction(9, 2, 16)
@@ -339,27 +340,29 @@ def q_learning(n_episodes: int, eps_start: float,
     # size changes
     training_sizes = {
         .0: (4, 3),
-        # .7: (5, 4),
-        # .8: (5, 5),
-        # .9: (8, 6)
+        .7: (5, 4),
+        .8: (5, 5),
+        .9: (8, 6)
     }
 
     # stats
-    epsilons = []
-    rewards = []
-    loss_s = []
+    stats = {name: ([], []) for name in [
+        "epsilons",
+        "rewards",
+        "loss",
+        "max_q",
+        "min_q",
+        "d_fill",
+        "eval_success",
+        "eval_regret",
+        "eval_success_inv",
+        "eval_regret_inv",
+        "eval_success_bigger",
+        "eval_regret_bigger",
+        "eval_success_inv_bigger",
+        "eval_regret_inv_bigger",
+    ]}  # type: Dict[str, Tuple[List[float], List[float]]]
     loss = 0
-    max_q = []
-    min_q = []
-    d_fill = []
-    eval_success = []
-    eval_regret = []
-    eval_success_inv = []
-    eval_regret_inv = []
-    # eval_success_bigger = []
-    # eval_regret_bigger = []
-    # eval_success_inv_bigger = []
-    # eval_regret_inv_bigger = []
     stat_every = max(1, int(n_episodes / 100))
     eval_every = max(1, int(n_episodes / 50))
     i_o = 0  # count optimizations
@@ -421,83 +424,103 @@ def q_learning(n_episodes: int, eps_start: float,
         if i_e % c == 0:
             qfun.copy_to(qfun_hat)
         if i_e % stat_every == 0:
-            d_fill.append(float(len(d))/d_max_len)
-            rewards.append(reward)
-            loss_s.append(float(loss))
-            epsilons.append(epsilon)
-            max_q.append(float(max(qvals)))
-            min_q.append(float(min(qvals)))
-        if i_e % eval_every == 0:
+            stats["d_fill"][0].append(i_e)
+            stats["d_fill"][1].append(float(len(d))/d_max_len)
+            stats["rewards"][0].append(i_e)
+            stats["rewards"][1].append(reward)
+            stats["loss_s"][0].append(i_e)
+            stats["loss_s"][1].append(float(loss))
+            stats["epsilons"][0].append(i_e)
+            stats["epsilons"][1].append(epsilon)
+            stats["max_q"][0].append(i_e)
+            stats["max_q"][1].append(float(max(qvals)))
+            stats["min_q"][0].append(i_e)
+            stats["min_q"][1].append(float(min(qvals)))
+        if i_e == 0 or (i_e % eval_every == 0 and len(d) > training_start):
             # evaluation qfun
             print("small")
             success, regret = evaluate(
                 data_test_small, qfun, ignore_finished_agents,
                 inverse=False, hop_dist=hop_dist)
-            eval_success.append(success)
-            eval_regret.append(regret)
+            stats["eval_success"][0].append(i_e)
+            stats["eval_success"][1].append(success)
+            stats["eval_regret"][0].append(i_e)
+            stats["eval_regret"][1].append(regret)
             success_inv, regret_inv = evaluate(
                 data_test_small, qfun, ignore_finished_agents,
                 inverse=True, hop_dist=hop_dist)
-            eval_success_inv.append(success_inv)
-            eval_regret_inv.append(regret_inv)
-            # print("big")
-            # success_bigger, regret_bigger = evaluate(
-            #     data_test_bigger, qfun, ignore_finished_agents,
-            #     inverse=False)
-            # eval_success_bigger.append(success_bigger)
-            # eval_regret_bigger.append(regret_bigger)
-            # success_inv_bigger, regret_inv_bigger = evaluate(
-            #     data_test_bigger, qfun, ignore_finished_agents,
-            #     inverse=True)
-            # eval_success_inv_bigger.append(success_inv_bigger)
-            # eval_regret_inv_bigger.append(regret_inv_bigger)
+            stats["eval_success_inv"][0].append(i_e)
+            stats["eval_success_inv"][1].append(success_inv)
+            stats["eval_regret_inv"][0].append(i_e)
+            stats["eval_regret_inv"][1].append(regret_inv)
+            print("big")
+            success_bigger, regret_bigger = evaluate(
+                data_test_bigger, qfun, ignore_finished_agents,
+                inverse=False, hop_dist=hop_dist)
+            stats["eval_success_bigger"][0].append(i_e)
+            stats["eval_success_bigger"][1].append(success_bigger)
+            stats["eval_regret_bigger"][0].append(i_e)
+            stats["eval_regret_bigger"][1].append(regret_bigger)
+            success_inv_bigger, regret_inv_bigger = evaluate(
+                data_test_bigger, qfun, ignore_finished_agents,
+                inverse=True, hop_dist=hop_dist)
+            stats["eval_success_inv_bigger"][0].append(i_e)
+            stats["eval_success_inv_bigger"][1].append(success_inv_bigger)
+            stats["eval_regret_inv_bigger"][0].append(i_e)
+            stats["eval_regret_inv_bigger"][1].append(regret_inv_bigger)
         del scenario
         del state
         del next_state
         pb.progress()
     pb.end()
-
-    # print stats
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    ax1.plot(epsilons, label="epsilon", linewidth=.5)
-    ax1.plot(rewards, label="reward", linewidth=.5)
-    ax1.plot(loss_s, label="loss", linewidth=.5)
-    ax1.plot(max_q, label="max_q", linewidth=.5)
-    ax1.plot(min_q, label="min_q", linewidth=.5)
-    ax1.plot(d_fill, label="d_fill", linewidth=.5)
-    ax1.set_ylim(bottom=-1)
-    ax1.spines.bottom.set_position('zero')
-    ax1.spines.top.set_color('none')
-    ax1.legend(loc='lower left')
-    ax2.plot(eval_success, label="eval_success", linewidth=.5)
-    ax2.plot(eval_success_inv, label="eval_success_inv", linewidth=.5)
-    # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=.5)
-    # ax2.plot(eval_success_inv_bigger, label="eval_success_inv_bigger", linewidth=.5)
-    ax2.legend()
-    ax3.plot(eval_regret, label="eval_regret", linewidth=.5)
-    ax3.plot(eval_regret_inv, label="eval_regret_inv", linewidth=.5)
-    # ax3.plot(eval_regret_bigger, label="eval_regret_bigger", linewidth=.5)
-    # ax3.plot(eval_regret_inv_bigger, label="eval_regret_inv_bigger", linewidth=.5)
-    ax3.legend()
-    plt.savefig(f'planner/mapf_with_rl/results/{name}.png', dpi=300)
+    with open(f"planner/mapf_with_rl/results/{name}.json", "w") as f:
+        json.dump(stats, f)
+    return stats
 
 
 if __name__ == "__main__":
     logging.getLogger(
         "sim.decentralized.runner").setLevel(logging.ERROR)
     runs = 4
-    for hop_dist in [3, 4, np.inf]:
-        for i_r in range(runs):
-            q_learning(
-                n_episodes=10000,
-                eps_start=.9,
-                c=100,
-                gamma=.9,
-                n_training_batch=64,
-                n_data_test=100,
-                ignore_finished_agents=True,
-                hop_dist=hop_dist,
-                seed=i_r,
-                name=f"run{i_r}_hop_dist{hop_dist}"
-            )
-    plt.show()
+    for i_r in range(runs):
+        stats = q_learning(
+            n_episodes=10000,
+            eps_start=.9,
+            c=100,
+            gamma=.9,
+            n_training_batch=64,
+            n_data_test=100,
+            ignore_finished_agents=True,
+            hop_dist=4,
+            seed=i_r,
+            name=f"run{i_r}_increasing"
+        )
+
+    # TODO:
+    # # print stats
+    # fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    # ax1.plot(epsilons, label="epsilon", linewidth=.5)
+    # ax1.plot(rewards, label="reward", linewidth=.5)
+    # ax1.plot(loss_s, label="loss", linewidth=.5)
+    # ax1.plot(max_q, label="max_q", linewidth=.5)
+    # ax1.plot(min_q, label="min_q", linewidth=.5)
+    # ax1.plot(d_fill, label="d_fill", linewidth=.5)
+    # ax1.set_ylim(bottom=-1)
+    # ax1.spines.bottom.set_position('zero')
+    # ax1.spines.top.set_color('none')
+    # ax1.legend(loc='lower left')
+    # ax2.plot(eval_success, label="eval_success", linewidth=.5)
+    # ax2.plot(eval_success_inv, label="eval_success_inv", linewidth=.5)
+    # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=.5)
+    # ax2.plot(eval_success_inv_bigger,
+    #          label="eval_success_inv_bigger", linewidth=.5)
+    # ax2.legend()
+    # ax3.plot(eval_regret, label="eval_regret", linewidth=.5)
+    # ax3.plot(eval_regret_inv, label="eval_regret_inv", linewidth=.5)
+    # ax3.plot(eval_regret_bigger, label="eval_regret_bigger", linewidth=.5)
+    # ax3.plot(eval_regret_inv_bigger,
+    #          label="eval_regret_inv_bigger", linewidth=.5)
+    # ax3.legend()
+    # plt.savefig(f'planner/mapf_with_rl/results/{name}.png', dpi=300)
+
+    # plt.show()
