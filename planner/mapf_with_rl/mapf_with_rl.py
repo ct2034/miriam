@@ -10,6 +10,7 @@ import torch
 import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
+from planner.mapf_with_rl.mapf_with_rl_plot import make_plot_from_json
 from scenarios.generators import random_fill
 from scenarios.solvers import cached_ecbs
 from sim.decentralized.iterators import IteratorType
@@ -239,13 +240,13 @@ def sample_random_minibatch(n: int, d, qfun_hat, gamma: float, rng: random.Rando
 
 def train(training_batch, qfun, optimizer):
     qfun.train()
-    loss_s = torch.zeros(len(training_batch))
+    loss = torch.zeros(len(training_batch))
     for i_b, tb in enumerate(training_batch):
         (state, action, y) = tb
         qvals = qfun(state)
         loss = (y - qvals[0, action]) ** 2
-        loss_s[i_b] = loss
-    mean_loss = torch.mean(loss_s)
+        loss[i_b] = loss
+    mean_loss = torch.mean(loss)
     optimizer.zero_grad()
     mean_loss.backward()
     optimizer.step()
@@ -428,15 +429,17 @@ def q_learning(n_episodes: int, eps_start: float,
             stats["d_fill"][1].append(float(len(d))/d_max_len)
             stats["rewards"][0].append(i_e)
             stats["rewards"][1].append(reward)
-            stats["loss_s"][0].append(i_e)
-            stats["loss_s"][1].append(float(loss))
+            stats["loss"][0].append(i_e)
+            stats["loss"][1].append(float(loss))
             stats["epsilons"][0].append(i_e)
             stats["epsilons"][1].append(epsilon)
             stats["max_q"][0].append(i_e)
             stats["max_q"][1].append(float(max(qvals)))
             stats["min_q"][0].append(i_e)
             stats["min_q"][1].append(float(min(qvals)))
-        if i_e == 0 or (i_e % eval_every == 0 and len(d) > training_start):
+        if (i_e == 0 or
+            i_e == n_episodes - 1 or
+                (i_e % eval_every == 0 and len(d) > training_start)):
             # evaluation qfun
             print("small")
             success, regret = evaluate(
@@ -481,6 +484,22 @@ def q_learning(n_episodes: int, eps_start: float,
 if __name__ == "__main__":
     logging.getLogger(
         "sim.decentralized.runner").setLevel(logging.ERROR)
+
+    # debug run
+    stats = q_learning(
+        n_episodes=10,
+        eps_start=.9,
+        c=2,
+        gamma=.9,
+        n_training_batch=2,
+        n_data_test=2,
+        ignore_finished_agents=True,
+        hop_dist=4,
+        seed=0,
+        name=f"debug"
+    )
+    make_plot_from_json("debug")
+
     runs = 4
     for i_r in range(runs):
         stats = q_learning(
@@ -495,32 +514,3 @@ if __name__ == "__main__":
             seed=i_r,
             name=f"run{i_r}_increasing"
         )
-
-    # TODO:
-    # # print stats
-    # fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    # ax1.plot(epsilons, label="epsilon", linewidth=.5)
-    # ax1.plot(rewards, label="reward", linewidth=.5)
-    # ax1.plot(loss_s, label="loss", linewidth=.5)
-    # ax1.plot(max_q, label="max_q", linewidth=.5)
-    # ax1.plot(min_q, label="min_q", linewidth=.5)
-    # ax1.plot(d_fill, label="d_fill", linewidth=.5)
-    # ax1.set_ylim(bottom=-1)
-    # ax1.spines.bottom.set_position('zero')
-    # ax1.spines.top.set_color('none')
-    # ax1.legend(loc='lower left')
-    # ax2.plot(eval_success, label="eval_success", linewidth=.5)
-    # ax2.plot(eval_success_inv, label="eval_success_inv", linewidth=.5)
-    # ax2.plot(eval_success_bigger, label="eval_success_bigger", linewidth=.5)
-    # ax2.plot(eval_success_inv_bigger,
-    #          label="eval_success_inv_bigger", linewidth=.5)
-    # ax2.legend()
-    # ax3.plot(eval_regret, label="eval_regret", linewidth=.5)
-    # ax3.plot(eval_regret_inv, label="eval_regret_inv", linewidth=.5)
-    # ax3.plot(eval_regret_bigger, label="eval_regret_bigger", linewidth=.5)
-    # ax3.plot(eval_regret_inv_bigger,
-    #          label="eval_regret_inv_bigger", linewidth=.5)
-    # ax3.legend()
-    # plt.savefig(f'planner/mapf_with_rl/results/{name}.png', dpi=300)
-
-    # plt.show()
