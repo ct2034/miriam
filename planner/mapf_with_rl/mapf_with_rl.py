@@ -145,7 +145,7 @@ def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents, hop_di
     while len(scenarios) < n:
         scen_data: SCENARIO_TYPE = random_fill(
             size=size,
-            fill=.4,
+            fill=.3,
             n_agents=n_agents,
             rng=rng)
         (env, starts, goals) = scen_data
@@ -253,8 +253,8 @@ def train(training_batch, qfun, optimizer):
     return mean_loss
 
 
-def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents: bool,
-             inverse: bool, hop_dist: int):
+def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents: bool, hop_dist: int,
+             inverse: bool):
     successful_s = []
     regret_s = []
     qfun.eval()
@@ -288,7 +288,8 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents: bool,
 
 
 def q_learning(n_episodes: int, eps_start: float,
-               c: int, gamma: float, n_training_batch: int, n_data_test: int,
+               c: int, gamma: float, n_training_batch: int,
+               test_scenarios: Dict[str, List[Scenario]],
                ignore_finished_agents: bool, hop_dist: int, seed: int, name: str):
     """Q-learning with experience replay
     pseudocode from https://github.com/diegoalejogm/deep-q-learning
@@ -298,7 +299,7 @@ def q_learning(n_episodes: int, eps_start: float,
     :param c: reset qfun_hat every c episodes
     :param gamma: discout factor for future rewards
     :param n_training_batch: size of training minibatch
-    :param n_data_test: how many testing scenarios to make
+    :param data_test: dict of test scenarios
     :param ignore_finished_agents: wether or not to ignore agents at their
            goal pose
     :param hop_dist: how big the agent state graph is (from current pos)
@@ -314,12 +315,6 @@ def q_learning(n_episodes: int, eps_start: float,
     # epsilon paramters
     eps_end = .01
     eps_alpha = -1 * log(eps_end / eps_start) / n_episodes
-
-    # testing scenarios
-    data_test_small = make_useful_scenarios(
-        n_data_test, ignore_finished_agents, 4, 3, hop_dist, rng)
-    data_test_bigger = make_useful_scenarios(
-        n_data_test, ignore_finished_agents, 8, 6, hop_dist, rng)
 
     # init qfun
     qfun = Qfunction(9, 2, 16)
@@ -354,15 +349,11 @@ def q_learning(n_episodes: int, eps_start: float,
         "max_q",
         "min_q",
         "d_fill",
-        "eval_success",
-        "eval_regret",
-        "eval_success_inv",
-        "eval_regret_inv",
-        "eval_success_bigger",
-        "eval_regret_bigger",
-        "eval_success_inv_bigger",
-        "eval_regret_inv_bigger",
-    ]}  # type: Dict[str, Tuple[List[float], List[float]]]
+    ] + [f"eval_success_{k}" for k in test_scenarios.keys()
+         ] + [f"eval_regret_{k}" for k in test_scenarios.keys()
+              ] + [f"eval_success_inv_{k}" for k in test_scenarios.keys()
+                   ] + [f"eval_regret_inv_{k}" for k in test_scenarios.keys()
+                        ]}  # type: Dict[str, Tuple[List[float], List[float]]]
     loss = 0
     stat_every = max(1, int(n_episodes / 100))
     eval_every = max(1, int(n_episodes / 50))
@@ -441,36 +432,22 @@ def q_learning(n_episodes: int, eps_start: float,
             i_e == n_episodes - 1 or
                 (i_e % eval_every == 0 and len(d) > training_start)):
             # evaluation qfun
-            print("small")
-            success, regret = evaluate(
-                data_test_small, qfun, ignore_finished_agents,
-                inverse=False, hop_dist=hop_dist)
-            stats["eval_success"][0].append(i_e)
-            stats["eval_success"][1].append(success)
-            stats["eval_regret"][0].append(i_e)
-            stats["eval_regret"][1].append(regret)
-            success_inv, regret_inv = evaluate(
-                data_test_small, qfun, ignore_finished_agents,
-                inverse=True, hop_dist=hop_dist)
-            stats["eval_success_inv"][0].append(i_e)
-            stats["eval_success_inv"][1].append(success_inv)
-            stats["eval_regret_inv"][0].append(i_e)
-            stats["eval_regret_inv"][1].append(regret_inv)
-            print("big")
-            success_bigger, regret_bigger = evaluate(
-                data_test_bigger, qfun, ignore_finished_agents,
-                inverse=False, hop_dist=hop_dist)
-            stats["eval_success_bigger"][0].append(i_e)
-            stats["eval_success_bigger"][1].append(success_bigger)
-            stats["eval_regret_bigger"][0].append(i_e)
-            stats["eval_regret_bigger"][1].append(regret_bigger)
-            success_inv_bigger, regret_inv_bigger = evaluate(
-                data_test_bigger, qfun, ignore_finished_agents,
-                inverse=True, hop_dist=hop_dist)
-            stats["eval_success_inv_bigger"][0].append(i_e)
-            stats["eval_success_inv_bigger"][1].append(success_inv_bigger)
-            stats["eval_regret_inv_bigger"][0].append(i_e)
-            stats["eval_regret_inv_bigger"][1].append(regret_inv_bigger)
+            for set_name, test_set in test_scenarios.items():
+                print(f"evaluating test set {set_name}")
+                success, regret = evaluate(
+                    test_set, qfun, ignore_finished_agents, hop_dist,
+                    inverse=False)
+                stats[f"eval_success_{set_name}"][0].append(i_e)
+                stats[f"eval_success_{set_name}"][1].append(success)
+                stats[f"eval_regret_{set_name}"][0].append(i_e)
+                stats[f"eval_regret_{set_name}"][1].append(regret)
+                inv_success, inv_regret = evaluate(
+                    test_set, qfun, ignore_finished_agents, hop_dist,
+                    inverse=True)
+                stats[f"eval_success_inv_{set_name}"][0].append(i_e)
+                stats[f"eval_success_inv_{set_name}"][1].append(inv_success)
+                stats[f"eval_regret_inv_{set_name}"][0].append(i_e)
+                stats[f"eval_regret_inv_{set_name}"][1].append(inv_regret)
         del scenario
         del state
         del next_state
@@ -486,19 +463,29 @@ if __name__ == "__main__":
         "sim.decentralized.runner").setLevel(logging.ERROR)
 
     # debug run
+    data_test = {"one": make_useful_scenarios(3, True, 4, 3, 1, random.Random(0)),
+                 "two": make_useful_scenarios(3, True, 4, 3, 1, random.Random(1))}
     stats = q_learning(
         n_episodes=10,
         eps_start=.9,
         c=2,
         gamma=.9,
         n_training_batch=2,
-        n_data_test=2,
+        test_scenarios=data_test,
         ignore_finished_agents=True,
         hop_dist=4,
         seed=0,
         name=f"debug"
     )
     make_plot_from_json("debug")
+
+    n_data_test = 100
+    test_scenarios = {
+        "small": make_useful_scenarios(
+            n_data_test, True, 4, 3, 3, random.Random(0)),
+        "big": make_useful_scenarios(
+            n_data_test, True, 8, 6, 3, random.Random(0))
+    }
 
     runs = 4
     for i_r in range(runs):
@@ -508,7 +495,7 @@ if __name__ == "__main__":
             c=100,
             gamma=.9,
             n_training_batch=64,
-            n_data_test=100,
+            test_scenarios=test_scenarios,
             ignore_finished_agents=True,
             hop_dist=4,
             seed=i_r,
