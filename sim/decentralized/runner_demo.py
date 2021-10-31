@@ -15,6 +15,25 @@ from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 if __name__ == "__main__":  # pragma: no cover
+    # a scenario
+    env = np.array([[0, 0, 0, 1],
+                    [0, 0, 0, 0],
+                    [1, 1, 0, 1],
+                    [0, 0, 0, 0]])
+    starts = np.array([[0, 2],
+                       [1, 1],
+                       [3, 3]])
+    goals = np.array([[0, 1],
+                      [3, 1],
+                      [1, 1]])
+    agents = to_agent_objects(env, starts, goals, rng=random.Random(0))
+    # plot_with_arrows(env, starts, goals)
+    # plt.show()
+    res = run_a_scenario(
+        env, agents, False, IteratorType.BLOCKING1,
+        ignore_finished_agents=False, print_progress=True)
+    print(res)
+
     # checking big environments
     env, starts, goals = random_fill(40, .2, 50, random.Random(0))
     agents = to_agent_objects(env, starts, goals)
