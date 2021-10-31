@@ -1,4 +1,4 @@
-name: Python package
+ld librarname: Python package
 
 on: [push]
 
@@ -25,13 +25,13 @@ jobs:
     #   run: |
     #     cd planner/cobra/external
     #     ./make_cobra.sh
-    - name: Build ecbs
-      run: |
-        sudo apt install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
-        mkdir planner/mapf_implementations/libMultiRobotPlanning/build
-        cd planner/mapf_implementations/libMultiRobotPlanning/build
-        cmake ..
-        make ecbs
+    # - name: Build ecbs
+    #   run: |
+    #     sudo apt install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
+    #     mkdir planner/mapf_implementations/libMultiRobotPlanning/build
+    #     cd planner/mapf_implementations/libMultiRobotPlanning/build
+    #     cmake ..
+    #     make ecbs
     - name: Lint with pycodestyle
       run: |
         pycodestyle .
