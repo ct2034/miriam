@@ -470,21 +470,21 @@ if __name__ == "__main__":
         "sim.decentralized.runner").setLevel(logging.ERROR)
 
     # debug run
-    # data_test = {"one": make_useful_scenarios(3, True, 4, 3, 1, random.Random(0)),
-    #              "two": make_useful_scenarios(3, True, 4, 3, 1, random.Random(1))}
-    # stats = q_learning(
-    #     n_episodes=10,
-    #     eps_start=.9,
-    #     c=2,
-    #     gamma=.9,
-    #     n_training_batch=2,
-    #     test_scenarios=data_test,
-    #     ignore_finished_agents=True,
-    #     hop_dist=4,
-    #     seed=0,
-    #     name=f"debug"
-    # )
-    # make_plot_from_json("debug")
+    data_test = {"one": make_useful_scenarios(3, True, 4, 3, 1, random.Random(0)),
+                 "two": make_useful_scenarios(3, True, 4, 3, 1, random.Random(1))}
+    stats = q_learning(
+        n_episodes=10,
+        eps_start=.9,
+        c=2,
+        gamma=.9,
+        n_training_batch=2,
+        test_scenarios=data_test,
+        ignore_finished_agents=True,
+        hop_dist=4,
+        seed=0,
+        name=f"debug"
+    )
+    make_plot_from_json("debug")
 
     n_data_test = 100
     test_scenarios = {
