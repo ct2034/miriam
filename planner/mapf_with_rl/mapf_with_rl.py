@@ -2,7 +2,9 @@
 import json
 import logging
 import random
+from functools import partial
 from math import exp, isclose, log
+from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -240,13 +242,13 @@ def sample_random_minibatch(n: int, d, qfun_hat, gamma: float, rng: random.Rando
 
 def train(training_batch, qfun, optimizer):
     qfun.train()
-    loss = torch.zeros(len(training_batch))
+    losss = torch.zeros(len(training_batch))
     for i_b, tb in enumerate(training_batch):
         (state, action, y) = tb
         qvals = qfun(state)
         loss = (y - qvals[0, action]) ** 2
-        loss[i_b] = loss
-    mean_loss = torch.mean(loss)
+        losss[i_b] = loss
+    mean_loss = torch.mean(losss)
     optimizer.zero_grad()
     mean_loss.backward()
     optimizer.step()
@@ -336,9 +338,9 @@ def q_learning(n_episodes: int, eps_start: float,
     # size changes
     training_sizes = {
         .0: (4, 3),
-        .7: (5, 4),
-        .8: (5, 5),
-        .9: (8, 6)
+        .6: (5, 4),
+        .7: (5, 5),
+        .8: (8, 6)
     }
 
     # stats
@@ -356,7 +358,7 @@ def q_learning(n_episodes: int, eps_start: float,
                         ]}  # type: Dict[str, Tuple[List[float], List[float]]]
     loss = 0
     stat_every = max(1, int(n_episodes / 100))
-    eval_every = max(1, int(n_episodes / 50))
+    eval_every = max(1, int(n_episodes / 20))
     i_o = 0  # count optimizations
 
     pb = ProgressBar(f"Run {name}", n_episodes, 5)
@@ -455,7 +457,12 @@ def q_learning(n_episodes: int, eps_start: float,
     pb.end()
     with open(f"planner/mapf_with_rl/results/{name}.json", "w") as f:
         json.dump(stats, f)
+    torch.save(qfun.state_dict(), f"planner/mapf_with_rl/models/{name}.pt")
     return stats
+
+
+def proxy_q_learning(kwargs):
+    return q_learning(**kwargs)
 
 
 if __name__ == "__main__":
@@ -463,21 +470,21 @@ if __name__ == "__main__":
         "sim.decentralized.runner").setLevel(logging.ERROR)
 
     # debug run
-    data_test = {"one": make_useful_scenarios(3, True, 4, 3, 1, random.Random(0)),
-                 "two": make_useful_scenarios(3, True, 4, 3, 1, random.Random(1))}
-    stats = q_learning(
-        n_episodes=10,
-        eps_start=.9,
-        c=2,
-        gamma=.9,
-        n_training_batch=2,
-        test_scenarios=data_test,
-        ignore_finished_agents=True,
-        hop_dist=4,
-        seed=0,
-        name=f"debug"
-    )
-    make_plot_from_json("debug")
+    # data_test = {"one": make_useful_scenarios(3, True, 4, 3, 1, random.Random(0)),
+    #              "two": make_useful_scenarios(3, True, 4, 3, 1, random.Random(1))}
+    # stats = q_learning(
+    #     n_episodes=10,
+    #     eps_start=.9,
+    #     c=2,
+    #     gamma=.9,
+    #     n_training_batch=2,
+    #     test_scenarios=data_test,
+    #     ignore_finished_agents=True,
+    #     hop_dist=4,
+    #     seed=0,
+    #     name=f"debug"
+    # )
+    # make_plot_from_json("debug")
 
     n_data_test = 100
     test_scenarios = {
@@ -487,17 +494,23 @@ if __name__ == "__main__":
             n_data_test, True, 8, 6, 3, random.Random(0))
     }
 
-    runs = 4
-    for i_r in range(runs):
-        stats = q_learning(
-            n_episodes=10000,
-            eps_start=.9,
-            c=100,
-            gamma=.9,
-            n_training_batch=64,
-            test_scenarios=test_scenarios,
-            ignore_finished_agents=True,
-            hop_dist=4,
-            seed=i_r,
-            name=f"run{i_r}_increasing"
-        )
+    n_runs = 8
+    kwargs = [
+        {
+            "n_episodes": 10000,
+            "eps_start": .9,
+            "c": 100,
+            "gamma": .9,
+            "n_training_batch": 64,
+            "test_scenarios": test_scenarios,
+            "ignore_finished_agents": True,
+            "hop_dist": 4,
+            "seed": i_r,
+            "name": f"run{i_r}_increasing"
+        } for i_r in range(n_runs)
+    ]
+    p = Pool(8)
+    results = p.map(proxy_q_learning, kwargs)
+
+    for i_r, result in enumerate(results):
+        make_plot_from_json(f"run{i_r}_increasing")
