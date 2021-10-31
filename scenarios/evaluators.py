@@ -10,7 +10,7 @@ from networkx.algorithms import approximation
 from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
-from sim.decentralized.agent import Agent
+from sim.decentralized.agent import Agent, env_to_nx
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import (is_environment_well_formed,
                                       to_agent_objects)
@@ -186,7 +186,7 @@ def n_nodes(env):
 
 def _gridmap_to_nx(env):
     a = Agent(env, np.array([0, 0]))
-    return a.env_to_nx(env, None)
+    return env_to_nx(env, None)
 
 
 def n_edges(env):
