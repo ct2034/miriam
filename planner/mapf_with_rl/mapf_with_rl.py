@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import json
 import logging
+import multiprocessing as mp
 import random
 from functools import partial
 from math import exp, isclose, log
-from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -515,7 +515,9 @@ if __name__ == "__main__":
             "name": f"run{i_r}_increasing"
         } for i_r in range(n_runs)
     ]
-    p = Pool(8)
+
+    ctx = mp.get_context('spawn')
+    p = ctx.Pool(8)
     results = p.map(proxy_q_learning, kwargs)
 
     for i_r, result in enumerate(results):
