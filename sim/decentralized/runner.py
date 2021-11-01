@@ -219,6 +219,7 @@ def run_a_scenario(env, agents, plot,
                    pause_on: Optional[Exception] = None,
                    ignore_finished_agents=True,
                    print_progress=False,
+                   time_limit=TIME_LIMIT,
                    ) -> SCENARIO_RESULT:
     n_agents = len(agents)
     # evaluation parameters
@@ -234,7 +235,7 @@ def run_a_scenario(env, agents, plot,
                 iterator)(agents, ignore_finished_agents)
             time_progress += time_slice
             space_progress += space_slice
-            if any(time_progress > TIME_LIMIT):
+            if any(time_progress > time_limit):
                 raise SimIterationException("timeout")
             if print_progress:
                 finished = sum(map(lambda a: a.is_at_goal(), agents))

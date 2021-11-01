@@ -17,6 +17,15 @@ logger = logging.getLogger(__name__)
 COST = "cost"
 
 
+def get_t_from_env(env: POTENTIAL_ENV_TYPE) -> int:
+    if is_gridmap(env):
+        return env.shape[0] + env.shape[1]
+    elif is_roadmap(env):
+        return env.shape[0]  # number of nodes
+    else:
+        raise ValueError("Env must be gridmap or roadmap")
+
+
 def env_to_nx(env: POTENTIAL_ENV_TYPE) -> nx.Graph:
     """convert numpy gridmap into networkx graph."""
     if is_gridmap(env):
@@ -27,8 +36,8 @@ def env_to_nx(env: POTENTIAL_ENV_TYPE) -> nx.Graph:
         has_roadmap = True
     else:
         raise ValueError("Env must be gridmap or roadmap")
+    t = get_t_from_env(env)
     if has_gridmap:
-        t = env.shape[0] + env.shape[1]
         dim = env.shape
         flat_graph = nx.grid_graph(dim, periodic=False)
         free = np.min(env)
@@ -38,7 +47,6 @@ def env_to_nx(env: POTENTIAL_ENV_TYPE) -> nx.Graph:
         flat_graph = nx.subgraph_view(flat_graph, filter_node=filter_node)
     elif has_roadmap:
         flat_graph = make_graph(env)
-        t = flat_graph.number_of_nodes()
 
     # add timed edges
     timed_graph = nx.DiGraph()
@@ -134,6 +142,7 @@ class Agent(Generic[C, N]):
             self.env_nx: nx.Graph = env_to_nx(self.env)
         else:
             self.env_nx = env_nx
+        self.t_max = np.max(np.array(self.env_nx.nodes())[:, -1])
         self.start: C = pos
         self.goal: Optional[C] = None
         self.path: Union[List[N], None] = None
@@ -218,7 +227,6 @@ class Agent(Generic[C, N]):
 
         g = nx.subgraph_view(
             self.env_nx, filter_node=filter_node, filter_edge=filter_edge)
-        t_max = np.max(np.array(g.nodes())[:, -1])
 
         # define distance function
         if self.has_gridmap:
@@ -236,7 +244,7 @@ class Agent(Generic[C, N]):
         # make goal waiting edges free
         any_goal_edge_existed = False
         goal_waiting_edges = [
-            (goal + (i,), goal + (i+1,)) for i in range(t_max-1)]
+            (goal + (i,), goal + (i+1,)) for i in range(self.t_max-1)]
         for e in goal_waiting_edges:
             try:
                 g.edges[e][COST] = 0.
@@ -251,7 +259,7 @@ class Agent(Generic[C, N]):
             p = list(nx.astar_path(
                 g,
                 start + (0,),
-                goal + (t_max,),
+                goal + (self.t_max,),
                 heuristic=dist,
                 weight=COST))
         except (nx.NetworkXNoPath, nx.NodeNotFound) as e:
