@@ -289,9 +289,6 @@ def evaluate(data_test: List[Scenario], qfun, ignore_finished_agents: bool, hop_
             #     logging.warning(f"regret: {regret}")
     mean_successful = np.mean(np.array(successful_s))
     mean_regret = np.mean(np.array(regret_s))
-    print(f"successful: {mean_successful:.2f}, " +
-          f"regret: {mean_regret:.2f}, " +
-          f"inv: {inverse}")
     return (mean_successful, mean_regret)
 
 
@@ -440,7 +437,6 @@ def q_learning(n_episodes: int, eps_start: float,
                 (i_e % eval_every == 0 and len(d) > training_start)):
             # evaluation qfun
             for set_name, test_set in test_scenarios.items():
-                print(f"evaluating test set {set_name}")
                 success, regret = evaluate(
                     test_set, qfun, ignore_finished_agents, hop_dist,
                     inverse=False)
@@ -455,6 +451,11 @@ def q_learning(n_episodes: int, eps_start: float,
                 stats[f"eval_success_inv_{set_name}"][1].append(inv_success)
                 stats[f"eval_regret_inv_{set_name}"][0].append(i_e)
                 stats[f"eval_regret_inv_{set_name}"][1].append(inv_regret)
+                print(f"evaluation test set {set_name} in {name}:\n" +
+                      f"  success: {success:.2f}\n" +
+                      f"  regret: {regret:.2f}\n" +
+                      f"  inv success: {inv_success:.2f}\n" +
+                      f"  inv regret: {inv_regret:.2f}")
         del scenario
         del state
         del next_state
