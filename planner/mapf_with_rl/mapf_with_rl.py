@@ -478,7 +478,7 @@ if __name__ == "__main__":
     data_test = {"one": make_useful_scenarios(3, True, 4, 3, 3, random.Random(0)),
                  "two": make_useful_scenarios(3, True, 8, 6, 3, random.Random(0))}
     stats = q_learning(
-        n_episodes=100,
+        n_episodes=20,
         eps_start=.9,
         c=2,
         gamma=.9,
