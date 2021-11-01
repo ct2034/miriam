@@ -15,15 +15,15 @@ from matplotlib import pyplot as plt
 from planner.mapf_with_rl.mapf_with_rl_plot import make_plot_from_json
 from scenarios.generators import random_fill
 from scenarios.solvers import cached_ecbs
+from sim.decentralized.agent import get_t_from_env
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import (FirstThenRaisingPolicy,
                                       InverseQLearningPolicy,
                                       PolicyCalledException, PolicyType,
                                       QLearningPolicy)
 from sim.decentralized.runner import (has_exception, run_a_scenario,
-                                      to_agent_objects,
-                                      will_they_collide_in_scen)
-from tools import ProgressBar
+                                      to_agent_objects, will_scenario_collide)
+from tools import ProgressBar, time_limit
 from torch.nn import Linear
 from torch_geometric.data import Data
 from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
@@ -66,6 +66,9 @@ class Scenario(object):
         self.agents = to_agent_objects(
             self.env, self.starts, self.goals,
             policy=PolicyType.LEARNED_RAISING, rng=rng)
+        if self.agents is INVALID:
+            self.useful = False
+            return
         # initialization to save state
         # the agent that got its policy called first
         self.agent_first_raised: Optional[int] = None
@@ -77,6 +80,8 @@ class Scenario(object):
         self.costs_so_far = 0.
         # cost if simulation was unsuccessful:
         self.UNSUCCESSFUL_COST = -.6
+        # maximum number of steps, i.e. timeout
+        self.TIME_LIMIT = get_t_from_env(self.env)
 
     def start(self) -> Data:
         state, reward = self._run()
@@ -109,7 +114,8 @@ class Scenario(object):
             self.env, self.agents, False,
             IteratorType.BLOCKING1,
             pause_on=PolicyCalledException,  # type: ignore
-            ignore_finished_agents=self.ignore_finished_agents)
+            ignore_finished_agents=self.ignore_finished_agents,
+            time_limit=self.TIME_LIMIT)
         # return either new state or results
         if has_exception(scenario_result):  # not done
             (average_time, _, _, _, exception
@@ -151,9 +157,9 @@ def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents, hop_di
             n_agents=n_agents,
             rng=rng)
         (env, starts, goals) = scen_data
-        collide, _ = will_they_collide_in_scen(
+        collide = will_scenario_collide(
             env, starts, goals, ignore_finished_agents)
-        if collide:
+        if collide == True:
             scen = Scenario(scen_data, ignore_finished_agents, hop_dist, rng)
             if scen.useful:
                 if n > 1:
@@ -308,8 +314,6 @@ def q_learning(n_episodes: int, eps_start: float,
     :param seed: for the random number generator
     :param name: to save the final plot under ({name}.png)
     """
-    time_limit = 10
-
     # random number generator
     rng = random.Random(seed)
     torch.manual_seed(seed)
@@ -375,7 +379,7 @@ def q_learning(n_episodes: int, eps_start: float,
         state = scenario.start()
         next_state = None
         # 3
-        for i_t in range(time_limit):
+        for i_t in range(scenario.TIME_LIMIT):
             if state is not None:  # episode has not ended
                 rand = rng.random()
                 if rand > epsilon:  # exploration
@@ -387,8 +391,9 @@ def q_learning(n_episodes: int, eps_start: float,
                         state)
                 # 6
                 next_state, reward = scenario.step(action)
-                if i_t == time_limit-1 and next_state is None:  # time out
+                if i_t == scenario.TIME_LIMIT-1 and next_state is not None:  # time out
                     reward = scenario.UNSUCCESSFUL_COST
+                    next_state = None
                 # 7
                 # if next_state is None:  # agents reached their goals
                 # 8 store in replay memory
@@ -470,10 +475,10 @@ if __name__ == "__main__":
         "sim.decentralized.runner").setLevel(logging.ERROR)
 
     # debug run
-    data_test = {"one": make_useful_scenarios(3, True, 4, 3, 1, random.Random(0)),
-                 "two": make_useful_scenarios(3, True, 4, 3, 1, random.Random(1))}
+    data_test = {"one": make_useful_scenarios(3, True, 4, 3, 3, random.Random(0)),
+                 "two": make_useful_scenarios(3, True, 8, 6, 3, random.Random(0))}
     stats = q_learning(
-        n_episodes=10,
+        n_episodes=100,
         eps_start=.9,
         c=2,
         gamma=.9,

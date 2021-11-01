@@ -7,6 +7,7 @@ from definitions import C
 from sim.decentralized.agent import Agent
 
 OBSERVATION_DISTANCE = 6
+RETRIES = 5
 
 
 class IteratorType(Enum):
@@ -223,7 +224,8 @@ def iterate_waiting(agents: Tuple[Agent], ignore_finished_agents) -> Tuple[List[
     return time_slice, space_slice
 
 
-def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agents
+def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agents,
+                     retries_left=RETRIES
                      ) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
@@ -332,7 +334,11 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
     make_sure_agents_are_safe(agents)
     if not has_at_least_one_agent_moved(
             agents, poses_at_beginning):
-        raise SimIterationException("Deadlock by waiting")
+        if retries_left > 0:
+            return iterate_blocking(agents, lookahead, ignore_finished_agents,
+                                    retries_left - 1)
+        else:
+            raise SimIterationException("Deadlock because of no progress")
 
     return time_slice, space_slice
 

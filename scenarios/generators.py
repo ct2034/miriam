@@ -17,14 +17,14 @@ logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
 def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
                              rng: random.Random):
-    agents = sim.decentralized.runner.initialize_agents(
-        env, n_agents, PolicyType.RANDOM,
-        tight_placement=True, rng=rng)
-    assert agents is not None
-    starts = np.array([a.pos for a in agents])
-    assert starts.shape == (n_agents, 2)
-    goals = np.array([a.goal for a in agents])
-    assert goals.shape == (n_agents, 2)
+    """Making `n_agents` starts and goals on `env`."""
+    free_poses = np.array(np.where(env == FREE))
+    n_free_poses = len(free_poses[0])
+    assert n_free_poses >= n_agents
+    choice_starts = rng.sample(range(n_free_poses), n_agents)
+    choice_goals = rng.sample(range(n_free_poses), n_agents)
+    starts = free_poses[:, choice_starts].T
+    goals = free_poses[:, choice_goals].T
     return starts, goals
 
 

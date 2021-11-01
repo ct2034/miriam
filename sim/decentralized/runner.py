@@ -7,7 +7,7 @@ from typing import *
 
 import numpy as np
 from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT
-from sim.decentralized.agent import Agent
+from sim.decentralized.agent import Agent, env_to_nx
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
 from sim.decentralized.policy import PolicyCalledException, PolicyType
@@ -104,8 +104,9 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
                      rng: random.Random = random.Random()):
     n_agents = starts.shape[0]
     agents = []
+    env_nx = env_to_nx(env)
     for i_a in range(n_agents):
-        a = Agent(env, starts[i_a], policy=policy, rng=rng)
+        a = Agent(env, starts[i_a], policy=policy, rng=rng, env_nx=env_nx)
         if not a.give_a_goal(goals[i_a]):
             return INVALID
         agents.append(a)
@@ -158,10 +159,30 @@ def check_time_evaluation(time_progress, space_progress
     return average_time, max_time, average_length, max_length
 
 
-def will_they_collide_in_scen(env, starts, goals, ignore_finished_agents):
+def will_scenario_collide_and_get_paths(env, starts, goals, ignore_finished_agents):
     """checks if for a given set of starts and goals the agents travelling
     between may collide on the given env."""
     return will_agents_collide(to_agent_objects(env, starts, goals), ignore_finished_agents)
+
+
+def will_scenario_collide(env, starts, goals, ignore_finished_agents) -> Optional[bool]:
+    """checks if for a given set of starts and goals the agents travelling
+    between may collide on the given env."""
+    if ignore_finished_agents == False:
+        raise NotImplementedError()
+    env_nx = env_to_nx(env)
+    n_agents = starts.shape[0]
+    seen = set()
+    for i_a in range(n_agents):
+        a = Agent(env, starts[i_a], env_nx=env_nx)
+        if not a.give_a_goal(goals[i_a]):
+            return None
+        assert a.path is not None, "Agent should have a path"
+        for pos in a.path:
+            if pos in seen:
+                return True
+            seen.add(pos)
+    return False
 
 
 def will_agents_collide(agents, ignore_finished_agents):
@@ -196,7 +217,9 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, rng: random.Random, 
 def run_a_scenario(env, agents, plot,
                    iterator: IteratorType = IteratorType.WAITING,
                    pause_on: Optional[Exception] = None,
-                   ignore_finished_agents=True
+                   ignore_finished_agents=True,
+                   print_progress=False,
+                   time_limit=TIME_LIMIT,
                    ) -> SCENARIO_RESULT:
     n_agents = len(agents)
     # evaluation parameters
@@ -212,8 +235,11 @@ def run_a_scenario(env, agents, plot,
                 iterator)(agents, ignore_finished_agents)
             time_progress += time_slice
             space_progress += space_slice
-            if any(time_progress > TIME_LIMIT):
+            if any(time_progress > time_limit):
                 raise SimIterationException("timeout")
+            if print_progress:
+                finished = sum(map(lambda a: a.is_at_goal(), agents))
+                print(f"t:{max(time_progress)} finished: {finished}/{n_agents}")
         successful = 1
     except Exception as e:  # pragma: no cover
         if isinstance(e, SimIterationException):

@@ -7,26 +7,43 @@ from definitions import INVALID
 from matplotlib import pyplot as plt
 from scenarios.evaluators import (cost_ecbs, cost_independent,
                                   cost_sim_decentralized_learned)
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import random_fill, tracing_pathes_in_the_dark
 from scenarios.solvers import ecbs
-from scenarios.visualization import plot_with_paths
+from scenarios.visualization import plot_with_arrows, plot_with_paths
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 if __name__ == "__main__":  # pragma: no cover
-    # this does not look good at the moment ...
-    env = np.array([[0, 0, 0, 0],
+    # a scenario
+    env = np.array([[0, 0, 0, 1],
                     [0, 0, 0, 0],
-                    [1, 1, 0, 0],
-                    [1, 1, 0, 0]], dtype=np.int8)
-    goals = np.array([[3, 3], [1, 2], [0, 2]])
-    starts = np.array([[0, 0], [1, 1], [2, 2]])
-    agents = to_agent_objects(env, starts, goals)
-    paths_ecbs = ecbs(env, starts, goals, return_paths=True)
-    plot_with_paths(env, paths_ecbs)
+                    [1, 1, 0, 1],
+                    [0, 0, 0, 0]])
+    starts = np.array([[0, 2],
+                       [1, 1],
+                       [3, 3]])
+    goals = np.array([[0, 1],
+                      [3, 1],
+                      [1, 1]])
+    agents = to_agent_objects(env, starts, goals, rng=random.Random(0))
+    # plot_with_arrows(env, starts, goals)
+    # plt.show()
     res = run_a_scenario(
-        env, agents, True, IteratorType.BLOCKING1, ignore_finished_agents=False)
+        env, agents, False, IteratorType.BLOCKING1,
+        ignore_finished_agents=False, print_progress=True)
+    print(res)
+
+    # checking big environments
+    env, starts, goals = random_fill(40, .2, 50, random.Random(0))
+    agents = to_agent_objects(env, starts, goals)
+    plot_with_arrows(env, starts, goals)
+    plt.show()
+    # paths_ecbs = ecbs(env, starts, goals, return_paths=True)
+    # plot_with_paths(env, paths_ecbs)
+    res = run_a_scenario(
+        env, agents, False, IteratorType.BLOCKING1,
+        ignore_finished_agents=False, print_progress=True)
     print(res)
 
     env = np.zeros((3, 3))

@@ -19,7 +19,7 @@ from scenarios.evaluators import cached_ecbs
 from scenarios.generators import (building_walls, random_fill,
                                   tracing_pathes_in_the_dark)
 from scenarios.main_eval import GENERATOR
-from sim.decentralized.runner import will_they_collide_in_scen
+from sim.decentralized.runner import will_scenario_collide_and_get_paths
 from tools import ProgressBar
 
 VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
@@ -466,7 +466,7 @@ def simulate_one_data(width, fill, n_agents, base_seed, pb, i):
             )
             seed += random.randint(0, 10E6)
             seed = seed % (2E32-1)
-            do_collide, indep_agent_paths = will_they_collide_in_scen(
+            do_collide, indep_agent_paths = will_scenario_collide_and_get_paths(
                 gridmap, starts, goals)
 
         data = cached_ecbs(
@@ -595,7 +595,7 @@ if __name__ == "__main__":
                     width, fill, n_agents, random.Random(seed)
                 )
                 seed += 1
-                do_collide, indep_agent_paths = will_they_collide_in_scen(
+                do_collide, indep_agent_paths = will_scenario_collide_and_get_paths(
                     gridmap, starts, goals, ignore_finished_agents=False)
 
             data = {
