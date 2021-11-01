@@ -457,7 +457,7 @@ def q_learning(n_episodes: int, eps_start: float,
     pb.end()
     with open(f"planner/mapf_with_rl/results/{name}.json", "w") as f:
         json.dump(stats, f)
-    torch.save(qfun.state_dict(), f"planner/mapf_with_rl/models/{name}.pt")
+    torch.save(qfun.state_dict(), f"planner/mapf_with_rl/results/{name}.pt")
     return stats
 
 
