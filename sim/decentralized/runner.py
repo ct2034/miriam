@@ -243,7 +243,7 @@ def run_a_scenario(env, agents, plot,
         successful = 1
     except Exception as e:  # pragma: no cover
         if isinstance(e, SimIterationException):
-            logger.warning(e)
+            pass  # logger.warning(e)
         elif pause_on is not None and isinstance(e, pause_on):  # type: ignore
             assert isinstance(e, PolicyCalledException)
             return check_time_evaluation(
