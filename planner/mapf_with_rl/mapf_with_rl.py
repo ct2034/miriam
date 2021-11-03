@@ -153,7 +153,7 @@ def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
                          tracing_pathes_in_the_dark, building_walls]
     scenarios: List[Scenario] = []
     if n > 1:
-        pb = ProgressBar("Data Generation", n, 1)
+        pb = ProgressBar("Data Generation", n, 5)
     while len(scenarios) < n:
         scen_data: SCENARIO_TYPE = generator(
             size,  # size
@@ -367,7 +367,7 @@ def q_learning(n_episodes: int, eps_start: float,
     eval_every = max(1, int(n_episodes / 20))
     i_o = 0  # count optimizations
 
-    pb = ProgressBar(f"Run {name}", n_episodes, 5)
+    pb = ProgressBar(f"Run {name}", n_episodes, 1)
     # 1
     for i_e in range(n_episodes):
         # 2
