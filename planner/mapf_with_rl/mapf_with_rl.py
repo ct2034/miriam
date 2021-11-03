@@ -503,7 +503,7 @@ if __name__ == "__main__":
     n_runs = 8
     kwargs = [
         {
-            "n_episodes": 10E5,
+            "n_episodes": int(10E5),
             "eps_start": .9,
             "c": 100,
             "gamma": .9,
