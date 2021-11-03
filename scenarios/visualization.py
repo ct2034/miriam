@@ -110,16 +110,16 @@ def plot_state(data: Data):
 
     n_nodes = data_x.shape[0]
     g = nx.Graph()
-    for i_e in range(data_edge_index.shape[1]):
-        g.add_edge(data_edge_index[0, i_e], data_edge_index[1, i_e])
+    g.add_edges_from(data_edge_index.T)
 
     label_dict = {}
     for i_n in range(n_nodes):
-        data = list(map(int, data_x[i_n, :]))
-        label = f"{data[0:3]}\n{data[3:6]}\n{data[6:9]}"
-        label_dict[i_n] = label.replace("0", " ")
-
+        data = list(map(float, data_x[i_n, :]))
+        label_dict[i_n] = (f'[{data[0]:.2f}, {data[1]:.2f}, {data[2]:.2f}]\n' +
+                           f'[{data[3]:.2f}, {data[4]:.2f}, {data[5]:.2f}]\n' +
+                           f'[{data[6]:.2f}, {data[7]:.2f}, {data[8]:.2f}]')
     plt.figure()
     nx.draw(g, pos=data_pos.tolist())
     nx.draw_networkx_labels(g, pos=data_pos.tolist(),
-                            labels=label_dict, font_family='monospace')
+                            labels=label_dict,
+                            font_family='monospace', font_size=8)
