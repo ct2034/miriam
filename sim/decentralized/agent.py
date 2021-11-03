@@ -15,6 +15,8 @@ from tools import hasher
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 COST = "cost"
+WAITING_COST = 1. - 1E-9
+MOVING_COST = 1
 
 
 def get_t_from_env(env: POTENTIAL_ENV_TYPE) -> int:
@@ -79,10 +81,10 @@ def env_to_nx(env: POTENTIAL_ENV_TYPE) -> nx.Graph:
                 e[0][:-1] == e[1][:-1]
             ):
                 # waiting generally is a little cheaper
-                return 1. - 1E-9
+                return WAITING_COST
             else:
                 # unit cost
-                return 1
+                return MOVING_COST
         nx.set_edge_attributes(
             timed_graph, {e: move_cost(e) for e in timed_graph.edges()}, COST)
     elif has_roadmap:
@@ -265,6 +267,11 @@ class Agent(Generic[C, N]):
         except (nx.NetworkXNoPath, nx.NodeNotFound) as e:
             logger.warning(e)
             return None
+        finally:
+            # restore goal waiting edges
+            for e in goal_waiting_edges:  # type: ignore
+                if e in self.env_nx.edges:
+                    self.env_nx.edges[e][COST] = WAITING_COST
 
         # check end to only return useful part of path
         end = None
