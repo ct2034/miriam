@@ -52,12 +52,12 @@ class TestAgent(unittest.TestCase):
         a = Agent(env, np.array([0, 0]))
         a.give_a_goal(np.array([0, 0]))
 
-        self.assertEqual(len(a.env_nx), 8)
+        self.assertEqual(len(a.env_nx), 24)  # 4 * 6
         for i in range(4):
             self.assertTrue((0, 0, i) in a.env_nx)
             self.assertTrue((0, 1, i) in a.env_nx)
 
-        self.assertEqual(len(a.env_nx.edges), 12)
+        self.assertEqual(len(a.env_nx.edges), 44)  # 4 * 6 * 4
         for i in range(3):
             self.assertTrue(((0, 0, i), (0, 0, i+1)) in a.env_nx.edges)
             self.assertTrue(((0, 1, i), (0, 1, i+1)) in a.env_nx.edges)
