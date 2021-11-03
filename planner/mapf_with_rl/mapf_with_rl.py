@@ -5,7 +5,7 @@ import multiprocessing as mp
 import random
 from functools import partial
 from math import exp, isclose, log
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -13,7 +13,8 @@ import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
 from planner.mapf_with_rl.mapf_with_rl_plot import make_plot_from_json
-from scenarios.generators import random_fill
+from scenarios.generators import (GENERATOR_TYPE, building_walls, random_fill,
+                                  tracing_pathes_in_the_dark)
 from scenarios.solvers import cached_ecbs
 from sim.decentralized.agent import get_t_from_env
 from sim.decentralized.iterators import IteratorType
@@ -145,17 +146,20 @@ class Scenario(object):
         return state, reward
 
 
-def make_useful_scenarios(n: int, ignore_finished_agents, size, n_agents, hop_dist,
+def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
+                          n_agents: int, hop_dist: int, generator: GENERATOR_TYPE,
                           rng: random.Random) -> List[Scenario]:
+    assert generator in [random_fill,
+                         tracing_pathes_in_the_dark, building_walls]
     scenarios: List[Scenario] = []
     if n > 1:
         pb = ProgressBar("Data Generation", n, 5)
     while len(scenarios) < n:
-        scen_data: SCENARIO_TYPE = random_fill(
-            size=size,
-            fill=.3,
-            n_agents=n_agents,
-            rng=rng)
+        scen_data: SCENARIO_TYPE = generator(
+            size,  # size
+            .3,  # fill
+            n_agents,  # n_agents
+            rng)  # rng
         (env, starts, goals) = scen_data
         collide = will_scenario_collide(
             env, starts, goals, ignore_finished_agents)
@@ -338,10 +342,10 @@ def q_learning(n_episodes: int, eps_start: float,
 
     # size changes
     training_sizes = {
-        .0: (4, 3),
-        .6: (5, 4),
-        .7: (5, 5),
-        .8: (8, 6)
+        .0: (4, 3, [random_fill]),
+        .4: (5, 4, [random_fill, tracing_pathes_in_the_dark]),
+        .6: (5, 5, [random_fill, tracing_pathes_in_the_dark]),
+        .8: (8, 6, [random_fill, tracing_pathes_in_the_dark, building_walls])
     }
 
     # stats
@@ -352,13 +356,14 @@ def q_learning(n_episodes: int, eps_start: float,
         "max_q",
         "min_q",
         "d_fill",
+        "timesteps",
     ] + [f"eval_success_{k}" for k in test_scenarios.keys()
          ] + [f"eval_regret_{k}" for k in test_scenarios.keys()
               ] + [f"eval_success_inv_{k}" for k in test_scenarios.keys()
                    ] + [f"eval_regret_inv_{k}" for k in test_scenarios.keys()
                         ]}  # type: Dict[str, Tuple[List[float], List[float]]]
     loss = 0
-    stat_every = max(1, int(n_episodes / 100))
+    stat_every = max(1, int(n_episodes / 1000))
     eval_every = max(1, int(n_episodes / 20))
     i_o = 0  # count optimizations
 
@@ -368,9 +373,10 @@ def q_learning(n_episodes: int, eps_start: float,
         # 2
         for progress in sorted(training_sizes.keys()):
             if i_e >= int(n_episodes * progress):
-                size, n_agents = training_sizes[progress]
+                size, n_agents, generators = training_sizes[progress]
+                generator = rng.choice(generators)
         [scenario] = make_useful_scenarios(
-            1, ignore_finished_agents, size, n_agents, hop_dist, rng)
+            1, ignore_finished_agents, size, n_agents, hop_dist, generator, rng)
         # TODO only decrease after training_start
         epsilon = eps_start * exp(-eps_alpha * i_e)
         state = scenario.start()
@@ -432,6 +438,8 @@ def q_learning(n_episodes: int, eps_start: float,
             stats["max_q"][1].append(float(max(qvals)))
             stats["min_q"][0].append(i_e)
             stats["min_q"][1].append(float(min(qvals)))
+            stats["timesteps"][0].append(i_e)
+            stats["timesteps"][1].append(i_t)
         if (i_e == 0 or
             i_e == n_episodes - 1 or
                 (i_e % eval_every == 0 and len(d) > training_start)):
@@ -476,8 +484,10 @@ if __name__ == "__main__":
         "sim.decentralized.runner").setLevel(logging.ERROR)
 
     # debug run
-    data_test = {"one": make_useful_scenarios(3, True, 4, 3, 3, random.Random(0)),
-                 "two": make_useful_scenarios(3, True, 8, 6, 3, random.Random(0))}
+    data_test = {"one": make_useful_scenarios(3, True, 4, 3, 3,
+                                              random_fill, random.Random(0)),
+                 "two": make_useful_scenarios(3, True, 8, 6, 3,
+                                              tracing_pathes_in_the_dark, random.Random(0))}
     stats = q_learning(
         n_episodes=20,
         eps_start=.9,
@@ -494,10 +504,12 @@ if __name__ == "__main__":
 
     n_data_test = 100
     test_scenarios = {
-        "small": make_useful_scenarios(
-            n_data_test, True, 4, 3, 3, random.Random(0)),
-        "big": make_useful_scenarios(
-            n_data_test, True, 8, 6, 3, random.Random(0))
+        "small_random_fill": make_useful_scenarios(
+            n_data_test, True, 4, 3, 3, random_fill, random.Random(0)),
+        "big_tracing_pathes_in_the_dark": make_useful_scenarios(
+            n_data_test, True, 8, 6, 3, tracing_pathes_in_the_dark, random.Random(0)),
+        "big_building_walls": make_useful_scenarios(
+            n_data_test, True, 8, 6, 3, building_walls, random.Random(0)),
     }
 
     n_runs = 8

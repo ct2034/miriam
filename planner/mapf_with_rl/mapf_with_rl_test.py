@@ -6,6 +6,8 @@ import torch
 from planner.mapf_with_rl.mapf_with_rl import (Qfunction, Scenario,
                                                make_useful_scenarios)
 from scenarios import test_helper
+from scenarios.generators import (building_walls, random_fill,
+                                  tracing_pathes_in_the_dark)
 from tools import hasher
 from torch_geometric.data import Data
 
@@ -90,35 +92,40 @@ class TestMapfWithRl(unittest.TestCase):
         self.assertEqual(reward_0, s0.UNSUCCESSFUL_COST)
 
     def test_make_useful_scenarios(self):
-        scenarios_0 = make_useful_scenarios(3, True, 4, 2, 3, random.Random(0))
-        self.assertEqual(len(scenarios_0), 3)
-        scenarios_1 = make_useful_scenarios(3, True, 4, 2, 3, random.Random(1))
-        self.assertEqual(len(scenarios_1), 3)
-
-        for s in scenarios_0 + scenarios_1:
-            self.assertTrue(s.useful)
-            s.start()
+        for generator in [building_walls, random_fill,
+                          tracing_pathes_in_the_dark]:
+            scenarios_0 = make_useful_scenarios(
+                3, True, 4, 2, 3, generator, random.Random(0))
+            self.assertEqual(len(scenarios_0), 3)
+            scenarios_1 = make_useful_scenarios(
+                3, True, 4, 2, 3, generator, random.Random(1))
+            self.assertEqual(len(scenarios_1), 3)
+            for s in scenarios_0 + scenarios_1:
+                self.assertTrue(s.useful)
+                s.start()
 
     def test_make_useful_scenarios_determinism(self):
-        scenarios_base = make_useful_scenarios(
-            5, True, 3, 2, 3, random.Random(0))
-        scenarios_same_seed = make_useful_scenarios(
-            5, True, 3, 2, 3, random.Random(0))
-        scenarios_different_seed = make_useful_scenarios(
-            5, True, 3, 2, 3, random.Random(1))
+        for generator in [building_walls, random_fill,
+                          tracing_pathes_in_the_dark]:
+            scenarios_base = make_useful_scenarios(
+                5, True, 3, 2, 3, generator, random.Random(0))
+            scenarios_same_seed = make_useful_scenarios(
+                5, True, 3, 2, 3, generator, random.Random(0))
+            scenarios_different_seed = make_useful_scenarios(
+                5, True, 3, 2, 3, generator, random.Random(1))
 
-        for i_s in range(len(scenarios_base)):
-            for i_a in range(len(scenarios_base[i_s].agents)):
-                self.assertEqual(
-                    str(scenarios_base[i_s].agents[i_a]),
-                    str(scenarios_same_seed[i_s].agents[i_a])
-                )
-        for i_s in range(len(scenarios_base)):
-            for i_a in range(len(scenarios_base[i_s].agents)):
-                self.assertNotEqual(
-                    str(scenarios_base[i_s].agents[i_a]),
-                    str(scenarios_different_seed[i_s].agents[i_a])
-                )
+            for i_s in range(len(scenarios_base)):
+                for i_a in range(len(scenarios_base[i_s].agents)):
+                    self.assertEqual(
+                        str(scenarios_base[i_s].agents[i_a]),
+                        str(scenarios_same_seed[i_s].agents[i_a])
+                    )
+            for i_s in range(len(scenarios_base)):
+                for i_a in range(len(scenarios_base[i_s].agents)):
+                    self.assertNotEqual(
+                        str(scenarios_base[i_s].agents[i_a]),
+                        str(scenarios_different_seed[i_s].agents[i_a])
+                    )
 
     def test_qfunction(self):
         # seeing if different qfuns give different results on different data

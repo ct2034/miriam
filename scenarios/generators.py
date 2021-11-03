@@ -14,6 +14,9 @@ from sim.decentralized.policy import PolicyType
 
 logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
 
+GENERATOR_TYPE = Callable[[int, float, int, random.Random],
+                          Tuple[np.ndarray, np.ndarray, np.ndarray]]
+
 
 def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
                              rng: random.Random):
@@ -28,7 +31,7 @@ def make_starts_goals_on_env(env: np.ndarray, n_agents: int,
     return starts, goals
 
 
-# random ######################################################################
+# random_fill #################################################################
 
 def random_fill(size: int, fill: float,
                 n_agents: int, rng: random.Random):
