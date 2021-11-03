@@ -153,7 +153,7 @@ def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
                          tracing_pathes_in_the_dark, building_walls]
     scenarios: List[Scenario] = []
     if n > 1:
-        pb = ProgressBar("Data Generation", n, 5)
+        pb = ProgressBar("Data Generation", n, 1)
     while len(scenarios) < n:
         scen_data: SCENARIO_TYPE = generator(
             size,  # size
