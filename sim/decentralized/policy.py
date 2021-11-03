@@ -274,6 +274,8 @@ class LearnedRaisingPolicy(LearnedPolicy):
         for i_id, id in enumerate(ids):
             paths_until_col.append(self._path_until_coll(
                 paths_full[i_id], self.path_is[id], None))
+        positions = ([self.a.pos] +
+                        list(self.poss.values()))
         # making basic graph info
         own_pos = self.a.pos
         if self.a.has_gridmap:
@@ -283,13 +285,13 @@ class LearnedRaisingPolicy(LearnedPolicy):
             raise NotImplementedError()
         # node features
         data_x = torch.cat((
-            get_agent_pos_layer(data_pos, paths_until_col, [i_a]),
+            get_agent_pos_layer(data_pos, positions, [i_a]),
             get_agent_path_layer(data_pos, paths_until_col, [i_a]),
             get_agent_path_layer(data_pos, paths_full, [i_a]),
-            get_agent_pos_layer(data_pos, paths_until_col, [i_ca]),
+            get_agent_pos_layer(data_pos, positions, [i_ca]),
             get_agent_path_layer(data_pos, paths_until_col, [i_ca]),
             get_agent_path_layer(data_pos, paths_full, [i_ca]),
-            get_agent_pos_layer(data_pos, paths_until_col, i_oas),
+            get_agent_pos_layer(data_pos, positions, i_oas),
             get_agent_path_layer(data_pos, paths_until_col, i_oas),
             get_agent_path_layer(data_pos, paths_full, i_oas),
         ), 1)
