@@ -19,7 +19,7 @@ COST = "cost"
 
 def get_t_from_env(env: POTENTIAL_ENV_TYPE) -> int:
     if is_gridmap(env):
-        return env.shape[0] + env.shape[1]
+        return (env.shape[0] + env.shape[1]) * 3
     elif is_roadmap(env):
         return env.shape[0]  # number of nodes
     else:
