@@ -7,7 +7,6 @@ from definitions import C
 from sim.decentralized.agent import Agent
 
 OBSERVATION_DISTANCE = 6
-RETRIES = 5
 
 
 class IteratorType(Enum):
@@ -92,11 +91,11 @@ def check_for_colissions(
     return node_colissions, edge_colissions
 
 
-def make_sure_agents_are_safe(agents: Tuple[Agent]):
+def make_sure_agents_are_safe(agents: Tuple[Agent], ignore_fa: bool):
     """Assert that no too agents are in the same place"""
     poses = set()
     for a in agents:
-        if not a.is_at_goal():
+        if not a.is_at_goal() or not ignore_fa:
             if a.has_gridmap:
                 assert (tuple(a.pos) not in poses
                         ), "Two agents at the same place."
@@ -217,15 +216,14 @@ def iterate_waiting(agents: Tuple[Agent], ignore_finished_agents) -> Tuple[List[
         if not a.is_at_goal():
             time_slice[i_a] = 1
 
-    make_sure_agents_are_safe(agents)
+    make_sure_agents_are_safe(agents, ignore_finished_agents)
     assert has_at_least_one_agent_moved(
         agents, agents_at_beginning), "no agent has changed"
 
     return time_slice, space_slice
 
 
-def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agents,
-                     retries_left=RETRIES
+def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agents
                      ) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
@@ -331,14 +329,10 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
         a.make_next_step(possible_next_poses[i_a])
         a.remove_all_blocks_and_replan()
 
-    make_sure_agents_are_safe(agents)
+    make_sure_agents_are_safe(agents, ignore_finished_agents)
     if not has_at_least_one_agent_moved(
             agents, poses_at_beginning):
-        if retries_left > 0:
-            return iterate_blocking(agents, lookahead, ignore_finished_agents,
-                                    retries_left - 1)
-        else:
-            raise SimIterationException("Deadlock because of no progress")
+        raise SimIterationException("Deadlock because of no progress")
 
     return time_slice, space_slice
 
