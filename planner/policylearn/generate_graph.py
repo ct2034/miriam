@@ -5,6 +5,7 @@ import networkx as nx
 import numpy as np
 import torch
 from definitions import FREE, C
+from sortedcontainers import SortedSet
 from torch_geometric.data import Data
 
 
@@ -44,14 +45,11 @@ def gridmap_to_graph(gridmap: np.ndarray, hop_dist: int,
     return data_edge_index, data_pos
 
 
-def get_agent_pos_layer(data_pos, paths_until_col, i_as):
+def get_agent_pos_layer(data_pos, positions, i_as):
     n_nodes = data_pos.shape[0]
     data_x_slice = torch.zeros((n_nodes, 1))
     for i_a in i_as:
-        if len(paths_until_col[i_a]) >= 2:
-            pos = paths_until_col[i_a][-2]
-        else:
-            pos = paths_until_col[i_a][0]
+        pos = positions[i_a]
         node = pos_to_node(data_pos, pos)
         if node is not None:
             data_x_slice[node, 0] = 1
@@ -62,10 +60,13 @@ def get_agent_path_layer(data_pos, paths, i_as):
     n_nodes = data_pos.shape[0]
     data_x_slice = torch.zeros((n_nodes, 1))
     for i_a in i_as:
-        for i_t, pos in enumerate(paths[i_a]):
+        path = paths[i_a]
+        previous = -1
+        for i_t, pos in enumerate(path):
             node = pos_to_node(data_pos, pos)
-            if node is not None:
-                data_x_slice[node, 0] += float(i_t) / len(paths[i_a])
+            if node is not None and node != previous:
+                data_x_slice[node, 0] += (float(i_t)+1) / len(path)
+            previous = node
     return data_x_slice
 
 
