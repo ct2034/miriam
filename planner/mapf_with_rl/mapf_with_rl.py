@@ -30,6 +30,9 @@ from torch_geometric.data import Data
 from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
                                 global_mean_pool)
 
+ctx = mp.get_context('spawn')
+N_PROCESSES = min(8, mp.cpu_count())
+
 
 def get_ecbs_cost(scen: SCENARIO_TYPE, ignore_finished_agents: bool):
     env, starts, goals = scen
@@ -146,15 +149,16 @@ class Scenario(object):
         return state, reward
 
 
-def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
-                          n_agents: int, hop_dist: int, generator: GENERATOR_TYPE,
-                          rng: random.Random) -> List[Scenario]:
-    assert generator in [random_fill,
-                         tracing_pathes_in_the_dark, building_walls]
-    scenarios: List[Scenario] = []
-    if n > 1:
-        pb = ProgressBar("Data Generation", n, 5)
-    while len(scenarios) < n:
+def make_a_useful_scenario(ignore_finished_agents: bool, size: int,
+                           n_agents: int, hop_dist: int, generator: GENERATOR_TYPE,
+                           rng: random.Random, pb: Optional[ProgressBar] = None,
+                           i_r: Optional[int] = None) -> Scenario:
+    MAX_RETRIES = 100
+    if i_r is not None:
+        for _ in range(i_r):
+            # changing state of rng depending on run index
+            _ = rng.random()
+    for _ in range(MAX_RETRIES):
         scen_data: SCENARIO_TYPE = generator(
             size,  # size
             .3,  # fill
@@ -166,11 +170,41 @@ def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
         if collide == True:
             scen = Scenario(scen_data, ignore_finished_agents, hop_dist, rng)
             if scen.useful:
-                if n > 1:
-                    pb.progress()
-                scenarios.append(scen)
-    if n > 1:
+                if pb is not None and i_r is not None:
+                    pb.progress(i_r)
+                return scen
+    raise RuntimeError(
+        f"could not find a useful scenario after {MAX_RETRIES} retries.")
+
+
+def proxy_make_a_useful_scenario(args):
+    return make_a_useful_scenario(*args)
+
+
+def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
+                          n_agents: int, hop_dist: int,
+                          generator: GENERATOR_TYPE,
+                          rng: random.Random) -> List[Scenario]:
+    assert generator in [random_fill,
+                         tracing_pathes_in_the_dark, building_walls]
+    if n == 1:
+        try:
+            scenarios = [make_a_useful_scenario(
+                ignore_finished_agents, size, n_agents, hop_dist, generator,
+                rng)]
+        except RuntimeError:
+            # retry
+            scenarios = make_useful_scenarios(
+                n, ignore_finished_agents, size, n_agents, hop_dist, generator, rng)
+    else:
+        p = ctx.Pool(N_PROCESSES)
+        pb = ProgressBar("Data Generation", n, 5)
+        args = [(ignore_finished_agents, size, n_agents, hop_dist, generator,
+                 rng, pb, i_r) for i_r in range(n)]
+        scenarios = p.map(proxy_make_a_useful_scenario, args)
         pb.end()
+        p.close()
+        p.join()
     return scenarios
 
 
@@ -528,9 +562,10 @@ if __name__ == "__main__":
         } for i_r in range(n_runs)
     ]
 
-    ctx = mp.get_context('spawn')
-    p = ctx.Pool(8)
+    p = ctx.Pool(N_PROCESSES)
     results = p.map(proxy_q_learning, kwargs)
+    p.close()
+    p.join()
 
     for i_r, result in enumerate(results):
         make_plot_from_json(f"run{i_r}_increasing")

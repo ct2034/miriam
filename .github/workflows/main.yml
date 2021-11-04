@@ -32,6 +32,9 @@ jobs:
     #     cd planner/mapf_implementations/libMultiRobotPlanning/build
     #     cmake ..
     #     make ecbs
+    - name: Ecbs deps
+      run: |
+        sudo apt install libyaml-cpp0.6
     - name: Lint with pycodestyle
       run: |
         pycodestyle .
