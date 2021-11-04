@@ -7,14 +7,34 @@ from definitions import INVALID
 from matplotlib import pyplot as plt
 from scenarios.evaluators import (cost_ecbs, cost_independent,
                                   cost_sim_decentralized_learned)
-from scenarios.generators import random_fill, tracing_pathes_in_the_dark
+from scenarios.generators import (corridor_with_passing, random_fill,
+                                  tracing_pathes_in_the_dark)
 from scenarios.solvers import ecbs
 from scenarios.visualization import plot_with_arrows, plot_with_paths
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
+from tools import ProgressBar
 
 if __name__ == "__main__":  # pragma: no cover
+    # scenario with corridor and one place to pass
+    rng = random.Random(0)
+    (env, starts, goals) = corridor_with_passing(10, 2, rng)
+    plot_with_arrows(env, starts, goals)
+    results = []
+    n_runs = 100
+    pb = ProgressBar("demo", n_runs, 10)
+    for _ in range(n_runs):
+        (env, starts, goals) = corridor_with_passing(10, 2, rng)
+        agents = to_agent_objects(
+            env, starts, goals, PolicyType.RANDOM, rng)
+        res = run_a_scenario(env, agents, False, IteratorType.BLOCKING1,
+                             ignore_finished_agents=False)
+        results.append(res)
+        pb.progress()
+    pb.end()
+    print(f'average_success_rate={np.mean([r[4] for r in results]):.3f}')
+
     # a scenario
     env = np.array([[0, 0, 0, 1],
                     [0, 0, 0, 0],
