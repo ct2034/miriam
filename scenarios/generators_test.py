@@ -1,8 +1,10 @@
 import unittest
 
 import numpy as np
+from numpy.core.numeric import count_nonzero
 
 from scenarios.generators import *
+from scenarios.test_helper import is_connected
 
 
 class TestGenerators(unittest.TestCase):
@@ -295,6 +297,30 @@ class TestGenerators(unittest.TestCase):
         self.assertRaises(AssertionError, lambda: can_be_set(full, [1, 3]))
         # pos out to bottom
         self.assertRaises(AssertionError, lambda: can_be_set(full, [3, 1]))
+
+    def test_corridor_with_passing(self):
+        size = 10
+        # test if correct dimensions are returned
+        (env, starts, goals) = corridor_with_passing(
+            size, 2, random.Random(0))
+        self.assertEqual(env.shape, (10, 10))
+        self.assertEqual(starts.shape, (2, 2))
+        self.assertEqual(goals.shape, (2, 2))
+        # at least some cells need to be 0
+        self.assertGreater(np.count_nonzero(env == 0), 0)
+        # at least some cells need to be 1
+        self.assertGreater(np.count_nonzero(env == 1), 0)
+
+        # test if there is exactly one passing point
+        path_len = abs(starts[0, 0] - goals[0, 0]) + \
+            abs(starts[0, 1] - goals[0, 1]) + 1
+        self.assertEqual(np.count_nonzero(env == FREE),
+                         path_len+1)  # +1 for passing point
+        self.assertEqual(np.count_nonzero(env == OBSTACLE),
+                         size**2 - path_len - 1)
+
+        # make sure all free cells are connected
+        self.assertTrue(is_connected(env))
 
 
 if __name__ == "__main__":  # pragma: no cover

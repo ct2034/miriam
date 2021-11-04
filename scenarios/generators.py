@@ -254,3 +254,80 @@ def building_walls(size: int, fill: float,
             env[tuple(pos)] = OBSTACLE
     starts, goals = make_starts_goals_on_env(env, n_agents, rng)
     return env, starts, goals
+
+
+# corridors with passing ######################################################
+
+def sign(x):
+    if x > 0:
+        return 1
+    elif x < 0:
+        return -1
+    else:
+        return 0
+
+
+def corridor_with_passing(size: int, n_agents: int, rng: random.Random):
+    """Scenarios where two agents have to pass each other in a corridor with
+    one ore more passing points."""
+    env = np.ones((size, size), dtype=np.int8)
+    assert n_agents == 2
+    corridor_start = (rng.randrange(size), rng.randrange(size))
+    corridor_end = (rng.randrange(size), rng.randrange(size))
+    while corridor_end[0] == corridor_start[0] or \
+            corridor_end[1] == corridor_start[1]:
+        corridor_end = (rng.randrange(size), rng.randrange(size))
+    # random path from start to end
+    left = min(corridor_start[0], corridor_end[0])
+    leftmost_pose = (corridor_start
+                     if corridor_start[0] == left else corridor_end)
+    rightmost_pose = (corridor_end
+                      if leftmost_pose == corridor_start else corridor_start)
+    lower = min(corridor_start[1], corridor_end[1])
+    lowermost_pose = (corridor_start
+                      if corridor_start[1] == lower else corridor_end)
+    uppermost_pose = (corridor_end
+                      if lowermost_pose == corridor_start else corridor_start)
+    path_len = abs(corridor_start[0] - corridor_end[0]) + \
+        abs(corridor_start[1] - corridor_end[1])
+    assert path_len > 0
+    path = [leftmost_pose, ]
+    horizontal_not_vertical = bool(rng.randrange(2))
+    if horizontal_not_vertical:
+        corner = (rightmost_pose[0], leftmost_pose[1])
+    else:
+        corner = (leftmost_pose[0], rightmost_pose[1])
+
+    for _ in range(path_len):
+        if path[-1] == corner:
+            # switch direction
+            horizontal_not_vertical = not horizontal_not_vertical
+        if horizontal_not_vertical:
+            next_pose = (path[-1][0] + 1, path[-1][1])
+        else:
+            d = sign(rightmost_pose[1] - leftmost_pose[1])
+            next_pose = (path[-1][0], path[-1][1] + d)
+        path.append(next_pose)
+    assert path[-1] == rightmost_pose
+    # set path as FREE
+    for pos in path:
+        env[tuple(pos)] = FREE
+    # make passing point free
+    midpoint = path[int(path_len / 2)]
+    # search 4 cells around midpoint
+    possible_passing_points = []
+    for x, y in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
+        if not (midpoint[0] + x < 0 or midpoint[0] + x >= size or
+                midpoint[1] + y < 0 or midpoint[1] + y >= size):
+            if env[midpoint[0] + x, midpoint[1] + y] == OBSTACLE:
+                possible_passing_points.append((midpoint[0] + x,
+                                                midpoint[1] + y))
+    if len(possible_passing_points) == 0:
+        # retry
+        return corridor_with_passing(size, n_agents, rng)
+    env[rng.choice(possible_passing_points)] = FREE
+
+    # set starts and goals
+    starts = np.array([corridor_start, corridor_end])
+    goals = np.array([corridor_end, corridor_start])
+    return env, starts, goals
