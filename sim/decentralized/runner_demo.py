@@ -19,13 +19,13 @@ from tools import ProgressBar
 if __name__ == "__main__":  # pragma: no cover
     # scenario with corridor and one place to pass
     rng = random.Random(0)
-    (env, starts, goals) = corridor_with_passing(10, 2, rng)
+    (env, starts, goals) = corridor_with_passing(10, 0, 2, rng)
     plot_with_arrows(env, starts, goals)
     results = []
     n_runs = 100
     pb = ProgressBar("demo", n_runs, 10)
     for _ in range(n_runs):
-        (env, starts, goals) = corridor_with_passing(10, 2, rng)
+        (env, starts, goals) = corridor_with_passing(10, 0, 2, rng)
         agents = to_agent_objects(
             env, starts, goals, PolicyType.RANDOM, rng)
         res = run_a_scenario(env, agents, False, IteratorType.BLOCKING1,

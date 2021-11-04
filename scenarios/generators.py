@@ -267,7 +267,8 @@ def sign(x):
         return 0
 
 
-def corridor_with_passing(size: int, n_agents: int, rng: random.Random):
+def corridor_with_passing(size: int, _: float, n_agents: int,
+                          rng: random.Random):
     """Scenarios where two agents have to pass each other in a corridor with
     one ore more passing points."""
     env = np.ones((size, size), dtype=np.int8)
@@ -324,7 +325,7 @@ def corridor_with_passing(size: int, n_agents: int, rng: random.Random):
                                                 midpoint[1] + y))
     if len(possible_passing_points) == 0:
         # retry
-        return corridor_with_passing(size, n_agents, rng)
+        return corridor_with_passing(size, 0, n_agents, rng)
     env[rng.choice(possible_passing_points)] = FREE
 
     # set starts and goals

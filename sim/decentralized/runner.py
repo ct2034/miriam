@@ -237,11 +237,13 @@ def run_a_scenario(env, agents, plot,
             space_progress += space_slice
             if any(time_progress > time_limit):
                 raise SimIterationException("timeout")
-            if print_progress:
-                finished = sum(map(lambda a: a.is_at_goal(), agents))
-                print(f"t:{max(time_progress)} finished: {finished}/{n_agents}")
+            finished = sum(map(lambda a: a.is_at_goal(), agents))
+            logger.debug(
+                f"t:{max(time_progress)} finished: {finished}/{n_agents}")
         successful = 1
+        logger.debug('success')
     except Exception as e:  # pragma: no cover
+        logger.debug(f'Exception: {e.__class__.__name__}, {e}')
         if isinstance(e, SimIterationException):
             pass  # logger.warning(e)
         elif pause_on is not None and isinstance(e, pause_on):  # type: ignore

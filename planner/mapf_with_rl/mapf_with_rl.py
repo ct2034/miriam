@@ -13,7 +13,8 @@ import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
 from planner.mapf_with_rl.mapf_with_rl_plot import make_plot_from_json
-from scenarios.generators import (GENERATOR_TYPE, building_walls, random_fill,
+from scenarios.generators import (GENERATOR_TYPE, building_walls,
+                                  corridor_with_passing, random_fill,
                                   tracing_pathes_in_the_dark)
 from scenarios.solvers import cached_ecbs
 from sim.decentralized.agent import get_t_from_env
@@ -185,7 +186,7 @@ def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
                           n_agents: int, hop_dist: int,
                           generator: GENERATOR_TYPE,
                           rng: random.Random) -> List[Scenario]:
-    assert generator in [random_fill,
+    assert generator in [random_fill, corridor_with_passing,
                          tracing_pathes_in_the_dark, building_walls]
     if n == 1:
         try:
@@ -518,10 +519,13 @@ if __name__ == "__main__":
         "sim.decentralized.runner").setLevel(logging.ERROR)
 
     # debug run
+    logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
     data_test = {"one": make_useful_scenarios(3, True, 4, 3, 3,
                                               random_fill, random.Random(0)),
                  "two": make_useful_scenarios(3, True, 8, 6, 3,
-                                              tracing_pathes_in_the_dark, random.Random(0))}
+                                              tracing_pathes_in_the_dark, random.Random(0)),
+                 "three": make_useful_scenarios(3, True, 12, 2, 3,
+                                                corridor_with_passing, random.Random(0))}
     stats = q_learning(
         n_episodes=20,
         eps_start=.9,
@@ -536,6 +540,8 @@ if __name__ == "__main__":
     )
     make_plot_from_json("debug")
 
+    # real run
+    logging.getLogger("sim.decentralized.runner").setLevel(logging.INFO)
     n_data_test = 100
     test_scenarios = {
         "small_random_fill": make_useful_scenarios(
@@ -544,6 +550,8 @@ if __name__ == "__main__":
             n_data_test, True, 8, 6, 3, tracing_pathes_in_the_dark, random.Random(0)),
         "big_building_walls": make_useful_scenarios(
             n_data_test, True, 8, 6, 3, building_walls, random.Random(0)),
+        "corridor_passing": make_useful_scenarios(
+            n_data_test, True, 8, 2, 3, corridor_with_passing, random.Random(0)),
     }
 
     n_runs = 8

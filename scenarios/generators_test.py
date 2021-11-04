@@ -302,7 +302,7 @@ class TestGenerators(unittest.TestCase):
         size = 10
         # test if correct dimensions are returned
         (env, starts, goals) = corridor_with_passing(
-            size, 2, random.Random(0))
+            size, 0, 2, random.Random(0))
         self.assertEqual(env.shape, (10, 10))
         self.assertEqual(starts.shape, (2, 2))
         self.assertEqual(goals.shape, (2, 2))
