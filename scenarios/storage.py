@@ -81,7 +81,6 @@ def save_result(scenario: SCENARIO_TYPE, result_type: ResultType,
     if has_file(scenario):
         with open(get_filepath(scenario), 'rb') as f:
             data: dict = pkl.load(f)
-            assert key_str not in data.keys()  # was not there before
         data[key_str] = result
         with open(get_filepath(scenario), 'wb') as f:
             pkl.dump(data, f)
