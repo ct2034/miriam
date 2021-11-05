@@ -2,7 +2,9 @@ import os
 import shutil
 import uuid
 
+import networkx as nx
 import numpy as np
+from sim.decentralized.agent import env_to_nx
 
 ENVVAR_STORAGE_PATH_STR = 'SCENARIO_STORAGE_PATH'
 STORAGE_PATH_TESTING = "/tmp/testing/"
@@ -42,6 +44,12 @@ def assert_path_equality(self, should_be, test):
     n_agents = len(should_be)
     for i_a in range(n_agents):
         self.assertTrue(np.all(should_be[i_a] == test[i_a]))
+
+
+def is_connected(env):
+    """make sure all free cells are reachable from one another"""
+    g = env_to_nx(env)
+    return nx.is_weakly_connected(g)
 
 
 env = np.array([
