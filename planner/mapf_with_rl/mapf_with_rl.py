@@ -378,9 +378,9 @@ def q_learning(n_episodes: int, eps_start: float,
     # size changes
     training_sizes = {
         .0: (4, 3, [random_fill]),
-        # .4: (5, 4, [random_fill, tracing_pathes_in_the_dark]),
-        # .6: (5, 5, [random_fill, tracing_pathes_in_the_dark]),
-        # .8: (8, 6, [random_fill, tracing_pathes_in_the_dark, building_walls])
+        .4: (5, 4, [random_fill, tracing_pathes_in_the_dark]),
+        .6: (5, 5, [random_fill, tracing_pathes_in_the_dark]),
+        .8: (8, 6, [random_fill, tracing_pathes_in_the_dark, building_walls])
     }
 
     # stats
@@ -566,7 +566,7 @@ if __name__ == "__main__":
             "ignore_finished_agents": True,
             "hop_dist": 4,
             "seed": i_r,
-            "name": f"run{i_r}"
+            "name": f"run{i_r}_increasing"
         } for i_r in range(n_runs)
     ]
 
