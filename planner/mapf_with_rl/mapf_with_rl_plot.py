@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import json
+import os
 import sys
 from typing import Dict, List, Tuple
 
 from matplotlib import pyplot as plt
+from tools import ProgressBar
 
 
 def plot_this_experiment(data: Dict[str, Tuple[List[int], List[float]]]):
@@ -31,7 +33,15 @@ def make_plot_from_json(name: str):
     plt.savefig(f'planner/mapf_with_rl/results/{name}.png', dpi=300)
 
 
+def make_plots_for_all_files_in_results_dir():
+    files = os.listdir('planner/mapf_with_rl/results')
+    pb = ProgressBar("Plots", len(files), 10)
+    for filename in files:
+        if filename.endswith('.json'):
+            make_plot_from_json(filename[:-5])
+        pb.progress()
+    pb.end()
+
+
 if __name__ == '__main__':
-    # make plot from command line arguments
-    if len(sys.argv) > 1:
-        make_plot_from_json(sys.argv[1])
+    make_plots_for_all_files_in_results_dir()
