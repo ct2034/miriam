@@ -574,6 +574,3 @@ if __name__ == "__main__":
     results = p.map(proxy_q_learning, kwargs)
     p.close()
     p.join()
-
-    for i_r, result in enumerate(results):
-        make_plot_from_json(f"run{i_r}_increasing")
