@@ -39,16 +39,21 @@ def arena():
     pb.end()
     print(f'average_success_rate={np.mean([r[4] for r in results]):.3f}')
 
+
 def corridor():
-    # scenario with corridor and one place to pass
+    # scenario with corridor and one place to pas
+    logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
     rng = random.Random(0)
     (env, starts, goals) = corridor_with_passing(10, 0, 2, rng)
     plot_with_arrows(env, starts, goals)
     results = []
     n_runs = 100
     pb = ProgressBar("demo", n_runs, 10)
-    for _ in range(n_runs):
-        (env, starts, goals) = corridor_with_passing(10, 0, 2, rng)
+    for i_r in range(n_runs):
+        print(f'run {i_r}')
+        rng = random.Random(i_r)
+        (env, starts, goals) = corridor_with_passing(
+            10, 0, 2, rng)
         agents = to_agent_objects(
             env, starts, goals, PolicyType.RANDOM, rng)
         res = run_a_scenario(env, agents, False, IteratorType.BLOCKING1,
@@ -57,6 +62,7 @@ def corridor():
         pb.progress()
     pb.end()
     print(f'average_success_rate={np.mean([r[4] for r in results]):.3f}')
+
 
 def a_scenario():
     # a scenario
@@ -78,6 +84,7 @@ def a_scenario():
         ignore_finished_agents=False, print_progress=True)
     print(res)
 
+
 def big_environments():
     # checking big environments
     env, starts, goals = random_fill(40, .2, 50, random.Random(0))
@@ -90,6 +97,7 @@ def big_environments():
         env, agents, False, IteratorType.BLOCKING1,
         ignore_finished_agents=False, print_progress=True)
     print(res)
+
 
 def blocking_3():
     env = np.zeros((3, 3))
@@ -106,6 +114,7 @@ def blocking_3():
     plot_with_paths(env, paths_ecbs)
     res = run_a_scenario(env, agents, True, IteratorType.BLOCKING3)
     print(res)
+
 
 def find_and_run_interesting_scenario():
     logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)
@@ -143,8 +152,9 @@ def find_and_run_interesting_scenario():
     res_decen = run_a_scenario(env, agents, plot=True, iterator=it)
     print(res_decen)
 
+
 if __name__ == "__main__":  # pragma: no cover
-    arena()
+    # arena()
     corridor()
     # a_scenario()
     # big_environments()

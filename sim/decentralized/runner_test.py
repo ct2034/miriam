@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 import random
 import unittest
+from typing import FrozenSet
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 import sim.decentralized.runner as runner
+from definitions import FREE
+from scenarios.generators import corridor_with_passing
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType, get_iterator_fun
 from sim.decentralized.policy import PolicyType, RandomPolicy
-from sim.decentralized.runner import SimIterationException
+from sim.decentralized.runner import (SimIterationException, run_a_scenario,
+                                      to_agent_objects)
 from tools import hasher
 
 
@@ -29,7 +33,8 @@ class TestRunner(unittest.TestCase):
         rng = random.Random(0)
         env_same_seed = runner.initialize_environment_random_fill(10, .5, rng)
         rng = random.Random(1)
-        env_different_seed = runner.initialize_environment_random_fill(10, .5, rng)
+        env_different_seed = runner.initialize_environment_random_fill(
+            10, .5, rng)
         self.assertEqual(hasher([env]), hasher([env_same_seed]))
         self.assertNotEqual(hasher([env]), hasher([env_different_seed]))
 
@@ -217,6 +222,21 @@ class TestRunner(unittest.TestCase):
             for _ in range(10):
                 self.assertRaises(runner.SimIterationException,
                                   lambda: iterator_fun(agents, True))
+
+    def test_run_a_scenario_oscillation_detection(self):
+        i_r = 3
+        rng = random.Random(i_r)
+        (env, starts, goals) = corridor_with_passing(
+            10, 0, 2, rng)
+        agents = to_agent_objects(
+            env, starts, goals, PolicyType.RANDOM, rng)
+        from sim.decentralized.iterators import SimIterationException
+        SimIterationException.__init__ = MagicMock(return_value=None)
+        res = run_a_scenario(
+            env, agents, False, IteratorType.BLOCKING1, ignore_finished_agents=False)
+        SimIterationException.__init__.assert_called_with(
+            "oscillation deadlock")
+        print(res)
 
     def test_evaluate_policies(self):
         n_runs = 5

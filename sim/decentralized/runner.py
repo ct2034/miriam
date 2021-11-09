@@ -6,7 +6,7 @@ import random
 from typing import *
 
 import numpy as np
-from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT
+from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT, C
 from sim.decentralized.agent import Agent, env_to_nx
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
@@ -225,6 +225,9 @@ def run_a_scenario(env, agents, plot,
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
     space_progress = np.zeros([n_agents], dtype=float)
+    paths = list(map(lambda _: list(), range(n_agents)))
+    oscillation_count = 0
+    max_oscillation_count = 1
     # iterate
     successful: int = 0
     try:
@@ -240,8 +243,21 @@ def run_a_scenario(env, agents, plot,
             finished = sum(map(lambda a: a.is_at_goal(), agents))
             logger.debug(
                 f"t:{max(time_progress)} finished: {finished}/{n_agents}")
+            t = len(paths[0])
+            for i_a, a in enumerate(agents):
+                paths[i_a].append(a.pos)  # untimed
+            # check same poses two timesteps ago
+            if t >= 2:
+                if all(map(
+                        lambda i_a: paths[i_a][-3] == paths[i_a][-1],
+                        range(n_agents))):
+                    oscillation_count += 1
+            if oscillation_count > max_oscillation_count:
+                raise SimIterationException("oscillation deadlock")
         successful = 1
         logger.debug('success')
+        lengths = list(map(len, paths))
+        assert all(map(lambda l: l == lengths[0], lengths))
     except Exception as e:  # pragma: no cover
         logger.debug(f'Exception: {e.__class__.__name__}, {e}')
         if isinstance(e, SimIterationException):
