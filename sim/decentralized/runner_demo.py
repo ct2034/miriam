@@ -7,8 +7,8 @@ from definitions import INVALID
 from matplotlib import pyplot as plt
 from scenarios.evaluators import (cost_ecbs, cost_independent,
                                   cost_sim_decentralized_learned)
-from scenarios.generators import (corridor_with_passing, random_fill,
-                                  tracing_pathes_in_the_dark)
+from scenarios.generators import (arena_with_crossing, corridor_with_passing,
+                                  random_fill, tracing_pathes_in_the_dark)
 from scenarios.solvers import ecbs
 from scenarios.visualization import plot_with_arrows, plot_with_paths
 from sim.decentralized.iterators import IteratorType
@@ -16,16 +16,20 @@ from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 from tools import ProgressBar
 
-if __name__ == "__main__":  # pragma: no cover
-    # scenario with corridor and one place to pass
+
+def arena():
+    # scenario arena
     rng = random.Random(0)
-    (env, starts, goals) = corridor_with_passing(10, 0, 2, rng)
+    (env, starts, goals) = arena_with_crossing(10, 0, 4, rng)
+    print(starts)
+    print(goals)
     plot_with_arrows(env, starts, goals)
+    plt.show()
     results = []
     n_runs = 100
     pb = ProgressBar("demo", n_runs, 10)
     for _ in range(n_runs):
-        (env, starts, goals) = corridor_with_passing(10, 0, 2, rng)
+        (env, starts, goals) = arena_with_crossing(10, 0, 6, rng)
         agents = to_agent_objects(
             env, starts, goals, PolicyType.RANDOM, rng)
         res = run_a_scenario(env, agents, False, IteratorType.BLOCKING1,
@@ -35,6 +39,32 @@ if __name__ == "__main__":  # pragma: no cover
     pb.end()
     print(f'average_success_rate={np.mean([r[4] for r in results]):.3f}')
 
+
+def corridor():
+    # scenario with corridor and one place to pas
+    logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
+    rng = random.Random(0)
+    (env, starts, goals) = corridor_with_passing(10, 0, 2, rng)
+    plot_with_arrows(env, starts, goals)
+    results = []
+    n_runs = 100
+    pb = ProgressBar("demo", n_runs, 10)
+    for i_r in range(n_runs):
+        print(f'run {i_r}')
+        rng = random.Random(i_r)
+        (env, starts, goals) = corridor_with_passing(
+            10, 0, 2, rng)
+        agents = to_agent_objects(
+            env, starts, goals, PolicyType.RANDOM, rng)
+        res = run_a_scenario(env, agents, False, IteratorType.BLOCKING1,
+                             ignore_finished_agents=False)
+        results.append(res)
+        pb.progress()
+    pb.end()
+    print(f'average_success_rate={np.mean([r[4] for r in results]):.3f}')
+
+
+def a_scenario():
     # a scenario
     env = np.array([[0, 0, 0, 1],
                     [0, 0, 0, 0],
@@ -54,6 +84,8 @@ if __name__ == "__main__":  # pragma: no cover
         ignore_finished_agents=False, print_progress=True)
     print(res)
 
+
+def big_environments():
     # checking big environments
     env, starts, goals = random_fill(40, .2, 50, random.Random(0))
     agents = to_agent_objects(env, starts, goals)
@@ -66,6 +98,8 @@ if __name__ == "__main__":  # pragma: no cover
         ignore_finished_agents=False, print_progress=True)
     print(res)
 
+
+def blocking_3():
     env = np.zeros((3, 3))
     starts = np.array([
         [0, 0],
@@ -81,6 +115,8 @@ if __name__ == "__main__":  # pragma: no cover
     res = run_a_scenario(env, agents, True, IteratorType.BLOCKING3)
     print(res)
 
+
+def find_and_run_interesting_scenario():
     logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)
     logging.getLogger("__main__").setLevel(logging.ERROR)
     logging.getLogger("root").setLevel(logging.ERROR)
@@ -115,3 +151,12 @@ if __name__ == "__main__":  # pragma: no cover
     logging.getLogger("sim.decentralized.policy").setLevel(logging.DEBUG)
     res_decen = run_a_scenario(env, agents, plot=True, iterator=it)
     print(res_decen)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    # arena()
+    corridor()
+    # a_scenario()
+    # big_environments()
+    # blocking_3()
+    # find_and_run_interesting_scenario()

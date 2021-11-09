@@ -86,7 +86,7 @@ class Scenario(object):
         # cost if simulation was unsuccessful:
         self.UNSUCCESSFUL_COST = -.6
         # maximum number of steps, i.e. timeout
-        self.TIME_LIMIT = get_t_from_env(self.env)
+        self.TIME_LIMIT = get_t_from_env(self.env) - 1
 
     def start(self) -> Data:
         state, reward = self._run()
