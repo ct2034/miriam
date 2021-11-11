@@ -12,7 +12,8 @@ import torch
 import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
 from matplotlib import pyplot as plt
-from planner.mapf_with_rl.mapf_with_rl_plot import make_plot_from_json
+from planner.mapf_with_rl.mapf_with_rl_plot import (
+    make_plots_for_all_files_in_results_dir, make_summary_plot_for_all_files_in_results_dir)
 from scenarios.generators import (GENERATOR_TYPE, building_walls,
                                   corridor_with_passing, random_fill,
                                   tracing_pathes_in_the_dark)
@@ -574,3 +575,7 @@ if __name__ == "__main__":
     results = p.map(proxy_q_learning, kwargs)
     p.close()
     p.join()
+
+    # make plots
+    make_summary_plot_for_all_files_in_results_dir()
+    make_plots_for_all_files_in_results_dir()

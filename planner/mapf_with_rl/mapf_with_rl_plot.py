@@ -102,7 +102,7 @@ def make_summary_plot_for_files(files: List[str], name_out: str):
     fig.savefig(f'planner/mapf_with_rl/results/{name_out}.png', dpi=300)
 
 
-def make_summary_plot_for_all_files():
+def make_summary_plot_for_all_files_in_results_dir():
     files = os.listdir('planner/mapf_with_rl/results')
     json_files_by_suffix = {}
     for filename in files:
@@ -123,5 +123,5 @@ def make_summary_plot_for_all_files():
 
 
 if __name__ == '__main__':
-    make_summary_plot_for_all_files()
+    make_summary_plot_for_all_files_in_results_dir()
     make_plots_for_all_files_in_results_dir()
