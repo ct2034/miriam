@@ -13,3 +13,6 @@
 [submodule "planner/mapf_implementations/libMultiRobotPlanning"]
 	path = planner/mapf_implementations/libMultiRobotPlanning
 	url = https://github.com/ct2034/libMultiRobotPlanning.git
+[submodule "planner/primal2/PRIMAL2"]
+	path = planner/primal2/PRIMAL2
+	url = https://github.com/marmotlab/PRIMAL2.git
