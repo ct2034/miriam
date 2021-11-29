@@ -16,3 +16,6 @@
 [submodule "planner/primal2/PRIMAL2"]
 	path = planner/primal2/PRIMAL2
 	url = https://github.com/marmotlab/PRIMAL2.git
+[submodule "planner/dhc/DHC"]
+	path = planner/dhc/DHC
+	url = https://github.com/ct2034/DHC.git
