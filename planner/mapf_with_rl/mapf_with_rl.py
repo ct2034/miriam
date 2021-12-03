@@ -3,20 +3,19 @@ import json
 import logging
 import multiprocessing as mp
 import random
-from functools import partial
-from math import exp, isclose, log
-from typing import Callable, Dict, List, Optional, Tuple
+from math import exp, log
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 from definitions import INVALID, SCENARIO_TYPE
-from matplotlib import pyplot as plt
 from planner.mapf_with_rl.mapf_with_rl_plot import (
-    make_plots_for_all_files_in_results_dir, make_summary_plot_for_all_files_in_results_dir)
-from scenarios.generators import (GENERATOR_TYPE, building_walls,
-                                  corridor_with_passing, random_fill,
-                                  tracing_pathes_in_the_dark)
+    make_plot_from_json, make_plots_for_all_files_in_results_dir,
+    make_summary_plot_for_all_files_in_results_dir)
+from scenarios.generators import (GENERATOR_TYPE, arena_with_crossing,
+                                  building_walls, corridor_with_passing,
+                                  random_fill, tracing_pathes_in_the_dark)
 from scenarios.solvers import cached_ecbs
 from sim.decentralized.agent import get_t_from_env
 from sim.decentralized.iterators import IteratorType
@@ -26,7 +25,7 @@ from sim.decentralized.policy import (FirstThenRaisingPolicy,
                                       QLearningPolicy)
 from sim.decentralized.runner import (has_exception, run_a_scenario,
                                       to_agent_objects, will_scenario_collide)
-from tools import ProgressBar, time_limit
+from tools import ProgressBar
 from torch.nn import Linear
 from torch_geometric.data import Data
 from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
@@ -187,8 +186,8 @@ def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
                           n_agents: int, hop_dist: int,
                           generator: GENERATOR_TYPE,
                           rng: random.Random) -> List[Scenario]:
-    assert generator in [random_fill, corridor_with_passing,
-                         tracing_pathes_in_the_dark, building_walls]
+    assert generator in [arena_with_crossing, corridor_with_passing,
+                         tracing_pathes_in_the_dark, building_walls, random_fill]
     if n == 1:
         try:
             scenarios = [make_a_useful_scenario(
@@ -378,10 +377,10 @@ def q_learning(n_episodes: int, eps_start: float,
 
     # size changes
     training_sizes = {
-        .0: (4, 3, [random_fill]),
-        .4: (5, 4, [random_fill, tracing_pathes_in_the_dark]),
-        .6: (5, 5, [random_fill, tracing_pathes_in_the_dark]),
-        .8: (8, 6, [random_fill, tracing_pathes_in_the_dark, building_walls])
+        .0: (3, 2, [arena_with_crossing]),
+        .4: (5, 4, [arena_with_crossing]),
+        .6: (7, 6, [arena_with_crossing])
+        # .8: (10, 2, [arena_with_crossing])
     }
 
     # stats
@@ -521,12 +520,14 @@ if __name__ == "__main__":
 
     # debug run
     logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
-    data_test = {"one": make_useful_scenarios(3, True, 4, 3, 3,
-                                              random_fill, random.Random(0)),
-                 "two": make_useful_scenarios(3, True, 8, 6, 3,
-                                              tracing_pathes_in_the_dark, random.Random(0)),
-                 "three": make_useful_scenarios(3, True, 12, 2, 3,
-                                                corridor_with_passing, random.Random(0))}
+    data_test = {"random_fill": make_useful_scenarios(3, True, 4, 3, 3,
+                                                      random_fill, random.Random(0)),
+                 "tracing_pathes_in_the_dark": make_useful_scenarios(3, True, 8, 6, 3,
+                                                                     tracing_pathes_in_the_dark, random.Random(0)),
+                 "corridor_with_passing": make_useful_scenarios(3, True, 12, 2, 3,
+                                                                corridor_with_passing, random.Random(0)),
+                 "arena_with_crossing": make_useful_scenarios(3, True, 4, 3, 3,
+                                                              arena_with_crossing, random.Random(0))}
     stats = q_learning(
         n_episodes=20,
         eps_start=.9,
@@ -545,20 +546,18 @@ if __name__ == "__main__":
     logging.getLogger("sim.decentralized.runner").setLevel(logging.INFO)
     n_data_test = 100
     test_scenarios = {
-        "small_random_fill": make_useful_scenarios(
-            n_data_test, True, 4, 3, 3, random_fill, random.Random(0)),
-        "big_tracing_pathes_in_the_dark": make_useful_scenarios(
-            n_data_test, True, 8, 6, 3, tracing_pathes_in_the_dark, random.Random(0)),
-        "big_building_walls": make_useful_scenarios(
-            n_data_test, True, 8, 6, 3, building_walls, random.Random(0)),
-        "corridor_passing": make_useful_scenarios(
-            n_data_test, True, 8, 2, 3, corridor_with_passing, random.Random(0)),
+        "arena_with_crossing_2agents": make_useful_scenarios(
+            n_data_test, True, 8, 2, 3, arena_with_crossing, random.Random(0)),
+        "arena_with_crossing_4agents": make_useful_scenarios(
+            n_data_test, True, 8, 4, 3, arena_with_crossing, random.Random(0)),
+        "arena_with_crossing_6agents": make_useful_scenarios(
+            n_data_test, True, 8, 6, 3, arena_with_crossing, random.Random(0)),
     }
 
     n_runs = 8
     kwargs = [
         {
-            "n_episodes": int(10E4),
+            "n_episodes": int(10E3),
             "eps_start": .9,
             "c": 100,
             "gamma": .9,
