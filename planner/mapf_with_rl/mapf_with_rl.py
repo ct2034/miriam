@@ -377,10 +377,10 @@ def q_learning(n_episodes: int, eps_start: float,
 
     # size changes
     training_sizes = {
-        .0: (3, 2, [arena_with_crossing]),
-        .4: (5, 4, [arena_with_crossing]),
-        .6: (7, 6, [arena_with_crossing])
-        # .8: (10, 2, [arena_with_crossing])
+        .0: (4, 2, [arena_with_crossing]),
+        .3: (8, 4, [arena_with_crossing]),
+        .5: (8, 6, [arena_with_crossing]),
+        .7: (8, 8, [arena_with_crossing])
     }
 
     # stats
@@ -546,18 +546,18 @@ if __name__ == "__main__":
     logging.getLogger("sim.decentralized.runner").setLevel(logging.INFO)
     n_data_test = 100
     test_scenarios = {
-        "arena_with_crossing_2agents": make_useful_scenarios(
-            n_data_test, True, 8, 2, 3, arena_with_crossing, random.Random(0)),
         "arena_with_crossing_4agents": make_useful_scenarios(
             n_data_test, True, 8, 4, 3, arena_with_crossing, random.Random(0)),
         "arena_with_crossing_6agents": make_useful_scenarios(
             n_data_test, True, 8, 6, 3, arena_with_crossing, random.Random(0)),
+        "arena_with_crossing_8agents": make_useful_scenarios(
+            n_data_test, True, 8, 8, 3, arena_with_crossing, random.Random(0)),
     }
 
     n_runs = 8
     kwargs = [
         {
-            "n_episodes": int(10E3),
+            "n_episodes": int(50E3),
             "eps_start": .9,
             "c": 100,
             "gamma": .9,
