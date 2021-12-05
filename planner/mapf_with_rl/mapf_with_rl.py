@@ -469,10 +469,11 @@ def q_learning(n_episodes: int, eps_start: float,
             stats["loss"][1].append(float(loss))
             stats["epsilons"][0].append(i_e)
             stats["epsilons"][1].append(epsilon)
-            stats["max_q"][0].append(i_e)
-            stats["max_q"][1].append(float(max(qvals)))
-            stats["min_q"][0].append(i_e)
-            stats["min_q"][1].append(float(min(qvals)))
+            if len(qvals) > 0:
+                stats["max_q"][0].append(i_e)
+                stats["max_q"][1].append(float(max(qvals)))
+                stats["min_q"][0].append(i_e)
+                stats["min_q"][1].append(float(min(qvals)))
             stats["timesteps"][0].append(i_e)
             stats["timesteps"][1].append(i_t)
         if (i_e == 0 or
@@ -566,7 +567,7 @@ if __name__ == "__main__":
             "ignore_finished_agents": True,
             "hop_dist": 4,
             "seed": i_r,
-            "name": f"run{i_r}_increasing"
+            "name": f"run{i_r}_arena_with_crossing_increasing"
         } for i_r in range(n_runs)
     ]
 
