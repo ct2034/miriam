@@ -44,7 +44,7 @@ class PlanEcbsTest(unittest.TestCase):
         )
         self.assertEqual(res, INVALID)
 
-    def test_a_scenario(self):
+    def test_some_arena_scenarios(self):
         rng = Random(0)
         for _ in range(10):
             env, s, g = arena_with_crossing(4, 0.5, 3, rng)
@@ -54,9 +54,37 @@ class PlanEcbsTest(unittest.TestCase):
                 goals=g,
                 suboptimality=1.5,
                 timeout=10,
-                disappear_at_goal=False  # can not be solved then
+                disappear_at_goal=False
             )
             self.assertNotEqual(res, INVALID)
+
+    def test_scenario_with_identical_start_states(self):
+        env = np.zeros((5, 5), dtype=np.int8)
+        starts = [(0, 0), (0, 0)]
+        goals = [(4, 4), (4, 3)]
+        res = plan_in_gridmap(
+            gridmap=env,
+            starts=starts,
+            goals=goals,
+            suboptimality=1.5,
+            timeout=10,
+            disappear_at_goal=False
+        )
+        self.assertEqual(res, INVALID)
+
+    def test_scenario_with_identical_goal_states(self):
+        env = np.zeros((5, 5), dtype=np.int8)
+        starts = [(0, 0), (0, 1)]
+        goals = [(4, 4), (4, 4)]
+        res = plan_in_gridmap(
+            gridmap=env,
+            starts=starts,
+            goals=goals,
+            suboptimality=1.5,
+            timeout=10,
+            disappear_at_goal=False
+        )
+        self.assertEqual(res, INVALID)
 
 
 if __name__ == '__main__':
