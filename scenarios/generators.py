@@ -336,9 +336,8 @@ def corridor_with_passing(size: int, _: float, n_agents: int,
 # arena ########################################################################
 
 
-def a_possible_pose(size, i):
+def a_possible_pose(size, i, n_possible_poses):
     """Return a possible pose around the edge of the arena."""
-    n_possible_poses = size * 2 - 1
     if i < int(n_possible_poses / 2):
         return (i, 0)
     else:
@@ -353,9 +352,10 @@ def flip_pose(size, pose):
 def arena_with_crossing(size: int, _: float, n_agents: int,
                         rng: random.Random):
     env = np.zeros((size, size), dtype=np.int8)
-    n_possible_poses = size * 2 - 1
+    n_possible_poses = size * 2 - 2
     assert n_agents <= n_possible_poses
-    choices = rng.choices(range(n_possible_poses), k=n_agents)
-    starts = list(map(lambda i: a_possible_pose(size, i), choices))
+    choices = rng.sample(range(n_possible_poses), k=n_agents)
+    starts = list(map(lambda i: a_possible_pose(
+        size, i, n_possible_poses), choices))
     goals = list(map(lambda i: flip_pose(size, starts[i]), range(n_agents)))
     return env, np.array(starts), np.array(goals)

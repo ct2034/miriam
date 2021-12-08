@@ -322,6 +322,26 @@ class TestGenerators(unittest.TestCase):
         # make sure all free cells are connected
         self.assertTrue(is_connected(env))
 
+    # arena with crossing -----------------------------------------------------
+    def test_arena_with_crossing_no_duplicate_starts_or_goals(self):
+        rng = random.Random(0)
+        for _ in range(10):
+            # test if correct dimensions are returned
+            (env, starts, goals
+             ) = arena_with_crossing(10, 0, 8, rng)
+            self.assertEqual(env.shape, (10, 10))
+            self.assertEqual(starts.shape, (8, 2))
+            self.assertEqual(goals.shape, (8, 2))
+            # all cells are zero here
+            self.assertEqual(np.count_nonzero(env), 0)
+
+            # make sure all free cells are connected
+            self.assertTrue(is_connected(env))
+
+            # make sure there are no duplicates
+            self.assertTrue(starts.shape == np.unique(starts, axis=0).shape)
+            self.assertTrue(goals.shape == np.unique(goals, axis=0).shape)
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
