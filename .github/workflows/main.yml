@@ -6,10 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-    - name: Checkout repo
+    - name: Checkout repo and submodules
       uses: actions/checkout@v2
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@master
+      with:
+        submodules: recursive
     - name: Set up Python 3.8.10
       uses: actions/setup-python@v2
       with:
