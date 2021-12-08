@@ -225,7 +225,7 @@ def run_a_scenario(env, agents, plot,
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
     space_progress = np.zeros([n_agents], dtype=float)
-    paths = list(map(lambda _: list(), range(n_agents)))
+    paths: List[List[Tuple]] = list(map(lambda _: list(), range(n_agents)))
     oscillation_count = 0
     max_oscillation_count = 1
     # iterate
