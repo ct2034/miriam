@@ -9,6 +9,8 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from torch_geometric.data import Data
 
+from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
+
 _ = Axes3D
 
 
@@ -18,11 +20,14 @@ def get_colors(n_agents):
     return colors
 
 
-def plot_env(ax, env):
-    ax.imshow(np.swapaxes(env, 0, 1), cmap='Greys', origin='lower')
+def plot_env(ax, env: POTENTIAL_ENV_TYPE):
+    if is_gridmap(env):
+        ax.imshow(np.swapaxes(env, 0, 1), cmap='Greys', origin='lower')
+    elif is_roadmap(env):
+        raise NotImplementedError
 
 
-def plot_with_arrows(env, starts, goals):
+def plot_env_with_arrows(env: POTENTIAL_ENV_TYPE, starts, goals):
     fig = plt.figure(figsize=[5, 5])
     ax = fig.add_subplot()
     plot_env(ax, env)

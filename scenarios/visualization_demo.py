@@ -23,7 +23,7 @@ env, starts, goals = scenarios.generators.tracing_pathes_in_the_dark(
 
 
 # %%
-visualization.plot_with_arrows(env, starts, goals)
+visualization.plot_env_with_arrows(env, starts, goals)
 plt.show()
 
 

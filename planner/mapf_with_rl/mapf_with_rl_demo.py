@@ -4,7 +4,7 @@ import random
 import numpy as np
 from matplotlib import pyplot as plt
 from planner.mapf_with_rl.mapf_with_rl import Scenario
-from scenarios.visualization import (plot_state, plot_with_arrows,
+from scenarios.visualization import (plot_state, plot_env_with_arrows,
                                      plot_with_paths)
 
 if __name__ == "__main__":
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         rng=random.Random(0)
     )
     assert s.useful
-    plot_with_arrows(env, starts, goals)
+    plot_env_with_arrows(env, starts, goals)
 
     paths = list(map(lambda a: np.array(a.path), s.agents))
     plot_with_paths(env, paths)

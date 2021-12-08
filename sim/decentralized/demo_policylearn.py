@@ -24,7 +24,7 @@ def make_scenario():
 
 if __name__ == "__main__":
     (gridmap, starts, goals) = make_scenario()
-    visualization.plot_with_arrows(gridmap, starts, goals)
+    visualization.plot_env_with_arrows(gridmap, starts, goals)
     plt.show()
 
     for p in PolicyType:
