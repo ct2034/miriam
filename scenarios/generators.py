@@ -333,7 +333,7 @@ def corridor_with_passing(size: int, _: float, n_agents: int,
     goals = np.array([corridor_end, corridor_start])
     return env, starts, goals
 
-# arena ########################################################################
+# arena with crossing #########################################################
 
 
 def a_possible_pose(size, i, n_possible_poses):
