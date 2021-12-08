@@ -85,8 +85,3 @@ class PlanEcbsTest(unittest.TestCase):
             disappear_at_goal=False
         )
         self.assertEqual(res, INVALID)
-
-
-if __name__ == '__main__':
-    logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
-    PlanEcbsTest().test_a_scenario()
