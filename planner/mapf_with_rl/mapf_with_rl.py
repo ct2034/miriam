@@ -232,7 +232,7 @@ class Qfunction(torch.nn.Module):
         edge_index = data.edge_index
         pos = data.pos
         # everything is one batch
-        batch = torch.tensor([0 for _ in range(x.shape[0])], dtype=torch.int64)
+        batch = torch.tensor([0 for _ in range(x.shape[0])], dtype=torch.int8)
 
         # 1. Obtain node embeddings
         x = self.conv1(x, edge_index)
