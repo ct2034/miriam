@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-from definitions import C, N
+from definitions import C
 from sim.decentralized.agent import Agent
 
 OBSERVATION_DISTANCE = 6
