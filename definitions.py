@@ -15,7 +15,7 @@ DEFAULT_TIMEOUT_S = 30  # seconds;
 SCENARIO_TYPE = Tuple[np.ndarray, np.ndarray, np.ndarray]
 SCENARIO_RESULT = Tuple[float, float, float, float, Any]
 
-C = TypeVar('C', Tuple[int, int], Tuple[int])  # location coordinate
+C = TypeVar('C', Tuple[int, int], int)  # location coordinate
 N = TypeVar('N', Tuple[int, int, int], Tuple[int, int])  # planning node
 
 EDGE_TYPE = Tuple[C, C, int]

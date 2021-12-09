@@ -7,7 +7,6 @@ import numpy as np
 import torch
 from definitions import (BLOCKED_EDGES_TYPE, BLOCKED_NODES_TYPE, EDGE_TYPE,
                          PATH, C, N)
-from roadmaps.var_odrm_torch.var_odrm_torch import make_graph
 from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
 from sim.decentralized.policy import Policy, PolicyType
 from tools import hasher
@@ -15,6 +14,7 @@ from tools import hasher
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 COST = "cost"
+POS = "pos"
 WAITING_COST = 1. - 1E-9
 MOVING_COST = 1
 
@@ -23,7 +23,7 @@ def get_t_from_env(env: POTENTIAL_ENV_TYPE) -> int:
     if is_gridmap(env):
         return (env.shape[0] + env.shape[1]) * 3
     elif is_roadmap(env):
-        return env.shape[0]  # number of nodes
+        return env.number_of_nodes()
     else:
         raise ValueError("Env must be gridmap or roadmap")
 
@@ -48,7 +48,8 @@ def env_to_nx(env: POTENTIAL_ENV_TYPE) -> nx.Graph:
             return env[n[0], n[1]] == free
         flat_graph = nx.subgraph_view(flat_graph, filter_node=filter_node)
     elif has_roadmap:
-        flat_graph = make_graph(env)
+        assert isinstance(env, nx.Graph)
+        flat_graph = env  # is already a networkx graph
 
     # add timed edges
     timed_graph = nx.DiGraph()
@@ -89,13 +90,14 @@ def env_to_nx(env: POTENTIAL_ENV_TYPE) -> nx.Graph:
             timed_graph, {e: move_cost(e) for e in timed_graph.edges()}, COST)
     elif has_roadmap:
         HIGH_COST = 99
+        pos = nx.get_node_attributes(flat_graph, "pos")
 
         def move_cost(e):
             a, b = e
             if a[:-1] != b[:-1]:  # moving
                 # geometric distance
                 return torch.linalg.vector_norm(
-                    env[a[:-1]] - env[b[:-1]]
+                    torch.tensor(pos[a[0]]) - torch.tensor(pos[b[0]])
                 )
             else:
                 return HIGH_COST
@@ -136,9 +138,9 @@ class Agent(Generic[C, N]):
         elif is_roadmap(env):
             self.has_roadmap = True
             self.has_gridmap = False
-            self.n_nodes = env.shape[0]
-            assert len(pos) == 1  # (node)
-            assert pos[0] < self.n_nodes, "Position must be a node index"
+            self.n_nodes = env.number_of_nodes()
+            assert isinstance(pos, int)  # (node)
+            assert pos < self.n_nodes, "Position must be a node index"
             self.pos = pos
         if env_nx is None:
             self.env_nx: nx.Graph = env_to_nx(self.env)
@@ -184,7 +186,7 @@ class Agent(Generic[C, N]):
         if self.has_gridmap:
             assert len(goal) == 2  # (x, y)
         elif self.has_roadmap:
-            assert len(goal) == 1  # (node)
+            assert isinstance(goal, int)  # (node)
         path = self.plan_timed_path(
             start=self.pos,
             goal=goal
@@ -229,6 +231,7 @@ class Agent(Generic[C, N]):
 
         g = nx.subgraph_view(
             self.env_nx, filter_node=filter_node, filter_edge=filter_edge)
+        pos = nx.get_node_attributes(self.env, POS)
 
         # define distance function
         if self.has_gridmap:
@@ -240,13 +243,13 @@ class Agent(Generic[C, N]):
             def dist(a, b):
                 # geometric distance
                 return torch.linalg.vector_norm(
-                    self.env[a[:-1]] - self.env[b[:-1]]
+                    torch.tensor(pos[a[0]]) - torch.tensor(pos[b[0]])
                 )
 
         # make goal waiting edges free
         any_goal_edge_existed = False
         goal_waiting_edges = [
-            (goal + (i,), goal + (i+1,)) for i in range(self.t_max-1)]
+            ((goal, i), (goal, i+1)) for i in range(self.t_max-1)]
         for e in goal_waiting_edges:
             try:
                 g.edges[e][COST] = 0.
@@ -260,8 +263,8 @@ class Agent(Generic[C, N]):
         try:
             p = list(nx.astar_path(
                 g,
-                start + (0,),
-                goal + (self.t_max,),
+                (start, 0),
+                (goal, self.t_max),
                 heuristic=dist,
                 weight=COST))
         except (nx.NetworkXNoPath, nx.NodeNotFound) as e:
@@ -275,12 +278,20 @@ class Agent(Generic[C, N]):
 
         # check end to only return useful part of path
         end = None
-        assert p[-1][:-1] == goal
-        i = len(p) - 1
-        while i >= 0 or end is None:
-            if p[i][:-1] == goal:
-                end = i+1
-            i -= 1
+        if self.has_gridmap:
+            assert p[-1][:-1] == goal
+            i = len(p) - 1
+            while i >= 0 or end is None:
+                if p[i][:-1] == goal:
+                    end = i+1
+                i -= 1
+        elif self.has_roadmap:
+            assert p[-1][0] == goal
+            i = len(p) - 1
+            while i >= 0 or end is None:
+                if p[i][0] == goal:
+                    end = i+1
+                i -= 1
         assert end is not None
         return p[0:end]
 

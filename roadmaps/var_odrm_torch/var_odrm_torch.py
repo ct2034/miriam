@@ -205,7 +205,7 @@ def optimize_poses(g, pos, map_img, optimizer):
     test_length = get_paths_len(pos, test_paths)
     training_paths = make_paths(g, pos, 10)
     training_length = get_paths_len(pos, training_paths)
-    backward = training_length.backward()
+    _ = training_length.backward()
     optimizer.step()
     g = make_graph(pos, map_img)
     optimizer.zero_grad()

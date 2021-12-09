@@ -3,9 +3,9 @@ from enum import Enum, auto
 from typing import Union
 
 import numpy as np
-import torch
+import networkx as nx
 
-POTENTIAL_ENV_TYPE = Union[np.ndarray, torch.Tensor]
+POTENTIAL_ENV_TYPE = Union[np.ndarray, nx.Graph]
 
 
 class EnvType(Enum):
@@ -20,9 +20,7 @@ def _get_type(env: POTENTIAL_ENV_TYPE) -> EnvType:
     ):
         return EnvType.GRIDMAP
     elif(
-        isinstance(env, torch.Tensor) and
-        env.shape[0] != env.shape[1] and
-        env.shape[1] == 2
+        isinstance(env, nx.Graph)
     ):
         return EnvType.ROADMAP
     else:
