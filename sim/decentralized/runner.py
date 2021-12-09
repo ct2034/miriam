@@ -261,7 +261,8 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
             # check same poses two timesteps ago
             if t >= 2:
                 if all(map(
-                        lambda i_a: paths_out[i_a][-3] == paths_out[i_a][-1],
+                        lambda i_a: paths_out[i_a][-3]  # type: ignore
+                    == paths_out[i_a][-1],  # type: ignore
                         range(n_agents))):
                     oscillation_count += 1
             if oscillation_count > max_oscillation_count:

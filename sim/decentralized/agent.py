@@ -240,6 +240,7 @@ class Agent(Generic[C, N]):
                 (x1, y1, _) = a
                 (x2, y2, _) = b
                 return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+            assert isinstance(goal, tuple)
             goal_waiting_edges = [
                 (goal + (i,), goal + (i+1,)) for i in range(self.t_max-1)]
 
@@ -251,6 +252,7 @@ class Agent(Generic[C, N]):
                 return torch.linalg.vector_norm(
                     torch.tensor(pos_s[a[0]]) - torch.tensor(pos_s[b[0]])
                 )
+            assert isinstance(goal, int)
             goal_waiting_edges = [
                 ((goal, i), (goal, i+1)) for i in range(self.t_max-1)]
 
@@ -267,11 +269,15 @@ class Agent(Generic[C, N]):
 
         # define start and goal for timed graph
         if self.has_gridmap:
-            start_t: N = start + (0,)
-            goal_t: N = goal + (self.t_max,)
+            assert isinstance(start, tuple)
+            assert isinstance(goal, tuple)
+            start_t = start + (0,)  # type: ignore
+            goal_t = goal + (self.t_max,)  # type: ignore
         elif self.has_roadmap:
-            start_t = (start, 0)
-            goal_t = (goal, self.t_max)
+            assert isinstance(start, int)
+            assert isinstance(goal, int)
+            start_t = (start, 0)  # type: ignore
+            goal_t = (goal, self.t_max)  # type: ignore
 
         # plan path
         try:
@@ -403,6 +409,8 @@ class Agent(Generic[C, N]):
                 return self.path[self.path_i + 1][:-1]  # type: ignore
             elif self.has_roadmap:
                 return int(self.path[self.path_i + 1][0])  # type: ignore
+            else:
+                raise RuntimeError
 
     def remove_all_blocks_and_replan(self):
         if (  # there were blocks

@@ -1,4 +1,5 @@
 import random
+from typing import Any, List
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     plot_env_with_arrows(g, starts, goals)
 
     # initialize agents
-    agents = [Agent(g, start) for start in starts]
+    agents = tuple([Agent(g, start) for start in starts])
     for i, agent in enumerate(agents):
         agent.give_a_goal(goals[i])
 
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     plot_with_paths(g, paths)
 
     # run the scenario
-    paths_run = []
+    paths_run: List[Any] = []
     run_a_scenario(env=g,
                    agents=agents,
                    plot=False,
