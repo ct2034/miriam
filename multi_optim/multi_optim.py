@@ -3,7 +3,6 @@ from typing import Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
-import png
 import torch
 from matplotlib import pyplot as plt
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
@@ -11,14 +10,15 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     sample_points)
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import Policy, PolicyType
+from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar
 
 
 def find_collisions(agents: List[Agent]
                     ) -> Dict[Tuple[int, int], Tuple[int, int]]:
-    agent_visited: Dict[Tuple[int, int], int] = {}  # {(node, t): agent}
+    # {(node, t): agent}
+    agent_visited: Dict[Tuple[int, int], int] = {}
     # {(node, t): (agent1, agent2)}
     collisions: Dict[Tuple[int, int], Tuple[int, int]] = {}
     for i_a, a in enumerate(agents):
