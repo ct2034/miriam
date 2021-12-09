@@ -5,6 +5,7 @@ import unittest
 
 import networkx as nx
 import numpy as np
+from definitions import POS
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import Policy, PolicyType, RandomPolicy
 
@@ -219,6 +220,48 @@ class TestAgent(unittest.TestCase):
         a.give_a_goal((2, 3))
         self.assertTrue(a.is_at_goal())
         self.assertEqual(len(a.path), 1)
+
+    def test_agent_with_graph(self):
+        """Basic operation of agents on graphs"""
+        pos_s = {
+            0: (0., 0.),
+            1: (0., 0.99),
+            2: (1., 0.),
+            3: (1., 1.)
+        }
+        g = nx.Graph()
+        g.add_edge(0, 1)
+        g.add_edge(0, 2)
+        g.add_edge(1, 3)
+        g.add_edge(2, 3)
+        nx.set_node_attributes(g, pos_s, POS)
+
+        a = Agent(g, 0)
+        self.assertTrue(a.give_a_goal(3))
+
+        def general_path_assertions(self):
+            self.assertEqual(len(a.path), 3)
+            self.assertEqual(len(a.path[0]), 2)
+            self.assertEqual(a.path[0], (0, 0))
+            self.assertEqual(a.path[2], (3, 2))
+        general_path_assertions(self)
+        self.assertEqual(a.path[1], (1, 1))  # along 1 is quicker
+
+        # if we block that node ..
+        self.assertTrue(a.block_node((1, 1)))
+        general_path_assertions(self)
+        self.assertEqual(a.path[1], (2, 1))  # along 2
+
+        # unblock
+        a.blocked_nodes = set()
+        self.assertTrue(a.give_a_goal(3))
+        general_path_assertions(self)
+        self.assertEqual(a.path[1], (1, 1))  # along 1 is quicker
+
+        # now blocking an edge
+        self.assertTrue(a.block_edge(((1, 1), (3, 2))))
+        general_path_assertions(self)
+        self.assertEqual(a.path[1], (2, 1))  # along 2
 
 
 if __name__ == "__main__":  # pragma: no cover

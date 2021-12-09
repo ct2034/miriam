@@ -94,7 +94,7 @@ def env_to_nx(env: POTENTIAL_ENV_TYPE) -> nx.Graph:
 
         def move_cost(e):
             a, b = e
-            if a[:-1] != b[:-1]:  # moving
+            if a[0] != b[0]:  # moving
                 # geometric distance
                 return torch.linalg.vector_norm(
                     torch.tensor(pos[a[0]]) - torch.tensor(pos[b[0]])
@@ -108,8 +108,8 @@ def env_to_nx(env: POTENTIAL_ENV_TYPE) -> nx.Graph:
         min_edge_cost = torch.min(torch.Tensor(edge_costs))
         for e in timed_graph.edges:
             a, b = e
-            if a[:-1] == b[:-1]:  # waiting
-                timed_graph.edges[e][COST] = min_edge_cost*.9
+            if a[0] == b[0]:  # waiting
+                timed_graph.edges[e][COST] = min_edge_cost*.99
         edge_costs = list(nx.get_edge_attributes(
             timed_graph, COST).values())
         max_edge_cost = torch.max(torch.Tensor(edge_costs))
@@ -225,11 +225,18 @@ class Agent(Generic[C, N]):
         def filter_node(n):
             return n not in blocked_nodes
 
-        def filter_edge(n1, n2):
-            return (
-                (n1[:-1], n2[:-1], n1[-1]) not in blocked_edges and
-                (n2[:-1], n1[:-1], n1[-1]) not in blocked_edges
-            )
+        if self.has_gridmap:
+            def filter_edge(n1, n2):
+                return (
+                    (n1[:-1], n2[:-1], n1[-1]) not in blocked_edges and
+                    (n2[:-1], n1[:-1], n1[-1]) not in blocked_edges
+                )
+        elif self.has_roadmap:
+            def filter_edge(n1, n2):
+                return (
+                    ((n1[0], n1[1]), (n2[0], n2[1])) not in blocked_edges and
+                    ((n2[0], n1[1]), (n1[0], n2[1])) not in blocked_edges
+                )
 
         g = nx.subgraph_view(
             self.env_nx, filter_node=filter_node, filter_edge=filter_edge)
@@ -254,7 +261,7 @@ class Agent(Generic[C, N]):
                 )
             assert isinstance(goal, int)
             goal_waiting_edges = [
-                ((goal, i), (goal, i+1)) for i in range(self.t_max-1)]
+                ((goal, i), (goal, i+1)) for i in range(self.t_max)]
 
         # make goal waiting edges free
         any_goal_edge_existed = False
