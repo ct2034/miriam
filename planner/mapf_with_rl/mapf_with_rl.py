@@ -362,6 +362,7 @@ def q_learning(n_episodes: int, eps_start: float,
     qfun = Qfunction(9, 2, 16)
     qfun_hat = Qfunction(9, 2, 16)
     qfun.copy_to(qfun_hat)
+    qvals = None
 
     # replay memory
     # (state, action, reward, next state)
@@ -469,7 +470,7 @@ def q_learning(n_episodes: int, eps_start: float,
             stats["loss"][1].append(float(loss))
             stats["epsilons"][0].append(i_e)
             stats["epsilons"][1].append(epsilon)
-            if len(qvals) > 0:
+            if qvals is not None:
                 stats["max_q"][0].append(i_e)
                 stats["max_q"][1].append(float(max(qvals)))
                 stats["min_q"][0].append(i_e)
