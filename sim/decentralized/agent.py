@@ -233,25 +233,29 @@ class Agent(Generic[C, N]):
 
         g = nx.subgraph_view(
             self.env_nx, filter_node=filter_node, filter_edge=filter_edge)
-        pos = nx.get_node_attributes(self.env, POS)
 
-        # define distance function
+        # define distance function and goal edges
         if self.has_gridmap:
             def dist(a, b):
                 (x1, y1, _) = a
                 (x2, y2, _) = b
                 return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+            goal_waiting_edges = [
+                (goal + (i,), goal + (i+1,)) for i in range(self.t_max-1)]
+
         elif self.has_roadmap:
+            pos_s = nx.get_node_attributes(self.env, POS)
+
             def dist(a, b):
                 # geometric distance
                 return torch.linalg.vector_norm(
-                    torch.tensor(pos[a[0]]) - torch.tensor(pos[b[0]])
+                    torch.tensor(pos_s[a[0]]) - torch.tensor(pos_s[b[0]])
                 )
+            goal_waiting_edges = [
+                ((goal, i), (goal, i+1)) for i in range(self.t_max-1)]
 
         # make goal waiting edges free
         any_goal_edge_existed = False
-        goal_waiting_edges = [
-            ((goal, i), (goal, i+1)) for i in range(self.t_max-1)]
         for e in goal_waiting_edges:
             try:
                 g.edges[e][COST] = 0.
@@ -261,12 +265,20 @@ class Agent(Generic[C, N]):
         if not any_goal_edge_existed:
             return None
 
+        # define start and goal for timed graph
+        if self.has_gridmap:
+            start_t: N = start + (0,)
+            goal_t: N = goal + (self.t_max,)
+        elif self.has_roadmap:
+            start_t = (start, 0)
+            goal_t = (goal, self.t_max)
+
         # plan path
         try:
             p = list(nx.astar_path(
                 g,
-                (start, 0),
-                (goal, self.t_max),
+                start_t,
+                goal_t,
                 heuristic=dist,
                 weight=COST))
         except (nx.NetworkXNoPath, nx.NodeNotFound) as e:
@@ -281,10 +293,10 @@ class Agent(Generic[C, N]):
         # check end to only return useful part of path
         end = None
         if self.has_gridmap:
-            assert p[-1][:-1] == goal
+            assert p[-1][: -1] == goal
             i = len(p) - 1
             while i >= 0 or end is None:
-                if p[i][:-1] == goal:
+                if p[i][: -1] == goal:
                     end = i+1
                 i -= 1
         elif self.has_roadmap:
@@ -295,7 +307,7 @@ class Agent(Generic[C, N]):
                     end = i+1
                 i -= 1
         assert end is not None
-        return p[0:end]
+        return p[0: end]
 
     def is_there_path_with_node_blocks(self, blocks: BLOCKED_NODES_TYPE
                                        ) -> bool:
@@ -387,7 +399,10 @@ class Agent(Generic[C, N]):
         else:
             assert self.path is not None, "Should have a path by now"
             assert self.path_i is not None, "Should have a path index by now"
-            return self.path[self.path_i + 1][:-1]  # type: ignore
+            if self.has_gridmap:
+                return self.path[self.path_i + 1][:-1]  # type: ignore
+            elif self.has_roadmap:
+                return int(self.path[self.path_i + 1][0])  # type: ignore
 
     def remove_all_blocks_and_replan(self):
         if (  # there were blocks

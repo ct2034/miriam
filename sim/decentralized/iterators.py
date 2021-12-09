@@ -1,9 +1,10 @@
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Tuple
 
+import networkx as nx
 import numpy as np
 import torch
-from definitions import C
+from definitions import POS, C
 from sim.decentralized.agent import Agent
 
 OBSERVATION_DISTANCE = 6
@@ -73,8 +74,8 @@ def check_for_colissions(
                         node_colissions[next_poses[i_a]] = [i_a, i_oa]
                     if ((next_poses[i_a] == current_poses[i_oa]) and
                             (next_poses[i_oa] == current_poses[i_a])):
-                        edge = [current_poses[i_a],
-                                next_poses[i_a]]
+                        edge = (current_poses[i_a],
+                                next_poses[i_a])
                         edge_colissions[edge] = [i_a, i_oa]
                         #####################################################
                         #                                                   #
@@ -207,9 +208,10 @@ def iterate_waiting(agents: Tuple[Agent], ignore_finished_agents) -> Tuple[List[
             if a.has_gridmap:
                 dx = 1.
             elif a.has_roadmap:
+                pos_s = nx.get_node_attributes(a.env, POS)
                 dx = float(torch.linalg.vector_norm(
-                    a.env[a.pos] -
-                    a.env[possible_next_agent_poses[i_a]]
+                    torch.tensor(pos_s[a.pos]) -
+                    torch.tensor(pos_s[possible_next_agent_poses[i_a]])
                 ))
             a.make_next_step(possible_next_agent_poses[i_a])
             space_slice[i_a] = dx

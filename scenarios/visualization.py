@@ -8,7 +8,7 @@ from matplotlib import cm
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from torch_geometric.data import Data
-
+from definitions import POS
 from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
 
 _ = Axes3D
@@ -25,26 +25,26 @@ def plot_env(ax, env: POTENTIAL_ENV_TYPE):
         ax.imshow(np.swapaxes(env, 0, 1), cmap='Greys', origin='lower')
         return None
     elif is_roadmap(env):
-        pos = nx.get_node_attributes(env, 'pos')
+        pos_s = nx.get_node_attributes(env, POS)
         nx.draw_networkx(env,
-                         pos=pos, ax=ax,
+                         pos=pos_s, ax=ax,
                          node_color='k', edge_color='grey',
                          node_size=10, with_labels=False)
-        return pos
+        return pos_s
 
 
 def plot_env_with_arrows(env: POTENTIAL_ENV_TYPE, starts, goals):
     fig = plt.figure(figsize=[5, 5])
     ax = fig.add_subplot()
-    pos = plot_env(ax, env)
+    pos_s = plot_env(ax, env)
     if is_gridmap(env):
-        assert pos is None
+        assert pos_s is None
         start_pos_s = starts
         goal_pos_s = goals
     elif is_roadmap(env):
-        assert pos is not None
-        start_pos_s = list(map(lambda s: pos[s], starts))
-        goal_pos_s = list(map(lambda g: pos[g], goals))
+        assert pos_s is not None
+        start_pos_s = list(map(lambda s: pos_s[s], starts))
+        goal_pos_s = list(map(lambda g: pos_s[g], goals))
     n_agents = len(start_pos_s)
     colors = get_colors(n_agents)
     for i_a in range(n_agents):
@@ -103,7 +103,15 @@ def plot_with_paths(env, paths):
             legend_str.append("Agent " + str(i))
             i += 1
     elif is_roadmap(env):
-        pos = nx.get_node_attributes(env, 'pos')
+        if isinstance(paths[0][0], int):  # not timed
+            paths_timed = []
+            for ap in paths:
+                ap_t = []
+                for i, p in enumerate(ap):
+                    ap_t.append((p, i))
+                paths_timed.append(ap_t)
+            paths = paths_timed
+        pos = nx.get_node_attributes(env, POS)
         for e in env.edges():
             ax.plot([pos[e[0]][0], pos[e[1]][0]],
                     [pos[e[0]][1], pos[e[1]][1]],

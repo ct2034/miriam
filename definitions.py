@@ -22,3 +22,6 @@ EDGE_TYPE = Tuple[C, C, int]
 BLOCKED_EDGES_TYPE = Set[EDGE_TYPE]
 BLOCKED_NODES_TYPE = Set[N]
 PATH = List[N]
+
+# string for position in graph
+POS = 'pos'
