@@ -3,10 +3,11 @@ import random
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-from libpysal import examples, weights
+from libpysal import weights
 from libpysal.cg import voronoi_frames
 from scenarios.visualization import plot_env_with_arrows, plot_with_paths
 from sim.decentralized.agent import Agent
+from sim.decentralized.runner import will_agents_collide
 
 if __name__ == '__main__':
     n_agents = 8
@@ -36,8 +37,12 @@ if __name__ == '__main__':
     for i, agent in enumerate(agents):
         agent.give_a_goal(goals[i])
 
+    # will they collide?
+    do_collide, paths = will_agents_collide(
+        agents, ignore_finished_agents=True)
+    print(f"Will agents collide? {do_collide}")
+
     # visualize paths
-    paths = [agent.path for agent in agents]
     plot_with_paths(g, paths)
 
     plt.show()

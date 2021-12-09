@@ -27,7 +27,9 @@ def gridmap_to_graph(gridmap: np.ndarray, hop_dist: int,
     g = nx.grid_2d_graph(width, height)
     g = g.to_undirected(as_view=True)
     if hop_dist < np.inf:
-        g = nx.ego_graph(g, tuple(own_pos), radius=hop_dist)
+        if isinstance(own_pos, int):
+            own_pos = (own_pos,)  # type: ignore
+        g = nx.ego_graph(g, own_pos, radius=hop_dist)
 
     def filter_node(n):
         return gridmap[n] == FREE

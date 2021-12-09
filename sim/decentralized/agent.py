@@ -132,6 +132,7 @@ class Agent(Generic[C, N]):
         if is_gridmap(env):
             self.has_roadmap: bool = False
             self.has_gridmap: bool = True
+            assert isinstance(pos, tuple)
             assert len(pos) == 2  # (x, y)
             assert isinstance(self.env, np.ndarray), "Env must be numpy array"
             self.pos: C = pos
@@ -184,6 +185,7 @@ class Agent(Generic[C, N]):
         if isinstance(goal, np.ndarray):
             goal = tuple(goal)  # type: ignore  # dirty fix for some tests
         if self.has_gridmap:
+            assert isinstance(goal, tuple)
             assert len(goal) == 2  # (x, y)
         elif self.has_roadmap:
             assert isinstance(goal, int)  # (node)

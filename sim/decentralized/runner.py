@@ -7,6 +7,7 @@ from typing import *
 
 import numpy as np
 from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT, C
+from scenarios.types import POTENTIAL_ENV_TYPE
 from sim.decentralized.agent import Agent, env_to_nx
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
@@ -145,7 +146,7 @@ def is_environment_well_formed(agents: Tuple[Agent]) -> bool:
     return True
 
 
-def are_all_agents_at_their_goals(agents: List[Agent]) -> bool:
+def are_all_agents_at_their_goals(agents: Tuple[Agent, ...]) -> bool:
     """Returns true iff all agents are at their respective goals."""
     return all(map(lambda a: a.is_at_goal(), agents))
 
@@ -214,12 +215,14 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, rng: random.Random, 
     return res
 
 
-def run_a_scenario(env, agents, plot,
+def run_a_scenario(env: POTENTIAL_ENV_TYPE,
+                   agents: Tuple[Agent, ...],
+                   plot: bool,
                    iterator: IteratorType = IteratorType.WAITING,
                    pause_on: Optional[Exception] = None,
-                   ignore_finished_agents=True,
-                   print_progress=False,
-                   time_limit=TIME_LIMIT,
+                   ignore_finished_agents: bool = True,
+                   print_progress: bool = False,
+                   time_limit: int = TIME_LIMIT,
                    ) -> SCENARIO_RESULT:
     n_agents = len(agents)
     # evaluation parameters

@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-from definitions import C
+from definitions import C, N
 from sim.decentralized.agent import Agent
 
 OBSERVATION_DISTANCE = 6
@@ -57,7 +57,7 @@ def check_for_colissions(
         ignore_finished_agents: bool = True) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
     """check for two agents going to meet at one vertex or two agents using
     the same edge."""
-    node_colissions = {}
+    node_colissions: Dict[C, List[int]] = {}
     edge_colissions = {}
     if possible_next_agent_poses is not None:
         next_poses: List[C] = possible_next_agent_poses
@@ -70,12 +70,12 @@ def check_for_colissions(
             for i_oa in [i for i in range(len(agents)) if i > i_a]:
                 if not agents[i_oa].is_at_goal(dt) or not ignore_finished_agents:
                     if next_poses[i_a] == next_poses[i_oa]:
-                        node_colissions[tuple(next_poses[i_a])] = [i_a, i_oa]
+                        node_colissions[next_poses[i_a]] = [i_a, i_oa]
                     if ((next_poses[i_a] == current_poses[i_oa]) and
                             (next_poses[i_oa] == current_poses[i_a])):
-                        edge = [tuple(current_poses[i_a]),
-                                tuple(next_poses[i_a])]
-                        edge_colissions[tuple(edge)] = [i_a, i_oa]
+                        edge = [current_poses[i_a],
+                                next_poses[i_a]]
+                        edge_colissions[edge] = [i_a, i_oa]
                         #####################################################
                         #                                                   #
                         #  t     i_a   i_oa                                 #
