@@ -4,11 +4,13 @@ bresenham
 cherrypy
 coloredlogs
 flask
+geopandas
 git+https://github.com/scottgs/pyflann.git@1e06ec23ea99385920ad3554cf06451ce44cf442
 gitpython
 ipykernel
 iso8601
 keras
+libpysal
 matplotlib
 munkres
 mypy
@@ -23,6 +25,7 @@ pypng
 pytest
 pytest-cov
 pytest-timeout
+rtree
 scipy
 seaborn
 sortedcontainers

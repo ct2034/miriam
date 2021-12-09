@@ -98,7 +98,7 @@ def run_optimization(
     map_img = read_map(map_fname)
     pos = sample_points(n_nodes, map_img)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
-    g = make_graph(pos)
+    g = make_graph(pos, map_img)
 
     draw_graph(g, pos)
     plt.show()
@@ -107,7 +107,7 @@ def run_optimization(
     for i_r in range(n_runs):
         # Optimizing Poses
         g, pos, test_length, training_length = optimize_poses(
-            g, pos, optimizer_pos)
+            g, pos, map_img, optimizer_pos)
 
         # Optimizing Agents
         rng = np.random.RandomState(i_r)
