@@ -7,9 +7,9 @@ from random import Random
 
 import networkx as nx
 import yaml
-from definitions import INVALID
-from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, make_paths,
-                                                    read_map, sample_points)
+from definitions import POS
+from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, read_map,
+                                                    sample_points)
 
 logger = logging.getLogger(__name__)
 
