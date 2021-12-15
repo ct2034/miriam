@@ -8,7 +8,7 @@ from random import Random
 import matplotlib.pyplot as plt
 import networkx as nx
 import yaml
-from definitions import POS
+from definitions import INVALID, POS
 from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, read_map,
                                                     sample_points)
 from scenarios.visualization import plot_with_paths
@@ -130,7 +130,7 @@ def plan_cbsr(g, starts, goals):
     print("success_cbsr: " + str(success_cbsr))
 
     # check output
-    paths = None
+    paths = INVALID
     if os.path.isfile(fname_outfile):
         paths = read_outfile(fname_outfile)
         print("paths: " + str(paths))
