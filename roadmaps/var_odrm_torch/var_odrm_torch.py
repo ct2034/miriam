@@ -217,7 +217,7 @@ if __name__ == "__main__":
     epochs = 300
     learning_rate = 1e-4
     stats_every = int(epochs / 50)
-    map_fname: str = "../odrm_eval/maps/z.png"
+    map_fname: str = "../odrm/odrm_eval/maps/z.png"
 
     random.seed(0)
     map_img = read_map(map_fname)

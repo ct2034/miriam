@@ -134,7 +134,7 @@ def run_delaunay_libpysal(pos_np, map_img):
 
 if __name__ == '__main__':
     n_nodes = 1000
-    map_fname: str = "roadmaps/odrm_eval/maps/z.png"
+    map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png"
     map_img = read_map(map_fname)
     assert map_img.shape[0] == map_img.shape[1], "map must be square"
 

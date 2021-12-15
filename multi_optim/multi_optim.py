@@ -94,7 +94,7 @@ def run_optimization(
         n_runs: int = 16,
         lr_pos: float = 1e-4,
         n_agents: int = 4,
-        map_fname: str = "roadmaps/odrm_eval/maps/z.png"):
+        map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png"):
     map_img = read_map(map_fname)
     pos = sample_points(n_nodes, map_img)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
