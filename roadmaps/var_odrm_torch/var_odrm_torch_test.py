@@ -1,5 +1,6 @@
 import unittest
 from math import sqrt
+from random import Random
 
 import torch
 from roadmaps.var_odrm_torch.var_odrm_torch import *
@@ -8,6 +9,7 @@ from roadmaps.var_odrm_torch.var_odrm_torch import *
 class TestVarOdrmTorch(unittest.TestCase):
     def __init__(self, methodName: str) -> None:
         super().__init__(methodName=methodName)
+        self.rng = Random(0)
         self.pos = torch.tensor([
             [.2, .2],
             [.2, .8],
@@ -39,7 +41,7 @@ class TestVarOdrmTorch(unittest.TestCase):
 
     def test_sample_points(self):
         n = 100
-        points = sample_points(n, self.map_img)
+        points = sample_points(n, self.map_img, self.rng)
         self.assertEqual(n, points.shape[0])
         self.assertEqual(2, points.shape[1])
         self.assertEqual(0, np.count_nonzero(points > 1))
@@ -58,9 +60,12 @@ class TestVarOdrmTorch(unittest.TestCase):
     def test_make_paths(self):
         n = self.pos.shape[0]
         graph = make_graph(self.pos, self.map_img)
-        paths = make_paths(graph, self.pos, 10)
+        paths = make_paths(graph, self.pos, 10, self.rng)
         for path in paths:
             start, goal, node_path = path
+            start = np.array(start)
+            goal = np.array(goal)
+            node_path = np.array(node_path)
             self.assertEqual(0, np.count_nonzero(start > 1))
             self.assertEqual(0, np.count_nonzero(start < 0))
             self.assertEqual(0, np.count_nonzero(goal > 1))
