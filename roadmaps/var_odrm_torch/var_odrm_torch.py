@@ -1,5 +1,6 @@
-import random
+#!/usr/bin/env python3
 from functools import lru_cache
+from random import Random
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -16,6 +17,7 @@ from tools import ProgressBar
 
 dtype = torch.float
 device = torch.device("cpu")
+DISTANCE = "distance"
 
 
 def read_map(fname: str):
@@ -28,7 +30,7 @@ def read_map(fname: str):
     return tuple(data)
 
 
-@lru_cache
+# @lru_cache  # this slowed things down a lot. TODO: investigate
 def is_coord_free(map_img, point):
     size = len(map_img)
     return map_img[
@@ -38,7 +40,7 @@ def is_coord_free(map_img, point):
     ] >= 255
 
 
-@lru_cache
+# @lru_cache  # this slowed things down a lot. TODO: investigate
 def is_pixel_free(map_img, point):
     return map_img[
         int(point[0])
@@ -55,48 +57,31 @@ def check_edge(pos, map_img, a, b):
         int(pos[b][0]*size),
         int(pos[b][1]*size)
     )
-    # print(list(line))
     return all([is_pixel_free(map_img, tuple(x)) for x in line])
 
 
-def sample_points(n, map_img):
+def sample_points(n, map_img, rng: Random):
     points = np.empty(shape=(0, 2))
     while points.shape[0] < n:
-        point = np.random.random([2])
-        if is_coord_free(map_img, tuple(point)):
-            points = np.append(points, [point.T], axis=0)
+        point = (rng.random(), rng.random())
+        if is_coord_free(map_img, point):
+            points = np.append(points, [np.array(point)], axis=0)
     return torch.tensor(points, device=device,
                         dtype=dtype, requires_grad=True)
 
 
 def make_graph(pos, map_img):
     """Convert array of node positions into graph by Delaunay Triangulation."""
-    n_nodes = pos.shape[0]
-    g = nx.Graph()
     pos_np = pos.detach().numpy()
-    # to discourage too many edges parallel to walls,
-    # these will be ignored after Delaunay because they are not added by any
-    # edge below.
-    n_fn = 5
-    # fake_nodes = np.array(
-    #     [(0.01, 1/n_fn*i) for i in range(n_fn+1)] +
-    #     [(1, 1/n_fn*i) for i in range(n_fn+1)] +
-    #     [(1/n_fn*i, 0.01) for i in range(n_fn+1)] +
-    #     [(1/n_fn*i, 1) for i in range(n_fn+1)]
-    # )
-    # pos_np = np.append(pos_np, fake_nodes, axis=0)
     cells, _ = voronoi_frames(pos_np, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells)
     g = delaunay.to_networkx()
-    nx.set_edge_attributes(g, [], 'distance')
-    for e in g.edges():
-        a, b = e
-        if a >= n_nodes or b >= n_nodes:
-            g.remove_edge(a, b)
-        elif not check_edge(pos, map_img, a, b):
+    nx.set_edge_attributes(g, [], DISTANCE)
+    for a, b in g.edges():
+        if not check_edge(pos, map_img, a, b):
             g.remove_edge(a, b)
         else:
-            g.edges[e]['distance'] = np.linalg.norm(pos_np[a] - pos_np[b])
+            g.edges[(a, b)][DISTANCE] = np.linalg.norm(pos_np[a] - pos_np[b])
     return g
 
 
@@ -144,7 +129,7 @@ def draw_graph(g, pos, paths=[]):
 
 def plan_path_between_nodes(g, start, goal):
     try:
-        return nx.shortest_path(g, start, goal, 'distance')
+        return nx.shortest_path(g, start, goal, DISTANCE)
     except (NetworkXNoPath, nx.NodeNotFound):
         return None
 
@@ -162,14 +147,14 @@ def plan_path_between_coordinates(g, flann, start, goal):
         return None
 
 
-def make_paths(g, pos, n_paths, seed=random.randint(0, 10E6)):
+def make_paths(g, pos, n_paths, rng):
     pos_np = pos.detach().numpy()
     flann = FLANN()
     flann.build_index(np.array(pos_np))
     paths = []
     for i in range(n_paths):
-        np.random.seed(seed+i)
-        [start, goal] = np.random.random((2, 2))
+        start = (rng.random(), rng.random())
+        goal = (rng.random(), rng.random())
         path = plan_path_between_coordinates(g, flann, start, goal)
         if path is not None:
             paths.append(path)
@@ -203,10 +188,10 @@ def get_paths_len(pos, paths):
     return torch.sum(all_lens)
 
 
-def optimize_poses(g, pos, map_img, optimizer):
-    test_paths = make_paths(g, pos, 20, 0)
+def optimize_poses(g, pos, map_img, optimizer, rng):
+    test_paths = make_paths(g, pos, 20, rng)
     test_length = get_paths_len(pos, test_paths)
-    training_paths = make_paths(g, pos, 10)
+    training_paths = make_paths(g, pos, 10, rng)
     training_length = get_paths_len(pos, training_paths)
     _ = training_length.backward()
     optimizer.step()
@@ -220,23 +205,23 @@ if __name__ == "__main__":
     epochs = 300
     learning_rate = 1e-4
     stats_every = int(epochs / 50)
-    map_fname: str = "../odrm/odrm_eval/maps/z.png"
+    map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png"
+    rng = Random(0)
 
-    random.seed(0)
     map_img = read_map(map_fname)
-    pos = sample_points(n, map_img)
+    pos = sample_points(n, map_img, rng)
     g = make_graph(pos, map_img)
-    test_paths = make_paths(g, pos, 20, 0)
+    test_paths = make_paths(g, pos, 20, rng)
 
     optimizer = torch.optim.Adam([pos], lr=learning_rate)
     test_costs = []
 
     draw_graph(g, pos, test_paths[:4])
-    plt.savefig("pre_training.png")
+    plt.savefig("roadmaps/var_odrm_torch/pre_training.png")
     pb = ProgressBar("Training", epochs)
     for i_e in range(epochs):
         g, pos, test_length, training_length = optimize_poses(
-            g, pos, map_img, optimizer)
+            g, pos, map_img, optimizer, rng)
         if i_e % stats_every == stats_every-1:
             print(f"test_length: {test_length}")
             print(f"training_length: {training_length}")
@@ -245,9 +230,9 @@ if __name__ == "__main__":
     pb.end()
 
     draw_graph(g, pos, test_paths[:4])
-    plt.savefig("post_training.png")
+    plt.savefig("roadmaps/var_odrm_torch/post_training.png")
 
     plt.figure()
     plt.plot(test_costs)
-    plt.savefig("test_length.png")
+    plt.savefig("roadmaps/var_odrm_torch/test_length.png")
     plt.show()
