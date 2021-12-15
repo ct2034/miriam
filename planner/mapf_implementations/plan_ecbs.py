@@ -51,6 +51,7 @@ def call_subprocess(fname_infile, fname_outfile,
                     suboptimality, timeout, disappear_at_goal):
     start_time = time.time()
     out_data = INVALID
+    process = None
     t = 0
     cmd = [
         os.path.dirname(__file__) + "/libMultiRobotPlanning/build/ecbs",
@@ -82,12 +83,13 @@ def call_subprocess(fname_infile, fname_outfile,
         logger.warning("CalledProcessError")
         logger.warning(e.output)
     finally:
-        if process.poll() is None:
-            process.kill()
-        try:
-            os.remove(fname_infile)
-        except OSError:
-            pass
+        if process is not None:
+            if process.poll() is None:
+                process.kill()
+            try:
+                os.remove(fname_infile)
+            except OSError:
+                pass
     if os.path.exists(fname_outfile):
         try:
             out_data = read_outfile(fname_outfile)
