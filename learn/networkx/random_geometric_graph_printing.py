@@ -1,11 +1,12 @@
 from math import sqrt
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from definitions import POS
+from pyflann import *
 from scipy.spatial import Delaunay
 
 import networkx as nx
-from pyflann import *
 
 
 def dist(a, b):
@@ -17,7 +18,7 @@ N = 300
 G = nx.random_geometric_graph(N, 0.1)
 
 # position is stored as node attribute data for random_geometric_graph
-pos = nx.get_node_attributes(G, 'pos')
+pos = nx.get_node_attributes(G, POS)
 pos2 = pos.copy()
 pos3 = pos.copy()
 

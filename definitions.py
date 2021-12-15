@@ -1,6 +1,7 @@
 from typing import Any, List, Set, Tuple, TypeVar
 
 import numpy as np
+from libpysal.cg.kdtree import DISTANCE_METRICS
 
 FREE = 0
 INVALID = -1
@@ -23,5 +24,6 @@ BLOCKED_EDGES_TYPE = Set[EDGE_TYPE]
 BLOCKED_NODES_TYPE = Set[N]
 PATH = List[N]
 
-# string for position in graph
+# strings for graph attributes
 POS = 'pos'
+DISTANCE = 'distance'

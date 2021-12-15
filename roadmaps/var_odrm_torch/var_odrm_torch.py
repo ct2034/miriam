@@ -8,6 +8,7 @@ import numpy as np
 import png
 import torch
 from bresenham import bresenham
+from definitions import DISTANCE, POS
 from libpysal import weights
 from libpysal.cg import voronoi_frames
 from networkx.exception import NetworkXNoPath, NodeNotFound
@@ -17,12 +18,11 @@ from tools import ProgressBar
 
 dtype = torch.float
 device = torch.device("cpu")
-DISTANCE = "distance"
 
 
 def read_map(fname: str):
     r = png.Reader(filename=fname)
-    width, height, rows, info = r.read()
+    width, height, rows, _ = r.read()
     assert width == height
     data = []
     for i, row in enumerate(rows):
@@ -76,6 +76,8 @@ def make_graph(pos, map_img):
     cells, _ = voronoi_frames(pos_np, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells)
     g = delaunay.to_networkx()
+    nx.set_node_attributes(g, {
+        i: pos_np[i] for i in range(len(pos_np))}, POS)
     nx.set_edge_attributes(g, [], DISTANCE)
     for a, b in g.edges():
         if not check_edge(pos, map_img, a, b):

@@ -7,6 +7,7 @@ import networkx as nx
 import numpy as np
 import png
 from bresenham import bresenham
+from definitions import POS
 from libpysal import weights
 from libpysal.cg import voronoi_frames
 from scipy.spatial import Delaunay as Delaunay
@@ -43,7 +44,7 @@ class Delaunay_scipy(Delaunay_impl):
         nx.set_node_attributes(g,
                                {i: tuple(self.points[i])
                                 for i in range(n_nodes)},
-                               'pos')
+                               POS)
         return g
 
 
@@ -69,7 +70,7 @@ class Delaunay_libpysal(Delaunay_impl):
         nx.set_node_attributes(g,
                                {i: tuple(self.points[i])
                                 for i in range(n_nodes)},
-                               'pos')
+                               POS)
         return g
 
 
