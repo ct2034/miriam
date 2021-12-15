@@ -138,7 +138,7 @@ if __name__ == '__main__':
     map_img = read_map(map_fname)
     assert map_img.shape[0] == map_img.shape[1], "map must be square"
 
-    n_runs = 100
+    n_runs = 1000
     success_s_scipy = 0
     success_s_libpysal = 0
     times_scipy = []
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     print("success rate scipy:", success_s_scipy / n_runs)
     print("success rate libpysal:", success_s_libpysal / n_runs)
     # success rate scipy: 1.0
-    # success rate libpysal: 0.99
+    # success rate libpysal: 0.988
 
     # show runtimes
     plt.figure()
