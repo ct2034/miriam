@@ -34,17 +34,19 @@ class TestVarOdrmTorch(unittest.TestCase):
             (self.pos[2][0], self.pos[2][1] - 1),
             [1, 2]
         )
+        map_img_np = np.full((10, 10), 255)
+        self.map_img = tuple(map(tuple, map_img_np))
 
     def test_sample_points(self):
-        n = 1000
-        points = sample_points(n)
+        n = 100
+        points = sample_points(n, self.map_img)
         self.assertEqual(n, points.shape[0])
         self.assertEqual(2, points.shape[1])
         self.assertEqual(0, np.count_nonzero(points > 1))
         self.assertEqual(0, np.count_nonzero(points < 0))
 
     def test_make_graph(self):
-        graph = make_graph(self.pos)
+        graph = make_graph(self.pos, self.map_img)
         self.assertEqual(5, graph.number_of_edges())
         self.assertEqual(self.pos.shape[0], graph.number_of_nodes())
         self.assertTrue(graph.has_edge(0, 1))
@@ -55,7 +57,7 @@ class TestVarOdrmTorch(unittest.TestCase):
 
     def test_make_paths(self):
         n = self.pos.shape[0]
-        graph = make_graph(self.pos)
+        graph = make_graph(self.pos, self.map_img)
         paths = make_paths(graph, self.pos, 10)
         for path in paths:
             start, goal, node_path = path
