@@ -5,13 +5,16 @@ import subprocess
 import time
 from random import Random
 
+import matplotlib.pyplot as plt
 import networkx as nx
 import yaml
 from definitions import POS
 from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, read_map,
                                                     sample_points)
+from scenarios.visualization import plot_with_paths
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def call_subprocess(cmd, timeout):
@@ -25,14 +28,14 @@ def call_subprocess(cmd, timeout):
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=os.path.dirname(__file__)
+            cwd=this_dir
         )
         while t < timeout:
             t = time.time() - start_time
             if process.poll() is not None:
-                print("process.returncode " + str(process.returncode))
+                logger.debug("process.returncode " + str(process.returncode))
                 stdoutdata, stderrdata = process.communicate()
-                print("stdoutdata: " + str(stdoutdata))
+                logger.debug("stdoutdata: " + str(stdoutdata))
                 if stderrdata:
                     logger.error("stderrdata: " + str(stderrdata))
                 else:
@@ -40,9 +43,9 @@ def call_subprocess(cmd, timeout):
                 break
             time.sleep(.1)
         if success:
-            print("runtime: " + str(t))
+            logger.debug("runtime: " + str(t))
         else:
-            print("timeout: " + str(t))
+            logger.debug("timeout: " + str(t))
     except subprocess.CalledProcessError as e:
         logger.warning("CalledProcessError")
         logger.warning(e.output)
@@ -55,9 +58,9 @@ def call_subprocess(cmd, timeout):
 
 def write_infile(fname, g, starts, goals):
     def num2ch(number):
-        ch = ord('A') + number
-        assert ch <= ord('Z')
-        return chr(ch)
+        # ch = ord('A') + number
+        # assert ch <= ord('Z')
+        return str(number)
 
     data = {}
     data["roadmap"] = {}
@@ -82,12 +85,27 @@ def write_infile(fname, g, starts, goals):
         yaml.dump(data, f, default_flow_style=True)
 
 
+def read_outfile(fname):
+    with open(fname, 'r') as f:
+        data = yaml.load(f)
+    paths = []
+    assert 'schedule' in data.keys()
+    schedule = data['schedule']
+    n_agents = len(schedule)
+    paths = [list() for _ in range(n_agents)]
+    for k, v in schedule.items():
+        i_a = int(k.replace('agent', ''))
+        for pose in v:
+            paths[i_a].append((pose['v'], pose['t']))
+    return paths
+
+
 if __name__ == "__main__":
-    logger.setLevel(logging.DEBUG)
-    map_fname: str = "roadmaps/odrm/odrm_eval/maps/c.png"
+    map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png"
     rng = Random(1)
-    n = 10
-    n_agents = 1
+    n = 20
+    n_agents = 4
+    this_dir = os.path.dirname(__file__)
 
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
@@ -97,20 +115,19 @@ if __name__ == "__main__":
     for i_a in range(n_agents):
         assert nx.has_path(g, starts[i_a], goals[i_a])
 
-    fname_infile_to_annotate = os.path.dirname(
-        __file__) + "/demo_infile_to_annotate.yaml"
-    fname_infile = os.path.dirname(__file__) + "/demo_infile.yaml"
-    fname_outfile = os.path.dirname(__file__) + "/demo_outfile.yaml"
+    fname_infile_to_annotate = this_dir + "/demo_infile_to_annotate.yaml"
+    fname_infile = this_dir + "/demo_infile.yaml"
+    fname_outfile = this_dir + "/demo_outfile.yaml"
     write_infile(fname_infile_to_annotate, g, starts, goals)
 
     # call annotate_roadmap
     cmd_ar = [
         "python3",
-        os.path.dirname(__file__) +
+        this_dir +
         "/libMultiRobotPlanning/tools/annotate_roadmap.py",
         fname_infile_to_annotate,
         fname_infile,
-        "0.1"  # radius
+        "0.01"  # radius
     ]
     print("call annotate_roadmap")
     success_ar = call_subprocess(cmd_ar, 60)
@@ -118,7 +135,7 @@ if __name__ == "__main__":
 
     # call cbs_roadmap
     cmd_cbsr = [
-        os.path.dirname(__file__) + "/libMultiRobotPlanning/build/cbs_roadmap",
+        this_dir + "/libMultiRobotPlanning/build/cbs_roadmap",
         "-i", fname_infile,
         "-o", fname_outfile]
     print("call cbs_roadmap")
@@ -126,12 +143,17 @@ if __name__ == "__main__":
     print("success_cbsr: " + str(success_cbsr))
 
     # check output
+    paths = None
     if os.path.isfile(fname_outfile):
-        with open(fname_outfile, 'r') as f:
-            data = yaml.load(f)
-        print("data: " + str(data))
+        paths = read_outfile(fname_outfile)
+        print("paths: " + str(paths))
 
     # clean up
     for file in [fname_infile, fname_infile_to_annotate, fname_outfile]:
         if os.path.isfile(file):
             os.remove(file)
+
+    # plot
+    if paths is not None:
+        plot_with_paths(g, paths)
+        plt.show()

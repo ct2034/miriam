@@ -121,7 +121,8 @@ def plot_with_paths(env, paths):
                     linewidth=0.5)
         assert paths is not None, "Paths have not been set"
         for i, path in enumerate(paths):  # pathset per agent
-            p = np.array(list(map(lambda s: pos[s[0]] + (s[1],), path)))
+            p = np.array(list(map(
+                lambda s: tuple(pos[s[0]]) + (s[1],), path)))
             ax.plot(xs=p[:, 0],
                     ys=p[:, 1],
                     zs=p[:, 2],
