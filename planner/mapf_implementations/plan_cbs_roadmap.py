@@ -100,21 +100,8 @@ def read_outfile(fname):
     return paths
 
 
-if __name__ == "__main__":
-    map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png"
-    rng = Random(1)
-    n = 20
-    n_agents = 4
+def plan_cbsr(g, starts, goals):
     this_dir = os.path.dirname(__file__)
-
-    map_img = read_map(map_fname)
-    pos = sample_points(n, map_img, rng)
-    g = make_graph(pos, map_img)
-    starts = rng.sample(range(n), n_agents)
-    goals = rng.sample(range(n), n_agents)
-    for i_a in range(n_agents):
-        assert nx.has_path(g, starts[i_a], goals[i_a])
-
     fname_infile_to_annotate = this_dir + "/demo_infile_to_annotate.yaml"
     fname_infile = this_dir + "/demo_infile.yaml"
     fname_outfile = this_dir + "/demo_outfile.yaml"
@@ -152,6 +139,24 @@ if __name__ == "__main__":
     for file in [fname_infile, fname_infile_to_annotate, fname_outfile]:
         if os.path.isfile(file):
             os.remove(file)
+    return paths
+
+
+if __name__ == "__main__":
+    map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png"
+    rng = Random(1)
+    n = 20
+    n_agents = 4
+
+    map_img = read_map(map_fname)
+    pos = sample_points(n, map_img, rng)
+    g = make_graph(pos, map_img)
+    starts = rng.sample(range(n), n_agents)
+    goals = rng.sample(range(n), n_agents)
+    for i_a in range(n_agents):
+        assert nx.has_path(g, starts[i_a], goals[i_a])
+
+    paths = plan_cbsr(g, starts, goals)
 
     # plot
     if paths is not None:
