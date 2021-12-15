@@ -7,10 +7,11 @@ import numpy as np
 import png
 import torch
 from bresenham import bresenham
+from libpysal import weights
+from libpysal.cg import voronoi_frames
 from networkx.exception import NetworkXNoPath, NodeNotFound
 from pyflann import FLANN
 from scenarios.visualization import get_colors
-from scipy.spatial import Delaunay
 from tools import ProgressBar
 
 dtype = torch.float
@@ -77,23 +78,25 @@ def make_graph(pos, map_img):
     # these will be ignored after Delaunay because they are not added by any
     # edge below.
     n_fn = 5
-    fake_nodes = np.array(
-        [(0, 1/n_fn*i) for i in range(n_fn+1)] +
-        [(1, 1/n_fn*i) for i in range(n_fn+1)] +
-        [(1/n_fn*i, 0) for i in range(n_fn+1)] +
-        [(1/n_fn*i, 1) for i in range(n_fn+1)]
-    )
-    pos_np = np.append(pos_np, fake_nodes, axis=0)
-    tri = Delaunay(pos_np)
-    (indptr, indices) = tri.vertex_neighbor_vertices
-    for i in range(n_nodes):
-        neighbors = indices[indptr[i]:indptr[i+1]]
-        for n in neighbors:
-            if n >= n_nodes:
-                continue  # ignoring fake nodes form above
-            if check_edge(pos, map_img, i, n):
-                g.add_edge(i, n,
-                           distance=np.linalg.norm(pos_np[i] - pos_np[n]))
+    # fake_nodes = np.array(
+    #     [(0.01, 1/n_fn*i) for i in range(n_fn+1)] +
+    #     [(1, 1/n_fn*i) for i in range(n_fn+1)] +
+    #     [(1/n_fn*i, 0.01) for i in range(n_fn+1)] +
+    #     [(1/n_fn*i, 1) for i in range(n_fn+1)]
+    # )
+    # pos_np = np.append(pos_np, fake_nodes, axis=0)
+    cells, _ = voronoi_frames(pos_np, clip="bbox")
+    delaunay = weights.Rook.from_dataframe(cells)
+    g = delaunay.to_networkx()
+    nx.set_edge_attributes(g, [], 'distance')
+    for e in g.edges():
+        a, b = e
+        if a >= n_nodes or b >= n_nodes:
+            g.remove_edge(a, b)
+        elif not check_edge(pos, map_img, a, b):
+            g.remove_edge(a, b)
+        else:
+            g.edges[e]['distance'] = np.linalg.norm(pos_np[a] - pos_np[b])
     return g
 
 
