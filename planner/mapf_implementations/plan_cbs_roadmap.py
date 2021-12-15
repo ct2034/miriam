@@ -12,6 +12,7 @@ from definitions import INVALID, POS
 from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, read_map,
                                                     sample_points)
 from scenarios.visualization import plot_with_paths
+from tools import hasher
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -28,7 +29,7 @@ def call_subprocess(cmd, timeout):
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=this_dir
+            cwd=os.path.dirname(__file__)
         )
         while t < timeout:
             t = time.time() - start_time
@@ -102,9 +103,11 @@ def read_outfile(fname):
 
 def plan_cbsr(g, starts, goals):
     this_dir = os.path.dirname(__file__)
-    fname_infile_to_annotate = this_dir + "/demo_infile_to_annotate.yaml"
-    fname_infile = this_dir + "/demo_infile.yaml"
-    fname_outfile = this_dir + "/demo_outfile.yaml"
+    tmp_dir = "/tmp/"
+    hash = hasher([g, starts, goals])
+    fname_infile_to_annotate = f"{tmp_dir}{hash}_infile_to_annotate.yaml"
+    fname_infile = f"{tmp_dir}{hash}_infile.yaml"
+    fname_outfile = f"{tmp_dir}{hash}_outfile.yaml"
     write_infile(fname_infile_to_annotate, g, starts, goals)
 
     # call annotate_roadmap
