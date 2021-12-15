@@ -95,8 +95,8 @@ plt.ylim(-0.05, 1.05)
 plt.axis('off')
 
 
-# vgl delauny ---
-# ---------------
+# vgl delaunay ---
+# ----------------
 points = np.array(list(pos.values()))
 tri = Delaunay(points)
 
