@@ -39,6 +39,6 @@ class PlanCbsrTest(unittest.TestCase):
         starts = [0]
         goals = [4]
         paths = plan_cbsr(g, starts, goals, .2, 60)
-        # this currently times out which gives the right result but is not 
+        # this currently times out which gives the right result but is not
         # really what we want
         self.assertEqual(paths, INVALID)

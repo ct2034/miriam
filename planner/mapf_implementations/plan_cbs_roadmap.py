@@ -58,29 +58,24 @@ def call_subprocess(cmd, timeout):
 
 
 def write_infile(fname, g, starts, goals):
-    def num2ch(number):
-        # ch = ord('A') + number
-        # assert ch <= ord('Z')
-        return str(number)
-
     data = {}
     data["roadmap"] = {}
     data["roadmap"]["undirected"] = True
     data["roadmap"]["allow_wait_actions"] = True
     data["roadmap"]["vertices"] = {}
     for n in g.nodes:
-        data["roadmap"]["vertices"][num2ch(n)] = list(
+        data["roadmap"]["vertices"][str(n)] = list(
             map(float, g.nodes[n][POS]))
     data["roadmap"]["edges"] = []
     for e in g.edges:
         data["roadmap"]["edges"].append(
-            [num2ch(e[0]), num2ch(e[1])])
+            [str(e[0]), str(e[1])])
     data["agents"] = []
     for i in range(len(starts)):
         data["agents"].append({
             "name": "agent" + str(i),
-            "start": num2ch(starts[i]),
-            "goal": num2ch(goals[i])
+            "start": str(starts[i]),
+            "goal": str(goals[i])
         })
     with open(fname, 'w') as f:
         yaml.dump(data, f, default_flow_style=True)
