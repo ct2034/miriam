@@ -101,7 +101,7 @@ def read_outfile(fname):
     return paths
 
 
-def plan_cbsr(g, starts, goals):
+def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
     this_dir = os.path.dirname(__file__)
     tmp_dir = "/tmp/"
     hash = hasher([g, starts, goals])
@@ -117,10 +117,10 @@ def plan_cbsr(g, starts, goals):
         "/libMultiRobotPlanning/tools/annotate_roadmap.py",
         fname_infile_to_annotate,
         fname_infile,
-        "0.01"  # radius
+        str(radius)
     ]
     print("call annotate_roadmap")
-    success_ar = call_subprocess(cmd_ar, 60)
+    success_ar = call_subprocess(cmd_ar, timeout)
     print("success_ar: " + str(success_ar))
 
     # call cbs_roadmap
@@ -129,7 +129,7 @@ def plan_cbsr(g, starts, goals):
         "-i", fname_infile,
         "-o", fname_outfile]
     print("call cbs_roadmap")
-    success_cbsr = call_subprocess(cmd_cbsr, 60)
+    success_cbsr = call_subprocess(cmd_cbsr, timeout)
     print("success_cbsr: " + str(success_cbsr))
 
     # check output
