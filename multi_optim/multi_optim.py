@@ -1,10 +1,11 @@
-import random
+from random import Random
 from typing import Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
@@ -33,7 +34,7 @@ def find_collisions(agents: List[Agent]
     return collisions
 
 
-def optimize_policy(g: nx.Graph, pos, n_agents, rng):
+def optimize_policy(g: nx.Graph, n_agents, rng):
     n_nodes = g.number_of_nodes()
     has_collisions = False
     fixed_env_nx: Optional[nx.Graph] = None
@@ -45,12 +46,12 @@ def optimize_policy(g: nx.Graph, pos, n_agents, rng):
             start, goal = starts_goals[i_ga, :]
             policy = PolicyType.RANDOM
             if fixed_env_nx is None:
-                agent = Agent(pos, (start,), policy)
+                agent = Agent(g, int(start), policy)
                 fixed_env_nx = agent.env_nx.copy()
             else:
-                agent = Agent(pos, (start,), policy,
+                agent = Agent(g, int(start), policy,
                               env_nx=fixed_env_nx.copy())
-            agent.give_a_goal((goal,))
+            agent.give_a_goal(int(goal))
             agents.append(agent)
         collisions = find_collisions(agents)
         has_collisions = (len(collisions) > 0)
@@ -73,9 +74,9 @@ def optimize_policy(g: nx.Graph, pos, n_agents, rng):
             else:
                 policy = PolicyType.RANDOM
             assert fixed_env_nx is not None
-            agent = Agent(pos, (start,), policy,
+            agent = Agent(g, int(start), policy,
                           env_nx=fixed_env_nx.copy())
-            agent.give_a_goal((goal,))
+            agent.give_a_goal(int(goal))
             agents.append(agent)
         results[i_a] = run_a_scenario(
             None, agents, False, IteratorType.BLOCKING1)
@@ -94,31 +95,33 @@ def run_optimization(
         n_runs: int = 16,
         lr_pos: float = 1e-4,
         n_agents: int = 4,
-        map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png"):
+        map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png",
+        rng: Random = Random(0)):
     map_img = read_map(map_fname)
-    pos = sample_points(n_nodes, map_img)
+    pos = sample_points(n_nodes, map_img, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g = make_graph(pos, map_img)
 
-    draw_graph(g, pos)
+    draw_graph(g)
     plt.show()
 
     pb = ProgressBar("Optimization", n_runs)
     for i_r in range(n_runs):
         # Optimizing Poses
         g, pos, test_length, training_length = optimize_poses(
-            g, pos, map_img, optimizer_pos)
+            g, pos, map_img, optimizer_pos, rng)
 
         # Optimizing Agents
         rng = np.random.RandomState(i_r)
-        optimize_policy(g, pos, n_agents, rng)
+        optimize_policy(g, n_agents, rng)
         pb.progress()
 
     pb.end()
 
-    draw_graph(g, pos)
+    draw_graph(g)
     plt.show()
 
 
 if __name__ == "__main__":
-    run_optimization()
+    rng = Random(0)
+    run_optimization(rng=rng)

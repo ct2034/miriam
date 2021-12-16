@@ -230,7 +230,7 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
     # how do agents look like at beginning?
-    poses_at_beginning = tuple(map(lambda a: tuple(a.pos), agents))
+    poses_at_beginning = tuple(map(lambda a: a.pos, agents))
 
     for dt in range(lookahead - 1, -1, -1):
         # all that are not at their goals can generally procede. This is therefore

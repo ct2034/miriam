@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import random
 import unittest
-from typing import FrozenSet
+from random import Random
 from unittest.mock import MagicMock
 
+import networkx as nx
 import numpy as np
 import pytest
 import sim.decentralized.runner as runner
-from definitions import FREE
+from definitions import POS
 from scenarios.generators import corridor_with_passing
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType, get_iterator_fun
@@ -253,6 +254,40 @@ class TestRunner(unittest.TestCase):
                     if names[i_e] != "successful":
                         # data should be different
                         assert np.std(dat[i_e, :]) > 0
+
+    def test_running_on_graph(self):
+        """Making sure iterator works with agents on graph"""
+        rng = Random(0)
+        pos_s = {
+            0: (0., 0.),
+            1: (0., 1.),
+            2: (1., 0.),
+            3: (1., 1.),
+            4: (.5, .5)
+        }
+        g = nx.Graph()
+        g.add_edge(0, 1)
+        g.add_edge(0, 2)
+        g.add_edge(1, 3)
+        g.add_edge(2, 3)
+        g.add_edge(3, 4)
+        g.add_edge(4, 0)
+        g.add_edge(4, 1)
+        g.add_edge(4, 2)
+        nx.set_node_attributes(g, pos_s, POS)
+
+        agents = [
+            Agent(g, 0, PolicyType.RANDOM, rng=rng),
+            Agent(g, 1, PolicyType.RANDOM, rng=rng)
+        ]
+        agents[0].give_a_goal(3)
+        agents[1].give_a_goal(2)
+
+        paths_out = []
+        res = run_a_scenario(
+            None, agents, False, IteratorType.BLOCKING1,
+            paths_out=paths_out)
+        pass
 
 
 if __name__ == "__main__":  # pragma: no cover
