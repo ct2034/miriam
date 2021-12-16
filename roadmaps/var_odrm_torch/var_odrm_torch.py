@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from functools import lru_cache
 from random import Random
+from typing import List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -18,9 +19,11 @@ from tools import ProgressBar
 
 dtype = torch.float
 device = torch.device("cpu")
+PATH_TYPE = Tuple[Tuple[float, float], Tuple[float, float], List[int]]
 
 
-def read_map(fname: str):
+def read_map(fname: str) -> Tuple[Tuple[int, ...], ...]:
+    """Read a map from a PNG file into a 2D tuple."""
     r = png.Reader(filename=fname)
     width, height, rows, _ = r.read()
     assert width == height
@@ -31,7 +34,10 @@ def read_map(fname: str):
 
 
 # @lru_cache  # this slowed things down a lot. TODO: investigate
-def is_coord_free(map_img, point):
+def is_coord_free(
+        map_img: Tuple[Tuple[int, ...], ...],
+        point: Tuple[float, float]) -> bool:
+    """Check if a coordinate is free."""
     size = len(map_img)
     return map_img[
         int(point[0] * size)
@@ -41,7 +47,10 @@ def is_coord_free(map_img, point):
 
 
 # @lru_cache  # this slowed things down a lot. TODO: investigate
-def is_pixel_free(map_img, point):
+def is_pixel_free(
+        map_img: Tuple[Tuple[int, ...], ...],
+        point: Tuple[float, float]) -> bool:
+    """Check if a pixel is free."""
     return map_img[
         int(point[0])
     ][
@@ -49,7 +58,12 @@ def is_pixel_free(map_img, point):
     ] >= 255
 
 
-def check_edge(pos, map_img, a, b):
+def check_edge(
+        pos: np.ndarray,
+        map_img: Tuple[Tuple[int, ...], ...],
+        a: int,
+        b: int) -> bool:
+    """Check edge between two nodes."""
     size = len(map_img)
     line = bresenham(
         int(pos[a][0]*size),
@@ -57,10 +71,14 @@ def check_edge(pos, map_img, a, b):
         int(pos[b][0]*size),
         int(pos[b][1]*size)
     )
-    return all([is_pixel_free(map_img, tuple(x)) for x in line])
+    return all([is_pixel_free(map_img, (x[0], x[1])) for x in line])
 
 
-def sample_points(n, map_img, rng: Random):
+def sample_points(
+        n: int,
+        map_img: Tuple[Tuple[int, ...], ...],
+        rng: Random) -> torch.Tensor:
+    """Sample `n` random points (0 <= x <= 1) from a map."""
     points = np.empty(shape=(0, 2))
     while points.shape[0] < n:
         point = (rng.random(), rng.random())
@@ -70,7 +88,9 @@ def sample_points(n, map_img, rng: Random):
                         dtype=dtype, requires_grad=True)
 
 
-def make_graph(pos, map_img):
+def make_graph(
+        pos: torch.Tensor,
+        map_img: Tuple[Tuple[int, ...], ...]) -> nx.Graph:
     """Convert array of node positions into graph by Delaunay Triangulation."""
     pos_np = pos.detach().numpy()
     cells, _ = voronoi_frames(pos_np, clip="bbox")
@@ -87,16 +107,20 @@ def make_graph(pos, map_img):
     return g
 
 
-def draw_graph(g, pos, paths=[]):
+def draw_graph(
+        g: nx.Graph,
+        paths: List[PATH_TYPE] = []):
+    """Display the graph and (optionally) paths."""
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    N = pos.shape[0]
-    pos_np = pos.detach().numpy()
+    N = g.number_of_nodes()
+    pos = nx.get_node_attributes(g, POS)
+    pos_np = np.array([pos[i] for i in range(N)])
     options = {
         "ax": ax,
         "node_size": 20,
-        "node_color": "red",
-        "edgecolors": "black",
+        "node_color": "black",
+        "edgecolors": "grey",
         "linewidths": 1,
         "width": 1,
         "with_labels": False
@@ -129,14 +153,24 @@ def draw_graph(g, pos, paths=[]):
         ax.set_ylim([0., 1.])
 
 
-def plan_path_between_nodes(g, start, goal):
+def plan_path_between_nodes(
+        g: nx.Graph,
+        start: int,
+        goal: int) -> Optional[List[int]]:
+    """Plan a path on `g` between two nodes."""
     try:
         return nx.shortest_path(g, start, goal, DISTANCE)
     except (NetworkXNoPath, nx.NodeNotFound):
         return None
 
 
-def plan_path_between_coordinates(g, flann, start, goal):
+def plan_path_between_coordinates(
+        g: nx.Graph,
+        flann: FLANN,
+        start: Tuple[float, float],
+        goal: Tuple[float, float]) -> Optional[PATH_TYPE]:
+    """Plan a path on `g` between two coordinates.
+    Uses a FLANN first to find the nearest nodes to `start` and `goal`."""
     nn = 1
     result, _ = flann.nn_index(
         np.array([start, goal], dtype="float32"), nn,
@@ -149,8 +183,13 @@ def plan_path_between_coordinates(g, flann, start, goal):
         return None
 
 
-def make_paths(g, pos, n_paths, rng):
-    pos_np = pos.detach().numpy()
+def make_paths(
+        g: nx.Graph,
+        n_paths: int,
+        rng: Random) -> List[PATH_TYPE]:
+    """Make `n_paths` path between random coordinates on `g`."""
+    pos = nx.get_node_attributes(g, POS)
+    pos_np = np.array([pos[n] for n in g.nodes()])
     flann = FLANN()
     flann.build_index(np.array(pos_np))
     paths = []
@@ -163,7 +202,12 @@ def make_paths(g, pos, n_paths, rng):
     return paths
 
 
-def get_path_len(pos, path):
+def get_path_len(
+        pos: torch.Tensor,
+        path: PATH_TYPE) -> torch.Tensor:
+    """Get the length of a path. With the sections from start coordinates to
+    first node and from last node to goal coordinates beeing weighted 
+    `TAIL_WEIGHT` times more."""
     TAIL_WEIGHT = 3
     (start, goal, path_vs) = path
     sections = torch.zeros(len(path_vs)+1)
@@ -180,7 +224,10 @@ def get_path_len(pos, path):
     return torch.sum(sections)
 
 
-def get_paths_len(pos, paths):
+def get_paths_len(
+        pos: torch.Tensor,
+        paths: List[PATH_TYPE]) -> torch.Tensor:
+    """Get the lengths of all paths in `paths`."""
     all_lens = torch.zeros(len(paths))
     for i, p in enumerate(paths):
         try:
@@ -190,10 +237,16 @@ def get_paths_len(pos, paths):
     return torch.sum(all_lens)
 
 
-def optimize_poses(g, pos, map_img, optimizer, rng):
-    test_paths = make_paths(g, pos, 20, rng)
+def optimize_poses(
+        g: nx.Graph,
+        pos: torch.Tensor,
+        map_img: Tuple[Tuple[int, ...], ...],
+        optimizer: torch.optim.Optimizer,
+        rng: Random):
+    """Optimize the poses of the nodes on `g` using `optimizer`."""
+    test_paths = make_paths(g, 20, rng)
     test_length = get_paths_len(pos, test_paths)
-    training_paths = make_paths(g, pos, 10, rng)
+    training_paths = make_paths(g, 10, rng)
     training_length = get_paths_len(pos, training_paths)
     _ = training_length.backward()
     optimizer.step()
@@ -213,12 +266,12 @@ if __name__ == "__main__":
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
     g = make_graph(pos, map_img)
-    test_paths = make_paths(g, pos, 20, rng)
+    test_paths = make_paths(g, 20, rng)
 
     optimizer = torch.optim.Adam([pos], lr=learning_rate)
     test_costs = []
 
-    draw_graph(g, pos, test_paths[:4])
+    draw_graph(g, test_paths[:4])
     plt.savefig("roadmaps/var_odrm_torch/pre_training.png")
     pb = ProgressBar("Training", epochs)
     for i_e in range(epochs):
@@ -231,7 +284,7 @@ if __name__ == "__main__":
             pb.progress(i_e)
     pb.end()
 
-    draw_graph(g, pos, test_paths[:4])
+    draw_graph(g, test_paths[:4])
     plt.savefig("roadmaps/var_odrm_torch/post_training.png")
 
     plt.figure()

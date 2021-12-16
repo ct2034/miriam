@@ -40,7 +40,7 @@ jobs:
         pycodestyle .
     - name: Type checking with mypy
       run: |
-        mypy scenarios sim/decentralized/
+        mypy scenarios sim/decentralized/ roadmaps/var_odrm_torch/
     - name: Test with pytest
       run: |
         pytest -rP
