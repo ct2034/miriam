@@ -1,7 +1,7 @@
 import unittest
-from math import sqrt
 from random import Random
 
+import numpy as np
 import torch
 from roadmaps.var_odrm_torch.var_odrm_torch import *
 
