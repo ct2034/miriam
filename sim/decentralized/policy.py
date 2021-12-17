@@ -44,6 +44,7 @@ class PolicyType(Enum):
     ONE_THEN_RANDOM = auto()
     ZERO_THEN_RANDOM = auto()
     FIRST_THEN_RAISING = auto()
+    EDGE = auto()
 
 
 class Policy(object):
@@ -71,10 +72,13 @@ class Policy(object):
             return FirstThenRandomPolicy(agent, 0.)
         elif type == PolicyType.FIRST_THEN_RAISING:
             return FirstThenRaisingPolicy(agent, **kwargs)
+        elif type == PolicyType.EDGE:
+            return EdgePolicy(agent)
 
     def __init__(self, agent) -> None:
         super().__init__()
         self.a = agent  # type: ignore
+        self.edge_based = False
 
     def __str__(self):
         return type(self).__name__
@@ -275,7 +279,7 @@ class LearnedRaisingPolicy(LearnedPolicy):
             paths_until_col.append(self._path_until_coll(
                 paths_full[i_id], self.path_is[id], None))
         positions = ([self.a.pos] +
-                        list(self.poss.values()))
+                     list(self.poss.values()))
         # making basic graph info
         own_pos = self.a.pos
         if self.a.has_gridmap:
@@ -363,3 +367,11 @@ class FirstThenRandomPolicy(Policy):
             self.first_call = False
             return self.first_return_value
         return self.a.rng.random()
+
+
+class EdgePolicy(Policy):
+    def __init__(self, agent: Agent) -> None:
+        super().__init__(agent)
+        self.edge_base = True
+
+        
