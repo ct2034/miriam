@@ -45,9 +45,10 @@ def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> List[C]:
         else:
             assert a.path is not None
             assert a.path_i is not None
-            poses.append(a.path[a.path_i + dt][:-1])
-        if np.linalg.norm(np.array(poses[-1]) - np.array(a.pos)) > dt:
-            assert False
+            if a.has_gridmap:
+                poses.append(a.path[a.path_i + dt][:-1])
+            elif a.has_roadmap:
+                poses.append(a.path[a.path_i + dt][0])
     return poses
 
 
@@ -229,6 +230,10 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
                      ) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
+    # get poses
+    if agents[0].has_roadmap:
+        pos_s = nx.get_node_attributes(agents[0].env, POS)
+
     # how do agents look like at beginning?
     poses_at_beginning = tuple(map(lambda a: a.pos, agents))
 
@@ -268,6 +273,8 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
             else:
                 # we need to solve the blocks by blocking some agents
                 for pose, [i_a1, i_a2] in node_colissions.items():
+                    if agents[i_a1].has_roadmap:
+                        pose = (pose,)
                     pose_to_block = pose + (dt+1,)
                     if (agents[i_a1].get_priority(agents[i_a2].id) >
                             agents[i_a2].get_priority(agents[i_a1].id)):
@@ -321,9 +328,9 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
             if a.has_gridmap:
                 dx = 1.
             elif a.has_roadmap:
-                dx = float(torch.linalg.vector_norm(
-                    a.env[a.pos] -
-                    a.env[possible_next_poses[i_a]]
+                dx = float(np.linalg.norm(
+                    pos_s[a.pos] -
+                    pos_s[possible_next_poses[i_a]]
                 ))
             space_slice[i_a] = dx
         if not a.is_at_goal():
