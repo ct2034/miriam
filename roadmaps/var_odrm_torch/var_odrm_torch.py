@@ -109,10 +109,25 @@ def make_graph(
 
 def draw_graph(
         g: nx.Graph,
-        paths: List[PATH_TYPE] = []):
+        map_img: Tuple[Tuple[int, ...], ...] = tuple(),
+        paths: List[PATH_TYPE] = [],
+        title: str = ""):
     """Display the graph and (optionally) paths."""
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
+
+    # Map Image
+    if map_img:
+        ax.imshow(
+            np.swapaxes(map_img, 0, 1),
+            cmap="gray",
+            alpha=.5,
+            extent=(0, 1, 0, 1),
+            origin="lower"
+        )
+
+    # Graph
     N = g.number_of_nodes()
     pos = nx.get_node_attributes(g, POS)
     pos_np = np.array([pos[i] for i in range(N)])
@@ -128,6 +143,7 @@ def draw_graph(
     pos_dict = {i: pos_np[i] for i in range(N)}
     nx.draw_networkx(g, pos_dict, **options)
 
+    # Paths
     colors = get_colors(len(paths))
     style = '--'
     for i_p, p in enumerate(paths):
@@ -186,6 +202,7 @@ def plan_path_between_coordinates(
 def make_paths(
         g: nx.Graph,
         n_paths: int,
+        map_img: Tuple[Tuple[int, ...], ...],
         rng: Random) -> List[PATH_TYPE]:
     """Make `n_paths` path between random coordinates on `g`."""
     pos = nx.get_node_attributes(g, POS)
@@ -195,7 +212,11 @@ def make_paths(
     paths = []
     for i in range(n_paths):
         start = (rng.random(), rng.random())
+        while not is_coord_free(map_img, start):
+            start = (rng.random(), rng.random())
         goal = (rng.random(), rng.random())
+        while not is_coord_free(map_img, goal):
+            goal = (rng.random(), rng.random())
         path = plan_path_between_coordinates(g, flann, start, goal)
         if path is not None:
             paths.append(path)
@@ -244,9 +265,9 @@ def optimize_poses(
         optimizer: torch.optim.Optimizer,
         rng: Random):
     """Optimize the poses of the nodes on `g` using `optimizer`."""
-    test_paths = make_paths(g, 20, rng)
+    test_paths = make_paths(g, 20, map_img, Random(0))
     test_length = get_paths_len(pos, test_paths)
-    training_paths = make_paths(g, 10, rng)
+    training_paths = make_paths(g, 10, map_img, rng)
     training_length = get_paths_len(pos, training_paths)
     _ = training_length.backward()
     optimizer.step()
@@ -266,12 +287,12 @@ if __name__ == "__main__":
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
     g = make_graph(pos, map_img)
-    test_paths = make_paths(g, 20, rng)
+    test_paths = make_paths(g, 20, map_img, rng)
 
     optimizer = torch.optim.Adam([pos], lr=learning_rate)
     test_costs = []
 
-    draw_graph(g, test_paths[:4])
+    draw_graph(g, map_img, test_paths[:4])
     plt.savefig("roadmaps/var_odrm_torch/pre_training.png")
     pb = ProgressBar("Training", epochs)
     for i_e in range(epochs):
@@ -284,7 +305,7 @@ if __name__ == "__main__":
             pb.progress(i_e)
     pb.end()
 
-    draw_graph(g, test_paths[:4])
+    draw_graph(g, map_img, test_paths[:4])
     plt.savefig("roadmaps/var_odrm_torch/post_training.png")
 
     plt.figure()
