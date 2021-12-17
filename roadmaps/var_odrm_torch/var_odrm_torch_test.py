@@ -74,21 +74,38 @@ class TestVarOdrmTorch(unittest.TestCase):
             self.assertEqual(0, np.count_nonzero(np.array(node_path) < 0))
             self.assertEqual(0, np.count_nonzero(np.array(node_path) > n))
 
-    def test_get_path_len(self):
+    def test_get_path_len_training(self):
         self.assertAlmostEqual(
             .6,
-            float(get_path_len(self.pos, self.path_nodes)))
+            float(get_path_len(self.pos, self.path_nodes, True)))
         self.assertAlmostEqual(
             6.6,
-            float(get_path_len(self.pos, self.path_nodes_plus_one_start)),
+            float(get_path_len(self.pos, self.path_nodes_plus_one_start, True)),
             places=5)
         self.assertAlmostEqual(
             6.6,
-            float(get_path_len(self.pos, self.path_nodes_plus_one_goal)),
+            float(get_path_len(self.pos, self.path_nodes_plus_one_goal, True)),
             places=5)
         self.assertAlmostEqual(
             12.6,
-            float(get_path_len(self.pos, self.path_nodes_plus_one_start_goal)),
+            float(get_path_len(self.pos, self.path_nodes_plus_one_start_goal, True)),
+            places=5)
+
+    def test_get_path_len_testing(self):
+        self.assertAlmostEqual(
+            .6,
+            float(get_path_len(self.pos, self.path_nodes, False)))
+        self.assertAlmostEqual(
+            1.6,
+            float(get_path_len(self.pos, self.path_nodes_plus_one_start, False)),
+            places=5)
+        self.assertAlmostEqual(
+            1.6,
+            float(get_path_len(self.pos, self.path_nodes_plus_one_goal, False)),
+            places=5)
+        self.assertAlmostEqual(
+            2.6,
+            float(get_path_len(self.pos, self.path_nodes_plus_one_start_goal, False)),
             places=5)
 
     def test_get_paths_len(self):
@@ -100,5 +117,9 @@ class TestVarOdrmTorch(unittest.TestCase):
         ]
         self.assertAlmostEqual(
             .6 + 6.6 + 6.6 + 12.6,
-            float(get_paths_len(self.pos, paths)),
+            float(get_paths_len(self.pos, paths, True)),
+            places=5)
+        self.assertAlmostEqual(
+            .6 + 1.6 + 1.6 + 2.6,
+            float(get_paths_len(self.pos, paths, False)),
             places=5)

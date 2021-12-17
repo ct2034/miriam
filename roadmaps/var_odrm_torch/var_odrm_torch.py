@@ -225,10 +225,11 @@ def make_paths(
 
 def get_path_len(
         pos: torch.Tensor,
-        path: PATH_TYPE) -> torch.Tensor:
+        path: PATH_TYPE,
+        training: bool) -> torch.Tensor:
     """Get the length of a path. With the sections from start coordinates to
     first node and from last node to goal coordinates beeing weighted 
-    `TAIL_WEIGHT` times more."""
+    `TAIL_WEIGHT` times more (if training is true, else once)."""
     TAIL_WEIGHT = 3
     (start, goal, path_vs) = path
     sections = torch.zeros(len(path_vs)+1)
@@ -238,21 +239,30 @@ def get_path_len(
             pos[path_vs[i]] - pos[path_vs[j]])
     s_tail = torch.linalg.vector_norm(
         torch.tensor(start) - pos[path_vs[0]])
-    sections[-2] = TAIL_WEIGHT * (s_tail ** 2 + s_tail)
+    if training:
+        sections[-2] = TAIL_WEIGHT * (s_tail ** 2 + s_tail)
+    else:
+        sections[-2] = s_tail
     g_tail = torch.linalg.vector_norm(
         torch.tensor(goal) - pos[path_vs[-1]])
-    sections[-1] = TAIL_WEIGHT * (g_tail ** 2 + g_tail)
+    if training:
+        sections[-1] = TAIL_WEIGHT * (g_tail ** 2 + g_tail)
+    else:
+        sections[-1] = g_tail
     return torch.sum(sections)
 
 
 def get_paths_len(
         pos: torch.Tensor,
-        paths: List[PATH_TYPE]) -> torch.Tensor:
-    """Get the lengths of all paths in `paths`."""
+        paths: List[PATH_TYPE],
+        training: bool) -> torch.Tensor:
+    """Get the lengths of all paths in `paths`.
+    If `training` is `True`, the tails are weighted more."""
     all_lens = torch.zeros(len(paths))
     for i, p in enumerate(paths):
         try:
-            all_lens[i] = get_path_len(pos, p)
+            all_lens[i] = get_path_len(pos, p,
+                                       training)
         except (NetworkXNoPath, NodeNotFound):
             pass
     return torch.sum(all_lens)
@@ -266,9 +276,9 @@ def optimize_poses(
         rng: Random):
     """Optimize the poses of the nodes on `g` using `optimizer`."""
     test_paths = make_paths(g, 20, map_img, Random(0))
-    test_length = get_paths_len(pos, test_paths)
+    test_length = get_paths_len(pos, test_paths, False)
     training_paths = make_paths(g, 10, map_img, rng)
-    training_length = get_paths_len(pos, training_paths)
+    training_length = get_paths_len(pos, training_paths, True)
     _ = training_length.backward()
     optimizer.step()
     g = make_graph(pos, map_img)
