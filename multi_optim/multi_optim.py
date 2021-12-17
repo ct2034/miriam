@@ -92,34 +92,60 @@ def optimize_policy(g: nx.Graph, n_agents, rng):
 
 def run_optimization(
         n_nodes: int = 64,
-        n_runs: int = 16,
+        n_runs: int = 1024,
+        stats_every: int = 1,
         lr_pos: float = 1e-4,
         n_agents: int = 4,
-        map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png",
+        map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
         rng: Random = Random(0)):
     map_img = read_map(map_fname)
     pos = sample_points(n_nodes, map_img, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g = make_graph(pos, map_img)
+    draw_graph(g, map_img, title="Start")
+    plt.savefig("multi_optim/start.png")
 
-    draw_graph(g)
-    plt.show()
+    stats = {
+        "test_length": {
+            "x": [],
+            "t": []
+        },
+        "training_length": {
+            "x": [],
+            "t": []
+        }
+    }
 
-    pb = ProgressBar("Optimization", n_runs)
+    pb = ProgressBar("Optimization", n_runs, 10)
     for i_r in range(n_runs):
         # Optimizing Poses
         g, pos, test_length, training_length = optimize_poses(
             g, pos, map_img, optimizer_pos, rng)
 
-        # Optimizing Agents
-        rng = np.random.RandomState(i_r)
-        optimize_policy(g, n_agents, rng)
+        # Optimizing Policy
+        # optimize_policy(g, n_agents, rng)
+
+        # Saving stats
+        if i_r % stats_every == 0:
+            stats["test_length"]["x"].append(test_length)
+            stats["test_length"]["t"].append(i_r)
+            stats["training_length"]["x"].append(training_length)
+            stats["training_length"]["t"].append(i_r)
         pb.progress()
 
     pb.end()
 
-    draw_graph(g)
-    plt.show()
+    draw_graph(g, map_img, title="End")
+    plt.savefig("multi_optim/end.png")
+
+    plt.figure()
+    for k, v in stats.items():
+        plt.plot(v["t"], v["x"], label=k)
+    plt.xlabel("Run")
+    plt.legend()
+    plt.savefig("multi_optim/stats.png")
+
+    return g, pos, test_length, training_length
 
 
 if __name__ == "__main__":
