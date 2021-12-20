@@ -9,16 +9,6 @@ class TestGraphConverter(unittest.TestCase):
         super().__init__(methodName=methodName)
         self.env = np.zeros((8, 8))
 
-    def test_gridmap_to_nx(self):
-        small_env = np.zeros((3, 3))
-        small_env[0, 0] = OBSTACLE
-        small_env[0, 1] = OBSTACLE
-        small_env[1, 0] = OBSTACLE
-        small_env[1, 1] = OBSTACLE
-        g = gridmap_to_nx(small_env)
-        self.assertEqual(len(g.nodes), 5)
-        self.assertEqual(len(g.edges), 4)
-
     def test_coordinate_to_node(self):
         self.assertEqual(coordinate_to_node(self.env, (0, 0)), 0)
         self.assertEqual(coordinate_to_node(self.env, (0, 7)), 7)
@@ -45,3 +35,22 @@ class TestGraphConverter(unittest.TestCase):
             node = rng.randint(0, 63)
             self.assertEqual(coordinate_to_node(
                 self.env, node_to_coordinate(self.env, node)), node)
+
+    def test_gridmap_to_nx(self):
+        small_env = np.zeros((3, 3))
+        small_env[0, 0] = OBSTACLE
+        small_env[0, 1] = OBSTACLE
+        small_env[1, 0] = OBSTACLE
+        small_env[1, 1] = OBSTACLE
+        g = gridmap_to_nx(small_env)
+        self.assertEqual(len(g.nodes), 5)
+        self.assertEqual(len(g.edges), 4)
+
+    def test_starts_or_goals_to_nodes(self):
+        starts_or_goals = np.array([(0, 0), (0, 7), (7, 0), (7, 7)])
+        out = starts_or_goals_to_nodes(starts_or_goals, self.env)
+        self.assertEqual(out.shape, (4,))
+        self.assertEqual(out[0], 0)
+        self.assertEqual(out[1], 7)
+        self.assertEqual(out[2], 56)
+        self.assertEqual(out[3], 63)
