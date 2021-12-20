@@ -45,6 +45,9 @@ class TestGraphConverter(unittest.TestCase):
         g = gridmap_to_nx(small_env)
         self.assertEqual(len(g.nodes), 5)
         self.assertEqual(len(g.edges), 4)
+        self.assertEqual(g.nodes[2][POS], (0, 2))
+        self.assertEqual(g.nodes[5][POS], (1, 2))
+        self.assertEqual(g.nodes[8][POS], (2, 2))
 
     def test_starts_or_goals_to_nodes(self):
         starts_or_goals = np.array([(0, 0), (0, 7), (7, 0), (7, 7)])

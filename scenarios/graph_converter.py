@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 from typing import Tuple
-from definitions import FREE
+from definitions import FREE, POS
 
 
 def coordinate_to_node(
@@ -29,14 +29,17 @@ def node_to_coordinate(
 def gridmap_to_nx(env: np.ndarray) -> nx.Graph:
     """Convert a gridmap to a networkx graph"""
     g = nx.Graph()
+    pos = {}
     for i, j in np.ndindex(env.shape):
         if env[i, j] == FREE:
             g.add_node(coordinate_to_node(env, (i, j)))
+            pos[coordinate_to_node(env, (i, j))] = (i, j)
         for di, dj in [(-1, 0), (0, -1)]:
             if i+di >= 0 and j+dj >= 0:
                 if env[i + di, j + dj] == FREE:
                     g.add_edge(coordinate_to_node(env, (i, j)),
                                coordinate_to_node(env, (i + di, j + dj)))
+    nx.set_node_attributes(g, pos, POS)
     return g
 
 
