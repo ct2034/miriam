@@ -228,7 +228,7 @@ def get_path_len(
         path: PATH_TYPE,
         training: bool) -> torch.Tensor:
     """Get the length of a path. With the sections from start coordinates to
-    first node and from last node to goal coordinates beeing weighted 
+    first node and from last node to goal coordinates beeing weighted
     `TAIL_WEIGHT` times more (if training is true, else once)."""
     TAIL_WEIGHT = 3
     (start, goal, path_vs) = path
