@@ -1,7 +1,7 @@
 import unittest
 
 import torch
-from planner.policylearn.edge_policy import EdgePolicy
+from planner.policylearn.edge_policy import EdgePolicyModel
 
 
 class EdgePolicyTest(unittest.TestCase):
@@ -9,7 +9,7 @@ class EdgePolicyTest(unittest.TestCase):
         n_nodes = 5
         num_node_features = 2
         conv_channels = 2
-        policy = EdgePolicy(num_node_features, conv_channels)
+        policy = EdgePolicyModel(num_node_features, conv_channels)
         x = torch.randn(n_nodes, num_node_features)
         edge_index = torch.tensor([
             [0, 0, 0, 0],

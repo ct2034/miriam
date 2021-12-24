@@ -66,6 +66,14 @@ def plot_with_paths(env, paths):
     colors = get_colors(len(paths))
     legend_str = []
     if is_gridmap(env):
+        if len(paths[0][0]) == 2:  # not timed
+            paths_timed = []
+            for ap in paths:
+                ap_t = []
+                for t, p in enumerate(ap):
+                    ap_t.append(p + (t,))
+                paths_timed.append(ap_t)
+            paths = np.array(paths_timed)
         ax.axis([-1, len(env[:, 0]), -1, len(env[:, 0])])
         ax.set_facecolor('white')
         ax.set_proj_type('ortho')
@@ -90,25 +98,25 @@ def plot_with_paths(env, paths):
         ax.set_ylim(0, env.shape[1])
 
         # Paths
-        i = 0
+        t = 0
         prop_cycle = plt.rcParams['axes.prop_cycle']
         assert paths is not None, "Paths have not been set"
         for p in paths:  # pathset per agent
             ax.plot(xs=p[:, 0] + .5,
                     ys=p[:, 1] + .5,
                     zs=p[:, 2],
-                    color=colors[i],
+                    color=colors[t],
                     alpha=1,
                     zorder=100)
-            legend_str.append("Agent " + str(i))
-            i += 1
+            legend_str.append("Agent " + str(t))
+            t += 1
     elif is_roadmap(env):
         if isinstance(paths[0][0], int):  # not timed
             paths_timed = []
             for ap in paths:
                 ap_t = []
-                for i, p in enumerate(ap):
-                    ap_t.append((p, i))
+                for t, p in enumerate(ap):
+                    ap_t.append((p, t))
                 paths_timed.append(ap_t)
             paths = paths_timed
         pos = nx.get_node_attributes(env, POS)
@@ -120,16 +128,16 @@ def plot_with_paths(env, paths):
                     alpha=0.5,
                     linewidth=0.5)
         assert paths is not None, "Paths have not been set"
-        for i, path in enumerate(paths):  # pathset per agent
+        for t, path in enumerate(paths):  # pathset per agent
             p = np.array(list(map(
                 lambda s: tuple(pos[s[0]]) + (s[1],), path)))
             ax.plot(xs=p[:, 0],
                     ys=p[:, 1],
                     zs=p[:, 2],
-                    color=colors[i],
+                    color=colors[t],
                     alpha=1,
                     zorder=100)
-            legend_str.append("Agent " + str(i))
+            legend_str.append("Agent " + str(t))
         ax.grid(False)
     plt.tight_layout()
 

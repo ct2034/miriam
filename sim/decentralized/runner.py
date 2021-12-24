@@ -103,11 +103,11 @@ def initialize_new_agent(
 
 def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
                      rng: random.Random = random.Random()):
-    n_agents = starts.shape[0]
+    n_agents = np.array(starts).shape[0]
     agents = []
     env_nx = env_to_nx(env)
     for i_a in range(n_agents):
-        a = Agent(env, starts[i_a], policy=policy, rng=rng, env_nx=env_nx)
+        a = Agent(env, int(starts[i_a]), policy=policy, rng=rng, env_nx=env_nx)
         if not a.give_a_goal(goals[i_a]):
             return INVALID
         agents.append(a)
@@ -275,11 +275,12 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
         logger.debug(f'Exception: {e.__class__.__name__}, {e}')
         if isinstance(e, SimIterationException):
             pass  # logger.warning(e)
-        elif pause_on is not None and isinstance(e, pause_on):  # type: ignore
-            assert isinstance(e, PolicyCalledException)
-            return check_time_evaluation(
-                time_progress,
-                space_progress) + (e, )
+        elif pause_on is not None:
+            if isinstance(e, pause_on):  # type: ignore
+                assert isinstance(e, PolicyCalledException)
+                return check_time_evaluation(
+                    time_progress,
+                    space_progress) + (e, )
         else:
             raise e
     return check_time_evaluation(

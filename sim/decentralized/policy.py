@@ -3,16 +3,17 @@ from collections import OrderedDict
 from enum import Enum, auto
 from typing import Optional
 
+import networkx as nx
 import numpy as np
 import torch
-from definitions import C
 from importtf import keras, tf
+from planner.policylearn.edge_policy_graph_utils import agents_to_data
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
 from planner.policylearn.generate_graph import (get_agent_path_layer,
                                                 get_agent_pos_layer,
                                                 gridmap_to_graph)
-from planner.policylearn.train_model import (CLASSIFICATION_STR, CONVRNN_STR,
+from planner.policylearn.train_model import ( CONVRNN_STR,
                                              fix_data_convrnn)
 from tensorflow.keras.models import load_model
 from torch_geometric.data import Data
@@ -73,11 +74,13 @@ class Policy(object):
         elif type == PolicyType.FIRST_THEN_RAISING:
             return FirstThenRaisingPolicy(agent, **kwargs)
         elif type == PolicyType.EDGE:
-            return EdgePolicy(agent)
+            return EdgePolicy(agent, **kwargs)
 
     def __init__(self, agent) -> None:
         super().__init__()
         self.a = agent  # type: ignore
+        # is this policy edge based?
+        # this would mean, it is *not* priority based!
         self.edge_based = False
 
     def __str__(self):
@@ -370,8 +373,20 @@ class FirstThenRandomPolicy(Policy):
 
 
 class EdgePolicy(Policy):
-    def __init__(self, agent: Agent) -> None:
+    def __init__(self, agent, nn) -> None:
         super().__init__(agent)
         self.edge_base = True
+        self.nn = nn
 
-        
+    def get_priority(self, _) -> float:
+        raise NotImplementedError()
+
+    def get_edge(self, agents):
+        i_a_self = agents.index(self.a)
+        data, own_pos = agents_to_data(agents, i_a_self)
+        score, targets = self.nn.forward(
+            data.x,
+            data.edge_index,
+            data.pos,
+            own_pos)
+        return targets[torch.argmax(score)]

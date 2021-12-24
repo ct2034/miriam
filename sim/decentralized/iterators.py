@@ -1,3 +1,4 @@
+import logging
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -7,6 +8,9 @@ import torch
 from definitions import POS, C
 from sim.decentralized.agent import Agent
 
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+
 OBSERVATION_DISTANCE = 6
 
 
@@ -14,6 +18,8 @@ class IteratorType(Enum):
     WAITING = auto()
     BLOCKING1 = auto()
     BLOCKING3 = auto()
+    EDGE_POLICY1 = auto()
+    EDGE_POLICY3 = auto()
 
 
 class SimIterationException(Exception):
@@ -121,7 +127,7 @@ def has_at_least_one_agent_moved(
     return False
 
 
-def iterate_waiting(agents: Tuple[Agent], ignore_finished_agents) -> Tuple[List[int], List[float]]:
+def iterate_waiting(agents: Tuple[Agent], ignore_finished_agents: bool) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
     # all that are not at their goals can generally procede. This is therefore
@@ -226,7 +232,7 @@ def iterate_waiting(agents: Tuple[Agent], ignore_finished_agents) -> Tuple[List[
     return time_slice, space_slice
 
 
-def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agents
+def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agents: bool
                      ) -> Tuple[List[int], List[float]]:
     """Given a set of agents, find possible next steps for each
     agent and move them there if possible."""
@@ -346,7 +352,66 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
     return time_slice, space_slice
 
 
-# -> ((Tuple[Agent], bool) -> Tuple[List[int], List[int]]):
+def iterate_edge_policy(
+    agents: Tuple[Agent],
+    lookahead: int,
+    ignore_finished_agents: bool
+) -> Tuple[List[int], List[float]]:
+    """An iterator that will ask a policy which edge to take in the even of a collision."""
+    for a in agents:
+        assert a.has_roadmap, "This function only works with roadmaps"
+
+    solved = False
+    RETRIES = 3
+    i_try = 0
+
+    all_colissions = []
+    for dt in range(lookahead):
+        all_colissions.append(check_for_colissions(
+            agents, dt, None, ignore_finished_agents))
+    agents_with_colissions = get_agents_in_col(all_colissions)
+    logger.debug(f"all_colissions: {all_colissions}")
+
+    # calling the policy for each agent that has colissions
+    while (not solved) and i_try < RETRIES:
+        logger.debug(f"agents with colissions: {agents_with_colissions}")
+        next_nodes = []
+        for i_a, a in enumerate(agents):
+            if i_a in agents_with_colissions:
+                next_nodes.append(a.policy.get_edge(agents))
+            else:
+                next_nodes.append(a.what_is_next_step())
+        next_collisions = check_for_colissions(
+            agents, 0, next_nodes, ignore_finished_agents)
+        solved = not any(next_collisions)
+        logger.debug(
+            f"try {i_try}, solved: {solved}, next_collisions: {next_collisions}")
+        new_agents_with_colissions = get_agents_in_col([next_collisions])
+        agents_with_colissions.update(new_agents_with_colissions)
+        i_try += 1
+    if i_try == RETRIES:
+        raise SimIterationException(f"Failed to solve after {RETRIES} tries")
+    else:
+        for i_a, a in enumerate(agents):
+            a.make_next_step(next_nodes[i_a])
+            a.remove_all_blocks_and_replan()
+
+    time_slice: List[int] = [0] * len(agents)
+    space_slice: List[float] = [0.] * len(agents)
+    return time_slice, space_slice
+
+
+def get_agents_in_col(all_colissions):
+    agents_with_colissions = set()
+    for i_t in range(len(all_colissions)):
+        nodecol, edgecol = all_colissions[i_t]
+        for node, [i_a1, i_a2] in nodecol.items():
+            agents_with_colissions.update([i_a1, i_a2])
+        for edge, [i_a1, i_a2] in edgecol.items():
+            agents_with_colissions.update([i_a1, i_a2])
+    return agents_with_colissions
+
+
 def get_iterator_fun(type: IteratorType):
     if type is IteratorType.WAITING:
         return iterate_waiting
@@ -354,3 +419,7 @@ def get_iterator_fun(type: IteratorType):
         return lambda agents, ignore_fa: iterate_blocking(agents, 1, ignore_fa)
     elif type is IteratorType.BLOCKING3:
         return lambda agents, ignore_fa: iterate_blocking(agents, 3, ignore_fa)
+    elif type is IteratorType.EDGE_POLICY1:
+        return lambda agents, ignore_fa: iterate_edge_policy(agents, 1, ignore_fa)
+    elif type is IteratorType.EDGE_POLICY3:
+        return lambda agents, ignore_fa: iterate_edge_policy(agents, 3, ignore_fa)
