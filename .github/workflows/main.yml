@@ -35,12 +35,18 @@ jobs:
     - name: Ecbs deps
       run: |
         sudo apt install libyaml-cpp0.6
-    - name: Lint with pycodestyle
-      run: |
-        pycodestyle .
-    - name: Type checking with mypy
-      run: |
-        mypy scenarios sim/decentralized/ roadmaps/var_odrm_torch/
     - name: Test with pytest
       run: |
         pytest -rP
+  pycodestyle:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Lint with pycodestyle
+      run: |
+        pycodestyle .
+  mypy:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Type checking with mypy
+      run: |
+        mypy scenarios sim/decentralized/ roadmaps/var_odrm_torch/
