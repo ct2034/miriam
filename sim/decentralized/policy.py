@@ -3,12 +3,11 @@ from collections import OrderedDict
 from enum import Enum, auto
 from typing import Optional
 
-import networkx as nx
 import numpy as np
+import scenarios
 import torch
 from definitions import INVALID
 from importtf import keras, tf
-from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy_graph_utils import agents_to_data
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
@@ -405,7 +404,8 @@ class OptimalEdgePolicy(Policy):
         starts = [a.pos for a in agents]
         goals = [a.goal for a in agents]
         i_a_self = agents.index(self.a)
-        paths = plan_cbsr(self.a.env, starts, goals, radius=.05, timeout=60)
+        paths = scenarios.solvers.cached_cbsr(
+            self.a.env, starts, goals, radius=.05, timeout=60)
         if paths is INVALID:
             raise RuntimeError("No paths found")
         else:

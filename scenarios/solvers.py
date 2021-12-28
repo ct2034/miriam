@@ -3,9 +3,9 @@ import random
 import numpy as np
 from definitions import DEFAULT_TIMEOUT_S, INVALID
 from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
+from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.matteoantoniazzi_mapf.plan import icts_plan, paths_from_info
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 from scenarios import storage
@@ -79,6 +79,34 @@ def _ecbs_data_to_paths(data):
         paths.append(np.array(one_path))
     return paths
 
+
+# cbs roadmaps ################################################################
+
+
+def cached_cbsr(env, starts, goals,
+                timeout=DEFAULT_TIMEOUT_S,
+                radius=0.1,
+                skip_cache=False):
+    if skip_cache:
+        paths = plan_cbsr(env, starts, goals, radius=radius, timeout=timeout)
+    else:
+        scenario = (env, starts, goals)
+        solver_params = {
+            "radius": radius,
+            "timeout": timeout
+        }
+        if storage.has_result(scenario, ResultType.CBSR_PATHS,
+                              solver_params):
+            paths = storage.get_result(
+                scenario, ResultType.CBSR_PATHS, solver_params)
+        else:
+            paths = plan_cbsr(env, starts, goals,
+                              radius=radius, timeout=timeout)
+            storage.save_result(scenario, ResultType.CBSR_PATHS,
+                                solver_params, paths)
+    return paths
+
+
 # icts ########################################################################
 
 
@@ -115,7 +143,7 @@ def indep(env, starts, goals):
     return paths
 
 
-def cached_decentralized(env, starts, goals, policy: PolicyType,
+def cached_decentralized(env, starts, goals, policy,
                          ignore_finished_agents, skip_cache=False):
     solver_params = {
         "policy": policy.name,
@@ -138,7 +166,7 @@ def cached_decentralized(env, starts, goals, policy: PolicyType,
 
 
 def decentralized(env, starts, goals,
-                  policy: PolicyType, ignore_finished_agents):
+                  policy, ignore_finished_agents):
     agents = to_agent_objects(
         env, starts, goals, policy, rng=random.Random(0))
     if agents is INVALID:

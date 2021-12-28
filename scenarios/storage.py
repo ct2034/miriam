@@ -15,6 +15,7 @@ SCENARIO_STORAGE_PATH_ENVVAR_STR = 'SCENARIO_STORAGE_PATH'
 
 
 class ResultType(Enum):
+    CBSR_PATHS = auto()
     ECBS_PATHS = auto()
     ECBS_DATA = auto()
     ICTS_PATHS = auto()

@@ -2,11 +2,10 @@ import logging
 from random import Random
 
 import matplotlib.pyplot as plt
-import sim.decentralized.policy
+import scenarios.evaluators
 import torch
 import torch.nn as nn
 import torch_geometric
-from scenarios.evaluators import to_agent_objects
 from scenarios.generators import arena_with_crossing
 from scenarios.graph_converter import gridmap_to_nx, starts_or_goals_to_nodes
 from scenarios.visualization import plot_with_paths
@@ -103,8 +102,8 @@ if __name__ == "__main__":
     env_g = gridmap_to_nx(env)
     starts_g = starts_or_goals_to_nodes(starts, env)
     goals_g = starts_or_goals_to_nodes(goals, env)
-    agents = to_agent_objects(env_g, starts_g, goals_g,
-                              policy=PolicyType.OPTIMAL_EDGE)
+    agents = scenarios.evaluators.to_agent_objects(env_g, starts_g, goals_g,
+                                                   policy=PolicyType.OPTIMAL_EDGE)
 
     # for a in agents:
     #     a.policy = sim.decentralized.policy.EdgePolicy(a, model)
