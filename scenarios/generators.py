@@ -352,7 +352,7 @@ def flip_pose(size, pose):
 def arena_with_crossing(size: int, _: float, n_agents: int,
                         rng: random.Random):
     env = np.zeros((size, size), dtype=np.int8)
-    n_possible_poses = size * 2 - 2
+    n_possible_poses = size * 2 - 1
     assert n_agents <= n_possible_poses
     choices = rng.sample(range(n_possible_poses), k=n_agents)
     starts = list(map(lambda i: a_possible_pose(
