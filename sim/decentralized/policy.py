@@ -78,7 +78,7 @@ class Policy(object):
         elif type == PolicyType.EDGE:
             return EdgePolicy(agent, **kwargs)
         elif type == PolicyType.OPTIMAL_EDGE:
-            return OptimalEdgePolicy(agent, **kwargs)
+            return OptimalEdgePolicy(agent)
 
     def __init__(self, agent) -> None:
         super().__init__()

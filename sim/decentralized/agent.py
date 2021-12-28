@@ -467,6 +467,7 @@ class Agent(Generic[C, N]):
         """Move agent to the given position. (Ignoring the path)
         Motion must be possible by the environment."""
         if self.has_gridmap:
+            assert isinstance(pos_to_go_to, tuple), "Should be a tuple"
             assert len(pos_to_go_to) == 2, "Should have 2 dims"
             raise NotImplementedError
         elif self.has_roadmap:
