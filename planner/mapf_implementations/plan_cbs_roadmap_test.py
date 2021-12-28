@@ -27,7 +27,7 @@ class PlanCbsrTest(unittest.TestCase):
         """Simple solvable scenario."""
         starts = [0, 1]
         goals = [2, 3]
-        paths = plan_cbsr(self.g, starts, goals, .2, 15)
+        paths = plan_cbsr(self.g, starts, goals, .2, 60)
         self.assertNotEqual(paths, INVALID)
         self.assertEqual(len(paths), 2)  # n_agents
 
