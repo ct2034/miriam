@@ -364,6 +364,9 @@ def iterate_edge_policy(
     solved = False
     RETRIES = 3
     i_try = 0
+    space_slice: List[float] = [0.] * len(agents)
+    time_slice: List[int] = [1] * len(agents)
+    pos = nx.get_node_attributes(a.env, POS)
 
     poses_at_beginning = tuple(map(lambda a: a.pos, agents))
     all_colissions = []
@@ -396,11 +399,14 @@ def iterate_edge_policy(
         raise SimIterationException(f"Failed to solve after {RETRIES} tries")
     else:
         for i_a, a in enumerate(agents):
+            if not a.is_at_goal():
+                time_slice[i_a] = 1
+            space_slice[i_a] = float(np.linalg.norm(
+                np.array(pos[a.pos]) - np.array(pos[next_nodes[i_a]])
+            ))
             a.make_this_step(next_nodes[i_a])
             a.remove_all_blocks_and_replan()
 
-    time_slice: List[int] = [0] * len(agents)
-    space_slice: List[float] = [0.] * len(agents)
     return time_slice, space_slice
 
 
