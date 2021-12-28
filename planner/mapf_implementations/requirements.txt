@@ -1,3 +1,4 @@
+cvxpy
 psutil
 pyyaml
 matplotlib
