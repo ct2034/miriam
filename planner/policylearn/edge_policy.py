@@ -11,6 +11,7 @@ from scenarios.generators import arena_with_crossing
 from scenarios.graph_converter import gridmap_to_nx, starts_or_goals_to_nodes
 from scenarios.visualization import plot_with_paths
 from sim.decentralized.iterators import IteratorType
+from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario
 
 
@@ -98,14 +99,16 @@ if __name__ == "__main__":
 
     # trying in a scenario
     rng = Random(0)
-    (env, starts, goals) = arena_with_crossing(8, 0, 8, rng)
+    (env, starts, goals) = arena_with_crossing(3, 0, 5, rng)
     env_g = gridmap_to_nx(env)
     starts_g = starts_or_goals_to_nodes(starts, env)
     goals_g = starts_or_goals_to_nodes(goals, env)
-    agents = to_agent_objects(env_g, starts_g, goals_g)
+    agents = to_agent_objects(env_g, starts_g, goals_g,
+                              policy=PolicyType.OPTIMAL_EDGE)
 
-    for a in agents:
-        a.policy = sim.decentralized.policy.EdgePolicy(a, model)
+    # for a in agents:
+    #     a.policy = sim.decentralized.policy.EdgePolicy(a, model)
+
     paths = []
     stats = run_a_scenario(env, agents, plot=False,
                            iterator=IteratorType.EDGE_POLICY3,

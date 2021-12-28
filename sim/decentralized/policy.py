@@ -6,7 +6,9 @@ from typing import Optional
 import networkx as nx
 import numpy as np
 import torch
+from definitions import INVALID
 from importtf import keras, tf
+from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy_graph_utils import agents_to_data
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
@@ -45,6 +47,7 @@ class PolicyType(Enum):
     ZERO_THEN_RANDOM = auto()
     FIRST_THEN_RAISING = auto()
     EDGE = auto()
+    OPTIMAL_EDGE = auto()
 
 
 class Policy(object):
@@ -74,6 +77,8 @@ class Policy(object):
             return FirstThenRaisingPolicy(agent, **kwargs)
         elif type == PolicyType.EDGE:
             return EdgePolicy(agent, **kwargs)
+        elif type == PolicyType.OPTIMAL_EDGE:
+            return OptimalEdgePolicy(agent, **kwargs)
 
     def __init__(self, agent) -> None:
         super().__init__()
@@ -389,3 +394,20 @@ class EdgePolicy(Policy):
             data.pos,
             own_pos)
         return targets[torch.argmax(score)]
+
+
+class OptimalEdgePolicy(Policy):
+    def __init__(self, agent) -> None:
+        super().__init__(agent)
+        self.edge_based = True
+
+    def get_edge(self, agents):
+        starts = [a.pos for a in agents]
+        goals = [a.goal for a in agents]
+        i_a_self = agents.index(self.a)
+        paths = plan_cbsr(self.a.env, starts, goals, radius=.05, timeout=60)
+        if paths is INVALID:
+            raise RuntimeError("No paths found")
+        else:
+            path = paths[i_a_self]
+            return path[1][0]
