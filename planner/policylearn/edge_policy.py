@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     # trying in a scenario
     rng = Random(0)
-    (env, starts, goals) = arena_with_crossing(3, 0, 5, rng)
+    (env, starts, goals) = arena_with_crossing(4, 0, 6, rng)
     env_g = gridmap_to_nx(env)
     starts_g = starts_or_goals_to_nodes(starts, env)
     goals_g = starts_or_goals_to_nodes(goals, env)
