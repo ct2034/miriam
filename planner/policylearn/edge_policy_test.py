@@ -23,7 +23,6 @@ class EdgePolicyTest(unittest.TestCase):
             [0, -1]
         ])
         node = 0
-        batch = torch.tensor([0, 0, 0, 0, 0])
-        score, targets = policy(x, edge_index, pos, node, batch)
+        score, targets = policy(x, edge_index, pos, node)
         self.assertEqual(score.shape, (4,))
         self.assertEqual(targets.shape, (4,))

@@ -335,8 +335,8 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
                 dx = 1.
             elif a.has_roadmap:
                 dx = float(np.linalg.norm(
-                    pos_s[a.pos] -
-                    pos_s[possible_next_poses[i_a]]
+                    np.array(pos_s[a.pos]) -
+                    np.array(pos_s[possible_next_poses[i_a]])
                 ))
             space_slice[i_a] = dx
         if not a.is_at_goal():

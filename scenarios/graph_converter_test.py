@@ -52,7 +52,7 @@ class TestGraphConverter(unittest.TestCase):
     def test_starts_or_goals_to_nodes(self):
         starts_or_goals = np.array([(0, 0), (0, 7), (7, 0), (7, 7)])
         out = starts_or_goals_to_nodes(starts_or_goals, self.env)
-        self.assertEqual(out.shape, (4,))
+        self.assertEqual(len(out), 4)
         self.assertEqual(out[0], 0)
         self.assertEqual(out[1], 7)
         self.assertEqual(out[2], 56)

@@ -60,7 +60,7 @@ class TestVarOdrmTorch(unittest.TestCase):
     def test_make_paths(self):
         n = self.pos.shape[0]
         graph = make_graph(self.pos, self.map_img)
-        paths = make_paths(graph, 10, self.rng)
+        paths = make_paths(graph, 10, self.map_img, self.rng)
         for path in paths:
             start, goal, node_path = path
             start = np.array(start)

@@ -6,8 +6,8 @@ import random
 from typing import *
 
 import numpy as np
-from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT, C
-from scenarios.types import POTENTIAL_ENV_TYPE
+from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT
+from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
 from sim.decentralized.agent import Agent, env_to_nx
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
@@ -107,7 +107,11 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
     agents = []
     env_nx = env_to_nx(env)
     for i_a in range(n_agents):
-        a = Agent(env, int(starts[i_a]), policy=policy, rng=rng, env_nx=env_nx)
+        if is_gridmap(env):
+            a = Agent(env, starts[i_a], policy=policy, rng=rng, env_nx=env_nx)
+        elif is_roadmap(env):
+            a = Agent(env, int(starts[i_a]),
+                      policy=policy, rng=rng, env_nx=env_nx)
         if not a.give_a_goal(goals[i_a]):
             return INVALID
         agents.append(a)

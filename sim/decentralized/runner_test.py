@@ -122,7 +122,11 @@ class TestRunner(unittest.TestCase):
         self.assertFalse(runner.is_environment_well_formed(agents))
 
     def test_iterate_sim_and_are_all_agents_at_their_goals(self):
-        for iterator_type in IteratorType:
+        for iterator_type in [
+            IteratorType.WAITING,
+            IteratorType.BLOCKING1,
+            IteratorType.BLOCKING3
+        ]:
             iterator_fun = get_iterator_fun(iterator_type)
             env = np.array([[0, 0], [0, 0]])
             agents = (
