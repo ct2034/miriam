@@ -7,6 +7,7 @@ from random import Random
 
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 import yaml
 from definitions import INVALID, POS
 from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, read_map,
@@ -99,6 +100,15 @@ def read_outfile(fname):
 def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
     this_dir = os.path.dirname(__file__)
     tmp_dir = "/tmp/"
+
+    # assertions on starts and goals
+    assert len(starts) == len(goals), "starts and goals must have same length"
+    assert len(starts) > 0, "there must be at least one start"
+    assert len(goals) > 0, "there must be at least one goal"
+    assert len(starts) == len(np.unique(starts)), "starts must be unique"
+    assert len(goals) == len(np.unique(goals)), "goals must be unique"
+
+    # write infile
     hash = hasher([g, starts, goals])
     fname_infile_to_annotate = f"{tmp_dir}{hash}_infile_to_annotate.yaml"
     fname_infile = f"{tmp_dir}{hash}_infile.yaml"
@@ -126,6 +136,10 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
     print("call cbs_roadmap")
     success_cbsr = call_subprocess(cmd_cbsr, timeout)
     print("success_cbsr: " + str(success_cbsr))
+    if not success_cbsr:
+        with open(fname_infile, 'r') as f:
+            content = "".join(f.readlines())
+            logger.debug(f"cbsr failed on: >>{content}<<")
 
     # check output
     paths = INVALID
