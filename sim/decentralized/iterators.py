@@ -365,6 +365,7 @@ def iterate_edge_policy(
     RETRIES = 3
     i_try = 0
 
+    poses_at_beginning = tuple(map(lambda a: a.pos, agents))
     all_colissions = []
     for dt in range(lookahead):
         all_colissions.append(check_for_colissions(
@@ -395,7 +396,7 @@ def iterate_edge_policy(
         raise SimIterationException(f"Failed to solve after {RETRIES} tries")
     else:
         for i_a, a in enumerate(agents):
-            a.make_next_step(next_nodes[i_a])
+            a.make_this_step(next_nodes[i_a])
             a.remove_all_blocks_and_replan()
 
     time_slice: List[int] = [0] * len(agents)

@@ -423,6 +423,10 @@ class Agent(Generic[C, N]):
         if (  # there were blocks
             len(self.blocked_edges) > 0 or
             len(self.blocked_nodes) > 0
+        ) or (  # at a position that is not in path
+            self.path_i is not None and
+            self.path is not None and
+            self.path[self.path_i] != (self.pos, self.path_i)
         ):
             # resetting blocks now
             self.blocked_nodes = set()
@@ -458,6 +462,21 @@ class Agent(Generic[C, N]):
             assert self.path_i is not None, "Should have a path_i by now"
             self.path_i += 1
             self.pos = potential_next_pos
+
+    def make_this_step(self, pos_to_go_to: C):
+        """Move agent to the given position. (Ignoring the path)
+        Motion must be possible by the environment."""
+        if self.has_gridmap:
+            assert len(pos_to_go_to) == 2, "Should have 2 dims"
+            raise NotImplementedError
+        elif self.has_roadmap:
+            assert isinstance(pos_to_go_to, int), "Should be an int"
+            if self.pos != pos_to_go_to:
+                if not self.env.has_edge(
+                        self.pos, pos_to_go_to):
+                    raise RuntimeError(
+                        "Should have edge from current pos to pos_to_go_to")
+        self.pos = pos_to_go_to
 
     def get_path_i_not_none(self) -> int:
         assert self.path_i is not None
