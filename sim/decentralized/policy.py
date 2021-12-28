@@ -13,8 +13,7 @@ from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
 from planner.policylearn.generate_graph import (get_agent_path_layer,
                                                 get_agent_pos_layer,
                                                 gridmap_to_graph)
-from planner.policylearn.train_model import ( CONVRNN_STR,
-                                             fix_data_convrnn)
+from planner.policylearn.train_model import CONVRNN_STR, fix_data_convrnn
 from tensorflow.keras.models import load_model
 from torch_geometric.data import Data
 
@@ -375,7 +374,7 @@ class FirstThenRandomPolicy(Policy):
 class EdgePolicy(Policy):
     def __init__(self, agent, nn) -> None:
         super().__init__(agent)
-        self.edge_base = True
+        self.edge_based = True
         self.nn = nn
 
     def get_priority(self, _) -> float:
