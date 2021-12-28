@@ -5,8 +5,8 @@ from definitions import OBSTACLE
 
 
 class TestGraphConverter(unittest.TestCase):
-    def __init__(self, methodName: str = ...) -> None:
-        super().__init__(methodName=methodName)
+    def __init__(self, *args, **kwargs):
+        super(TestGraphConverter, self).__init__(*args, **kwargs)
         self.env = np.zeros((8, 8))
 
     def test_coordinate_to_node(self):

@@ -378,7 +378,9 @@ def iterate_edge_policy(
         next_nodes = []
         for i_a, a in enumerate(agents):
             if i_a in agents_with_colissions:
-                next_nodes.append(a.policy.get_edge(agents))
+                assert hasattr(a.policy, "get_edge"), \
+                    "Needs edge-based policy"
+                next_nodes.append(a.policy.get_edge(agents))  # type: ignore
             else:
                 next_nodes.append(a.what_is_next_step())
         next_collisions = check_for_colissions(
