@@ -1,17 +1,13 @@
 import logging
-from functools import lru_cache
 from typing import Tuple
-
+import sim
 import networkx as nx
 import numpy as np
-import tools
 from definitions import DEFAULT_TIMEOUT_S, FREE, INVALID
 from networkx.algorithms import approximation
 from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
                                                 is_info_valid,
                                                 sum_of_costs_from_info)
-from sim.decentralized.agent import Agent, env_to_nx
-from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import (is_environment_well_formed,
                                       to_agent_objects)
 
@@ -136,7 +132,8 @@ def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
 # decen #######################################################################
 def cost_sim_decentralized_random(env, starts, goals, skip_cache=False):
     metrics = cached_decentralized(
-        env, starts, goals, PolicyType.RANDOM, skip_cache)
+        env, starts, goals,
+        sim.decentralized.policy.PolicyType.RANDOM, skip_cache)
     if metrics is INVALID:
         return INVALID
     (average_time, _, _, _, successful
@@ -149,7 +146,8 @@ def cost_sim_decentralized_random(env, starts, goals, skip_cache=False):
 
 def cost_sim_decentralized_learned(env, starts, goals, skip_cache=False):
     metrics = cached_decentralized(
-        env, starts, goals, PolicyType.LEARNED, skip_cache)
+        env, starts, goals,
+        sim.decentralized.policy.PolicyType.LEARNED, skip_cache)
     if metrics is INVALID:
         return INVALID
     (average_time, _, _, _, successful
@@ -185,8 +183,7 @@ def n_nodes(env):
 
 
 def _gridmap_to_nx(env):
-    a = Agent(env, np.array([0, 0]))
-    return env_to_nx(env, None)
+    return sim.decentralized.agent.env_to_nx(env, None)
 
 
 def n_edges(env):

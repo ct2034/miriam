@@ -16,7 +16,6 @@ from scenarios.visualization import plot_with_paths
 from tools import hasher
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def call_subprocess(cmd, timeout):
@@ -124,18 +123,21 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
         fname_infile,
         str(radius)
     ]
-    print("call annotate_roadmap")
+    logger.debug("call annotate_roadmap")
     success_ar = call_subprocess(cmd_ar, timeout)
-    print("success_ar: " + str(success_ar))
+    logger.debug("success_ar: " + str(success_ar))
+
+    if not success_ar:
+        return INVALID
 
     # call cbs_roadmap
     cmd_cbsr = [
         this_dir + "/libMultiRobotPlanning/build/cbs_roadmap",
         "-i", fname_infile,
         "-o", fname_outfile]
-    print("call cbs_roadmap")
+    logger.debug("call cbs_roadmap")
     success_cbsr = call_subprocess(cmd_cbsr, timeout)
-    print("success_cbsr: " + str(success_cbsr))
+    logger.debug("success_cbsr: " + str(success_cbsr))
     if not success_cbsr:
         with open(fname_infile, 'r') as f:
             content = "".join(f.readlines())
@@ -145,7 +147,7 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
     paths = INVALID
     if os.path.isfile(fname_outfile):
         paths = read_outfile(fname_outfile)
-        print("paths: " + str(paths))
+        logger.debug("paths: " + str(paths))
 
     # clean up
     for file in [fname_infile, fname_infile_to_annotate, fname_outfile]:

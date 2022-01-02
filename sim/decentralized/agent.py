@@ -477,6 +477,7 @@ class Agent(Generic[C, N]):
                         self.pos, pos_to_go_to):
                     raise RuntimeError(
                         "Should have edge from current pos to pos_to_go_to")
+            self.path_i += 1
         self.pos = pos_to_go_to
 
     def get_path_i_not_none(self) -> int:

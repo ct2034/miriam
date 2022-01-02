@@ -101,11 +101,12 @@ def initialize_new_agent(
     return None
 
 
-def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
+def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM, env_nx=None,
                      rng: random.Random = random.Random()):
     n_agents = np.array(starts).shape[0]
     agents = []
-    env_nx = env_to_nx(env)
+    if env_nx is None:
+        env_nx = env_to_nx(env)
     for i_a in range(n_agents):
         if is_gridmap(env):
             a = Agent(env, starts[i_a], policy=policy, rng=rng, env_nx=env_nx)

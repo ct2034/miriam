@@ -1,11 +1,14 @@
 import logging
 from random import Random
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import scenarios.evaluators
+import scenarios.solvers
 import torch
 import torch.nn as nn
 import torch_geometric
+from definitions import INVALID
 from scenarios.generators import arena_with_crossing
 from scenarios.graph_converter import gridmap_to_nx, starts_or_goals_to_nodes
 from scenarios.visualization import plot_with_paths
@@ -13,9 +16,12 @@ from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario
 
+MODEL_INPUT = Tuple[
+    torch.Tensor, torch.Tensor, torch.Tensor, int]
+
 
 class EdgePolicyModel(nn.Module):
-    def __init__(self, num_node_features, conv_channels):
+    def __init__(self, num_node_features=2, conv_channels=4):
         super().__init__()
         self.conv1 = torch_geometric.nn.GCNConv(
             num_node_features, conv_channels)
@@ -47,9 +53,28 @@ class EdgePolicyModel(nn.Module):
             else:
                 raise ValueError("Edge not found")
 
+        # read values at potential targets as score
         score = self.readout(x[targets])
         score = torch.softmax(score, dim=0)
         return score[:, 0], targets
+
+    def learn(self, inputs: List[MODEL_INPUT], ys: List[int]):
+        assert len(inputs) == len(ys)
+        self.train()
+        self.zero_grad()
+        scores = torch.tensor([])
+        y_goals = torch.tensor([])
+        for i in range(len(inputs)):
+            x, edge_index, pos, node = inputs[i]
+            score, targets = self.forward(x, edge_index, pos, node)
+            y_goal = torch.zeros(score.shape[0], dtype=torch.float)
+            y_goal[(targets == ys[i]).nonzero()] = 1
+            scores = torch.cat((scores, score))
+            y_goals = torch.cat((y_goals, y_goal))
+        loss = torch.nn.functional.binary_cross_entropy(
+            scores, y_goals)
+        loss.backward()
+        return float(loss)
 
 
 if __name__ == "__main__":

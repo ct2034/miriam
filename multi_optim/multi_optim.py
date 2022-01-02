@@ -1,3 +1,4 @@
+import logging
 from random import Random
 from typing import Dict, List, Optional, Tuple
 
@@ -5,18 +6,15 @@ import networkx as nx
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
-from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
-from sim.decentralized.agent import Agent
-from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import PolicyType
-from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar
 
+import dagger
 
-def find_collisions(agents: List[Agent]
+
+def find_collisions(agents
                     ) -> Dict[Tuple[int, int], Tuple[int, int]]:
     # {(node, t): agent}
     agent_visited: Dict[Tuple[int, int], int] = {}
@@ -34,103 +32,73 @@ def find_collisions(agents: List[Agent]
     return collisions
 
 
-def optimize_policy(g: nx.Graph, n_agents, rng):
-    n_nodes = g.number_of_nodes()
-    has_collisions = False
-    fixed_env_nx: Optional[nx.Graph] = None
-    while not has_collisions:
-        agents: List[Agent] = []
-        starts_goals = rng.choice(
-            np.arange(n_nodes), size=(n_agents, 2), replace=False)
-        for i_ga in range(n_agents):
-            start, goal = starts_goals[i_ga, :]
-            policy = PolicyType.RANDOM
-            if fixed_env_nx is None:
-                agent = Agent(g, int(start), policy)
-                fixed_env_nx = agent.env_nx.copy()
-            else:
-                agent = Agent(g, int(start), policy,
-                              env_nx=fixed_env_nx.copy())
-            agent.give_a_goal(int(goal))
-            agents.append(agent)
-        collisions = find_collisions(agents)
-        has_collisions = (len(collisions) > 0)
-    collision_nodes = np.array(list(collisions.keys()))
-    first = np.argmin(collision_nodes[:, 1])
-    col_node, col_t = collision_nodes[first]
-    col_agents = collisions[(col_node, col_t)]
-    print(f"col_node: {col_node}, col_t: {col_t}, col_agents: {col_agents}")
-    # save results when this agent has prio
-    results: Dict[int, Tuple[float, float, float, float, float]] = {}
-    for i_ca, i_a in enumerate(col_agents):
-        i_oa = col_agents[i_ca % len(col_agents)]
-        agents = []
-        for i_ga in range(n_agents):
-            start, goal = starts_goals[i_ga, :]
-            if i_ga == i_a:
-                policy = PolicyType.ONE_THEN_RANDOM
-            elif i_ga == i_oa:
-                policy = PolicyType.ZERO_THEN_RANDOM
-            else:
-                policy = PolicyType.RANDOM
-            assert fixed_env_nx is not None
-            agent = Agent(g, int(start), policy,
-                          env_nx=fixed_env_nx.copy())
-            agent.give_a_goal(int(goal))
-            agents.append(agent)
-        results[i_a] = run_a_scenario(
-            None, agents, False, IteratorType.BLOCKING1)
-    for i_a, r in results.items():
-        print(f"Agent {i_a}")
-        (average_time, max_time, average_length,  max_length, successful
-         ) = r
-        print(f" average_time: {average_time}, max_time: {max_time},\n" +
-              f" average_length: {average_length}," +
-              f" max_length: {max_length},\n" +
-              f" successful: {successful}")
+def optimize_policy(model, g: nx.Graph, n_agents, rng):
+    ds = dagger.DaggerStrategy(model, g, 2, n_agents, rng)
+    model, loss = ds.run_dagger()
+    return model, loss
 
 
 def run_optimization(
-        n_nodes: int = 64,
-        n_runs: int = 1024,
+        n_nodes: int = 16,
+        n_runs_pose: int = 1024,
+        n_runs_policy: int = 8,
         stats_every: int = 1,
         lr_pos: float = 1e-4,
-        n_agents: int = 4,
+        n_agents: int = 3,
         map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
         rng: Random = Random(0)):
+    # Roadmap
     map_img = read_map(map_fname)
     pos = sample_points(n_nodes, map_img, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g = make_graph(pos, map_img)
-    draw_graph(g, map_img, title="Start")
-    plt.savefig("multi_optim/start.png")
 
+    # Policy
+    policy_model = None  # start with no policy
+
+    # Visualization and analysis
     stats = {
-        "test_length": {
+        "poses_test_length": {
             "x": [],
             "t": []
         },
-        "training_length": {
+        "poses_training_length": {
+            "x": [],
+            "t": []
+        },
+        "policy_loss": {
             "x": [],
             "t": []
         }
     }
+    draw_graph(g, map_img, title="Start")
+    plt.savefig("multi_optim/start.png")
 
-    pb = ProgressBar("Optimization", n_runs, 10)
+    # Making sense of two n_runs
+    assert n_runs_pose > n_runs_policy
+    n_runs = n_runs_pose
+    n_runs_pose_per_policy = n_runs // n_runs_policy
+
+    # Run optimization
+    pb = ProgressBar("Optimization", n_runs, 1)
     for i_r in range(n_runs):
         # Optimizing Poses
-        g, pos, test_length, training_length = optimize_poses(
+        g, pos, poses_test_length, poses_training_length = optimize_poses(
             g, pos, map_img, optimizer_pos, rng)
 
-        # Optimizing Policy
-        # optimize_policy(g, n_agents, rng)
+        if i_r % n_runs_pose_per_policy == 0:
+            # Optimizing Policy
+            policy_model, policy_loss = optimize_policy(
+                policy_model, g, n_agents, rng)
 
         # Saving stats
         if i_r % stats_every == 0:
-            stats["test_length"]["x"].append(test_length)
-            stats["test_length"]["t"].append(i_r)
-            stats["training_length"]["x"].append(training_length)
-            stats["training_length"]["t"].append(i_r)
+            stats["poses_test_length"]["x"].append(poses_test_length)
+            stats["poses_test_length"]["t"].append(i_r)
+            stats["poses_training_length"]["x"].append(poses_training_length)
+            stats["poses_training_length"]["t"].append(i_r)
+            stats["policy_loss"]["x"].append(policy_loss)
+            stats["policy_loss"]["t"].append(i_r)
         pb.progress()
 
     pb.end()
@@ -145,9 +113,13 @@ def run_optimization(
     plt.legend()
     plt.savefig("multi_optim/stats.png")
 
-    return g, pos, test_length, training_length
+    return g, pos, poses_test_length, poses_training_length
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap").setLevel(logging.DEBUG)
+
     rng = Random(0)
     run_optimization(rng=rng)

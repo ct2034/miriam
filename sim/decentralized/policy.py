@@ -4,11 +4,10 @@ from enum import Enum, auto
 from typing import Optional
 
 import numpy as np
-import scenarios
 import torch
-from definitions import INVALID
 from importtf import keras, tf
-from planner.policylearn.edge_policy_graph_utils import agents_to_data
+from planner.policylearn.edge_policy_graph_utils import (agents_to_data,
+                                                         get_optimal_edge)
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
                                                extract_all_fovs)
 from planner.policylearn.generate_graph import (get_agent_path_layer,
@@ -47,6 +46,8 @@ class PolicyType(Enum):
     FIRST_THEN_RAISING = auto()
     EDGE = auto()
     OPTIMAL_EDGE = auto()
+    EDGE_RAISING = auto()
+    EDGE_THEN_RAISING = auto()
 
 
 class Policy(object):
@@ -78,6 +79,8 @@ class Policy(object):
             return EdgePolicy(agent, **kwargs)
         elif type == PolicyType.OPTIMAL_EDGE:
             return OptimalEdgePolicy(agent)
+        elif type == PolicyType.EDGE_RAISING:
+            return EdgeRaisingPolicy(agent)
 
     def __init__(self, agent) -> None:
         super().__init__()
@@ -380,19 +383,20 @@ class EdgePolicy(Policy):
         super().__init__(agent)
         self.edge_based = True
         self.nn = nn
+        self.nn.eval()
 
     def get_priority(self, _) -> float:
         raise NotImplementedError()
 
     def get_edge(self, agents):
         i_a_self = agents.index(self.a)
-        data, own_pos = agents_to_data(agents, i_a_self)
+        data, own_pos, big_from_small = agents_to_data(agents, i_a_self)
         score, targets = self.nn.forward(
             data.x,
             data.edge_index,
             data.pos,
             own_pos)
-        return targets[torch.argmax(score)]
+        return big_from_small[targets[torch.argmax(score)]]
 
 
 class OptimalEdgePolicy(Policy):
@@ -401,13 +405,27 @@ class OptimalEdgePolicy(Policy):
         self.edge_based = True
 
     def get_edge(self, agents):
-        starts = [a.pos for a in agents]
-        goals = [a.goal for a in agents]
-        i_a_self = agents.index(self.a)
-        paths = scenarios.solvers.cached_cbsr(
-            self.a.env, starts, goals, radius=.05, timeout=60)
-        if paths is INVALID:
-            raise RuntimeError("No paths found")
-        else:
-            path = paths[i_a_self]
-            return path[1][0]
+        return get_optimal_edge(agents, agents.index(self.a))
+
+
+class EdgeRaisingPolicy(Policy):
+    def __init__(self, agent) -> None:
+        super().__init__(agent)
+        self.edge_based = True
+
+    def get_edge(self, agents):
+        raise PolicyCalledException(self, 0)
+
+
+class EdgeThenRaisingPolicy(Policy):
+    def __init__(self, agent, first_val: int) -> None:
+        super().__init__(agent)
+        self.edge_based = True
+        self.first_call = True
+        self.first_val = first_val
+
+    def get_edge(self, agents):
+        if self.first_call:
+            self.first_call = False
+            return self.first_val
+        raise PolicyCalledException(self, 0)
