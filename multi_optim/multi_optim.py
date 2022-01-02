@@ -119,7 +119,8 @@ def run_optimization(
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap").setLevel(logging.DEBUG)
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.DEBUG)
 
     rng = Random(0)
     run_optimization(rng=rng)

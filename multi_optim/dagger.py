@@ -87,7 +87,7 @@ class ScenarioState():
 
 
 class DaggerStrategy():
-    """Implementation of DAgger 
+    """Implementation of DAgger
     (https://proceedings.mlr.press/v15/ross11a.html)"""
 
     def __init__(self, model, graph, n_episodes, n_agents, rng):
@@ -111,7 +111,8 @@ class DaggerStrategy():
             goals = rng.sample(self.graph.nodes(), self.n_agents)
             # is this solvable?
             paths = scenarios.solvers.cached_cbsr(
-                self.graph, starts, goals, radius=RADIUS, timeout=int(TIMEOUT*.9))
+                self.graph, starts, goals, radius=RADIUS,
+                timeout=int(TIMEOUT*.9))
             if paths != INVALID:
                 solvable = True
 
