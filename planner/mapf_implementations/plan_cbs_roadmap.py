@@ -22,7 +22,7 @@ def call_subprocess(cmd, timeout):
     start_time = time.time()
     success = False
     t = 0.
-    logger.info(" ".join(cmd))
+    logger.debug(" ".join(cmd))
     process = None
     try:
         process = subprocess.Popen(
@@ -84,6 +84,8 @@ def write_infile(fname, g, starts, goals):
 def read_outfile(fname):
     with open(fname, 'r') as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
+    if data['statistics']['success'] == 0:
+        return INVALID
     paths = []
     assert 'schedule' in data.keys()
     schedule = data['schedule']

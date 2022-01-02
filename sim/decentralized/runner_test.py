@@ -234,11 +234,14 @@ class TestRunner(unittest.TestCase):
         (env, starts, goals) = corridor_with_passing(
             10, 0, 2, rng)
         agents = to_agent_objects(
-            env, starts, goals, PolicyType.RANDOM, rng)
+            env, starts, goals,
+            policy=PolicyType.RANDOM,
+            rng=rng)
         from sim.decentralized.iterators import SimIterationException
         SimIterationException.__init__ = MagicMock(return_value=None)
         res = run_a_scenario(
-            env, agents, False, IteratorType.BLOCKING1, ignore_finished_agents=False)
+            env, agents, False,
+            IteratorType.BLOCKING1, ignore_finished_agents=False)
         SimIterationException.__init__.assert_called_with(
             "oscillation deadlock")
         print(res)
