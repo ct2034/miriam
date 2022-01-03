@@ -58,7 +58,7 @@ class EdgePolicyModel(nn.Module):
         score = torch.softmax(score, dim=0)
         return score[:, 0], targets
 
-    def learn(self, inputs: List[MODEL_INPUT], ys: List[int]):
+    def learn(self, inputs: List[MODEL_INPUT], ys: List[int], optimizer):
         assert len(inputs) == len(ys)
         self.train()
         self.zero_grad()
@@ -73,7 +73,11 @@ class EdgePolicyModel(nn.Module):
             y_goals = torch.cat((y_goals, y_goal))
         loss = torch.nn.functional.binary_cross_entropy(
             scores, y_goals)
-        loss.backward()
+        try:
+            loss.backward()
+            optimizer.step()
+        except RuntimeError:
+            logging.warning("Could not train")
         return float(loss)
 
 

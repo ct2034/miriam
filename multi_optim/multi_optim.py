@@ -6,6 +6,7 @@ import networkx as nx
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+from planner.policylearn.edge_policy import EdgePolicyModel
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
@@ -32,8 +33,8 @@ def find_collisions(agents
     return collisions
 
 
-def optimize_policy(model, g: nx.Graph, n_agents, rng):
-    ds = dagger.DaggerStrategy(model, g, 2, n_agents, rng)
+def optimize_policy(model, g: nx.Graph, n_agents, optimizer, rng):
+    ds = dagger.DaggerStrategy(model, g, 2, n_agents, optimizer, rng)
     model, loss = ds.run_dagger()
     return model, loss
 
@@ -44,6 +45,7 @@ def run_optimization(
         n_runs_policy: int = 128,
         stats_every: int = 1,
         lr_pos: float = 1e-4,
+        lr_policy: float = 1e-4,
         n_agents: int = 8,
         map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
         rng: Random = Random(0)):
@@ -54,10 +56,12 @@ def run_optimization(
     g = make_graph(pos, map_img)
 
     # Policy
-    policy_model = None  # start with no policy
+    policy_model = EdgePolicyModel()
+    optimizer_policy = torch.optim.Adam(
+        policy_model.parameters(), lr=lr_policy)
 
     # Visualization and analysis
-    stats = {
+    stats: Dict[str, Dict[str, List[float]]] = {
         "poses_test_length": {
             "x": [],
             "t": []
@@ -89,7 +93,7 @@ def run_optimization(
         if i_r % n_runs_pose_per_policy == 0:
             # Optimizing Policy
             policy_model, policy_loss = optimize_policy(
-                policy_model, g, n_agents, rng)
+                policy_model, g, n_agents, optimizer_policy, rng)
 
         # Saving stats
         if i_r % stats_every == 0:
@@ -118,9 +122,9 @@ def run_optimization(
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.DEBUG)
+    # logging.getLogger(
+    #     "planner.mapf_implementations.plan_cbs_roadmap"
+    # ).setLevel(logging.DEBUG)
 
     rng = Random(0)
     run_optimization(rng=rng)

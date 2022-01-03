@@ -90,7 +90,7 @@ class DaggerStrategy():
     """Implementation of DAgger
     (https://proceedings.mlr.press/v15/ross11a.html)"""
 
-    def __init__(self, model, graph, n_episodes, n_agents, rng):
+    def __init__(self, model, graph, n_episodes, n_agents, optimizer, rng):
         self.d = set()
         self.model = model
         self.graph = graph
@@ -98,10 +98,7 @@ class DaggerStrategy():
         self.n_agents = n_agents
         self.env_nx = env_to_nx(graph)
         self.rng = rng
-
-        # Initialize the policy on first run
-        if self.model is None:
-            self.model = EdgePolicyModel()
+        self.optimizer = optimizer
 
     def sample_trajectory(self, rng, max_steps=MAX_STEPS):
         """Sample a trajectory using the given policy."""
@@ -160,7 +157,9 @@ class DaggerStrategy():
             ds = self.rng.sample(self.d, min(len(self.d), N_LEARN_MAX))
             loss = self.model.learn(
                 [get_input_data_from_observation(s.observe()) for s, _ in ds],
-                [a for _, a in ds])
+                [a for _, a in ds],
+                self.optimizer
+            )
             loss_s.append(loss)
 
         return self.model, np.mean(loss_s)
