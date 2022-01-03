@@ -106,8 +106,10 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
     assert len(starts) == len(goals), "starts and goals must have same length"
     assert len(starts) > 0, "there must be at least one start"
     assert len(goals) > 0, "there must be at least one goal"
-    assert len(starts) == len(np.unique(starts)), "starts must be unique"
-    assert len(goals) == len(np.unique(goals)), "goals must be unique"
+    if not len(starts) == len(np.unique(starts)):  # starts must be unique
+        return INVALID
+    if not len(goals) == len(np.unique(goals)):  # goals must be unique
+        return INVALID
 
     # write infile
     hash = hasher([g, starts, goals])

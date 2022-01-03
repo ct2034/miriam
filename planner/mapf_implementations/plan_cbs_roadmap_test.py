@@ -42,3 +42,50 @@ class PlanCbsrTest(unittest.TestCase):
         # this currently times out which gives the right result but is not
         # really what we want
         self.assertEqual(paths, INVALID)
+
+    def test_two_agents_same_start_or_goal(self):
+        """Testing behavior when two agents start or end at the same place."""
+        g = self.g.copy()
+        # same start
+        starts = [0, 0, 1, 2]
+        goals = [2, 3, 0, 1]
+        paths = plan_cbsr(g, starts, goals, .2, 60)
+        self.assertEqual(paths, INVALID)
+        # same goal
+        starts = [0, 1, 2, 3]
+        goals = [0, 1, 0, 2]
+        paths = plan_cbsr(g, starts, goals, .2, 60)
+        self.assertEqual(paths, INVALID)
+
+    def test_scenario_solvable_with_waiting(self):
+        """Scenario with waiting."""
+        g = nx.Graph()
+        g.add_edges_from([
+            (0, 1),
+            (1, 2),
+            (2, 3),
+            (2, 4),
+            (4, 5)
+        ])
+        nx.set_node_attributes(g, {
+            0: (0, 0),
+            1: (1, 0),
+            2: (2, 0),
+            3: (2, 1),  # waiting point
+            4: (3, 0),
+            5: (4, 0)
+        }, POS)
+        starts = [0, 5]
+        goals = [5, 0]
+        paths = plan_cbsr(g, starts, goals, .2, 60)
+        self.assertNotEqual(paths, INVALID)
+        self.assertEqual(len(paths), 2)  # n_agents
+        waited = False
+        for i_a in range(2):
+            prev_node = None
+            for node in paths[i_a]:
+                if prev_node is not None:
+                    if prev_node[0] == node[0]:
+                        waited = True
+                prev_node = node
+        self.assertTrue(waited)
