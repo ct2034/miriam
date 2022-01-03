@@ -10,7 +10,10 @@ from hashlib import sha256
 from itertools import product
 from typing import Tuple
 
+import networkx as nx
 import numpy as np
+
+from definitions import POS
 
 
 class TimeoutException(Exception):
@@ -271,19 +274,22 @@ def hasher(args, kwargs={}):
     """Hash args that are hashable or np.ndarrays"""
     hashstr = ""
     for i, arg in enumerate(list(args)):
-        if isinstance(arg, np.ndarray):
-            hashstr += str(sha256(arg.tobytes()).hexdigest())
-        else:
-            hashstr += str(arg)
+        hashstr += to_string(arg)
         hashstr += str(i)
     for keyw, arg in kwargs.items():
-        if isinstance(arg, np.ndarray):
-            hashstr += str(sha256(arg.tobytes()).hexdigest())
-        else:
-            hashstr += str(arg)
+        hashstr += to_string(arg)
         hashstr += str(keyw)
     my_hash = sha256(hashstr.encode('utf-8')).hexdigest()
     return my_hash
+
+
+def to_string(arg):
+    if isinstance(arg, np.ndarray):
+        return str(sha256(arg.tobytes()).hexdigest())
+    elif isinstance(arg, nx.Graph):
+        return str(nx.get_node_attributes(arg, POS))
+    else:
+        return str(arg)
 
 
 RED_SEQ = "\033[;31m"

@@ -1,5 +1,6 @@
 import unittest
 
+import networkx as nx
 import numpy as np
 
 import tools
@@ -57,6 +58,15 @@ class TestTools(unittest.TestCase):
                             tools.hasher((), params_diff_int_a))
         self.assertNotEqual(tools.hasher((), params_base),
                             tools.hasher((), params_diff_int_b))
+
+    def test_graphs(self):
+        g1 = nx.Graph([(0, 1)])
+        nx.set_node_attributes(g1, {0: {"pos": [0, 0]}})
+
+        g2 = nx.Graph([(0, 1)])
+        nx.set_node_attributes(g2, {0: {"pos": [0, 0.1]}})
+        self.assertNotEqual(
+            tools.hasher([g1], {}), tools.hasher([g2], {}))
 
 
 if __name__ == "__main__":  # pragma: no cover

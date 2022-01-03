@@ -10,6 +10,8 @@ import networkx as nx
 import numpy as np
 import yaml
 from definitions import INVALID, POS
+from planner.mapf_implementations.libMultiRobotPlanning.tools import \
+    annotate_roadmap
 from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, read_map,
                                                     sample_points)
 from scenarios.visualization import plot_with_paths
@@ -57,7 +59,7 @@ def call_subprocess(cmd, timeout):
     return success
 
 
-def write_infile(fname, g, starts, goals):
+def write_roadmap_file(fname, g, radius):
     data = {}
     data["roadmap"] = {}
     data["roadmap"]["undirected"] = True
@@ -70,6 +72,14 @@ def write_infile(fname, g, starts, goals):
     for e in g.edges:
         data["roadmap"]["edges"].append(
             [str(e[0]), str(e[1])])
+    data = annotate_roadmap.add_self_edges(data)
+    data = annotate_roadmap.add_edge_conflicts(radius, data)
+    with open(fname, 'w') as f:
+        yaml.dump(data, f, default_flow_style=True)
+    return data
+
+
+def write_infile(fname, data, starts, goals):
     data["agents"] = []
     for i in range(len(starts)):
         data["agents"].append({
@@ -100,6 +110,9 @@ def read_outfile(fname):
 
 def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
     this_dir = os.path.dirname(__file__)
+    cache_dir = os.path.join(this_dir, 'cache')
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
     tmp_dir = "/tmp/"
 
     # assertions on starts and goals
@@ -111,28 +124,24 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
     if not len(goals) == len(np.unique(goals)):  # goals must be unique
         return INVALID
 
+    # make roadmap (with caching)
+    hash_roadmap = hasher([g, radius])
+    fname_roadmap = f"{cache_dir}/{hash_roadmap}_roadmap.yaml"
+    data = None
+    if not os.path.exists(fname_roadmap):
+        data = write_roadmap_file(fname_roadmap, g, radius)
+    else:
+        with open(fname_roadmap, 'r') as f:
+            data = yaml.load(f, Loader=yaml.SafeLoader)
+    if data is None:  # error
+        logging.warning("no annotated oadmap")
+        return INVALID
+
     # write infile
     hash = hasher([g, starts, goals])
-    fname_infile_to_annotate = f"{tmp_dir}{hash}_infile_to_annotate.yaml"
     fname_infile = f"{tmp_dir}{hash}_infile.yaml"
     fname_outfile = f"{tmp_dir}{hash}_outfile.yaml"
-    write_infile(fname_infile_to_annotate, g, starts, goals)
-
-    # call annotate_roadmap
-    cmd_ar = [
-        "python3",
-        this_dir +
-        "/libMultiRobotPlanning/tools/annotate_roadmap.py",
-        fname_infile_to_annotate,
-        fname_infile,
-        str(radius)
-    ]
-    logger.debug("call annotate_roadmap")
-    success_ar = call_subprocess(cmd_ar, timeout)
-    logger.debug("success_ar: " + str(success_ar))
-
-    if not success_ar:
-        return INVALID
+    write_infile(fname_infile, data, starts, goals)
 
     # call cbs_roadmap
     cmd_cbsr = [
@@ -154,7 +163,7 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
         logger.debug("paths: " + str(paths))
 
     # clean up
-    for file in [fname_infile, fname_infile_to_annotate, fname_outfile]:
+    for file in [fname_infile, fname_outfile]:
         if os.path.isfile(file):
             os.remove(file)
     return paths
