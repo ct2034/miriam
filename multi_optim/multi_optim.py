@@ -39,12 +39,12 @@ def optimize_policy(model, g: nx.Graph, n_agents, rng):
 
 
 def run_optimization(
-        n_nodes: int = 16,
+        n_nodes: int = 32,
         n_runs_pose: int = 1024,
-        n_runs_policy: int = 8,
+        n_runs_policy: int = 128,
         stats_every: int = 1,
         lr_pos: float = 1e-4,
-        n_agents: int = 3,
+        n_agents: int = 8,
         map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
         rng: Random = Random(0)):
     # Roadmap
