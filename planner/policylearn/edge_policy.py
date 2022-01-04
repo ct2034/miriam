@@ -77,7 +77,10 @@ class EdgePolicyModel(nn.Module):
             loss.backward()
             optimizer.step()
         except RuntimeError:
-            logging.warning("Could not train")
+            logging.warning(f"Could not train with: " +
+                            f"y_goals {y_goals}, scores {scores}" +
+                            f"ys {ys}, targets {targets}")
+            return None
         return float(loss)
 
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import scenarios
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 ACTION = int
-OBSERVATION = Tuple[Data, int]
+OBSERVATION = Tuple[Data, int, Dict[int, int]]
 MAX_STEPS = 10
 N_LEARN_MAX = 100
 
@@ -160,6 +160,9 @@ class DaggerStrategy():
                 [a for _, a in ds],
                 self.optimizer
             )
-            loss_s.append(loss)
+            if loss is not None:
+                loss_s.append(loss)
 
+        if len(loss_s) == 0:
+            return self.model, np.mean([0])
         return self.model, np.mean(loss_s)
