@@ -93,12 +93,19 @@ class DaggerStrategy():
     def __init__(self, model, graph, n_episodes, n_agents, optimizer, rng):
         self.d = set()
         self.model = model
-        self.graph = graph
+        self.graph = self._add_self_edges_to_graph(graph)
         self.n_episodes = n_episodes
         self.n_agents = n_agents
         self.env_nx = env_to_nx(graph)
         self.rng = rng
         self.optimizer = optimizer
+
+    def _add_self_edges_to_graph(self, graph):
+        """Add self edges to the graph."""
+        for node in graph.nodes():
+            assert not graph.has_edge(node, node)
+            graph.add_edge(node, node)
+        return graph
 
     def sample_trajectory(self, rng, max_steps=MAX_STEPS):
         """Sample a trajectory using the given policy."""
