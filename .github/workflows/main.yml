@@ -80,4 +80,4 @@ jobs:
         pip install -r learn/pytorch/requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
     - name: Type checking with mypy
       run: |
-        mypy scenarios sim/decentralized/ roadmaps/var_odrm_torch/
+        mypy
