@@ -108,7 +108,7 @@ def read_outfile(fname):
     return paths
 
 
-def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
+def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_cache: bool = False):
     this_dir = os.path.dirname(__file__)
     cache_dir = os.path.join(this_dir, 'cache')
     if not os.path.exists(cache_dir):
@@ -128,7 +128,9 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60.):
     hash_roadmap = hasher([g, radius])
     fname_roadmap = f"{cache_dir}/{hash_roadmap}_roadmap.yaml"
     data = None
-    if not os.path.exists(fname_roadmap):
+    if not os.path.exists(fname_roadmap) or skip_cache:
+        if os.path.exists(fname_roadmap):
+            os.remove(fname_roadmap)
         data = write_roadmap_file(fname_roadmap, g, radius)
     else:
         with open(fname_roadmap, 'r') as f:
