@@ -13,7 +13,7 @@ keras
 libpysal
 matplotlib
 munkres
-mypy==0.930
+mypy
 networkx
 numpy
 psutil
