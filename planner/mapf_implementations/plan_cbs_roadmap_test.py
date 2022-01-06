@@ -27,7 +27,7 @@ class PlanCbsrTest(unittest.TestCase):
         """Simple solvable scenario."""
         starts = [0, 1]
         goals = [2, 3]
-        paths = plan_cbsr(self.g, starts, goals, .2, 60)
+        paths = plan_cbsr(self.g, starts, goals, .2, 60, skip_cache=True)
         self.assertNotEqual(paths, INVALID)
         self.assertEqual(len(paths), 2)  # n_agents
 
@@ -38,7 +38,7 @@ class PlanCbsrTest(unittest.TestCase):
         g.nodes[4][POS] = (2, 2)  # far away
         starts = [0]
         goals = [4]
-        paths = plan_cbsr(g, starts, goals, .2, 60)
+        paths = plan_cbsr(g, starts, goals, .2, 60, skip_cache=True)
         # this currently times out which gives the right result but is not
         # really what we want
         self.assertEqual(paths, INVALID)
@@ -49,12 +49,12 @@ class PlanCbsrTest(unittest.TestCase):
         # same start
         starts = [0, 0, 1, 2]
         goals = [2, 3, 0, 1]
-        paths = plan_cbsr(g, starts, goals, .2, 60)
+        paths = plan_cbsr(g, starts, goals, .2, 60, skip_cache=True)
         self.assertEqual(paths, INVALID)
         # same goal
         starts = [0, 1, 2, 3]
         goals = [0, 1, 0, 2]
-        paths = plan_cbsr(g, starts, goals, .2, 60)
+        paths = plan_cbsr(g, starts, goals, .2, 60, skip_cache=True)
         self.assertEqual(paths, INVALID)
 
     def test_scenario_solvable_with_waiting(self):
@@ -77,7 +77,7 @@ class PlanCbsrTest(unittest.TestCase):
         }, POS)
         starts = [0, 5]
         goals = [5, 0]
-        paths = plan_cbsr(g, starts, goals, .2, 60)
+        paths = plan_cbsr(g, starts, goals, .2, 60, skip_cache=True)
         self.assertNotEqual(paths, INVALID)
         self.assertEqual(len(paths), 2)  # n_agents
         waited = False
