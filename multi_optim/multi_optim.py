@@ -80,7 +80,9 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
 
 
 def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, rng):
-    ds = dagger.DaggerStrategy(model, g, 2, n_agents, optimizer, old_d, rng)
+    n_epochs = 8
+    ds = dagger.DaggerStrategy(
+        model, g, n_epochs, n_agents, optimizer, old_d, rng)
     model, loss = ds.run_dagger()
 
     rng_test = Random(1)
