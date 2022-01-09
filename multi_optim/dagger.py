@@ -134,18 +134,15 @@ class DaggerStrategy():
         states = []
         for i_s in range(max_steps):
             try:
-                observation = state.observe()
-                if observation is None:
+                if state.finished:
                     break
+                observation = state.observe()
+                states.append(state.copy())
                 scores, targets = self.model(
                     *(get_input_data_from_observation(observation)))
                 action = int(targets[scores.argmax()])
                 # Take action
                 state.step(action)
-                if state.finished:
-                    break
-                else:
-                    states.append(state.copy())
             except RuntimeError as e:
                 logger.warning("RuntimeError: {}".format(e))
                 break
