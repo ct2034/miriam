@@ -5,11 +5,17 @@ from typing import Dict, List, Optional, Tuple
 import networkx as nx
 import numpy as np
 import torch
+from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
 from planner.policylearn.edge_policy import EdgePolicyModel
+from planner.policylearn.edge_policy_graph_utils import RADIUS
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
+from sim.decentralized.agent import Agent
+from sim.decentralized.iterators import IteratorType
+from sim.decentralized.policy import EdgePolicy, OptimalEdgePolicy
+from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar
 
 import dagger
@@ -33,10 +39,54 @@ def find_collisions(agents
     return collisions
 
 
+def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
+                ) -> Tuple[Optional[float], float]:
+    regret_s = []
+    success_s = []
+    for i_e in range(n_eval):
+        starts = rng.sample(g.nodes(), n_agents)
+        goals = rng.sample(g.nodes(), n_agents)
+        for policy in [OptimalEdgePolicy, EdgePolicy]:
+            agents = []
+            for i_a in range(n_agents):
+                a = Agent(g, starts[i_a], env_nx=env_nx, radius=RADIUS)
+                a.give_a_goal(goals[i_a])
+                a.policy = policy(a, model)
+                agents.append(a)
+            if policy is EdgePolicy:
+                res_policy = run_a_scenario(
+                    env=g,
+                    agents=tuple(agents),
+                    plot=False,
+                    iterator=IteratorType.EDGE_POLICY3)
+            elif policy is OptimalEdgePolicy:
+                try:
+                    res_optim = run_a_scenario(
+                        env=g,
+                        agents=tuple(agents),
+                        plot=False,
+                        iterator=IteratorType.EDGE_POLICY3)
+                except RuntimeError:
+                    res_optim = (0, 0, 0, 0, 0)
+
+        success = res_policy[4] and res_optim[4]
+        if success:
+            regret_s.append(res_policy[0] - res_optim[0])
+        success_s.append(res_policy[4])
+    if len(regret_s) > 0:
+        return np.mean(regret_s), np.mean(success_s)
+    else:
+        return None, np.mean(success_s)
+
+
 def optimize_policy(model, g: nx.Graph, n_agents, optimizer, rng):
     ds = dagger.DaggerStrategy(model, g, 2, n_agents, optimizer, rng)
     model, loss = ds.run_dagger()
-    return model, loss
+
+    rng_test = Random(1)
+    regret, success = eval_policy(model, g, ds.env_nx, n_agents, 10, rng_test)
+
+    return model, loss, regret, success
 
 
 def run_optimization(
@@ -73,6 +123,14 @@ def run_optimization(
         "policy_loss": {
             "x": [],
             "t": []
+        },
+        "policy_regret": {
+            "x": [],
+            "t": []
+        },
+        "policy_success": {
+            "x": [],
+            "t": []
         }
     }
     draw_graph(g, map_img, title="Start")
@@ -89,22 +147,25 @@ def run_optimization(
         # Optimizing Poses
         g, pos, poses_test_length, poses_training_length = optimize_poses(
             g, pos, map_img, optimizer_pos, rng)
-
-        if i_r % n_runs_pose_per_policy == 0:
-            # Optimizing Policy
-            policy_model, policy_loss = optimize_policy(
-                policy_model, g, n_agents, optimizer_policy, rng)
-
-        # Saving stats
         if i_r % stats_every == 0:
             stats["poses_test_length"]["x"].append(poses_test_length)
             stats["poses_test_length"]["t"].append(i_r)
             stats["poses_training_length"]["x"].append(poses_training_length)
             stats["poses_training_length"]["t"].append(i_r)
+
+        if i_r % n_runs_pose_per_policy == 0:
+            # Optimizing Policy
+            policy_model, policy_loss, regret, success = optimize_policy(
+                policy_model, g, n_agents, optimizer_policy, rng)
             stats["policy_loss"]["x"].append(policy_loss)
             stats["policy_loss"]["t"].append(i_r)
-        pb.progress()
+            if regret is not None:
+                stats["policy_regret"]["x"].append(regret)
+                stats["policy_regret"]["t"].append(i_r)
+            stats["policy_success"]["x"].append(success)
+            stats["policy_success"]["t"].append(i_r)
 
+        pb.progress()
     pb.end()
 
     draw_graph(g, map_img, title="End")

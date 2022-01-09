@@ -101,7 +101,9 @@ def initialize_new_agent(
     return None
 
 
-def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM, env_nx=None,
+def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM, 
+                     env_nx=None,
+                     radius: Optional[float] = None, 
                      rng: random.Random = random.Random()):
     n_agents = np.array(starts).shape[0]
     agents = []
@@ -112,7 +114,7 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM, env_nx=None,
             a = Agent(env, starts[i_a], policy=policy, rng=rng, env_nx=env_nx)
         elif is_roadmap(env):
             a = Agent(env, int(starts[i_a]),
-                      policy=policy, rng=rng, env_nx=env_nx)
+                      policy=policy, rng=rng, env_nx=env_nx, radius=radius)
         if not a.give_a_goal(goals[i_a]):
             return INVALID
         agents.append(a)

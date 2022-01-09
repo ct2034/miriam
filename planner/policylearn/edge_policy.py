@@ -63,6 +63,7 @@ class EdgePolicyModel(nn.Module):
         self.train()
         self.zero_grad()
         scores = torch.tensor([])
+        targets = torch.tensor([])
         y_goals = torch.tensor([])
         for i in range(len(inputs)):
             x, edge_index, pos, node = inputs[i]

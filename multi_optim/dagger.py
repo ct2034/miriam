@@ -42,11 +42,13 @@ class ScenarioState():
     def __init__(self, graph, starts, goals, i_agent_to_consider,
                  env_nx, model) -> None:
         self.graph = graph
+        self.env_nx = env_nx
         self.starts = starts
         self.goals = goals
         self.i_agent_to_consider = i_agent_to_consider
         self.finished = False
-        self.agents = to_agent_objects(graph, starts, goals, env_nx=env_nx)
+        self.agents = to_agent_objects(
+            graph, starts, goals, env_nx=env_nx, radius=RADIUS)
         self.model = model
         for i in range(len(self.agents)):
             if i != self.i_agent_to_consider:
@@ -65,13 +67,6 @@ class ScenarioState():
             pause_on=PolicyCalledException)
         if has_exception(scenario_result):
             self.finished = True
-        return ScenarioState(
-            graph=self.graph,
-            starts=[a.pos for a in self.agents],  # this is the new start
-            goals=self.goals,
-            i_agent_to_consider=self.i_agent_to_consider,
-            env_nx=env_to_nx(self.graph),
-            model=self.model)
 
     def observe(self) -> Optional[OBSERVATION]:
         """Return the observation of the current state, None if finished"""
@@ -84,6 +79,16 @@ class ScenarioState():
         self.agents[self.i_agent_to_consider].policy = EdgeThenRaisingPolicy(
             self.agents[self.i_agent_to_consider], action)
         return self.run()
+
+    def copy(self):
+        """Return a copy of the current state"""
+        return ScenarioState(
+            graph=self.graph,
+            starts=self.starts,
+            goals=self.goals,
+            i_agent_to_consider=self.i_agent_to_consider,
+            env_nx=self.env_nx,
+            model=self.model)
 
 
 class DaggerStrategy():
@@ -121,11 +126,11 @@ class DaggerStrategy():
                 solvable = True
 
         i_a = rng.randrange(self.n_agents)
-        s = ScenarioState(self.graph, starts, goals,
-                          i_a, self.env_nx, self.model)
+        state = ScenarioState(self.graph, starts, goals,
+                              i_a, self.env_nx, self.model)
 
         # Sample initial state
-        state = s.run()
+        state.run()
         states = []
         for i_s in range(max_steps):
             try:
@@ -136,8 +141,11 @@ class DaggerStrategy():
                     *(get_input_data_from_observation(observation)))
                 action = int(targets[scores.argmax()])
                 # Take action
-                state = state.step(action)
-                states.append(state)
+                state.step(action)
+                if state.finished:
+                    break
+                else:
+                    states.append(state.copy())
             except RuntimeError as e:
                 logger.warning("RuntimeError: {}".format(e))
                 break
@@ -145,6 +153,7 @@ class DaggerStrategy():
 
     def get_optimal_action(self, state):
         """Get the optimal action for the given state."""
+        assert not state.finished
         return get_optimal_edge(state.agents, state.i_agent_to_consider)
 
     def run_dagger(self):

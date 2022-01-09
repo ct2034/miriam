@@ -1,17 +1,23 @@
 import logging
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Tuple
+from multiprocessing import Pool
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import networkx as nx
 import numpy as np
 import torch
 from definitions import POS, C
+from planner.mapf_implementations.libMultiRobotPlanning.tools.annotate_roadmap import \
+    check_proxy
+from planner.mapf_implementations.libMultiRobotPlanning.tools.collision import (
+    ellipsoid_collision_motion, precheck_bounding_box)
 from sim.decentralized.agent import Agent
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 OBSERVATION_DISTANCE = 6
+POOL = Pool(processes=8)
 
 
 class IteratorType(Enum):
@@ -352,6 +358,34 @@ def iterate_blocking(agents: Tuple[Agent], lookahead: int, ignore_finished_agent
     return time_slice, space_slice
 
 
+def check_motion_col(g: nx.Graph, radius: float,
+                     node_s_start: List[C], node_s_end: List[C]) -> Set[int]:
+    pos_s = nx.get_node_attributes(g, POS)
+    n_agents = len(node_s_start)
+    assert len(node_s_end) == n_agents,\
+        "node_s_start and node_s_end must have same length"
+    E = np.diag([radius, radius])
+    colliding_agents = set()
+    edges_to_check: List[Tuple[
+        int, int, np.ndarray,  # i, j, E
+        np.ndarray, np.ndarray, np.ndarray, np.ndarray  # p0, p1, q0, q1
+    ]] = []
+    for i_a1 in range(n_agents):
+        for i_a2 in range(i_a1 + 1, n_agents):
+            p0 = np.array(pos_s[node_s_start[i_a1]])
+            p1 = np.array(pos_s[node_s_end[i_a1]])
+            q0 = np.array(pos_s[node_s_start[i_a2]])
+            q1 = np.array(pos_s[node_s_end[i_a2]])
+            if precheck_bounding_box(E, p0, p1, q0, q1):
+                edges_to_check.append((i_a1, i_a2, E, p0, p1, q0, q1))
+    results = POOL.map(check_proxy, edges_to_check)
+    for result, (i_a1, i_a2, _, _, _, _, _) in zip(results, edges_to_check):
+        if result:
+            colliding_agents.add(i_a1)
+            colliding_agents.add(i_a2)
+    return colliding_agents
+
+
 def iterate_edge_policy(
     agents: Tuple[Agent],
     lookahead: int,
@@ -360,6 +394,9 @@ def iterate_edge_policy(
     """An iterator that will ask a policy which edge to take in the even of a collision."""
     for a in agents:
         assert a.has_roadmap, "This function only works with roadmaps"
+    assert agents[0].radius is not None, "radius must be set"
+    assert all(a.radius == agents[0].radius for a in agents),\
+        "all radii must be equal"
 
     solved = False
     RETRIES = 3
@@ -368,7 +405,7 @@ def iterate_edge_policy(
     time_slice: List[int] = [1] * len(agents)
     pos = nx.get_node_attributes(a.env, POS)
 
-    poses_at_beginning = tuple(map(lambda a: a.pos, agents))
+    poses_at_beginning = list(map(lambda a: a.pos, agents))
     all_colissions = []
     for dt in range(lookahead):
         all_colissions.append(check_for_colissions(
@@ -389,10 +426,12 @@ def iterate_edge_policy(
                 next_nodes.append(a.what_is_next_step())
         next_collisions = check_for_colissions(
             agents, 0, next_nodes, ignore_finished_agents)
-        solved = not any(next_collisions)
+        new_agents_with_colissions = get_agents_in_col([next_collisions])
+        new_agents_with_colissions.update(check_motion_col(
+            agents[0].env, agents[0].radius, next_nodes, poses_at_beginning))
+        solved = not any(new_agents_with_colissions)
         logger.debug(
             f"try {i_try}, solved: {solved}, next_collisions: {next_collisions}")
-        new_agents_with_colissions = get_agents_in_col([next_collisions])
         agents_with_colissions.update(new_agents_with_colissions)
         i_try += 1
     if i_try == RETRIES:
@@ -410,7 +449,7 @@ def iterate_edge_policy(
     return time_slice, space_slice
 
 
-def get_agents_in_col(all_colissions):
+def get_agents_in_col(all_colissions) -> Set[int]:
     agents_with_colissions = set()
     for i_t in range(len(all_colissions)):
         nodecol, edgecol = all_colissions[i_t]

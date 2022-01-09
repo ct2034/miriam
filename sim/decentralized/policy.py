@@ -78,7 +78,7 @@ class Policy(object):
         elif type == PolicyType.EDGE:
             return EdgePolicy(agent, **kwargs)
         elif type == PolicyType.OPTIMAL_EDGE:
-            return OptimalEdgePolicy(agent)
+            return OptimalEdgePolicy(agent, **kwargs)
         elif type == PolicyType.EDGE_RAISING:
             return EdgeRaisingPolicy(agent)
 
@@ -396,11 +396,11 @@ class EdgePolicy(Policy):
             data.edge_index,
             data.pos,
             own_pos)
-        return big_from_small[targets[torch.argmax(score)]]
+        return big_from_small[targets[torch.argmax(score)].item()]
 
 
 class OptimalEdgePolicy(Policy):
-    def __init__(self, agent) -> None:
+    def __init__(self, agent, _) -> None:
         super().__init__(agent)
         self.edge_based = True
 

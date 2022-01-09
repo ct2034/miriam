@@ -14,7 +14,7 @@ def agents_to_data(agents, i_self):
     assert agents[i_self].has_roadmap
     g = agents[i_self].env
     g_sml = nx.ego_graph(g, own_pos, radius=HOP_DIST)
-    big_from_small = {i: n for i, n in enumerate(g_sml.nodes)}
+    big_from_small = {i: int(n) for i, n in enumerate(g_sml.nodes)}
     small_from_big = {n: i for i, n in big_from_small.items()}
     pos = nx.get_node_attributes(g, POS)
     # data layers

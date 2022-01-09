@@ -122,6 +122,7 @@ class Agent(Generic[C, N]):
         self, env: POTENTIAL_ENV_TYPE, pos: C,
         policy: PolicyType = PolicyType.RANDOM,
         env_nx: Optional[nx.Graph] = None,
+        radius: Optional[float] = None,
         rng: random.Random = random.Random()
     ):
         """Initialize a new agent at a given postion `pos` using a given
@@ -136,6 +137,8 @@ class Agent(Generic[C, N]):
             assert len(pos) == 2  # (x, y)
             assert isinstance(self.env, np.ndarray), "Env must be numpy array"
             self.pos: C = pos
+            assert self.radius is None, "Radius not supported for gridmap"
+            self.radius: Optional[float] = None
         elif is_roadmap(env):
             self.has_roadmap = True
             self.has_gridmap = False
@@ -143,6 +146,7 @@ class Agent(Generic[C, N]):
             assert isinstance(pos, int)  # (node)
             assert pos < self.n_nodes, "Position must be a node index"
             self.pos = pos
+            self.radius = radius
         if env_nx is None:
             self.env_nx: nx.Graph = env_to_nx(self.env)
         else:
@@ -426,7 +430,8 @@ class Agent(Generic[C, N]):
         ) or (  # at a position that is not in path
             self.path_i is not None and
             self.path is not None and
-            self.path[self.path_i] != (self.pos, self.path_i)
+            (self.path_i >= len(self.path) or
+             self.path[self.path_i] != (self.pos, self.path_i))
         ):
             # resetting blocks now
             self.blocked_nodes = set()
