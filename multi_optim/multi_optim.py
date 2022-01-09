@@ -79,14 +79,14 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
         return None, np.mean(success_s)
 
 
-def optimize_policy(model, g: nx.Graph, n_agents, optimizer, rng):
-    ds = dagger.DaggerStrategy(model, g, 2, n_agents, optimizer, rng)
+def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, rng):
+    ds = dagger.DaggerStrategy(model, g, 2, n_agents, optimizer, old_d, rng)
     model, loss = ds.run_dagger()
 
     rng_test = Random(1)
     regret, success = eval_policy(model, g, ds.env_nx, n_agents, 10, rng_test)
 
-    return model, loss, regret, success
+    return model, loss, regret, success, ds.d
 
 
 def run_optimization(
@@ -109,6 +109,7 @@ def run_optimization(
     policy_model = EdgePolicyModel()
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
+    old_d = None
 
     # Visualization and analysis
     stats: Dict[str, Dict[str, List[float]]] = {
@@ -155,8 +156,9 @@ def run_optimization(
 
         if i_r % n_runs_pose_per_policy == 0:
             # Optimizing Policy
-            policy_model, policy_loss, regret, success = optimize_policy(
-                policy_model, g, n_agents, optimizer_policy, rng)
+            (policy_model, policy_loss, regret, success, old_d
+             ) = optimize_policy(
+                policy_model, g, n_agents, optimizer_policy, old_d, rng)
             stats["policy_loss"]["x"].append(policy_loss)
             stats["policy_loss"]["t"].append(i_r)
             if regret is not None:

@@ -95,8 +95,11 @@ class DaggerStrategy():
     """Implementation of DAgger
     (https://proceedings.mlr.press/v15/ross11a.html)"""
 
-    def __init__(self, model, graph, n_episodes, n_agents, optimizer, rng):
-        self.d = set()
+    def __init__(self, model, graph, n_episodes, n_agents, optimizer, old_d, rng):
+        if old_d is None:
+            self.d = set()
+        else:
+            self.d = old_d
         self.model = model
         self.graph = self._add_self_edges_to_graph(graph)
         self.n_episodes = n_episodes
