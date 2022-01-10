@@ -80,16 +80,6 @@ class ScenarioState():
             self.agents[self.i_agent_to_consider], action)
         return self.run()
 
-    def copy(self):
-        """Return a copy of the current state"""
-        return ScenarioState(
-            graph=self.graph,
-            starts=self.starts,
-            goals=self.goals,
-            i_agent_to_consider=self.i_agent_to_consider,
-            env_nx=self.env_nx,
-            model=self.model)
-
 
 class DaggerStrategy():
     """Implementation of DAgger
@@ -134,22 +124,26 @@ class DaggerStrategy():
 
         # Sample initial state
         state.run()
-        states = []
+        these_ds = set()
         for i_s in range(max_steps):
             try:
                 if state.finished:
                     break
                 observation = state.observe()
-                states.append(state.copy())
                 scores, targets = self.model(
                     *(get_input_data_from_observation(observation)))
                 action = int(targets[scores.argmax()])
+                # observation, action pair for learning
+                optimal_action = self.get_optimal_action(state)
+                these_ds.add((
+                    get_input_data_from_observation(observation),
+                    optimal_action))
                 # Take action
                 state.step(action)
             except RuntimeError as e:
                 logger.warning("RuntimeError: {}".format(e))
                 break
-        return states
+        return these_ds
 
     def get_optimal_action(self, state):
         """Get the optimal action for the given state."""
@@ -161,21 +155,18 @@ class DaggerStrategy():
         loss_s = []
         for i_e in range(self.n_episodes):
             # sample new data
-            states = self.sample_trajectory(self.rng)
-            for state in states:
-                try:
-                    action = self.get_optimal_action(state)
-                    self.d.add((state, action))
-                except RuntimeError as e:
-                    logger.warning("RuntimeError: {}".format(e))
+            these_ds = self.sample_trajectory(self.rng)
+            self.d.update(these_ds)
 
             # learn
             ds = self.rng.sample(self.d, min(len(self.d), N_LEARN_MAX))
+            s_s = []
+            a_s = []
+            for d in ds:
+                s_s.append(d[0])
+                a_s.append(d[1])
             loss = self.model.learn(
-                [get_input_data_from_observation(s.observe()) for s, _ in ds],
-                [a for _, a in ds],
-                self.optimizer
-            )
+                s_s, a_s, optimizer=self.optimizer)
             if loss is not None:
                 loss_s.append(loss)
 
