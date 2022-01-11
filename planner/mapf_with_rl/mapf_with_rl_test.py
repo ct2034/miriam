@@ -2,13 +2,13 @@ import random
 import unittest
 
 import numpy as np
+import planner.mapf_with_rl.mapf_with_rl
 import torch
 from planner.mapf_with_rl.mapf_with_rl import (Qfunction, Scenario,
                                                make_useful_scenarios)
 from scenarios import test_helper
 from scenarios.generators import (building_walls, random_fill,
                                   tracing_pathes_in_the_dark)
-from tools import hasher
 from torch_geometric.data import Data
 
 
@@ -20,6 +20,7 @@ class TestMapfWithRl(unittest.TestCase):
         # making the folder to store cache during test in.
         cls.data_path = test_helper.make_cache_folder_and_set_envvar(
             set_envvar=True)
+        planner.mapf_with_rl.mapf_with_rl.N_PROCESSES = 2
 
     @classmethod
     def tearDownClass(cls):
@@ -95,11 +96,11 @@ class TestMapfWithRl(unittest.TestCase):
         for generator in [building_walls, random_fill,
                           tracing_pathes_in_the_dark]:
             scenarios_0 = make_useful_scenarios(
-                3, True, 4, 2, 3, generator, random.Random(0))
-            self.assertEqual(len(scenarios_0), 3)
+                2, True, 4, 2, 3, generator, random.Random(0))
+            self.assertEqual(len(scenarios_0), 2)
             scenarios_1 = make_useful_scenarios(
-                3, True, 4, 2, 3, generator, random.Random(1))
-            self.assertEqual(len(scenarios_1), 3)
+                2, True, 4, 2, 3, generator, random.Random(1))
+            self.assertEqual(len(scenarios_1), 2)
             for s in scenarios_0 + scenarios_1:
                 self.assertTrue(s.useful)
                 s.start()
@@ -108,11 +109,14 @@ class TestMapfWithRl(unittest.TestCase):
         for generator in [building_walls, random_fill,
                           tracing_pathes_in_the_dark]:
             scenarios_base = make_useful_scenarios(
-                5, True, 3, 2, 3, generator, random.Random(0))
+                4, True, 3, 2, 3, generator, random.Random(0))
+            self.assertEqual(len(scenarios_base), 4)
             scenarios_same_seed = make_useful_scenarios(
-                5, True, 3, 2, 3, generator, random.Random(0))
+                4, True, 3, 2, 3, generator, random.Random(0))
+            self.assertEqual(len(scenarios_same_seed), 4)
             scenarios_different_seed = make_useful_scenarios(
-                5, True, 3, 2, 3, generator, random.Random(1))
+                4, True, 3, 2, 3, generator, random.Random(1))
+            self.assertEqual(len(scenarios_different_seed), 4)
 
             for i_s in range(len(scenarios_base)):
                 for i_a in range(len(scenarios_base[i_s].agents)):
