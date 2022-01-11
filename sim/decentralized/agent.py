@@ -137,7 +137,7 @@ class Agent(Generic[C, N]):
             assert len(pos) == 2  # (x, y)
             assert isinstance(self.env, np.ndarray), "Env must be numpy array"
             self.pos: C = pos
-            assert self.radius is None, "Radius not supported for gridmap"
+            assert radius is None, "Radius not supported for gridmap"
             self.radius: Optional[float] = None
         elif is_roadmap(env):
             self.has_roadmap = True
