@@ -33,6 +33,7 @@ from torch_geometric.nn import (GCNConv, global_add_pool, global_max_pool,
 
 ctx = mp.get_context('spawn')
 N_PROCESSES = min(8, mp.cpu_count())
+MAX_RETRIES = 100
 
 
 def get_ecbs_cost(scen: SCENARIO_TYPE, ignore_finished_agents: bool):
@@ -154,7 +155,6 @@ def make_a_useful_scenario(ignore_finished_agents: bool, size: int,
                            n_agents: int, hop_dist: int, generator: GENERATOR_TYPE,
                            rng: random.Random, pb: Optional[ProgressBar] = None,
                            i_r: Optional[int] = None) -> Scenario:
-    MAX_RETRIES = 100
     if i_r is not None:
         for _ in range(i_r):
             # changing state of rng depending on run index
@@ -188,24 +188,15 @@ def make_useful_scenarios(n: int, ignore_finished_agents: bool, size: int,
                           rng: random.Random) -> List[Scenario]:
     assert generator in [arena_with_crossing, corridor_with_passing,
                          tracing_pathes_in_the_dark, building_walls, random_fill]
-    if n == 1:
-        try:
-            scenarios = [make_a_useful_scenario(
-                ignore_finished_agents, size, n_agents, hop_dist, generator,
-                rng)]
-        except RuntimeError:
-            # retry
-            scenarios = make_useful_scenarios(
-                n, ignore_finished_agents, size, n_agents, hop_dist, generator, rng)
-    else:
-        p = ctx.Pool(N_PROCESSES)
-        pb = ProgressBar("Data Generation", n, 5)
-        args = [(ignore_finished_agents, size, n_agents, hop_dist, generator,
-                 rng, pb, i_r) for i_r in range(n)]
-        scenarios = p.map(proxy_make_a_useful_scenario, args)
-        pb.end()
-        p.close()
-        p.join()
+    n_processes = min(N_PROCESSES, n)
+    p = ctx.Pool(n_processes)
+    pb = ProgressBar("Data Generation", n, 5)
+    args = [(ignore_finished_agents, size, n_agents, hop_dist, generator,
+             rng, pb, i_r) for i_r in range(n)]
+    scenarios = p.map(proxy_make_a_useful_scenario, args)
+    pb.end()
+    p.close()
+    p.join()
     return scenarios
 
 
