@@ -13,6 +13,8 @@ from typing import Dict, List, Tuple, Union
 
 import networkx as nx
 import numpy as np
+import yaml
+from yaml.loader import Loader
 
 from definitions import POS
 
@@ -343,7 +345,6 @@ class ProgressBar(object):
 
 class StatCollector(object):
     def __init__(self, names: List[str]):
-        self.names: List[str] = names
         self.stats: Dict[
             str, Dict[str, List[float]]] = {}
         for name in names:
@@ -352,8 +353,8 @@ class StatCollector(object):
                 "x": []
             }
 
-    def add(self, name: str, t: float, x: float):
-        assert name in self.names
+    def add(self, name: str, t: int, x: float):
+        assert name in self.stats.keys()
         self.stats[name]["t"].append(t)
         self.stats[name]["x"].append(x)
 
@@ -368,7 +369,17 @@ class StatCollector(object):
     def get_stats_wildcard(self, pattern: str):
         matched_names = []
         regex = re.compile(pattern)
-        for n in self.names:
+        for n in self.stats.keys():
             if regex.match(n):
                 matched_names.append(n)
         return self.get_stats(matched_names)
+
+    def to_yaml(self, filename: str):
+        assert filename.endswith(".yaml")
+        with open(filename, 'w') as f:
+            yaml.dump(self.stats, f)
+
+    def from_yaml(self, filename: str):
+        assert filename.endswith(".yaml")
+        with open(filename, 'r') as f:
+            self.stats = yaml.load(f, Loader=yaml.SafeLoader)

@@ -146,18 +146,19 @@ def run_optimization(
         g, pos, poses_test_length, poses_training_length = optimize_poses(
             g, pos, map_img, optimizer_pos, rng)
         if i_r % stats_every == 0:
-            stats.add("poses_test_length", i_r, poses_test_length)
-            stats.add("poses_training_length", i_r, poses_training_length)
+            stats.add("poses_test_length", i_r, float(poses_test_length))
+            stats.add("poses_training_length", i_r,
+                      float(poses_training_length))
 
         if i_r % n_runs_pose_per_policy == 0:
             # Optimizing Policy
             (policy_model, policy_loss, regret, success, old_d
              ) = optimize_policy(
                 policy_model, g, n_agents, optimizer_policy, old_d, rng)
-            stats.add("policy_loss", i_r, policy_loss)
+            stats.add("policy_loss", i_r, float(policy_loss))
             if regret is not None:
-                stats.add("policy_regret", i_r, regret)
-            stats.add("policy_success", i_r, success)
+                stats.add("policy_regret", i_r, float(regret))
+            stats.add("policy_success", i_r, float(success))
 
         pb.progress()
     pb.end()
@@ -165,7 +166,7 @@ def run_optimization(
     draw_graph(g, map_img, title="End")
     plt.savefig(f"multi_optim/results/{prefix}_end.png")
 
-    fig, axs = plt.subplots(2, 1)
+    fig, axs = plt.subplots(2, 1, sharex=True)
     for i_x, part in enumerate(["poses", "policy"]):
         for k, v in stats.get_stats_wildcard(f"{part}.*").items():
             axs[i_x].plot(v[0], v[1], label=k)
@@ -173,6 +174,12 @@ def run_optimization(
         axs[i_x].xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.xlabel("Run")
     plt.savefig(f"multi_optim/results/{prefix}_stats.png")
+
+    # Save results
+    stats.to_yaml(f"multi_optim/results/{prefix}_stats.yaml")
+    nx.write_gpickle(g, f"multi_optim/results/{prefix}_graph.gpickle")
+    torch.save(policy_model.state_dict(),
+               f"multi_optim/results/{prefix}_policy_model.pt")
 
     return g, pos, poses_test_length, poses_training_length
 
