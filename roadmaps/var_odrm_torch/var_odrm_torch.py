@@ -97,7 +97,7 @@ def make_graph(
     delaunay = weights.Rook.from_dataframe(cells)
     g = delaunay.to_networkx()
     nx.set_node_attributes(g, {
-        i: tuple(pos_np[i]) for i in range(len(pos_np))}, POS)
+        i: pos_np[i] for i in range(len(pos_np))}, POS)
     nx.set_edge_attributes(g, [], DISTANCE)
     for a, b in g.edges():
         if not check_edge(pos, map_img, a, b):
