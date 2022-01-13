@@ -7,6 +7,7 @@ import numpy as np
 import torch
 from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import RADIUS
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
@@ -16,7 +17,7 @@ from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import EdgePolicy, OptimalEdgePolicy
 from sim.decentralized.runner import run_a_scenario
-from tools import ProgressBar
+from tools import ProgressBar, StatCollector
 
 import dagger
 
@@ -46,28 +47,36 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
     for i_e in range(n_eval):
         starts = rng.sample(g.nodes(), n_agents)
         goals = rng.sample(g.nodes(), n_agents)
+        failed_at_creation = False
         for policy in [OptimalEdgePolicy, EdgePolicy]:
             agents = []
             for i_a in range(n_agents):
                 a = Agent(g, starts[i_a], env_nx=env_nx, radius=RADIUS)
-                a.give_a_goal(goals[i_a])
+                res = a.give_a_goal(goals[i_a])
+                if not res:  # failed to find a path
+                    failed_at_creation = True
                 a.policy = policy(a, model)
                 agents.append(a)
-            if policy is EdgePolicy:
-                res_policy = run_a_scenario(
-                    env=g,
-                    agents=tuple(agents),
-                    plot=False,
-                    iterator=IteratorType.EDGE_POLICY3)
-            elif policy is OptimalEdgePolicy:
-                try:
-                    res_optim = run_a_scenario(
+            if failed_at_creation:
+                res_policy = (0., 0., 0., 0., 0.)
+                res_optim = (0., 0., 0., 0., 0.)
+            else:
+                if policy is EdgePolicy:
+                    res_policy = run_a_scenario(
                         env=g,
                         agents=tuple(agents),
                         plot=False,
                         iterator=IteratorType.EDGE_POLICY3)
-                except RuntimeError:
-                    res_optim = (0, 0, 0, 0, 0)
+                elif policy is OptimalEdgePolicy:
+                    try:
+                        res_optim = run_a_scenario(
+                            env=g,
+                            agents=tuple(agents),
+                            plot=False,
+                            iterator=IteratorType.EDGE_POLICY3)
+                    except Exception as e:
+                        logging.error(e)
+                        res_optim = (0, 0, 0, 0, 0)
 
         success = res_policy[4] and res_optim[4]
         if success:
@@ -100,7 +109,8 @@ def run_optimization(
         lr_policy: float = 1e-4,
         n_agents: int = 8,
         map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
-        rng: Random = Random(0)):
+        rng: Random = Random(0),
+        prefix: str = "noname"):
     # Roadmap
     map_img = read_map(map_fname)
     pos = sample_points(n_nodes, map_img, rng)
@@ -114,30 +124,15 @@ def run_optimization(
     old_d = None
 
     # Visualization and analysis
-    stats: Dict[str, Dict[str, List[float]]] = {
-        "poses_test_length": {
-            "x": [],
-            "t": []
-        },
-        "poses_training_length": {
-            "x": [],
-            "t": []
-        },
-        "policy_loss": {
-            "x": [],
-            "t": []
-        },
-        "policy_regret": {
-            "x": [],
-            "t": []
-        },
-        "policy_success": {
-            "x": [],
-            "t": []
-        }
-    }
+
+    stats = StatCollector([
+        "poses_test_length",
+        "poses_training_length",
+        "policy_loss",
+        "policy_regret",
+        "policy_success"])
     draw_graph(g, map_img, title="Start")
-    plt.savefig("multi_optim/start.png")
+    plt.savefig(f"multi_optim/results/{prefix}_start.png")
 
     # Making sense of two n_runs
     assert n_runs_pose > n_runs_policy
@@ -151,45 +146,62 @@ def run_optimization(
         g, pos, poses_test_length, poses_training_length = optimize_poses(
             g, pos, map_img, optimizer_pos, rng)
         if i_r % stats_every == 0:
-            stats["poses_test_length"]["x"].append(poses_test_length)
-            stats["poses_test_length"]["t"].append(i_r)
-            stats["poses_training_length"]["x"].append(poses_training_length)
-            stats["poses_training_length"]["t"].append(i_r)
+            stats.add("poses_test_length", i_r, poses_test_length)
+            stats.add("poses_training_length", i_r, poses_training_length)
 
         if i_r % n_runs_pose_per_policy == 0:
             # Optimizing Policy
             (policy_model, policy_loss, regret, success, old_d
              ) = optimize_policy(
                 policy_model, g, n_agents, optimizer_policy, old_d, rng)
-            stats["policy_loss"]["x"].append(policy_loss)
-            stats["policy_loss"]["t"].append(i_r)
+            stats.add("policy_loss", i_r, policy_loss)
             if regret is not None:
-                stats["policy_regret"]["x"].append(regret)
-                stats["policy_regret"]["t"].append(i_r)
-            stats["policy_success"]["x"].append(success)
-            stats["policy_success"]["t"].append(i_r)
+                stats.add("policy_regret", i_r, regret)
+            stats.add("policy_success", i_r, success)
 
         pb.progress()
     pb.end()
 
     draw_graph(g, map_img, title="End")
-    plt.savefig("multi_optim/end.png")
+    plt.savefig(f"multi_optim/results/{prefix}_end.png")
 
-    plt.figure()
-    for k, v in stats.items():
-        plt.plot(v["t"], v["x"], label=k)
+    fig, axs = plt.subplots(2, 1)
+    for i_x, part in enumerate(["poses", "policy"]):
+        for k, v in stats.get_stats_wildcard(f"{part}.*").items():
+            axs[i_x].plot(v[0], v[1], label=k)
+        axs[i_x].legend()
+        axs[i_x].xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.xlabel("Run")
-    plt.legend()
-    plt.savefig("multi_optim/stats.png")
+    plt.savefig(f"multi_optim/results/{prefix}_stats.png")
 
     return g, pos, poses_test_length, poses_training_length
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    # logging.getLogger(
-    #     "planner.mapf_implementations.plan_cbs_roadmap"
-    # ).setLevel(logging.DEBUG)
 
+    # debug run
     rng = Random(0)
-    run_optimization(rng=rng)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.DEBUG)
+    run_optimization(
+        n_nodes=8,
+        n_runs_pose=4,
+        n_runs_policy=2,
+        stats_every=1,
+        lr_pos=1e-4,
+        lr_policy=1e-4,
+        n_agents=2,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        rng=rng,
+        prefix="debug")
+
+    # real run
+    rng = Random(0)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        rng=rng,
+        prefix="run")

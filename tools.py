@@ -2,13 +2,14 @@ import getpass
 import logging
 import multiprocessing
 import os
+import re
 import signal
 import subprocess
 from contextlib import contextmanager
 from datetime import datetime
 from hashlib import sha256
 from itertools import product
-from typing import Tuple
+from typing import Dict, List, Tuple, Union
 
 import networkx as nx
 import numpy as np
@@ -338,3 +339,36 @@ class ProgressBar(object):
         print(BOLD_SEQ + "{} finished. elapsed time: {}".format(
             self.name,
             str(elapsed_time))+RESET_SEQ)
+
+
+class StatCollector(object):
+    def __init__(self, names: List[str]):
+        self.names: List[str] = names
+        self.stats: Dict[
+            str, Dict[str, List[float]]] = {}
+        for name in names:
+            self.stats[name] = {
+                "t": [],
+                "x": []
+            }
+
+    def add(self, name: str, t: float, x: float):
+        assert name in self.names
+        self.stats[name]["t"].append(t)
+        self.stats[name]["x"].append(x)
+
+    def get_stats(self, names: Union[List[str], str]):
+        if isinstance(names, str):
+            names = [names]
+        return {name: (
+            self.stats[name]["t"],
+            self.stats[name]["x"]
+        ) for name in names}
+
+    def get_stats_wildcard(self, pattern: str):
+        matched_names = []
+        regex = re.compile(pattern)
+        for n in self.names:
+            if regex.match(n):
+                matched_names.append(n)
+        return self.get_stats(matched_names)
