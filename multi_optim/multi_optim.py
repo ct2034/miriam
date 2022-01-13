@@ -140,7 +140,7 @@ def run_optimization(
     n_runs_pose_per_policy = n_runs // n_runs_policy
 
     # Run optimization
-    pb = ProgressBar("Optimization", n_runs, 1)
+    pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
     for i_r in range(n_runs):
         # Optimizing Poses
         g, pos, poses_test_length, poses_training_length = optimize_poses(
