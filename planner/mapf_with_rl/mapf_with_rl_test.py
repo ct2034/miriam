@@ -92,6 +92,7 @@ class TestMapfWithRl(unittest.TestCase):
         # failed scenario because agent 1 is blocking the way
         self.assertEqual(reward_0, s0.UNSUCCESSFUL_COST)
 
+    @unittest.skip("This test is too slow")
     def test_make_useful_scenarios(self):
         for generator in [building_walls, random_fill,
                           tracing_pathes_in_the_dark]:
@@ -105,6 +106,7 @@ class TestMapfWithRl(unittest.TestCase):
                 self.assertTrue(s.useful)
                 s.start()
 
+    @unittest.skip("This test is too slow")
     def test_make_useful_scenarios_determinism(self):
         for generator in [building_walls, random_fill,
                           tracing_pathes_in_the_dark]:
