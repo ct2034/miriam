@@ -13,22 +13,41 @@ if __name__ == "__main__":
         (2, 3),
         (3, 4),
         (4, 0),
+        (1, 5),
+        (3, 7),
+        (5, 6),
+        (6, 7),
+        (3, 8),
+        (7, 8),
     ])
     nx.set_node_attributes(g, {
         0: (0., 0.),
         1: (1., 0.),
         2: (1., 1.),
         3: (.5, 1.7),
-        4: (0., 1.)}, POS)
+        4: (0., 1.),
+        5: (2., 0.),
+        6: (2., 1.),
+        7: (1.5, 1.7),
+        8: (1, 3.4),
+    }, POS)
 
     agents = [
         Agent(g, 0, radius=.1),
-        Agent(g, 4, radius=.1)
+        Agent(g, 6, radius=.1)
     ]
-    agents[0].give_a_goal(3)
-    agents[1].give_a_goal(1)
+    agents[0].give_a_goal(7)
+    agents[1].give_a_goal(2)
 
-    data, _, _ = agents_to_data(agents, 0)
+    # each make first step
+    # agents[0].make_next_step(agents[0].path[1][0])
+    # agents[1].make_next_step(agents[1].path[1][0])
+
+    data, _, _ = agents_to_data(
+        agents=agents,
+        i_self=0,
+        hop_dist=2)
+    print(data.x)
 
     f, ax = plt.subplots(1, 1)
     plot_graph(ax, data.edge_index, data.pos, data.x)

@@ -4,6 +4,7 @@ import argparse
 import logging
 import pickle
 
+import torch
 from matplotlib import pyplot as plt
 from scenarios.visualization import (get_colors, plot_env, plot_schedule,
                                      plot_with_paths)
@@ -47,22 +48,25 @@ def plot_graph(ax, data_edge_index, data_pos, data_x):
     # nodes
     ax.scatter(data_pos[:, 0], data_pos[:, 1], color='k')
     n_node_features = data_x.shape[1]
+    max_data = torch.max(data_x).item()
     n_nodes = data_x.shape[0]
     colors = get_colors(n_node_features)
-    dp = 1./(n_node_features+2)
+    dp = .3/(n_node_features+2)
     for i_x in range(n_node_features):
         color = colors[i_x]
-        ax.scatter(
-            data_pos[:, 0] + dp*(i_x+1),
-            data_pos[:, 1] + dp*(i_x+1),
-            color=color,
-            alpha=.1)
         for i_n in range(n_nodes):
-            if data_x[i_n, i_x]:
+            if data_x[i_n, i_x] > 0:
                 ax.scatter(
                     data_pos[i_n, 0] + dp*(i_x+1),
                     data_pos[i_n, 1] + dp*(i_x+1),
-                    color=color)
+                    color=color,
+                    alpha=float(data_x[i_n, i_x])/max_data)
+            else:
+                ax.scatter(
+                    data_pos[:, 0] + dp*(i_x+1),
+                    data_pos[:, 1] + dp*(i_x+1),
+                    color=color,
+                    alpha=.01)
 
 
 if __name__ == "__main__":
