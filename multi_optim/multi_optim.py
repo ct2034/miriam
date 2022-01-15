@@ -100,7 +100,7 @@ def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, rng):
     model, loss = ds.run_dagger()
 
     rng_test = Random(1)
-    eval_n_agents = int(n_agents * .75)  # little less agents for evaluation
+    eval_n_agents = int(np.ceil(n_agents * .7))  # little less agents for evaluation
     regret, success = eval_policy(
         model, g, ds.env_nx, eval_n_agents, 10, rng_test)
 
