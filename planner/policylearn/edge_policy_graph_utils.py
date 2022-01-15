@@ -35,7 +35,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
     pos = nx.get_node_attributes(g, POS)
     self_pos = pos[self_node]
     self_next_pos = pos[agents[i_self].what_is_next_step()]
-    if self_next_pos is None or self_next_pos == self_pos:
+    if self_next_pos is None or (self_next_pos == self_pos).all():
         self_heading = 0.  # TODO: better idea?
     else:
         self_heading = atan2(
