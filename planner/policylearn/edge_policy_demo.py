@@ -34,9 +34,9 @@ if __name__ == "__main__":
 
     agents = [
         Agent(g, 0, radius=.1),
-        Agent(g, 6, radius=.1)
+        Agent(g, 5, radius=.1)
     ]
-    agents[0].give_a_goal(7)
+    agents[0].give_a_goal(5)
     agents[1].give_a_goal(2)
 
     # each make first step
