@@ -21,7 +21,9 @@ MODEL_INPUT = Tuple[
 
 
 class EdgePolicyModel(nn.Module):
-    def __init__(self, num_node_features=7, conv_channels=4):
+    def __init__(self, num_node_features=7,
+                 conv_channels=4, rng=Random(0)):
+        torch.manual_seed(rng.randint(0, 2 ** 32))
         super().__init__()
         self.conv1 = torch_geometric.nn.GCNConv(
             num_node_features, conv_channels)

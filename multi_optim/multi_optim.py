@@ -118,7 +118,7 @@ def run_optimization(
     g = make_graph(pos, map_img)
 
     # Policy
-    policy_model = EdgePolicyModel()
+    policy_model = EdgePolicyModel(rng=rng)
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
     old_d = None
