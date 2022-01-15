@@ -80,7 +80,12 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
 
         success = res_policy[4] and res_optim[4]
         if success:
-            regret_s.append(res_policy[0] - res_optim[0])
+            if res_policy[0] == 0:
+                regret = 0.
+            else:
+                # regret as percentage of suboptimal path
+                regret = (res_policy[0] - res_optim[0]) / res_policy[0]
+            regret_s.append(regret)
         success_s.append(res_policy[4])
     if len(regret_s) > 0:
         return np.mean(regret_s), np.mean(success_s)
@@ -95,7 +100,9 @@ def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, rng):
     model, loss = ds.run_dagger()
 
     rng_test = Random(1)
-    regret, success = eval_policy(model, g, ds.env_nx, n_agents, 10, rng_test)
+    eval_n_agents = int(n_agents * .75)  # little less agents for evaluation
+    regret, success = eval_policy(
+        model, g, ds.env_nx, eval_n_agents, 10, rng_test)
 
     return model, loss, regret, success, ds.d
 
