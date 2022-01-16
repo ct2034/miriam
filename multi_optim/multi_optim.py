@@ -21,6 +21,8 @@ from tools import ProgressBar, StatCollector
 
 import dagger
 
+logger = logging.getLogger(__name__)
+
 
 def find_collisions(agents
                     ) -> Dict[Tuple[int, int], Tuple[int, int]]:
@@ -75,7 +77,7 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
                             plot=False,
                             iterator=IteratorType.EDGE_POLICY3)
                     except Exception as e:
-                        logging.error(e)
+                        logger.error(e)
                         res_optim = (0, 0, 0, 0, 0)
 
         success = res_policy[4] and res_optim[4]
@@ -162,6 +164,8 @@ def run_optimization(
             if regret is not None:
                 stats.add("policy_regret", i_r, float(regret))
             stats.add("policy_success", i_r, float(success))
+            logger.info(f"Regret: {regret}")
+            logger.info(f"Success: {success}")
 
         pb.progress()
     pb.end()
