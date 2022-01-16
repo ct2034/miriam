@@ -216,7 +216,7 @@ if __name__ == "__main__":
     rng = Random(0)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.DEBUG)
+    ).setLevel(logging.INFO)
     run_optimization(
         n_nodes=16,
         n_runs_pose=512,
