@@ -95,7 +95,10 @@ def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, rng):
     model, loss = ds.run_dagger()
 
     rng_test = Random(1)
-    regret, success = eval_policy(model, g, ds.env_nx, n_agents, 10, rng_test)
+    # little less agents for evaluation
+    eval_n_agents = int(np.ceil(n_agents * .7))
+    regret, success = eval_policy(
+        model, g, ds.env_nx, eval_n_agents, 10, rng_test)
 
     return model, loss, regret, success, ds.d
 
@@ -204,11 +207,28 @@ if __name__ == "__main__":
         rng=rng,
         prefix="debug")
 
-    # real run
+    # small run
+    rng = Random(0)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=16,
+        n_runs_pose=512,
+        n_runs_policy=256,
+        stats_every=1,
+        lr_pos=1e-4,
+        lr_policy=1e-4,
+        n_agents=8,
+        map_fname="roadmaps/odrm/odrm_eval/maps/plain.png",
+        rng=rng,
+        prefix="small")
+
+    # full run
     rng = Random(0)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.INFO)
     run_optimization(
         rng=rng,
-        prefix="run")
+        prefix="full")
