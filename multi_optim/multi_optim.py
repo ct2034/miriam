@@ -129,7 +129,6 @@ def run_optimization(
     old_d = None
 
     # Visualization and analysis
-
     stats = StatCollector([
         "poses_test_length",
         "poses_training_length",
@@ -140,32 +139,38 @@ def run_optimization(
     plt.savefig(f"multi_optim/results/{prefix}_start.png")
 
     # Making sense of two n_runs
-    assert n_runs_pose > n_runs_policy
-    n_runs = n_runs_pose
-    n_runs_pose_per_policy = n_runs // n_runs_policy
+    n_runs = max(n_runs_pose, n_runs_policy)
+    if n_runs_policy > n_runs_pose:
+        n_runs_per_run_policy = 1
+        n_runs_per_run_pose = n_runs // n_runs_policy
+    else:  # n_runs_pose > n_runs_policy
+        n_runs_per_run_pose = 1
+        n_runs_per_run_policy = n_runs // n_runs_pose
 
     # Run optimization
     pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
     for i_r in range(n_runs):
         # Optimizing Poses
-        g, pos, poses_test_length, poses_training_length = optimize_poses(
-            g, pos, map_img, optimizer_pos, rng)
-        if i_r % stats_every == 0:
-            stats.add("poses_test_length", i_r, float(poses_test_length))
-            stats.add("poses_training_length", i_r,
-                      float(poses_training_length))
+        if i_r % n_runs_per_run_pose == 0:
+            g, pos, poses_test_length, poses_training_length = optimize_poses(
+                g, pos, map_img, optimizer_pos, rng)
+            if i_r % stats_every == 0:
+                stats.add("poses_test_length", i_r, float(poses_test_length))
+                stats.add("poses_training_length", i_r,
+                          float(poses_training_length))
 
-        if i_r % n_runs_pose_per_policy == 0:
-            # Optimizing Policy
+        # Optimizing Policy
+        if i_r % n_runs_per_run_policy == 0:
             (policy_model, policy_loss, regret, success, old_d
              ) = optimize_policy(
                 policy_model, g, n_agents, optimizer_policy, old_d, rng)
-            stats.add("policy_loss", i_r, float(policy_loss))
-            if regret is not None:
-                stats.add("policy_regret", i_r, float(regret))
-            stats.add("policy_success", i_r, float(success))
-            logger.info(f"Regret: {regret}")
-            logger.info(f"Success: {success}")
+            if i_r % stats_every == 0:
+                stats.add("policy_loss", i_r, float(policy_loss))
+                if regret is not None:
+                    stats.add("policy_regret", i_r, float(regret))
+                stats.add("policy_success", i_r, float(success))
+                logger.info(f"Regret: {regret}")
+                logger.info(f"Success: {success}")
 
         pb.progress()
     pb.end()
@@ -218,12 +223,12 @@ if __name__ == "__main__":
     ).setLevel(logging.INFO)
     run_optimization(
         n_nodes=16,
-        n_runs_pose=512,
-        n_runs_policy=256,
+        n_runs_pose=1,
+        n_runs_policy=1024,
         stats_every=1,
         lr_pos=1e-4,
         lr_policy=1e-4,
-        n_agents=8,
+        n_agents=6,
         map_fname="roadmaps/odrm/odrm_eval/maps/plain.png",
         rng=rng,
         prefix="small")
