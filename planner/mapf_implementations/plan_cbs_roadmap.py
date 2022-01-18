@@ -154,9 +154,12 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_
     success_cbsr = call_subprocess(cmd_cbsr, timeout)
     logger.debug("success_cbsr: " + str(success_cbsr))
     if not success_cbsr:
-        with open(fname_infile, 'r') as f:
-            content = "".join(f.readlines())
-            logger.debug(f"cbsr failed on: >>{content}<<")
+        try:
+            with open(fname_infile, 'r') as f:
+                content = "".join(f.readlines())
+                logger.debug(f"cbsr failed on: >>{content}<<")
+        except FileNotFoundError:
+            pass
 
     # check output
     paths = INVALID
