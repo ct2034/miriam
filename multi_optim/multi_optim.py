@@ -142,10 +142,10 @@ def run_optimization(
     n_runs = max(n_runs_pose, n_runs_policy)
     if n_runs_policy > n_runs_pose:
         n_runs_per_run_policy = 1
-        n_runs_per_run_pose = n_runs // n_runs_policy
+        n_runs_per_run_pose = n_runs // n_runs_pose
     else:  # n_runs_pose > n_runs_policy
         n_runs_per_run_pose = 1
-        n_runs_per_run_policy = n_runs // n_runs_pose
+        n_runs_per_run_policy = n_runs // n_runs_policy
 
     # Run optimization
     pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
