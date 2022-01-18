@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from definitions import POS, C
 from planner.mapf_implementations.libMultiRobotPlanning.tools.annotate_roadmap import \
-    check_proxy
+    check_edges
 from planner.mapf_implementations.libMultiRobotPlanning.tools.collision import (
     ellipsoid_collision_motion, precheck_bounding_box)
 from sim.decentralized.agent import Agent
@@ -17,7 +17,11 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 OBSERVATION_DISTANCE = 6
-POOL = Pool(processes=8)
+N_PROCESSES = 1
+if N_PROCESSES > 1:
+    POOL = Pool(processes=N_PROCESSES)
+else:
+    POOL = None
 
 
 class IteratorType(Enum):
@@ -378,7 +382,10 @@ def check_motion_col(g: nx.Graph, radius: float,
             q1 = np.array(pos_s[node_s_end[i_a2]])
             if precheck_bounding_box(E, p0, p1, q0, q1):
                 edges_to_check.append((i_a1, i_a2, E, p0, p1, q0, q1))
-    results = POOL.map(check_proxy, edges_to_check)
+    if POOL is not None:
+        results = POOL.map(check_edges, edges_to_check)
+    else:
+        results = [check_edges(*edge[2:]) for edge in edges_to_check]
     for result, (i_a1, i_a2, _, _, _, _, _) in zip(results, edges_to_check):
         if result:
             colliding_agents.add(i_a1)
