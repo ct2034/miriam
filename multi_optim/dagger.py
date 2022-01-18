@@ -65,7 +65,7 @@ class ScenarioState():
             plot=False,
             iterator=IteratorType.EDGE_POLICY3,
             pause_on=PolicyCalledException)
-        if has_exception(scenario_result):
+        if not has_exception(scenario_result):
             self.finished = True
 
     def observe(self) -> Optional[OBSERVATION]:
@@ -102,8 +102,8 @@ class DaggerStrategy():
     def _add_self_edges_to_graph(self, graph):
         """Add self edges to the graph."""
         for node in graph.nodes():
-            assert not graph.has_edge(node, node)
-            graph.add_edge(node, node)
+            if not graph.has_edge(node, node):
+                graph.add_edge(node, node)
         return graph
 
     def sample_trajectory(self, rng, max_steps=MAX_STEPS):
