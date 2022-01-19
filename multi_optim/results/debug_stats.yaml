@@ -42,7 +42,7 @@ poses_training_length:
   - 12.522939682006836
   - 14.146080017089844
 static:
-  git_hash: 8b5e8785d7089c1e30692c3fda8e4458a8cf051d
+  git_hash: cad91f63bd1cbc58d0300177dc114d2329430106
   hostname: marble
   lr_policy: 0.0001
   lr_pos: 0.0001
@@ -52,6 +52,6 @@ static:
   n_runs_policy: 2
   n_runs_pose: 4
   prefix: debug
-  runtime: '0:00:09.301380'
-  started_at: '2022-01-19T22:29:52.553635'
+  runtime: '0:00:08.462115'
+  started_at: '2022-01-19T22:30:22.355038'
   stats_every: 1
