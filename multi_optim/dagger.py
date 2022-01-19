@@ -1,10 +1,10 @@
 import logging
-import multiprocessing as mp
 from random import Random
 from typing import Dict, Optional, Tuple
 
 import numpy as np
 import scenarios
+import torch.multiprocessing as mp
 from definitions import INVALID, SCENARIO_RESULT
 from planner.policylearn.edge_policy import MODEL_INPUT, EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import (RADIUS, TIMEOUT,
@@ -20,6 +20,7 @@ from sim.decentralized.runner import (has_exception, run_a_scenario,
 from torch_geometric.data import Data
 
 logger = logging.getLogger(__name__)
+mp.set_sharing_strategy('file_system')
 
 
 ACTION = int
@@ -31,7 +32,6 @@ N_LEARN_MAX = 100
 def sample_trajectory_proxy(args):
     dg, rng = args
     return dg.sample_trajectory(rng)
-
 
 
 def get_input_data_from_observation(
