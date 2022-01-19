@@ -136,7 +136,7 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_
         with open(fname_roadmap, 'r') as f:
             data = yaml.load(f, Loader=yaml.SafeLoader)
     if data is None:  # error
-        logging.warning("no annotated oadmap")
+        logging.warning("no annotated roadmap")
         return INVALID
 
     # write infile
