@@ -215,7 +215,7 @@ def run_optimization(
     torch.save(policy_model.state_dict(),
                f"multi_optim/results/{prefix}_policy_model.pt")
 
-    logger.info(stats.get_static())
+    logger.info(stats.get_statics())
 
     return g, pos, poses_test_length, poses_training_length
 
