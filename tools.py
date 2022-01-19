@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from hashlib import sha256
 from itertools import product
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
@@ -17,6 +17,8 @@ import yaml
 from yaml.loader import Loader
 
 from definitions import POS
+
+STATIC = "static"
 
 
 class TimeoutException(Exception):
@@ -341,6 +343,7 @@ class ProgressBar(object):
         print(BOLD_SEQ + "{} finished. elapsed time: {}".format(
             self.name,
             str(elapsed_time))+RESET_SEQ)
+        return elapsed_time
 
 
 class StatCollector(object):
@@ -352,11 +355,18 @@ class StatCollector(object):
                 "t": [],
                 "x": []
             }
+        self.stats[STATIC] = {}
 
     def add(self, name: str, t: int, x: float):
         assert name in self.stats.keys()
         self.stats[name]["t"].append(t)
         self.stats[name]["x"].append(x)
+
+    def add_static(self, name: str, x: Union[float, str]):
+        self.stats[STATIC][name] = x
+
+    def add_statics(self, statics: Dict[str, Union[float, str]]):
+        self.stats[STATIC].update(statics)
 
     def get_stats(self, names: Union[List[str], str]):
         if isinstance(names, str):
@@ -372,7 +382,12 @@ class StatCollector(object):
         for n in self.stats.keys():
             if regex.match(n):
                 matched_names.append(n)
+        if STATIC in matched_names:
+            matched_names.remove(STATIC)
         return self.get_stats(matched_names)
+
+    def get_statics(self):
+        return self.stats[STATIC]
 
     def to_yaml(self, filename: str):
         assert filename.endswith(".yaml")

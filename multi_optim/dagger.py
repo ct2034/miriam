@@ -33,8 +33,6 @@ def sample_trajectory_proxy(args):
     return dg.sample_trajectory(rng)
 
 
-pool = mp.Pool(8)
-
 
 def get_input_data_from_observation(
         observation: OBSERVATION) -> MODEL_INPUT:
@@ -189,3 +187,6 @@ class DaggerStrategy():
         if len(loss_s) == 0:
             return self.model, np.mean([0])
         return self.model, np.mean(loss_s)
+
+
+pool = mp.Pool(8)

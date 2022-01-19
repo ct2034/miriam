@@ -1,7 +1,10 @@
+import datetime
 import logging
+import socket
 from random import Random
 from typing import Dict, List, Optional, Tuple
 
+import git
 import networkx as nx
 import numpy as np
 import torch
@@ -116,6 +119,8 @@ def run_optimization(
         map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
         rng: Random = Random(0),
         prefix: str = "noname"):
+    logger.info("run_optimization")
+
     # Roadmap
     map_img = read_map(map_fname)
     pos = sample_points(n_nodes, map_img, rng)
@@ -135,6 +140,22 @@ def run_optimization(
         "policy_loss",
         "policy_regret",
         "policy_success"])
+    stats.add_statics({
+        # metadata
+        "hostname": socket.gethostname(),
+        "git_hash": git.Repo(".").head.object.hexsha,
+        "started_at": datetime.datetime.now().isoformat(),
+        # parameters
+        "n_nodes": n_nodes,
+        "n_runs_pose": n_runs_pose,
+        "n_runs_policy": n_runs_policy,
+        "stats_every": stats_every,
+        "lr_pos": lr_pos,
+        "lr_policy": lr_policy,
+        "n_agents": n_agents,
+        "map_fname": map_fname,
+        "prefix": prefix
+    })
     draw_graph(g, map_img, title="Start")
     plt.savefig(f"multi_optim/results/{prefix}_start.png")
 
@@ -173,7 +194,8 @@ def run_optimization(
                 logger.info(f"Success: {success}")
 
         pb.progress()
-    pb.end()
+    runtime = pb.end()
+    stats.add_static("runtime", str(runtime))
 
     draw_graph(g, map_img, title="End")
     plt.savefig(f"multi_optim/results/{prefix}_end.png")
@@ -193,11 +215,14 @@ def run_optimization(
     torch.save(policy_model.state_dict(),
                f"multi_optim/results/{prefix}_policy_model.pt")
 
+    logger.info(stats.get_static())
+
     return g, pos, poses_test_length, poses_training_length
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    logging.getLogger(__name__).setLevel(logging.INFO)
 
     # debug run
     rng = Random(0)
