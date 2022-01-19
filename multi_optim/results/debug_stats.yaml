@@ -1,0 +1,57 @@
+policy_loss:
+  t:
+  - 0
+  - 2
+  x:
+  - 0.5820943713188171
+  - 0.5890395045280457
+policy_regret:
+  t:
+  - 0
+  - 2
+  x:
+  - 0.0
+  - 0.0
+policy_success:
+  t:
+  - 0
+  - 2
+  x:
+  - 0.6
+  - 0.6
+poses_test_length:
+  t:
+  - 0
+  - 1
+  - 2
+  - 3
+  x:
+  - 17.682222366333008
+  - 17.6773738861084
+  - 17.673826217651367
+  - 17.670486450195312
+poses_training_length:
+  t:
+  - 0
+  - 1
+  - 2
+  - 3
+  x:
+  - 19.52748680114746
+  - 18.864234924316406
+  - 15.684913635253906
+  - 16.816814422607422
+static:
+  git_hash: a02b26957a47d4c8861c249b776128bdc8856bb4
+  hostname: marble
+  lr_policy: 0.0001
+  lr_pos: 0.0001
+  map_fname: roadmaps/odrm/odrm_eval/maps/x.png
+  n_agents: 2
+  n_nodes: 8
+  n_runs_policy: 2
+  n_runs_pose: 4
+  prefix: debug
+  runtime: '0:00:16.057592'
+  started_at: '2022-01-19T10:00:01.887612'
+  stats_every: 1
