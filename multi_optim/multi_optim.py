@@ -91,7 +91,7 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
 
 
 def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, rng):
-    n_epochs = 8
+    n_epochs = 64
     ds = dagger.DaggerStrategy(
         model, g, n_epochs, n_agents, optimizer, old_d, rng)
     model, loss = ds.run_dagger()
@@ -111,7 +111,7 @@ def run_optimization(
         n_runs_policy: int = 128,
         stats_every: int = 1,
         lr_pos: float = 1e-4,
-        lr_policy: float = 1e-4,
+        lr_policy: float = 4e-4,
         n_agents: int = 8,
         map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
         rng: Random = Random(0),
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     run_optimization(
         n_nodes=16,
         n_runs_pose=1,
-        n_runs_policy=1024,
+        n_runs_policy=128,
         stats_every=1,
         lr_pos=1e-4,
         lr_policy=1e-4,

@@ -1,4 +1,6 @@
 import logging
+import multiprocessing as mp
+from random import Random
 from typing import Dict, Optional, Tuple
 
 import numpy as np
@@ -24,6 +26,14 @@ ACTION = int
 OBSERVATION = Tuple[Data, int, Dict[int, int]]
 MAX_STEPS = 10
 N_LEARN_MAX = 100
+
+
+def sample_trajectory_proxy(args):
+    dg, rng = args
+    return dg.sample_trajectory(rng)
+
+
+pool = mp.Pool(8)
 
 
 def get_input_data_from_observation(
@@ -65,7 +75,7 @@ class ScenarioState():
             plot=False,
             iterator=IteratorType.EDGE_POLICY3,
             pause_on=PolicyCalledException)
-        if has_exception(scenario_result):
+        if not has_exception(scenario_result):
             self.finished = True
 
     def observe(self) -> Optional[OBSERVATION]:
@@ -102,8 +112,8 @@ class DaggerStrategy():
     def _add_self_edges_to_graph(self, graph):
         """Add self edges to the graph."""
         for node in graph.nodes():
-            assert not graph.has_edge(node, node)
-            graph.add_edge(node, node)
+            if not graph.has_edge(node, node):
+                graph.add_edge(node, node)
         return graph
 
     def sample_trajectory(self, rng, max_steps=MAX_STEPS):
@@ -154,22 +164,27 @@ class DaggerStrategy():
     def run_dagger(self):
         """Run the DAgger algorithm."""
         loss_s = []
-        for i_e in range(self.n_episodes):
-            # sample new data
-            these_ds = self.sample_trajectory(self.rng)
-            self.d.update(these_ds)
 
-            # learn
-            ds = self.rng.sample(self.d, min(len(self.d), N_LEARN_MAX))
-            s_s = []
-            a_s = []
-            for d in ds:
-                s_s.append(d[0])
-                a_s.append(d[1])
-            loss = self.model.learn(
-                s_s, a_s, optimizer=self.optimizer)
-            if loss is not None:
-                loss_s.append(loss)
+        results = pool.map(
+            sample_trajectory_proxy,
+            [(self, Random(s)) for s in self.rng.choices(
+                range(2**32), k=self.n_episodes)]
+        )
+
+        for r in results:
+            self.d.update(r)
+
+        # learn
+        ds = self.rng.sample(self.d, min(len(self.d), N_LEARN_MAX))
+        s_s = []
+        a_s = []
+        for d in ds:
+            s_s.append(d[0])
+            a_s.append(d[1])
+        loss = self.model.learn(
+            s_s, a_s, optimizer=self.optimizer)
+        if loss is not None:
+            loss_s.append(loss)
 
         if len(loss_s) == 0:
             return self.model, np.mean([0])
