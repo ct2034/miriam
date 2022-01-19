@@ -1,13 +1,16 @@
 import datetime
 import logging
 import socket
-from random import Random
+import sys
+from fileinput import filename
+from random import Random, getstate
 from typing import Dict, List, Optional, Tuple
 
 import git
 import networkx as nx
 import numpy as np
 import torch
+import torch_geometric
 from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -120,6 +123,7 @@ def run_optimization(
         rng: Random = Random(0),
         prefix: str = "noname"):
     logger.info("run_optimization")
+    torch.manual_seed(rng.randint(0, 2 ** 32))
 
     # Roadmap
     map_img = read_map(map_fname)
@@ -221,8 +225,7 @@ def run_optimization(
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
 
     # debug run
     rng = Random(0)

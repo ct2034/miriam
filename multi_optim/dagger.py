@@ -96,7 +96,7 @@ class DaggerStrategy():
     def __init__(self, model, graph, n_episodes, n_agents,
                  optimizer, old_d, rng):
         if old_d is None:
-            self.d = set()
+            self.d = []
         else:
             self.d = old_d
         self.model = model
@@ -133,7 +133,7 @@ class DaggerStrategy():
 
         # Sample initial state
         state.run()
-        these_ds = set()
+        these_ds = []
         for i_s in range(max_steps):
             try:
                 if state.finished:
@@ -144,7 +144,7 @@ class DaggerStrategy():
                 action = int(targets[scores.argmax()])
                 # observation, action pair for learning
                 optimal_action = self.get_optimal_action(state)
-                these_ds.add((
+                these_ds.append((
                     get_input_data_from_observation(observation),
                     optimal_action))
                 # Take action
@@ -163,14 +163,14 @@ class DaggerStrategy():
         """Run the DAgger algorithm."""
         loss_s = []
 
+        params = [(self, Random(s)) for s in self.rng.sample(
+            range(2**32), k=self.n_episodes)]
         results = pool.map(
-            sample_trajectory_proxy,
-            [(self, Random(s)) for s in self.rng.choices(
-                range(2**32), k=self.n_episodes)]
+            sample_trajectory_proxy, params
         )
 
         for r in results:
-            self.d.update(r)
+            self.d.extend(r)
 
         # learn
         ds = self.rng.sample(self.d, min(len(self.d), N_LEARN_MAX))

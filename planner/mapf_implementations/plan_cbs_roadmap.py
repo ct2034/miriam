@@ -113,7 +113,6 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_
     cache_dir = os.path.join(this_dir, 'cache')
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
-    tmp_dir = "/tmp/"
 
     # assertions on starts and goals
     assert len(starts) == len(goals), "starts and goals must have same length"
@@ -141,25 +140,27 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_
 
     # write infile
     hash = hasher([g, starts, goals])
-    fname_infile = f"{tmp_dir}{hash}_infile.yaml"
-    fname_outfile = f"{tmp_dir}{hash}_outfile.yaml"
-    write_infile(fname_infile, data, starts, goals)
+    fname_infile = f"{cache_dir}/{hash}_infile.yaml"
+    fname_outfile = f"{cache_dir}/{hash}_outfile.yaml"
+    if not os.path.exists(fname_infile) or skip_cache:
+        write_infile(fname_infile, data, starts, goals)
 
     # call cbs_roadmap
-    cmd_cbsr = [
-        this_dir + "/libMultiRobotPlanning/build/cbs_roadmap",
-        "-i", fname_infile,
-        "-o", fname_outfile]
-    logger.debug("call cbs_roadmap")
-    success_cbsr = call_subprocess(cmd_cbsr, timeout)
-    logger.debug("success_cbsr: " + str(success_cbsr))
-    if not success_cbsr:
-        try:
-            with open(fname_infile, 'r') as f:
-                content = "".join(f.readlines())
-                logger.debug(f"cbsr failed on: >>{content}<<")
-        except FileNotFoundError:
-            pass
+    if not os.path.exists(fname_outfile) or skip_cache:
+        cmd_cbsr = [
+            this_dir + "/libMultiRobotPlanning/build/cbs_roadmap",
+            "-i", fname_infile,
+            "-o", fname_outfile]
+        logger.debug("call cbs_roadmap")
+        success_cbsr = call_subprocess(cmd_cbsr, timeout)
+        logger.debug("success_cbsr: " + str(success_cbsr))
+        if not success_cbsr:
+            try:
+                with open(fname_infile, 'r') as f:
+                    content = "".join(f.readlines())
+                    logger.debug(f"cbsr failed on: >>{content}<<")
+            except FileNotFoundError:
+                pass
 
     # check output
     paths = INVALID
@@ -167,10 +168,6 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_
         paths = read_outfile(fname_outfile)
         logger.debug("paths: " + str(paths))
 
-    # clean up
-    for file in [fname_infile, fname_outfile]:
-        if os.path.isfile(file):
-            os.remove(file)
     return paths
 
 
