@@ -133,6 +133,7 @@ def run_optimization(
 
     # Policy
     policy_model = EdgePolicyModel()
+    policy_model.use_multiprocessing = False
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
     old_d = None
