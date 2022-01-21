@@ -10,6 +10,7 @@ import git
 import networkx as nx
 import numpy as np
 import torch
+import torch.multiprocessing as tmp
 import torch_geometric
 from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
@@ -96,11 +97,11 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
         return None, np.mean(success_s)
 
 
-def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, rng):
+def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, pool, rng):
     n_epochs = 64
     ds = dagger.DaggerStrategy(
         model, g, n_epochs, n_agents, optimizer, old_d, rng)
-    model, loss = ds.run_dagger()
+    model, loss = ds.run_dagger(pool)
 
     rng_test = Random(1)
     # little less agents for evaluation
@@ -125,6 +126,10 @@ def run_optimization(
     logger.info("run_optimization")
     torch.manual_seed(rng.randint(0, 2 ** 32))
 
+    # multiprocessing
+    n_processes = min(tmp.cpu_count(), 8)
+    pool = tmp.Pool(processes=n_processes)
+
     # Roadmap
     map_img = read_map(map_fname)
     pos = sample_points(n_nodes, map_img, rng)
@@ -133,7 +138,8 @@ def run_optimization(
 
     # Policy
     policy_model = EdgePolicyModel()
-    policy_model.use_multiprocessing = False
+    # policy_model.use_multiprocessing = False
+    # policy_model.share_memory()
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
     old_d = None
@@ -189,7 +195,7 @@ def run_optimization(
         if i_r % n_runs_per_run_policy == 0:
             (policy_model, policy_loss, regret, success, old_d
              ) = optimize_policy(
-                policy_model, g, n_agents, optimizer_policy, old_d, rng)
+                policy_model, g, n_agents, optimizer_policy, old_d, pool, rng)
             if i_r % stats_every == 0:
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
@@ -227,6 +233,10 @@ def run_optimization(
 
 if __name__ == "__main__":
     logging.getLogger(__name__).setLevel(logging.DEBUG)
+
+    # multiprocessing
+    tmp.set_sharing_strategy('file_system')
+    tmp.set_start_method('fork')
 
     # debug run
     rng = Random(0)

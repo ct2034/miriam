@@ -4,7 +4,6 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import scenarios
-import torch.multiprocessing as mp
 from definitions import INVALID, SCENARIO_RESULT
 from planner.policylearn.edge_policy import MODEL_INPUT, EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import (RADIUS, TIMEOUT,
@@ -20,7 +19,6 @@ from sim.decentralized.runner import (has_exception, run_a_scenario,
 from torch_geometric.data import Data
 
 logger = logging.getLogger(__name__)
-mp.set_sharing_strategy('file_system')
 
 
 ACTION = int
@@ -159,7 +157,7 @@ class DaggerStrategy():
         assert not state.finished
         return get_optimal_edge(state.agents, state.i_agent_to_consider)
 
-    def run_dagger(self):
+    def run_dagger(self, pool):
         """Run the DAgger algorithm."""
         loss_s = []
 
@@ -184,9 +182,10 @@ class DaggerStrategy():
         if loss is not None:
             loss_s.append(loss)
 
+        del ds
+        del s_s
+        del a_s
+
         if len(loss_s) == 0:
             return self.model, np.mean([0])
         return self.model, np.mean(loss_s)
-
-
-pool = mp.Pool(8)
