@@ -54,6 +54,7 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
     regret_s = []
     success_s = []
     for i_e in range(n_eval):
+        logger.debug(f"Eval {i_e}")
         starts = rng.sample(g.nodes(), n_agents)
         goals = rng.sample(g.nodes(), n_agents)
         failed_at_creation = False
@@ -88,8 +89,11 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
                         res_optim = (0, 0, 0, 0, 0)
 
         success = res_policy[4] and res_optim[4]
+        logger.debug(f"success: {success}")
         if success:
-            regret_s.append(res_policy[0] - res_optim[0])
+            regret = res_policy[0] - res_optim[0]
+            regret_s.append(regret)
+            logger.debug(f"regret: {regret}")
         success_s.append(res_policy[4])
     if len(regret_s) > 0:
         return np.mean(regret_s), np.mean(success_s)
@@ -243,14 +247,17 @@ if __name__ == "__main__":
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.DEBUG)
+    logging.getLogger(
+        "sim.decentralized.policy"
+    ).setLevel(logging.DEBUG)
     run_optimization(
         n_nodes=8,
-        n_runs_pose=4,
-        n_runs_policy=2,
+        n_runs_pose=2,
+        n_runs_policy=16,
         stats_every=1,
         lr_pos=1e-4,
-        lr_policy=1e-4,
-        n_agents=2,
+        lr_policy=1e-3,
+        n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         rng=rng,
         prefix="debug")
