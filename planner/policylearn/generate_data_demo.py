@@ -34,6 +34,11 @@ def plot_fovs(X, Y):
     plt.show()
 
 
+def plot_graph_wo_pos_data(ax, data_edge_index, pos, data_x):
+    data_pos = torch.tensor([list(p) for _, p in pos.items()])
+    plot_graph(ax, data_edge_index, data_pos, data_x)
+
+
 def plot_graph(ax, data_edge_index, data_pos, data_x):
     # edges
     n_edges = data_edge_index.shape[1]

@@ -2,7 +2,7 @@ import networkx as nx
 from definitions import POS
 from matplotlib import pyplot as plt
 from planner.policylearn.edge_policy_graph_utils import agents_to_data
-from planner.policylearn.generate_data_demo import plot_graph
+from planner.policylearn.generate_data_demo import plot_graph_wo_pos_data
 from sim.decentralized.agent import Agent
 
 if __name__ == "__main__":
@@ -34,21 +34,24 @@ if __name__ == "__main__":
 
     agents = [
         Agent(g, 0, radius=.1),
-        Agent(g, 6, radius=.1)
+        Agent(g, 3, radius=.1)
     ]
-    agents[0].give_a_goal(7)
-    agents[1].give_a_goal(2)
+    agents[0].give_a_goal(5)
+    agents[1].give_a_goal(0)
 
     # each make first step
     # agents[0].make_next_step(agents[0].path[1][0])
     # agents[1].make_next_step(agents[1].path[1][0])
 
-    data, _, _ = agents_to_data(
+    data, _, big_from_small = agents_to_data(
         agents=agents,
         i_self=0,
         hop_dist=2)
     print(data.x)
+    pos = {
+        i_n: g.nodes[big_from_small[i_n]][POS] for i_n in range(data.num_nodes)
+    }
 
     f, ax = plt.subplots(1, 1)
-    plot_graph(ax, data.edge_index, data.pos, data.x)
+    plot_graph_wo_pos_data(ax, data.edge_index, pos, data.x)
     plt.show()
