@@ -44,7 +44,6 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
                     x_layer_other_paths[p_sml],
                     t_to_data(t, a.path_i))
     d = Data(
-        pos=torch.tensor([pos[n] for n in g_sml.nodes]),
         edge_index=torch.tensor([(
             small_from_big[n1],
             small_from_big[n2]

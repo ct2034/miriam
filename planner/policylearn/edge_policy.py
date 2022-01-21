@@ -29,7 +29,7 @@ class EdgePolicyModel(nn.Module):
             conv_channels, conv_channels)
         self.readout = torch.nn.Linear(conv_channels, 1)
 
-    def forward(self, x, edge_index, pos, node):
+    def forward(self, x, edge_index, node):
         # Obtain node embeddings
         x = self.conv1(x, edge_index)
         x = x.relu()
