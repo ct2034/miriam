@@ -37,8 +37,7 @@ def get_input_data_from_observation(
     data, node, big_from_small = observation
     x = data.x
     edge_index = data.edge_index
-    pos = data.pos
-    out = (x, edge_index, pos, node)
+    out = (x, edge_index, node)
     return out
 
 
