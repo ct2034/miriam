@@ -17,11 +17,6 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 OBSERVATION_DISTANCE = 6
-N_PROCESSES = 1
-if N_PROCESSES > 1:
-    POOL = Pool(processes=N_PROCESSES)
-else:
-    POOL = None
 
 
 class IteratorType(Enum):
@@ -382,10 +377,7 @@ def check_motion_col(g: nx.Graph, radius: float,
             q1 = np.array(pos_s[node_s_end[i_a2]])
             if precheck_bounding_box(E, p0, p1, q0, q1):
                 edges_to_check.append((i_a1, i_a2, E, p0, p1, q0, q1))
-    if POOL is not None:
-        results = POOL.map(check_edges, edges_to_check)
-    else:
-        results = [check_edges(*edge[2:]) for edge in edges_to_check]
+    results = [check_edges(*edge[2:]) for edge in edges_to_check]
     for result, (i_a1, i_a2, _, _, _, _, _) in zip(results, edges_to_check):
         if result:
             colliding_agents.add(i_a1)
