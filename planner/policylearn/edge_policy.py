@@ -66,7 +66,7 @@ class EdgePolicyModel(nn.Module):
         targets = torch.tensor([])
         y_goals = torch.tensor([])
         for i in range(len(inputs)):
-            x, edge_index, pos, node = inputs[i]
+            x, edge_index, node = inputs[i]
             score, targets = self.forward(x, edge_index, pos, node)
             y_goal = torch.zeros(score.shape[0], dtype=torch.float)
             y_goal[(targets == ys[i]).nonzero()] = 1
