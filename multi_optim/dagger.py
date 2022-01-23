@@ -156,7 +156,7 @@ class DaggerStrategy():
 
         params = [(self, s) for s in self.rng.sample(
             range(2**32), k=self.n_episodes)]
-        results_s = pool.map(
+        results_s = pool.imap_unordered(
             sample_trajectory_proxy, params
         )
 
