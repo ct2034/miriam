@@ -59,7 +59,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
 
     # 3. relative distance
     relative_pos = torch.zeros((len(small_from_big), 2))
-    for i_sml, i_big in small_from_big.items():
+    for i_big,  i_sml in small_from_big.items():
         relative_pos[i_sml] = torch.tensor(pos[i_big]) - own_pos
     relative_distance = torch.norm(relative_pos, dim=1)
 
