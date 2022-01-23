@@ -19,7 +19,7 @@ def t_to_data(t: int, path_i: int) -> float:
         return 1. + (t - path_i) * .1
 
 
-def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
+def agents_to_data(agents, i_self: int, hop_dist: int = 3):
     own_node = agents[i_self].pos
     assert agents[i_self].has_roadmap
     g = agents[i_self].env
@@ -33,7 +33,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
         next_node = agents[i_self].path[agents[i_self].path_i + 1][0]
         next_pos = torch.tensor(pos[next_node])
         own_angle = torch.atan2(
-            next_pos[1] - own_pos[1], next_pos[0] - own_pos[0])
+            next_pos[1] - own_pos[1], next_pos[0] - own_pos[0]).item()
     except IndexError:
         pass
 
@@ -54,7 +54,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
             if p in g_sml.nodes:
                 p_sml = small_from_big[p]
                 x_layer_other_paths[p_sml] = max(
-                    x_layer_other_paths[p_sml],
+                    float(x_layer_other_paths[p_sml].item()),
                     t_to_data(t, a.path_i))
 
     # 3. relative distance
@@ -77,7 +77,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
                      relative_distance.view(-1, 1),
                      relative_angle.view(-1, 1)], dim=1),
     )
-    return d, small_from_big[own_node], big_from_small
+    return d, big_from_small
 
 
 def get_optimal_edge(agents, i_agent_to_consider):

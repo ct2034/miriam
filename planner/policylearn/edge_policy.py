@@ -1,6 +1,6 @@
 import logging
 from random import Random
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 import matplotlib.pyplot as plt
 import scenarios.evaluators
@@ -15,9 +15,10 @@ from scenarios.visualization import plot_with_paths
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario
+from torch_geometric.data import Data
 
 MODEL_INPUT = Tuple[
-    torch.Tensor, torch.Tensor, torch.Tensor, int]
+    torch.Tensor, torch.Tensor]
 
 
 class EdgePolicyModel(nn.Module):
@@ -29,7 +30,10 @@ class EdgePolicyModel(nn.Module):
             conv_channels, conv_channels)
         self.readout = torch.nn.Linear(conv_channels, 1)
 
-    def forward(self, x, edge_index, node):
+    def forward(self, x, edge_index):
+        # Agents position is where x[0] is 1
+        node = torch.nonzero(x[:, 0] == 1.).item()
+
         # Obtain node embeddings
         x = self.conv1(x, edge_index)
         x = x.relu()
@@ -58,18 +62,16 @@ class EdgePolicyModel(nn.Module):
         score = torch.softmax(score, dim=0)
         return score[:, 0], targets
 
-    def learn(self, inputs: List[MODEL_INPUT], ys: List[int], optimizer):
-        assert len(inputs) == len(ys)
+    def learn(self, datas: List[Data], optimizer):
         self.train()
         self.zero_grad()
         scores = torch.tensor([])
         targets = torch.tensor([])
         y_goals = torch.tensor([])
-        for i in range(len(inputs)):
-            x, edge_index, node = inputs[i]
-            score, targets = self.forward(x, edge_index, node)
+        for d in datas:
+            score, targets = self.forward(d.x, d.edge_index)
             y_goal = torch.zeros(score.shape[0], dtype=torch.float)
-            y_goal[(targets == ys[i]).nonzero()] = 1
+            y_goal[(targets == d.y).nonzero()] = 1
             scores = torch.cat((scores, score))
             y_goals = torch.cat((y_goals, y_goal))
         loss = torch.nn.functional.binary_cross_entropy(
@@ -80,7 +82,7 @@ class EdgePolicyModel(nn.Module):
         except RuntimeError:
             logging.warning(f"Could not train with: " +
                             f"y_goals {y_goals}, scores {scores}, " +
-                            f"ys {ys}, targets {targets}")
+                            f"datas {datas}, targets {targets}")
             return None
         return float(loss)
 
@@ -141,7 +143,7 @@ if __name__ == "__main__":
     # for a in agents:
     #     a.policy = sim.decentralized.policy.EdgePolicy(a, model)
 
-    paths = []
+    paths: List[Any] = []
     stats = run_a_scenario(env, agents, plot=False,
                            iterator=IteratorType.EDGE_POLICY3,
                            paths_out=paths)

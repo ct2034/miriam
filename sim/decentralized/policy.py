@@ -390,11 +390,10 @@ class EdgePolicy(Policy):
 
     def get_edge(self, agents):
         i_a_self = agents.index(self.a)
-        data, own_pos, big_from_small = agents_to_data(agents, i_a_self)
+        data, big_from_small = agents_to_data(agents, i_a_self)
         score, targets = self.nn.forward(
             data.x,
-            data.edge_index,
-            own_pos)
+            data.edge_index)
         logger.debug(f"score: {score}")
         logger.debug(f"targets: {targets}")
         return big_from_small[targets[torch.argmax(score)].item()]

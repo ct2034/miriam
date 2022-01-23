@@ -101,11 +101,11 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
         return None, np.mean(success_s)
 
 
-def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, pool, rng):
+def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_ds, pool, rng):
     n_epochs = 64
     ds = dagger.DaggerStrategy(
-        model, g, n_epochs, n_agents, optimizer, old_d, rng)
-    model, loss = ds.run_dagger(pool)
+        model, g, n_epochs, n_agents, optimizer, rng)
+    model, loss, old_ds = ds.run_dagger(pool, old_ds)
 
     rng_test = Random(1)
     # little less agents for evaluation
@@ -113,7 +113,7 @@ def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_d, pool, rng):
     regret, success = eval_policy(
         model, g, ds.env_nx, eval_n_agents, 10, rng_test)
 
-    return model, loss, regret, success, ds.d
+    return model, loss, regret, success, old_ds
 
 
 def run_optimization(
@@ -140,13 +140,21 @@ def run_optimization(
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g = make_graph(pos, map_img)
 
+    # GPU or CPU?
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    else:
+        logger.warning("GPU not available, using CPU")
+        device = torch.device("cpu")
+
     # Policy
     policy_model = EdgePolicyModel()
+    policy_model.to(device)
     # policy_model.use_multiprocessing = False
     # policy_model.share_memory()
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
-    old_d = None
+    old_ds = []
 
     # Visualization and analysis
     stats = StatCollector([
@@ -197,9 +205,9 @@ def run_optimization(
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, policy_loss, regret, success, old_d
+            (policy_model, policy_loss, regret, success, old_ds
              ) = optimize_policy(
-                policy_model, g, n_agents, optimizer_policy, old_d, pool, rng)
+                policy_model, g, n_agents, optimizer_policy, old_ds, pool, rng)
             if i_r % stats_every == 0:
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
@@ -247,9 +255,9 @@ if __name__ == "__main__":
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.DEBUG)
-    logging.getLogger(
-        "sim.decentralized.policy"
-    ).setLevel(logging.DEBUG)
+    # logging.getLogger(
+    #     "sim.decentralized.policy"
+    # ).setLevel(logging.DEBUG)
     run_optimization(
         n_nodes=8,
         n_runs_pose=2,
@@ -266,6 +274,9 @@ if __name__ == "__main__":
     rng = Random(0)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    logging.getLogger(
+        "sim.decentralized.policy"
     ).setLevel(logging.INFO)
     run_optimization(
         n_nodes=16,
