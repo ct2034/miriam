@@ -19,20 +19,33 @@ def t_to_data(t: int, path_i: int) -> float:
         return 1. + (t - path_i) * .1
 
 
-def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
-    own_pos = agents[i_self].pos
+def agents_to_data(agents, i_self: int, hop_dist: int = 3):
+    own_node = agents[i_self].pos
     assert agents[i_self].has_roadmap
     g = agents[i_self].env
-    g_sml = nx.ego_graph(g, own_pos, radius=hop_dist)
+    g_sml = nx.ego_graph(g, own_node, radius=hop_dist)
     big_from_small = {i: int(n) for i, n in enumerate(g_sml.nodes)}
     small_from_big = {n: i for i, n in big_from_small.items()}
     pos = nx.get_node_attributes(g, POS)
+    own_pos = torch.tensor(pos[own_node])
+    own_angle = 0.
+    try:
+        next_node = agents[i_self].path[agents[i_self].path_i + 1][0]
+        next_pos = torch.tensor(pos[next_node])
+        own_angle = torch.atan2(
+            next_pos[1] - own_pos[1], next_pos[0] - own_pos[0]).item()
+    except IndexError:
+        pass
+
     # data layers
+    # 1. own path
     x_layer_own_path = torch.zeros((len(small_from_big), 1))
     for p, t in agents[i_self].path:
         if p in g_sml.nodes:
             p_sml = small_from_big[p]
             x_layer_own_path[p_sml] = t_to_data(t, agents[i_self].path_i)
+
+    # 2. other paths
     x_layer_other_paths = torch.zeros((len(small_from_big), 1))
     for i_a, a in enumerate(agents):
         if i_a == i_self:
@@ -41,19 +54,30 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Data:
             if p in g_sml.nodes:
                 p_sml = small_from_big[p]
                 x_layer_other_paths[p_sml] = max(
-                    x_layer_other_paths[p_sml],
+                    float(x_layer_other_paths[p_sml].item()),
                     t_to_data(t, a.path_i))
+
+    # 3. relative distance
+    relative_pos = torch.zeros((len(small_from_big), 2))
+    for i_big,  i_sml in small_from_big.items():
+        relative_pos[i_sml] = torch.tensor(pos[i_big]) - own_pos
+    relative_distance = torch.norm(relative_pos, dim=1)
+
+    # 4. relative angle
+    relative_angle = torch.atan2(
+        relative_pos[:, 1], relative_pos[:, 0]) - own_angle
+
     d = Data(
-        pos=torch.tensor([pos[n] for n in g_sml.nodes]),
         edge_index=torch.tensor([(
             small_from_big[n1],
             small_from_big[n2]
         ) for (n1, n2) in g_sml.edges]).t(),
         x=torch.cat([x_layer_own_path,
-                     x_layer_other_paths],
-                    dim=1)
+                     x_layer_other_paths,
+                     relative_distance.view(-1, 1),
+                     relative_angle.view(-1, 1)], dim=1),
     )
-    return d, small_from_big[own_pos], big_from_small
+    return d, big_from_small
 
 
 def get_optimal_edge(agents, i_agent_to_consider):

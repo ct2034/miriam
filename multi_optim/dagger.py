@@ -22,24 +22,20 @@ logger = logging.getLogger(__name__)
 
 
 ACTION = int
-OBSERVATION = Tuple[Data, int, Dict[int, int]]
+OBSERVATION = Tuple[Data, Dict[int, int]]
 MAX_STEPS = 10
-N_LEARN_MAX = 100
+N_LEARN_MAX = 1000
 
 
 def sample_trajectory_proxy(args):
-    dg, rng = args
-    return dg.sample_trajectory(rng)
+    dg, seed = args
+    return dg.sample_trajectory(seed)
 
 
 def get_input_data_from_observation(
         observation: OBSERVATION) -> MODEL_INPUT:
-    data, node, big_from_small = observation
-    x = data.x
-    edge_index = data.edge_index
-    pos = data.pos
-    out = (x, edge_index, pos, node)
-    return out
+    data, big_from_small = observation
+    return (data.x, data.edge_index)
 
 
 class ScenarioState():
@@ -92,11 +88,7 @@ class DaggerStrategy():
     (https://proceedings.mlr.press/v15/ross11a.html)"""
 
     def __init__(self, model, graph, n_episodes, n_agents,
-                 optimizer, old_d, rng):
-        if old_d is None:
-            self.d = []
-        else:
-            self.d = old_d
+                 optimizer, rng):
         self.model = model
         self.graph = self._add_self_edges_to_graph(graph)
         self.n_episodes = n_episodes
@@ -112,8 +104,9 @@ class DaggerStrategy():
                 graph.add_edge(node, node)
         return graph
 
-    def sample_trajectory(self, rng, max_steps=MAX_STEPS):
+    def sample_trajectory(self, seed, max_steps=MAX_STEPS):
         """Sample a trajectory using the given policy."""
+        rng = Random(seed)
         solvable = False
         while not solvable:
             starts = rng.sample(self.graph.nodes(), self.n_agents)
@@ -157,35 +150,31 @@ class DaggerStrategy():
         assert not state.finished
         return get_optimal_edge(state.agents, state.i_agent_to_consider)
 
-    def run_dagger(self, pool):
+    def run_dagger(self, pool, old_ds):
         """Run the DAgger algorithm."""
         loss_s = []
 
-        params = [(self, Random(s)) for s in self.rng.sample(
+        params = [(self, s) for s in self.rng.sample(
             range(2**32), k=self.n_episodes)]
-        results = pool.map(
+        results_s = pool.map(
             sample_trajectory_proxy, params
         )
 
-        for r in results:
-            self.d.extend(r)
+        for results in results_s:
+            for r in results:
+                x, edge_index = r[0]
+                this_data = Data(x=x,
+                                 edge_index=edge_index, y=r[1])
+                old_ds.append(this_data)
 
         # learn
-        ds = self.rng.sample(self.d, min(len(self.d), N_LEARN_MAX))
-        s_s = []
-        a_s = []
-        for d in ds:
-            s_s.append(d[0])
-            a_s.append(d[1])
+        ds = self.rng.sample(old_ds, min(len(old_ds), N_LEARN_MAX))
         loss = self.model.learn(
-            s_s, a_s, optimizer=self.optimizer)
+            ds, optimizer=self.optimizer)
         if loss is not None:
             loss_s.append(loss)
-
         del ds
-        del s_s
-        del a_s
 
         if len(loss_s) == 0:
             return self.model, np.mean([0])
-        return self.model, np.mean(loss_s)
+        return self.model, np.mean(loss_s), old_ds
