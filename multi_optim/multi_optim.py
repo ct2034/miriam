@@ -101,11 +101,11 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
         return None, np.mean(success_s)
 
 
-def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_ds, pool, rng):
-    n_epochs = 64
+def optimize_policy(model, g: nx.Graph, n_agents, n_data_learn_policy,
+                    n_epochs, optimizer, old_ds, pool, rng):
     ds = dagger.DaggerStrategy(
-        model, g, n_epochs, n_agents, optimizer, rng)
-    model, loss, old_ds = ds.run_dagger(pool, old_ds)
+        model, g, n_epochs, n_agents, n_data_learn_policy, optimizer, rng)
+    model, loss, new_data_perc, old_ds = ds.run_dagger(pool, old_ds)
 
     rng_test = Random(1)
     # little less agents for evaluation
@@ -113,13 +113,15 @@ def optimize_policy(model, g: nx.Graph, n_agents, optimizer, old_ds, pool, rng):
     regret, success = eval_policy(
         model, g, ds.env_nx, eval_n_agents, 10, rng_test)
 
-    return model, loss, regret, success, old_ds
+    return model, loss, regret, success, new_data_perc, old_ds
 
 
 def run_optimization(
         n_nodes: int = 32,
         n_runs_pose: int = 1024,
         n_runs_policy: int = 128,
+        n_data_learn_policy: int = 1024,
+        n_epochs_per_run_policy: int = 64,
         stats_every: int = 1,
         lr_pos: float = 1e-4,
         lr_policy: float = 4e-4,
@@ -162,7 +164,8 @@ def run_optimization(
         "poses_training_length",
         "policy_loss",
         "policy_regret",
-        "policy_success"])
+        "policy_success",
+        "policy_new_data_percentage"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -205,16 +208,19 @@ def run_optimization(
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, policy_loss, regret, success, old_ds
+            (policy_model, policy_loss, regret, success, new_data_perc, old_ds
              ) = optimize_policy(
-                policy_model, g, n_agents, optimizer_policy, old_ds, pool, rng)
+                policy_model, g, n_agents, n_data_learn_policy, n_epochs_per_run_policy, optimizer_policy, old_ds, pool, rng)
             if i_r % stats_every == 0:
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
                     stats.add("policy_regret", i_r, float(regret))
                 stats.add("policy_success", i_r, float(success))
+                stats.add("policy_new_data_percentage",
+                          i_r, float(new_data_perc))
                 logger.info(f"Regret: {regret}")
                 logger.info(f"Success: {success}")
+                logger.info(f"New data: {new_data_perc}")
 
         pb.progress()
     runtime = pb.end()
@@ -244,7 +250,6 @@ def run_optimization(
 
 
 if __name__ == "__main__":
-    logging.getLogger(__name__).setLevel(logging.DEBUG)
 
     # multiprocessing
     tmp.set_sharing_strategy('file_system')
@@ -252,6 +257,7 @@ if __name__ == "__main__":
 
     # debug run
     rng = Random(0)
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.DEBUG)
@@ -262,6 +268,8 @@ if __name__ == "__main__":
         n_nodes=8,
         n_runs_pose=2,
         n_runs_policy=16,
+        n_data_learn_policy=128,
+        n_epochs_per_run_policy=4,
         stats_every=1,
         lr_pos=1e-4,
         lr_policy=1e-3,
@@ -272,6 +280,7 @@ if __name__ == "__main__":
 
     # small run
     rng = Random(0)
+    logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.INFO)
@@ -282,6 +291,8 @@ if __name__ == "__main__":
         n_nodes=16,
         n_runs_pose=1,
         n_runs_policy=128,
+        n_data_learn_policy=1024,
+        n_epochs_per_run_policy=64,
         stats_every=1,
         lr_pos=1e-4,
         lr_policy=1e-4,

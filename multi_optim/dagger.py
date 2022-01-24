@@ -5,7 +5,7 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 import scenarios
 from definitions import INVALID, SCENARIO_RESULT
-from planner.policylearn.edge_policy import MODEL_INPUT, EdgePolicyModel
+from planner.policylearn.edge_policy import MODEL_INPUT
 from planner.policylearn.edge_policy_graph_utils import (RADIUS, TIMEOUT,
                                                          agents_to_data,
                                                          get_optimal_edge)
@@ -87,12 +87,13 @@ class DaggerStrategy():
     """Implementation of DAgger
     (https://proceedings.mlr.press/v15/ross11a.html)"""
 
-    def __init__(self, model, graph, n_episodes, n_agents,
+    def __init__(self, model, graph, n_episodes, n_agents, n_data_learn_policy,
                  optimizer, rng):
         self.model = model
         self.graph = self._add_self_edges_to_graph(graph)
         self.n_episodes = n_episodes
         self.n_agents = n_agents
+        self.n_data_learn_policy = n_data_learn_policy
         self.env_nx = env_to_nx(graph)
         self.rng = rng
         self.optimizer = optimizer
@@ -160,12 +161,24 @@ class DaggerStrategy():
             sample_trajectory_proxy, params
         )
 
+        new_data_n = 0
         for results in results_s:
+            new_data_n += len(results)
             for r in results:
                 x, edge_index = r[0]
                 this_data = Data(x=x,
                                  edge_index=edge_index, y=r[1])
-                old_ds.append(this_data)
+                if len(old_ds) < self.n_data_learn_policy:
+                    old_ds.append(this_data)
+                else:
+                    old_ds[self.rng.randint(
+                        0, len(old_ds) - 1)] = this_data
+
+        # how much data is new?
+        new_data_perc = float(new_data_n) / len(old_ds)
+
+        if new_data_perc > 0.5:
+            logging.warning(f"{new_data_perc*100}% new data points")
 
         # learn
         ds = self.rng.sample(old_ds, min(len(old_ds), N_LEARN_MAX))
@@ -177,4 +190,4 @@ class DaggerStrategy():
 
         if len(loss_s) == 0:
             return self.model, np.mean([0])
-        return self.model, np.mean(loss_s), old_ds
+        return self.model, np.mean(loss_s), new_data_perc, old_ds
