@@ -2,6 +2,7 @@ import datetime
 import logging
 import socket
 import sys
+import tracemalloc
 from fileinput import filename
 from random import Random, getstate
 from typing import Dict, List, Optional, Tuple
@@ -54,7 +55,7 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
     regret_s = []
     success_s = []
     for i_e in range(n_eval):
-        logger.debug(f"Eval {i_e}")
+        # logger.debug(f"Eval {i_e}")
         starts = rng.sample(g.nodes(), n_agents)
         goals = rng.sample(g.nodes(), n_agents)
         failed_at_creation = False
@@ -89,11 +90,11 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
                         res_optim = (0, 0, 0, 0, 0)
 
         success = res_policy[4] and res_optim[4]
-        logger.debug(f"success: {success}")
+        # logger.debug(f"success: {success}")
         if success:
             regret = res_policy[0] - res_optim[0]
             regret_s.append(regret)
-            logger.debug(f"regret: {regret}")
+            # logger.debug(f"regret: {regret}")
         success_s.append(res_policy[4])
     if len(regret_s) > 0:
         return np.mean(regret_s), np.mean(success_s)
@@ -152,6 +153,9 @@ def run_optimization(
     # Policy
     policy_model = EdgePolicyModel()
     policy_model.to(device)
+    for param in policy_model.parameters():
+        param.share_memory_()
+    policy_model.share_memory()
     # policy_model.use_multiprocessing = False
     # policy_model.share_memory()
     optimizer_policy = torch.optim.Adam(
@@ -210,7 +214,8 @@ def run_optimization(
         if i_r % n_runs_per_run_policy == 0:
             (policy_model, policy_loss, regret, success, new_data_perc, old_ds
              ) = optimize_policy(
-                policy_model, g, n_agents, n_data_learn_policy, n_epochs_per_run_policy, optimizer_policy, old_ds, pool, rng)
+                policy_model, g, n_agents, n_data_learn_policy,
+                n_epochs_per_run_policy, optimizer_policy, old_ds, pool, rng)
             if i_r % stats_every == 0:
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
@@ -250,6 +255,7 @@ def run_optimization(
 
 
 if __name__ == "__main__":
+    tracemalloc.start()
 
     # multiprocessing
     tmp.set_sharing_strategy('file_system')
@@ -302,10 +308,10 @@ if __name__ == "__main__":
         prefix="small")
 
     # full run
-    rng = Random(0)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        rng=rng,
-        prefix="full")
+    # rng = Random(0)
+    # logging.getLogger(
+    #     "planner.mapf_implementations.plan_cbs_roadmap"
+    # ).setLevel(logging.INFO)
+    # run_optimization(
+    #     rng=rng,
+    #     prefix="full")

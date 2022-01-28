@@ -1,11 +1,14 @@
+import copy
 import logging
+import tracemalloc
 from random import Random
 from typing import Dict, Optional, Tuple
 
 import numpy as np
 import scenarios
 from definitions import INVALID, SCENARIO_RESULT
-from planner.policylearn.edge_policy import MODEL_INPUT
+from humanfriendly import format_size
+from planner.policylearn.edge_policy import MODEL_INPUT, EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import (RADIUS, TIMEOUT,
                                                          agents_to_data,
                                                          get_optimal_edge)
@@ -25,11 +28,6 @@ ACTION = int
 OBSERVATION = Tuple[Data, Dict[int, int]]
 MAX_STEPS = 10
 N_LEARN_MAX = 1000
-
-
-def sample_trajectory_proxy(args):
-    dg, seed = args
-    return dg.sample_trajectory(seed)
 
 
 def get_input_data_from_observation(
@@ -83,6 +81,54 @@ class ScenarioState():
         return self.run()
 
 
+def sample_trajectory_proxy(args):
+    return sample_trajectory(*args)
+
+
+def sample_trajectory(seed, graph, n_agents, env_nx,
+                      model, max_steps=MAX_STEPS):
+    """Sample a trajectory using the given policy."""
+    rng = Random(seed)
+    solvable = False
+    while not solvable:
+        starts = rng.sample(graph.nodes(), n_agents)
+        goals = rng.sample(graph.nodes(), n_agents)
+        # is this solvable?
+        paths = scenarios.solvers.cached_cbsr(
+            graph, starts, goals, radius=RADIUS,
+            timeout=int(TIMEOUT*.9))
+        if paths != INVALID:
+            solvable = True
+
+    i_a = rng.randrange(n_agents)
+    state = ScenarioState(graph, starts, goals,
+                          i_a, env_nx, model)
+
+    # Sample initial state
+    state.run()
+    these_ds = []
+    for i_s in range(max_steps):
+        try:
+            if state.finished:
+                break
+            observation = state.observe()
+            scores, targets = model(
+                *(get_input_data_from_observation(observation)))
+            action = int(targets[scores.argmax()])
+            # observation, action pair for learning
+            optimal_action = get_optimal_edge(
+                state.agents, state.i_agent_to_consider)
+            these_ds.append((
+                get_input_data_from_observation(observation),
+                optimal_action))
+            # Take action
+            state.step(action)
+        except RuntimeError as e:
+            logger.warning("RuntimeError: {}".format(e))
+            break
+    return these_ds
+
+
 class DaggerStrategy():
     """Implementation of DAgger
     (https://proceedings.mlr.press/v15/ross11a.html)"""
@@ -105,57 +151,22 @@ class DaggerStrategy():
                 graph.add_edge(node, node)
         return graph
 
-    def sample_trajectory(self, seed, max_steps=MAX_STEPS):
-        """Sample a trajectory using the given policy."""
-        rng = Random(seed)
-        solvable = False
-        while not solvable:
-            starts = rng.sample(self.graph.nodes(), self.n_agents)
-            goals = rng.sample(self.graph.nodes(), self.n_agents)
-            # is this solvable?
-            paths = scenarios.solvers.cached_cbsr(
-                self.graph, starts, goals, radius=RADIUS,
-                timeout=int(TIMEOUT*.9))
-            if paths != INVALID:
-                solvable = True
-
-        i_a = rng.randrange(self.n_agents)
-        state = ScenarioState(self.graph, starts, goals,
-                              i_a, self.env_nx, self.model)
-
-        # Sample initial state
-        state.run()
-        these_ds = []
-        for i_s in range(max_steps):
-            try:
-                if state.finished:
-                    break
-                observation = state.observe()
-                scores, targets = self.model(
-                    *(get_input_data_from_observation(observation)))
-                action = int(targets[scores.argmax()])
-                # observation, action pair for learning
-                optimal_action = self.get_optimal_action(state)
-                these_ds.append((
-                    get_input_data_from_observation(observation),
-                    optimal_action))
-                # Take action
-                state.step(action)
-            except RuntimeError as e:
-                logger.warning("RuntimeError: {}".format(e))
-                break
-        return these_ds
-
-    def get_optimal_action(self, state):
-        """Get the optimal action for the given state."""
-        assert not state.finished
-        return get_optimal_edge(state.agents, state.i_agent_to_consider)
-
     def run_dagger(self, pool, old_ds):
         """Run the DAgger algorithm."""
         loss_s = []
 
-        params = [(self, s) for s in self.rng.sample(
+        logger.warning("Memory usage, current: " +
+                       str(format_size(tracemalloc.get_traced_memory()[0])) +
+                       " peak: " +
+                       str(format_size(tracemalloc.get_traced_memory()[1])))
+
+        model_copy = EdgePolicyModel(
+            self.model.num_node_features, self.model.conv_channels)
+        model_copy.load_state_dict(copy.deepcopy(self.model.state_dict()))
+        model_copy.to("cpu")
+
+        params = [(s, self.graph, self.n_agents, self.env_nx,
+                   model_copy) for s in self.rng.sample(
             range(2**32), k=self.n_episodes)]
         results_s = pool.imap_unordered(
             sample_trajectory_proxy, params
