@@ -145,6 +145,7 @@ def run_optimization(
 
     # GPU or CPU?
     if torch.cuda.is_available():
+        logger.info("Using GPU")
         device = torch.device("cuda:0")
     else:
         logger.warning("GPU not available, using CPU")
@@ -259,7 +260,7 @@ if __name__ == "__main__":
 
     # multiprocessing
     tmp.set_sharing_strategy('file_system')
-    tmp.set_start_method('fork')
+    tmp.set_start_method('spawn')
 
     # debug run
     rng = Random(0)
@@ -284,34 +285,22 @@ if __name__ == "__main__":
         rng=rng,
         prefix="debug")
 
-    # small run
+    # tiny run 
     rng = Random(0)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.INFO)
-    logging.getLogger(
-        "sim.decentralized.policy"
-    ).setLevel(logging.INFO)
     run_optimization(
-        n_nodes=16,
-        n_runs_pose=1,
+        n_nodes=8,
+        n_runs_pose=2,
         n_runs_policy=128,
-        n_data_learn_policy=1024,
-        n_epochs_per_run_policy=64,
+        n_data_learn_policy=512,
+        n_epochs_per_run_policy=16,
         stats_every=1,
         lr_pos=1e-4,
-        lr_policy=1e-4,
-        n_agents=6,
-        map_fname="roadmaps/odrm/odrm_eval/maps/plain.png",
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         rng=rng,
-        prefix="small")
-
-    # full run
-    # rng = Random(0)
-    # logging.getLogger(
-    #     "planner.mapf_implementations.plan_cbs_roadmap"
-    # ).setLevel(logging.INFO)
-    # run_optimization(
-    #     rng=rng,
-    #     prefix="full")
+        prefix="tiny")
