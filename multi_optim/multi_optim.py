@@ -103,11 +103,10 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
         return None, np.mean(success_s)
 
 
-def optimize_policy(model, g: nx.Graph, n_agents, n_data_learn_policy,
+def optimize_policy(model, g: nx.Graph, n_agents,
                     n_epochs, optimizer, data_files, pool, prefix, rng):
     ds = dagger.DaggerStrategy(
-        model, g, n_epochs, n_agents,
-        n_data_learn_policy, optimizer, prefix, rng)
+        model, g, n_epochs, n_agents, optimizer, prefix, rng)
     model, loss, new_data_perc, data_files = ds.run_dagger(pool, data_files)
 
     rng_test = Random(1)
@@ -123,7 +122,6 @@ def run_optimization(
         n_nodes: int = 32,
         n_runs_pose: int = 1024,
         n_runs_policy: int = 128,
-        n_data_learn_policy: int = 1024,
         n_epochs_per_run_policy: int = 64,
         stats_every: int = 1,
         lr_pos: float = 1e-4,
@@ -217,7 +215,7 @@ def run_optimization(
         if i_r % n_runs_per_run_policy == 0:
             (policy_model, policy_loss, regret, success, new_data_perc, policy_data_files
              ) = optimize_policy(
-                policy_model, g, n_agents, n_data_learn_policy,
+                policy_model, g, n_agents,
                 n_epochs_per_run_policy, optimizer_policy, policy_data_files, pool, prefix, rng)
             if i_r % stats_every == 0:
                 stats.add("policy_loss", i_r, float(policy_loss))
@@ -277,7 +275,6 @@ if __name__ == "__main__":
         n_nodes=8,
         n_runs_pose=2,
         n_runs_policy=16,
-        n_data_learn_policy=128,
         n_epochs_per_run_policy=4,
         stats_every=1,
         lr_pos=1e-4,
@@ -288,52 +285,47 @@ if __name__ == "__main__":
         prefix="debug")
 
     # tiny run
-    # rng = Random(0)
-    # logging.getLogger(__name__).setLevel(logging.INFO)
-    # logging.getLogger(
-    #     "planner.mapf_implementations.plan_cbs_roadmap"
-    # ).setLevel(logging.INFO)
-    # run_optimization(
-    #     n_nodes=16,
-    #     n_runs_pose=2,
-    #     n_runs_policy=128,
-    #     n_data_learn_policy=512,
-    #     n_epochs_per_run_policy=16,
-    #     stats_every=1,
-    #     lr_pos=1e-4,
-    #     lr_policy=1e-3,
-    #     n_agents=4,
-    #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-    #     rng=rng,
-    #     prefix="tiny")
+    rng = Random(0)
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=16,
+        n_runs_pose=2,
+        n_runs_policy=128,
+        n_epochs_per_run_policy=16,
+        stats_every=1,
+        lr_pos=1e-4,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        rng=rng,
+        prefix="tiny")
 
     # checking different metaparams ...
-    # diffs = {
-    #     "n_agents": [8],
-    #     "lr_policy": [3e-3, 3e-4],
-    #     "n_epochs_per_run_policy": [32, 64],
-    #     "n_data_learn_policy": [1024, 2048],
-    # }
-    # def_n_agents = 6
-    # def_lr_policy = 1e-3
-    # def_n_epochs_per_run_policy = 16
-    # def_n_data_learn_policy = 512
-    # for k, vs in diffs.items():
-    #     for v in vs:
-    #         rng = Random(0)
-    #         args = {
-    #             "n_nodes": 16,
-    #             "n_runs_pose": 2,
-    #             "n_runs_policy": 128,
-    #             "n_data_learn_policy": def_n_data_learn_policy,
-    #             "n_epochs_per_run_policy": def_n_epochs_per_run_policy,
-    #             "stats_every": 1,
-    #             "lr_pos": 1e-4,
-    #             "lr_policy": def_lr_policy,
-    #             "n_agents": def_n_agents,
-    #             "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
-    #             "rng": rng,
-    #             "prefix": f"tiny_{k}_{v}",
-    #         }
-    #         args[k] = v
-    #         run_optimization(**args)
+    diffs = {
+        # "n_agents": [8],
+        "lr_policy": [3e-3, 3e-4],
+        "n_epochs_per_run_policy": [32, 64],
+    }
+    def_n_agents = 6
+    def_lr_policy = 1e-3
+    def_n_epochs_per_run_policy = 16
+    for k, vs in diffs.items():
+        for v in vs:
+            rng = Random(0)
+            args = {
+                "n_nodes": 16,
+                "n_runs_pose": 2,
+                "n_runs_policy": 128,
+                "stats_every": 1,
+                "lr_pos": 1e-4,
+                "lr_policy": def_lr_policy,
+                "n_agents": def_n_agents,
+                "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+                "rng": rng,
+                "prefix": f"tiny_{k}_{v}",
+            }
+            args[k] = v
+            run_optimization(**args)

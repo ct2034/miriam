@@ -137,13 +137,12 @@ class DaggerStrategy():
     """Implementation of DAgger
     (https://proceedings.mlr.press/v15/ross11a.html)"""
 
-    def __init__(self, model, graph, n_episodes, n_agents, n_data_learn_policy,
+    def __init__(self, model, graph, n_episodes, n_agents,
                  optimizer, prefix, rng):
         self.model = model
         self.graph = self._add_self_edges_to_graph(graph)
         self.n_episodes = n_episodes
         self.n_agents = n_agents
-        self.n_data_learn_policy = n_data_learn_policy
         self.env_nx = env_to_nx(graph)
         self.rng = rng
         self.optimizer = optimizer
