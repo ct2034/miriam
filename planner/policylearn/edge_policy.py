@@ -15,6 +15,7 @@ from scenarios.visualization import plot_with_paths
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario
+from torch.nn.modules.module import T
 from torch_geometric.data import Data
 
 MODEL_INPUT = Tuple[
@@ -22,7 +23,7 @@ MODEL_INPUT = Tuple[
 
 
 class EdgePolicyModel(nn.Module):
-    def __init__(self, num_node_features=4, conv_channels=4):
+    def __init__(self, num_node_features=4, conv_channels=4, gpu=torch.device("cpu")):
         super().__init__()
         self.num_node_features = num_node_features
         self.conv_channels = conv_channels
@@ -31,6 +32,7 @@ class EdgePolicyModel(nn.Module):
         self.conv2 = torch_geometric.nn.GCNConv(
             conv_channels, conv_channels)
         self.readout = torch.nn.Linear(conv_channels, 1)
+        self.gpu = gpu
 
     def forward(self, x, edge_index):
         # Agents position is where x[0] is 1
@@ -67,12 +69,14 @@ class EdgePolicyModel(nn.Module):
     def learn(self, datas: List[Data], optimizer):
         self.train()
         self.zero_grad()
-        scores = torch.tensor([])
-        targets = torch.tensor([])
-        y_goals = torch.tensor([])
+        scores = torch.tensor([], device=self.gpu)
+        targets = torch.tensor([], device=self.gpu)
+        y_goals = torch.tensor([], device=self.gpu)
         for d in datas:
+            d.to(self.gpu)
             score, targets = self.forward(d.x, d.edge_index)
-            y_goal = torch.zeros(score.shape[0], dtype=torch.float)
+            y_goal = torch.zeros(
+                score.shape[0], dtype=torch.float, device=self.gpu)
             y_goal[(targets == d.y).nonzero()] = 1
             scores = torch.cat((scores, score))
             y_goals = torch.cat((y_goals, y_goal))
@@ -87,6 +91,17 @@ class EdgePolicyModel(nn.Module):
                             f"datas {datas}, targets {targets}")
             return None
         return float(loss)
+
+    def train(self: T, mode: bool = True) -> T:
+        if mode:  # train
+            self.to(self.gpu)
+            for p in self.parameters():
+                p.to(self.gpu)
+        else:  # eval
+            self.to("cpu")
+            for p in self.parameters():
+                p.to("cpu")
+        return super().train(mode)
 
 
 if __name__ == "__main__":

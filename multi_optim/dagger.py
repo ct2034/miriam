@@ -163,7 +163,7 @@ class DaggerStrategy():
         model_copy = EdgePolicyModel(
             self.model.num_node_features, self.model.conv_channels)
         model_copy.load_state_dict(copy.deepcopy(self.model.state_dict()))
-        model_copy.to("cpu")
+        model_copy.eval()
 
         params = [(s, self.graph, self.n_agents, self.env_nx,
                    model_copy) for s in self.rng.sample(

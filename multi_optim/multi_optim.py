@@ -54,6 +54,7 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
                 ) -> Tuple[Optional[float], float]:
     regret_s = []
     success_s = []
+    model.eval()
     for i_e in range(n_eval):
         # logger.debug(f"Eval {i_e}")
         starts = rng.sample(g.nodes(), n_agents)
@@ -146,14 +147,13 @@ def run_optimization(
     # GPU or CPU?
     if torch.cuda.is_available():
         logger.info("Using GPU")
-        device = torch.device("cuda:0")
+        gpu = torch.device("cuda:0")
     else:
         logger.warning("GPU not available, using CPU")
-        device = torch.device("cpu")
+        gpu = torch.device("cpu")
 
     # Policy
-    policy_model = EdgePolicyModel()
-    policy_model.to("cpu")
+    policy_model = EdgePolicyModel(gpu=gpu)
     for param in policy_model.parameters():
         param.share_memory_()
     policy_model.share_memory()
