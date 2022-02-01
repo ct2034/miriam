@@ -155,10 +155,10 @@ class DaggerStrategy():
         """Run the DAgger algorithm."""
         loss_s = []
 
-        logger.warning("Memory usage, current: " +
-                       str(format_size(tracemalloc.get_traced_memory()[0])) +
-                       " peak: " +
-                       str(format_size(tracemalloc.get_traced_memory()[1])))
+        logger.debug("Memory usage, current: " +
+                     str(format_size(tracemalloc.get_traced_memory()[0])) +
+                     " peak: " +
+                     str(format_size(tracemalloc.get_traced_memory()[1])))
 
         model_copy = EdgePolicyModel(
             self.model.num_node_features, self.model.conv_channels)
