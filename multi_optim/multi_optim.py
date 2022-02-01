@@ -104,10 +104,11 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
 
 
 def optimize_policy(model, g: nx.Graph, n_agents, n_data_learn_policy,
-                    n_epochs, optimizer, old_ds, pool, rng):
+                    n_epochs, optimizer, data_files, pool, prefix, rng):
     ds = dagger.DaggerStrategy(
-        model, g, n_epochs, n_agents, n_data_learn_policy, optimizer, rng)
-    model, loss, new_data_perc, old_ds = ds.run_dagger(pool, old_ds)
+        model, g, n_epochs, n_agents,
+        n_data_learn_policy, optimizer, prefix, rng)
+    model, loss, new_data_perc, data_files = ds.run_dagger(pool, data_files)
 
     rng_test = Random(1)
     # little less agents for evaluation
@@ -115,7 +116,7 @@ def optimize_policy(model, g: nx.Graph, n_agents, n_data_learn_policy,
     regret, success = eval_policy(
         model, g, ds.env_nx, eval_n_agents, 10, rng_test)
 
-    return model, loss, regret, success, new_data_perc, old_ds
+    return model, loss, regret, success, new_data_perc, data_files
 
 
 def run_optimization(
@@ -135,7 +136,7 @@ def run_optimization(
     torch.manual_seed(rng.randint(0, 2 ** 32))
 
     # multiprocessing
-    n_processes = min(tmp.cpu_count(), 8)
+    n_processes = min(tmp.cpu_count(), 2)
     pool = tmp.Pool(processes=n_processes)
 
     # Roadmap
@@ -148,6 +149,7 @@ def run_optimization(
     if torch.cuda.is_available():
         logger.info("Using GPU")
         gpu = torch.device("cuda:0")
+        torch.cuda.set_per_process_memory_fraction(1./(n_processes+2), gpu)
     else:
         logger.warning("GPU not available, using CPU")
         gpu = torch.device("cpu")
@@ -161,7 +163,7 @@ def run_optimization(
     # policy_model.share_memory()
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
-    old_ds = []
+    policy_data_files = []
 
     # Visualization and analysis
     stats = StatCollector([
@@ -213,10 +215,10 @@ def run_optimization(
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, policy_loss, regret, success, new_data_perc, old_ds
+            (policy_model, policy_loss, regret, success, new_data_perc, policy_data_files
              ) = optimize_policy(
                 policy_model, g, n_agents, n_data_learn_policy,
-                n_epochs_per_run_policy, optimizer_policy, old_ds, pool, rng)
+                n_epochs_per_run_policy, optimizer_policy, policy_data_files, pool, prefix, rng)
             if i_r % stats_every == 0:
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
@@ -286,52 +288,52 @@ if __name__ == "__main__":
         prefix="debug")
 
     # tiny run
-    rng = Random(0)
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=16,
-        n_runs_pose=2,
-        n_runs_policy=128,
-        n_data_learn_policy=512,
-        n_epochs_per_run_policy=16,
-        stats_every=1,
-        lr_pos=1e-4,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        rng=rng,
-        prefix="tiny")
+    # rng = Random(0)
+    # logging.getLogger(__name__).setLevel(logging.INFO)
+    # logging.getLogger(
+    #     "planner.mapf_implementations.plan_cbs_roadmap"
+    # ).setLevel(logging.INFO)
+    # run_optimization(
+    #     n_nodes=16,
+    #     n_runs_pose=2,
+    #     n_runs_policy=128,
+    #     n_data_learn_policy=512,
+    #     n_epochs_per_run_policy=16,
+    #     stats_every=1,
+    #     lr_pos=1e-4,
+    #     lr_policy=1e-3,
+    #     n_agents=4,
+    #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+    #     rng=rng,
+    #     prefix="tiny")
 
     # checking different metaparams ...
-    diffs = {
-        "n_agents": [8],
-        "lr_policy": [3e-3, 3e-4],
-        "n_epochs_per_run_policy": [32, 64],
-        "n_data_learn_policy": [1024, 2048],
-    }
-    def_n_agents = 6
-    def_lr_policy = 1e-3
-    def_n_epochs_per_run_policy = 16
-    def_n_data_learn_policy = 512
-    for k, vs in diffs.items():
-        for v in vs:
-            rng = Random(0)
-            args = {
-                "n_nodes": 16,
-                "n_runs_pose": 2,
-                "n_runs_policy": 128,
-                "n_data_learn_policy": def_n_data_learn_policy,
-                "n_epochs_per_run_policy": def_n_epochs_per_run_policy,
-                "stats_every": 1,
-                "lr_pos": 1e-4,
-                "lr_policy": def_lr_policy,
-                "n_agents": def_n_agents,
-                "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
-                "rng": rng,
-                "prefix": f"tiny_{k}_{v}",
-            }
-            args[k] = v
-            run_optimization(**args)
+    # diffs = {
+    #     "n_agents": [8],
+    #     "lr_policy": [3e-3, 3e-4],
+    #     "n_epochs_per_run_policy": [32, 64],
+    #     "n_data_learn_policy": [1024, 2048],
+    # }
+    # def_n_agents = 6
+    # def_lr_policy = 1e-3
+    # def_n_epochs_per_run_policy = 16
+    # def_n_data_learn_policy = 512
+    # for k, vs in diffs.items():
+    #     for v in vs:
+    #         rng = Random(0)
+    #         args = {
+    #             "n_nodes": 16,
+    #             "n_runs_pose": 2,
+    #             "n_runs_policy": 128,
+    #             "n_data_learn_policy": def_n_data_learn_policy,
+    #             "n_epochs_per_run_policy": def_n_epochs_per_run_policy,
+    #             "stats_every": 1,
+    #             "lr_pos": 1e-4,
+    #             "lr_policy": def_lr_policy,
+    #             "n_agents": def_n_agents,
+    #             "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+    #             "rng": rng,
+    #             "prefix": f"tiny_{k}_{v}",
+    #         }
+    #         args[k] = v
+    #         run_optimization(**args)

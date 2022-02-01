@@ -1,11 +1,15 @@
 import copy
 import logging
+import os
+import pickle
 import tracemalloc
 from random import Random
 from typing import Dict, Optional, Tuple
 
 import numpy as np
 import scenarios
+import tools
+import torch
 from definitions import INVALID, SCENARIO_RESULT
 from humanfriendly import format_size
 from planner.policylearn.edge_policy import MODEL_INPUT, EdgePolicyModel
@@ -134,7 +138,7 @@ class DaggerStrategy():
     (https://proceedings.mlr.press/v15/ross11a.html)"""
 
     def __init__(self, model, graph, n_episodes, n_agents, n_data_learn_policy,
-                 optimizer, rng):
+                 optimizer, prefix, rng):
         self.model = model
         self.graph = self._add_self_edges_to_graph(graph)
         self.n_episodes = n_episodes
@@ -143,6 +147,7 @@ class DaggerStrategy():
         self.env_nx = env_to_nx(graph)
         self.rng = rng
         self.optimizer = optimizer
+        self.prefix = prefix
 
     def _add_self_edges_to_graph(self, graph):
         """Add self edges to the graph."""
@@ -151,9 +156,19 @@ class DaggerStrategy():
                 graph.add_edge(node, node)
         return graph
 
-    def run_dagger(self, pool, old_ds):
+    def _get_data_folder(self):
+        return f"multi_optim/results/{self.prefix}_data"
+
+    def _get_path_data(self, hash):
+        folder = self._get_data_folder()
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        return folder+f"/{hash}.pkl"
+
+    def run_dagger(self, pool, data_files):
         """Run the DAgger algorithm."""
         loss_s = []
+        data_lengths = []
 
         logger.debug("Memory usage, current: " +
                      str(format_size(tracemalloc.get_traced_memory()[0])) +
@@ -168,37 +183,56 @@ class DaggerStrategy():
         params = [(s, self.graph, self.n_agents, self.env_nx,
                    model_copy) for s in self.rng.sample(
             range(2**32), k=self.n_episodes)]
-        results_s = pool.imap_unordered(
-            sample_trajectory_proxy, params
-        )
+        generation_hash = tools.hasher([], {
+            "seeds": [p[0] for p in params],
+            "self.graph": self.graph,
+            "self.n_agents": self.n_agents
+            # env_nx is not needed, because it depends on the graph
+        })
+        new_fname = self._get_path_data(generation_hash)
 
-        new_data_n = 0
-        for results in results_s:
-            new_data_n += len(results)
-            for r in results:
-                x, edge_index = r[0]
-                this_data = Data(x=x,
-                                 edge_index=edge_index, y=r[1])
-                if len(old_ds) < self.n_data_learn_policy:
-                    old_ds.append(this_data)
-                else:
-                    old_ds[self.rng.randint(
-                        0, len(old_ds) - 1)] = this_data
+        if os.path.exists(new_fname):
+            logger.debug("Loading data from file")
+            with open(new_fname, "rb") as f:
+                new_ds = pickle.load(f)
+        else:
+            results_s = pool.imap_unordered(
+                sample_trajectory_proxy, params
+            )
 
-        # how much data is new?
-        new_data_perc = float(new_data_n) / len(old_ds)
-
-        if new_data_perc > 0.5:
-            logging.warning(f"{new_data_perc*100}% new data points")
+            new_ds = []
+            for results in results_s:
+                for r in results:
+                    x, edge_index = r[0]
+                    this_data = Data(x=x,
+                                     edge_index=edge_index, y=r[1])
+                    new_ds.append(this_data)
+            with open(new_fname, "wb") as f:
+                pickle.dump(new_ds, f)
 
         # learn
-        ds = self.rng.sample(old_ds, min(len(old_ds), N_LEARN_MAX))
+        # first of the current data
+        data_lengths.append(len(new_ds))
         loss = self.model.learn(
-            ds, optimizer=self.optimizer)
+            new_ds, optimizer=self.optimizer)
         if loss is not None:
             loss_s.append(loss)
-        del ds
+        # then learn from files
+        for fname in data_files:
+            with open(fname, "rb") as f:
+                ds = pickle.load(f)
+            data_lengths.append(len(ds))
+            loss = self.model.learn(
+                ds, optimizer=self.optimizer)
+            if loss is not None:
+                loss_s.append(loss)
+
+        # after learning add new file
+        data_files.append(new_fname)
+
+        # statistics
+        new_data_perc = len(new_ds) / sum(data_lengths)
 
         if len(loss_s) == 0:
-            return self.model, np.mean([0])
-        return self.model, np.mean(loss_s), new_data_perc, old_ds
+            loss_s = [0]
+        return self.model, np.mean(loss_s), new_data_perc, data_files
