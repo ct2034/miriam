@@ -153,7 +153,7 @@ def run_optimization(
 
     # Policy
     policy_model = EdgePolicyModel()
-    policy_model.to(device)
+    policy_model.to("cpu")
     for param in policy_model.parameters():
         param.share_memory_()
     policy_model.share_memory()
@@ -285,14 +285,14 @@ if __name__ == "__main__":
         rng=rng,
         prefix="debug")
 
-    # tiny run 
+    # tiny run
     rng = Random(0)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.INFO)
     run_optimization(
-        n_nodes=8,
+        n_nodes=16,
         n_runs_pose=2,
         n_runs_policy=128,
         n_data_learn_policy=512,
@@ -304,3 +304,34 @@ if __name__ == "__main__":
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         rng=rng,
         prefix="tiny")
+
+    # checking different metaparams ...
+    diffs = {
+        "n_agents": [8],
+        "lr_policy": [3e-3, 3e-4],
+        "n_epochs_per_run_policy": [32, 64],
+        "n_data_learn_policy": [1024, 2048],
+    }
+    def_n_agents = 6
+    def_lr_policy = 1e-3
+    def_n_epochs_per_run_policy = 16
+    def_n_data_learn_policy = 512
+    for k, vs in diffs.items():
+        for v in vs:
+            rng = Random(0)
+            args = {
+                "n_nodes": 16,
+                "n_runs_pose": 2,
+                "n_runs_policy": 128,
+                "n_data_learn_policy": def_n_data_learn_policy,
+                "n_epochs_per_run_policy": def_n_epochs_per_run_policy,
+                "stats_every": 1,
+                "lr_pos": 1e-4,
+                "lr_policy": def_lr_policy,
+                "n_agents": def_n_agents,
+                "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+                "rng": rng,
+                "prefix": f"tiny_{k}_{v}",
+            }
+            args[k] = v
+            run_optimization(**args)
