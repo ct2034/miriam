@@ -80,7 +80,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3):
     return d, big_from_small
 
 
-def get_optimal_edge(agents, i_agent_to_consider):
+def get_optimal_edge(agents, i_agent: int):
     """Return the optimal edge to take for the given agent. """
     starts = [a.pos for a in agents]
     goals = [a.goal for a in agents]
@@ -89,7 +89,7 @@ def get_optimal_edge(agents, i_agent_to_consider):
     if paths is INVALID:
         raise RuntimeError("No paths found")
     else:
-        path = paths[i_agent_to_consider]
+        path = paths[i_agent]
         if len(path) == 1:  # already at goal
             return path[0][0]
         return path[1][0]

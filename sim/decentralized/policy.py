@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 from enum import Enum, auto
-from typing import Optional
+from typing import Optional, Set
 
 import numpy as np
 import torch
@@ -23,9 +23,11 @@ logger = logging.getLogger(__name__)
 
 
 class PolicyCalledException(Exception):
-    def __init__(self, policy, id_coll: int) -> None:
+    def __init__(self, policy, id_coll: int,
+                 agents_with_colissions: Optional[Set[int]] = None) -> None:
         super().__init__()
         self.policy: LearnedRaisingPolicy = policy
+        self.agents_with_colissions = agents_with_colissions
         self.id_coll = id_coll
 
     def get_agent_state(self, hop_dist: int):
@@ -388,7 +390,7 @@ class EdgePolicy(Policy):
     def get_priority(self, _) -> float:
         raise NotImplementedError()
 
-    def get_edge(self, agents):
+    def get_edge(self, agents, agents_with_colissions):
         i_a_self = agents.index(self.a)
         data, big_from_small = agents_to_data(agents, i_a_self)
         score, targets = self.nn.forward(
@@ -404,7 +406,7 @@ class OptimalEdgePolicy(Policy):
         super().__init__(agent)
         self.edge_based = True
 
-    def get_edge(self, agents):
+    def get_edge(self, agents, _):
         return get_optimal_edge(agents, agents.index(self.a))
 
 
@@ -413,8 +415,8 @@ class EdgeRaisingPolicy(Policy):
         super().__init__(agent)
         self.edge_based = True
 
-    def get_edge(self, agents):
-        raise PolicyCalledException(self, 0)
+    def get_edge(self, _, agents_with_colissions):
+        raise PolicyCalledException(self, 0, agents_with_colissions)
 
 
 class EdgeThenRaisingPolicy(Policy):
@@ -424,8 +426,8 @@ class EdgeThenRaisingPolicy(Policy):
         self.first_call = True
         self.first_val = first_val
 
-    def get_edge(self, agents):
+    def get_edge(self, _, agents_with_colissions):
         if self.first_call:
             self.first_call = False
             return self.first_val
-        raise PolicyCalledException(self, 0)
+        raise PolicyCalledException(self, 0, agents_with_colissions)

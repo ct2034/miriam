@@ -4,7 +4,7 @@ import os
 import pickle
 import tracemalloc
 from random import Random
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import scenarios
@@ -43,23 +43,20 @@ def get_input_data_from_observation(
 class ScenarioState():
     """A mapf scenario in a given state that can be executed step-wise"""
 
-    def __init__(self, graph, starts, goals, i_agent_to_consider,
+    def __init__(self, graph, starts, goals,
                  env_nx, model) -> None:
         self.graph = graph
         self.env_nx = env_nx
         self.starts = starts
         self.goals = goals
-        self.i_agent_to_consider = i_agent_to_consider
+        self.is_agents_to_consider: Optional[List[int]] = None
         self.finished = False
         self.agents = to_agent_objects(
             graph, starts, goals, env_nx=env_nx, radius=RADIUS)
         self.model = model
         for i in range(len(self.agents)):
-            if i != self.i_agent_to_consider:
-                self.agents[i].policy = EdgePolicy(self.agents[i], model)
-            else:
-                self.agents[i].policy = EdgeRaisingPolicy(
-                    self.agents[i])
+            self.agents[i].policy = EdgeRaisingPolicy(
+                self.agents[i])
 
     def run(self):
         """Start the scenario and return the initial state"""
@@ -71,17 +68,27 @@ class ScenarioState():
             pause_on=PolicyCalledException)
         if not has_exception(scenario_result):
             self.finished = True
+        else:
+            self.is_agents_to_consider = list(
+                scenario_result[-1].agents_with_colissions)
 
-    def observe(self) -> Optional[OBSERVATION]:
+    def observe(self) -> Optional[Dict[int, OBSERVATION]]:
         """Return the observation of the current state, None if finished"""
         if self.finished:
             return None
-        return agents_to_data(self.agents, self.i_agent_to_consider)
+        assert self.is_agents_to_consider is not None
 
-    def step(self, action: ACTION):
-        """Perform the given action and return the new state"""
-        self.agents[self.i_agent_to_consider].policy = EdgeThenRaisingPolicy(
-            self.agents[self.i_agent_to_consider], action)
+        observations = {}  # type: Dict[int, OBSERVATION]
+        for i_a in self.is_agents_to_consider:
+            observations[i_a] = agents_to_data(
+                self.agents, i_a)
+        return observations
+
+    def step(self, actions: Dict[int, ACTION]):
+        """Perform the given actions and return the new state"""
+        for i_a, action in actions.items():
+            self.agents[i_a].policy = EdgeThenRaisingPolicy(
+                self.agents[i_a], action)
         return self.run()
 
 
@@ -104,9 +111,8 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
         if paths != INVALID:
             solvable = True
 
-    i_a = rng.randrange(n_agents)
     state = ScenarioState(graph, starts, goals,
-                          i_a, env_nx, model)
+                          env_nx, model)
 
     # Sample initial state
     state.run()
@@ -115,18 +121,21 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
         try:
             if state.finished:
                 break
-            observation = state.observe()
-            scores, targets = model(
-                *(get_input_data_from_observation(observation)))
-            action = int(targets[scores.argmax()])
-            # observation, action pair for learning
-            optimal_action = get_optimal_edge(
-                state.agents, state.i_agent_to_consider)
-            these_ds.append((
-                get_input_data_from_observation(observation),
-                optimal_action))
-            # Take action
-            state.step(action)
+            observations = state.observe()
+            actions: Dict[int, ACTION] = {}
+            for i_a, obs in observations.items():
+                # find actions to take using the policy
+                scores, targets = model(
+                    *(get_input_data_from_observation(obs)))
+                action = int(targets[scores.argmax()])
+                actions[i_a] = action
+                # observation, action pairs for learning
+                optimal_action = get_optimal_edge(
+                    state.agents, i_a)
+                these_ds.append((
+                    get_input_data_from_observation(obs),
+                    optimal_action))
+            state.step(actions)
         except RuntimeError as e:
             logger.warning("RuntimeError: {}".format(e))
             break
