@@ -32,7 +32,7 @@ class EdgePolicyModel(nn.Module):
         self.conv2 = torch_geometric.nn.GCNConv(
             conv_channels, conv_channels)
         self.readout = torch.nn.Linear(conv_channels, 1)
-        self.gpu = gpu
+        self.gpu = gpu  # type: torch.device
 
     def forward(self, x, edge_index):
         # Agents position is where x[0] is 1
@@ -94,14 +94,14 @@ class EdgePolicyModel(nn.Module):
 
     def train(self: T, mode: bool = True) -> T:
         if mode:  # train
-            self.to(self.gpu)
+            self.to(self.gpu)  # type: ignore
             for p in self.parameters():
-                p.to(self.gpu)
+                p.to(self.gpu)  # type: ignore
         else:  # eval
             self.to("cpu")
             for p in self.parameters():
                 p.to("cpu")
-        return super().train(mode)
+        return super().train(mode)  # type: ignore
 
 
 if __name__ == "__main__":

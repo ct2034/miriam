@@ -163,7 +163,7 @@ def run_optimization(
     # policy_model.share_memory()
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
-    policy_data_files = []
+    policy_data_files = []  # type: List[str]
 
     # Visualization and analysis
     stats = StatCollector([
@@ -215,10 +215,12 @@ def run_optimization(
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, policy_loss, regret, success, new_data_perc, policy_data_files
+            (policy_model, policy_loss, regret, success, new_data_perc,
+             policy_data_files
              ) = optimize_policy(
                 policy_model, g, n_agents, n_data_learn_policy,
-                n_epochs_per_run_policy, optimizer_policy, policy_data_files, pool, prefix, rng)
+                n_epochs_per_run_policy, optimizer_policy, policy_data_files,
+                pool, prefix, rng)
             if i_r % stats_every == 0:
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
