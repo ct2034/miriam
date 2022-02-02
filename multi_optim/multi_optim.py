@@ -107,7 +107,8 @@ def optimize_policy(model, g: nx.Graph, n_agents,
                     n_epochs, optimizer, data_files, pool, prefix, rng):
     ds = dagger.DaggerStrategy(
         model, g, n_epochs, n_agents, optimizer, prefix, rng)
-    model, loss, new_data_perc, data_files = ds.run_dagger(pool, data_files)
+    model, loss, new_data_perc, data_files, data_len = ds.run_dagger(
+        pool, data_files)
 
     rng_test = Random(1)
     # little less agents for evaluation
@@ -115,7 +116,7 @@ def optimize_policy(model, g: nx.Graph, n_agents,
     regret, success = eval_policy(
         model, g, ds.env_nx, eval_n_agents, 10, rng_test)
 
-    return model, loss, regret, success, new_data_perc, data_files
+    return model, loss, regret, success, new_data_perc, data_files, data_len
 
 
 def run_optimization(
@@ -170,7 +171,8 @@ def run_optimization(
         "policy_loss",
         "policy_regret",
         "policy_success",
-        "policy_new_data_percentage"])
+        "policy_new_data_percentage",
+        "npolicy_data_len"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -214,7 +216,7 @@ def run_optimization(
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
             (policy_model, policy_loss, regret, success, new_data_perc,
-             policy_data_files
+             policy_data_files, data_len
              ) = optimize_policy(
                 policy_model, g, n_agents,
                 n_epochs_per_run_policy, optimizer_policy, policy_data_files,
@@ -226,9 +228,11 @@ def run_optimization(
                 stats.add("policy_success", i_r, float(success))
                 stats.add("policy_new_data_percentage",
                           i_r, float(new_data_perc))
+                stats.add("npolicy_data_len", i_r, float(data_len))
                 logger.info(f"Regret: {regret}")
                 logger.info(f"Success: {success}")
                 logger.info(f"New data: {new_data_perc}")
+                logger.info(f"Data length: {data_len}")
 
         pb.progress()
     runtime = pb.end()

@@ -36,8 +36,8 @@ N_LEARN_MAX = 1000
 
 def get_input_data_from_observation(
         observation: OBSERVATION) -> MODEL_INPUT:
-    data, big_from_small = observation
-    return (data.x, data.edge_index)
+    data, _ = observation
+    return data
 
 
 class ScenarioState():
@@ -86,10 +86,16 @@ class ScenarioState():
 
     def step(self, actions: Dict[int, ACTION]):
         """Perform the given actions and return the new state"""
-        for i_a, action in actions.items():
-            self.agents[i_a].policy = EdgeThenRaisingPolicy(
-                self.agents[i_a], action)
-        return self.run()
+        for i_a in range(len(self.agents)):
+            if i_a in actions.keys():
+                self.agents[i_a].policy = EdgeThenRaisingPolicy(
+                    self.agents[i_a], actions[i_a])
+            else:
+                self.agents[i_a].policy = EdgeRaisingPolicy(
+                    self.agents[i_a])
+            self.agents[i_a].start = self.agents[i_a].pos
+            self.agents[i_a].back_to_the_start()
+        self.run()
 
 
 def sample_trajectory_proxy(args):
@@ -125,16 +131,16 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
             actions: Dict[int, ACTION] = {}
             for i_a, obs in observations.items():
                 # find actions to take using the policy
+                d = get_input_data_from_observation(obs)
                 scores, targets = model(
-                    *(get_input_data_from_observation(obs)))
+                    d.x, d.edge_index)
                 action = int(targets[scores.argmax()])
                 actions[i_a] = action
                 # observation, action pairs for learning
                 optimal_action = get_optimal_edge(
                     state.agents, i_a)
-                these_ds.append((
-                    get_input_data_from_observation(obs),
-                    optimal_action))
+                d.y = optimal_action
+                these_ds.append(d)
             state.step(actions)
         except RuntimeError as e:
             logger.warning("RuntimeError: {}".format(e))
@@ -210,11 +216,7 @@ class DaggerStrategy():
 
             new_ds = []
             for results in results_s:
-                for r in results:
-                    x, edge_index = r[0]
-                    this_data = Data(x=x,
-                                     edge_index=edge_index, y=r[1])
-                    new_ds.append(this_data)
+                new_ds.extend(results)
             with open(new_fname, "wb") as f:
                 pickle.dump(new_ds, f)
 
@@ -243,4 +245,5 @@ class DaggerStrategy():
 
         if len(loss_s) == 0:
             loss_s = [0]
-        return self.model, np.mean(loss_s), new_data_perc, data_files
+        return (self.model, np.mean(loss_s), new_data_perc,
+                data_files, sum(data_lengths))
