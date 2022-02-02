@@ -445,6 +445,7 @@ def iterate_edge_policy(
             ))
             a.make_this_step(next_nodes[i_a])
             a.remove_all_blocks_and_replan()
+            a.policy.step()
 
     return time_slice, space_slice
 

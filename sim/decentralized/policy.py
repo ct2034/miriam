@@ -400,6 +400,9 @@ class EdgePolicy(Policy):
         logger.debug(f"targets: {targets}")
         return big_from_small[targets[torch.argmax(score)].item()]
 
+    def step(self):
+        pass
+
 
 class OptimalEdgePolicy(Policy):
     def __init__(self, agent, _) -> None:
@@ -408,6 +411,9 @@ class OptimalEdgePolicy(Policy):
 
     def get_edge(self, agents, _):
         return get_optimal_edge(agents, agents.index(self.a))
+
+    def step(self):
+        pass
 
 
 class EdgeRaisingPolicy(Policy):
@@ -418,16 +424,22 @@ class EdgeRaisingPolicy(Policy):
     def get_edge(self, _, agents_with_colissions):
         raise PolicyCalledException(self, 0, agents_with_colissions)
 
+    def step(self):
+        pass
+
 
 class EdgeThenRaisingPolicy(Policy):
     def __init__(self, agent, first_val: int) -> None:
         super().__init__(agent)
         self.edge_based = True
-        self.first_call = True
+        self.first_round = True
         self.first_val = first_val
 
     def get_edge(self, _, agents_with_colissions):
-        if self.first_call:
-            self.first_call = False
+        if self.first_round:
             return self.first_val
-        raise PolicyCalledException(self, 0, agents_with_colissions)
+        else:
+            raise PolicyCalledException(self, 0, agents_with_colissions)
+
+    def step(self):
+        self.first_round = False
