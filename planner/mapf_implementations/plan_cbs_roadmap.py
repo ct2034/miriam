@@ -94,6 +94,8 @@ def write_infile(fname, data, starts, goals):
 def read_outfile(fname):
     with open(fname, 'r') as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
+    if data is None:
+        return INVALID
     if data['statistics']['success'] == 0:
         return INVALID
     paths = []
