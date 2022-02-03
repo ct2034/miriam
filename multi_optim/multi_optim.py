@@ -78,14 +78,14 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
                         env=g,
                         agents=tuple(agents),
                         plot=False,
-                        iterator=IteratorType.EDGE_POLICY3)
+                        iterator=IteratorType.EDGE_POLICY2)
                 elif policy is OptimalEdgePolicy:
                     try:
                         res_optim = run_a_scenario(
                             env=g,
                             agents=tuple(agents),
                             plot=False,
-                            iterator=IteratorType.EDGE_POLICY3)
+                            iterator=IteratorType.EDGE_POLICY2)
                     except Exception as e:
                         logger.error(e)
                         res_optim = (0, 0, 0, 0, 0)

@@ -64,7 +64,7 @@ class ScenarioState():
             env=self.graph,
             agents=self.agents,
             plot=False,
-            iterator=IteratorType.EDGE_POLICY3,
+            iterator=IteratorType.EDGE_POLICY2,
             pause_on=PolicyCalledException)
         if not has_exception(scenario_result):
             self.finished = True
