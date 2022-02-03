@@ -109,14 +109,7 @@ def optimize_policy(model, g: nx.Graph, n_agents,
         model, g, n_epochs, n_agents, optimizer, prefix, rng)
     model, loss, new_data_perc, data_files, data_len = ds.run_dagger(
         pool, data_files)
-
-    rng_test = Random(1)
-    # little less agents for evaluation
-    eval_n_agents = int(np.ceil(n_agents * .7))
-    regret, success = eval_policy(
-        model, g, ds.env_nx, eval_n_agents, 10, rng_test)
-
-    return model, loss, regret, success, new_data_perc, data_files, data_len
+    return model, ds.env_nx, loss, new_data_perc, data_files, data_len
 
 
 def run_optimization(
@@ -124,7 +117,7 @@ def run_optimization(
         n_runs_pose: int = 1024,
         n_runs_policy: int = 128,
         n_epochs_per_run_policy: int = 64,
-        stats_every: int = 1,
+        stats_and_eval_every: int = 1,
         lr_pos: float = 1e-4,
         lr_policy: float = 4e-4,
         n_agents: int = 8,
@@ -182,7 +175,7 @@ def run_optimization(
         "n_nodes": n_nodes,
         "n_runs_pose": n_runs_pose,
         "n_runs_policy": n_runs_policy,
-        "stats_every": stats_every,
+        "stats_every": stats_and_eval_every,
         "lr_pos": lr_pos,
         "lr_policy": lr_policy,
         "n_agents": n_agents,
@@ -208,20 +201,28 @@ def run_optimization(
         if i_r % n_runs_per_run_pose == 0:
             g, pos, poses_test_length, poses_training_length = optimize_poses(
                 g, pos, map_img, optimizer_pos, rng)
-            if i_r % stats_every == 0:
+            if i_r % stats_and_eval_every == 0:
                 stats.add("poses_test_length", i_r, float(poses_test_length))
                 stats.add("poses_training_length", i_r,
                           float(poses_training_length))
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, policy_loss, regret, success, new_data_perc,
+            (policy_model, env_nx, policy_loss, new_data_perc,
              policy_data_files, data_len
              ) = optimize_policy(
                 policy_model, g, n_agents,
                 n_epochs_per_run_policy, optimizer_policy, policy_data_files,
                 pool, prefix, rng)
-            if i_r % stats_every == 0:
+            if i_r % stats_and_eval_every == 0:
+                # also eval now
+                rng_test = Random(1)
+                n_eval = 10
+                # little less agents for evaluation
+                eval_n_agents = int(np.ceil(n_agents * .7))
+                regret, success = eval_policy(
+                    policy_model, g, env_nx, eval_n_agents, n_eval, rng_test)
+
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
                     stats.add("policy_regret", i_r, float(regret))
@@ -282,7 +283,7 @@ if __name__ == "__main__":
         n_runs_pose=2,
         n_runs_policy=16,
         n_epochs_per_run_policy=4,
-        stats_every=1,
+        stats_and_eval_every=1,
         lr_pos=1e-4,
         lr_policy=1e-3,
         n_agents=4,
@@ -300,8 +301,8 @@ if __name__ == "__main__":
         n_nodes=16,
         n_runs_pose=2,
         n_runs_policy=128,
-        n_epochs_per_run_policy=16,
-        stats_every=1,
+        n_epochs_per_run_policy=128,
+        stats_and_eval_every=2,
         lr_pos=1e-4,
         lr_policy=1e-3,
         n_agents=4,
@@ -313,11 +314,11 @@ if __name__ == "__main__":
     diffs = {
         # "n_agents": [8],
         "lr_policy": [3e-3, 3e-4],
-        "n_epochs_per_run_policy": [32, 64],
+        # "n_epochs_per_run_policy": [32, 64],
     }  # type: Dict[str, List[float]]
     def_n_agents = 6
     def_lr_policy = 1e-3
-    def_n_epochs_per_run_policy = 16
+    def_n_epochs_per_run_policy = 128
     for k, vs in diffs.items():
         for v in vs:
             rng = Random(0)
@@ -325,7 +326,7 @@ if __name__ == "__main__":
                 "n_nodes": 16,
                 "n_runs_pose": 2,
                 "n_runs_policy": 128,
-                "stats_every": 1,
+                "stats_and_eval_every": 2,
                 "lr_pos": 1e-4,
                 "lr_policy": def_lr_policy,
                 "n_agents": def_n_agents,
