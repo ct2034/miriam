@@ -18,7 +18,7 @@ class Delaunay_impl:
     def __init__(self, points: np.ndarray, n_fake_nodes: int):
         raise NotImplementedError
 
-    def get_delaunay_graph(self) -> nx.Graph:
+    def get_delaunay_graph(self, map_img) -> nx.Graph:
         raise NotImplementedError
 
 
@@ -27,7 +27,7 @@ class Delaunay_scipy(Delaunay_impl):
         self.points = points
         self.n_fake_nodes = n_fake_nodes
 
-    def get_delaunay_graph(self) -> nx.Graph:
+    def get_delaunay_graph(self, map_img) -> nx.Graph:
         n_nodes = self.points.shape[0] - self.n_fake_nodes
         tri = Delaunay(self.points)
         (indptr, indices) = tri.vertex_neighbor_vertices
@@ -53,7 +53,7 @@ class Delaunay_libpysal(Delaunay_impl):
         self.points = points
         self.n_fake_nodes = n_fake_nodes
 
-    def get_delaunay_graph(self) -> nx.Graph:
+    def get_delaunay_graph(self, map_img) -> nx.Graph:
         n_nodes = self.points.shape[0] - self.n_fake_nodes
         cells, generators = voronoi_frames(self.points, clip="convex hull")
         delaunay = weights.Rook.from_dataframe(cells)
@@ -122,14 +122,14 @@ def prepare_fake_nodes(pos: np.ndarray) -> int:
 def run_delaunay_scipy(pos_np, map_img):
     n_fn = prepare_fake_nodes(pos_np)
     ds = Delaunay_scipy(pos_np, n_fn)
-    g = ds.get_delaunay_graph()
+    g = ds.get_delaunay_graph(map_img)
     return g
 
 
 def run_delaunay_libpysal(pos_np, map_img):
     n_fn = prepare_fake_nodes(pos_np)
     ds = Delaunay_libpysal(pos_np, n_fn)
-    g = ds.get_delaunay_graph()
+    g = ds.get_delaunay_graph(map_img)
     return g
 
 
