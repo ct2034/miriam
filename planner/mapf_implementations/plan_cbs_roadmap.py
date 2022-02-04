@@ -31,8 +31,8 @@ def call_subprocess(cmd, timeout):
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=os.path.dirname(__file__)
-        )
+            cwd=os.path.dirname(__file__),
+            timeout=timeout)
         while t < timeout:
             t = time.time() - start_time
             if process.poll() is not None:
