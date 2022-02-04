@@ -1,9 +1,11 @@
 import datetime
+import imp
 import logging
 import socket
 import sys
 import tracemalloc
 from fileinput import filename
+from multiprocessing.spawn import import_main_path
 from random import Random, getstate
 from typing import Dict, List, Optional, Tuple
 
@@ -12,7 +14,6 @@ import networkx as nx
 import numpy as np
 import torch
 import torch.multiprocessing as tmp
-import torch_geometric
 from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -27,7 +28,10 @@ from sim.decentralized.policy import EdgePolicy, OptimalEdgePolicy
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
 
-import dagger
+if __name__ == "__main__":
+    from dagger import DaggerStrategy
+else:
+    from multi_optim.dagger import DaggerStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +109,7 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
 
 def optimize_policy(model, g: nx.Graph, n_agents,
                     n_epochs, optimizer, data_files, pool, prefix, rng):
-    ds = dagger.DaggerStrategy(
+    ds = DaggerStrategy(
         model, g, n_epochs, n_agents, optimizer, prefix, rng)
     model, loss, new_data_perc, data_files, data_len = ds.run_dagger(
         pool, data_files)
@@ -313,7 +317,7 @@ if __name__ == "__main__":
     # checking different metaparams ...
     diffs = {
         # "n_agents": [8],
-        "lr_policy": [3e-3, 3e-4],
+        "lr_policy": [3e-4],
         # "n_epochs_per_run_policy": [32, 64],
     }  # type: Dict[str, List[float]]
     def_n_agents = 6
