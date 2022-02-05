@@ -65,7 +65,9 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3):
 
     # 4. relative angle
     relative_angle = torch.atan2(
-        relative_pos[:, 1], relative_pos[:, 0]) - own_angle
+        relative_pos[:, 1], relative_pos[:, 0])
+    # if not own node, add own angle
+    relative_angle[relative_distance != 0] -= own_angle
 
     d = Data(
         edge_index=torch.tensor([(
