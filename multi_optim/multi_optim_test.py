@@ -8,7 +8,7 @@ from multi_optim.multi_optim import *
 
 
 class MultiOptimTest(unittest.TestCase):
-    def __init__(self, methodName: str = ...) -> None:
+    def __init__(self, methodName: str = ...) -> None:  # type: ignore
         super().__init__(methodName)
         self.g = nx.Graph()
         self.g.add_edges_from([
