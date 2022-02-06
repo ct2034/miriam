@@ -57,15 +57,19 @@ class ScenarioState():
         for i in range(len(self.agents)):
             self.agents[i].policy = EdgeRaisingPolicy(
                 self.agents[i])
+        self.paths_out = []  # type: List[List[int]]
 
     def run(self):
         """Start the scenario and return the initial state"""
+        paths_out = self.paths_out
         scenario_result: SCENARIO_RESULT = run_a_scenario(
             env=self.graph,
             agents=self.agents,
             plot=False,
             iterator=IteratorType.EDGE_POLICY2,
-            pause_on=PolicyCalledException)
+            pause_on=PolicyCalledException,
+            paths_out=paths_out)
+        self.is_agents_to_consider = None
         if not has_exception(scenario_result):
             self.finished = True
         else:
@@ -119,9 +123,9 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
 
     state = ScenarioState(graph, starts, goals,
                           env_nx, model)
-
-    # Sample initial state
     state.run()
+
+    # Sample states
     these_ds = []
     for i_s in range(max_steps):
         try:

@@ -88,6 +88,14 @@ class ScenarioStateTest(unittest.TestCase):
                               self.pass_env_nx, self.model)
         state.run()
 
+        # check state after running
+        # the agents should not have moved
+        self.assertFalse(state.finished)
+        self.assertEqual(state.agents[0].pos, (0))
+        self.assertEqual(state.agents[1].pos, (3))
+        self.assertIn(0, state.is_agents_to_consider)
+        self.assertIn(1, state.is_agents_to_consider)
+
         # there should be an observation now
         observation = state.observe()
         self.assertIsNotNone(observation)
@@ -144,3 +152,16 @@ class ScenarioStateTest(unittest.TestCase):
             self.assertEqual(len(b2s), self.pass_graph.number_of_nodes())
             for k, v in b2s.items():
                 self.assertEqual(k, v)
+
+        # now we make a step
+        state.step({0: 2, 1: 1})  # agent 0 moves to node 2, agent 1 to node 1
+
+        # check state after running
+        self.assertTrue(state.finished)
+        self.assertEqual(state.agents[0].pos, (3))
+        self.assertEqual(state.agents[1].pos, (0))
+        self.assertIsNone(state.observe())
+        self.assertIsNone(state.is_agents_to_consider)
+
+        # check pathses we took to be correct
+        self.assertEqual(state.paths_out[0], [0, 2, 1, 3])
