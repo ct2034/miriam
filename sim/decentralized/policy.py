@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 from enum import Enum, auto
-from typing import Optional
+from typing import Optional, Set
 
 import numpy as np
 import torch
@@ -23,9 +23,11 @@ logger = logging.getLogger(__name__)
 
 
 class PolicyCalledException(Exception):
-    def __init__(self, policy, id_coll: int) -> None:
+    def __init__(self, policy, id_coll: int,
+                 agents_with_colissions: Optional[Set[int]] = None) -> None:
         super().__init__()
         self.policy: LearnedRaisingPolicy = policy
+        self.agents_with_colissions = agents_with_colissions
         self.id_coll = id_coll
 
     def get_agent_state(self, hop_dist: int):
@@ -388,7 +390,7 @@ class EdgePolicy(Policy):
     def get_priority(self, _) -> float:
         raise NotImplementedError()
 
-    def get_edge(self, agents):
+    def get_edge(self, agents, agents_with_colissions):
         i_a_self = agents.index(self.a)
         data, big_from_small = agents_to_data(agents, i_a_self)
         score, targets = self.nn.forward(
@@ -398,14 +400,20 @@ class EdgePolicy(Policy):
         logger.debug(f"targets: {targets}")
         return big_from_small[targets[torch.argmax(score)].item()]
 
+    def step(self):
+        pass
+
 
 class OptimalEdgePolicy(Policy):
     def __init__(self, agent, _) -> None:
         super().__init__(agent)
         self.edge_based = True
 
-    def get_edge(self, agents):
+    def get_edge(self, agents, _):
         return get_optimal_edge(agents, agents.index(self.a))
+
+    def step(self):
+        pass
 
 
 class EdgeRaisingPolicy(Policy):
@@ -413,19 +421,25 @@ class EdgeRaisingPolicy(Policy):
         super().__init__(agent)
         self.edge_based = True
 
-    def get_edge(self, agents):
-        raise PolicyCalledException(self, 0)
+    def get_edge(self, _, agents_with_colissions):
+        raise PolicyCalledException(self, 0, agents_with_colissions)
+
+    def step(self):
+        pass
 
 
 class EdgeThenRaisingPolicy(Policy):
     def __init__(self, agent, first_val: int) -> None:
         super().__init__(agent)
         self.edge_based = True
-        self.first_call = True
+        self.first_round = True
         self.first_val = first_val
 
-    def get_edge(self, agents):
-        if self.first_call:
-            self.first_call = False
+    def get_edge(self, _, agents_with_colissions):
+        if self.first_round:
             return self.first_val
-        raise PolicyCalledException(self, 0)
+        else:
+            raise PolicyCalledException(self, 0, agents_with_colissions)
+
+    def step(self):
+        self.first_round = False

@@ -24,6 +24,7 @@ class IteratorType(Enum):
     BLOCKING1 = auto()
     BLOCKING3 = auto()
     EDGE_POLICY1 = auto()
+    EDGE_POLICY2 = auto()
     EDGE_POLICY3 = auto()
 
 
@@ -420,7 +421,8 @@ def iterate_edge_policy(
             if i_a in agents_with_colissions:
                 assert hasattr(a.policy, "get_edge"), \
                     "Needs edge-based policy"
-                next_nodes.append(a.policy.get_edge(agents))  # type: ignore
+                next_nodes.append(a.policy.get_edge(
+                    agents, agents_with_colissions))  # type: ignore
             else:
                 next_nodes.append(a.what_is_next_step())
         next_collisions = check_for_colissions(
@@ -444,6 +446,7 @@ def iterate_edge_policy(
             ))
             a.make_this_step(next_nodes[i_a])
             a.remove_all_blocks_and_replan()
+            a.policy.step()
 
     return time_slice, space_slice
 
@@ -468,5 +471,7 @@ def get_iterator_fun(type: IteratorType):
         return lambda agents, ignore_fa: iterate_blocking(agents, 3, ignore_fa)
     elif type is IteratorType.EDGE_POLICY1:
         return lambda agents, ignore_fa: iterate_edge_policy(agents, 1, ignore_fa)
+    elif type is IteratorType.EDGE_POLICY2:
+        return lambda agents, ignore_fa: iterate_edge_policy(agents, 2, ignore_fa)
     elif type is IteratorType.EDGE_POLICY3:
         return lambda agents, ignore_fa: iterate_edge_policy(agents, 3, ignore_fa)

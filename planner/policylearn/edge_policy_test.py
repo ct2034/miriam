@@ -11,18 +11,11 @@ class EdgePolicyTest(unittest.TestCase):
         conv_channels = 2
         policy = EdgePolicyModel(num_node_features, conv_channels)
         x = torch.randn(n_nodes, num_node_features)
+        x[0, 0] = 1  # node 1 is our node
         edge_index = torch.tensor([
             [0, 0, 0, 0],
             [1, 2, 3, 4]
         ])
-        pos = torch.tensor([
-            [0, 0],
-            [1, 0],
-            [0, 1],
-            [-1, 0],
-            [0, -1]
-        ])
-        node = 0
-        score, targets = policy(x, edge_index, pos, node)
+        score, targets = policy(x, edge_index)
         self.assertEqual(score.shape, (4,))
         self.assertEqual(targets.shape, (4,))

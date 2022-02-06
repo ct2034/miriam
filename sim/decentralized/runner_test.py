@@ -294,7 +294,11 @@ class TestRunner(unittest.TestCase):
         res = run_a_scenario(
             None, agents, False, IteratorType.BLOCKING1,
             paths_out=paths_out)
-        pass
+
+        # check paths_out
+        self.assertEqual(len(paths_out), 2)
+        self.assertEqual(len(paths_out[0]), 3)
+        self.assertEqual(len(paths_out[1]), 3)
 
 
 if __name__ == "__main__":  # pragma: no cover
