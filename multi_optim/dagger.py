@@ -102,6 +102,18 @@ class ScenarioState():
         self.run()
 
 
+def make_a_state_with_an_upcoming_decision(
+        graph, n_agents, env_nx, model, rng) -> ScenarioState:
+    useful = False
+    while not useful:
+        starts = rng.sample(graph.nodes(), n_agents)
+        goals = rng.sample(graph.nodes(), n_agents)
+        state = ScenarioState(graph, starts, goals, env_nx, model)
+        state.run()
+        useful = not state.finished
+    return state
+
+
 def sample_trajectory_proxy(args):
     return sample_trajectory(*args)
 

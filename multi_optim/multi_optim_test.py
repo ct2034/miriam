@@ -4,7 +4,7 @@ import pytest
 from definitions import POS
 from sim.decentralized.agent import Agent
 
-from multi_optim.multi_optim import *
+from multi_optim.multi_optim_run import *
 
 
 class MultiOptimTest(unittest.TestCase):
