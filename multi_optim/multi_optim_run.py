@@ -1,8 +1,6 @@
 import datetime
-import imp
 import logging
 import socket
-import sys
 import tracemalloc
 from fileinput import filename
 from multiprocessing.spawn import import_main_path
@@ -18,20 +16,22 @@ from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import RADIUS
+from planner.policylearn.edge_policy_graph_utils import (RADIUS,
+                                                         get_optimal_edge)
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
-from sim.decentralized.agent import Agent
+from sim.decentralized.agent import Agent, env_to_nx
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import EdgePolicy, OptimalEdgePolicy
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
 
 if __name__ == "__main__":
-    from dagger import DaggerStrategy
+    from dagger import DaggerStrategy, make_a_state_with_an_upcoming_decision
 else:
-    from multi_optim.dagger import DaggerStrategy
+    from multi_optim.dagger import (DaggerStrategy,
+                                    make_a_state_with_an_upcoming_decision)
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +54,8 @@ def find_collisions(agents
     return collisions
 
 
-def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
-                ) -> Tuple[Optional[float], float]:
+def eval_policy_full_scenario(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
+                              ) -> Tuple[Optional[float], float]:
     regret_s = []
     success_s = []
     model.eval()
@@ -105,6 +105,36 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
         return np.mean(regret_s), np.mean(success_s)
     else:
         return None, np.mean(success_s)
+
+
+def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
+                  ) -> float:
+    model.eval()
+    env_nx = env_to_nx(g)
+    eval_set = []
+    for i_e in range(n_eval):
+        state = make_a_state_with_an_upcoming_decision(
+            g, n_agents, env_nx, model, rng)
+        observation = state.observe()
+        i_a = rng.sample(list(observation.keys()), 1)[0]
+        data, big_from_small = observation[i_a]
+        n_o = get_optimal_edge(state.agents, i_a)
+        eval_set.append((data, n_o, big_from_small))
+    return eval_set
+
+
+def eval_policy_on_set(model, eval_set):
+    model.eval()
+    correct = 0
+    n_eval = len(eval_set)
+    for data, n_o, big_from_small in eval_set:
+        score, targets = model(
+            data.x,
+            data.edge_index)
+        pred = big_from_small[targets[torch.argmax(score)].item()]
+        if pred == n_o:
+            correct += 1
+    return float(correct) / n_eval
 
 
 def optimize_policy(model, g: nx.Graph, n_agents,
@@ -160,6 +190,8 @@ def run_optimization(
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
     policy_data_files = []  # type: List[str]
+    policy_eval_set = make_eval_set(
+        policy_model, g, n_agents, 100, rng)
 
     # Visualization and analysis
     stats = StatCollector([
@@ -168,6 +200,7 @@ def run_optimization(
         "policy_loss",
         "policy_regret",
         "policy_success",
+        "policy_correct",
         "policy_new_data_percentage",
         "npolicy_data_len"])
     stats.add_statics({
@@ -224,18 +257,21 @@ def run_optimization(
                 n_eval = 10
                 # little less agents for evaluation
                 eval_n_agents = int(np.ceil(n_agents * .7))
-                regret, success = eval_policy(
+                regret, success = eval_policy_full_scenario(
                     policy_model, g, env_nx, eval_n_agents, n_eval, rng_test)
+                correct = eval_policy_on_set(policy_model, policy_eval_set)
 
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
                     stats.add("policy_regret", i_r, float(regret))
                 stats.add("policy_success", i_r, float(success))
+                stats.add("policy_correct", i_r, correct)
                 stats.add("policy_new_data_percentage",
                           i_r, float(new_data_perc))
                 stats.add("npolicy_data_len", i_r, float(data_len))
                 logger.info(f"Regret: {regret}")
                 logger.info(f"Success: {success}")
+                logger.info(f"Correct: {correct}")
                 logger.info(f"New data: {new_data_perc}")
                 logger.info(f"Data length: {data_len}")
 
