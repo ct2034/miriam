@@ -21,40 +21,26 @@ logger = logging.getLogger(__name__)
 
 
 def call_subprocess(cmd, timeout):
-    start_time = time.time()
     success = False
-    t = 0.
     logger.debug(" ".join(cmd))
     process = None
     try:
-        process = subprocess.Popen(
+        process = subprocess.run(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=os.path.dirname(__file__),
             timeout=timeout)
-        while t < timeout:
-            t = time.time() - start_time
-            if process.poll() is not None:
-                logger.debug("process.returncode " + str(process.returncode))
-                stdoutdata, stderrdata = process.communicate()
-                logger.debug("stdoutdata: " + str(stdoutdata))
-                if stderrdata:
-                    logger.error("stderrdata: " + str(stderrdata))
-                else:
-                    success = True
-                break
-            time.sleep(.1)
-        if success:
-            logger.debug("runtime: " + str(t))
-        else:
-            logger.debug("timeout: " + str(t))
+        logger.debug("returncode " + str(process.returncode))
+        logger.debug("stdout: " + str(process.stdout))
+        logger.debug("stderr: " + str(process.stderr))
+        success = True
     except subprocess.CalledProcessError as e:
         logger.warning("CalledProcessError")
         logger.warning(e.output)
-    finally:
-        if process is not None:
-            process.kill()
+    except subprocess.TimeoutExpired as e:
+        logger.debug("TimeoutExpired")
+        logger.debug(e.output)
     logger.debug("success: " + str(success))
     return success
 
