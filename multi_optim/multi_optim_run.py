@@ -352,8 +352,8 @@ if __name__ == "__main__":
 
     # checking different metaparams ...
     diffs = {
-        # "n_agents": [8],
-        "lr_policy": [3e-4],
+        "n_agents": [4, 5],
+        "lr_policy": [3e-3, 3e-4],
         # "n_epochs_per_run_policy": [32, 64],
     }  # type: Dict[str, List[float]]
     def_n_agents = 6

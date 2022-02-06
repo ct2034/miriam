@@ -110,7 +110,12 @@ def make_a_state_with_an_upcoming_decision(
         goals = rng.sample(graph.nodes(), n_agents)
         state = ScenarioState(graph, starts, goals, env_nx, model)
         state.run()
-        useful = not state.finished
+        if not state.finished:
+            try:
+                _ = get_optimal_edge(state.agents, 0)
+                useful = True
+            except RuntimeError:
+                pass
     return state
 
 

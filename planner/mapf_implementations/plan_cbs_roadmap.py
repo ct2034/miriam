@@ -34,7 +34,8 @@ def call_subprocess(cmd, timeout):
         logger.debug("returncode " + str(process.returncode))
         logger.debug("stdout: " + str(process.stdout))
         logger.debug("stderr: " + str(process.stderr))
-        success = True
+        if process.returncode == 0:
+            success = True
     except subprocess.CalledProcessError as e:
         logger.warning("CalledProcessError")
         logger.warning(e.output)
