@@ -421,7 +421,7 @@ def iterate_edge_policy(
             if i_a in agents_with_colissions:
                 assert hasattr(a.policy, "get_edge"), \
                     "Needs edge-based policy"
-                next_nodes.append(a.policy.get_edge(
+                next_nodes.append(a.policy.get_edge(  # type: ignore
                     agents, agents_with_colissions))  # type: ignore
             else:
                 next_nodes.append(a.what_is_next_step())
@@ -446,7 +446,7 @@ def iterate_edge_policy(
             ))
             a.make_this_step(next_nodes[i_a])
             a.remove_all_blocks_and_replan()
-            a.policy.step()
+            a.policy.step()  # type: ignore
 
     return time_slice, space_slice
 
