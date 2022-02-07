@@ -1,6 +1,5 @@
 import networkx as nx
 import scenarios
-import scenarios.solvers
 import torch
 from definitions import INVALID, POS
 from torch_geometric.data import Data
@@ -87,6 +86,7 @@ def get_optimal_edge(agents, i_agent: int):
     """Return the optimal edge to take for the given agent. """
     starts = [a.pos for a in agents]
     goals = [a.goal for a in agents]
+    import scenarios.solvers
     paths = scenarios.solvers.cached_cbsr(
         agents[0].env, starts, goals, radius=RADIUS, timeout=TIMEOUT)
     if paths is INVALID:
