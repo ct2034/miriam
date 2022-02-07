@@ -1,5 +1,6 @@
 import networkx as nx
 import scenarios
+import scenarios.solvers
 import torch
 from definitions import INVALID, POS
 from torch_geometric.data import Data
