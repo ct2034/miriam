@@ -54,8 +54,9 @@ def find_collisions(agents
     return collisions
 
 
-def eval_policy_full_scenario(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
-                              ) -> Tuple[Optional[float], float]:
+def eval_policy_full_scenario(
+    model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
+) -> Tuple[Optional[float], float]:
     regret_s = []
     success_s = []
     model.eval()
