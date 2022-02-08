@@ -16,11 +16,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.python.keras.backend import dropout
 from tools import ProgressBar
 
-# workaround, src https://github.com/tensorflow/tensorflow/issues/43174
-config = ConfigProto()
-config.gpu_options.allow_growth = True
-session = InteractiveSession(config=config)
-
 # choices of model type
 CLASSIFICATION_STR = "classification"
 CONVRNN_STR = "convrnn"
@@ -151,6 +146,11 @@ def augment_data(images_in, labels_in):
 
 
 if __name__ == "__main__":
+    # workaround, src https://github.com/tensorflow/tensorflow/issues/43174
+    config = ConfigProto()
+    config.gpu_options.allow_growth = True
+    session = InteractiveSession(config=config)
+    
     # arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
