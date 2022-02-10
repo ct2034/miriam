@@ -70,7 +70,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3):
     relative_angle[relative_distance != 0] -= own_angle
 
     d = Data(
-        edge_index=torch.tensor([(
+        edge_index=torch.tensor([(  # TODO: we need edges twice, for undirected graph
             small_from_big[n1],
             small_from_big[n2]
         ) for (n1, n2) in g_sml.edges]).t(),

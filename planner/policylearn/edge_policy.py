@@ -8,6 +8,7 @@ import scenarios.solvers
 import torch
 import torch.nn as nn
 import torch_geometric
+from torch.nn import Dropout2d
 from torch.nn.modules.module import T
 from torch_geometric.data import Data
 
@@ -24,6 +25,7 @@ class EdgePolicyModel(nn.Module):
             num_node_features, conv_channels)
         self.conv2 = torch_geometric.nn.GCNConv(
             conv_channels, conv_channels)
+        self.dropout = Dropout2d(p=.3)
         self.readout = torch.nn.Linear(conv_channels, 1)
         self.gpu = gpu  # type: torch.device
 
@@ -34,8 +36,10 @@ class EdgePolicyModel(nn.Module):
         # Obtain node embeddings
         x = self.conv1(x, edge_index)
         x = x.relu()
+        # x = self.dropout(x)
         x = self.conv2(x, edge_index)
         x = x.relu()
+        # x = self.dropout(x)
 
         # Relate to edges
         # take only edges that start or end at node
@@ -55,9 +59,9 @@ class EdgePolicyModel(nn.Module):
                 raise ValueError("Edge not found")
 
         # read values at potential targets as score
-        score = self.readout(x[targets])
+        score = self.readout(x[targets])[:, 0]
         score = torch.softmax(score, dim=0)
-        return score[:, 0], targets
+        return score, targets
 
     def predict(self, x, edge_index, big_from_small):
         self.eval()
@@ -74,7 +78,7 @@ class EdgePolicyModel(nn.Module):
 
     def learn(self, datas: List[Data], optimizer):
         self.train()
-        self.zero_grad()
+        optimizer.zero_grad()
         scores = torch.tensor([], device=self.gpu)
         targets = torch.tensor([], device=self.gpu)
         y_goals = torch.tensor([], device=self.gpu)

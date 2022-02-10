@@ -1,4 +1,5 @@
 import logging
+from itertools import product
 from random import Random
 from typing import Any, List
 
@@ -22,16 +23,16 @@ from torch_geometric.data import Data
 
 
 def make_random_data_self(rng, n_nodes, num_node_features):
-    edge_index = torch.tensor([
-        [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5],
-        [0, 1, 2, 3, 4, 1, 2, 4, 2, 3, 5, 3, 5, 4, 5, 5]
-    ])
+    fully_connected_edge_index = torch.tensor(
+        [[a, b] for a, b in product(range(n_nodes), repeat=2)],
+        dtype=torch.long
+    ).T
     node = rng.choice(range(n_nodes))
-    x = torch.randn(n_nodes, num_node_features) * .5
+    x = torch.zeros(n_nodes, num_node_features)
     x[node, 0] = 1.
     return Data(
         x=x,
-        edge_index=edge_index,
+        edge_index=fully_connected_edge_index,
         y=node
     )
 
@@ -45,18 +46,27 @@ def demo_learning():
     seed = 0
     rng = Random(seed)
     torch.manual_seed(seed)
-    n_nodes = 6
-    num_node_features = 4
-    conv_channels = 8
+    n_nodes = 3
+    big_from_small = {n: n for n in range(n_nodes)}
+    num_node_features = 2
+    conv_channels = 4
     model = EdgePolicyModel(num_node_features, conv_channels)
 
+    # eval set
+    eval_set = [make_random_data_self(rng, n_nodes, num_node_features)
+                for _ in range(50)]
+
     # learning to always use self edge
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    for i in range(int(1E4)):
-        d = make_random_data_self(rng, n_nodes, num_node_features)
-        loss = model.learn([d], optimizer)
+    optimizer = torch.optim.SGD(model.parameters(), lr=.1)
+    for i in range(int(3E4)):
+        ds = [make_random_data_self(rng, n_nodes, num_node_features)
+              for _ in range(10)]
+        loss = model.learn(ds, optimizer)
         if i % 1E3 == 0:
             print(f"loss: {loss:.3f}")
+            accuracy = model.accuracy(
+                eval_set, [big_from_small for _ in range(len(eval_set))])
+            print(f"accuracy: {accuracy:.3f}")
 
     # trying in a scenario
     # rng = Random(0)
