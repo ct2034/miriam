@@ -80,7 +80,7 @@ class Policy(object):
         elif type == PolicyType.EDGE:
             return EdgePolicy(agent, **kwargs)
         elif type == PolicyType.OPTIMAL_EDGE:
-            return OptimalEdgePolicy(agent, **kwargs)
+            return OptimalEdgePolicy(agent, 0, **kwargs)
         elif type == PolicyType.EDGE_RAISING:
             return EdgeRaisingPolicy(agent)
 
