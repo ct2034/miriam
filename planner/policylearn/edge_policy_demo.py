@@ -72,7 +72,8 @@ def demo_learning():
     starts_g = starts_or_goals_to_nodes(starts, env)
     goals_g = starts_or_goals_to_nodes(goals, env)
     agents = scenarios.evaluators.to_agent_objects(env_g, starts_g, goals_g,
-                                                   policy=PolicyType.OPTIMAL_EDGE)
+                                                   policy=PolicyType.OPTIMAL_EDGE,
+                                                   radius=.1)
 
     # for a in agents:
     #     a.policy = sim.decentralized.policy.EdgePolicy(a, model)
