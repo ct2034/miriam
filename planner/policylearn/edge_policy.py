@@ -1,4 +1,5 @@
 import logging
+from pickletools import optimize
 from random import Random
 from typing import Any, List, Tuple
 
@@ -21,10 +22,10 @@ class EdgePolicyModel(nn.Module):
         super().__init__()
         self.num_node_features = num_node_features
         self.conv_channels = conv_channels
-        self.conv1 = torch_geometric.nn.GCNConv(
-            num_node_features, conv_channels)
-        self.conv2 = torch_geometric.nn.GCNConv(
-            conv_channels, conv_channels)
+        self.conv1 = torch_geometric.nn.ChebConv(
+            num_node_features, conv_channels, K=2)
+        self.conv2 = torch_geometric.nn.ChebConv(
+            conv_channels, conv_channels, K=2)
         self.dropout = Dropout2d(p=.3)
         self.readout = torch.nn.Linear(conv_channels, 1)
         self.gpu = gpu  # type: torch.device
@@ -78,7 +79,6 @@ class EdgePolicyModel(nn.Module):
 
     def learn(self, datas: List[Data], optimizer):
         self.train()
-        optimizer.zero_grad()
         scores = torch.tensor([], device=self.gpu)
         targets = torch.tensor([], device=self.gpu)
         y_goals = torch.tensor([], device=self.gpu)
@@ -95,6 +95,7 @@ class EdgePolicyModel(nn.Module):
         try:
             loss.backward()
             optimizer.step()
+            optimizer.zero_grad()
         except RuntimeError:
             logging.warning(f"Could not train with: " +
                             f"y_goals {y_goals}, scores {scores}, " +

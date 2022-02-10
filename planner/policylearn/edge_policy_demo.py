@@ -28,7 +28,7 @@ def make_random_data_self(rng, n_nodes, num_node_features):
         dtype=torch.long
     ).T
     node = rng.choice(range(n_nodes))
-    x = torch.zeros(n_nodes, num_node_features)
+    x = torch.rand(n_nodes, num_node_features) * .5
     x[node, 0] = 1.
     return Data(
         x=x,
@@ -57,12 +57,12 @@ def demo_learning():
                 for _ in range(50)]
 
     # learning to always use self edge
-    optimizer = torch.optim.SGD(model.parameters(), lr=.1)
-    for i in range(int(3E4)):
+    optimizer = torch.optim.SGD(model.parameters(), lr=.01)
+    for i in range(int(1E3)):
         ds = [make_random_data_self(rng, n_nodes, num_node_features)
               for _ in range(10)]
         loss = model.learn(ds, optimizer)
-        if i % 1E3 == 0:
+        if i % 1E2 == 0:
             print(f"loss: {loss:.3f}")
             accuracy = model.accuracy(
                 eval_set, [big_from_small for _ in range(len(eval_set))])
