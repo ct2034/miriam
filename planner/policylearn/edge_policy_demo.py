@@ -4,6 +4,7 @@ from typing import Any, List
 
 import networkx as nx
 import scenarios
+import sim
 import torch
 from definitions import INVALID, POS
 from matplotlib import pyplot as plt
@@ -17,6 +18,22 @@ from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario
+from torch_geometric.data import Data
+
+
+def make_random_data_self(rng, n_nodes, num_node_features):
+    edge_index = torch.tensor([
+        [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5],
+        [0, 1, 2, 3, 4, 1, 2, 4, 2, 3, 5, 3, 5, 4, 5, 5]
+    ])
+    node = rng.choice(range(n_nodes))
+    x = torch.randn(n_nodes, num_node_features) * .5
+    x[node, 0] = 1.
+    return Data(
+        x=x,
+        edge_index=edge_index,
+        y=node
+    )
 
 
 def demo_learning():
@@ -25,66 +42,41 @@ def demo_learning():
     logging.getLogger('sim.decentralized.runner').setLevel(logging.DEBUG)
     logging.getLogger('sim.decentralized.iterators').setLevel(logging.DEBUG)
 
+    seed = 0
+    rng = Random(seed)
+    torch.manual_seed(seed)
     n_nodes = 6
-    num_node_features = 2
-    conv_channels = 4
+    num_node_features = 4
+    conv_channels = 8
     model = EdgePolicyModel(num_node_features, conv_channels)
-    x = torch.randn(n_nodes, num_node_features)
-    edge_index = torch.tensor([
-        [0, 0, 0, 0, 1, 0, 3, 5],
-        [1, 2, 3, 4, 4, 0, 1, 2]
-    ])
-    pos = torch.tensor([
-        [0, 0],
-        [1, 0],
-        [0, 1],
-        [-1, 0],
-        [0, -1],
-        [1, 1]
-    ])
-    node = 0
-    x[node, 0] = 1.
-    score, targets = model(x, edge_index)
 
     # learning to always use self edge
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    for i in range(100):
-        model.train()
-        node = 0
-        x[node, 0] = 1.
-        score, targets = model(x, edge_index)
-        score_optimal = torch.zeros(score.shape)
-        score_optimal[targets == node] = 1
-        # bce loss
-        loss = torch.nn.functional.binary_cross_entropy(
-            score, score_optimal)
-        if i % 10 == 0:
-            print(" ".join([f"{s:.3f}" for s in score.tolist()]))
-            print(f"loss: {loss.item():.3f}")
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
+    for i in range(int(1E4)):
+        d = make_random_data_self(rng, n_nodes, num_node_features)
+        loss = model.learn([d], optimizer)
+        if i % 1E3 == 0:
+            print(f"loss: {loss:.3f}")
 
     # trying in a scenario
-    rng = Random(0)
-    (env, starts, goals) = arena_with_crossing(4, 0, 6, rng)
-    env_g = gridmap_to_nx(env)
-    starts_g = starts_or_goals_to_nodes(starts, env)
-    goals_g = starts_or_goals_to_nodes(goals, env)
-    agents = scenarios.evaluators.to_agent_objects(env_g, starts_g, goals_g,
-                                                   policy=PolicyType.OPTIMAL_EDGE,
-                                                   radius=.1)
-
+    # rng = Random(0)
+    # (env, starts, goals) = arena_with_crossing(4, 0, 6, rng)
+    # env_g = gridmap_to_nx(env)
+    # starts_g = starts_or_goals_to_nodes(starts, env)
+    # goals_g = starts_or_goals_to_nodes(goals, env)
+    # agents = scenarios.evaluators.to_agent_objects(env_g, starts_g, goals_g,
+    #                                                policy=PolicyType.OPTIMAL_EDGE,  # will be overwritten below
+    #                                                radius=.1)
     # for a in agents:
     #     a.policy = sim.decentralized.policy.EdgePolicy(a, model)
 
-    paths: List[Any] = []
-    stats = run_a_scenario(env, agents, plot=False,
-                           iterator=IteratorType.EDGE_POLICY3,
-                           paths_out=paths)
-    print(stats)
-    plot_with_paths(env_g, paths)
-    plt.show()
+    # paths: List[Any] = []
+    # stats = run_a_scenario(env, agents, plot=False,
+    #                        iterator=IteratorType.EDGE_POLICY3,
+    #                        paths_out=paths)
+    # print(stats)
+    # plot_with_paths(env_g, paths)
+    # plt.show()
 
 
 def demo_graph():
