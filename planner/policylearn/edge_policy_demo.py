@@ -46,9 +46,9 @@ def demo_learning():
     seed = 0
     rng = Random(seed)
     torch.manual_seed(seed)
-    n_nodes = 3
+    n_nodes = 5
     big_from_small = {n: n for n in range(n_nodes)}
-    num_node_features = 2
+    num_node_features = 4
     conv_channels = 4
     model = EdgePolicyModel(num_node_features, conv_channels)
 
@@ -67,26 +67,29 @@ def demo_learning():
             accuracy = model.accuracy(
                 eval_set, [big_from_small for _ in range(len(eval_set))])
             print(f"accuracy: {accuracy:.3f}")
+    return model
 
-    # trying in a scenario
-    # rng = Random(0)
-    # (env, starts, goals) = arena_with_crossing(4, 0, 6, rng)
-    # env_g = gridmap_to_nx(env)
-    # starts_g = starts_or_goals_to_nodes(starts, env)
-    # goals_g = starts_or_goals_to_nodes(goals, env)
-    # agents = scenarios.evaluators.to_agent_objects(env_g, starts_g, goals_g,
-    #                                                policy=PolicyType.OPTIMAL_EDGE,  # will be overwritten below
-    #                                                radius=.1)
-    # for a in agents:
-    #     a.policy = sim.decentralized.policy.EdgePolicy(a, model)
 
-    # paths: List[Any] = []
-    # stats = run_a_scenario(env, agents, plot=False,
-    #                        iterator=IteratorType.EDGE_POLICY3,
-    #                        paths_out=paths)
-    # print(stats)
-    # plot_with_paths(env_g, paths)
-    # plt.show()
+def try_model_in_scenario(model):
+    rng = Random(0)
+    (env, starts, goals) = arena_with_crossing(4, 0, 6, rng)
+    env_g = gridmap_to_nx(env)
+    starts_g = starts_or_goals_to_nodes(starts, env)
+    goals_g = starts_or_goals_to_nodes(goals, env)
+    agents = scenarios.evaluators.to_agent_objects(env_g, starts_g, goals_g,
+                                                   policy=PolicyType.OPTIMAL_EDGE,  # will be overwritten below
+                                                   radius=.1)
+    for a in agents:
+        a.policy = sim.decentralized.policy.EdgePolicy(a, model)
+
+    paths: List[Any] = []
+    stats = run_a_scenario(env, agents, plot=False,
+                           iterator=IteratorType.EDGE_POLICY3,
+                           paths_out=paths)
+    print(stats)
+    print(paths)
+    plot_with_paths(env_g, paths)
+    plt.show()
 
 
 def demo_graph():
@@ -142,4 +145,5 @@ def demo_graph():
 
 
 if __name__ == "__main__":
-    demo_learning()
+    model = demo_learning()
+    try_model_in_scenario(model)
