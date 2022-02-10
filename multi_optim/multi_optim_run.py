@@ -173,9 +173,14 @@ def run_optimization(
 
     # GPU or CPU?
     if torch.cuda.is_available():
+        assert 1 == torch.cuda.device_count(),\
+            "Make sure this can only see one cuda device."
         logger.info("Using GPU")
         gpu = torch.device("cuda:0")
-        torch.cuda.set_per_process_memory_fraction(1./(n_processes+2), gpu)
+        torch.cuda.empty_cache()
+        print(torch.cuda.memory_summary())
+        # torch.cuda.set_per_process_memory_fraction(fraction=.1)
+        print(torch.cuda.memory_summary())
     else:
         logger.warning("GPU not available, using CPU")
         gpu = torch.device("cpu")
