@@ -4,7 +4,7 @@ import os
 import pickle
 import tracemalloc
 from random import Random
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import scenarios
@@ -36,53 +36,87 @@ N_LEARN_MAX = 1000
 
 def get_input_data_from_observation(
         observation: OBSERVATION) -> MODEL_INPUT:
-    data, big_from_small = observation
-    return (data.x, data.edge_index)
+    data, _ = observation
+    return data
 
 
 class ScenarioState():
     """A mapf scenario in a given state that can be executed step-wise"""
 
-    def __init__(self, graph, starts, goals, i_agent_to_consider,
+    def __init__(self, graph, starts, goals,
                  env_nx, model) -> None:
         self.graph = graph
         self.env_nx = env_nx
         self.starts = starts
         self.goals = goals
-        self.i_agent_to_consider = i_agent_to_consider
+        self.is_agents_to_consider: Optional[List[int]] = None
         self.finished = False
         self.agents = to_agent_objects(
             graph, starts, goals, env_nx=env_nx, radius=RADIUS)
         self.model = model
         for i in range(len(self.agents)):
-            if i != self.i_agent_to_consider:
-                self.agents[i].policy = EdgePolicy(self.agents[i], model)
-            else:
-                self.agents[i].policy = EdgeRaisingPolicy(
-                    self.agents[i])
+            self.agents[i].policy = EdgeRaisingPolicy(
+                self.agents[i])
+        self.paths_out = []  # type: List[List[int]]
 
     def run(self):
         """Start the scenario and return the initial state"""
+        paths_out = self.paths_out
         scenario_result: SCENARIO_RESULT = run_a_scenario(
             env=self.graph,
             agents=self.agents,
             plot=False,
-            iterator=IteratorType.EDGE_POLICY3,
-            pause_on=PolicyCalledException)
+            iterator=IteratorType.EDGE_POLICY2,
+            pause_on=PolicyCalledException,
+            paths_out=paths_out)
+        self.is_agents_to_consider = None
         if not has_exception(scenario_result):
             self.finished = True
+        else:
+            self.is_agents_to_consider = list(
+                scenario_result[-1].agents_with_colissions)
 
-    def observe(self) -> Optional[OBSERVATION]:
+    def observe(self) -> Optional[Dict[int, OBSERVATION]]:
         """Return the observation of the current state, None if finished"""
         if self.finished:
             return None
-        return agents_to_data(self.agents, self.i_agent_to_consider)
+        assert self.is_agents_to_consider is not None
 
-    def step(self, action: ACTION):
-        """Perform the given action and return the new state"""
-        self.agents[self.i_agent_to_consider].policy = EdgeThenRaisingPolicy(
-            self.agents[self.i_agent_to_consider], action)
-        return self.run()
+        observations = {}  # type: Dict[int, OBSERVATION]
+        for i_a in self.is_agents_to_consider:
+            observations[i_a] = agents_to_data(
+                self.agents, i_a)
+        return observations
+
+    def step(self, actions: Dict[int, ACTION]):
+        """Perform the given actions and return the new state"""
+        for i_a in range(len(self.agents)):
+            if i_a in actions.keys():
+                self.agents[i_a].policy = EdgeThenRaisingPolicy(
+                    self.agents[i_a], actions[i_a])
+            else:
+                self.agents[i_a].policy = EdgeRaisingPolicy(
+                    self.agents[i_a])
+            self.agents[i_a].start = self.agents[i_a].pos
+            self.agents[i_a].back_to_the_start()
+        self.run()
+
+
+def make_a_state_with_an_upcoming_decision(
+        graph, n_agents, env_nx, model, rng) -> ScenarioState:
+    useful = False
+    while not useful:
+        starts = rng.sample(graph.nodes(), n_agents)
+        goals = rng.sample(graph.nodes(), n_agents)
+        state = ScenarioState(graph, starts, goals, env_nx, model)
+        state.run()
+        if not state.finished:
+            try:
+                _ = get_optimal_edge(state.agents, 0)
+                useful = True
+            except RuntimeError:
+                pass
+    return state
 
 
 def sample_trajectory_proxy(args):
@@ -104,29 +138,31 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
         if paths != INVALID:
             solvable = True
 
-    i_a = rng.randrange(n_agents)
     state = ScenarioState(graph, starts, goals,
-                          i_a, env_nx, model)
-
-    # Sample initial state
+                          env_nx, model)
     state.run()
+
+    # Sample states
     these_ds = []
     for i_s in range(max_steps):
         try:
             if state.finished:
                 break
-            observation = state.observe()
-            scores, targets = model(
-                *(get_input_data_from_observation(observation)))
-            action = int(targets[scores.argmax()])
-            # observation, action pair for learning
-            optimal_action = get_optimal_edge(
-                state.agents, state.i_agent_to_consider)
-            these_ds.append((
-                get_input_data_from_observation(observation),
-                optimal_action))
-            # Take action
-            state.step(action)
+            observations = state.observe()
+            actions: Dict[int, ACTION] = {}
+            for i_a, obs in observations.items():
+                # find actions to take using the policy
+                d = get_input_data_from_observation(obs)
+                scores, targets = model(
+                    d.x, d.edge_index)
+                action = int(targets[scores.argmax()])
+                actions[i_a] = action
+                # observation, action pairs for learning
+                optimal_action = get_optimal_edge(
+                    state.agents, i_a)
+                d.y = optimal_action
+                these_ds.append(d)
+            state.step(actions)
         except RuntimeError as e:
             logger.warning("RuntimeError: {}".format(e))
             break
@@ -201,11 +237,7 @@ class DaggerStrategy():
 
             new_ds = []
             for results in results_s:
-                for r in results:
-                    x, edge_index = r[0]
-                    this_data = Data(x=x,
-                                     edge_index=edge_index, y=r[1])
-                    new_ds.append(this_data)
+                new_ds.extend(results)
             with open(new_fname, "wb") as f:
                 pickle.dump(new_ds, f)
 
@@ -234,4 +266,5 @@ class DaggerStrategy():
 
         if len(loss_s) == 0:
             loss_s = [0]
-        return self.model, np.mean(loss_s), new_data_perc, data_files
+        return (self.model, np.mean(loss_s), new_data_perc,
+                data_files, sum(data_lengths))

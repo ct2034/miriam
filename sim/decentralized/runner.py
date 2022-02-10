@@ -101,9 +101,9 @@ def initialize_new_agent(
     return None
 
 
-def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM, 
+def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
                      env_nx=None,
-                     radius: Optional[float] = None, 
+                     radius: Optional[float] = None,
                      rng: random.Random = random.Random()):
     n_agents = np.array(starts).shape[0]
     agents = []
@@ -235,12 +235,17 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
     space_progress = np.zeros([n_agents], dtype=float)
-    # enabling output of paths
+    # output of paths
     if paths_out is None:
+        # then the paths are used only internally
         paths_out = list(map(lambda _: list(), range(n_agents)))
-    else:
+    elif isinstance(paths_out, list) and len(paths_out) == 0:
+        # initialized with an empty list
         for _ in range(n_agents):
             paths_out.append(list())
+    else:
+        assert isinstance(paths_out, list) and len(paths_out) == n_agents, \
+            "paths_out should have been filled before"
     # oscillation parameters
     oscillation_count = 0
     max_oscillation_count = 1
@@ -248,9 +253,8 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
     successful: int = 0
     try:
         # poses before moving
-        for i_a, a in enumerate(agents):
-            paths_out[i_a].append(a.pos)
         while not are_all_agents_at_their_goals(agents):
+            poses_before_moving = list(map(lambda a: a.pos, agents))
             if plot:  # pragma: no cover
                 plot_env_agents(env, agents)
             time_slice, space_slice = get_iterator_fun(
@@ -263,8 +267,12 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
             logger.debug(
                 f"t:{max(time_progress)} finished: {finished}/{n_agents}")
             t = len(paths_out[0]) - 1
-            for i_a, a in enumerate(agents):
-                paths_out[i_a].append(a.pos)
+            # taking care of the paths_out
+            for i_a, p in enumerate(poses_before_moving):
+                paths_out[i_a].append(p)
+            if are_all_agents_at_their_goals(agents):
+                for i_a, a in enumerate(agents):
+                    paths_out[i_a].append(a.pos)
             # check same poses two timesteps ago
             if t >= 2:
                 if all(map(

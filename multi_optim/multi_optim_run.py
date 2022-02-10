@@ -1,9 +1,9 @@
 import datetime
 import logging
 import socket
-import sys
 import tracemalloc
 from fileinput import filename
+from multiprocessing.spawn import import_main_path
 from random import Random, getstate
 from typing import Dict, List, Optional, Tuple
 
@@ -12,22 +12,26 @@ import networkx as nx
 import numpy as np
 import torch
 import torch.multiprocessing as tmp
-import torch_geometric
 from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import RADIUS
+from planner.policylearn.edge_policy_graph_utils import (RADIUS,
+                                                         get_optimal_edge)
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
-from sim.decentralized.agent import Agent
+from sim.decentralized.agent import Agent, env_to_nx
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import EdgePolicy, OptimalEdgePolicy
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
 
-import dagger
+if __name__ == "__main__":
+    from dagger import DaggerStrategy, make_a_state_with_an_upcoming_decision
+else:
+    from multi_optim.dagger import (DaggerStrategy,
+                                    make_a_state_with_an_upcoming_decision)
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +54,9 @@ def find_collisions(agents
     return collisions
 
 
-def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
-                ) -> Tuple[Optional[float], float]:
+def eval_policy_full_scenario(
+    model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
+) -> Tuple[Optional[float], float]:
     regret_s = []
     success_s = []
     model.eval()
@@ -78,14 +83,14 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
                         env=g,
                         agents=tuple(agents),
                         plot=False,
-                        iterator=IteratorType.EDGE_POLICY3)
+                        iterator=IteratorType.EDGE_POLICY2)
                 elif policy is OptimalEdgePolicy:
                     try:
                         res_optim = run_a_scenario(
                             env=g,
                             agents=tuple(agents),
                             plot=False,
-                            iterator=IteratorType.EDGE_POLICY3)
+                            iterator=IteratorType.EDGE_POLICY2)
                     except Exception as e:
                         logger.error(e)
                         res_optim = (0, 0, 0, 0, 0)
@@ -103,19 +108,43 @@ def eval_policy(model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
         return None, np.mean(success_s)
 
 
+def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
+                  ) -> float:
+    model.eval()
+    env_nx = env_to_nx(g)
+    eval_set = []
+    for i_e in range(n_eval):
+        state = make_a_state_with_an_upcoming_decision(
+            g, n_agents, env_nx, model, rng)
+        observation = state.observe()
+        i_a = rng.sample(list(observation.keys()), 1)[0]
+        data, big_from_small = observation[i_a]
+        n_o = get_optimal_edge(state.agents, i_a)
+        eval_set.append((data, n_o, big_from_small))
+    return eval_set
+
+
+def eval_policy_on_set(model, eval_set):
+    model.eval()
+    correct = 0
+    n_eval = len(eval_set)
+    for data, n_o, big_from_small in eval_set:
+        score, targets = model(
+            data.x,
+            data.edge_index)
+        pred = big_from_small[targets[torch.argmax(score)].item()]
+        if pred == n_o:
+            correct += 1
+    return float(correct) / n_eval
+
+
 def optimize_policy(model, g: nx.Graph, n_agents,
                     n_epochs, optimizer, data_files, pool, prefix, rng):
-    ds = dagger.DaggerStrategy(
+    ds = DaggerStrategy(
         model, g, n_epochs, n_agents, optimizer, prefix, rng)
-    model, loss, new_data_perc, data_files = ds.run_dagger(pool, data_files)
-
-    rng_test = Random(1)
-    # little less agents for evaluation
-    eval_n_agents = int(np.ceil(n_agents * .7))
-    regret, success = eval_policy(
-        model, g, ds.env_nx, eval_n_agents, 10, rng_test)
-
-    return model, loss, regret, success, new_data_perc, data_files
+    model, loss, new_data_perc, data_files, data_len = ds.run_dagger(
+        pool, data_files)
+    return model, ds.env_nx, loss, new_data_perc, data_files, data_len
 
 
 def run_optimization(
@@ -123,7 +152,7 @@ def run_optimization(
         n_runs_pose: int = 1024,
         n_runs_policy: int = 128,
         n_epochs_per_run_policy: int = 64,
-        stats_every: int = 1,
+        stats_and_eval_every: int = 1,
         lr_pos: float = 1e-4,
         lr_policy: float = 4e-4,
         n_agents: int = 8,
@@ -161,7 +190,9 @@ def run_optimization(
     # policy_model.share_memory()
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
-    policy_data_files = []
+    policy_data_files = []  # type: List[str]
+    policy_eval_set = make_eval_set(
+        policy_model, g, n_agents, 100, rng)
 
     # Visualization and analysis
     stats = StatCollector([
@@ -170,7 +201,9 @@ def run_optimization(
         "policy_loss",
         "policy_regret",
         "policy_success",
-        "policy_new_data_percentage"])
+        "policy_correct",
+        "policy_new_data_percentage",
+        "npolicy_data_len"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -180,7 +213,7 @@ def run_optimization(
         "n_nodes": n_nodes,
         "n_runs_pose": n_runs_pose,
         "n_runs_policy": n_runs_policy,
-        "stats_every": stats_every,
+        "stats_every": stats_and_eval_every,
         "lr_pos": lr_pos,
         "lr_policy": lr_policy,
         "n_agents": n_agents,
@@ -206,27 +239,42 @@ def run_optimization(
         if i_r % n_runs_per_run_pose == 0:
             g, pos, poses_test_length, poses_training_length = optimize_poses(
                 g, pos, map_img, optimizer_pos, rng)
-            if i_r % stats_every == 0:
+            if i_r % stats_and_eval_every == 0:
                 stats.add("poses_test_length", i_r, float(poses_test_length))
                 stats.add("poses_training_length", i_r,
                           float(poses_training_length))
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, policy_loss, regret, success, new_data_perc, policy_data_files
+            (policy_model, env_nx, policy_loss, new_data_perc,
+             policy_data_files, data_len
              ) = optimize_policy(
                 policy_model, g, n_agents,
-                n_epochs_per_run_policy, optimizer_policy, policy_data_files, pool, prefix, rng)
-            if i_r % stats_every == 0:
+                n_epochs_per_run_policy, optimizer_policy, policy_data_files,
+                pool, prefix, rng)
+            if i_r % stats_and_eval_every == 0:
+                # also eval now
+                rng_test = Random(1)
+                n_eval = 10
+                # little less agents for evaluation
+                eval_n_agents = int(np.ceil(n_agents * .7))
+                regret, success = eval_policy_full_scenario(
+                    policy_model, g, env_nx, eval_n_agents, n_eval, rng_test)
+                correct = eval_policy_on_set(policy_model, policy_eval_set)
+
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
                     stats.add("policy_regret", i_r, float(regret))
                 stats.add("policy_success", i_r, float(success))
+                stats.add("policy_correct", i_r, correct)
                 stats.add("policy_new_data_percentage",
                           i_r, float(new_data_perc))
+                stats.add("npolicy_data_len", i_r, float(data_len))
                 logger.info(f"Regret: {regret}")
                 logger.info(f"Success: {success}")
+                logger.info(f"Correct: {correct}")
                 logger.info(f"New data: {new_data_perc}")
+                logger.info(f"Data length: {data_len}")
 
         pb.progress()
     runtime = pb.end()
@@ -276,7 +324,7 @@ if __name__ == "__main__":
         n_runs_pose=2,
         n_runs_policy=16,
         n_epochs_per_run_policy=4,
-        stats_every=1,
+        stats_and_eval_every=1,
         lr_pos=1e-4,
         lr_policy=1e-3,
         n_agents=4,
@@ -294,8 +342,8 @@ if __name__ == "__main__":
         n_nodes=16,
         n_runs_pose=2,
         n_runs_policy=128,
-        n_epochs_per_run_policy=16,
-        stats_every=1,
+        n_epochs_per_run_policy=128,
+        stats_and_eval_every=2,
         lr_pos=1e-4,
         lr_policy=1e-3,
         n_agents=4,
@@ -305,13 +353,13 @@ if __name__ == "__main__":
 
     # checking different metaparams ...
     diffs = {
-        # "n_agents": [8],
+        "n_agents": [4, 5],
         "lr_policy": [3e-3, 3e-4],
-        "n_epochs_per_run_policy": [32, 64],
-    }
+        # "n_epochs_per_run_policy": [32, 64],
+    }  # type: Dict[str, List[float]]
     def_n_agents = 6
     def_lr_policy = 1e-3
-    def_n_epochs_per_run_policy = 16
+    def_n_epochs_per_run_policy = 128
     for k, vs in diffs.items():
         for v in vs:
             rng = Random(0)
@@ -319,7 +367,7 @@ if __name__ == "__main__":
                 "n_nodes": 16,
                 "n_runs_pose": 2,
                 "n_runs_policy": 128,
-                "stats_every": 1,
+                "stats_and_eval_every": 2,
                 "lr_pos": 1e-4,
                 "lr_policy": def_lr_policy,
                 "n_agents": def_n_agents,
@@ -328,4 +376,4 @@ if __name__ == "__main__":
                 "prefix": f"tiny_{k}_{v}",
             }
             args[k] = v
-            run_optimization(**args)
+            run_optimization(**args)  # type: ignore
