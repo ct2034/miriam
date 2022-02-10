@@ -70,17 +70,20 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3):
     # if not own node, add own angle
     relative_angle[relative_distance != 0] -= own_angle
 
+    # edge index
+    edge_index = torch.tensor([(
+        small_from_big[n1],
+        small_from_big[n2]
+    ) for (n1, n2) in g_sml.edges]).t()
+    edge_index = to_undirected(edge_index)
+
     d = Data(
-        edge_index=torch.tensor([(
-            small_from_big[n1],
-            small_from_big[n2]
-        ) for (n1, n2) in g_sml.edges]).t(),
+        edge_index=edge_index,
         x=torch.cat([x_layer_own_path,
                      x_layer_other_paths,
                      relative_distance.view(-1, 1),
                      relative_angle.view(-1, 1)], dim=1),
     )
-    d = to_undirected(d)
     return d, big_from_small
 
 
