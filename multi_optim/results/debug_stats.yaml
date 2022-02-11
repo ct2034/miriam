@@ -223,7 +223,7 @@ poses_training_length:
   - 15.555509567260742
   - 13.55361270904541
 static:
-  git_hash: 43e519e5786a425386258993daac10baec4d50db
+  git_hash: b6e5cc0c9c5adf453ba12f37f85f3934e7ccfd96
   hostname: hal-9000
   lr_policy: 0.001
   lr_pos: 0.0001
@@ -233,6 +233,6 @@ static:
   n_runs_policy: 16
   n_runs_pose: 2
   prefix: debug
-  runtime: '0:01:18.738289'
-  started_at: '2022-02-11T00:00:38.447829'
+  runtime: '0:00:32.998024'
+  started_at: '2022-02-11T00:03:20.859503'
   stats_every: 1

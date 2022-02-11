@@ -179,9 +179,9 @@ def run_optimization(
         logger.info("Using GPU")
         gpu = torch.device("cuda:0")
         torch.cuda.empty_cache()
-        print(torch.cuda.memory_summary())
+        # print(torch.cuda.memory_summary())
         # torch.cuda.set_per_process_memory_fraction(fraction=.1)
-        print(torch.cuda.memory_summary())
+        # print(torch.cuda.memory_summary())
     else:
         logger.warning("GPU not available, using CPU")
         gpu = torch.device("cpu")
@@ -356,29 +356,29 @@ if __name__ == "__main__":
         rng=rng,
         prefix="tiny")
 
-    # checking different metaparams ...
-    diffs = {
-        "n_agents": [4, 5],
-        "lr_policy": [3e-3, 3e-4],
-        # "n_epochs_per_run_policy": [32, 64],
-    }  # type: Dict[str, List[float]]
-    def_n_agents = 6
-    def_lr_policy = 1e-3
-    def_n_epochs_per_run_policy = 128
-    for k, vs in diffs.items():
-        for v in vs:
-            rng = Random(0)
-            args = {
-                "n_nodes": 16,
-                "n_runs_pose": 2,
-                "n_runs_policy": 128,
-                "stats_and_eval_every": 2,
-                "lr_pos": 1e-4,
-                "lr_policy": def_lr_policy,
-                "n_agents": def_n_agents,
-                "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
-                "rng": rng,
-                "prefix": f"tiny_{k}_{v}",
-            }
-            args[k] = v
-            run_optimization(**args)  # type: ignore
+    # # checking different metaparams ...
+    # diffs = {
+    #     "n_agents": [4, 5],
+    #     "lr_policy": [3e-3, 3e-4],
+    #     # "n_epochs_per_run_policy": [32, 64],
+    # }  # type: Dict[str, List[float]]
+    # def_n_agents = 6
+    # def_lr_policy = 1e-3
+    # def_n_epochs_per_run_policy = 128
+    # for k, vs in diffs.items():
+    #     for v in vs:
+    #         rng = Random(0)
+    #         args = {
+    #             "n_nodes": 16,
+    #             "n_runs_pose": 2,
+    #             "n_runs_policy": 128,
+    #             "stats_and_eval_every": 2,
+    #             "lr_pos": 1e-4,
+    #             "lr_policy": def_lr_policy,
+    #             "n_agents": def_n_agents,
+    #             "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+    #             "rng": rng,
+    #             "prefix": f"tiny_{k}_{v}",
+    #         }
+    #         args[k] = v
+    #         run_optimization(**args)  # type: ignore
