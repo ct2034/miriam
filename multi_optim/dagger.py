@@ -245,11 +245,10 @@ class DaggerStrategy():
 
         # statistics
         len_new_data = sum(
-            1 if (lambda x: generation_hash in x[0]
-                  ) else 0 for x in epds.lookup)
-        new_data_perc = len_new_data / len(epds)
+            1 if generation_hash in x[0] else 0 for x in epds.lookup)
+        new_data_percentage = len_new_data / len(epds)
 
         if len(loss_s) == 0:
             loss_s = [0]
-        return (self.model, np.mean(loss_s), new_data_perc,
+        return (self.model, np.mean(loss_s), new_data_percentage,
                 data_files, len(epds))
