@@ -1,56 +1,97 @@
-import logging
-import os
-import pickle
+import json
 from random import Random
-from typing import Any, List, Tuple
 
 import torch
-from definitions import INVALID, POS
 from matplotlib import pyplot as plt
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import agents_to_data
-from planner.policylearn.generate_data_demo import plot_graph_wo_pos_data
-from scenarios.generators import arena_with_crossing
-from scenarios.graph_converter import gridmap_to_nx, starts_or_goals_to_nodes
-from scenarios.visualization import plot_with_paths
-from sim.decentralized.agent import Agent
-from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import PolicyType
-from sim.decentralized.runner import run_a_scenario
-from torch_geometric.data import Data, Dataset
+from tools import ProgressBar
 from torch_geometric.loader import DataLoader
 
 
-def learning():
+def learning(
+    name: str,
+    lr: float,
+    batch_size: int,
+    conv_channels: int,
+    # conv_layers: int,
+):
     rng = Random(0)
+    torch.manual_seed(0)
 
     # run to learn from
-    run_prefix: str = "tiny"
-    batch_size = 32
-    lr = 1E-2
-    n_test = 100
+    run_prefix_data: str = "debug"
+    n_test = 50
+    n_epochs = 100
 
     # load previously trained model
-    model = EdgePolicyModel(gpu=torch.device("cpu"))
-    model.load_state_dict(torch.load(
-        f"multi_optim/results/{run_prefix}_policy_model.pt"))
+    model = EdgePolicyModel(
+        gpu=torch.device("cpu"),
+        conv_channels=conv_channels)
+    # model.load_state_dict(torch.load(
+    #     f"multi_optim/results/{run_prefix_data}_policy_model.pt"))
 
     # load dataset from previous multi_optim_run
-    dataset = EdgePolicyDataset(f"multi_optim/results/{run_prefix}_data")
-    test_set_i_s = rng.sample(range(len(dataset)), n_test)
+    dataset = EdgePolicyDataset(f"multi_optim/results/{run_prefix_data}_data")
+    test_set_i_s = range(len(dataset) - n_test, len(dataset))
     test_set = dataset[test_set_i_s]
+    test_set = [(d, {n: n for n in range(d.num_nodes)}) for d in test_set]
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, exclude_keys=test_set_i_s)
 
+    stats = {
+        "accuracy": [],
+        "loss": [],
+    }
+
     # training
+    pb = ProgressBar(name, len(loader) * n_epochs, 5)
     optimizer = torch.optim.Adam(model.parameters(), lr)
-    for i_b, batch in enumerate(loader):
-        loss = model.learn(batch, optimizer)
-        if i_b % 10 == 0:
-            accuracy = model.accuracy(test_set)
-            print(f"accuracy: {accuracy}")
-            print(f"loss: {loss}")
+    for i_e in range(n_epochs):
+        for i_b, batch in enumerate(loader):
+            loss = model.learn(batch, optimizer)
+            pb.progress()
+        accuracy = model.accuracy(test_set)
+        print(f"accuracy: {accuracy}")
+        print(f"loss: {loss}")
+        stats["accuracy"].append(accuracy)
+        stats["loss"].append(loss)
+    pb.end()
+
+    # save model
+    torch.save(model.state_dict(),
+               f"planner/policylearn/results/edge_policy_{name}.pt")
+
+    # save stats
+    with open(f"planner/policylearn/results/edge_policy_{name}.json", "w") as f:
+        json.dump(stats, f)
+    plt.figure(figsize=(20, 20), dpi=500)
+    plt.plot(stats["accuracy"], label="accuracy")
+    plt.plot(stats["loss"], label="loss")
+    plt.legend()
+    plt.savefig(f"planner/policylearn/results/edge_policy_{name}.png")
 
 
 if __name__ == "__main__":
-    learning()
+    lr_s = [1E-2, 3E-2, 3E-1]
+    batch_size_s = [32, 64, 128]
+    conv_channels_s = [8, 16, 32]
+    # conv_layers_s = [1, 2, 3]
+    parameter_experiments = {
+        "lr": lr_s,
+        "batch_size": batch_size_s,
+        "conv_channels": conv_channels_s,
+        # "conv_layers": conv_layers_s,
+    }
+
+    # default run
+    kwargs = {k: v[0] for k, v in parameter_experiments.items()}
+    kwargs["name"] = f"default"
+    learning(**kwargs)
+
+    # experimental runs
+    for name, values in parameter_experiments.items():
+        for value in values[1:]:
+            kwargs = {k: v[0] for k, v in parameter_experiments.items()}
+            kwargs[name] = value
+            kwargs["name"] = f"{name}_{value}"
+            learning(**kwargs)
