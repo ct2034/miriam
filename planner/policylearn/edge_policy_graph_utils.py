@@ -1,3 +1,5 @@
+from typing import Dict, Tuple
+
 import networkx as nx
 import scenarios
 import torch
@@ -7,6 +9,8 @@ from torch_geometric.utils import to_undirected
 
 RADIUS = .001
 TIMEOUT = 120
+
+BFS_TYPE = Dict[int, int]
 
 
 def t_to_data(t: int, path_i: int) -> float:
@@ -20,13 +24,13 @@ def t_to_data(t: int, path_i: int) -> float:
         return 1. + (t - path_i) * .1
 
 
-def agents_to_data(agents, i_self: int, hop_dist: int = 3):
+def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TYPE]:
     own_node = agents[i_self].pos
     assert agents[i_self].has_roadmap
     g = agents[i_self].env
     g_sml = nx.ego_graph(g, own_node, radius=hop_dist)
-    big_from_small = {i: int(n) for i, n in enumerate(g_sml.nodes)}
-    small_from_big = {n: i for i, n in big_from_small.items()}
+    big_from_small: BFS_TYPE = {i: int(n) for i, n in enumerate(g_sml.nodes)}
+    small_from_big: BFS_TYPE = {n: i for i, n in big_from_small.items()}
     pos = nx.get_node_attributes(g, POS)
     own_pos = torch.tensor(pos[own_node])
     own_angle = 0.
@@ -77,7 +81,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3):
     ) for (n1, n2) in g_sml.edges]).t()
     edge_index = to_undirected(edge_index)
 
-    # get y
+    # get optimal y
     node_to_go = small_from_big[get_optimal_edge(agents, i_self)]
     assert torch.tensor([node_to_go, small_from_big[own_node]]) in edge_index.T
     y = torch.zeros(len(small_from_big), dtype=torch.float32)

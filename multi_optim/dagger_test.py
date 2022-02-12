@@ -106,7 +106,8 @@ class ScenarioStateTest(unittest.TestCase):
         # check the data
         for d in [data_0, data_1]:
             self.assertEqual(d.num_nodes, self.pass_graph.number_of_nodes())
-            self.assertEqual(d.num_edges, self.pass_graph.number_of_edges())
+            # made it undirected
+            self.assertEqual(d.num_edges, 2*self.pass_graph.number_of_edges())
             self.assertEqual(d.x.shape[0], self.pass_graph.number_of_nodes())
             self.assertEqual(d.x.shape[1], self.model.num_node_features)
         # 1. path layer ...

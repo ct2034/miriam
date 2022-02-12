@@ -6,12 +6,14 @@ from typing import Any, List, Tuple
 import torch
 import torch.nn as nn
 import torch_geometric
+from planner.policylearn.edge_policy_graph_utils import BFS_TYPE
 from torch.nn.modules.module import T
-from torch_geometric.data import Dataset
+from torch_geometric.data import Data, Dataset
 from torch_geometric.data.batch import Batch
 
 MODEL_INPUT = Tuple[
     torch.Tensor, torch.Tensor]
+EVAL_LIST = List[Tuple[Data, BFS_TYPE]]
 
 
 class EdgePolicyDataset(Dataset):
@@ -24,7 +26,7 @@ class EdgePolicyDataset(Dataset):
         self.lookup: List[Tuple[str, int]] = []  # (fname, i)
         for fname in self.fnames:
             len_this_file = len(
-                self.load_file(fname))
+                self._load_file(fname))
             lookup_section = [
                 (fname, i_d) for i_d in range(len_this_file)]
             self.lookup.extend(lookup_section)
@@ -32,7 +34,7 @@ class EdgePolicyDataset(Dataset):
     def len(self):
         return len(self.lookup)
 
-    def load_file(self, fname):
+    def _load_file(self, fname):
         if self.loaded_fname == fname:
             data = self.loaded_data
         else:
@@ -45,7 +47,7 @@ class EdgePolicyDataset(Dataset):
 
     def get(self, idx):
         fname, i_d = self.lookup[idx]
-        return self.load_file(fname)[i_d]
+        return self._load_file(fname)[i_d]
 
 
 class EdgePolicyModel(nn.Module):
@@ -75,7 +77,7 @@ class EdgePolicyModel(nn.Module):
                 x[batch == i_b], dim=0)
         return y_out_batched
 
-    def predict(self, x, edge_index):
+    def predict(self, x, edge_index, big_from_small):
         self.eval()
         n_nodes = x.shape[0]
         node = torch.nonzero(x[:, 0] == 1.).item()
@@ -97,15 +99,20 @@ class EdgePolicyModel(nn.Module):
         # read values at potential targets as score
         score = self.forward(x, edge_index, torch.tensor([0]*n_nodes))
         score_potential_targets = score[targets]
-        return targets[torch.argmax(score_potential_targets).item()]
+        node_small = targets[torch.argmax(
+            score_potential_targets).item()].item()
+        return big_from_small[node_small]
 
-    def accuracy(self, databatch: Batch):
-        datas = databatch.to_data_list()
-        results = torch.zeros(len(datas))
-        for i, data in enumerate(datas):
-            pred = self.predict(data.x, data.edge_index)
-            results[i] = int(pred == torch.argmax(data.y).item())
-        return torch.mean(results)
+    def accuracy(self, eval_list: EVAL_LIST) -> float:
+        results = torch.zeros(len(eval_list))
+        for i, (data, bfs) in enumerate(eval_list):
+            pred = self.predict(data.x, data.edge_index, bfs)
+            optimal_small = torch.argmax(data.y).item()
+            if isinstance(optimal_small, int):
+                results[i] = int(pred == bfs[optimal_small])
+            else:
+                results[i] = 0
+        return torch.mean(results).item()
 
     def learn(self, databatch: Batch, optimizer):
         self.train()
@@ -121,8 +128,9 @@ class EdgePolicyModel(nn.Module):
             optimizer.zero_grad()
         except RuntimeError:
             logging.warning(f"Could not train with: " +
-                            f"y_goals {y_goals}, scores {scores}, " +
-                            f"datas {databatch}, targets {targets}")
+                            f"y_goals {databatch.y} " +
+                            f"y_out_batched {y_out_batched} " +
+                            f"loss {loss}")
             return None
         return float(loss)
 

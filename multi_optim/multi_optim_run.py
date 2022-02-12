@@ -16,7 +16,7 @@ from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import (RADIUS,
+from planner.policylearn.edge_policy_graph_utils import (BFS_TYPE, RADIUS,
                                                          get_optimal_edge)
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
@@ -26,6 +26,7 @@ from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import EdgePolicy, OptimalEdgePolicy
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
+from torch_geometric.data import Data
 
 if __name__ == "__main__":
     from dagger import DaggerStrategy, make_a_state_with_an_upcoming_decision
@@ -109,7 +110,7 @@ def eval_policy_full_scenario(
 
 
 def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
-                  ) -> float:
+                  ) -> List[Tuple[Data, BFS_TYPE]]:
     model.eval()
     env_nx = env_to_nx(g)
     eval_set = []
@@ -119,32 +120,17 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
         observation = state.observe()
         i_a = rng.sample(list(observation.keys()), 1)[0]
         data, big_from_small = observation[i_a]
-        n_o = get_optimal_edge(state.agents, i_a)
-        eval_set.append((data, n_o, big_from_small))
+        eval_set.append((data, big_from_small))
     return eval_set
 
 
-def eval_policy_on_set(model, eval_set):
-    model.eval()
-    correct = 0
-    n_eval = len(eval_set)
-    for data, n_o, big_from_small in eval_set:
-        score, targets = model(
-            data.x,
-            data.edge_index)
-        pred = big_from_small[targets[torch.argmax(score)].item()]
-        if pred == n_o:
-            correct += 1
-    return float(correct) / n_eval
-
-
-def optimize_policy(model, g: nx.Graph, n_agents,
-                    n_epochs, batch_size, optimizer, data_files, pool, prefix, rng):
+def optimize_policy(model, g: nx.Graph, n_agents, n_epochs, batch_size,
+                    optimizer, data_files, pool, prefix, rng):
     ds = DaggerStrategy(
         model, g, n_epochs, n_agents, batch_size, optimizer, prefix, rng)
-    model, loss, new_data_perc, data_files, data_len = ds.run_dagger(
+    model, loss, new_data_percentage, data_files, data_len = ds.run_dagger(
         pool, data_files)
-    return model, ds.env_nx, loss, new_data_perc, data_files, data_len
+    return model, ds.env_nx, loss, new_data_percentage, data_files, data_len
 
 
 def run_optimization(
@@ -174,18 +160,18 @@ def run_optimization(
     g = make_graph(pos, map_img)
 
     # GPU or CPU?
-    # if torch.cuda.is_available():
-    #     assert 1 == torch.cuda.device_count(),\
-    #         "Make sure this can only see one cuda device."
-    #     logger.info("Using GPU")
-    #     gpu = torch.device("cuda:0")
-    #     torch.cuda.empty_cache()
-    #     # print(torch.cuda.memory_summary())
-    #     # torch.cuda.set_per_process_memory_fraction(fraction=.1)
-    #     # print(torch.cuda.memory_summary())
-    # else:
-    #     logger.warning("GPU not available, using CPU")
-    gpu = torch.device("cpu")
+    if torch.cuda.is_available():
+        assert 1 == torch.cuda.device_count(),\
+            "Make sure this can only see one cuda device."
+        logger.info("Using GPU")
+        gpu = torch.device("cuda:0")
+        torch.cuda.empty_cache()
+        # print(torch.cuda.memory_summary())
+        # torch.cuda.set_per_process_memory_fraction(fraction=.1)
+        # print(torch.cuda.memory_summary())
+    else:
+        logger.warning("GPU not available, using CPU")
+        gpu = torch.device("cpu")
 
     # Policy
     policy_model = EdgePolicyModel(gpu=gpu)
@@ -197,7 +183,7 @@ def run_optimization(
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
     policy_data_files = []  # type: List[str]
-    policy_eval_set = make_eval_set(
+    policy_eval_list = make_eval_set(
         policy_model, g, n_agents, 100, rng)
 
     # Visualization and analysis
@@ -207,9 +193,9 @@ def run_optimization(
         "policy_loss",
         "policy_regret",
         "policy_success",
-        "policy_correct",
+        "policy_accuracy",
         "policy_new_data_percentage",
-        "npolicy_data_len"])
+        "n_policy_data_len"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -253,11 +239,11 @@ def run_optimization(
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, env_nx, policy_loss, new_data_perc,
+            (policy_model, env_nx, policy_loss, new_data_percentage,
              policy_data_files, data_len
              ) = optimize_policy(
-                policy_model, g, n_agents,
-                n_epochs_per_run_policy, batch_size_policy, optimizer_policy, policy_data_files,
+                policy_model, g, n_agents, n_epochs_per_run_policy,
+                batch_size_policy, optimizer_policy, policy_data_files,
                 pool, prefix, rng)
             if i_r % stats_and_eval_every == 0:
                 # also eval now
@@ -267,20 +253,20 @@ def run_optimization(
                 eval_n_agents = int(np.ceil(n_agents * .7))
                 regret, success = eval_policy_full_scenario(
                     policy_model, g, env_nx, eval_n_agents, n_eval, rng_test)
-                correct = eval_policy_on_set(policy_model, policy_eval_set)
+                policy_accuracy = policy_model.accuracy(policy_eval_list)
 
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if regret is not None:
                     stats.add("policy_regret", i_r, float(regret))
                 stats.add("policy_success", i_r, float(success))
-                stats.add("policy_correct", i_r, correct)
+                stats.add("policy_accuracy", i_r, policy_accuracy)
                 stats.add("policy_new_data_percentage",
-                          i_r, float(new_data_perc))
-                stats.add("npolicy_data_len", i_r, float(data_len))
+                          i_r, float(new_data_percentage))
+                stats.add("n_policy_data_len", i_r, float(data_len))
                 logger.info(f"Regret: {regret}")
                 logger.info(f"Success: {success}")
-                logger.info(f"Correct: {correct}")
-                logger.info(f"New data: {new_data_perc}")
+                logger.info(f"Accuracy: {policy_accuracy:.2f}")
+                logger.info(f"New data: {new_data_percentage*100:.1f}%")
                 logger.info(f"Data length: {data_len}")
 
         pb.progress()
@@ -331,6 +317,7 @@ if __name__ == "__main__":
         n_runs_pose=2,
         n_runs_policy=16,
         n_epochs_per_run_policy=4,
+        batch_size_policy=16,
         stats_and_eval_every=1,
         lr_pos=1e-4,
         lr_policy=1e-3,
@@ -350,6 +337,7 @@ if __name__ == "__main__":
         n_runs_pose=2,
         n_runs_policy=128,
         n_epochs_per_run_policy=128,
+        batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-4,
         lr_policy=1e-3,

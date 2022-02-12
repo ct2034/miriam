@@ -25,7 +25,8 @@ from sim.decentralized.policy import (EdgePolicy, EdgeRaisingPolicy,
                                       PolicyCalledException)
 from sim.decentralized.runner import (has_exception, run_a_scenario,
                                       to_agent_objects)
-from torch_geometric.data import Data, DataLoader
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
 
 logger = logging.getLogger(__name__)
 
@@ -153,8 +154,7 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
             actions: Dict[int, ACTION] = {}
             for i_a, (d, bfs) in observations.items():
                 # find actions to take using the policy
-                node_to_go = model.predict(d.x, d.edge_index)
-                actions[i_a] = bfs[node_to_go]
+                actions[i_a] = model.predict(d.x, d.edge_index, bfs)
                 # observation, action pairs for learning
                 these_ds.append(d)
             state.step(actions)
@@ -245,11 +245,10 @@ class DaggerStrategy():
 
         # statistics
         len_new_data = sum(
-            1 if (lambda x: generation_hash in x[0]
-                  ) else 0 for x in epds.lookup)
-        new_data_perc = len_new_data / len(epds)
+            1 if generation_hash in x[0] else 0 for x in epds.lookup)
+        new_data_percentage = len_new_data / len(epds)
 
         if len(loss_s) == 0:
             loss_s = [0]
-        return (self.model, np.mean(loss_s), new_data_perc,
+        return (self.model, np.mean(loss_s), new_data_percentage,
                 data_files, len(epds))
