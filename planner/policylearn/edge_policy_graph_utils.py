@@ -77,12 +77,19 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3):
     ) for (n1, n2) in g_sml.edges]).t()
     edge_index = to_undirected(edge_index)
 
+    # get y
+    node_to_go = small_from_big[get_optimal_edge(agents, i_self)]
+    assert torch.tensor([node_to_go, small_from_big[own_node]]) in edge_index.T
+    y = torch.zeros(len(small_from_big), dtype=torch.float32)
+    y[node_to_go] = 1.
+
     d = Data(
         edge_index=edge_index,
         x=torch.cat([x_layer_own_path,
                      x_layer_other_paths,
                      relative_distance.view(-1, 1),
                      relative_angle.view(-1, 1)], dim=1),
+        y=y
     )
     return d, big_from_small
 

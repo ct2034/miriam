@@ -7,6 +7,7 @@ from timeit import repeat
 import torch
 from planner.policylearn.edge_policy import EdgePolicyModel
 from torch_geometric.data import Data
+from torch_geometric.data.batch import Batch
 
 
 class EdgePolicyTest(unittest.TestCase):
@@ -21,9 +22,8 @@ class EdgePolicyTest(unittest.TestCase):
             [0, 0, 0, 0],
             [1, 2, 3, 4]
         ])
-        score, targets = policy(x, edge_index)
-        self.assertEqual(score.shape, (4,))
-        self.assertEqual(targets.shape, (4,))
+        score = policy(x, edge_index, torch.tensor([0]*n_nodes))
+        self.assertEqual(score.shape, (n_nodes,))
 
     def test_edge_policy_learn(self):
         rng = Random(0)
@@ -38,25 +38,21 @@ class EdgePolicyTest(unittest.TestCase):
         datas = []
 
         # test data
-        big_from_small = {n: n for n in range(n_nodes)}
-        test_data = [self.make_data(
-            rng, num_node_features, n_nodes) for _ in range(10)]
-        test_acc = policy.accuracy(
-            test_data, [big_from_small] * len(test_data))
+        test_data = Batch.from_data_list([self.make_data(
+            rng, num_node_features, n_nodes) for _ in range(10)])
+        test_acc = policy.accuracy(test_data)
         self.assertLess(test_acc, 0.6)
 
         # train
         for _ in range(n_epochs):
             for _ in range(n_data):
                 datas.append(self.make_data(rng, num_node_features, n_nodes))
-            policy.learn(datas, optimizer)
-            test_acc = policy.accuracy(
-                test_data, [big_from_small] * len(test_data))
+            policy.learn(Batch.from_data_list(datas), optimizer)
+            test_acc = policy.accuracy(test_data)
             print(test_acc)
 
         # accuracy after training must have increased
-        test_acc = policy.accuracy(
-            test_data, [big_from_small] * len(test_data))
+        test_acc = policy.accuracy(test_data)
         self.assertGreater(test_acc, 0.85)
 
     def make_data(self, rng, num_node_features, n_nodes):
@@ -69,10 +65,10 @@ class EdgePolicyTest(unittest.TestCase):
         data_edge_index = torch.tensor(
             [[a, b] for a, b in product(range(n_nodes), repeat=2)]
         ).T
-        data_y = node
+        data_y = torch.zeros(n_nodes, dtype=torch.float32)
+        data_y[node] = 1.
         data = Data(
             x=data_x,
             edge_index=data_edge_index,
             y=data_y)
-
         return data

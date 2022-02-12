@@ -5,7 +5,6 @@ from typing import Optional, Set
 
 import numpy as np
 import torch
-from importtf import keras, tf
 from planner.policylearn.edge_policy_graph_utils import (agents_to_data,
                                                          get_optimal_edge)
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
@@ -13,11 +12,7 @@ from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
 from planner.policylearn.generate_graph import (get_agent_path_layer,
                                                 get_agent_pos_layer,
                                                 gridmap_to_graph)
-from planner.policylearn.train_model import CONVRNN_STR, fix_data_convrnn
-from tensorflow.keras.models import load_model
 from torch_geometric.data import Data
-
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +140,10 @@ class FillPolicy(Policy):
 class LearnedPolicy(Policy):
     # using machine learning for a greater tomorrow
     def __init__(self, agent) -> None:
+        from importtf import tf
+        from planner.policylearn.train_model import (CONVRNN_STR,
+                                                     fix_data_convrnn)
+        from tensorflow.keras.models import load_model
         super().__init__(agent)
         self.radius = 3  # how far to look in each direction
         self.ts = 3  # how long to collect data for
@@ -393,12 +392,10 @@ class EdgePolicy(Policy):
     def get_edge(self, agents, agents_with_colissions):
         i_a_self = agents.index(self.a)
         data, big_from_small = agents_to_data(agents, i_a_self)
-        score, targets = self.nn.forward(
+        node_to_go = self.nn.predict(
             data.x,
-            data.edge_index)
-        logger.debug(f"score: {score}")
-        logger.debug(f"targets: {targets}")
-        return big_from_small[targets[torch.argmax(score)].item()]
+            data.edge_index) 
+        return big_from_small[node_to_go]
 
     def step(self):
         pass

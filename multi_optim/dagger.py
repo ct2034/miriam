@@ -8,11 +8,13 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import scenarios
+import scenarios.solvers
 import tools
 import torch
 from definitions import INVALID, SCENARIO_RESULT
 from humanfriendly import format_size
-from planner.policylearn.edge_policy import MODEL_INPUT, EdgePolicyModel
+from planner.policylearn.edge_policy import (MODEL_INPUT, EdgePolicyDataset,
+                                             EdgePolicyModel)
 from planner.policylearn.edge_policy_graph_utils import (RADIUS, TIMEOUT,
                                                          agents_to_data,
                                                          get_optimal_edge)
@@ -23,7 +25,7 @@ from sim.decentralized.policy import (EdgePolicy, EdgeRaisingPolicy,
                                       PolicyCalledException)
 from sim.decentralized.runner import (has_exception, run_a_scenario,
                                       to_agent_objects)
-from torch_geometric.data import Data
+from torch_geometric.data import Data, DataLoader
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +83,6 @@ class ScenarioState():
         if self.finished:
             return None
         assert self.is_agents_to_consider is not None
-
         observations = {}  # type: Dict[int, OBSERVATION]
         for i_a in self.is_agents_to_consider:
             observations[i_a] = agents_to_data(
@@ -150,17 +151,11 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
                 break
             observations = state.observe()
             actions: Dict[int, ACTION] = {}
-            for i_a, obs in observations.items():
+            for i_a, (d, bfs) in observations.items():
                 # find actions to take using the policy
-                d = get_input_data_from_observation(obs)
-                scores, targets = model(
-                    d.x, d.edge_index)
-                action = int(targets[scores.argmax()])
-                actions[i_a] = action
+                node_to_go = model.predict(d.x, d.edge_index)
+                actions[i_a] = bfs[node_to_go]
                 # observation, action pairs for learning
-                optimal_action = get_optimal_edge(
-                    state.agents, i_a)
-                d.y = optimal_action
                 these_ds.append(d)
             state.step(actions)
         except RuntimeError as e:
@@ -174,11 +169,12 @@ class DaggerStrategy():
     (https://proceedings.mlr.press/v15/ross11a.html)"""
 
     def __init__(self, model, graph, n_episodes, n_agents,
-                 optimizer, prefix, rng):
+                 batch_size, optimizer, prefix, rng):
         self.model = model
         self.graph = self._add_self_edges_to_graph(graph)
         self.n_episodes = n_episodes
         self.n_agents = n_agents
+        self.batch_size = batch_size
         self.env_nx = env_to_nx(graph)
         self.rng = rng
         self.optimizer = optimizer
@@ -225,16 +221,14 @@ class DaggerStrategy():
             # env_nx is not needed, because it depends on the graph
         })
         new_fname = self._get_path_data(generation_hash)
+        data_files.append(new_fname)
 
+        # only create file if this data does not exist
         if os.path.exists(new_fname):
-            logger.debug("Loading data from file")
-            with open(new_fname, "rb") as f:
-                new_ds = pickle.load(f)
+            pass
         else:
             results_s = pool.imap_unordered(
-                sample_trajectory_proxy, params
-            )
-
+                sample_trajectory_proxy, params)
             new_ds = []
             for results in results_s:
                 new_ds.extend(results)
@@ -242,29 +236,20 @@ class DaggerStrategy():
                 pickle.dump(new_ds, f)
 
         # learn
-        # first of the current data
-        data_lengths.append(len(new_ds))
-        loss = self.model.learn(
-            new_ds, optimizer=self.optimizer)
-        if loss is not None:
+        epds = EdgePolicyDataset(self._get_data_folder())
+        loader = DataLoader(epds, batch_size=self.batch_size, shuffle=True)
+        loss_s = []
+        for i_b, batch in enumerate(loader):
+            loss = self.model.learn(batch, self.optimizer)
             loss_s.append(loss)
-        # then learn from files
-        for fname in data_files:
-            with open(fname, "rb") as f:
-                ds = pickle.load(f)
-            data_lengths.append(len(ds))
-            loss = self.model.learn(
-                ds, optimizer=self.optimizer)
-            if loss is not None:
-                loss_s.append(loss)
-
-        # after learning add new file
-        data_files.append(new_fname)
 
         # statistics
-        new_data_perc = len(new_ds) / sum(data_lengths)
+        len_new_data = sum(
+            1 if (lambda x: generation_hash in x[0]
+                  ) else 0 for x in epds.lookup)
+        new_data_perc = len_new_data / len(epds)
 
         if len(loss_s) == 0:
             loss_s = [0]
         return (self.model, np.mean(loss_s), new_data_perc,
-                data_files, sum(data_lengths))
+                data_files, len(epds))

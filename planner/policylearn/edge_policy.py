@@ -1,20 +1,51 @@
 import logging
-from pickletools import optimize
-from random import Random
+import os
+import pickle
 from typing import Any, List, Tuple
 
-import matplotlib.pyplot as plt
-import scenarios.evaluators
-import scenarios.solvers
 import torch
 import torch.nn as nn
 import torch_geometric
-from torch.nn import Dropout2d
 from torch.nn.modules.module import T
-from torch_geometric.data import Data
+from torch_geometric.data import Dataset
+from torch_geometric.data.batch import Batch
 
 MODEL_INPUT = Tuple[
     torch.Tensor, torch.Tensor]
+
+
+class EdgePolicyDataset(Dataset):
+    def __init__(self, path, transform=None, pre_transform=None, pre_filter=None):
+        super().__init__(transform, pre_transform, pre_filter)
+        self.path = path
+        self.loaded_fname = None
+        self.loaded_data = None
+        self.fnames = os.listdir(path)
+        self.lookup: List[Tuple[str, int]] = []  # (fname, i)
+        for fname in self.fnames:
+            len_this_file = len(
+                self.load_file(fname))
+            lookup_section = [
+                (fname, i_d) for i_d in range(len_this_file)]
+            self.lookup.extend(lookup_section)
+
+    def len(self):
+        return len(self.lookup)
+
+    def load_file(self, fname):
+        if self.loaded_fname == fname:
+            data = self.loaded_data
+        else:
+            fpath = self.path + "/" + fname
+            with open(fpath, "rb") as f:
+                data = pickle.load(f)
+            self.loaded_fname = fname
+            self.loaded_data = data
+        return data
+
+    def get(self, idx):
+        fname, i_d = self.lookup[idx]
+        return self.load_file(fname)[i_d]
 
 
 class EdgePolicyModel(nn.Module):
@@ -26,28 +57,31 @@ class EdgePolicyModel(nn.Module):
             num_node_features, conv_channels, K=2)
         self.conv2 = torch_geometric.nn.ChebConv(
             conv_channels, conv_channels, K=2)
-        self.dropout = Dropout2d(p=.3)
         self.readout = torch.nn.Linear(conv_channels, 1)
         self.gpu = gpu  # type: torch.device
 
-    def forward(self, x, edge_index):
-        # Agents position is where x[0] is 1
-        node = torch.nonzero(x[:, 0] == 1.).item()
-
+    def forward(self, x, edge_index, batch):
         # Obtain node embeddings
         x = self.conv1(x, edge_index)
         x = x.relu()
-        # x = self.dropout(x)
         x = self.conv2(x, edge_index)
         x = x.relu()
-        # x = self.dropout(x)
 
-        # Relate to edges
-        # take only edges that start or end at node
+        # read values at potential targets as score
+        x = self.readout(x)[:, 0]
+        y_out_batched = torch.zeros_like(x)
+        for i_b in torch.unique(batch):
+            y_out_batched[batch == i_b] = torch.softmax(
+                x[batch == i_b], dim=0)
+        return y_out_batched
+
+    def predict(self, x, edge_index):
+        self.eval()
+        n_nodes = x.shape[0]
+        node = torch.nonzero(x[:, 0] == 1.).item()
         relevant_edge_index = edge_index[:,
                                          torch.bitwise_or(edge_index[0] == node,
                                                           edge_index[1] == node)]
-        # make index of targets
         targets = torch.zeros(relevant_edge_index.shape[1], dtype=torch.long)
         for i, (s, d) in enumerate(relevant_edge_index.t()):
             if s == node and d == node:
@@ -58,40 +92,29 @@ class EdgePolicyModel(nn.Module):
                 targets[i] = s
             else:
                 raise ValueError("Edge not found")
+        targets = torch.unique(targets)
 
         # read values at potential targets as score
-        score = self.readout(x[targets])[:, 0]
-        score = torch.softmax(score, dim=0)
-        return score, targets
+        score = self.forward(x, edge_index, torch.tensor([0]*n_nodes))
+        score_potential_targets = score[targets]
+        return targets[torch.argmax(score_potential_targets).item()]
 
-    def predict(self, x, edge_index, big_from_small):
-        self.eval()
-        score, targets = self.forward(x, edge_index)
-        return big_from_small[targets[torch.argmax(score)].item()]
-
-    def accuracy(self, datas: List[Data], big_from_smalls):
-        assert len(datas) == len(big_from_smalls)
+    def accuracy(self, databatch: Batch):
+        datas = databatch.to_data_list()
         results = torch.zeros(len(datas))
-        for i, (data, bfs) in enumerate(zip(datas, big_from_smalls)):
-            pred = self.predict(data.x, data.edge_index, bfs)
-            results[i] = int(pred == data.y)
+        for i, data in enumerate(datas):
+            pred = self.predict(data.x, data.edge_index)
+            results[i] = int(pred == torch.argmax(data.y).item())
         return torch.mean(results)
 
-    def learn(self, datas: List[Data], optimizer):
+    def learn(self, databatch: Batch, optimizer):
         self.train()
-        scores = torch.tensor([], device=self.gpu)
-        targets = torch.tensor([], device=self.gpu)
-        y_goals = torch.tensor([], device=self.gpu)
-        for d in datas:
-            d.to(self.gpu)
-            score, targets = self.forward(d.x, d.edge_index)
-            y_goal = torch.zeros(
-                score.shape[0], dtype=torch.float, device=self.gpu)
-            y_goal[(targets == d.y).nonzero()] = 1
-            scores = torch.cat((scores, score))
-            y_goals = torch.cat((y_goals, y_goal))
+        databatch.to(self.gpu)
+        y_out_batched = self.forward(
+            databatch.x, databatch.edge_index, databatch.batch)
+
         loss = torch.nn.functional.binary_cross_entropy(
-            scores, y_goals)
+            y_out_batched, databatch.y)
         try:
             loss.backward()
             optimizer.step()
@@ -99,7 +122,7 @@ class EdgePolicyModel(nn.Module):
         except RuntimeError:
             logging.warning(f"Could not train with: " +
                             f"y_goals {y_goals}, scores {scores}, " +
-                            f"datas {datas}, targets {targets}")
+                            f"datas {databatch}, targets {targets}")
             return None
         return float(loss)
 

@@ -139,9 +139,9 @@ def eval_policy_on_set(model, eval_set):
 
 
 def optimize_policy(model, g: nx.Graph, n_agents,
-                    n_epochs, optimizer, data_files, pool, prefix, rng):
+                    n_epochs, batch_size, optimizer, data_files, pool, prefix, rng):
     ds = DaggerStrategy(
-        model, g, n_epochs, n_agents, optimizer, prefix, rng)
+        model, g, n_epochs, n_agents, batch_size, optimizer, prefix, rng)
     model, loss, new_data_perc, data_files, data_len = ds.run_dagger(
         pool, data_files)
     return model, ds.env_nx, loss, new_data_perc, data_files, data_len
@@ -152,6 +152,7 @@ def run_optimization(
         n_runs_pose: int = 1024,
         n_runs_policy: int = 128,
         n_epochs_per_run_policy: int = 64,
+        batch_size_policy: int = 32,
         stats_and_eval_every: int = 1,
         lr_pos: float = 1e-4,
         lr_policy: float = 4e-4,
@@ -173,18 +174,18 @@ def run_optimization(
     g = make_graph(pos, map_img)
 
     # GPU or CPU?
-    if torch.cuda.is_available():
-        assert 1 == torch.cuda.device_count(),\
-            "Make sure this can only see one cuda device."
-        logger.info("Using GPU")
-        gpu = torch.device("cuda:0")
-        torch.cuda.empty_cache()
-        # print(torch.cuda.memory_summary())
-        # torch.cuda.set_per_process_memory_fraction(fraction=.1)
-        # print(torch.cuda.memory_summary())
-    else:
-        logger.warning("GPU not available, using CPU")
-        gpu = torch.device("cpu")
+    # if torch.cuda.is_available():
+    #     assert 1 == torch.cuda.device_count(),\
+    #         "Make sure this can only see one cuda device."
+    #     logger.info("Using GPU")
+    #     gpu = torch.device("cuda:0")
+    #     torch.cuda.empty_cache()
+    #     # print(torch.cuda.memory_summary())
+    #     # torch.cuda.set_per_process_memory_fraction(fraction=.1)
+    #     # print(torch.cuda.memory_summary())
+    # else:
+    #     logger.warning("GPU not available, using CPU")
+    gpu = torch.device("cpu")
 
     # Policy
     policy_model = EdgePolicyModel(gpu=gpu)
@@ -218,6 +219,7 @@ def run_optimization(
         "n_nodes": n_nodes,
         "n_runs_pose": n_runs_pose,
         "n_runs_policy": n_runs_policy,
+        "batch_size_policy": batch_size_policy,
         "stats_every": stats_and_eval_every,
         "lr_pos": lr_pos,
         "lr_policy": lr_policy,
@@ -255,7 +257,7 @@ def run_optimization(
              policy_data_files, data_len
              ) = optimize_policy(
                 policy_model, g, n_agents,
-                n_epochs_per_run_policy, optimizer_policy, policy_data_files,
+                n_epochs_per_run_policy, batch_size_policy, optimizer_policy, policy_data_files,
                 pool, prefix, rng)
             if i_r % stats_and_eval_every == 0:
                 # also eval now

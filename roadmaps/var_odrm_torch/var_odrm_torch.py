@@ -17,8 +17,6 @@ from pyflann import FLANN
 from scenarios.visualization import get_colors
 from tools import ProgressBar
 
-dtype = torch.float
-device = torch.device("cpu")
 PATH_TYPE = Tuple[Tuple[float, float], Tuple[float, float], List[int]]
 
 
@@ -84,8 +82,8 @@ def sample_points(
         point = (rng.random(), rng.random())
         if is_coord_free(map_img, point):
             points = np.append(points, [np.array(point)], axis=0)
-    return torch.tensor(points, device=device,
-                        dtype=dtype, requires_grad=True)
+    return torch.tensor(points, device=torch.device("cpu"),
+                        dtype=torch.float, requires_grad=True)
 
 
 def make_graph(
