@@ -394,8 +394,9 @@ class EdgePolicy(Policy):
         data, big_from_small = agents_to_data(agents, i_a_self)
         node_to_go = self.nn.predict(
             data.x,
-            data.edge_index) 
-        return big_from_small[node_to_go]
+            data.edge_index,
+            big_from_small) 
+        return node_to_go
 
     def step(self):
         pass
