@@ -21,7 +21,7 @@ def learning(
     # run to learn from
     run_prefix_data: str = "debug"
     n_test = 50
-    n_epochs = 100
+    n_epochs = 200
 
     # load previously trained model
     model = EdgePolicyModel(
@@ -72,9 +72,9 @@ def learning(
 
 
 if __name__ == "__main__":
-    lr_s = [1E-2, 3E-2, 3E-1]
-    batch_size_s = [32, 64, 128]
-    conv_channels_s = [8, 16, 32]
+    lr_s = [3E-2, 1E-2, 3E-3, 1E-3]
+    batch_size_s = [64, 128]
+    conv_channels_s = [32, 64]
     # conv_layers_s = [1, 2, 3]
     parameter_experiments = {
         "lr": lr_s,
