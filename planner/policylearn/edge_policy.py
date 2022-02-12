@@ -107,7 +107,11 @@ class EdgePolicyModel(nn.Module):
         results = torch.zeros(len(eval_list))
         for i, (data, bfs) in enumerate(eval_list):
             pred = self.predict(data.x, data.edge_index, bfs)
-            results[i] = int(pred == bfs[torch.argmax(data.y).item()])
+            optimal_small = torch.argmax(data.y).item()
+            if isinstance(optimal_small, int):
+                results[i] = int(pred == bfs[optimal_small])
+            else:
+                results[i] = 0
         return torch.mean(results).item()
 
     def learn(self, databatch: Batch, optimizer):
