@@ -124,8 +124,8 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
     return eval_set
 
 
-def optimize_policy(model, g: nx.Graph, n_agents,
-                    n_epochs, batch_size, optimizer, data_files, pool, prefix, rng):
+def optimize_policy(model, g: nx.Graph, n_agents, n_epochs, batch_size,
+                    optimizer, data_files, pool, prefix, rng):
     ds = DaggerStrategy(
         model, g, n_epochs, n_agents, batch_size, optimizer, prefix, rng)
     model, loss, new_data_percentage, data_files, data_len = ds.run_dagger(
@@ -195,7 +195,7 @@ def run_optimization(
         "policy_success",
         "policy_accuracy",
         "policy_new_data_percentage",
-        "npolicy_data_len"])
+        "n_policy_data_len"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -239,7 +239,7 @@ def run_optimization(
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, env_nx, policy_loss, new_data_perc,
+            (policy_model, env_nx, policy_loss, new_data_percentage,
              policy_data_files, data_len
              ) = optimize_policy(
                 policy_model, g, n_agents, n_epochs_per_run_policy,
@@ -261,12 +261,12 @@ def run_optimization(
                 stats.add("policy_success", i_r, float(success))
                 stats.add("policy_accuracy", i_r, policy_accuracy)
                 stats.add("policy_new_data_percentage",
-                          i_r, float(new_data_perc))
-                stats.add("npolicy_data_len", i_r, float(data_len))
+                          i_r, float(new_data_percentage))
+                stats.add("n_policy_data_len", i_r, float(data_len))
                 logger.info(f"Regret: {regret}")
                 logger.info(f"Success: {success}")
-                logger.info(f"Accuracy: {policy_accuracy}")
-                logger.info(f"New data: {new_data_perc}")
+                logger.info(f"Accuracy: {policy_accuracy:.2f}")
+                logger.info(f"New data: {new_data_percentage*100:.1f}%")
                 logger.info(f"Data length: {data_len}")
 
         pb.progress()
@@ -317,6 +317,7 @@ if __name__ == "__main__":
         n_runs_pose=2,
         n_runs_policy=16,
         n_epochs_per_run_policy=4,
+        batch_size_policy=16,
         stats_and_eval_every=1,
         lr_pos=1e-4,
         lr_policy=1e-3,
@@ -336,6 +337,7 @@ if __name__ == "__main__":
         n_runs_pose=2,
         n_runs_policy=128,
         n_epochs_per_run_policy=128,
+        batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-4,
         lr_policy=1e-3,
