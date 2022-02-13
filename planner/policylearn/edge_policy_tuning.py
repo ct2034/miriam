@@ -39,10 +39,14 @@ def learning(
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, exclude_keys=test_set_i_s)
 
+    # stat collection
     stats = {
         "accuracy": [],
         "loss": [],
     }
+    n_stat_points_desired = 200
+    n_stat_points_per_epoch = n_stat_points_desired // n_epochs
+    stats_every_x_batch = len(loader) // n_stat_points_per_epoch
 
     # training
     pb = ProgressBar(name, len(loader) * n_epochs, 1)
@@ -51,11 +55,12 @@ def learning(
         for i_b, batch in enumerate(loader):
             loss = model.learn(batch, optimizer)
             pb.progress()
-        accuracy = model.accuracy(test_set)
-        print(f"accuracy: {accuracy}")
-        print(f"loss: {loss}")
-        stats["accuracy"].append(accuracy)
-        stats["loss"].append(loss)
+            if i_b % stats_every_x_batch == 0:
+                accuracy = model.accuracy(test_set)
+                print(f"accuracy: {accuracy}")
+                print(f"loss: {loss}")
+                stats["accuracy"].append(accuracy)
+                stats["loss"].append(loss)
     pb.end()
 
     # save model
