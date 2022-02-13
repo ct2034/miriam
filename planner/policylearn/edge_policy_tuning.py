@@ -19,9 +19,9 @@ def learning(
     torch.manual_seed(0)
 
     # run to learn from
-    run_prefix_data: str = "debug"
+    run_prefix_data: str = "tiny"
     n_test = 50
-    n_epochs = 200
+    n_epochs = 50
 
     # load previously trained model
     model = EdgePolicyModel(
