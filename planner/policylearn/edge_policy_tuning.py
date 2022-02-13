@@ -2,6 +2,7 @@ import json
 from random import Random
 
 import torch
+import torch.multiprocessing as mp
 from matplotlib import pyplot as plt
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from tools import ProgressBar
@@ -21,7 +22,7 @@ def learning(
     # run to learn from
     run_prefix_data: str = "tiny"
     n_test = 50
-    n_epochs = 50
+    n_epochs = 10
 
     # load previously trained model
     model = EdgePolicyModel(
@@ -71,6 +72,10 @@ def learning(
     plt.savefig(f"planner/policylearn/results/edge_policy_{name}.png")
 
 
+def learning_proxy(kwargs):
+    learning(**kwargs)
+
+
 if __name__ == "__main__":
     lr_s = [3E-2, 1E-2, 3E-3, 1E-3]
     batch_size_s = [64, 128]
@@ -83,10 +88,13 @@ if __name__ == "__main__":
         # "conv_layers": conv_layers_s,
     }
 
+    # prepare multithreading
+    params_to_run = []
+
     # default run
     kwargs = {k: v[0] for k, v in parameter_experiments.items()}
     kwargs["name"] = f"default"
-    learning(**kwargs)
+    params_to_run.append(kwargs.copy())
 
     # experimental runs
     for name, values in parameter_experiments.items():
@@ -94,4 +102,7 @@ if __name__ == "__main__":
             kwargs = {k: v[0] for k, v in parameter_experiments.items()}
             kwargs[name] = value
             kwargs["name"] = f"{name}_{value}"
-            learning(**kwargs)
+            params_to_run.append(kwargs.copy())
+
+    p = mp.Pool(16)
+    p.map(learning_proxy, params_to_run)
