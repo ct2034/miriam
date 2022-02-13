@@ -1,5 +1,6 @@
 import json
 from random import Random
+from typing import Dict, List, Union
 
 import torch
 import torch.multiprocessing as mp
@@ -86,7 +87,7 @@ if __name__ == "__main__":
         "batch_size": batch_size_s,
         "conv_channels": conv_channels_s,
         # "conv_layers": conv_layers_s,
-    }
+    }  # type: Dict[str, Union[str, List[Union[float, int]]]]
 
     # prepare multithreading
     params_to_run = []
