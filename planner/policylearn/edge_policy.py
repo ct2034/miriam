@@ -51,23 +51,28 @@ class EdgePolicyDataset(Dataset):
 
 
 class EdgePolicyModel(nn.Module):
-    def __init__(self, num_node_features=4, conv_channels=4, gpu=torch.device("cpu")):
+    def __init__(
+            self,
+            num_node_features=4,
+            num_conv_channels=4,
+            num_gcn_layers=2,
+            gpu=torch.device("cpu")):
         super().__init__()
         self.num_node_features = num_node_features
-        self.conv_channels = conv_channels
-        self.conv1 = torch_geometric.nn.ChebConv(
-            num_node_features, conv_channels, K=2)
-        self.conv2 = torch_geometric.nn.ChebConv(
-            conv_channels, conv_channels, K=2)
-        self.readout = torch.nn.Linear(conv_channels, 1)
+        self.conv_channels = num_conv_channels
+        self.conv_layers = []
+        for i in range(num_gcn_layers):
+            channels_in = self.num_node_features if i == 0 else self.conv_channels
+            self.conv_layers.append(
+                torch_geometric.nn.ChebConv(channels_in, self.conv_channels, K=2))
+        self.readout = torch.nn.Linear(num_conv_channels, 1)
         self.gpu = gpu  # type: torch.device
 
     def forward(self, x, edge_index, batch):
         # Obtain node embeddings
-        x = self.conv1(x, edge_index)
-        x = x.relu()
-        x = self.conv2(x, edge_index)
-        x = x.relu()
+        for conv_layer in self.conv_layers:
+            x = conv_layer(x, edge_index)
+            x = x.relu()
 
         # read values at potential targets as score
         x = self.readout(x)[:, 0]
