@@ -1,5 +1,7 @@
 import json
+import os
 from random import Random
+from sre_parse import fix_flags
 from typing import Dict, List, Union
 
 import torch
@@ -78,7 +80,7 @@ def learning_proxy(kwargs):
     learning(**kwargs)
 
 
-if __name__ == "__main__":
+def tuning():
     lr_s = [3E-2]  # , 1E-2, 3E-3, 1E-3]
     batch_size_s = [64]  # , 128]
     conv_channels_s = [32]  # , 64]
@@ -108,3 +110,34 @@ if __name__ == "__main__":
 
     p = mp.Pool(16)
     p.map(learning_proxy, params_to_run)
+
+
+def rolling_average(data: List[float], n: int = 3) -> List[float]:
+    return [sum(data[i:i + n]) / n for i in range(len(data) - n)]
+
+
+def plot_results():
+    fnames = os.listdir("planner/policylearn/results")
+    fnames_json = [f for f in fnames if f.endswith(".json")]
+
+    fig, (ax1, ax2) = plt.subplots(
+        2, 1,
+        figsize=(20, 20),
+        dpi=500,
+        sharex=True)
+    for fname in fnames_json:
+        with open(f"planner/policylearn/results/{fname}", "r") as f:
+            stats = json.load(f)
+        label = fname.replace(".json", "").replace("edge_policy_", "")
+        ax1.plot(rolling_average(stats["accuracy"]), label=label)
+        ax2.plot(rolling_average(stats["loss"]), label=label)
+    ax1.legend()
+    ax1.set_ylabel("accuracy")
+    ax2.legend()
+    ax2.set_ylabel("loss")
+    plt.savefig("planner/policylearn/results/edge_policy_results.png")
+
+
+if __name__ == "__main__":
+    # tuning()
+    plot_results()
