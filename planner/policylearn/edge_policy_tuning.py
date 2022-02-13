@@ -23,7 +23,7 @@ def learning(
     # run to learn from
     run_prefix_data: str = "tiny"
     n_test = 50
-    n_epochs = 10
+    n_epochs = 10  # on hal = ~5h
 
     # load previously trained model
     model = EdgePolicyModel(
@@ -46,7 +46,7 @@ def learning(
     }
 
     # training
-    pb = ProgressBar(name, len(loader) * n_epochs, 5)
+    pb = ProgressBar(name, len(loader) * n_epochs, 1)
     optimizer = torch.optim.Adam(model.parameters(), lr)
     for i_e in range(n_epochs):
         for i_b, batch in enumerate(loader):
