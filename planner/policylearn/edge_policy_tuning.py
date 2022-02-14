@@ -116,11 +116,11 @@ def tuning():
             kwargs["name"] = f"{name}_{value}"
             params_to_run.append(kwargs.copy())
 
-    p = mp.Pool(16)
+    p = mp.Pool(len(params_to_run))
     p.map(learning_proxy, params_to_run)
 
 
-def rolling_average(data: List[float], n: int = 3) -> List[float]:
+def rolling_average(data: List[float], n: int = 10) -> List[float]:
     return [sum(data[i:i + n]) / n for i in range(len(data) - n)]
 
 
@@ -147,5 +147,5 @@ def plot_results():
 
 
 if __name__ == "__main__":
-    tuning()
+    # tuning()
     plot_results()
