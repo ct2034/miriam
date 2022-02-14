@@ -24,8 +24,8 @@ def learning(
 
     # run to learn from
     run_prefix_data: str = "tiny"
-    n_test = 50
-    n_epochs = 10  # on hal = ~5h
+    n_test = 100
+    n_epochs = 20  # on hal = ~10h
 
     # load previously trained model
     model = EdgePolicyModel(
@@ -89,9 +89,9 @@ def learning_proxy(kwargs):
 def tuning():
     lr_s = [3E-2, 1E-2]
     batch_size_s = [64, 32, 128]
-    conv_channels_s = [64, 128]
-    conv_layers_s = [2, 1, 3]
-    readout_layers_s = [1, 2, 3]
+    conv_channels_s = [128, 64]
+    conv_layers_s = [3, 2, 4]
+    readout_layers_s = [2, 3, 1]
     parameter_experiments = {
         "lr": lr_s,
         "batch_size": batch_size_s,
