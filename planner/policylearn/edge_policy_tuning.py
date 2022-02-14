@@ -147,5 +147,5 @@ def plot_results():
 
 
 if __name__ == "__main__":
-    # tuning()
+    tuning()
     plot_results()
