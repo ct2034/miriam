@@ -55,27 +55,40 @@ class EdgePolicyModel(nn.Module):
             self,
             num_node_features=4,
             num_conv_channels=4,
-            num_gcn_layers=2,
+            num_conv_layers=2,
+            num_readout_layers=1,
             gpu=torch.device("cpu")):
         super().__init__()
         self.num_node_features = num_node_features
-        self.conv_channels = num_conv_channels
-        self.conv_layers = []
-        for i in range(num_gcn_layers):
-            channels_in = self.num_node_features if i == 0 else self.conv_channels
-            self.conv_layers.append(
-                torch_geometric.nn.ChebConv(channels_in, self.conv_channels, K=2))
-        self.readout = torch.nn.Linear(num_conv_channels, 1)
+        self.num_conv_channels = num_conv_channels
         self.gpu = gpu  # type: torch.device
 
+        # creating needed layers
+        self.conv_layers = torch.nn.ModuleList()
+        for i in range(num_conv_layers):
+            channels_in = self.num_node_features if i == 0 else num_conv_channels
+            self.conv_layers.append(
+                torch_geometric.nn.ChebConv(channels_in, num_conv_channels, K=2))
+        self.readout_layers = torch.nn.ModuleList()
+        for i in range(num_readout_layers):
+            channels_out = 1 if i == num_readout_layers-1 else num_conv_channels
+            self.readout_layers.append(
+                torch.nn.Linear(num_conv_channels, channels_out)
+            )
+
     def forward(self, x, edge_index, batch):
-        # Obtain node embeddings
+        # Convolution layer(s)
         for conv_layer in self.conv_layers:
             x = conv_layer(x, edge_index)
             x = x.relu()
 
         # read values at potential targets as score
-        x = self.readout(x)[:, 0]
+        for readout_layer in self.readout_layers:
+            x = readout_layer(x)
+            x = x.relu()
+
+        # flatten and softmax data respecting batches
+        x = x[:, 0]
         y_out_batched = torch.zeros_like(x)
         for i_b in torch.unique(batch):
             y_out_batched[batch == i_b] = torch.softmax(

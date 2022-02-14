@@ -17,6 +17,7 @@ def learning(
     batch_size: int,
     conv_channels: int,
     conv_layers: int,
+    readout_layers: int
 ):
     rng = Random(0)
     torch.manual_seed(0)
@@ -30,7 +31,8 @@ def learning(
     model = EdgePolicyModel(
         gpu=torch.device("cpu"),
         num_conv_channels=conv_channels,
-        num_gcn_layers=conv_layers)
+        num_conv_layers=conv_layers,
+        num_readout_layers=readout_layers)
     # model.load_state_dict(torch.load(
     #     f"multi_optim/results/{run_prefix_data}_policy_model.pt"))
 
@@ -89,11 +91,13 @@ def tuning():
     batch_size_s = [64, 32, 128]
     conv_channels_s = [64, 128]
     conv_layers_s = [2, 1, 3]
+    readout_layers_s = [1, 2, 3]
     parameter_experiments = {
         "lr": lr_s,
         "batch_size": batch_size_s,
         "conv_channels": conv_channels_s,
         "conv_layers": conv_layers_s,
+        "readout_layers": readout_layers_s
     }  # type: Dict[str, Union[str, List[Union[float, int]]]]
 
     # prepare multithreading
@@ -143,5 +147,5 @@ def plot_results():
 
 
 if __name__ == "__main__":
-    # tuning()
+    tuning()
     plot_results()
