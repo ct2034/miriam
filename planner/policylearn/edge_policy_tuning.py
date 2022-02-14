@@ -22,9 +22,9 @@ def learning(
     torch.manual_seed(0)
 
     # run to learn from
-    run_prefix_data: str = "debug"
+    run_prefix_data: str = "tiny"
     n_test = 50
-    n_epochs = 100
+    n_epochs = 10  # on hal = ~5h
 
     # load previously trained model
     model = EdgePolicyModel(
@@ -85,9 +85,9 @@ def learning_proxy(kwargs):
 
 
 def tuning():
-    lr_s = [3E-2, 1E-2, 3E-3, 1E-3]
-    batch_size_s = [64, 128]
-    conv_channels_s = [64]
+    lr_s = [3E-2, 1E-2]
+    batch_size_s = [64, 32, 128]
+    conv_channels_s = [64, 128]
     conv_layers_s = [2, 1, 3]
     parameter_experiments = {
         "lr": lr_s,
