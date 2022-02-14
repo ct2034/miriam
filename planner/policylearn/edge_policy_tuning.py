@@ -1,7 +1,7 @@
 import json
 import os
 from random import Random
-from typing import List
+from typing import Dict, List, Union
 
 import torch
 import torch.multiprocessing as mp
@@ -16,20 +16,21 @@ def learning(
     lr: float,
     batch_size: int,
     conv_channels: int,
-    # conv_layers: int,
+    conv_layers: int,
 ):
     rng = Random(0)
     torch.manual_seed(0)
 
     # run to learn from
-    run_prefix_data: str = "tiny"
+    run_prefix_data: str = "debug"
     n_test = 50
-    n_epochs = 10  # on hal = ~5h
+    n_epochs = 100
 
     # load previously trained model
     model = EdgePolicyModel(
         gpu=torch.device("cpu"),
-        conv_channels=conv_channels)
+        num_conv_channels=conv_channels,
+        num_gcn_layers=conv_layers)
     # model.load_state_dict(torch.load(
     #     f"multi_optim/results/{run_prefix_data}_policy_model.pt"))
 
@@ -86,14 +87,14 @@ def learning_proxy(kwargs):
 def tuning():
     lr_s = [3E-2, 1E-2, 3E-3, 1E-3]
     batch_size_s = [64, 128]
-    conv_channels_s = [32, 64]
-    # conv_layers_s = [1, 2, 3]
+    conv_channels_s = [64]
+    conv_layers_s = [2, 1, 3]
     parameter_experiments = {
         "lr": lr_s,
         "batch_size": batch_size_s,
         "conv_channels": conv_channels_s,
-        # "conv_layers": conv_layers_s,
-    }
+        "conv_layers": conv_layers_s,
+    }  # type: Dict[str, Union[str, List[Union[float, int]]]]
 
     # prepare multithreading
     params_to_run = []
