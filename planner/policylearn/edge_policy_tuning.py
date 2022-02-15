@@ -87,7 +87,7 @@ def learning_proxy(kwargs):
 
 
 def tuning():
-    lr_s = [3E-2, 1E-2]
+    lr_s = [1E-2, 3E-2, 3E-3]
     batch_size_s = [64, 32, 128]
     conv_channels_s = [128, 64]
     conv_layers_s = [3, 2, 4]
