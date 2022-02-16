@@ -64,8 +64,8 @@ def learning(
             pb.progress()
             if i_b % stats_every_x_batch == 0:
                 accuracy = model.accuracy(test_set)
-                print(f"{name} accuracy: {accuracy}")
-                print(f"{name} loss: {loss}")
+                print(f"{accuracy:.3f} (accuracy)@{name}")
+                print(f"{loss:.3f} (loss)@{name}")
                 stats["accuracy"].append(accuracy)
                 stats["loss"].append(loss)
     pb.end()
