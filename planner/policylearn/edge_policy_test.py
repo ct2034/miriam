@@ -29,17 +29,19 @@ class EdgePolicyTest(unittest.TestCase):
         rng = Random(0)
         torch.manual_seed(0)
         num_node_features = 2
-        conv_channels = 3
+        conv_channels = 5
         n_nodes = 2
         n_epochs = 10
-        n_data = 10
-        policy = EdgePolicyModel(num_node_features, conv_channels)
-        optimizer = torch.optim.Adam(policy.parameters(), lr=.1)
+        n_data = 20
+        policy = EdgePolicyModel(
+            num_node_features, conv_channels)
+        optimizer = torch.optim.Adam(policy.parameters(), lr=.01)
         datas = []
 
         # test data
-        test_data = Batch.from_data_list([self.make_data(
-            rng, num_node_features, n_nodes) for _ in range(10)])
+        test_data = [(
+            self.make_data(rng, num_node_features, n_nodes),
+            {x: x for x in range(n_nodes)}) for _ in range(10)]
         test_acc = policy.accuracy(test_data)
         self.assertLess(test_acc, 0.6)
 
