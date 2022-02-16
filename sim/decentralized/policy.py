@@ -141,8 +141,7 @@ class LearnedPolicy(Policy):
     # using machine learning for a greater tomorrow
     def __init__(self, agent) -> None:
         from importtf import tf
-        from planner.policylearn.train_model import (CONVRNN_STR,
-                                                     fix_data_convrnn)
+        from planner.policylearn.train_model import CONVRNN_STR
         from tensorflow.keras.models import load_model
         super().__init__(agent)
         self.radius = 3  # how far to look in each direction
@@ -199,6 +198,9 @@ class LearnedPolicy(Policy):
         :param id: which agent are we meeting
         :return: priority
         """
+        from importtf import tf
+        from planner.policylearn.train_model import (CONVRNN_STR,
+                                                     fix_data_convrnn)
         logger.debug(
             f"get_priority, self_agent: {self.a}, other_id: {id_coll}")
         N_T = 3
@@ -395,7 +397,7 @@ class EdgePolicy(Policy):
         node_to_go = self.nn.predict(
             data.x,
             data.edge_index,
-            big_from_small) 
+            big_from_small)
         return node_to_go
 
     def step(self):
