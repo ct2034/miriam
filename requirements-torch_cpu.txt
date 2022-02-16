@@ -1,0 +1,9 @@
+moviepy
+
+torch==1.10.0 -f https://download.pytorch.org/whl/cpu/torch_stable.html
+
+torch-scatter -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+# torch-cluster -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+# torch-spline-conv -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+torch-geometric -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
