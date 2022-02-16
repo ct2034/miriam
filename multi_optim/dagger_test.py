@@ -4,6 +4,7 @@ from math import pi
 
 import networkx as nx
 from planner.policylearn.edge_policy import EdgePolicyModel
+from scenarios.test_helper import make_cache_folder_and_set_envvar
 from sim.decentralized.agent import env_to_nx
 
 from multi_optim.dagger import *
@@ -12,6 +13,7 @@ from multi_optim.dagger import *
 class ScenarioStateTest(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:  # type: ignore
         super().__init__(methodName)
+        make_cache_folder_and_set_envvar()
 
         # square graph
         self.sq_graph = nx.Graph()
