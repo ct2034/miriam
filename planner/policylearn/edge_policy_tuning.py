@@ -17,7 +17,8 @@ def learning(
     batch_size: int,
     conv_channels: int,
     conv_layers: int,
-    readout_layers: int
+    readout_layers: int,
+    cheb_filter_size: int
 ):
     rng = Random(0)
     torch.manual_seed(0)
@@ -32,7 +33,8 @@ def learning(
         gpu=torch.device("cpu"),
         num_conv_channels=conv_channels,
         num_conv_layers=conv_layers,
-        num_readout_layers=readout_layers)
+        num_readout_layers=readout_layers,
+        cheb_filter_size=cheb_filter_size)
     # model.load_state_dict(torch.load(
     #     f"multi_optim/results/{run_prefix_data}_policy_model.pt"))
 
@@ -87,17 +89,19 @@ def learning_proxy(kwargs):
 
 
 def tuning():
-    lr_s = [1E-2, 3E-2, 3E-3]
+    lr_s = [3E-3, 1E-2]
     batch_size_s = [64, 32, 128]
     conv_channels_s = [128, 64]
-    conv_layers_s = [3, 2, 4]
-    readout_layers_s = [2, 3, 1]
+    conv_layers_s = [3, 4]
+    readout_layers_s = [2, 1]
+    cheb_filter_size_s = [2, 1, 3, 4]
     parameter_experiments = {
         "lr": lr_s,
         "batch_size": batch_size_s,
         "conv_channels": conv_channels_s,
         "conv_layers": conv_layers_s,
-        "readout_layers": readout_layers_s
+        "readout_layers": readout_layers_s,
+        "cheb_filter_size": cheb_filter_size_s
     }  # type: Dict[str, Union[str, List[Union[float, int]]]]
 
     # prepare multithreading

@@ -57,6 +57,7 @@ class EdgePolicyModel(nn.Module):
             num_conv_channels=4,
             num_conv_layers=2,
             num_readout_layers=1,
+            cheb_filter_size=2,
             gpu=torch.device("cpu")):
         super().__init__()
         self.num_node_features = num_node_features
@@ -68,7 +69,8 @@ class EdgePolicyModel(nn.Module):
         for i in range(num_conv_layers):
             channels_in = self.num_node_features if i == 0 else num_conv_channels
             self.conv_layers.append(
-                torch_geometric.nn.ChebConv(channels_in, num_conv_channels, K=2))
+                torch_geometric.nn.ChebConv(channels_in, num_conv_channels, 
+                K=cheb_filter_size))
         self.readout_layers = torch.nn.ModuleList()
         for i in range(num_readout_layers):
             channels_out = 1 if i == num_readout_layers-1 else num_conv_channels
