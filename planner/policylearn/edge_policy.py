@@ -54,6 +54,7 @@ class EdgePolicyModel(nn.Module):
             num_conv_layers=2,
             num_readout_layers=1,
             cheb_filter_size=2,
+            dropout_p=.3,
             gpu=torch.device("cpu")):
         super().__init__()
         self.num_node_features = num_node_features
@@ -67,6 +68,7 @@ class EdgePolicyModel(nn.Module):
             self.conv_layers.append(
                 torch_geometric.nn.ChebConv(channels_in, num_conv_channels,
                                             K=cheb_filter_size))
+        self.dropout = nn.Dropout(dropout_p)
         self.readout_layers = torch.nn.ModuleList()
         for i in range(num_readout_layers):
             channels_out = 1 if i == num_readout_layers-1 else num_conv_channels
@@ -81,6 +83,7 @@ class EdgePolicyModel(nn.Module):
         # Convolution layer(s)
         for conv_layer in self.conv_layers:
             x = conv_layer(x, edge_index)
+            x = self.dropout(x)
             x = x.relu()
 
         # read values at potential targets as score
