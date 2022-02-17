@@ -17,16 +17,17 @@ EVAL_LIST = List[Tuple[Data, BFS_TYPE]]
 
 
 class EdgePolicyDataset(Dataset):
-    def __init__(self, path, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, path, transform=None, pre_transform=None, pre_filter=None, gpu=None):
         super().__init__(transform, pre_transform, pre_filter)
         self.path = path
-        self.loaded_fname = None
-        self.loaded_data = None
         self.fnames = os.listdir(path)
         self.lookup: List[Tuple[str, int]] = []  # (fname, i)
+        self.gpu = gpu
+        self.data_store = {}
         for fname in self.fnames:
-            len_this_file = len(
-                self._load_file(fname))
+            data = self._load_file(fname)
+            len_this_file = len(data)
+            self.data_store[fname] = data
             lookup_section = [
                 (fname, i_d) for i_d in range(len_this_file)]
             self.lookup.extend(lookup_section)
@@ -35,19 +36,14 @@ class EdgePolicyDataset(Dataset):
         return len(self.lookup)
 
     def _load_file(self, fname):
-        if self.loaded_fname == fname:
-            data = self.loaded_data
-        else:
-            fpath = self.path + "/" + fname
-            with open(fpath, "rb") as f:
-                data = pickle.load(f)
-            self.loaded_fname = fname
-            self.loaded_data = data
+        fpath = self.path + "/" + fname
+        with open(fpath, "rb") as f:
+            data = pickle.load(f)
         return data
 
     def get(self, idx):
         fname, i_d = self.lookup[idx]
-        return self._load_file(fname)[i_d]
+        return self.data_store[fname][i_d].to(self.gpu)
 
 
 class EdgePolicyModel(nn.Module):
@@ -69,8 +65,8 @@ class EdgePolicyModel(nn.Module):
         for i in range(num_conv_layers):
             channels_in = self.num_node_features if i == 0 else num_conv_channels
             self.conv_layers.append(
-                torch_geometric.nn.ChebConv(channels_in, num_conv_channels, 
-                K=cheb_filter_size))
+                torch_geometric.nn.ChebConv(channels_in, num_conv_channels,
+                                            K=cheb_filter_size))
         self.readout_layers = torch.nn.ModuleList()
         for i in range(num_readout_layers):
             channels_out = 1 if i == num_readout_layers-1 else num_conv_channels
@@ -79,6 +75,9 @@ class EdgePolicyModel(nn.Module):
             )
 
     def forward(self, x, edge_index, batch):
+        x = x.to(self.gpu)
+        edge_index = edge_index.to(self.gpu)
+
         # Convolution layer(s)
         for conv_layer in self.conv_layers:
             x = conv_layer(x, edge_index)
@@ -135,8 +134,9 @@ class EdgePolicyModel(nn.Module):
         return torch.mean(results).item()
 
     def learn(self, databatch: Batch, optimizer):
-        self.train()
         databatch.to(self.gpu)
+        self.train()
+        # databatch.to(self.gpu)
         y_out_batched = self.forward(
             databatch.x, databatch.edge_index, databatch.batch)
 
@@ -154,13 +154,13 @@ class EdgePolicyModel(nn.Module):
             return None
         return float(loss)
 
-    def train(self: T, mode: bool = True) -> T:
-        if mode:  # train
-            self.to(self.gpu)  # type: ignore
-            for p in self.parameters():
-                p.to(self.gpu)  # type: ignore
-        else:  # eval
-            self.to("cpu")
-            for p in self.parameters():
-                p.to("cpu")
-        return super().train(mode)  # type: ignore
+    # def train(self: T, mode: bool = True) -> T:
+    #     if mode:  # train
+    #         self.to(self.gpu)  # type: ignore
+    #         for p in self.parameters():
+    #             p.to(self.gpu)  # type: ignore
+    #     else:  # eval
+    #         self.to("cpu")
+    #         for p in self.parameters():
+    #             p.to("cpu")
+    #     return super().train(mode)  # type: ignore
