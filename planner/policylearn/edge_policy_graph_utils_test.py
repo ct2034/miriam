@@ -11,7 +11,7 @@ from sim.decentralized.agent import Agent
 class TestEdgePolicyGraphUtils(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEdgePolicyGraphUtils, self).__init__(*args, **kwargs)
-        make_cache_folder_and_set_envvar()
+        make_cache_folder_and_set_envvar() 
         self.env = nx.Graph()
         for x, y in product(range(7), range(7)):
             self.env.add_node(x + y * 7, pos=(float(x), float(y)))
