@@ -30,7 +30,7 @@ def learning(
 
     # load previously trained model
     model = EdgePolicyModel(
-        gpu=torch.device("cpu"),
+        gpu=torch.device("cuda:0"),
         num_conv_channels=conv_channels,
         num_conv_layers=conv_layers,
         num_readout_layers=readout_layers,
