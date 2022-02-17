@@ -141,7 +141,7 @@ def tuning():
     #             params_to_run.append(kwargs.copy())
 
     mp.set_start_method("spawn")
-    p = mp.Pool(len(params_to_run))
+    p = mp.Pool(16)
     p.map(learning_proxy, params_to_run)
 
 
