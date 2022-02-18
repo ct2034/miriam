@@ -50,11 +50,11 @@ class EdgePolicyModel(nn.Module):
     def __init__(
             self,
             num_node_features=4,
-            num_conv_channels=4,
-            num_conv_layers=2,
-            num_readout_layers=1,
-            cheb_filter_size=2,
-            dropout_p=.3,
+            num_conv_channels=128,
+            num_conv_layers=4,
+            num_readout_layers=2,
+            cheb_filter_size=5,
+            dropout_p=.2,
             gpu=torch.device("cpu")):
         super().__init__()
         self.num_node_features = num_node_features
