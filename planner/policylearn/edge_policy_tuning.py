@@ -131,14 +131,14 @@ def tuning():
         params_to_run.append(kwargs.copy())
 
     # experimental runs
-    # for name, values in parameter_experiments.items():
-    #     for value in values[1:]:
-    #         for seed in seed_s:
-    #             kwargs = {k: v[0] for k, v in parameter_experiments.items()}
-    #             kwargs[name] = value
-    #             kwargs["name"] = f"{name}_{value}_seed_{seed}"
-    #             kwargs["seed"] = seed
-    #             params_to_run.append(kwargs.copy())
+    for name, values in parameter_experiments.items():
+        for value in values[1:]:
+            for seed in seed_s:
+                kwargs = {k: v[0] for k, v in parameter_experiments.items()}
+                kwargs[name] = value
+                kwargs["name"] = f"{name}_{value}_seed_{seed}"
+                kwargs["seed"] = seed
+                params_to_run.append(kwargs.copy())
 
     mp.set_start_method("spawn")
     p = mp.Pool(16)
@@ -215,7 +215,7 @@ def plot_results():
         axs[0, i_l].legend()
         axs[1, i_l].legend()
 
-    plt.savefig("planner/policylearn/results/edge_policy_results.png")
+    plt.savefig("planner/policylearn/results/_edge_policy_results.png")
 
 
 if __name__ == "__main__":
