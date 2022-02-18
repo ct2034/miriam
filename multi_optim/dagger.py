@@ -206,8 +206,7 @@ class DaggerStrategy():
                      " peak: " +
                      str(format_size(tracemalloc.get_traced_memory()[1])))
 
-        model_copy = EdgePolicyModel(
-            self.model.num_node_features, self.model.conv_channels)
+        model_copy = EdgePolicyModel()
         model_copy.load_state_dict(copy.deepcopy(self.model.state_dict()))
         model_copy.eval()
 
@@ -217,7 +216,8 @@ class DaggerStrategy():
         generation_hash = tools.hasher([], {
             "seeds": [p[0] for p in params],
             "self.graph": self.graph,
-            "self.n_agents": self.n_agents
+            "self.n_agents": self.n_agents,
+            "model": model_copy
             # env_nx is not needed, because it depends on the graph
         })
         new_fname = self._get_path_data(generation_hash)

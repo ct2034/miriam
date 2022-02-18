@@ -2,6 +2,7 @@ import datetime
 import logging
 import socket
 import tracemalloc
+from email import policy
 from fileinput import filename
 from multiprocessing.spawn import import_main_path
 from random import Random, getstate
@@ -12,6 +13,7 @@ import networkx as nx
 import numpy as np
 import torch
 import torch.multiprocessing as tmp
+from cuda_util import pick_gpu_lowest_memory
 from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -144,6 +146,7 @@ def run_optimization(
         lr_policy: float = 4e-4,
         n_agents: int = 8,
         map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
+        load_policy_model: Optional[str] = None,
         rng: Random = Random(0),
         prefix: str = "noname"):
     logger.info("run_optimization")
@@ -161,10 +164,8 @@ def run_optimization(
 
     # GPU or CPU?
     if torch.cuda.is_available():
-        assert 1 == torch.cuda.device_count(),\
-            "Make sure this can only see one cuda device."
-        logger.info("Using GPU")
-        gpu = torch.device("cuda:0")
+        gpu = torch.device(pick_gpu_lowest_memory())
+        logger.info(f"Using GPU {gpu}")
         torch.cuda.empty_cache()
         # print(torch.cuda.memory_summary())
         # torch.cuda.set_per_process_memory_fraction(fraction=.1)
@@ -175,6 +176,9 @@ def run_optimization(
 
     # Policy
     policy_model = EdgePolicyModel(gpu=gpu)
+    if load_policy_model is not None:
+        policy_model.load_state_dict(torch.load(load_policy_model))
+    policy_model.to(gpu)
     for param in policy_model.parameters():
         param.share_memory_()
     policy_model.share_memory()
@@ -211,6 +215,8 @@ def run_optimization(
         "lr_policy": lr_policy,
         "n_agents": n_agents,
         "map_fname": map_fname,
+        "load_policy_model": (
+            load_policy_model if load_policy_model else "None"),
         "prefix": prefix
     })
     draw_graph(g, map_img, title="Start")
@@ -309,9 +315,9 @@ if __name__ == "__main__":
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.DEBUG)
-    # logging.getLogger(
-    #     "sim.decentralized.policy"
-    # ).setLevel(logging.DEBUG)
+    logging.getLogger(
+        "sim.decentralized.policy"
+    ).setLevel(logging.DEBUG)
     run_optimization(
         n_nodes=8,
         n_runs_pose=2,
@@ -343,32 +349,69 @@ if __name__ == "__main__":
         lr_policy=1e-3,
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
         rng=rng,
         prefix="tiny")
 
-    # # checking different metaparams ...
-    # diffs = {
-    #     "n_agents": [4, 5],
-    #     "lr_policy": [3e-3, 3e-4],
-    #     # "n_epochs_per_run_policy": [32, 64],
-    # }  # type: Dict[str, List[float]]
-    # def_n_agents = 6
-    # def_lr_policy = 1e-3
-    # def_n_epochs_per_run_policy = 128
-    # for k, vs in diffs.items():
-    #     for v in vs:
-    #         rng = Random(0)
-    #         args = {
-    #             "n_nodes": 16,
-    #             "n_runs_pose": 2,
-    #             "n_runs_policy": 128,
-    #             "stats_and_eval_every": 2,
-    #             "lr_pos": 1e-4,
-    #             "lr_policy": def_lr_policy,
-    #             "n_agents": def_n_agents,
-    #             "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
-    #             "rng": rng,
-    #             "prefix": f"tiny_{k}_{v}",
-    #         }
-    #         args[k] = v
-    #         run_optimization(**args)  # type: ignore
+    # tiny_varpose run
+    rng = Random(0)
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=16,
+        n_runs_pose=64,
+        n_runs_policy=128,
+        n_epochs_per_run_policy=128,
+        batch_size_policy=128,
+        stats_and_eval_every=2,
+        lr_pos=1e-4,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
+        rng=rng,
+        prefix="tiny_varpose")
+
+    # medium run
+    rng = Random(0)
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=64,
+        n_runs_pose=2,
+        n_runs_policy=128,
+        n_epochs_per_run_policy=128,
+        batch_size_policy=128,
+        stats_and_eval_every=2,
+        lr_pos=1e-4,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
+        rng=rng,
+        prefix="medium")
+
+    # large run
+    rng = Random(0)
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=256,
+        n_runs_pose=2,
+        n_runs_policy=128,
+        n_epochs_per_run_policy=128,
+        batch_size_policy=128,
+        stats_and_eval_every=2,
+        lr_pos=1e-4,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
+        rng=rng,
+        prefix="large")
