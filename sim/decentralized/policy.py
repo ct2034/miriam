@@ -113,7 +113,8 @@ class ClosestPolicy(Policy):
         super().__init__(agent)
 
     def get_priority(self, _) -> float:
-        return 1. / np.linalg.norm(np.array(self.a.goal) - np.array(self.a.pos))
+        return float(1. /
+                     np.linalg.norm(np.array(self.a.goal) - np.array(self.a.pos)))
 
 
 class FillPolicy(Policy):

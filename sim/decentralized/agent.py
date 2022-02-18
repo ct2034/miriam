@@ -23,6 +23,7 @@ def get_t_from_env(env: POTENTIAL_ENV_TYPE) -> int:
     if is_gridmap(env):
         return (env.shape[0] + env.shape[1]) * 3
     elif is_roadmap(env):
+        assert isinstance(env, nx.Graph)
         return env.number_of_nodes()
     else:
         raise ValueError("Env must be gridmap or roadmap")
@@ -142,6 +143,7 @@ class Agent(Generic[C, N]):
         elif is_roadmap(env):
             self.has_roadmap = True
             self.has_gridmap = False
+            assert isinstance(env, nx.Graph)
             self.n_nodes = env.number_of_nodes()
             assert isinstance(pos, int)  # (node)
             assert pos < self.n_nodes, "Position must be a node index"
@@ -477,6 +479,7 @@ class Agent(Generic[C, N]):
             raise NotImplementedError
         elif self.has_roadmap:
             assert isinstance(pos_to_go_to, int), "Should be an int"
+            assert isinstance(self.env, nx.Graph), "Should be a nx graph"
             if self.pos != pos_to_go_to:
                 if not self.env.has_edge(
                         self.pos, pos_to_go_to):

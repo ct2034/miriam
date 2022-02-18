@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from functools import lru_cache
 from random import Random
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -57,7 +57,7 @@ def is_pixel_free(
 
 
 def check_edge(
-        pos: np.ndarray,
+        pos: Union[np.ndarray, torch.Tensor],
         map_img: Tuple[Tuple[int, ...], ...],
         a: int,
         b: int) -> bool:
