@@ -20,26 +20,28 @@ class EdgePolicyDataset(Dataset):
     def __init__(self, path, transform=None, pre_transform=None, pre_filter=None, gpu=None):
         super().__init__(transform, pre_transform, pre_filter)
         self.path = path
-        self.fnames = os.listdir(path)
+        self.fnames = [self.path + "/" + fname for fname in os.listdir(path)]
         self.lookup: List[Tuple[str, int]] = []  # (fname, i)
         self.gpu = gpu
         self.data_store = {}
         for fname in self.fnames:
-            data = self._load_file(fname)
-            len_this_file = len(data)
-            self.data_store[fname] = data
-            lookup_section = [
-                (fname, i_d) for i_d in range(len_this_file)]
-            self.lookup.extend(lookup_section)
+            self.add_file(fname)
 
     def len(self):
         return len(self.lookup)
 
     def _load_file(self, fname):
-        fpath = self.path + "/" + fname
-        with open(fpath, "rb") as f:
+        with open(fname, "rb") as f:
             data = pickle.load(f)
         return data
+
+    def add_file(self, fname):
+        data = self._load_file(fname)
+        len_this_file = len(data)
+        self.data_store[fname] = data
+        lookup_section = [
+            (fname, i_d) for i_d in range(len_this_file)]
+        self.lookup.extend(lookup_section)
 
     def get(self, idx):
         fname, i_d = self.lookup[idx]
