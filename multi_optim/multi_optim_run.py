@@ -17,7 +17,7 @@ from cuda_util import pick_gpu_lowest_memory
 from definitions import INVALID, SCENARIO_RESULT
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
-from planner.policylearn.edge_policy import EdgePolicyModel
+from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import (BFS_TYPE, RADIUS,
                                                          get_optimal_edge)
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
@@ -127,12 +127,12 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
 
 
 def optimize_policy(model, g: nx.Graph, n_agents, n_epochs, batch_size,
-                    optimizer, data_files, pool, prefix, rng):
+                    optimizer, epds, pool, prefix, rng):
     ds = DaggerStrategy(
         model, g, n_epochs, n_agents, batch_size, optimizer, prefix, rng)
-    model, loss, new_data_percentage, data_files, data_len = ds.run_dagger(
-        pool, data_files)
-    return model, ds.env_nx, loss, new_data_percentage, data_files, data_len
+    model, loss, new_data_percentage, epds, data_len = ds.run_dagger(
+        pool, epds)
+    return model, ds.env_nx, loss, new_data_percentage, epds, data_len
 
 
 def run_optimization(
@@ -167,9 +167,6 @@ def run_optimization(
         gpu = torch.device(pick_gpu_lowest_memory())
         logger.info(f"Using GPU {gpu}")
         torch.cuda.empty_cache()
-        # print(torch.cuda.memory_summary())
-        # torch.cuda.set_per_process_memory_fraction(fraction=.1)
-        # print(torch.cuda.memory_summary())
     else:
         logger.warning("GPU not available, using CPU")
         gpu = torch.device("cpu")
@@ -182,13 +179,15 @@ def run_optimization(
     for param in policy_model.parameters():
         param.share_memory_()
     policy_model.share_memory()
-    # policy_model.use_multiprocessing = False
-    # policy_model.share_memory()
+
+    # Optimizer
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
-    policy_data_files = []  # type: List[str]
     policy_eval_list = make_eval_set(
         policy_model, g, n_agents, 100, rng)
+
+    # Data for policy
+    epds = EdgePolicyDataset(f"multi_optim/results/{prefix}_data")
 
     # Visualization and analysis
     stats = StatCollector([
@@ -246,10 +245,10 @@ def run_optimization(
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
             (policy_model, env_nx, policy_loss, new_data_percentage,
-             policy_data_files, data_len
+             epds, data_len
              ) = optimize_policy(
                 policy_model, g, n_agents, n_epochs_per_run_policy,
-                batch_size_policy, optimizer_policy, policy_data_files,
+                batch_size_policy, optimizer_policy, epds,
                 pool, prefix, rng)
             if i_r % stats_and_eval_every == 0:
                 # also eval now

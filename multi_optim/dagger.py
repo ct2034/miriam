@@ -196,7 +196,7 @@ class DaggerStrategy():
             os.makedirs(folder)
         return folder+f"/{hash}.pkl"
 
-    def run_dagger(self, pool, data_files):
+    def run_dagger(self, pool, epds):
         """Run the DAgger algorithm."""
         loss_s = []
         data_lengths = []
@@ -221,7 +221,7 @@ class DaggerStrategy():
             # env_nx is not needed, because it depends on the graph
         })
         new_fname = self._get_path_data(generation_hash)
-        data_files.append(new_fname)
+        epds.add_file(new_fname)
 
         # only create file if this data does not exist
         if os.path.exists(new_fname):
@@ -236,7 +236,6 @@ class DaggerStrategy():
                 pickle.dump(new_ds, f)
 
         # learn
-        epds = EdgePolicyDataset(self._get_data_folder())
         loader = DataLoader(epds, batch_size=self.batch_size, shuffle=True)
         loss_s = []
         for i_b, batch in enumerate(loader):
@@ -251,4 +250,4 @@ class DaggerStrategy():
         if len(loss_s) == 0:
             loss_s = [0]
         return (self.model, np.mean(loss_s), new_data_percentage,
-                data_files, len(epds))
+                epds, len(epds))
