@@ -2,7 +2,6 @@
 import logging
 import os
 import subprocess
-import time
 from random import Random
 
 import matplotlib.pyplot as plt
@@ -116,13 +115,17 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_
     hash_roadmap = hasher([g, radius])
     fname_roadmap = f"{cache_dir}/{hash_roadmap}_roadmap.yaml"
     data = None
-    if not os.path.exists(fname_roadmap) or skip_cache:
+    if os.path.exists(fname_roadmap) and not skip_cache:
+        try:
+            with open(fname_roadmap, 'r') as f:
+                data = yaml.load(f, Loader=yaml.SafeLoader)
+        except yaml.parser.ParserError as e:
+            logger.warning("yaml.parser.ParserError")
+            logger.warning(e)
+    if not data:  # nothing was loaded
         if os.path.exists(fname_roadmap):
             os.remove(fname_roadmap)
         data = write_roadmap_file(fname_roadmap, g, radius)
-    else:
-        with open(fname_roadmap, 'r') as f:
-            data = yaml.load(f, Loader=yaml.SafeLoader)
     if data is None:  # error
         logging.warning("no annotated roadmap")
         return INVALID
