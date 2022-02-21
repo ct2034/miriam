@@ -20,11 +20,12 @@ class EdgePolicyDataset(Dataset):
     def __init__(self, path, transform=None, pre_transform=None, pre_filter=None, gpu=None):
         super().__init__(transform, pre_transform, pre_filter)
         self.path = path
-        self.fnames = [self.path + "/" + fname for fname in os.listdir(path)]
         self.lookup: List[Tuple[str, int]] = []  # (fname, i)
         self.gpu = gpu
         self.data_store = {}
-        for fname in self.fnames:
+        self.added_fnames: List[str] = []
+        fname_to_init = [self.path + "/" + fname for fname in os.listdir(path)]
+        for fname in fname_to_init:
             self.add_file(fname)
 
     def len(self):
@@ -36,6 +37,10 @@ class EdgePolicyDataset(Dataset):
         return data
 
     def add_file(self, fname):
+        if fname in self.added_fnames:
+            # don't add the same file twice
+            return
+        self.added_fnames.append(fname)
         data = self._load_file(fname)
         len_this_file = len(data)
         self.data_store[fname] = data

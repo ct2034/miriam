@@ -221,7 +221,6 @@ class DaggerStrategy():
             # env_nx is not needed, because it depends on the graph
         })
         new_fname = self._get_path_data(generation_hash)
-        epds.add_file(new_fname)
 
         # only create file if this data does not exist
         if os.path.exists(new_fname):
@@ -234,6 +233,9 @@ class DaggerStrategy():
                 new_ds.extend(results)
             with open(new_fname, "wb") as f:
                 pickle.dump(new_ds, f)
+
+        # add this to the dataset
+        epds.add_file(new_fname)
 
         # learn
         loader = DataLoader(epds, batch_size=self.batch_size, shuffle=True)
