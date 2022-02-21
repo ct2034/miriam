@@ -199,7 +199,7 @@ class DaggerStrategy():
     def run_dagger(self, pool, epds):
         """Run the DAgger algorithm."""
         loss_s = []
-        data_lengths = []
+        old_len = len(epds)
 
         logger.debug("Memory usage, current: " +
                      str(format_size(tracemalloc.get_traced_memory()[0])) +
@@ -245,9 +245,7 @@ class DaggerStrategy():
             loss_s.append(loss)
 
         # statistics
-        len_new_data = sum(
-            1 if generation_hash in x[0] else 0 for x in epds.lookup)
-        new_data_percentage = len_new_data / len(epds)
+        new_data_percentage = (len(epds)-old_len)/len(epds)
 
         if len(loss_s) == 0:
             loss_s = [0]
