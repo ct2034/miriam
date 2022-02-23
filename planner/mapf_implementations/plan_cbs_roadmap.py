@@ -119,8 +119,8 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_
         try:
             with open(fname_roadmap, 'r') as f:
                 data = yaml.load(f, Loader=yaml.SafeLoader)
-        except yaml.parser.ParserError as e:
-            logger.warning("yaml.parser.ParserError")
+        except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
+            logger.warning(e.__class__)
             logger.warning(e)
     if not data:  # nothing was loaded
         if os.path.exists(fname_roadmap):
