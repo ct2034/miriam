@@ -9,7 +9,7 @@ set(PYTHON_LIBRARY /usr/lib/python${PYTHON_DOT_VERSION}/config-${PYTHON_DOT_VERS
 # Find Boost
 find_package(Boost REQUIRED COMPONENTS 
     # python-py${PYTHON_VERSION}
-    python{PYTHON_VERSION}
+    python${PYTHON_VERSION}
     graph
     random
     )
@@ -20,7 +20,10 @@ include_directories(${PYTHON_INCLUDE} ${Boost_INCLUDE_DIRS})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -lrt -O3")
 
 SET(LIBASTAR astar)
+SET(LIBASTARGRAPH astar_graph)
 
 add_library(${LIBASTAR} SHARED ${LIBASTAR}.cpp)
+add_library(${LIBASTARGRAPH} SHARED ${LIBASTARGRAPH}.cpp)
 
 TARGET_LINK_LIBRARIES(${LIBASTAR} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${LIBASTARGRAPH} ${Boost_LIBRARIES})
