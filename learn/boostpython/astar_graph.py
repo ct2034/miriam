@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
+
+import random
+
+import networkx as nx
 from libastar_graph import AstarSolver
 
 if __name__ == "__main__":
-    pos = [
-        [.1, .1],
-        [.1, .9],
-        [.9, .9],
-        [.9, .1]
-    ]
-    edges = [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 0]
-    ]
-
-    a = AstarSolver(pos, edges)
+    g = nx.random_geometric_graph(100, 0.15)
+    pos = nx.get_node_attributes(g, 'pos')
+    posl = [[pos[v][0], pos[v][1]] for v in g.nodes()]
+    edges = [[e[0], e[1]] for e in g.edges()]
+    a = AstarSolver(posl, edges)
     print(a)
-    print(a.get(0).x)
-    print(a.get(1).x)
-    print(a.get(2).x)
-    print(a.get(3).x)
-    a.append(8)
-    a.append(3)
+    print(a.retreive(random.randrange(g.number_of_nodes())))
+    print(a.retreive(random.randrange(g.number_of_nodes())))
+    print(a.retreive(random.randrange(g.number_of_nodes())))
+    print("#"*20)
+    print(a.plan(random.randrange(g.number_of_nodes()),
+          random.randrange(g.number_of_nodes())))
+    print(a.plan(random.randrange(g.number_of_nodes()),
+          random.randrange(g.number_of_nodes())))
+    print(a.plan(random.randrange(g.number_of_nodes()),
+          random.randrange(g.number_of_nodes())))
