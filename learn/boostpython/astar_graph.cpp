@@ -120,7 +120,7 @@ private:
 int main(int argc, char** argv)
 {
   // specify some types
-  typedef adjacency_list<listS, vecS, undirectedS, no_property, property<edge_weight_t, cost> > mygraph_t;
+  typedef adjacency_list<listS, vecS, undirectedS, no_property, property<edge_weight_t, cost>> mygraph_t;
   typedef property_map<mygraph_t, edge_weight_t>::type WeightMap;
   typedef mygraph_t::vertex_descriptor vertex;
   typedef mygraph_t::edge_descriptor edge_descriptor;
@@ -221,17 +221,73 @@ int main(int argc, char** argv)
   return 0;
 }
 
+// Input defs
+typedef boost::python::list pylist;
+typedef std::pair<int, int> intedge;
+typedef float cost;
+// Graph defs
+typedef adjacency_list<listS, vecS, undirectedS, no_property, property<edge_weight_t, cost>> mygraph_t;
+typedef property_map<mygraph_t, edge_weight_t>::type WeightMap;
+typedef mygraph_t::vertex_descriptor vertex;
+typedef mygraph_t::edge_descriptor edge_descriptor;
+
 class AstarSolver
 {
 public:
-  boost::python::list l;
-  boost::python::list get();
+  AstarSolver(pylist pos, pylist edges);
+  pylist l;
+  location get(int i);
   void append(int i);
+
+private:
+  std::vector<location> location_v;
+  std::vector<intedge> edge_v;
+  int N;  // number of nodes
 };
 
-boost::python::list AstarSolver::get()
+AstarSolver::AstarSolver(pylist pos, pylist edges)
 {
-  return l;
+  N = boost::python::len(pos);
+  location_v = std::vector<location>(N);
+  for (int i = 0; i < N; i++)
+  {
+    pylist l = boost::python::extract<pylist>(pos[i]);
+    location_v[i].x = boost::python::extract<double>(l[0]);
+    location_v[i].y = boost::python::extract<double>(l[1]);
+  }
+  edge_v = std::vector<intedge>(boost::python::len(edges));
+  for (int i = 0; i < boost::python::len(edges); i++)
+  {
+    pylist l = boost::python::extract<pylist>(edges[i]);
+    edge_v[i].first = boost::python::extract<int>(l[0]);
+    edge_v[i].second = boost::python::extract<int>(l[1]);
+  }
+
+  // create graph
+  // mygraph_t g(N);
+  // WeightMap weightmap = get(edge_weight, g);
+  // for (std::size_t j = 0; j < num_edges; ++j)
+  // {
+  //   edge_descriptor e;
+  //   bool inserted;
+  //   boost::tie(e, inserted) = add_edge(edge_v[j].first, edge_v[j].second, g);
+  //   weightmap[e] = weights[j];
+  // }
+}
+
+location AstarSolver::get(int i)
+{
+  cout << "location of node " << i << endl;
+  cout << location_v[i].x << " " << location_v[i].y << endl;
+  cout << "edges" << endl;
+  for (auto e : edge_v)
+  {
+    if (e.first == i || e.second == i)
+    {
+      cout << e.first << " " << e.second << endl;
+    }
+  }
+  return location_v.data()[i];
 }
 
 void AstarSolver::append(int i)
@@ -242,5 +298,8 @@ void AstarSolver::append(int i)
 BOOST_PYTHON_MODULE(libastar_graph)
 {
   using namespace boost::python;
-  class_<AstarSolver>("AstarSolver").def("get", &AstarSolver::get).def("append", &AstarSolver::append);
+  class_<AstarSolver>("AstarSolver", init<pylist, pylist>())
+      .def("get", &AstarSolver::get)
+      .def("append", &AstarSolver::append);
+  class_<location>("location").def_readwrite("x", &location::x).def_readwrite("y", &location::y);
 }
