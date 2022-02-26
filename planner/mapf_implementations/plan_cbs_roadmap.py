@@ -180,6 +180,6 @@ if __name__ == "__main__":
     paths = plan_cbsr(g, starts, goals)
 
     # plot
-    if paths is not None:
+    if paths is not INVALID:
         plot_with_paths(g, paths)
         plt.show()
