@@ -9,7 +9,7 @@ from libastar_graph import AstarSolver
 from matplotlib import pyplot as plt
 
 if __name__ == "__main__":
-    g = nx.random_geometric_graph(10000, 0.015)  # type: nx.Graph
+    g = nx.random_geometric_graph(10000, 0.013)  # type: nx.Graph
     pos = nx.get_node_attributes(g, 'pos')
     posl = [[pos[v][0], pos[v][1]] for v in g.nodes()]
     edges = [[e[0], e[1]] for e in g.edges()]
