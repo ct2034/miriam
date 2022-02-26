@@ -91,8 +91,9 @@ def initialize_new_agent(
                    ) > 0, "Possible poses should be left"
         goals = np.transpose(no_obstacle_nor_agent_or_goal)
 
-    goals = list(goals)
-    rng.shuffle(goals)
+    goals_tmp = list(goals)
+    rng.shuffle(goals_tmp)
+    goals = np.array(goals_tmp)
     for g in goals:
         if a.give_a_goal(g):  # success
             return a
@@ -254,7 +255,7 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
         while not are_all_agents_at_their_goals(agents):
             poses_before_moving = list(map(lambda a: a.pos, agents))
             if plot:  # pragma: no cover
-                plot_env_agents(env, agents)
+                plot_env_agents(env, agents)  # type: ignore
             time_slice, space_slice = get_iterator_fun(
                 iterator)(agents, ignore_finished_agents)
             time_progress += time_slice

@@ -11,13 +11,13 @@ class TestIterators(unittest.TestCase):
         super().__init__(methodName=methodName)
         self.env = np.array([[0, 0], [0, 1]])
         self.agents = (
-            Agent(self.env, np.array([0, 0]), PolicyType.RANDOM),
-            Agent(self.env, np.array([0, 1]), PolicyType.RANDOM),
-            Agent(self.env, np.array([1, 0]), PolicyType.RANDOM)
+            Agent(self.env, (0, 0), PolicyType.RANDOM),
+            Agent(self.env, (0, 1), PolicyType.RANDOM),
+            Agent(self.env, (1, 0), PolicyType.RANDOM)
         )
-        self.agents[0].give_a_goal(np.array([0, 1]))
-        self.agents[1].give_a_goal(np.array([0, 0]))
-        self.agents[2].give_a_goal(np.array([0, 0]))
+        self.agents[0].give_a_goal((0, 1))
+        self.agents[1].give_a_goal((0, 0))
+        self.agents[2].give_a_goal((0, 0))
 
     def test_get_possible_next_agent_poses_when_all_are_allowed(self):
         # getting next steps when all are allowed
