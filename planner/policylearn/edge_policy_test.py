@@ -29,10 +29,10 @@ class EdgePolicyTest(unittest.TestCase):
         rng = Random(0)
         torch.manual_seed(0)
         num_node_features = 2
-        conv_channels = 5
+        conv_channels = 3
         n_nodes = 2
-        n_epochs = 10
-        n_data = 20
+        n_epochs = 20
+        n_data = 10
         policy = EdgePolicyModel(
             num_node_features, conv_channels)
         optimizer = torch.optim.Adam(policy.parameters(), lr=.01)
