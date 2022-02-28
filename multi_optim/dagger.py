@@ -18,11 +18,9 @@ from planner.policylearn.edge_policy import (MODEL_INPUT, EdgePolicyDataset,
 from planner.policylearn.edge_policy_graph_utils import (RADIUS, TIMEOUT,
                                                          agents_to_data,
                                                          get_optimal_edge)
-from sim.decentralized.agent import env_to_nx
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import (EdgePolicy, EdgeRaisingPolicy,
-                                      EdgeThenRaisingPolicy,
-                                      PolicyCalledException)
+from sim.decentralized.policy import (LearndedPolicy, PolicyCalledException,
+                                      RaisingPolicy, ValueThenRaisingPolicy)
 from sim.decentralized.runner import (has_exception, run_a_scenario,
                                       to_agent_objects)
 from torch_geometric.data import Data
@@ -37,39 +35,33 @@ MAX_STEPS = 10
 N_LEARN_MAX = 1000
 
 
-def get_input_data_from_observation(
-        observation: OBSERVATION) -> MODEL_INPUT:
-    data, _ = observation
-    return data
-
-
 class ScenarioState():
     """A mapf scenario in a given state that can be executed step-wise"""
 
-    def __init__(self, graph, starts, goals,
-                 env_nx, model) -> None:
+    def __init__(self, graph, starts, goals, model) -> None:
         self.graph = graph
-        self.env_nx = env_nx
         self.starts = starts
         self.goals = goals
         self.is_agents_to_consider: Optional[List[int]] = None
         self.finished = False
         self.agents = to_agent_objects(
-            graph, starts, goals, env_nx=env_nx, radius=RADIUS)
+            graph, starts, goals, radius=RADIUS)
         self.model = model
-        for i in range(len(self.agents)):
-            self.agents[i].policy = EdgeRaisingPolicy(
-                self.agents[i])
+        if self.agents is None:
+            raise RuntimeError("Error in agent generation")
+        for a in self.agents:
+            a.policy = RaisingPolicy(a)
         self.paths_out = []  # type: List[List[int]]
 
     def run(self):
         """Start the scenario and return the initial state"""
         paths_out = self.paths_out
+        assert self.agents is not None
         scenario_result: SCENARIO_RESULT = run_a_scenario(
             env=self.graph,
-            agents=self.agents,
+            agents=tuple(self.agents),
             plot=False,
-            iterator=IteratorType.EDGE_POLICY2,
+            iterator=IteratorType.LOOKAHEAD2,
             pause_on=PolicyCalledException,
             paths_out=paths_out)
         self.is_agents_to_consider = None
@@ -92,12 +84,13 @@ class ScenarioState():
 
     def step(self, actions: Dict[int, ACTION]):
         """Perform the given actions and return the new state"""
+        assert self.agents is not None
         for i_a in range(len(self.agents)):
             if i_a in actions.keys():
-                self.agents[i_a].policy = EdgeThenRaisingPolicy(
+                self.agents[i_a].policy = ValueThenRaisingPolicy(
                     self.agents[i_a], actions[i_a])
             else:
-                self.agents[i_a].policy = EdgeRaisingPolicy(
+                self.agents[i_a].policy = RaisingPolicy(
                     self.agents[i_a])
             self.agents[i_a].start = self.agents[i_a].pos
             self.agents[i_a].back_to_the_start()
@@ -105,12 +98,13 @@ class ScenarioState():
 
 
 def make_a_state_with_an_upcoming_decision(
-        graph, n_agents, env_nx, model, rng) -> ScenarioState:
+        graph, n_agents,  model, rng) -> ScenarioState:
     useful = False
+    state = None
     while not useful:
         starts = rng.sample(graph.nodes(), n_agents)
         goals = rng.sample(graph.nodes(), n_agents)
-        state = ScenarioState(graph, starts, goals, env_nx, model)
+        state = ScenarioState(graph, starts, goals,  model)
         state.run()
         if not state.finished:
             try:
@@ -118,6 +112,7 @@ def make_a_state_with_an_upcoming_decision(
                 useful = True
             except RuntimeError:
                 pass
+    assert state
     return state
 
 
@@ -125,10 +120,12 @@ def sample_trajectory_proxy(args):
     return sample_trajectory(*args)
 
 
-def sample_trajectory(seed, graph, n_agents, env_nx,
+def sample_trajectory(seed, graph, n_agents,
                       model, max_steps=MAX_STEPS):
     """Sample a trajectory using the given policy."""
     rng = Random(seed)
+    starts = None
+    goals = None
     solvable = False
     while not solvable:
         starts = rng.sample(graph.nodes(), n_agents)
@@ -140,8 +137,7 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
         if paths != INVALID:
             solvable = True
 
-    state = ScenarioState(graph, starts, goals,
-                          env_nx, model)
+    state = ScenarioState(graph, starts, goals, model)
     state.run()
 
     # Sample states
@@ -152,6 +148,7 @@ def sample_trajectory(seed, graph, n_agents, env_nx,
                 break
             observations = state.observe()
             actions: Dict[int, ACTION] = {}
+            assert observations is not None
             for i_a, (d, bfs) in observations.items():
                 # find actions to take using the policy
                 actions[i_a] = model.predict(d.x, d.edge_index, bfs)
@@ -175,7 +172,6 @@ class DaggerStrategy():
         self.n_episodes = n_episodes
         self.n_agents = n_agents
         self.batch_size = batch_size
-        self.env_nx = env_to_nx(graph)
         self.rng = rng
         self.optimizer = optimizer
         self.prefix = prefix
@@ -210,15 +206,14 @@ class DaggerStrategy():
         model_copy.load_state_dict(copy.deepcopy(self.model.state_dict()))
         model_copy.eval()
 
-        params = [(s, self.graph, self.n_agents, self.env_nx,
-                   model_copy) for s in self.rng.sample(
+        params = [(s, self.graph, self.n_agents, model_copy)
+                  for s in self.rng.sample(
             range(2**32), k=self.n_episodes)]
         generation_hash = tools.hasher([], {
             "seeds": [p[0] for p in params],
             "self.graph": self.graph,
             "self.n_agents": self.n_agents,
             "model": model_copy
-            # env_nx is not needed, because it depends on the graph
         })
         new_fname = self._get_path_data(generation_hash)
 

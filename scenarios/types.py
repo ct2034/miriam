@@ -1,11 +1,13 @@
 # methods to check type of environment
 from enum import Enum, auto
-from typing import Union
+from typing import Union, Dict, Tuple
 
 import numpy as np
 import networkx as nx
 
 POTENTIAL_ENV_TYPE = Union[np.ndarray, nx.Graph]
+
+COORD_TO_NODE_TYPE = Dict[Tuple[int, int], int]
 
 
 class EnvType(Enum):

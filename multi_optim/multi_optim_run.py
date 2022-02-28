@@ -8,7 +8,7 @@ from multiprocessing.spawn import import_main_path
 from random import Random, getstate
 from typing import Dict, List, Optional, Tuple
 
-import git
+import git.repo
 import networkx as nx
 import numpy as np
 import torch
@@ -23,9 +23,9 @@ from planner.policylearn.edge_policy_graph_utils import (BFS_TYPE, RADIUS,
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
-from sim.decentralized.agent import Agent, env_to_nx
+from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import EdgePolicy, OptimalEdgePolicy
+from sim.decentralized.policy import LearndedPolicy, OptimalPolicy
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
 from torch_geometric.data import Data
@@ -58,7 +58,7 @@ def find_collisions(agents
 
 
 def eval_policy_full_scenario(
-    model, g: nx.Graph, env_nx: nx.Graph, n_agents, n_eval, rng
+    model, g: nx.Graph, n_agents, n_eval, rng
 ) -> Tuple[Optional[float], float]:
     regret_s = []
     success_s = []
@@ -68,32 +68,32 @@ def eval_policy_full_scenario(
         starts = rng.sample(g.nodes(), n_agents)
         goals = rng.sample(g.nodes(), n_agents)
         failed_at_creation = False
-        for policy in [OptimalEdgePolicy, EdgePolicy]:
+
+        res_policy = (0., 0., 0., 0., 0.)
+        res_optim = (0., 0., 0., 0., 0.)
+        for policy in [OptimalPolicy, LearndedPolicy]:
             agents = []
             for i_a in range(n_agents):
-                a = Agent(g, starts[i_a], env_nx=env_nx, radius=RADIUS)
+                a = Agent(g, starts[i_a], radius=RADIUS)
                 res = a.give_a_goal(goals[i_a])
                 if not res:  # failed to find a path
                     failed_at_creation = True
                 a.policy = policy(a, model)
                 agents.append(a)
-            if failed_at_creation:
-                res_policy = (0., 0., 0., 0., 0.)
-                res_optim = (0., 0., 0., 0., 0.)
-            else:
-                if policy is EdgePolicy:
+            if not failed_at_creation:
+                if policy is LearndedPolicy:
                     res_policy = run_a_scenario(
                         env=g,
                         agents=tuple(agents),
                         plot=False,
-                        iterator=IteratorType.EDGE_POLICY2)
-                elif policy is OptimalEdgePolicy:
+                        iterator=IteratorType.LOOKAHEAD2)
+                elif policy is OptimalPolicy:
                     try:
                         res_optim = run_a_scenario(
                             env=g,
                             agents=tuple(agents),
                             plot=False,
-                            iterator=IteratorType.EDGE_POLICY2)
+                            iterator=IteratorType.LOOKAHEAD2)
                     except Exception as e:
                         logger.error(e)
                         res_optim = (0, 0, 0, 0, 0)
@@ -114,12 +114,12 @@ def eval_policy_full_scenario(
 def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
                   ) -> List[Tuple[Data, BFS_TYPE]]:
     model.eval()
-    env_nx = env_to_nx(g)
     eval_set = []
     for i_e in range(n_eval):
         state = make_a_state_with_an_upcoming_decision(
-            g, n_agents, env_nx, model, rng)
+            g, n_agents,  model, rng)
         observation = state.observe()
+        assert observation is not None
         i_a = rng.sample(list(observation.keys()), 1)[0]
         data, big_from_small = observation[i_a]
         eval_set.append((data, big_from_small))
@@ -132,7 +132,7 @@ def optimize_policy(model, g: nx.Graph, n_agents, n_epochs, batch_size,
         model, g, n_epochs, n_agents, batch_size, optimizer, prefix, rng)
     model, loss, new_data_percentage, epds, data_len = ds.run_dagger(
         pool, epds)
-    return model, ds.env_nx, loss, new_data_percentage, epds, data_len
+    return model,  loss, new_data_percentage, epds, data_len
 
 
 def run_optimization(
@@ -202,7 +202,7 @@ def run_optimization(
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
-        "git_hash": git.Repo(".").head.object.hexsha,
+        "git_hash": git.repo.Repo(".").head.object.hexsha,
         "started_at": datetime.datetime.now().isoformat(),
         # parameters
         "n_nodes": n_nodes,
@@ -232,6 +232,8 @@ def run_optimization(
 
     # Run optimization
     pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
+    poses_test_length = 0
+    poses_training_length = 0
     for i_r in range(n_runs):
         # Optimizing Poses
         if i_r % n_runs_per_run_pose == 0:
@@ -244,7 +246,7 @@ def run_optimization(
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, env_nx, policy_loss, new_data_percentage,
+            (policy_model, policy_loss, new_data_percentage,
              epds, data_len
              ) = optimize_policy(
                 policy_model, g, n_agents, n_epochs_per_run_policy,
@@ -257,7 +259,7 @@ def run_optimization(
                 # little less agents for evaluation
                 eval_n_agents = int(np.ceil(n_agents * .7))
                 regret, success = eval_policy_full_scenario(
-                    policy_model, g, env_nx, eval_n_agents, n_eval, rng_test)
+                    policy_model, g, eval_n_agents, n_eval, rng_test)
                 policy_accuracy = policy_model.accuracy(policy_eval_list)
 
                 stats.add("policy_loss", i_r, float(policy_loss))
