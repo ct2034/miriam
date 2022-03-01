@@ -47,13 +47,14 @@ def find_collisions(agents
     collisions: Dict[Tuple[int, int], Tuple[int, int]] = {}
     for i_a, a in enumerate(agents):
         assert a.path is not None
-        for node in a.path:
-            if node in agent_visited.keys():
-                collisions[node] = (
-                    agent_visited[node],
+        for t, node in enumerate(a.path):
+            node_t = (node, t)
+            if node_t in agent_visited.keys():
+                collisions[node_t] = (
+                    agent_visited[node_t],
                     i_a
                 )
-            agent_visited[node] = i_a
+            agent_visited[node_t] = i_a
     return collisions
 
 
