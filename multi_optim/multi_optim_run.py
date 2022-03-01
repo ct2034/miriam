@@ -25,7 +25,7 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     sample_points)
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import LearndedPolicy, OptimalPolicy
+from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
 from torch_geometric.data import Data
@@ -71,7 +71,7 @@ def eval_policy_full_scenario(
 
         res_policy = (0., 0., 0., 0., 0.)
         res_optim = (0., 0., 0., 0., 0.)
-        for policy in [OptimalPolicy, LearndedPolicy]:
+        for policy in [OptimalPolicy, LearnedPolicy]:
             agents = []
             for i_a in range(n_agents):
                 a = Agent(g, starts[i_a], radius=RADIUS)
@@ -81,7 +81,7 @@ def eval_policy_full_scenario(
                 a.policy = policy(a, model)
                 agents.append(a)
             if not failed_at_creation:
-                if policy is LearndedPolicy:
+                if policy is LearnedPolicy:
                     res_policy = run_a_scenario(
                         env=g,
                         agents=tuple(agents),

@@ -38,8 +38,10 @@ class PolicyType(Enum):
 class Policy(object):
     @classmethod
     def construct_by_type(cls, type: PolicyType, agent, **kwargs):
-        if type == PolicyType.LEARNED:
-            return LearndedPolicy(agent, **kwargs)
+        if type == PolicyType.RANDOM:
+            return RandomPolicy(agent)
+        elif type == PolicyType.LEARNED:
+            return LearnedPolicy(agent, **kwargs)
         elif type == PolicyType.OPTIMAL:
             return OptimalPolicy(agent, 0, **kwargs)
         elif type == PolicyType.RAISING:
@@ -65,17 +67,15 @@ class Policy(object):
 class RandomPolicy(Policy):
     def __init__(self, agent, seed=None) -> None:
         super().__init__(agent)
-        if seed:
-            self.rng = random.Random(seed)
-        else:
-            self.rng = random.Random()
 
     def get_edge(self, _, __):
-        potential_next_nodes = self.a.env.adj[self.a.pos]
-        return self.rng.choice(potential_next_nodes)
+        potential_next_nodes = list(self.a.env.adj[self.a.pos])
+        if self.a.pos not in potential_next_nodes:
+            potential_next_nodes.append(self.a.pos)
+        return self.a.rng.choice(potential_next_nodes)
 
 
-class LearndedPolicy(Policy):
+class LearnedPolicy(Policy):
     def __init__(self, agent, nn) -> None:
         super().__init__(agent)
         self.nn = nn
