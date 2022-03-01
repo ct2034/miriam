@@ -6,6 +6,7 @@ from typing import Optional, Set
 
 import numpy as np
 import torch
+from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import (agents_to_data,
                                                          get_optimal_edge)
 from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
@@ -41,7 +42,10 @@ class Policy(object):
         if type == PolicyType.RANDOM:
             return RandomPolicy(agent)
         elif type == PolicyType.LEARNED:
-            return LearnedPolicy(agent, **kwargs)
+            nn = EdgePolicyModel(gpu="cpu")
+            nn.load_state_dict(torch.load(
+                "sim/decentralized/policy_model.pt", map_location="cpu"))
+            return LearnedPolicy(agent, nn, **kwargs)
         elif type == PolicyType.OPTIMAL:
             return OptimalPolicy(agent, 0, **kwargs)
         elif type == PolicyType.RAISING:
