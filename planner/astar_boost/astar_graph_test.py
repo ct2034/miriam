@@ -2,6 +2,7 @@ import unittest
 
 import networkx as nx
 from planner.astar_boost.build.libastar_graph import AstarSolver
+from planner.astar_boost.converter import initialize_from_graph
 
 
 class ScenarioStateTest(unittest.TestCase):
@@ -61,11 +62,7 @@ class ScenarioStateTest(unittest.TestCase):
         self.assertEqual(path_1_3[2], 3)
 
     def test_plan_random(self):
-        g = nx.random_geometric_graph(10000, 0.02)
-        pos = nx.get_node_attributes(g, 'pos')
-        posl = [[pos[v][0], pos[v][1]] for v in g.nodes()]
-        edges = [[e[0], e[1]] for e in g.edges()]
-
-        a = AstarSolver(posl, edges)
-        path = a.plan(0, len(posl) - 1)
+        g = nx.random_geometric_graph(10000, 0.02)  # type: nx.Graph
+        a = initialize_from_graph(g)
+        path = a.plan(0, g.number_of_nodes() - 1)
         self.assertNotEqual(len(path), 0)
