@@ -19,7 +19,7 @@ from planner.policylearn.edge_policy_graph_utils import (RADIUS, TIMEOUT,
                                                          agents_to_data,
                                                          get_optimal_edge)
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import (LearndedPolicy, PolicyCalledException,
+from sim.decentralized.policy import (LearnedPolicy, PolicyCalledException,
                                       RaisingPolicy, ValueThenRaisingPolicy)
 from sim.decentralized.runner import (has_exception, run_a_scenario,
                                       to_agent_objects)
@@ -71,6 +71,10 @@ class ScenarioState():
             self.is_agents_to_consider = list(
                 scenario_result[-1].agents_with_colissions)
 
+        print("run")
+        for a in self.agents:
+            print(a)
+
     def observe(self) -> Optional[Dict[int, OBSERVATION]]:
         """Return the observation of the current state, None if finished"""
         if self.finished:
@@ -85,15 +89,15 @@ class ScenarioState():
     def step(self, actions: Dict[int, ACTION]):
         """Perform the given actions and return the new state"""
         assert self.agents is not None
-        for i_a in range(len(self.agents)):
+        for i_a, a in enumerate(self.agents):
             if i_a in actions.keys():
-                self.agents[i_a].policy = ValueThenRaisingPolicy(
-                    self.agents[i_a], actions[i_a])
+                a.policy = ValueThenRaisingPolicy(
+                    a, actions[i_a])
             else:
-                self.agents[i_a].policy = RaisingPolicy(
-                    self.agents[i_a])
-            self.agents[i_a].start = self.agents[i_a].pos
-            self.agents[i_a].back_to_the_start()
+                a.policy = RaisingPolicy(
+                    a)
+            a.start = a.pos
+            a.back_to_the_start()
         self.run()
 
 
