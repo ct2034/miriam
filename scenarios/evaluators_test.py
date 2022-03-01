@@ -4,6 +4,7 @@ import unittest
 import numpy as np
 import pytest
 from definitions import INVALID
+from sim.decentralized.agent import Agent
 from sim.decentralized.policy import LearnedPolicy, PolicyType, RandomPolicy
 from sim.decentralized.runner import to_agent_objects
 
@@ -37,13 +38,14 @@ class TestEvaluators(unittest.TestCase):
         ])
         res_agents = to_agent_objects(
             test_helper.env, starts, goals)
-        self.assertNotEqual(INVALID, res_agents)
-        res_starts = list(map(lambda a: tuple(a.pos), res_agents))
-        res_goals = list(map(lambda a: tuple(a.goal), res_agents))
-        self.assertEqual((0, 0), res_starts[0])
-        self.assertEqual((0, 2), res_starts[1])
-        self.assertEqual((2, 0), res_goals[0])
-        self.assertEqual((2, 2), res_goals[1])
+        self.assertIsNotNone(res_agents)
+        assert res_agents is not None
+        res_starts = list(map(lambda a: a.pos, res_agents))
+        res_goals = list(map(lambda a: a.goal, res_agents))
+        self.assertEqual(0, res_starts[0])
+        self.assertEqual(2, res_starts[1])
+        self.assertEqual(6, res_goals[0])
+        self.assertEqual(8, res_goals[1])
         # returns invalid when one path is not possible
         starts_invalid = np.array([
             [0, 0],
@@ -53,8 +55,7 @@ class TestEvaluators(unittest.TestCase):
             [0, 2],
             [1, 2]  # obstacle
         ])
-        self.assertEqual(
-            scenarios.evaluators.INVALID,
+        self.assertIsNone(
             to_agent_objects(
                 test_helper.env, starts_invalid, goals_invalid)
         )
@@ -66,47 +67,6 @@ class TestEvaluators(unittest.TestCase):
             test_helper.env, starts, goals, policy=PolicyType.LEARNED)
         for a in res_agents_learned:
             self.assertIsInstance(a.policy, LearnedPolicy)
-
-    def test_is_well_formed(self):
-        # well formed
-        starts_wf = np.array([
-            [0, 0],
-            [0, 2]
-        ])
-        goals_wf = np.array([
-            [2, 0],
-            [2, 2]
-        ])
-        self.assertTrue(
-            scenarios.evaluators.is_well_formed(
-                test_helper.env, starts_wf, goals_wf)
-        )
-        # not well formed
-        starts_nwf = np.array([
-            [1, 1],
-            [0, 2]
-        ])
-        goals_nwf = np.array([
-            [2, 0],
-            [2, 2]
-        ])
-        self.assertFalse(
-            scenarios.evaluators.is_well_formed(
-                test_helper.env, starts_nwf, goals_nwf)
-        )
-        # returns invalid when one path is not possible
-        starts_invalid = np.array([
-            [0, 0],
-            [1, 0]  # obstacle
-        ])
-        goals_invalid = np.array([
-            [0, 2],
-            [1, 2]  # obstacle
-        ])
-        self.assertFalse(
-            scenarios.evaluators.is_well_formed(
-                test_helper.env, starts_invalid, goals_invalid)
-        )
 
     def test_cost_ecbs_success(self):
         # agents that collide in the middle
