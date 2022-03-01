@@ -137,7 +137,7 @@ def icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
 
 def indep(env, starts, goals):
     agents = to_agent_objects(env, starts, goals)
-    if agents is INVALID:
+    if agents is None:
         return INVALID
     paths = [a.path for a in agents]
     return paths
@@ -169,9 +169,9 @@ def decentralized(env, starts, goals,
                   policy, ignore_finished_agents):
     agents = to_agent_objects(
         env, starts, goals, policy, rng=random.Random(0))
-    if agents is INVALID:
+    if agents is None:
         return INVALID
     assert agents is not None
     return run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.LOOKAHEAD3,
+        env, agents, plot=False, iterator=IteratorType.LOOKAHEAD1,
         ignore_finished_agents=ignore_finished_agents)

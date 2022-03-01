@@ -1,7 +1,5 @@
-import unittest
-
 import numpy as np
-
+import pytest
 from planner import estimator as e
 
 
@@ -59,20 +57,21 @@ def generate_data(
     return _history
 
 
-@unittest.skip  # TODO: Finish Tests!
+@pytest.mark.skip  # TODO: Finish Tests!
 def base_test():
     s = e.init(8)
     e.update(s, 0, 4, 5)
-    assert e.estimation(s, 4, 5) == (1, 0), "with only one update we expect a clear result"
+    assert e.estimation(s, 4, 5) == (
+        1, 0), "with only one update we expect a clear result"
 
 
-@unittest.skip  # TODO: Finish Tests!
+@pytest.mark.skip  # TODO: Finish Tests!
 def fix_neg_values_test():
     a = np.linspace(-1, 1, 100)
     assert np.min(e.fix_neg_values(a)) == 0, "failed to fix negative values"
 
 
-@unittest.skip  # TODO: Finish Tests!
+@pytest.mark.skip  # TODO: Finish Tests!
 def list_test():
     np.random.seed(42)
     n = 3  # number of landmarks

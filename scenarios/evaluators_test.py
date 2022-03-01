@@ -275,6 +275,7 @@ class TestEvaluators(unittest.TestCase):
                 test_helper.env, starts_invalid, goals_invalid)
         )
 
+    @pytest.mark.skip  # not working on this right now
     def test_cost_sim_decentralized_random_collision_tight(self):
         # agents that collide in the middle. on tight map ...
         # one agent will have to wait.
@@ -286,6 +287,7 @@ class TestEvaluators(unittest.TestCase):
                 skip_cache=True)
         )
 
+    @pytest.mark.skip  # not working on this right now
     def test_cost_sim_decentralized_random_collision_open(self):
         # two agents crossing each other in open space
         # should find ways to go around each other
