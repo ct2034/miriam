@@ -20,8 +20,8 @@ class TestEdgePolicyGraphUtils(unittest.TestCase):
             if y > 0:
                 self.env.add_edge(x + y * 7, x + (y - 1) * 7)
         self.agents = [
-            Agent(self.env, pos=24),
-            Agent(self.env, pos=25)
+            Agent(self.env, pos=24, radius=.3),
+            Agent(self.env, pos=25, radius=.3)
         ]
         self.agents[0].give_a_goal(27)
         self.agents[1].give_a_goal(21)
