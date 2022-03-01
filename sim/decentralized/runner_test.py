@@ -91,8 +91,6 @@ class TestRunner(unittest.TestCase):
             env, 2, PolicyType.RANDOM, tight_placement=True)
         assert agents is not None
         self.assertEqual(len(agents), 2)
-        print(agents[0])
-        print(agents[1])
         self.assertTrue(0 in map(lambda a: a.pos, agents) and
                         0 in map(lambda a: a.goal, agents))
         self.assertTrue(1 in map(lambda a: a.pos, agents) and
