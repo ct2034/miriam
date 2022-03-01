@@ -111,7 +111,8 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
     agents = []
     for i_a in range(n_agents):
         if is_gridmap(env):
-            a = Agent(env, starts[i_a], policy=policy, rng=rng)
+            a = Agent(env, starts[i_a], policy=policy, rng=rng,
+                      radius=radius)
         elif is_roadmap(env):
             a = Agent(env, int(starts[i_a]), policy=policy, rng=rng,
                       radius=radius)

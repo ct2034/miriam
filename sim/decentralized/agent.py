@@ -9,6 +9,7 @@ import torch
 from definitions import (BLOCKED_EDGES_TYPE, BLOCKED_NODES_TYPE, EDGE_TYPE,
                          FREE, INVALID, PATH, C, C_grid, N)
 from planner.astar_boost.build.libastar_graph import AstarSolver
+from planner.astar_boost.converter import initialize_from_graph
 from scenarios.types import (COORD_TO_NODE_TYPE, POTENTIAL_ENV_TYPE,
                              is_gridmap, is_roadmap)
 from sim.decentralized.policy import Policy, PolicyType
@@ -42,7 +43,7 @@ def gridmap_to_graph(gridmap: np.ndarray) -> Tuple[
             if y > 0 and gridmap[x, y - 1] == FREE:
                 g.add_edge(coord_to_node[(x, y)], coord_to_node[(x, y - 1)])
 
-    nx.set_node_attributes(g, POS, node_to_coord)
+    nx.set_node_attributes(g, node_to_coord, POS)
     return g, coord_to_node
 
 
@@ -66,8 +67,6 @@ class Agent(object):
             assert isinstance(pos, tuple)
             self.pos = self.coord_to_node[pos]
             assert len(pos) == 2  # (x, y)self.pos: C = pos
-            assert radius is None, "Radius not supported for gridmap"
-            self.radius: Optional[float] = None
         elif is_roadmap(env):
             self.has_roadmap = True
             self.has_gridmap = False
@@ -77,8 +76,8 @@ class Agent(object):
             assert isinstance(pos, int)  # (node)
             assert pos < self.n_nodes, "Position must be a node index"
             self.pos = pos
-            self.radius = radius
-        self.astar_solver = AstarSolver(self.env)
+        self.radius = radius
+        self.astar_solver = initialize_from_graph(self.env)
         self.start: C = self.pos
         self.goal: Optional[C] = None
         self.path: Union[PATH, None] = None
@@ -118,6 +117,7 @@ class Agent(object):
         if self.has_gridmap:
             assert isinstance(goal, tuple)
             assert len(goal) == 2  # (x, y)
+            goal = self.coord_to_node[goal]
         elif self.has_roadmap:
             assert isinstance(goal, int)  # (node)
         path = self.plan_path(
@@ -134,7 +134,7 @@ class Agent(object):
 
     def plan_path(self, start: C, goal: C) -> Optional[PATH]:
         """Plan a path from `start` to `goal`."""
-        p = self.astar_solver(start, goal)
+        p = self.astar_solver.plan(start, goal)
         if len(p) == 0:
             return None
         return p
@@ -160,12 +160,7 @@ class Agent(object):
         else:
             assert self.path is not None, "Should have a path by now"
             assert self.path_i is not None, "Should have a path index by now"
-            if self.has_gridmap:
-                return self.path[self.path_i + 1][:-1]  # type: ignore
-            elif self.has_roadmap:
-                return int(self.path[self.path_i + 1][0])  # type: ignore
-            else:
-                raise RuntimeError
+            return self.path[self.path_i + 1]
 
     def replan(self):
         """Replan the path to the current goal."""
@@ -178,7 +173,7 @@ class Agent(object):
         assert self.path is not None, "We must be successful with no blocks"
 
     def back_to_the_start(self):
-        """Reset current progress and place agent at its start as if nothing ever 
+        """Reset current progress and place agent at its start as if nothing ever
         happened."""
         self.pos = self.start
         self.replan()
@@ -199,20 +194,13 @@ class Agent(object):
     def make_this_step(self, pos_to_go_to: C):
         """Move agent to the given position. (Ignoring the path)
         Motion must be possible by the environment."""
-        if self.has_gridmap:
-            assert isinstance(pos_to_go_to, tuple), "Should be a tuple"
-            assert len(pos_to_go_to) == 2, "Should have 2 dims"
-            raise NotImplementedError
-        elif self.has_roadmap:
-            assert isinstance(pos_to_go_to, int), "Should be an int"
-            assert isinstance(self.env, nx.Graph), "Should be a nx graph"
-            if self.pos != pos_to_go_to:
-                if not self.env.has_edge(
-                        self.pos, pos_to_go_to):
-                    raise RuntimeError(
-                        "Should have edge from current pos to pos_to_go_to")
-            assert self.path_i is not None, "Should have a path_i by now"
-            self.path_i += 1
+        if self.pos != pos_to_go_to:
+            if not self.env.has_edge(
+                    self.pos, pos_to_go_to):
+                raise RuntimeError(
+                    "Should have edge from current pos to pos_to_go_to")
+        assert self.path_i is not None, "Should have a path_i by now"
+        self.path_i += 1
         self.pos = pos_to_go_to
 
     def get_path_i_not_none(self) -> int:

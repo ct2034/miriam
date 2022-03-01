@@ -156,8 +156,6 @@ def iterate_edge_policy(
     ignore_finished_agents: bool
 ) -> Tuple[List[int], List[float]]:
     """An iterator that will ask a policy which edge to take in the even of a collision."""
-    for a in agents:
-        assert a.has_roadmap, "This function only works with roadmaps"
     assert agents[0].radius is not None, "radius must be set"
     assert all(a.radius == agents[0].radius for a in agents),\
         "all radii must be equal"

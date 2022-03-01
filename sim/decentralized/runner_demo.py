@@ -55,9 +55,12 @@ def corridor():
         (env, starts, goals) = corridor_with_passing(
             10, 0, 2, rng)
         agents = to_agent_objects(
-            env, starts, goals, PolicyType.RANDOM, rng)
-        res = run_a_scenario(env, agents, False, IteratorType.BLOCKING1,
-                             ignore_finished_agents=False)
+            env, starts, goals, PolicyType.RANDOM, radius=.3, rng=rng)
+        if agents is not None:
+            res = run_a_scenario(env, tuple(agents), False, IteratorType.LOOKAHEAD2,
+                                 ignore_finished_agents=False)
+        else:
+            res = (0,) * 5
         results.append(res)
         pb.progress()
     pb.end()
