@@ -78,6 +78,7 @@ class Agent(object):
             assert isinstance(pos, int)  # (node)
             assert pos < self.n_nodes, "Position must be a node index"
             self.pos = pos
+            assert radius is not None
             self.radius = radius
         self.astar_solver = initialize_from_graph(self.env)
         self.start: C = self.pos
@@ -111,7 +112,7 @@ class Agent(object):
             f"hash(env): {hasher(self.env)}"
         )
 
-    def give_a_goal(self, goal: Union[C, np.ndarray]) -> bool:
+    def give_a_goal(self, goal: Union[C, C_grid, np.ndarray]) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
         if isinstance(goal, np.ndarray):
@@ -122,6 +123,7 @@ class Agent(object):
             goal = self.coord_to_node[goal]
         elif self.has_roadmap:
             assert isinstance(goal, int)  # (node)
+        assert isinstance(goal, int)
         path = self.plan_path(
             start=self.pos,
             goal=goal
