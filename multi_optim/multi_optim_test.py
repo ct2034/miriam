@@ -23,6 +23,7 @@ class MultiOptimTest(unittest.TestCase):
             2: (0., 2.),
             3: (2., 2.),
             4: (2., 0.)}, POS)
+        self.radius = .3
 
         #   2   3
         #    \ /|
@@ -32,9 +33,9 @@ class MultiOptimTest(unittest.TestCase):
 
     def test_find_collisions(self):
         agents = [
-            Agent(self.g, 0),
-            Agent(self.g, 4),
-            Agent(self.g, 3)]
+            Agent(self.g, 0, radius=self.radius),
+            Agent(self.g, 4, radius=self.radius),
+            Agent(self.g, 3, radius=self.radius)]
         agents[0].give_a_goal(3)
         agents[1].give_a_goal(2)
         agents[2].give_a_goal(4)
