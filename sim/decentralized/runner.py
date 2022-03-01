@@ -1,7 +1,7 @@
 import itertools
 import logging
 import random
-from typing import Iterable, List, Optional, Tuple, Type
+from typing import Iterable, List, Optional, Tuple, Type, Union
 
 import numpy as np
 from definitions import BLOCKED_NODES_TYPE, INVALID, POS, SCENARIO_RESULT
@@ -210,7 +210,7 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, rng: random.Random, 
 
 
 def run_a_scenario(env: POTENTIAL_ENV_TYPE,
-                   agents: Tuple[Agent, ...],
+                   agents: Union[Tuple[Agent, ...], List[Agent]],
                    plot: bool,
                    iterator: IteratorType = IteratorType.LOOKAHEAD1,
                    pause_on: Optional[Type[Exception]] = None,
