@@ -35,7 +35,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     own_pos = torch.tensor(pos[own_node])
     own_angle = 0.
     try:
-        next_node = agents[i_self].path[agents[i_self].path_i + 1][0]
+        next_node = agents[i_self].path[agents[i_self].path_i + 1]
         next_pos = torch.tensor(pos[next_node])
         own_angle = torch.atan2(
             next_pos[1] - own_pos[1], next_pos[0] - own_pos[0]).item()
@@ -45,7 +45,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     # data layers
     # 1. own path
     x_layer_own_path = torch.zeros((len(small_from_big), 1))
-    for p, t in agents[i_self].path:
+    for t, p in enumerate(agents[i_self].path):
         if p in g_sml.nodes:
             p_sml = small_from_big[p]
             x_layer_own_path[p_sml] = t_to_data(t, agents[i_self].path_i)
@@ -55,7 +55,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     for i_a, a in enumerate(agents):
         if i_a == i_self:
             continue
-        for p, t in a.path:
+        for t, p in enumerate(a.path):
             if p in g_sml.nodes:
                 p_sml = small_from_big[p]
                 x_layer_other_paths[p_sml] = max(
