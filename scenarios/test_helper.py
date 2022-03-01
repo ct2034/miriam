@@ -48,7 +48,7 @@ def assert_path_equality(self, should_be, test):
 def is_connected(env):
     """make sure all free cells are reachable from one another"""
     if isinstance(env, np.ndarray):
-        env = gridmap_to_graph(env)
+        env, _ = gridmap_to_graph(env)
     return nx.is_weakly_connected(env)
 
 
