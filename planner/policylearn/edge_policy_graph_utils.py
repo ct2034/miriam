@@ -26,7 +26,6 @@ def t_to_data(t: int, path_i: int) -> float:
 
 def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TYPE]:
     own_node = agents[i_self].pos
-    assert agents[i_self].has_roadmap
     g = agents[i_self].env
     g_sml = nx.ego_graph(g, own_node, radius=hop_dist)
     big_from_small: BFS_TYPE = {i: int(n) for i, n in enumerate(g_sml.nodes)}

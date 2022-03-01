@@ -32,7 +32,7 @@ def arena():
         (env, starts, goals) = arena_with_crossing(10, 0, 6, rng)
         agents = to_agent_objects(
             env, starts, goals, PolicyType.RANDOM, rng)
-        res = run_a_scenario(env, agents, False, IteratorType.BLOCKING1,
+        res = run_a_scenario(env, agents, False, IteratorType.LOOKAHEAD1,
                              ignore_finished_agents=False)
         results.append(res)
         pb.progress()
@@ -83,7 +83,7 @@ def a_scenario():
     # plot_with_arrows(env, starts, goals)
     # plt.show()
     res = run_a_scenario(
-        env, agents, False, IteratorType.BLOCKING1,
+        env, agents, False, IteratorType.LOOKAHEAD1,
         ignore_finished_agents=False, print_progress=True)
     print(res)
 
@@ -97,8 +97,8 @@ def big_environments():
     # paths_ecbs = ecbs(env, starts, goals, return_paths=True)
     # plot_with_paths(env, paths_ecbs)
     res = run_a_scenario(
-        env, agents, False, IteratorType.BLOCKING1,
-        ignore_finished_agents=False, print_progress=True)
+        env, agents, False, IteratorType.LOOKAHEAD1,
+        ignore_finished_agents=False)
     print(res)
 
 
@@ -115,7 +115,8 @@ def blocking_3():
     agents = to_agent_objects(env, starts, goals)
     paths_ecbs = ecbs(env, starts, goals, return_paths=True)
     plot_with_paths(env, paths_ecbs)
-    res = run_a_scenario(env, agents, True, IteratorType.BLOCKING3)
+    assert agents is not None
+    res = run_a_scenario(env, tuple(agents), True, IteratorType.LOOKAHEAD3)
     print(res)
 
 
@@ -127,7 +128,7 @@ def find_and_run_interesting_scenario():
     size = 8
     n_agents = 8
     policy = PolicyType.LEARNED
-    it = IteratorType.BLOCKING3
+    it = IteratorType.LOOKAHEAD3
     interesting = False
     seed = 0
 

@@ -7,7 +7,7 @@ import networkx as nx
 import numpy as np
 import torch
 from definitions import (BLOCKED_EDGES_TYPE, BLOCKED_NODES_TYPE, EDGE_TYPE,
-                         FREE, INVALID, PATH, C, C_grid, N)
+                         FREE, INVALID, PATH, POS, C, C_grid, N)
 from planner.astar_boost.build.libastar_graph import AstarSolver
 from planner.astar_boost.converter import initialize_from_graph
 from scenarios.types import (COORD_TO_NODE_TYPE, POTENTIAL_ENV_TYPE,
@@ -18,7 +18,6 @@ from tools import hasher
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 COST = "cost"
-POS = "pos"
 
 
 def gridmap_to_graph(gridmap: np.ndarray) -> Tuple[
@@ -29,7 +28,7 @@ def gridmap_to_graph(gridmap: np.ndarray) -> Tuple[
     coord_to_node: COORD_TO_NODE_TYPE = {}
     node_to_coord: Dict[int, Tuple[float, float]] = {}
     for x, y in product(range(w), range(h)):
-        node = x + y * w
+        node = y + x * h
         coord_to_node[(x, y)] = node
         node_to_coord[node] = (float(x), float(y))
 
@@ -49,7 +48,8 @@ def gridmap_to_graph(gridmap: np.ndarray) -> Tuple[
 
 class Agent(object):
     def __init__(
-        self, env: POTENTIAL_ENV_TYPE, pos: Union[C, C_grid],
+        self, env: POTENTIAL_ENV_TYPE,
+        pos: Union[C, C_grid, np.ndarray],
         policy: PolicyType = PolicyType.LEARNED,
         radius: Optional[float] = None,
         rng: random.Random = random.Random()
@@ -67,6 +67,8 @@ class Agent(object):
             assert isinstance(pos, tuple)
             self.pos = self.coord_to_node[pos]
             assert len(pos) == 2  # (x, y)self.pos: C = pos
+            if radius is None:
+                self.radius = .4  # good for gridmaps
         elif is_roadmap(env):
             self.has_roadmap = True
             self.has_gridmap = False
@@ -76,7 +78,7 @@ class Agent(object):
             assert isinstance(pos, int)  # (node)
             assert pos < self.n_nodes, "Position must be a node index"
             self.pos = pos
-        self.radius = radius
+            self.radius = radius
         self.astar_solver = initialize_from_graph(self.env)
         self.start: C = self.pos
         self.goal: Optional[C] = None
@@ -109,7 +111,7 @@ class Agent(object):
             f"hash(env): {hasher(self.env)}"
         )
 
-    def give_a_goal(self, goal: C) -> bool:
+    def give_a_goal(self, goal: Union[C, np.ndarray]) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
         if isinstance(goal, np.ndarray):
