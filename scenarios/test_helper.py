@@ -49,7 +49,7 @@ def is_connected(env):
     """make sure all free cells are reachable from one another"""
     if isinstance(env, np.ndarray):
         env, _ = gridmap_to_graph(env)
-    return nx.is_weakly_connected(env)
+    return nx.is_connected(env)
 
 
 env = np.array([

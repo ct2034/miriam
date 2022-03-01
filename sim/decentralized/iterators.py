@@ -30,7 +30,7 @@ class SimIterationException(Exception):
 
 
 def get_possible_next_agent_poses(
-        agents: Tuple[Agent],
+        agents: Tuple[Agent, ...],
         can_proceed: List[bool]) -> List[C]:
     """Where would the agents be if they would be allowed to move to the next
     step in their paths if they have a true in `can_proceed`."""
@@ -44,7 +44,7 @@ def get_possible_next_agent_poses(
     return possible_next_agent_poses
 
 
-def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> List[C]:
+def get_poses_in_dt(agents: Tuple[Agent, ...], dt: int) -> List[C]:
     """Get poses at time dt from now in the future, so `dt=0` is now."""
     poses: List[C] = []
     for a in agents:
@@ -59,7 +59,7 @@ def get_poses_in_dt(agents: Tuple[Agent], dt: int) -> List[C]:
 
 
 def check_for_colissions(
-        agents: Tuple[Agent],
+        agents: Tuple[Agent, ...],
         dt: int = 0,
         possible_next_agent_poses: Optional[List[C]] = None,
         ignore_finished_agents: bool = True) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
@@ -99,7 +99,7 @@ def check_for_colissions(
     return node_colissions, edge_colissions
 
 
-def make_sure_agents_are_safe(agents: Tuple[Agent], ignore_fa: bool):
+def make_sure_agents_are_safe(agents: Tuple[Agent, ...], ignore_fa: bool):
     """Assert that no too agents are in the same place"""
     poses = set()
     for a in agents:
@@ -109,7 +109,7 @@ def make_sure_agents_are_safe(agents: Tuple[Agent], ignore_fa: bool):
 
 
 def has_at_least_one_agent_moved(
-        agents: Tuple[Agent], agents_at_beginning: Tuple[Any, ...]
+        agents: Tuple[Agent, ...], agents_at_beginning: Tuple[Any, ...]
 ) -> bool:
     """given the set of agents from the start, have they changed now?"""
     for i_a in range(len(agents)):
@@ -151,7 +151,7 @@ def check_motion_col(g: nx.Graph, radius: float,
 
 
 def iterate_edge_policy(
-    agents: Tuple[Agent],
+    agents: Tuple[Agent, ...],
     lookahead: int,
     ignore_finished_agents: bool
 ) -> Tuple[List[int], List[float]]:

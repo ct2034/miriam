@@ -10,6 +10,7 @@ import pytest
 import sim.decentralized.runner as runner
 from definitions import POS
 from scenarios.generators import corridor_with_passing
+from scenarios.test_helper import make_cache_folder_and_set_envvar
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType, get_iterator_fun
 from sim.decentralized.policy import PolicyType, RandomPolicy
@@ -21,6 +22,7 @@ from tools import hasher
 class TestRunner(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestRunner, self).__init__(*args, **kwargs)
+        make_cache_folder_and_set_envvar()
         random.seed(0)
 
     def test_initialize_environment(self):
