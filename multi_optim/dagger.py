@@ -71,9 +71,9 @@ class ScenarioState():
             self.is_agents_to_consider = list(
                 scenario_result[-1].agents_with_colissions)
 
-        print("run")
+        logger.debug("run")
         for a in self.agents:
-            print(a)
+            logger.debug(a)
 
     def observe(self) -> Optional[Dict[int, OBSERVATION]]:
         """Return the observation of the current state, None if finished"""
