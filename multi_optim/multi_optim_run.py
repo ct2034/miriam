@@ -14,7 +14,7 @@ import numpy as np
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import INVALID, SCENARIO_RESULT
+from definitions import INVALID, SCENARIO_RESULT, SUCCESS
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
@@ -37,6 +37,13 @@ else:
                                     make_a_state_with_an_upcoming_decision)
 
 logger = logging.getLogger(__name__)
+
+# Indices of results
+IDX_AVERAGE_TIME = 0
+IDX_MAX_TIME = 1
+IDX_AVERAGE_LENGTH = 2
+IDX_MAX_LENGTH = 3
+IDX_SUCCESS = 4
 
 
 def find_collisions(agents
@@ -70,8 +77,8 @@ def eval_policy_full_scenario(
         goals = rng.sample(g.nodes(), n_agents)
         failed_at_creation = False
 
-        res_policy = (0., 0., 0., 0., 0.)
-        res_optim = (0., 0., 0., 0., 0.)
+        res_policy = (0., 0., 0., 0., 0)
+        res_optim = (0., 0., 0., 0., 0)
         for policy in [OptimalPolicy, LearnedPolicy]:
             agents = []
             for i_a in range(n_agents):
@@ -87,25 +94,27 @@ def eval_policy_full_scenario(
                         env=g,
                         agents=tuple(agents),
                         plot=False,
-                        iterator=IteratorType.LOOKAHEAD2)
+                        iterator=IteratorType.LOOKAHEAD2,
+                        ignore_finished_agents=False)
                 elif policy is OptimalPolicy:
                     try:
                         res_optim = run_a_scenario(
                             env=g,
                             agents=tuple(agents),
                             plot=False,
-                            iterator=IteratorType.LOOKAHEAD2)
+                            iterator=IteratorType.LOOKAHEAD2,
+                            ignore_finished_agents=False)
                     except Exception as e:
                         logger.error(e)
-                        res_optim = (0, 0, 0, 0, 0)
 
-        success = res_policy[4] and res_optim[4]
+        success = res_policy[IDX_SUCCESS] == 1 and res_optim[IDX_SUCCESS] == 1
         # logger.debug(f"success: {success}")
         if success:
-            regret = res_policy[0] - res_optim[0]
+            regret = res_policy[IDX_AVERAGE_LENGTH] - \
+                res_optim[IDX_AVERAGE_LENGTH]
             regret_s.append(regret)
             # logger.debug(f"regret: {regret}")
-        success_s.append(res_policy[4])
+        success_s.append(res_policy[IDX_SUCCESS])
     if len(regret_s) > 0:
         return np.mean(regret_s), np.mean(success_s)
     else:
