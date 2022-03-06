@@ -1,7 +1,7 @@
 import logging
 import random
 from itertools import product
-from typing import *
+from typing import Dict, Optional, Tuple, Union
 
 import networkx as nx
 import numpy as np
