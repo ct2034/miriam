@@ -24,9 +24,11 @@ class EdgePolicyDataset(Dataset):
         self.gpu = gpu
         self.data_store = {}
         self.added_fnames: List[str] = []
-        fname_to_init = [self.path + "/" + fname for fname in os.listdir(path)]
-        for fname in fname_to_init:
-            self.add_file(fname)
+        if os.path.isdir(path):
+            fname_to_init = [self.path + "/" +
+                             fname for fname in os.listdir(path)]
+            for fname in fname_to_init:
+                self.add_file(fname)
 
     def len(self):
         return len(self.lookup)
