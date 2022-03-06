@@ -69,6 +69,8 @@ class Agent(object):
             assert len(pos) == 2  # (x, y)self.pos: C = pos
             if radius is None:
                 self.radius = .4  # good for gridmaps
+            else:
+                self.radius = radius
         elif is_roadmap(env):
             self.has_roadmap = True
             self.has_gridmap = False
