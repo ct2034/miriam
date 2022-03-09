@@ -16,6 +16,13 @@ DEFAULT_TIMEOUT_S = 30  # seconds;
 SCENARIO_TYPE = Tuple[np.ndarray, np.ndarray, np.ndarray]
 SCENARIO_RESULT = Tuple[float, float, float, float, Any]
 
+# Indices of results
+IDX_AVERAGE_TIME = 0
+IDX_MAX_TIME = 1
+IDX_AVERAGE_LENGTH = 2
+IDX_MAX_LENGTH = 3
+IDX_SUCCESS = 4
+
 C = int
 C_grid = Tuple[int, int]
 N = Tuple[int, int]

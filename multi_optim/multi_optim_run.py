@@ -14,7 +14,8 @@ import numpy as np
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import INVALID, SCENARIO_RESULT, SUCCESS
+from definitions import (IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID,
+                         SCENARIO_RESULT, SUCCESS)
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
@@ -37,13 +38,6 @@ else:
                                     make_a_state_with_an_upcoming_decision)
 
 logger = logging.getLogger(__name__)
-
-# Indices of results
-IDX_AVERAGE_TIME = 0
-IDX_MAX_TIME = 1
-IDX_AVERAGE_LENGTH = 2
-IDX_MAX_LENGTH = 3
-IDX_SUCCESS = 4
 
 
 def find_collisions(agents
