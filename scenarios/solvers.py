@@ -101,8 +101,8 @@ def cached_cbsr(env, starts, goals,
             paths = storage.get_result(
                 scenario, ResultType.CBSR_PATHS, solver_params)
         else:
-            paths = plan_cbsr(env, starts, goals,
-                              radius=radius, timeout=timeout, skip_cache=skip_cache)
+            paths = plan_cbsr(env, starts, goals, radius=radius,
+                              timeout=timeout, skip_cache=skip_cache)
             storage.save_result(scenario, ResultType.CBSR_PATHS,
                                 solver_params, paths)
     return paths
