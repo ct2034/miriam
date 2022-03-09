@@ -76,7 +76,7 @@ class RandomPolicy(Policy):
         potential_next_nodes = list(self.a.env.adj[self.a.pos])
         if self.a.pos not in potential_next_nodes:
             potential_next_nodes.append(self.a.pos)
-        return self.a.rng.choice(potential_next_nodes)
+        return int(self.a.rng.choice(potential_next_nodes))
 
 
 class LearnedPolicy(Policy):
