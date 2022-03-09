@@ -74,6 +74,10 @@ if __name__ == '__main__':
                     results[i_r][PolicyType.LEARNED][IDX_SUCCESS] and
                     results[i_r][PolicyType.OPTIMAL][IDX_SUCCESS]):
                 print(f"Policy {policy} is better than optimal")
+                # filename of roadmap is 'planner/mapf_implementations/cache/187280093900cae76fffd919cbea9110bf8042fab2df6aa35bbd415480b785ce_roadmap.yaml'
+                # paths_learned = [[2, **1**, 2, 4], [4, 2, 6, 0], [0, 5, 3, 3]]
+                # paths_optimal = [[2, **3**, 2, 4], [4, 2, 6, 0], [0, 5, 3, 3]]
+                # which are both possible, if i analyzed the roadmap files correctly. But the learned is shorter ...
                 print(repr(starts))
                 print(repr(goals))
                 plot_with_paths(g, paths[i_r][PolicyType.LEARNED])

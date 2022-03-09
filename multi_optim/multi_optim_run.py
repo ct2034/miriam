@@ -102,6 +102,16 @@ def eval_policy_full_scenario(
         if success:
             regret = res_policy[IDX_AVERAGE_LENGTH] - \
                 res_optim[IDX_AVERAGE_LENGTH]
+
+            if regret < 0:
+                logger.warning("Regret is negative")
+            #     DEBUG
+            #     torch.save(model.state_dict(), "debug.pt")
+            #     nx.write_gpickle(g, f"debug.gpickle")
+            #     print(f"Starts: {starts}")
+            #     print(f"Goals: {goals}")
+            #     raise Exception("Regret is negative")
+
             regret_s.append(regret)
             # logger.debug(f"regret: {regret}")
         success_s.append(res_policy[IDX_SUCCESS])
