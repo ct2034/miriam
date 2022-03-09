@@ -15,7 +15,7 @@ from definitions import INVALID, SCENARIO_RESULT
 from humanfriendly import format_size
 from planner.policylearn.edge_policy import (MODEL_INPUT, EdgePolicyDataset,
                                              EdgePolicyModel)
-from planner.policylearn.edge_policy_graph_utils import (RADIUS, TIMEOUT,
+from planner.policylearn.edge_policy_graph_utils import (TIMEOUT,
                                                          agents_to_data,
                                                          get_optimal_edge)
 from sim.decentralized.iterators import IteratorType
@@ -33,6 +33,7 @@ ACTION = int
 OBSERVATION = Tuple[Data, Dict[int, int]]
 MAX_STEPS = 10
 N_LEARN_MAX = 1000
+RADIUS = 0.001
 
 
 class ScenarioState():

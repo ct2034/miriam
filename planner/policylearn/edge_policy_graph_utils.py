@@ -7,7 +7,6 @@ from definitions import INVALID, POS
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected
 
-RADIUS = .001
 TIMEOUT = 120
 
 BFS_TYPE = Dict[int, int]
@@ -97,16 +96,18 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     return d, big_from_small
 
 
-def get_optimal_edge(agents, i_agent: int):
+def get_optimal_edge(agents, i_agent: int) -> int:
     """Return the optimal edge to take for the given agent. """
     starts = [a.pos for a in agents]
     goals = [a.goal for a in agents]
+    radius = agents[i_agent].radius
     import scenarios.solvers
     paths = scenarios.solvers.cached_cbsr(
-        agents[0].env, starts, goals, radius=RADIUS, timeout=TIMEOUT)
+        agents[0].env, starts, goals, radius=radius, timeout=TIMEOUT)
     if paths is INVALID:
         raise RuntimeError("No paths found")
     else:
+        assert not isinstance(paths, str)
         path = paths[i_agent]
         if len(path) == 1:  # already at goal
             return path[0][0]

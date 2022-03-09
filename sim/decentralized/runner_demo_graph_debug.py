@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import torch
 from definitions import IDX_AVERAGE_LENGTH, IDX_SUCCESS, PATH
+from multi_optim.dagger import RADIUS
 from planner.policylearn.edge_policy import EdgePolicyModel
 from scenarios.visualization import plot_with_paths
 from sim.decentralized.agent import Agent
@@ -44,7 +45,7 @@ if __name__ == '__main__':
         # plot_env_with_arrows(g, starts, goals)  # type: ignore
 
         # initialize agents
-        agents = tuple([Agent(g, start, radius=.1, policy=policy)
+        agents = tuple([Agent(g, start, radius=RADIUS, policy=policy)
                        for start in starts])
         for i, agent in enumerate(agents):
             agent.give_a_goal(goals[i])

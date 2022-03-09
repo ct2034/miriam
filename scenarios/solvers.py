@@ -85,7 +85,7 @@ def _ecbs_data_to_paths(data):
 
 def cached_cbsr(env, starts, goals,
                 timeout=DEFAULT_TIMEOUT_S,
-                radius=0.1,
+                radius: float = 0.1,
                 skip_cache=False):
     if skip_cache:
         paths = plan_cbsr(env, starts, goals, radius=radius, timeout=timeout)

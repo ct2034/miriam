@@ -2,10 +2,7 @@ import datetime
 import logging
 import socket
 import tracemalloc
-from email import policy
-from fileinput import filename
-from multiprocessing.spawn import import_main_path
-from random import Random, getstate
+from random import Random
 from typing import Dict, List, Optional, Tuple
 
 import git.repo
@@ -14,13 +11,11 @@ import numpy as np
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import (IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID,
-                         SCENARIO_RESULT, SUCCESS)
+from definitions import IDX_AVERAGE_LENGTH, IDX_SUCCESS
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import (BFS_TYPE, RADIUS,
-                                                         get_optimal_edge)
+from planner.policylearn.edge_policy_graph_utils import BFS_TYPE
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
@@ -32,9 +27,10 @@ from tools import ProgressBar, StatCollector
 from torch_geometric.data import Data
 
 if __name__ == "__main__":
-    from dagger import DaggerStrategy, make_a_state_with_an_upcoming_decision
+    from dagger import (RADIUS, DaggerStrategy,
+                        make_a_state_with_an_upcoming_decision)
 else:
-    from multi_optim.dagger import (DaggerStrategy,
+    from multi_optim.dagger import (RADIUS, DaggerStrategy,
                                     make_a_state_with_an_upcoming_decision)
 
 logger = logging.getLogger(__name__)
@@ -284,9 +280,7 @@ def run_optimization(
     runtime = pb.end()
     stats.add_static("runtime", str(runtime))
 
-    draw_graph(g, map_img, title="End")
-    plt.savefig(f"multi_optim/results/{prefix}_end.png")
-
+    # Plot stats
     fig, axs = plt.subplots(2, 1, sharex=True)
     for i_x, part in enumerate(["poses", "policy"]):
         for k, v in stats.get_stats_wildcard(f"{part}.*").items():
@@ -297,6 +291,8 @@ def run_optimization(
     plt.savefig(f"multi_optim/results/{prefix}_stats.png")
 
     # Save results
+    draw_graph(g, map_img, title="End")
+    plt.savefig(f"multi_optim/results/{prefix}_end.png")
     stats.to_yaml(f"multi_optim/results/{prefix}_stats.yaml")
     nx.write_gpickle(g, f"multi_optim/results/{prefix}_graph.gpickle")
     torch.save(policy_model.state_dict(),
