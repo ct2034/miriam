@@ -198,9 +198,9 @@ def will_agents_collide(agents, ignore_finished_agents):
         agent_paths.append(a.path)
         for pos in a.path:
             if not do_collide:  # only need to do this if no collision was found
-                if tuple(pos) in seen:
+                if pos in seen:
                     do_collide = True
-                seen.add(tuple(pos))
+                seen.add(pos)
     return do_collide, agent_paths
 
 
@@ -333,7 +333,7 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
     pb.end()
 
     if plot_eval:  # pragma: no cover
-        plot_evaluations(evaluations, evaluation_names, PolicyType.RANDOM)
+        plot_evaluations(evaluations, evaluation_names, PolicyType.OPTIMAL)
     return (evaluations, evaluation_names)
 
 
@@ -342,4 +342,4 @@ if __name__ == "__main__":  # pragma: no cover
     logging.getLogger("sim.decentralized.policy").setLevel(logging.INFO)
     logging.getLogger("__main__").setLevel(logging.INFO)
     logging.getLogger("root").setLevel(logging.INFO)
-    evaluate_policies(4, 4, 100)
+    evaluate_policies(4, 2, 10)
