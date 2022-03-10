@@ -291,12 +291,13 @@ def run_optimization(
     stats.add_static("runtime", str(runtime))
 
     # Plot stats
-    fig, axs = plt.subplots(2, 1, sharex=True)
+    _, axs = plt.subplots(2, 1, sharex=True)
     for i_x, part in enumerate(["poses", "policy"]):
         for k, v in stats.get_stats_wildcard(f"{part}.*").items():
-            axs[i_x].plot(v[0], v[1], label=k)
-        axs[i_x].legend()
-        axs[i_x].xaxis.set_major_locator(MaxNLocator(integer=True))
+            axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
+        axs[i_x].legend()  # type: ignore
+        axs[i_x].xaxis.set_major_locator(  # type: ignore
+            MaxNLocator(integer=True))
     plt.xlabel("Run")
     plt.savefig(f"multi_optim/results/{prefix}_stats.png")
 

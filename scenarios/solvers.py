@@ -52,6 +52,7 @@ def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, suboptimality=1.0,
     if data is None or data is INVALID:
         return INVALID
     n_agents = starts.shape[0]
+    assert not isinstance(data, int)
     if SCHEDULE not in data.keys():
         return INVALID
     schedule = data[SCHEDULE]
@@ -79,7 +80,6 @@ def _ecbs_data_to_paths(data):
         paths.append(np.array(one_path))
     return paths
 
-
 # cbs roadmaps ################################################################
 
 
@@ -106,7 +106,6 @@ def cached_cbsr(env, starts, goals,
             storage.save_result(scenario, ResultType.CBSR_PATHS,
                                 solver_params, paths)
     return paths
-
 
 # icts ########################################################################
 
