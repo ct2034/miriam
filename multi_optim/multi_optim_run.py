@@ -1,5 +1,8 @@
+import copy
 import datetime
 import logging
+import os
+import pickle
 import socket
 import tracemalloc
 from random import Random
@@ -8,14 +11,17 @@ from typing import Dict, List, Optional, Tuple
 import git.repo
 import networkx as nx
 import numpy as np
+import scenarios
+import scenarios.solvers
+import tools
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import IDX_AVERAGE_LENGTH, IDX_SUCCESS
+from definitions import IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, C
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import BFS_TYPE
+from planner.policylearn.edge_policy_graph_utils import BFS_TYPE, TIMEOUT
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
                                                     optimize_poses, read_map,
                                                     sample_points)
@@ -27,13 +33,107 @@ from tools import ProgressBar, StatCollector
 from torch_geometric.data import Data
 
 if __name__ == "__main__":
-    from dagger import (RADIUS, DaggerStrategy,
-                        make_a_state_with_an_upcoming_decision)
+    from dagger import RADIUS, DaggerStrategy
+    from state import ScenarioState, make_a_state_with_an_upcoming_decision
 else:
-    from multi_optim.dagger import (RADIUS, DaggerStrategy,
-                                    make_a_state_with_an_upcoming_decision)
+    from multi_optim.dagger import RADIUS, DaggerStrategy
+    from multi_optim.state import (ACTION, ScenarioState,
+                                   make_a_state_with_an_upcoming_decision)
 
 logger = logging.getLogger(__name__)
+
+MAX_STEPS = 10
+
+
+def sample_trajectory_proxy(args):
+    return sample_trajectory(*args)
+
+
+def sample_trajectory(seed, graph, n_agents,
+                      model, max_steps=MAX_STEPS):
+    """Sample a trajectory using the given policy."""
+    rng = Random(seed)
+    starts = None
+    goals = None
+    solvable = False
+    while not solvable:
+        starts = rng.sample(graph.nodes(), n_agents)
+        goals = rng.sample(graph.nodes(), n_agents)
+        # is this solvable?
+        optimal_paths = scenarios.solvers.cached_cbsr(
+            graph, starts, goals, radius=RADIUS,
+            timeout=int(TIMEOUT*.9))
+        if optimal_paths != INVALID:
+            solvable = True
+
+    state = ScenarioState(graph, starts, goals, model, RADIUS)
+    state.run()
+
+    # Sample states
+    these_ds = []
+    paths = None  # type: Optional[List[List[C]]]
+    for i_s in range(max_steps):
+        try:
+            if state.finished:
+                paths = state.paths_out
+                break
+            observations = state.observe()
+            actions: Dict[int, ACTION] = {}
+            assert observations is not None
+            for i_a, (d, bfs) in observations.items():
+                # find actions to take using the policy
+                actions[i_a] = model.predict(d.x, d.edge_index, bfs)
+                # observation, action pairs for learning
+                these_ds.append(d)
+            state.step(actions)
+        except RuntimeError as e:
+            logger.warning("RuntimeError: {}".format(e))
+            break
+    return these_ds
+
+
+def _get_data_folder(prefix):
+    return f"multi_optim/results/{prefix}_data"
+
+
+def _get_path_data(prefix, hash) -> str:
+    folder = _get_data_folder(prefix)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return folder+f"/{hash}.pkl"
+
+
+def sample_trajectories_in_parallel(
+        model: EdgePolicyModel, graph: nx.Graph, n_agents: int,
+        n_episodes: int, prefix: str, pool, rng: Random):
+    model_copy = EdgePolicyModel()
+    model_copy.load_state_dict(copy.deepcopy(model.state_dict()))
+    model_copy.eval()
+
+    params = [(s, graph, n_agents, model_copy)
+              for s in rng.sample(
+        range(2**32), k=n_episodes)]
+    generation_hash = tools.hasher([], {
+        "seeds": [p[0] for p in params],
+        "graph": graph,
+        "n_agents": n_agents,
+        "model": model_copy
+    })
+    new_fname: str = _get_path_data(prefix, generation_hash)
+    # only create file if this data does not exist
+    if os.path.exists(new_fname):
+        pass
+    else:
+        results_s = pool.imap_unordered(
+            sample_trajectory_proxy, params)
+        new_ds = []
+        for results in results_s:
+            new_ds.extend(results)
+        with open(new_fname, "wb") as f:
+            pickle.dump(new_ds, f)
+
+    # add this to the dataset
+    return new_fname
 
 
 def find_collisions(agents
@@ -127,7 +227,7 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
     eval_set = []
     for i_e in range(n_eval):
         state = make_a_state_with_an_upcoming_decision(
-            g, n_agents,  model, rng)
+            g, n_agents,  model, RADIUS, rng)
         observation = state.observe()
         assert observation is not None
         i_a = rng.sample(list(observation.keys()), 1)[0]
@@ -137,12 +237,11 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
 
 
 def optimize_policy(model, g: nx.Graph, n_agents, n_epochs, batch_size,
-                    optimizer, epds, pool, prefix, rng):
+                    optimizer, epds, prefix, rng):
     ds = DaggerStrategy(
         model, g, n_epochs, n_agents, batch_size, optimizer, prefix, rng)
-    model, loss, new_data_percentage, epds, data_len = ds.run_dagger(
-        pool, epds)
-    return model,  loss, new_data_percentage, epds, data_len
+    model, loss = ds.learn_dagger(epds)
+    return model, loss
 
 
 def run_optimization(
@@ -245,6 +344,15 @@ def run_optimization(
     poses_test_length = 0
     poses_training_length = 0
     for i_r in range(n_runs):
+        # Sample runs for both optimizations
+        old_data_len = len(epds)
+        new_fname = sample_trajectories_in_parallel(
+            policy_model, g, n_agents, n_epochs_per_run_policy,
+            prefix, pool, rng)
+        epds.add_file(new_fname)
+        data_len = len(epds)
+        new_data_percentage = (data_len - old_data_len) / data_len
+
         # Optimizing Poses
         if i_r % n_runs_per_run_pose == 0:
             g, pos, poses_test_length, poses_training_length = optimize_poses(
@@ -256,12 +364,10 @@ def run_optimization(
 
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
-            (policy_model, policy_loss, new_data_percentage,
-             epds, data_len
-             ) = optimize_policy(
+            policy_model, policy_loss = optimize_policy(
                 policy_model, g, n_agents, n_epochs_per_run_policy,
                 batch_size_policy, optimizer_policy, epds,
-                pool, prefix, rng)
+                prefix, rng)
             if i_r % stats_and_eval_every == 0:
                 # also eval now
                 rng_test = Random(1)

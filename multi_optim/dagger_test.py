@@ -7,6 +7,7 @@ from planner.policylearn.edge_policy import EdgePolicyModel
 from scenarios.test_helper import make_cache_folder_and_set_envvar
 
 from multi_optim.dagger import *
+from multi_optim.state import ScenarioState
 
 
 class ScenarioStateTest(unittest.TestCase):
@@ -22,6 +23,7 @@ class ScenarioStateTest(unittest.TestCase):
                 self.sq_graph.add_edge(x + 5*y, x - 1 + 5*y)
             if y > 0:
                 self.sq_graph.add_edge(x + 5*y, x + 5*(y - 1))
+        self.radius = 0.2
 
         # graph with passing point
         self.pass_graph = nx.Graph()
@@ -43,7 +45,8 @@ class ScenarioStateTest(unittest.TestCase):
         """Test running the scenario with parallel paths."""
         starts = [0, 1, 2, 3, 4]
         goals = [20, 21, 22, 23, 24]
-        state = ScenarioState(self.sq_graph, starts, goals, self.model)
+        state = ScenarioState(self.sq_graph, starts,
+                              goals, self.model, self.radius)
         # not finished before running
         self.assertFalse(state.finished)
 
@@ -61,7 +64,8 @@ class ScenarioStateTest(unittest.TestCase):
         """Test running the scenario with a collision."""
         starts = [0, 3]
         goals = [3, 0]
-        state = ScenarioState(self.pass_graph, starts, goals, self.model)
+        state = ScenarioState(self.pass_graph, starts,
+                              goals, self.model, self.radius)
         # not finished before running
         self.assertFalse(state.finished)
 
@@ -81,7 +85,8 @@ class ScenarioStateTest(unittest.TestCase):
         # preparation
         starts = [0, 3]
         goals = [3, 0]
-        state = ScenarioState(self.pass_graph, starts, goals, self.model)
+        state = ScenarioState(self.pass_graph, starts,
+                              goals, self.model, self.radius)
         state.run()
 
         # check state after running
