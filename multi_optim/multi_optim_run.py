@@ -306,7 +306,7 @@ def run_optimization(
         "policy_regret",
         "policy_success",
         "policy_accuracy",
-        "policy_new_data_percentage",
+        "general_new_data_percentage",
         "n_policy_data_len"])
     stats.add_statics({
         # metadata
@@ -383,7 +383,7 @@ def run_optimization(
                     stats.add("policy_regret", i_r, float(regret))
                 stats.add("policy_success", i_r, float(success))
                 stats.add("policy_accuracy", i_r, policy_accuracy)
-                stats.add("policy_new_data_percentage",
+                stats.add("general_new_data_percentage",
                           i_r, float(new_data_percentage))
                 stats.add("n_policy_data_len", i_r, float(data_len))
                 logger.info(f"Regret: {regret}")
@@ -397,8 +397,10 @@ def run_optimization(
     stats.add_static("runtime", str(runtime))
 
     # Plot stats
-    _, axs = plt.subplots(2, 1, sharex=True)
-    for i_x, part in enumerate(["poses", "policy"]):
+    prefixes = ["poses", "policy", "general"]
+    _, axs = plt.subplots(len(prefixes), 1, sharex=True,
+                          figsize=(20, 30), dpi=200)
+    for i_x, part in enumerate(prefixes):
         for k, v in stats.get_stats_wildcard(f"{part}.*").items():
             axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
         axs[i_x].legend()  # type: ignore
