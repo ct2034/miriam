@@ -1,7 +1,7 @@
 import logging
 import os
 import pickle
-from typing import Any, List, Tuple
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
@@ -84,6 +84,18 @@ class EdgePolicyModel(nn.Module):
             self.readout_layers.append(
                 torch.nn.Linear(num_conv_channels, channels_out)
             )
+
+    def __hash__(self) -> int:
+        rng = torch.Generator()
+        rng.manual_seed(0)
+        n_nodes = 10
+        d = Data(
+            x=torch.randn(n_nodes, self.num_node_features, generator=rng),
+            edge_index=torch.tensor([range(n_nodes), [0]*n_nodes]),
+            batch=torch.tensor([0]*n_nodes)
+        )
+        self.eval()
+        return hash(str(self.forward(d.x, d.edge_index, d.batch)))
 
     def forward(self, x, edge_index, batch):
         x = x.to(self.gpu)

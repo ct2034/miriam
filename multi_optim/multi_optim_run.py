@@ -89,7 +89,7 @@ def sample_trajectory(seed, graph, n_agents,
         except RuntimeError as e:
             logger.warning("RuntimeError: {}".format(e))
             break
-    return these_ds
+    return these_ds, paths
 
 
 def _get_data_folder(prefix):
@@ -127,8 +127,8 @@ def sample_trajectories_in_parallel(
         results_s = pool.imap_unordered(
             sample_trajectory_proxy, params)
         new_ds = []
-        for results in results_s:
-            new_ds.extend(results)
+        for ds, paths in results_s:
+            new_ds.extend(ds)
         with open(new_fname, "wb") as f:
             pickle.dump(new_ds, f)
 
@@ -345,6 +345,8 @@ def run_optimization(
     poses_training_length = 0
     for i_r in range(n_runs):
         # Sample runs for both optimizations
+        assert n_runs_policy >= n_runs_pose, \
+            "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
         new_fname = sample_trajectories_in_parallel(
             policy_model, g, n_agents, n_epochs_per_run_policy,
@@ -386,9 +388,10 @@ def run_optimization(
                 stats.add("general_new_data_percentage",
                           i_r, float(new_data_percentage))
                 stats.add("n_policy_data_len", i_r, float(data_len))
-                logger.info(f"Regret: {regret}")
+                logger.info(f"Loss: {policy_loss:.3f}")
+                logger.info(f"Regret: {regret:.3f}")
                 logger.info(f"Success: {success}")
-                logger.info(f"Accuracy: {policy_accuracy:.2f}")
+                logger.info(f"Accuracy: {policy_accuracy:.3f}")
                 logger.info(f"New data: {new_data_percentage*100:.1f}%")
                 logger.info(f"Data length: {data_len}")
 
