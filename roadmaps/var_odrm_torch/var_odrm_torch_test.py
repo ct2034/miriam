@@ -49,7 +49,8 @@ class TestVarOdrmTorch(unittest.TestCase):
 
     def test_make_graph(self):
         graph = make_graph(self.pos, self.map_img)
-        self.assertEqual(5, graph.number_of_edges())
+        # 5 delaunay-edges and 4 self-edges
+        self.assertEqual(5 + 4, graph.number_of_edges())
         self.assertEqual(self.pos.shape[0], graph.number_of_nodes())
         self.assertTrue(graph.has_edge(0, 1))
         self.assertTrue(graph.has_edge(0, 3))

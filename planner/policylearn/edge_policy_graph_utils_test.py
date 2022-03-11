@@ -11,7 +11,7 @@ from sim.decentralized.agent import Agent
 class TestEdgePolicyGraphUtils(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestEdgePolicyGraphUtils, self).__init__(*args, **kwargs)
-        make_cache_folder_and_set_envvar() 
+        make_cache_folder_and_set_envvar()
         self.env = nx.Graph()
         for x, y in product(range(7), range(7)):
             self.env.add_node(x + y * 7, pos=(float(x), float(y)))
@@ -20,8 +20,8 @@ class TestEdgePolicyGraphUtils(unittest.TestCase):
             if y > 0:
                 self.env.add_edge(x + y * 7, x + (y - 1) * 7)
         self.agents = [
-            Agent(self.env, pos=24),
-            Agent(self.env, pos=25)
+            Agent(self.env, pos=24, radius=.3),
+            Agent(self.env, pos=25, radius=.3)
         ]
         self.agents[0].give_a_goal(27)
         self.agents[1].give_a_goal(21)
@@ -91,4 +91,4 @@ class TestEdgePolicyGraphUtils(unittest.TestCase):
         opt_node_1 = get_optimal_edge(agents, 1)
 
         self.assertEqual(opt_node_0, 31)
-        self.assertEqual(opt_node_1, 18)
+        self.assertEqual(opt_node_1, 24)

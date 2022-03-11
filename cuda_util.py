@@ -39,7 +39,7 @@ def gpu_memory_map():
     output = run_command("nvidia-smi")
     gpu_output = output[output.find("GPU Memory"):]
     # lines of the form
-    # |    0      8734    C   python                                       11705MiB |
+    # |    0      8734    C   python    11705MiB |
     memory_regex = re.compile(
         r"[|]\s+?(?P<gpu_id>\d+)\D+?(?P<pid>\d+).+[ ](?P<gpu_memory>\d+)MiB")
     rows = gpu_output.split("\n")
@@ -64,7 +64,8 @@ def pick_gpu_lowest_memory():
 
 
 def setup_one_gpu():
-    assert not 'tensorflow' in sys.modules, "GPU setup must happen before importing TensorFlow"
+    assert 'tensorflow' not in sys.modules, \
+        "GPU setup must happen before importing TensorFlow"
     gpu_id = pick_gpu_lowest_memory()
     print("Picking GPU "+str(gpu_id))
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"

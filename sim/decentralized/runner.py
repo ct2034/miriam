@@ -1,12 +1,12 @@
 import itertools
 import logging
 import random
-from typing import *
+from typing import Iterable, List, Optional, Tuple, Type, Union
 
 import numpy as np
-from definitions import BLOCKED_NODES_TYPE, INVALID, SCENARIO_RESULT
+from definitions import BLOCKED_NODES_TYPE, INVALID, POS, SCENARIO_RESULT
 from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
-from sim.decentralized.agent import Agent, env_to_nx
+from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
 from sim.decentralized.policy import PolicyCalledException, PolicyType
@@ -35,8 +35,15 @@ def initialize_environment_random_fill(size: int, fill: float, rng: random.Rando
     return environment
 
 
+def get_int_tuple_pos(a: Agent, pos: int) -> Tuple[int, int]:
+    assert a.has_gridmap
+    pos_coord_f = a.env.nodes()[pos][POS]
+    pos_coord = (int(pos_coord_f[0]), int(pos_coord_f[1]))
+    return pos_coord
+
+
 def initialize_new_agent(
-        env: np.ndarray, agents: List[Agent], policy: PolicyType,
+        gridmap: np.ndarray, agents: List[Agent], policy: PolicyType,
         tight_placement: bool = False,
         rng: random.Random = random.Random()) -> Optional[Agent]:
     """Place new agent in the environment, where no obstacle or other agent
@@ -48,51 +55,56 @@ def initialize_new_agent(
     :return: the agent
     """
     if tight_placement:  # starts can be at other goals
-        env_with_agents = env.copy()
-        env_with_goals = env.copy()
+        gridmap_with_agents = gridmap.copy()
+        env_with_goals = gridmap.copy()
         for a in agents:
-            env_with_agents[tuple(a.pos)] = 1
+            pos_coord = get_int_tuple_pos(a, a.pos)
+            gridmap_with_agents[pos_coord] = 1
             assert a.goal is not None, "Agent should have a goal"
-            env_with_goals[tuple(a.goal)] = 1
-        no_obstacle_nor_agent = np.where(env_with_agents == 0)
+            goal_coord = get_int_tuple_pos(a, a.goal)
+            env_with_goals[goal_coord] = 1
+        no_obstacle_nor_agent = np.where(gridmap_with_agents == 0)
         no_obstacle_nor_goal = np.where(env_with_goals == 0)
         assert len(no_obstacle_nor_agent[0]
                    ) > 0, "Possible poses should be left"
         assert len(no_obstacle_nor_goal[0]
                    ) > 0, "Possible poses should be left"
         pos: int = rng.choice(list(np.transpose(no_obstacle_nor_agent)))
-        a = Agent(env, pos, policy, rng=rng)  # we have the agent
+        a = Agent(gridmap, pos, policy, rng=rng)  # we have the agent
 
         # now finding the goal ...
         goals = np.transpose(no_obstacle_nor_goal)
     else:  # no tight placement: sample starts and goals from same distribution
-        env_with_agents_and_goals = env.copy()
+        gridmap_with_agents_and_goals = gridmap.copy()
         for a in agents:
-            env_with_agents_and_goals[tuple(a.pos)] = 1
+            pos_coord = get_int_tuple_pos(a, a.pos)
+            gridmap_with_agents_and_goals[pos_coord] = 1
             assert a.goal is not None, "Agent should have a goal"
-            env_with_agents_and_goals[tuple(a.goal)] = 1
+            goal_coord = get_int_tuple_pos(a, a.goal)
+            gridmap_with_agents_and_goals[goal_coord] = 1
         no_obstacle_nor_agent_or_goal = np.where(
-            env_with_agents_and_goals == 0)
+            gridmap_with_agents_and_goals == 0)
         assert len(no_obstacle_nor_agent_or_goal[0]
                    ) > 0, "Possible poses should be left"
         pos = rng.choice(np.transpose(
             no_obstacle_nor_agent_or_goal))  # type: ignore
-        a = Agent(env, pos, policy, rng=rng)  # we have the agent
+        a = Agent(gridmap, pos, policy, rng=rng)  # we have the agent
 
         # now finding the goal ...
         if a.has_gridmap:
             assert isinstance(pos, Iterable)
-            env_with_agents_and_goals[tuple(pos)] = 1
+            gridmap_with_agents_and_goals[tuple(pos)] = 1
         elif a.has_roadmap:
-            env_with_agents_and_goals[pos] = 1
+            gridmap_with_agents_and_goals[pos] = 1
         no_obstacle_nor_agent_or_goal = np.where(
-            env_with_agents_and_goals == 0)
+            gridmap_with_agents_and_goals == 0)
         assert len(no_obstacle_nor_agent_or_goal[0]
                    ) > 0, "Possible poses should be left"
         goals = np.transpose(no_obstacle_nor_agent_or_goal)
 
-    goals = list(goals)
-    rng.shuffle(goals)
+    goals_tmp = list(goals)
+    rng.shuffle(goals_tmp)
+    goals = np.array(goals_tmp)
     for g in goals:
         if a.give_a_goal(g):  # success
             return a
@@ -100,21 +112,21 @@ def initialize_new_agent(
 
 
 def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
-                     env_nx=None,
                      radius: Optional[float] = None,
-                     rng: random.Random = random.Random()):
+                     rng: random.Random = random.Random()) -> Optional[List[Agent]]:
     n_agents = np.array(starts).shape[0]
     agents = []
-    if env_nx is None:
-        env_nx = env_to_nx(env)
     for i_a in range(n_agents):
         if is_gridmap(env):
-            a = Agent(env, starts[i_a], policy=policy, rng=rng, env_nx=env_nx)
+            a = Agent(env, starts[i_a], policy=policy, rng=rng,
+                      radius=radius)
         elif is_roadmap(env):
-            a = Agent(env, int(starts[i_a]),
-                      policy=policy, rng=rng, env_nx=env_nx, radius=radius)
+            a = Agent(env, int(starts[i_a]), policy=policy, rng=rng,
+                      radius=radius)
+        else:
+            raise RuntimeError("Unknown environment type")
         if not a.give_a_goal(goals[i_a]):
-            return INVALID
+            return None
         agents.append(a)
     return agents
 
@@ -134,21 +146,6 @@ def initialize_agents(
             return None
         agents.append(agent)
     return tuple(agents)  # returning tuple because it can be immutable now
-
-
-def is_environment_well_formed(agents: Tuple[Agent]) -> bool:
-    """Check if the environment is well formed according to Cap2015"""
-    for a in agents:
-        if isinstance(a.env, np.ndarray):
-            a.env = a.env.copy()
-        blocks: BLOCKED_NODES_TYPE = set()
-        for other_a in [ia for ia in agents if ia != a]:
-            assert other_a.goal is not None, "Other agent should have a goal"
-            blocks.add(other_a.pos)
-            blocks.add(other_a.goal)
-        if not a.is_there_path_with_node_blocks(blocks):
-            return False
-    return True
 
 
 def are_all_agents_at_their_goals(agents: Tuple[Agent, ...]) -> bool:
@@ -176,11 +173,10 @@ def will_scenario_collide(env, starts, goals, ignore_finished_agents) -> Optiona
     between may collide on the given env."""
     if ignore_finished_agents == False:
         raise NotImplementedError()
-    env_nx = env_to_nx(env)
     n_agents = starts.shape[0]
     seen = set()
     for i_a in range(n_agents):
-        a = Agent(env, starts[i_a], env_nx=env_nx)
+        a = Agent(env, starts[i_a])
         if not a.give_a_goal(goals[i_a]):
             return None
         assert a.path is not None, "Agent should have a path"
@@ -202,9 +198,9 @@ def will_agents_collide(agents, ignore_finished_agents):
         agent_paths.append(a.path)
         for pos in a.path:
             if not do_collide:  # only need to do this if no collision was found
-                if tuple(pos) in seen:
+                if pos in seen:
                     do_collide = True
-                seen.add(tuple(pos))
+                seen.add(pos)
     return do_collide, agent_paths
 
 
@@ -221,15 +217,17 @@ def sample_and_run_a_scenario(size, n_agents, policy, plot, rng: random.Random, 
 
 
 def run_a_scenario(env: POTENTIAL_ENV_TYPE,
-                   agents: Tuple[Agent, ...],
+                   agents: Union[Tuple[Agent, ...], List[Agent]],
                    plot: bool,
-                   iterator: IteratorType = IteratorType.WAITING,
-                   pause_on: Optional[Exception] = None,
+                   iterator: IteratorType = IteratorType.LOOKAHEAD1,
+                   pause_on: Optional[Type[Exception]] = None,
                    ignore_finished_agents: bool = True,
                    time_limit: int = TIME_LIMIT,
-                   paths_out: Optional[List[List[Tuple]]] = None,
+                   paths_out: Optional[List[List[int]]] = None,
                    ) -> SCENARIO_RESULT:
     n_agents = len(agents)
+    if isinstance(agents, list):
+        agents = tuple(agents)
     # evaluation parameters
     time_progress = np.zeros([n_agents], dtype=float)
     space_progress = np.zeros([n_agents], dtype=float)
@@ -254,7 +252,7 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
         while not are_all_agents_at_their_goals(agents):
             poses_before_moving = list(map(lambda a: a.pos, agents))
             if plot:  # pragma: no cover
-                plot_env_agents(env, agents)
+                plot_env_agents(env, agents)  # type: ignore
             time_slice, space_slice = get_iterator_fun(
                 iterator)(agents, ignore_finished_agents)
             time_progress += time_slice
@@ -317,11 +315,9 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         "successful"
     ]
     # policies = PolicyType
-    policies = [PolicyType.CLOSEST,
-                PolicyType.FILL,
-                PolicyType.RANDOM,
+    policies = [PolicyType.RANDOM,
                 PolicyType.LEARNED,
-                PolicyType.INVERSE_LEARNED]
+                PolicyType.OPTIMAL]
     pb = ProgressBar("evaluate_policies", len(policies)*runs, 5)
 
     for policy in policies:
@@ -329,21 +325,21 @@ def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
         evaluation_per_policy = np.empty([len(evaluation_names), 0])
         for _ in range(runs):
             results = sample_and_run_a_scenario(
-                size, n_agents, policy, False, rng, IteratorType.BLOCKING3)
+                size, n_agents, policy, False, rng, IteratorType.LOOKAHEAD3)
             evaluation_per_policy = np.append(
-                evaluation_per_policy, np.transpose([results]), axis=1)
+                evaluation_per_policy, np.transpose(np.array([results])), axis=1)
             pb.progress()
         evaluations[policy] = evaluation_per_policy
     pb.end()
 
     if plot_eval:  # pragma: no cover
-        plot_evaluations(evaluations, evaluation_names, PolicyType.RANDOM)
+        plot_evaluations(evaluations, evaluation_names, PolicyType.OPTIMAL)
     return (evaluations, evaluation_names)
 
 
 if __name__ == "__main__":  # pragma: no cover
-    logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)
-    logging.getLogger("sim.decentralized.policy").setLevel(logging.ERROR)
-    logging.getLogger("__main__").setLevel(logging.ERROR)
-    logging.getLogger("root").setLevel(logging.ERROR)
-    evaluate_policies(8, 8, 100)
+    logging.getLogger("sim.decentralized.agent").setLevel(logging.INFO)
+    logging.getLogger("sim.decentralized.policy").setLevel(logging.INFO)
+    logging.getLogger("__main__").setLevel(logging.INFO)
+    logging.getLogger("root").setLevel(logging.INFO)
+    evaluate_policies(4, 2, 10)

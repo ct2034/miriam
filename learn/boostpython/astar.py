@@ -9,7 +9,6 @@ from itertools import product
 width = 100
 height = 50
 
-np.random.seed(0)
 grid = np.random.random_integers(0, 10, size=(width, height))
 plt.imshow(grid)
 

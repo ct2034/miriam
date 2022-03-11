@@ -52,6 +52,7 @@ def ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, suboptimality=1.0,
     if data is None or data is INVALID:
         return INVALID
     n_agents = starts.shape[0]
+    assert not isinstance(data, int)
     if SCHEDULE not in data.keys():
         return INVALID
     schedule = data[SCHEDULE]
@@ -79,16 +80,16 @@ def _ecbs_data_to_paths(data):
         paths.append(np.array(one_path))
     return paths
 
-
 # cbs roadmaps ################################################################
 
 
 def cached_cbsr(env, starts, goals,
                 timeout=DEFAULT_TIMEOUT_S,
-                radius=0.1,
+                radius: float = 0.1,
                 skip_cache=False):
     if skip_cache:
-        paths = plan_cbsr(env, starts, goals, radius=radius, timeout=timeout)
+        paths = plan_cbsr(env, starts, goals, radius=radius,
+                          timeout=timeout, skip_cache=skip_cache)
     else:
         scenario = (env, starts, goals)
         solver_params = {
@@ -100,12 +101,11 @@ def cached_cbsr(env, starts, goals,
             paths = storage.get_result(
                 scenario, ResultType.CBSR_PATHS, solver_params)
         else:
-            paths = plan_cbsr(env, starts, goals,
-                              radius=radius, timeout=timeout)
+            paths = plan_cbsr(env, starts, goals, radius=radius,
+                              timeout=timeout, skip_cache=skip_cache)
             storage.save_result(scenario, ResultType.CBSR_PATHS,
                                 solver_params, paths)
     return paths
-
 
 # icts ########################################################################
 
@@ -137,7 +137,7 @@ def icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, return_paths=False):
 
 def indep(env, starts, goals):
     agents = to_agent_objects(env, starts, goals)
-    if agents is INVALID:
+    if agents is None:
         return INVALID
     paths = [a.path for a in agents]
     return paths
@@ -169,8 +169,9 @@ def decentralized(env, starts, goals,
                   policy, ignore_finished_agents):
     agents = to_agent_objects(
         env, starts, goals, policy, rng=random.Random(0))
-    if agents is INVALID:
+    if agents is None:
         return INVALID
+    assert agents is not None
     return run_a_scenario(
-        env, agents, plot=False, iterator=IteratorType.BLOCKING3,
+        env, agents, plot=False, iterator=IteratorType.LOOKAHEAD1,
         ignore_finished_agents=ignore_finished_agents)

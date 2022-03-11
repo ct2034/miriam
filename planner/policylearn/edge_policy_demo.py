@@ -77,14 +77,14 @@ def try_model_in_scenario(model):
     starts_g = starts_or_goals_to_nodes(starts, env)
     goals_g = starts_or_goals_to_nodes(goals, env)
     agents = scenarios.evaluators.to_agent_objects(env_g, starts_g, goals_g,
-                                                   policy=PolicyType.OPTIMAL_EDGE,  # will be overwritten below
+                                                   policy=PolicyType.OPTIMAL,  # will be overwritten below
                                                    radius=.1)
     for a in agents:
         a.policy = sim.decentralized.policy.EdgePolicy(a, model)
 
     paths: List[Any] = []
     stats = run_a_scenario(env, agents, plot=False,
-                           iterator=IteratorType.EDGE_POLICY3,
+                           iterator=IteratorType.LOOKAHEAD3,
                            paths_out=paths)
     print(stats)
     print(paths)

@@ -7,7 +7,6 @@ from definitions import INVALID, POS
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected
 
-RADIUS = .001
 TIMEOUT = 120
 
 BFS_TYPE = Dict[int, int]
@@ -26,7 +25,6 @@ def t_to_data(t: int, path_i: int) -> float:
 
 def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TYPE]:
     own_node = agents[i_self].pos
-    assert agents[i_self].has_roadmap
     g = agents[i_self].env
     g_sml = nx.ego_graph(g, own_node, radius=hop_dist)
     big_from_small: BFS_TYPE = {i: int(n) for i, n in enumerate(g_sml.nodes)}
@@ -35,7 +33,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     own_pos = torch.tensor(pos[own_node])
     own_angle = 0.
     try:
-        next_node = agents[i_self].path[agents[i_self].path_i + 1][0]
+        next_node = agents[i_self].path[agents[i_self].path_i + 1]
         next_pos = torch.tensor(pos[next_node])
         own_angle = torch.atan2(
             next_pos[1] - own_pos[1], next_pos[0] - own_pos[0]).item()
@@ -45,7 +43,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     # data layers
     # 1. own path
     x_layer_own_path = torch.zeros((len(small_from_big), 1))
-    for p, t in agents[i_self].path:
+    for t, p in enumerate(agents[i_self].path):
         if p in g_sml.nodes:
             p_sml = small_from_big[p]
             x_layer_own_path[p_sml] = t_to_data(t, agents[i_self].path_i)
@@ -55,7 +53,7 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     for i_a, a in enumerate(agents):
         if i_a == i_self:
             continue
-        for p, t in a.path:
+        for t, p in enumerate(a.path):
             if p in g_sml.nodes:
                 p_sml = small_from_big[p]
                 x_layer_other_paths[p_sml] = max(
@@ -98,16 +96,18 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     return d, big_from_small
 
 
-def get_optimal_edge(agents, i_agent: int):
+def get_optimal_edge(agents, i_agent: int) -> int:
     """Return the optimal edge to take for the given agent. """
     starts = [a.pos for a in agents]
     goals = [a.goal for a in agents]
+    radius = agents[i_agent].radius
     import scenarios.solvers
     paths = scenarios.solvers.cached_cbsr(
-        agents[0].env, starts, goals, radius=RADIUS, timeout=TIMEOUT)
+        agents[0].env, starts, goals, radius=radius, timeout=TIMEOUT)
     if paths is INVALID:
         raise RuntimeError("No paths found")
     else:
+        assert not isinstance(paths, str)
         path = paths[i_agent]
         if len(path) == 1:  # already at goal
             return path[0][0]

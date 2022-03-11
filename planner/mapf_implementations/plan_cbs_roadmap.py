@@ -96,7 +96,7 @@ def read_outfile(fname):
     return paths
 
 
-def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_cache: bool = False):
+def plan_cbsr(g, starts, goals, radius: float, timeout: float, skip_cache: bool):
     this_dir = os.path.dirname(__file__)
     cache_dir = os.path.join(this_dir, 'cache')
     if not os.path.exists(cache_dir):
@@ -180,6 +180,6 @@ if __name__ == "__main__":
     paths = plan_cbsr(g, starts, goals)
 
     # plot
-    if paths is not None:
+    if paths is not INVALID:
         plot_with_paths(g, paths)
         plt.show()

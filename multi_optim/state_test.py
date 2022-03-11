@@ -5,9 +5,8 @@ from math import pi
 import networkx as nx
 from planner.policylearn.edge_policy import EdgePolicyModel
 from scenarios.test_helper import make_cache_folder_and_set_envvar
-from sim.decentralized.agent import env_to_nx
 
-from multi_optim.dagger import *
+from multi_optim.state import ScenarioState
 
 
 class ScenarioStateTest(unittest.TestCase):
@@ -23,7 +22,7 @@ class ScenarioStateTest(unittest.TestCase):
                 self.sq_graph.add_edge(x + 5*y, x - 1 + 5*y)
             if y > 0:
                 self.sq_graph.add_edge(x + 5*y, x + 5*(y - 1))
-        self.sq_env_nx = env_to_nx(self.sq_graph)
+        self.radius = 0.2
 
         # graph with passing point
         self.pass_graph = nx.Graph()
@@ -37,7 +36,6 @@ class ScenarioStateTest(unittest.TestCase):
         self.pass_graph.add_edge(1, 3)
         self.pass_graph.add_edge(1, 2)
         self.pass_graph.add_edge(3, 4)
-        self.pass_env_nx = env_to_nx(self.pass_graph)
 
         # any model
         self.model = EdgePolicyModel(gpu="cpu")
@@ -46,8 +44,8 @@ class ScenarioStateTest(unittest.TestCase):
         """Test running the scenario with parallel paths."""
         starts = [0, 1, 2, 3, 4]
         goals = [20, 21, 22, 23, 24]
-        state = ScenarioState(self.sq_graph, starts, goals,
-                              self.sq_env_nx, self.model)
+        state = ScenarioState(self.sq_graph, starts,
+                              goals, self.model, self.radius)
         # not finished before running
         self.assertFalse(state.finished)
 
@@ -65,8 +63,8 @@ class ScenarioStateTest(unittest.TestCase):
         """Test running the scenario with a collision."""
         starts = [0, 3]
         goals = [3, 0]
-        state = ScenarioState(self.pass_graph, starts, goals,
-                              self.pass_env_nx, self.model)
+        state = ScenarioState(self.pass_graph, starts,
+                              goals, self.model, self.radius)
         # not finished before running
         self.assertFalse(state.finished)
 
@@ -86,21 +84,24 @@ class ScenarioStateTest(unittest.TestCase):
         # preparation
         starts = [0, 3]
         goals = [3, 0]
-        state = ScenarioState(self.pass_graph, starts, goals,
-                              self.pass_env_nx, self.model)
+        state = ScenarioState(self.pass_graph, starts,
+                              goals, self.model, self.radius)
         state.run()
 
         # check state after running
         # the agents should not have moved
         self.assertFalse(state.finished)
+        assert state.agents is not None
         self.assertEqual(state.agents[0].pos, (0))
         self.assertEqual(state.agents[1].pos, (3))
+        assert state.is_agents_to_consider is not None
         self.assertIn(0, state.is_agents_to_consider)
         self.assertIn(1, state.is_agents_to_consider)
 
         # there should be an observation now
         observation = state.observe()
         self.assertIsNotNone(observation)
+        assert observation is not None
         self.assertEqual(len(observation), 2)
         data_0, big2sml_0 = observation[0]
         data_1, big2sml_1 = observation[1]
