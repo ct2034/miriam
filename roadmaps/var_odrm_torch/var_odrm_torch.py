@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from functools import lru_cache
+import enum
+from functools import lru_cache, reduce
 from random import Random
 from typing import List, Optional, Tuple, Union
 
@@ -288,6 +289,32 @@ def optimize_poses(
     g = make_graph(pos, map_img)
     optimizer.zero_grad()
     return g, pos, test_length, training_length
+
+
+def optimize_poses_from_node_paths(
+        g: nx.Graph,
+        pos: torch.Tensor,
+        path_set: List[List[PATH_TYPE]],
+        optimizer):
+    n_paths = reduce(lambda x, y: x + len(y), path_set, 0)
+    lengths = torch.zeros(n_paths)
+    i_p = 0
+    for paths in path_set:
+        for path in paths:
+            if len(path) > 0:
+                sections = torch.zeros(len(path)-1)
+                for i_n in range(len(path)-1):
+                    sections[i_n] = torch.linalg.vector_norm(
+                        pos[path[i_n]] - pos[path[i_n+1]]
+                    )
+                lengths[i_p] = torch.sum(sections)
+                i_p += 1
+    total_lenght = torch.sum(lengths)
+    if total_lenght.item() > 0.:
+        _ = total_lenght.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+    return g, pos, total_lenght
 
 
 if __name__ == "__main__":

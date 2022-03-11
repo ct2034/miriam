@@ -22,9 +22,9 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import BFS_TYPE, TIMEOUT
-from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph, make_graph,
-                                                    optimize_poses, read_map,
-                                                    sample_points)
+from roadmaps.var_odrm_torch.var_odrm_torch import (
+    draw_graph, make_graph, optimize_poses_from_node_paths, read_map,
+    sample_points)
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
@@ -131,7 +131,8 @@ def sample_trajectories_in_parallel(
         new_ds = []
         for ds, paths in results_s:
             new_ds.extend(ds)
-            paths_s.append(paths)
+            if paths is not None:
+                paths_s.append(paths)
         with open(new_fname, "wb") as f:
             pickle.dump(new_ds, f)
 
@@ -158,11 +159,12 @@ def find_collisions(agents
     return collisions
 
 
-def eval_policy_full_scenario(
+def eval_full_scenario(
     model, g: nx.Graph, n_agents, n_eval, rng
-) -> Tuple[Optional[float], float]:
+) -> Tuple[Optional[float], float, float]:
     regret_s = []
     success_s = []
+    length_s = []
     model.eval()
     for i_e in range(n_eval):
         # logger.debug(f"Eval {i_e}")
@@ -216,12 +218,12 @@ def eval_policy_full_scenario(
             #     raise Exception("Regret is negative")
 
             regret_s.append(regret)
-            # logger.debug(f"regret: {regret}")
+            length_s.append(res_policy[IDX_AVERAGE_LENGTH])
         success_s.append(res_policy[IDX_SUCCESS])
     if len(regret_s) > 0:
-        return np.mean(regret_s), np.mean(success_s)
+        return np.mean(regret_s), np.mean(success_s), np.mean(length_s)
     else:
-        return None, np.mean(success_s)
+        return None, np.mean(success_s), np.mean(length_s)
 
 
 def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
@@ -308,13 +310,14 @@ def run_optimization(
 
     # Visualization and analysis
     stats = StatCollector([
-        "poses_test_length",
+        # "poses_test_length",
         "poses_training_length",
         "policy_loss",
         "policy_regret",
         "policy_success",
         "policy_accuracy",
         "general_new_data_percentage",
+        "general_length",
         "n_policy_data_len"])
     stats.add_statics({
         # metadata
@@ -349,7 +352,7 @@ def run_optimization(
 
     # Run optimization
     pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
-    poses_test_length = 0
+    # poses_test_length = 0
     poses_training_length = 0
     for i_r in range(n_runs):
         optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
@@ -368,10 +371,10 @@ def run_optimization(
 
         # Optimizing Poses
         if optimize_poses_now:
-            g, pos, poses_test_length, poses_training_length = optimize_poses(
-                g, pos, map_img, optimizer_pos, rng)
+            g, pos, poses_training_length = optimize_poses_from_node_paths(
+                g, pos, paths_s, optimizer_pos)
             if i_r % stats_and_eval_every == 0:
-                stats.add("poses_test_length", i_r, float(poses_test_length))
+                # stats.add("poses_test_length", i_r, float(poses_test_length))
                 stats.add("poses_training_length", i_r,
                           float(poses_training_length))
 
@@ -385,7 +388,7 @@ def run_optimization(
                 n_eval = 10
                 # little less agents for evaluation
                 eval_n_agents = int(np.ceil(n_agents * .7))
-                regret, success = eval_policy_full_scenario(
+                (regret, success, general_length) = eval_full_scenario(
                     policy_model, g, eval_n_agents, n_eval, rng_test)
                 policy_accuracy = policy_model.accuracy(policy_eval_list)
 
@@ -394,13 +397,15 @@ def run_optimization(
                     stats.add("policy_regret", i_r, float(regret))
                 stats.add("policy_success", i_r, float(success))
                 stats.add("policy_accuracy", i_r, policy_accuracy)
+                stats.add("general_length", i_r, float(general_length))
                 stats.add("general_new_data_percentage",
                           i_r, float(new_data_percentage))
                 stats.add("n_policy_data_len", i_r, float(data_len))
                 logger.info(f"Loss: {policy_loss:.3f}")
-                logger.info(f"Regret: {regret:.3f}")
+                logger.info(f"Regret: {regret:e}")
                 logger.info(f"Success: {success}")
                 logger.info(f"Accuracy: {policy_accuracy:.3f}")
+                logger.info(f"Length: {general_length:.3f}")
                 logger.info(f"New data: {new_data_percentage*100:.1f}%")
                 logger.info(f"Data length: {data_len}")
 
@@ -430,8 +435,6 @@ def run_optimization(
                f"multi_optim/results/{prefix}_policy_model.pt")
 
     logger.info(stats.get_statics())
-
-    return g, pos, poses_test_length, poses_training_length
 
 
 if __name__ == "__main__":
