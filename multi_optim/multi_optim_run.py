@@ -31,18 +31,18 @@ from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
 from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
-    from dagger import RADIUS, DaggerStrategy
     from state import ScenarioState, make_a_state_with_an_upcoming_decision
 else:
-    from multi_optim.dagger import RADIUS, DaggerStrategy
     from multi_optim.state import (ACTION, ScenarioState,
                                    make_a_state_with_an_upcoming_decision)
 
 logger = logging.getLogger(__name__)
 
 MAX_STEPS = 10
+RADIUS = 0.001
 
 
 def sample_trajectory_proxy(args):
@@ -238,10 +238,23 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
 
 def optimize_policy(model, g: nx.Graph, n_agents, n_epochs, batch_size,
                     optimizer, epds, prefix, rng):
-    ds = DaggerStrategy(
-        model, g, n_epochs, n_agents, batch_size, optimizer, prefix, rng)
-    model, loss = ds.learn_dagger(epds)
-    return model, loss
+    loss_s = []
+
+    logger.debug("Memory usage, current: " +
+                 str(format_size(tracemalloc.get_traced_memory()[0])) +
+                 " peak: " +
+                 str(format_size(tracemalloc.get_traced_memory()[1])))
+
+    # learn
+    loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
+    loss_s = []
+    for _, batch in enumerate(loader):
+        loss = model.learn(batch, optimizer)
+        loss_s.append(loss)
+
+    if len(loss_s) == 0:
+        loss_s = [0]
+    return model, np.mean(loss_s)
 
 
 def run_optimization(
