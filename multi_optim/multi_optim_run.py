@@ -236,7 +236,8 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
     return eval_set
 
 
-def optimize_policy(model, batch_size, optimizer, epds) -> Tuple[EdgePolicyModel, float]:
+def optimize_policy(model, batch_size, optimizer, epds
+                    ) -> Tuple[EdgePolicyModel, float]:
     loss_s = []
     # learn
     loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
@@ -437,6 +438,8 @@ if __name__ == "__main__":
     tmp.set_start_method('spawn')
 
     # debug run
+    for d in os.listdir("multi_optim/results/debug_data"):
+        os.remove(f"multi_optim/results/debug_data/{d}")
     rng = Random(0)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(
