@@ -1,5 +1,6 @@
 import unittest
 from random import Random
+from unittest.mock import patch
 
 import networkx as nx
 import torch
@@ -7,8 +8,12 @@ from definitions import POS
 from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.edge_policy_test import make_data
 from sim.decentralized.agent import Agent
+from sim.decentralized.policy import RaisingPolicy, RandomPolicy
+from sim.decentralized.runner import to_agent_objects
 
-from multi_optim.multi_optim_run import find_collisions, optimize_policy
+import multi_optim.state
+from multi_optim.multi_optim_run import (find_collisions, optimize_policy,
+                                         sample_trajectory)
 
 
 class MultiOptimTest(unittest.TestCase):
@@ -83,3 +88,61 @@ class MultiOptimTest(unittest.TestCase):
         # accuracy after training must have increased
         test_acc = policy.accuracy(test_data)
         self.assertGreater(test_acc, 0.85)
+
+    def test_sample_trajectory(self):
+        model = EdgePolicyModel(4, 3)
+        starts = [0, 4]
+        goals = [3, 2]
+        rng = Random(1)
+
+        def patch_init(self, graph, _starts, _goals, model, radius):
+            print("patch_init")
+            self.graph = graph
+            self.starts = starts
+            self.goals = goals
+            self.is_agents_to_consider = None
+            self.finished = False
+            self.agents = to_agent_objects(
+                graph, self.starts, self.goals, radius=radius, rng=rng)
+            self.model = model
+            if self.agents is None:
+                raise RuntimeError("Error in agent generation")
+            for a in self.agents:
+                a.policy = RaisingPolicy(a)
+            self.paths_out = []
+
+        def patch_step(self, _actions):
+            """Perform the given actions and return the new state"""
+            print(f"{_actions=}")
+            print(f"{self.agents[0].pos=}")
+            print(f"{self.agents[1].pos=}")
+            assert self.agents is not None
+            for i_a, a in enumerate(self.agents):
+                a.policy = RandomPolicy(a, 1)
+                a.start = a.pos
+                a.back_to_the_start()
+            self.run()
+
+        with patch.object(multi_optim.state.ScenarioState, '__init__',
+                          new=patch_init):
+            with patch.object(multi_optim.state.ScenarioState, 'step',
+                              new=patch_step):
+                ds, paths = sample_trajectory(
+                    seed=0,
+                    graph=self.g,
+                    n_agents=len(starts),
+                    model=model,
+                    max_steps=10)
+                print(f"{ds=}")
+                print(f"{paths=}")
+
+        # we have some data from collisions
+        self.assertTrue(len(ds) > 0)
+
+        # we have some paths
+        assert paths is not None
+        self.assertEqual(len(paths), len(starts))
+        for i_a, path in enumerate(paths):
+            self.assertEqual(len(path), 4)
+            self.assertEqual(path[0], starts[i_a])
+            self.assertEqual(path[3], goals[i_a])

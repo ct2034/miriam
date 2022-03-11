@@ -127,13 +127,15 @@ def sample_trajectories_in_parallel(
         results_s = pool.imap_unordered(
             sample_trajectory_proxy, params)
         new_ds = []
+        paths_s = []
         for ds, paths in results_s:
             new_ds.extend(ds)
+            paths_s.append(paths)
         with open(new_fname, "wb") as f:
             pickle.dump(new_ds, f)
 
     # add this to the dataset
-    return new_fname
+    return new_fname, paths_s
 
 
 def find_collisions(agents
@@ -353,7 +355,7 @@ def run_optimization(
         assert n_runs_policy >= n_runs_pose, \
             "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
-        new_fname = sample_trajectories_in_parallel(
+        new_fname, paths_s = sample_trajectories_in_parallel(
             policy_model, g, n_agents, n_epochs_per_run_policy,
             prefix, pool, rng)
         epds.add_file(new_fname)

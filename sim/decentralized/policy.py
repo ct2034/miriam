@@ -69,7 +69,7 @@ class Policy(object):
 
 
 class RandomPolicy(Policy):
-    def __init__(self, agent, seed=None) -> None:
+    def __init__(self, agent, _=None) -> None:
         super().__init__(agent)
 
     def get_edge(self, _, __):
