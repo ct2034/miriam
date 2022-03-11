@@ -45,3 +45,5 @@ class MultiOptimTest(unittest.TestCase):
         self.assertEqual(list(collisions.keys())[0][1], 1)  # t
         self.assertIn(0, collisions[(1, 1)])  # agent
         self.assertIn(1, collisions[(1, 1)])  # agent
+
+    def test_
