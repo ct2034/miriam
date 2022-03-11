@@ -7,6 +7,7 @@ import torch
 from definitions import POS
 from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.edge_policy_test import make_data
+from scenarios.test_helper import make_cache_folder_and_set_envvar
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import RaisingPolicy, RandomPolicy
 from sim.decentralized.runner import to_agent_objects
@@ -19,6 +20,7 @@ from multi_optim.multi_optim_run import (find_collisions, optimize_policy,
 class MultiOptimTest(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:  # type: ignore
         super().__init__(methodName)
+        make_cache_folder_and_set_envvar()
         self.g = nx.Graph()
         self.g.add_edges_from([
             (0, 1),
