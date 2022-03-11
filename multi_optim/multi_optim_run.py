@@ -238,8 +238,6 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
 
 def optimize_policy(model, batch_size, optimizer, epds
                     ) -> Tuple[EdgePolicyModel, float]:
-    loss_s = []
-    # learn
     loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
     loss_s = []
     for _, batch in enumerate(loader):
