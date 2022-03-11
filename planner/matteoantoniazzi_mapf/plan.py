@@ -14,7 +14,7 @@ INFO_TYPE = Tuple[List[List[Tuple[int, int]]],
 
 
 def icts_plan(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
-              timeout: int = DEFAULT_TIMEOUT_S) -> Tuple[Any]:
+              timeout: int = DEFAULT_TIMEOUT_S) -> INFO_TYPE:
     sse = SolverSettings()
     sse.set_time_out(timeout)
     solver = ICTSSolver(sse)
@@ -30,7 +30,7 @@ def icts_plan(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
     problem_instance = ProblemInstance(problem_map, agents)
 
     info = solver.solve(problem_instance, return_infos=True)
-    return info
+    return info  # type: ignore
 
 
 def is_info_valid(info: INFO_TYPE) -> bool:

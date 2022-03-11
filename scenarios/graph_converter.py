@@ -1,6 +1,6 @@
 import networkx as nx
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List
 from definitions import FREE, POS
 
 
@@ -45,7 +45,7 @@ def gridmap_to_nx(env: np.ndarray) -> nx.Graph:
 
 def starts_or_goals_to_nodes(
         starts_or_goals: np.ndarray,
-        env: np.ndarray) -> np.ndarray:
+        env: np.ndarray) -> List[int]:
     """Convert starts and goals to node numbers"""
     return [
         coordinate_to_node(env, coordinate) for coordinate in starts_or_goals

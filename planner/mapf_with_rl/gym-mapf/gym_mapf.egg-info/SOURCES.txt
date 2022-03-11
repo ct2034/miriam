@@ -1,7 +1,0 @@
-README.md
-setup.py
-gym_mapf.egg-info/PKG-INFO
-gym_mapf.egg-info/SOURCES.txt
-gym_mapf.egg-info/dependency_links.txt
-gym_mapf.egg-info/requires.txt
-gym_mapf.egg-info/top_level.txt

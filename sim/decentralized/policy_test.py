@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 
 import unittest
+from lib2to3 import pytree
+from pickletools import pybytes
 from unittest.mock import MagicMock
 
 import numpy as np
+import pytest
+from planner.policylearn.train_model import CONVRNN_STR
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import CONVRNN_STR, LearnedPolicy, PolicyType
+from sim.decentralized.policy import LearnedPolicy, PolicyType
 from sim.decentralized.runner import run_a_scenario
 
 
 class TestLearnedPolicy(unittest.TestCase):
+
+    @pytest.mark.skip  # TODO we should rewrite these for edge policies
     def test_learned_path_until_coll_long(self):
         lp = LearnedPolicy(Agent(np.array([[0, ]]), np.array([0, 0])))
 
@@ -30,6 +36,7 @@ class TestLearnedPolicy(unittest.TestCase):
         self.assertEqual(max(path_until_coll[1]), 2)
         self.assertEqual(max(path_until_coll[2]), 3)
 
+    @pytest.mark.skip  # TODO we should rewrite these for edge policies
     def test_learned_path_until_coll_short(self):
         lp = LearnedPolicy(Agent(np.array([[0, ]]), np.array([0, 0])))
 
@@ -46,6 +53,7 @@ class TestLearnedPolicy(unittest.TestCase):
         self.assertEqual(max(path_until_coll[1]), 2)
         self.assertEqual(max(path_until_coll[2]), 3)
 
+    @pytest.mark.skip  # TODO we should rewrite these for edge policies
     def test_learned_path_until_coll_shortest(self):
         lp = LearnedPolicy(Agent(np.array([[0, ]]), np.array([0, 0])))
 
@@ -59,6 +67,7 @@ class TestLearnedPolicy(unittest.TestCase):
         self.assertEqual(max(path_until_coll[1]), 2)
         self.assertEqual(max(path_until_coll[2]), 2)
 
+    @pytest.mark.skip  # TODO we should rewrite these for edge policies
     def test_learned_get_priority_calling_model(self):
         predictMock = MagicMock(return_value=[[.5, ], ])
         env = np.zeros((3, 3))

@@ -4,8 +4,7 @@ import uuid
 
 import networkx as nx
 import numpy as np
-from sim.decentralized.agent import env_to_nx
-
+from sim.decentralized.agent import gridmap_to_graph
 ENVVAR_STORAGE_PATH_STR = 'SCENARIO_STORAGE_PATH'
 STORAGE_PATH_TESTING = "/tmp/testing/"
 
@@ -48,8 +47,9 @@ def assert_path_equality(self, should_be, test):
 
 def is_connected(env):
     """make sure all free cells are reachable from one another"""
-    g = env_to_nx(env)
-    return nx.is_weakly_connected(g)
+    if isinstance(env, np.ndarray):
+        env, _ = gridmap_to_graph(env)
+    return nx.is_connected(env)
 
 
 env = np.array([

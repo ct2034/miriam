@@ -2,7 +2,6 @@
 import logging
 import os
 import subprocess
-import time
 from random import Random
 
 import matplotlib.pyplot as plt
@@ -97,7 +96,7 @@ def read_outfile(fname):
     return paths
 
 
-def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_cache: bool = False):
+def plan_cbsr(g, starts, goals, radius: float, timeout: float, skip_cache: bool):
     this_dir = os.path.dirname(__file__)
     cache_dir = os.path.join(this_dir, 'cache')
     if not os.path.exists(cache_dir):
@@ -116,13 +115,17 @@ def plan_cbsr(g, starts, goals, radius: float = .01, timeout: float = 60., skip_
     hash_roadmap = hasher([g, radius])
     fname_roadmap = f"{cache_dir}/{hash_roadmap}_roadmap.yaml"
     data = None
-    if not os.path.exists(fname_roadmap) or skip_cache:
+    if os.path.exists(fname_roadmap) and not skip_cache:
+        try:
+            with open(fname_roadmap, 'r') as f:
+                data = yaml.load(f, Loader=yaml.SafeLoader)
+        except yaml.YAMLError as e:
+            logger.warning(e.__class__)
+            logger.warning(e)
+    if not data:  # nothing was loaded
         if os.path.exists(fname_roadmap):
             os.remove(fname_roadmap)
         data = write_roadmap_file(fname_roadmap, g, radius)
-    else:
-        with open(fname_roadmap, 'r') as f:
-            data = yaml.load(f, Loader=yaml.SafeLoader)
     if data is None:  # error
         logging.warning("no annotated roadmap")
         return INVALID
@@ -177,6 +180,6 @@ if __name__ == "__main__":
     paths = plan_cbsr(g, starts, goals)
 
     # plot
-    if paths is not None:
+    if paths is not INVALID:
         plot_with_paths(g, paths)
         plt.show()

@@ -1,4 +1,5 @@
 import unittest
+import pytest
 
 import numpy as np
 from definitions import INVALID
@@ -85,6 +86,7 @@ class TestSolvers(unittest.TestCase):
         test_helper.assert_path_equality(
             self, test_helper.paths_no_collision, paths)
 
+    @pytest.mark.skip  # not working on this right now
     def test_indep_collision(self):
         paths = indep(
             test_helper.env, test_helper.starts_collision,
@@ -92,6 +94,7 @@ class TestSolvers(unittest.TestCase):
         test_helper.assert_path_equality(
             self, test_helper.paths_collision_indep, paths)
 
+    @pytest.mark.skip  # not working on this right now
     def test_indep_no_collision(self):
         paths = indep(
             test_helper.env, test_helper.starts_no_collision,

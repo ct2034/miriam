@@ -1,7 +1,7 @@
 import logging
 import os
 import pickle
-from typing import Any, List, Tuple
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
@@ -17,60 +17,103 @@ EVAL_LIST = List[Tuple[Data, BFS_TYPE]]
 
 
 class EdgePolicyDataset(Dataset):
-    def __init__(self, path, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, path, transform=None, pre_transform=None, pre_filter=None, gpu=None):
         super().__init__(transform, pre_transform, pre_filter)
         self.path = path
-        self.loaded_fname = None
-        self.loaded_data = None
-        self.fnames = os.listdir(path)
         self.lookup: List[Tuple[str, int]] = []  # (fname, i)
-        for fname in self.fnames:
-            len_this_file = len(
-                self._load_file(fname))
-            lookup_section = [
-                (fname, i_d) for i_d in range(len_this_file)]
-            self.lookup.extend(lookup_section)
+        self.gpu = gpu
+        self.data_store = {}
+        self.added_fnames: List[str] = []
+        if os.path.isdir(path):
+            fname_to_init = [self.path + "/" +
+                             fname for fname in os.listdir(path)]
+            for fname in fname_to_init:
+                self.add_file(fname)
 
     def len(self):
         return len(self.lookup)
 
     def _load_file(self, fname):
-        if self.loaded_fname == fname:
-            data = self.loaded_data
-        else:
-            fpath = self.path + "/" + fname
-            with open(fpath, "rb") as f:
-                data = pickle.load(f)
-            self.loaded_fname = fname
-            self.loaded_data = data
+        with open(fname, "rb") as f:
+            data = pickle.load(f)
         return data
+
+    def add_file(self, fname):
+        if fname in self.added_fnames:
+            # don't add the same file twice
+            return
+        self.added_fnames.append(fname)
+        data = self._load_file(fname)
+        len_this_file = len(data)
+        self.data_store[fname] = data
+        lookup_section = [
+            (fname, i_d) for i_d in range(len_this_file)]
+        self.lookup.extend(lookup_section)
 
     def get(self, idx):
         fname, i_d = self.lookup[idx]
-        return self._load_file(fname)[i_d]
+        return self.data_store[fname][i_d].to(self.gpu)
 
 
 class EdgePolicyModel(nn.Module):
-    def __init__(self, num_node_features=4, conv_channels=4, gpu=torch.device("cpu")):
+    def __init__(
+            self,
+            num_node_features=4,
+            num_conv_channels=128,
+            num_conv_layers=4,
+            num_readout_layers=2,
+            cheb_filter_size=5,
+            dropout_p=.2,
+            gpu=torch.device("cpu")):
         super().__init__()
         self.num_node_features = num_node_features
-        self.conv_channels = conv_channels
-        self.conv1 = torch_geometric.nn.ChebConv(
-            num_node_features, conv_channels, K=2)
-        self.conv2 = torch_geometric.nn.ChebConv(
-            conv_channels, conv_channels, K=2)
-        self.readout = torch.nn.Linear(conv_channels, 1)
+        self.num_conv_channels = num_conv_channels
         self.gpu = gpu  # type: torch.device
 
+        # creating needed layers
+        self.conv_layers = torch.nn.ModuleList()
+        for i in range(num_conv_layers):
+            channels_in = self.num_node_features if i == 0 else num_conv_channels
+            self.conv_layers.append(
+                torch_geometric.nn.ChebConv(channels_in, num_conv_channels,
+                                            K=cheb_filter_size))
+        self.dropout = nn.Dropout(dropout_p)
+        self.readout_layers = torch.nn.ModuleList()
+        for i in range(num_readout_layers):
+            channels_out = 1 if i == num_readout_layers-1 else num_conv_channels
+            self.readout_layers.append(
+                torch.nn.Linear(num_conv_channels, channels_out)
+            )
+
+    def __hash__(self) -> int:
+        rng = torch.Generator()
+        rng.manual_seed(0)
+        n_nodes = 10
+        d = Data(
+            x=torch.randn(n_nodes, self.num_node_features, generator=rng),
+            edge_index=torch.tensor([range(n_nodes), [0]*n_nodes]),
+            batch=torch.tensor([0]*n_nodes)
+        )
+        self.eval()
+        return hash(str(self.forward(d.x, d.edge_index, d.batch)))
+
     def forward(self, x, edge_index, batch):
-        # Obtain node embeddings
-        x = self.conv1(x, edge_index)
-        x = x.relu()
-        x = self.conv2(x, edge_index)
-        x = x.relu()
+        x = x.to(self.gpu)
+        edge_index = edge_index.to(self.gpu)
+
+        # Convolution layer(s)
+        for conv_layer in self.conv_layers:
+            x = conv_layer(x, edge_index)
+            x = self.dropout(x)
+            x = x.relu()
 
         # read values at potential targets as score
-        x = self.readout(x)[:, 0]
+        for readout_layer in self.readout_layers:
+            x = readout_layer(x)
+            x = x.relu()
+
+        # flatten and softmax data respecting batches
+        x = x[:, 0]
         y_out_batched = torch.zeros_like(x)
         for i_b in torch.unique(batch):
             y_out_batched[batch == i_b] = torch.softmax(
@@ -115,8 +158,9 @@ class EdgePolicyModel(nn.Module):
         return torch.mean(results).item()
 
     def learn(self, databatch: Batch, optimizer):
-        self.train()
         databatch.to(self.gpu)
+        self.train()
+        # databatch.to(self.gpu)
         y_out_batched = self.forward(
             databatch.x, databatch.edge_index, databatch.batch)
 
@@ -134,13 +178,13 @@ class EdgePolicyModel(nn.Module):
             return None
         return float(loss)
 
-    def train(self: T, mode: bool = True) -> T:
-        if mode:  # train
-            self.to(self.gpu)  # type: ignore
-            for p in self.parameters():
-                p.to(self.gpu)  # type: ignore
-        else:  # eval
-            self.to("cpu")
-            for p in self.parameters():
-                p.to("cpu")
-        return super().train(mode)  # type: ignore
+    # def train(self: T, mode: bool = True) -> T:
+    #     if mode:  # train
+    #         self.to(self.gpu)  # type: ignore
+    #         for p in self.parameters():
+    #             p.to(self.gpu)  # type: ignore
+    #     else:  # eval
+    #         self.to("cpu")
+    #         for p in self.parameters():
+    #             p.to("cpu")
+    #     return super().train(mode)  # type: ignore

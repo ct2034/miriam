@@ -20,14 +20,14 @@ jobs:
         pip install -r requirements.txt
         pip install -r planner/mapf_implementations/requirements.txt
         pip install -r sim/decentralized/requirements.txt
-        pip install -r learn/pytorch/requirements.txt -f https://download.pytorch.org/whl/cu113/torch_stable.html -f https://data.pyg.org/whl/torch-1.10.0+cu113.html
+        pip install -r requirements-torch_cpu.txt -f https://download.pytorch.org/whl/cpu/torch_stable.html -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
     # - name: Build cobra
     #   run: |
     #     cd planner/cobra/external
     #     ./make_cobra.sh
     - name: Build ecbs and cbs_roadmap
       run: |
-        sudo apt install -y cmake libboost-dev libboost-program-options-dev libboost-regex-dev libyaml-cpp-dev
+        sudo apt install -y cmake libboost1.71-dev libboost-program-options1.71-dev libboost-regex1.71-dev libyaml-cpp-dev
         rm -rf planner/mapf_implementations/libMultiRobotPlanning/build
         mkdir planner/mapf_implementations/libMultiRobotPlanning/build
         cd planner/mapf_implementations/libMultiRobotPlanning/build
@@ -36,6 +36,14 @@ jobs:
     - name: Ecbs deps
       run: |
         sudo apt install libyaml-cpp0.6
+    - name: Build astar_boost
+      run: |
+        sudo apt install -y cmake libboost-python1.71-dev libboost-graph1.71-dev libboost-random1.71-dev
+        cd planner/astar_boost
+        mkdir -p build
+        cd build
+        cmake ..
+        make
     - name: Test with pytest
       run: |
         pytest -rP
@@ -56,7 +64,7 @@ jobs:
         pip install -r requirements.txt
         pip install -r planner/mapf_implementations/requirements.txt
         pip install -r sim/decentralized/requirements.txt
-        pip install -r learn/pytorch/requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
+        pip install -r requirements-torch_cpu.txt -f https://download.pytorch.org/whl/cpu/torch_stable.html -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
     - name: Lint with pycodestyle
       run: |
         pycodestyle .
@@ -77,7 +85,7 @@ jobs:
         pip install -r requirements.txt
         pip install -r planner/mapf_implementations/requirements.txt
         pip install -r sim/decentralized/requirements.txt
-        pip install -r learn/pytorch/requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://pytorch-geometric.com/whl/torch-1.9.0+cpu.html
+        pip install -r requirements-torch_cpu.txt -f https://download.pytorch.org/whl/cpu/torch_stable.html -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
     - name: Type checking with mypy
       run: |
         mypy
