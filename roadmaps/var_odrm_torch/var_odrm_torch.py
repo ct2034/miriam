@@ -93,7 +93,7 @@ def make_graph(
     pos_np = pos.detach().numpy()
     cells, _ = voronoi_frames(pos_np, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells)
-    g = delaunay.to_networkx()
+    g: nx.Graph = delaunay.to_networkx()
     nx.set_node_attributes(g, {
         i: pos_np[i] for i in range(len(pos_np))}, POS)
     nx.set_edge_attributes(g, [], DISTANCE)
@@ -101,7 +101,13 @@ def make_graph(
         if not check_edge(pos, map_img, a, b):
             g.remove_edge(a, b)
         else:
-            g.edges[(a, b)][DISTANCE] = np.linalg.norm(pos_np[a] - pos_np[b])
+            g.edges[(a, b)][DISTANCE] = float(
+                np.linalg.norm(pos_np[a] - pos_np[b]))
+    # add self-edges
+    for node in g.nodes():
+        if not g.has_edge(node, node):
+            g.add_edge(node, node)
+            g.edges[(node, node)][DISTANCE] = 0.
     return g
 
 

@@ -31,18 +31,18 @@ from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
 from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
 from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
-    from dagger import RADIUS, DaggerStrategy
     from state import ScenarioState, make_a_state_with_an_upcoming_decision
 else:
-    from multi_optim.dagger import RADIUS, DaggerStrategy
     from multi_optim.state import (ACTION, ScenarioState,
                                    make_a_state_with_an_upcoming_decision)
 
 logger = logging.getLogger(__name__)
 
 MAX_STEPS = 10
+RADIUS = 0.001
 
 
 def sample_trajectory_proxy(args):
@@ -236,12 +236,18 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
     return eval_set
 
 
-def optimize_policy(model, g: nx.Graph, n_agents, n_epochs, batch_size,
-                    optimizer, epds, prefix, rng):
-    ds = DaggerStrategy(
-        model, g, n_epochs, n_agents, batch_size, optimizer, prefix, rng)
-    model, loss = ds.learn_dagger(epds)
-    return model, loss
+def optimize_policy(model, batch_size, optimizer, epds):
+    loss_s = []
+    # learn
+    loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
+    loss_s = []
+    for _, batch in enumerate(loader):
+        loss = model.learn(batch, optimizer)
+        loss_s.append(loss)
+
+    if len(loss_s) == 0:
+        loss_s = [0]
+    return model, np.mean(loss_s)
 
 
 def run_optimization(
@@ -367,9 +373,7 @@ def run_optimization(
         # Optimizing Policy
         if i_r % n_runs_per_run_policy == 0:
             policy_model, policy_loss = optimize_policy(
-                policy_model, g, n_agents, n_epochs_per_run_policy,
-                batch_size_policy, optimizer_policy, epds,
-                prefix, rng)
+                policy_model, batch_size_policy, optimizer_policy, epds)
             if i_r % stats_and_eval_every == 0:
                 # also eval now
                 rng_test = Random(1)
