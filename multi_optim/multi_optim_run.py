@@ -17,7 +17,7 @@ import tools
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, C
+from definitions import IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, PATH, C
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
@@ -105,7 +105,8 @@ def _get_path_data(prefix, hash) -> str:
 
 def sample_trajectories_in_parallel(
         model: EdgePolicyModel, graph: nx.Graph, n_agents: int,
-        n_episodes: int, prefix: str, pool, rng: Random):
+        n_episodes: int, prefix: str, require_paths: bool, pool, rng: Random
+) -> Tuple[str, List[List[PATH]]]:
     model_copy = EdgePolicyModel()
     model_copy.load_state_dict(copy.deepcopy(model.state_dict()))
     model_copy.eval()
@@ -120,14 +121,14 @@ def sample_trajectories_in_parallel(
         "model": model_copy
     })
     new_fname: str = _get_path_data(prefix, generation_hash)
-    # only create file if this data does not exist
-    if os.path.exists(new_fname):
+    # only create file if this data does not exist or if paths are required
+    paths_s: List[List[PATH]] = []
+    if os.path.exists(new_fname) and not require_paths:
         pass
     else:
         results_s = pool.imap_unordered(
             sample_trajectory_proxy, params)
         new_ds = []
-        paths_s = []
         for ds, paths in results_s:
             new_ds.extend(ds)
             paths_s.append(paths)
@@ -351,19 +352,22 @@ def run_optimization(
     poses_test_length = 0
     poses_training_length = 0
     for i_r in range(n_runs):
+        optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
+        optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
+
         # Sample runs for both optimizations
         assert n_runs_policy >= n_runs_pose, \
             "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
         new_fname, paths_s = sample_trajectories_in_parallel(
             policy_model, g, n_agents, n_epochs_per_run_policy,
-            prefix, pool, rng)
+            prefix, optimize_poses_now, pool, rng)
         epds.add_file(new_fname)
         data_len = len(epds)
         new_data_percentage = (data_len - old_data_len) / data_len
 
         # Optimizing Poses
-        if i_r % n_runs_per_run_pose == 0:
+        if optimize_poses_now:
             g, pos, poses_test_length, poses_training_length = optimize_poses(
                 g, pos, map_img, optimizer_pos, rng)
             if i_r % stats_and_eval_every == 0:
@@ -372,7 +376,7 @@ def run_optimization(
                           float(poses_training_length))
 
         # Optimizing Policy
-        if i_r % n_runs_per_run_policy == 0:
+        if optimize_policy_now:
             policy_model, policy_loss = optimize_policy(
                 policy_model, batch_size_policy, optimizer_policy, epds)
             if i_r % stats_and_eval_every == 0:
