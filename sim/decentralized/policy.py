@@ -1,20 +1,12 @@
 import logging
-import random
-from collections import OrderedDict
+from copy import deepcopy
 from enum import Enum, auto
 from typing import Optional, Set
 
-import numpy as np
 import torch
 from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import (agents_to_data,
                                                          get_optimal_edge)
-from planner.policylearn.generate_fovs import (add_padding_to_gridmap,
-                                               extract_all_fovs)
-from planner.policylearn.generate_graph import (get_agent_path_layer,
-                                                get_agent_pos_layer,
-                                                gridmap_to_graph)
-from torch_geometric.data import Data
 
 logger = logging.getLogger(__name__)
 
@@ -88,9 +80,11 @@ class LearnedPolicy(Policy):
     def get_edge(self, agents, _):
         i_a_self = agents.index(self.a)
         data, big_from_small = agents_to_data(agents, i_a_self)
+        data_copy = deepcopy(data)
+        del data
         node_to_go = self.nn.predict(
-            data.x,
-            data.edge_index,
+            data_copy.x,
+            data_copy.edge_index,
             big_from_small)
         return node_to_go
 
