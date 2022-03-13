@@ -272,7 +272,7 @@ def run_optimization(
     torch.manual_seed(rng.randint(0, 2 ** 32))
 
     # multiprocessing
-    n_processes = min(tmp.cpu_count(), 8)
+    n_processes = min(tmp.cpu_count(), 16)
     pool = tmp.Pool(processes=n_processes)
 
     # Roadmap
