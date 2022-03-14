@@ -266,8 +266,9 @@ def get_paths_len(
     all_lens = torch.zeros(len(paths))
     for i, p in enumerate(paths):
         try:
-            all_lens[i] = get_path_len(pos, p,
-                                       training)
+            if len(p[2]) > 0:
+                all_lens[i] = get_path_len(pos, p,
+                                           training)
         except (NetworkXNoPath, NodeNotFound):
             pass
     return torch.sum(all_lens)

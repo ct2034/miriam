@@ -25,9 +25,10 @@ from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import BFS_TYPE, TIMEOUT
 from pyflann import FLANN
-from roadmaps.var_odrm_torch.var_odrm_torch import (
-    draw_graph, make_graph_and_flann, optimize_poses_from_paths, read_map,
-    sample_points)
+from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
+                                                    make_graph_and_flann,
+                                                    optimize_poses_from_paths,
+                                                    read_map, sample_points)
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
