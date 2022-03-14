@@ -10,15 +10,13 @@ import numpy as np
 import png
 import torch
 from bresenham import bresenham
-from definitions import DISTANCE, MAP_IMG, POS
+from definitions import DISTANCE, MAP_IMG, PATH_W_COORDS, POS
 from libpysal import weights
 from libpysal.cg import voronoi_frames
 from networkx.exception import NetworkXNoPath, NodeNotFound
 from pyflann import FLANN
 from scenarios.visualization import get_colors
 from tools import ProgressBar
-
-PATH_TYPE = Tuple[Tuple[float, float], Tuple[float, float], List[int]]
 
 
 def read_map(fname: str) -> MAP_IMG:
@@ -96,11 +94,11 @@ def make_graph_and_flann(
     flann.build_index(np.array(pos_np))
     cells, _ = voronoi_frames(pos_np, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells)
-    g: nx.Graph = delaunay.to_networkx()
+    g: nx.Graph = delaunay.to_networkx()  # type: ignore
     nx.set_node_attributes(g, {
         i: pos_np[i] for i in range(len(pos_np))}, POS)
     nx.set_edge_attributes(g, [], DISTANCE)
-    for a, b in g.edges():
+    for a, b in g.edges():  # type: ignore
         if not check_edge(pos, map_img, a, b):
             g.remove_edge(a, b)
         else:
@@ -117,7 +115,7 @@ def make_graph_and_flann(
 def draw_graph(
         g: nx.Graph,
         map_img: MAP_IMG = tuple(),
-        paths: List[PATH_TYPE] = [],
+        paths: List[PATH_W_COORDS] = [],
         title: str = ""):
     """Display the graph and (optionally) paths."""
     fig = plt.figure()
@@ -127,7 +125,7 @@ def draw_graph(
     # Map Image
     if map_img:
         ax.imshow(
-            np.swapaxes(map_img, 0, 1),
+            np.swapaxes(np.array(map_img), 0, 1),
             cmap="gray",
             alpha=.5,
             extent=(0, 1, 0, 1),
@@ -182,7 +180,7 @@ def plan_path_between_nodes(
         goal: int) -> Optional[List[int]]:
     """Plan a path on `g` between two nodes."""
     try:
-        return nx.shortest_path(g, start, goal, DISTANCE)
+        return nx.shortest_path(g, start, goal, DISTANCE)  # type: ignore
     except (NetworkXNoPath, nx.NodeNotFound):
         return None
 
@@ -191,7 +189,7 @@ def plan_path_between_coordinates(
         g: nx.Graph,
         flann: FLANN,
         start: Tuple[float, float],
-        goal: Tuple[float, float]) -> Optional[PATH_TYPE]:
+        goal: Tuple[float, float]) -> Optional[PATH_W_COORDS]:
     """Plan a path on `g` between two coordinates.
     Uses a FLANN first to find the nearest nodes to `start` and `goal`."""
     nn = 1
@@ -210,7 +208,7 @@ def make_paths(
         g: nx.Graph,
         n_paths: int,
         map_img: MAP_IMG,
-        rng: Random) -> List[PATH_TYPE]:
+        rng: Random) -> List[PATH_W_COORDS]:
     """Make `n_paths` path between random coordinates on `g`."""
     pos = nx.get_node_attributes(g, POS)
     pos_np = np.array([pos[n] for n in g.nodes()])
@@ -232,7 +230,7 @@ def make_paths(
 
 def get_path_len(
         pos: torch.Tensor,
-        path: PATH_TYPE,
+        path: PATH_W_COORDS,
         training: bool) -> torch.Tensor:
     """Get the length of a path. With the sections from start coordinates to
     first node and from last node to goal coordinates beeing weighted
@@ -261,7 +259,7 @@ def get_path_len(
 
 def get_paths_len(
         pos: torch.Tensor,
-        paths: List[PATH_TYPE],
+        paths: List[PATH_W_COORDS],
         training: bool) -> torch.Tensor:
     """Get the lengths of all paths in `paths`.
     If `training` is `True`, the tails are weighted more."""
@@ -293,32 +291,21 @@ def optimize_poses(
     return g, pos, test_length, training_length
 
 
-def optimize_poses_from_node_paths(
+def optimize_poses_from_paths(
         g: nx.Graph,
         pos: torch.Tensor,
-        path_set: List[List[PATH_TYPE]],
+        path_set: List[List[PATH_W_COORDS]],
         map_img: MAP_IMG,
         optimizer: torch.optim.Optimizer):
-    n_paths = reduce(lambda x, y: x + len(y), path_set, 0)
-    lengths = torch.zeros(n_paths)
-    i_p = 0
-    for paths in path_set:
-        for path in paths:
-            if len(path) > 0:
-                sections = torch.zeros(len(path)-1)
-                for i_n in range(len(path)-1):
-                    sections[i_n] = torch.linalg.vector_norm(
-                        pos[path[i_n]] - pos[path[i_n+1]]
-                    )
-                lengths[i_p] = torch.sum(sections)
-                i_p += 1
-    total_lenght = torch.sum(lengths)
-    if total_lenght.item() > 0.:
-        _ = total_lenght.backward()
+    paths: List[PATH_W_COORDS]
+    paths = reduce(lambda x, y: x + y, path_set, [])
+    training_length = get_paths_len(pos, paths, True)
+    if training_length.item() > 0.:
+        _ = training_length.backward()
         optimizer.step()
         optimizer.zero_grad()
     g, flann = make_graph_and_flann(pos, map_img)
-    return g, pos, flann, total_lenght
+    return g, pos, flann, training_length
 
 
 if __name__ == "__main__":

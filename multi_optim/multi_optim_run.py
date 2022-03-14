@@ -20,14 +20,14 @@ import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
 from definitions import (IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, MAP_IMG,
-                         PATH, C)
+                         PATH, PATH_W_COORDS, C)
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import BFS_TYPE, TIMEOUT
 from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (
-    draw_graph, make_graph_and_flann, optimize_poses_from_node_paths, read_map,
+    draw_graph, make_graph_and_flann, optimize_poses_from_paths, read_map,
     sample_points)
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
@@ -64,6 +64,9 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
     pos_np = np.array([pos[n] for n in graph.nodes])
     flann.build_index(np.array(pos_np))
 
+    starts_coord: Optional[List[Tuple[float, float]]] = None
+    goals_coord: Optional[List[Tuple[float, float]]] = None
+
     solvable = False
     while not solvable:
         unique = False
@@ -73,6 +76,14 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
                 starts_goals_coord.detach().numpy(),
                 1,
                 random_seed=rng.randint(0, 2**32))
+            starts_coord = [
+                starts_goals_coord[i, :2].detach().numpy().astype(float)
+                for i in range(n_agents)
+            ]
+            goals_coord = [
+                starts_goals_coord[i, :2].detach().numpy().astype(float)
+                for i in range(n_agents, n_agents*2)
+            ]
             starts = result[0:n_agents].tolist()
             goals = result[n_agents:].tolist()
             unique = (len(set(starts)) == n_agents and
@@ -84,16 +95,20 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
         if optimal_paths != INVALID:
             solvable = True
 
+    assert starts_coord is not None
+    assert goals_coord is not None
+
     state = ScenarioState(graph, starts, goals, model, RADIUS)
     state.run()
 
     # Sample states
     these_ds = []
-    paths = None  # type: Optional[List[List[C]]]
+    paths = None  # type: Optional[List[PATH_W_COORDS]]
     for i_s in range(max_steps):
         try:
             if state.finished:
-                paths = state.paths_out
+                paths = [(starts_coord[i], goals_coord[i], state.paths_out[i])
+                         for i in range(n_agents)]
                 break
             observations = state.observe()
             actions: Dict[int, ACTION] = {}
@@ -127,7 +142,7 @@ def sample_trajectories_in_parallel(
         model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, flann,
         n_agents: int, n_episodes: int, prefix: str, require_paths: bool,
         pool, rng: Random
-) -> Tuple[str, List[List[PATH]]]:
+) -> Tuple[str, List[List[PATH_W_COORDS]]]:
     model_copy = EdgePolicyModel()
     model_copy.load_state_dict(copy.deepcopy(model.state_dict()))
     model_copy.eval()
@@ -143,7 +158,7 @@ def sample_trajectories_in_parallel(
     })
     new_fname: str = _get_path_data(prefix, generation_hash)
     # only create file if this data does not exist or if paths are required
-    paths_s: List[List[PATH]] = []
+    paths_s: List[List[PATH_W_COORDS]] = []
     if os.path.exists(new_fname) and not require_paths:
         pass
     else:
@@ -397,7 +412,7 @@ def run_optimization(
         # Optimizing Poses
         if optimize_poses_now:
             (g, pos, flann, poses_training_length
-             ) = optimize_poses_from_node_paths(
+             ) = optimize_poses_from_paths(
                 g, pos, paths_s, map_img, optimizer_pos)
             if i_r % stats_and_eval_every == 0:
                 # stats.add("poses_test_length", i_r, float(poses_test_length))
