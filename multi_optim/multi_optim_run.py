@@ -107,8 +107,11 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
     for i_s in range(max_steps):
         try:
             if state.finished:
-                paths = [(starts_coord[i], goals_coord[i], state.paths_out[i])
-                         for i in range(n_agents)]
+                if len(state.paths_out[0]) > 0:
+                    paths = [(starts_coord[i], goals_coord[i], state.paths_out[i])
+                             for i in range(n_agents)]
+                else:
+                    paths = None
                 break
             observations = state.observe()
             actions: Dict[int, ACTION] = {}
