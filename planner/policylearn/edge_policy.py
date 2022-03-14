@@ -1,7 +1,6 @@
 import logging
 import os
 import pickle
-from copy import deepcopy
 from typing import List, Tuple
 
 import torch
@@ -99,31 +98,26 @@ class EdgePolicyModel(nn.Module):
         return hash(str(self.forward(d.x, d.edge_index, d.batch)))
 
     def forward(self, x, edge_index, batch):
-        x_copy = deepcopy(x)
-        edge_index_copy = deepcopy(edge_index)
-        batch_copy = deepcopy(batch)
-        del x, edge_index, batch
-
-        x_copy = x_copy.to(self.gpu)
-        edge_index_copy = edge_index_copy.to(self.gpu)
+        x = x.to(self.gpu)
+        edge_index = edge_index.to(self.gpu)
 
         # Convolution layer(s)
         for conv_layer in self.conv_layers:
-            x_copy = conv_layer(x_copy, edge_index_copy)
-            x_copy = self.dropout(x_copy)
-            x_copy = x_copy.relu()
+            x = conv_layer(x, edge_index)
+            x = self.dropout(x)
+            x = x.relu()
 
         # read values at potential targets as score
         for readout_layer in self.readout_layers:
-            x_copy = readout_layer(x_copy)
-            x_copy = x_copy.relu()
+            x = readout_layer(x)
+            x = x.relu()
 
         # flatten and softmax data respecting batches
-        x_copy = x_copy[:, 0]
-        y_out_batched = torch.zeros_like(x_copy)
-        for i_b in torch.unique(batch_copy):
-            y_out_batched[batch_copy == i_b] = torch.softmax(
-                x_copy[batch_copy == i_b], dim=0)
+        x = x[:, 0]
+        y_out_batched = torch.zeros_like(x)
+        for i_b in torch.unique(batch):
+            y_out_batched[batch == i_b] = torch.softmax(
+                x[batch == i_b], dim=0)
         return y_out_batched
 
     def predict(self, x, edge_index, big_from_small):
@@ -153,10 +147,8 @@ class EdgePolicyModel(nn.Module):
         return big_from_small[node_small]
 
     def accuracy(self, eval_list: EVAL_LIST) -> float:
-        eval_list_copy = deepcopy(eval_list)
-        del eval_list
-        results = torch.zeros(len(eval_list_copy))
-        for i, (data, bfs) in enumerate(eval_list_copy):
+        results = torch.zeros(len(eval_list))
+        for i, (data, bfs) in enumerate(eval_list):
             pred = self.predict(data.x, data.edge_index, bfs)
             optimal_small = torch.argmax(data.y).item()
             if isinstance(optimal_small, int):
@@ -166,23 +158,21 @@ class EdgePolicyModel(nn.Module):
         return torch.mean(results).item()
 
     def learn(self, databatch: Batch, optimizer):
-        db_copy = deepcopy(databatch)
-        del databatch
-        db_copy.to(self.gpu)
+        databatch.to(self.gpu)
         self.train()
-        # db_copy.to(self.gpu)
+        # databatch.to(self.gpu)
         y_out_batched = self.forward(
-            db_copy.x, db_copy.edge_index, db_copy.batch)
+            databatch.x, databatch.edge_index, databatch.batch)
 
         loss = torch.nn.functional.binary_cross_entropy(
-            y_out_batched, db_copy.y)
+            y_out_batched, databatch.y)
         try:
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
         except RuntimeError:
             logging.warning(f"Could not train with: " +
-                            f"y_goals {y_copy} " +
+                            f"y_goals {databatch.y} " +
                             f"y_out_batched {y_out_batched} " +
                             f"loss {loss}")
             return None

@@ -5,7 +5,6 @@ import os
 import pickle
 import socket
 import tracemalloc
-from copy import deepcopy
 from random import Random
 from typing import Dict, List, Optional, Tuple
 from unittest import result
@@ -114,12 +113,10 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
             actions: Dict[int, ACTION] = {}
             assert observations is not None, "observations is None"
             for i_a, (d, bfs) in observations.items():
-                d_copy = deepcopy(d)
-                del d
                 # find actions to take using the policy
-                actions[i_a] = model.predict(d_copy.x, d_copy.edge_index, bfs)
+                actions[i_a] = model.predict(d.x, d.edge_index, bfs)
                 # observation, action pairs for learning
-                these_ds.append(d_copy)
+                these_ds.append(d)
             state.step(actions)
         except RuntimeError as e:
             logger.warning("RuntimeError: {}".format(e))
@@ -280,8 +277,7 @@ def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
 
 def optimize_policy(model, batch_size, optimizer, epds
                     ) -> Tuple[EdgePolicyModel, float]:
-    loader = DataLoader(epds, num_workers=0,
-                        batch_size=batch_size, shuffle=True)
+    loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
     loss_s = []
     for _, batch in enumerate(loader):
         loss = model.learn(batch, optimizer)
