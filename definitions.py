@@ -35,3 +35,5 @@ PATH = List[C]
 # strings for graph attributes
 POS = 'pos'
 DISTANCE = 'distance'
+
+MAP_IMG = Tuple[Tuple[int, ...], ...]

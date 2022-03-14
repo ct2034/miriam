@@ -8,6 +8,7 @@ import tracemalloc
 from copy import deepcopy
 from random import Random
 from typing import Dict, List, Optional, Tuple
+from unittest import result
 
 import git.repo
 import networkx as nx
@@ -18,13 +19,15 @@ import tools
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, PATH, C
+from definitions import (IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, MAP_IMG,
+                         PATH, C)
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import BFS_TYPE, TIMEOUT
+from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (
-    draw_graph, make_graph, optimize_poses_from_node_paths, read_map,
+    draw_graph, make_graph_and_flann, optimize_poses_from_node_paths, read_map,
     sample_points)
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
@@ -50,16 +53,30 @@ def sample_trajectory_proxy(args):
     return sample_trajectory(*args)
 
 
-def sample_trajectory(seed, graph, n_agents,
-                      model, max_steps=MAX_STEPS):
+def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
+                      max_steps=MAX_STEPS):
     """Sample a trajectory using the given policy."""
     rng = Random(seed)
     starts = None
     goals = None
+    flann = FLANN()
+    pos = graph.nodes.data("pos")
+    pos_np = np.array([pos[n] for n in graph.nodes])
+    flann.build_index(np.array(pos_np))
+
     solvable = False
     while not solvable:
-        starts = rng.sample(graph.nodes(), n_agents)
-        goals = rng.sample(graph.nodes(), n_agents)
+        unique = False
+        while not unique:
+            starts_goals_coord = sample_points(n_agents * 2, map_img, rng)
+            result, _ = flann.nn_index(
+                starts_goals_coord.detach().numpy(),
+                1,
+                random_seed=rng.randint(0, 2**32))
+            starts = result[0:n_agents].tolist()
+            goals = result[n_agents:].tolist()
+            unique = (len(set(starts)) == n_agents and
+                      len(set(goals)) == n_agents)
         # is this solvable?
         optimal_paths = scenarios.solvers.cached_cbsr(
             graph, starts, goals, radius=RADIUS,
@@ -80,7 +97,7 @@ def sample_trajectory(seed, graph, n_agents,
                 break
             observations = state.observe()
             actions: Dict[int, ACTION] = {}
-            assert observations is not None
+            assert observations is not None, "observations is None"
             for i_a, (d, bfs) in observations.items():
                 d_copy = deepcopy(d)
                 del d
@@ -107,14 +124,15 @@ def _get_path_data(prefix, hash) -> str:
 
 
 def sample_trajectories_in_parallel(
-        model: EdgePolicyModel, graph: nx.Graph, n_agents: int,
-        n_episodes: int, prefix: str, require_paths: bool, pool, rng: Random
+        model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, flann,
+        n_agents: int, n_episodes: int, prefix: str, require_paths: bool,
+        pool, rng: Random
 ) -> Tuple[str, List[List[PATH]]]:
     model_copy = EdgePolicyModel()
     model_copy.load_state_dict(copy.deepcopy(model.state_dict()))
     model_copy.eval()
 
-    params = [(s, graph, n_agents, model_copy)
+    params = [(s, graph, n_agents, model_copy, map_img)
               for s in rng.sample(
         range(2**32), k=n_episodes)]
     generation_hash = tools.hasher([], {
@@ -131,6 +149,7 @@ def sample_trajectories_in_parallel(
     else:
         results_s = pool.imap_unordered(
             sample_trajectory_proxy, params)
+        # results_s = map(sample_trajectory_proxy, params)
         new_ds = []
         for ds, paths in results_s:
             new_ds.extend(ds)
@@ -280,10 +299,12 @@ def run_optimization(
     pool = tmp.Pool(processes=n_processes)
 
     # Roadmap
-    map_img = read_map(map_fname)
+    map_img: MAP_IMG = read_map(map_fname)
     pos = sample_points(n_nodes, map_img, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
-    g = make_graph(pos, map_img)
+    g: nx.Graph
+    flann: FLANN
+    (g, flann) = make_graph_and_flann(pos, map_img)
 
     # GPU or CPU?
     if torch.cuda.is_available():
@@ -367,7 +388,7 @@ def run_optimization(
             "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
         new_fname, paths_s = sample_trajectories_in_parallel(
-            policy_model, g, n_agents, n_epochs_per_run_policy,
+            policy_model, g, map_img, flann, n_agents, n_epochs_per_run_policy,
             prefix, optimize_poses_now, pool, rng)
         epds.add_file(new_fname)
         data_len = len(epds)
@@ -375,8 +396,9 @@ def run_optimization(
 
         # Optimizing Poses
         if optimize_poses_now:
-            g, pos, poses_training_length = optimize_poses_from_node_paths(
-                g, pos, paths_s, optimizer_pos)
+            (g, pos, flann, poses_training_length
+             ) = optimize_poses_from_node_paths(
+                g, pos, paths_s, map_img, optimizer_pos)
             if i_r % stats_and_eval_every == 0:
                 # stats.add("poses_test_length", i_r, float(poses_test_length))
                 stats.add("poses_training_length", i_r,
