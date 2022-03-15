@@ -62,7 +62,7 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
     flann = FLANN()
     pos = graph.nodes.data("pos")
     pos_np = np.array([pos[n] for n in graph.nodes])
-    flann.build_index(np.array(pos_np))
+    flann.build_index(np.array(pos_np, dtype=np.float32))
 
     starts_coord: Optional[List[Tuple[float, float]]] = None
     goals_coord: Optional[List[Tuple[float, float]]] = None

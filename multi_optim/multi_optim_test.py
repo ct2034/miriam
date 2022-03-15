@@ -134,6 +134,7 @@ class MultiOptimTest(unittest.TestCase):
                     graph=self.g,
                     n_agents=len(starts),
                     model=model,
+                    map_img=((255,),),
                     max_steps=10)
                 print(f"{ds=}")
                 print(f"{paths=}")
@@ -144,7 +145,9 @@ class MultiOptimTest(unittest.TestCase):
         # we have some paths
         assert paths is not None
         self.assertEqual(len(paths), len(starts))
-        for i_a, path in enumerate(paths):
+        for i_a, coord_path in enumerate(paths):
+            self.assertEqual(len(coord_path), 3)
+            _, _, path = coord_path
             self.assertEqual(len(path), 4)
             self.assertEqual(path[0], starts[i_a])
             self.assertEqual(path[3], goals[i_a])
