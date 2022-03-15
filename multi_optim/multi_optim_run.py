@@ -108,8 +108,11 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
         try:
             if state.finished:
                 if len(state.paths_out[0]) > 0:
-                    paths = [(starts_coord[i], goals_coord[i], state.paths_out[i])
-                             for i in range(n_agents)]
+                    paths = [(
+                        starts_coord[i],
+                        goals_coord[i],
+                        state.paths_out[i])
+                        for i in range(n_agents)]
                 else:
                     paths = None
                 break
