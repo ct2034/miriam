@@ -36,7 +36,7 @@ class ScenarioState():
         self.paths_out = []  # type: List[List[int]]
 
     def run(self):
-        """Start the scenario and return the initial state"""
+        """Advance the scenario until an action is needed"""
         assert self.agents is not None
         scenario_result: SCENARIO_RESULT = run_a_scenario(
             env=self.graph,

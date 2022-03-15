@@ -13,8 +13,7 @@ from sim.decentralized.policy import RaisingPolicy, RandomPolicy
 from sim.decentralized.runner import to_agent_objects
 
 import multi_optim.state
-from multi_optim.multi_optim_run import (find_collisions, optimize_policy,
-                                         sample_trajectory)
+from multi_optim.multi_optim_run import optimize_policy, sample_trajectory
 
 
 class MultiOptimTest(unittest.TestCase):
@@ -41,21 +40,6 @@ class MultiOptimTest(unittest.TestCase):
         #     1 |
         #    / \|
         #   0   4
-
-    def test_find_collisions(self):
-        agents = [
-            Agent(self.g, 0, radius=self.radius),
-            Agent(self.g, 4, radius=self.radius),
-            Agent(self.g, 3, radius=self.radius)]
-        agents[0].give_a_goal(3)
-        agents[1].give_a_goal(2)
-        agents[2].give_a_goal(4)
-        collisions = find_collisions(agents)
-        self.assertEqual(len(collisions), 1)
-        self.assertEqual(list(collisions.keys())[0][0], 1)  # node
-        self.assertEqual(list(collisions.keys())[0][1], 1)  # t
-        self.assertIn(0, collisions[(1, 1)])  # agent
-        self.assertIn(1, collisions[(1, 1)])  # agent
 
     def test_optimize_policy(self):
         # this is analog to edge_policy_test.py / test_edge_policy_learn

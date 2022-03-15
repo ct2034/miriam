@@ -5,6 +5,7 @@ import os
 import pickle
 import socket
 import tracemalloc
+from optparse import Option
 from random import Random
 from typing import Dict, List, Optional, Tuple
 from unittest import result
@@ -19,7 +20,7 @@ import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
 from definitions import (IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, MAP_IMG,
-                         PATH, PATH_W_COORDS, C)
+                         PATH, PATH_W_COORDS, POS, C)
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
@@ -38,8 +39,10 @@ from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
+    from eval import Eval
     from state import ScenarioState, make_a_state_with_an_upcoming_decision
 else:
+    from multi_optim.eval import Eval
     from multi_optim.state import (ACTION, ScenarioState,
                                    make_a_state_with_an_upcoming_decision)
 
@@ -47,6 +50,7 @@ logger = logging.getLogger(__name__)
 
 MAX_STEPS = 10
 RADIUS = 0.001
+ITERATOR_TYPE = IteratorType.LOOKAHEAD2
 
 
 def sample_trajectory_proxy(args):
@@ -60,7 +64,7 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
     starts = None
     goals = None
     flann = FLANN()
-    pos = graph.nodes.data("pos")
+    pos = graph.nodes.data(POS)
     pos_np = np.array([pos[n] for n in graph.nodes])
     flann.build_index(np.array(pos_np, dtype=np.float32))
 
@@ -181,107 +185,6 @@ def sample_trajectories_in_parallel(
     return new_fname, paths_s
 
 
-def find_collisions(agents
-                    ) -> Dict[Tuple[int, int], Tuple[int, int]]:
-    # {(node, t): agent}
-    agent_visited: Dict[Tuple[int, int], int] = {}
-    # {(node, t): (agent1, agent2)}
-    collisions: Dict[Tuple[int, int], Tuple[int, int]] = {}
-    for i_a, a in enumerate(agents):
-        assert a.path is not None
-        for t, node in enumerate(a.path):
-            node_t = (node, t)
-            if node_t in agent_visited.keys():
-                collisions[node_t] = (
-                    agent_visited[node_t],
-                    i_a
-                )
-            agent_visited[node_t] = i_a
-    return collisions
-
-
-def eval_full_scenario(
-    model, g: nx.Graph, n_agents, n_eval, rng
-) -> Tuple[Optional[float], float, float]:
-    regret_s = []
-    success_s = []
-    length_s = []
-    model.eval()
-    for i_e in range(n_eval):
-        # logger.debug(f"Eval {i_e}")
-        starts = rng.sample(g.nodes(), n_agents)
-        goals = rng.sample(g.nodes(), n_agents)
-        failed_at_creation = False
-
-        res_policy = (0., 0., 0., 0., 0)
-        res_optim = (0., 0., 0., 0., 0)
-        for policy in [OptimalPolicy, LearnedPolicy]:
-            agents = []
-            for i_a in range(n_agents):
-                a = Agent(g, starts[i_a], radius=RADIUS)
-                res = a.give_a_goal(goals[i_a])
-                if not res:  # failed to find a path
-                    failed_at_creation = True
-                a.policy = policy(a, model)
-                agents.append(a)
-            if not failed_at_creation:
-                if policy is LearnedPolicy:
-                    res_policy = run_a_scenario(
-                        env=g,
-                        agents=tuple(agents),
-                        plot=False,
-                        iterator=IteratorType.LOOKAHEAD2,
-                        ignore_finished_agents=False)
-                elif policy is OptimalPolicy:
-                    try:
-                        res_optim = run_a_scenario(
-                            env=g,
-                            agents=tuple(agents),
-                            plot=False,
-                            iterator=IteratorType.LOOKAHEAD2,
-                            ignore_finished_agents=False)
-                    except Exception as e:
-                        logger.error(e)
-
-        success = res_policy[IDX_SUCCESS] == 1 and res_optim[IDX_SUCCESS] == 1
-        # logger.debug(f"success: {success}")
-        if success:
-            regret = res_policy[IDX_AVERAGE_LENGTH] - \
-                res_optim[IDX_AVERAGE_LENGTH]
-
-            if regret < 0:
-                logger.warning("Regret is negative")
-            #     DEBUG
-            #     torch.save(model.state_dict(), "debug.pt")
-            #     nx.write_gpickle(g, f"debug.gpickle")
-            #     print(f"Starts: {starts}")
-            #     print(f"Goals: {goals}")
-            #     raise Exception("Regret is negative")
-
-            regret_s.append(regret)
-            length_s.append(res_policy[IDX_AVERAGE_LENGTH])
-        success_s.append(res_policy[IDX_SUCCESS])
-    if len(regret_s) > 0:
-        return np.mean(regret_s), np.mean(success_s), np.mean(length_s)
-    else:
-        return None, np.mean(success_s), np.mean(length_s)
-
-
-def make_eval_set(model, g: nx.Graph, n_agents, n_eval, rng
-                  ) -> List[Tuple[Data, BFS_TYPE]]:
-    model.eval()
-    eval_set = []
-    for i_e in range(n_eval):
-        state = make_a_state_with_an_upcoming_decision(
-            g, n_agents,  model, RADIUS, rng)
-        observation = state.observe()
-        assert observation is not None
-        i_a = rng.sample(list(observation.keys()), 1)[0]
-        data, big_from_small = observation[i_a]
-        eval_set.append((data, big_from_small))
-    return eval_set
-
-
 def optimize_policy(model, batch_size, optimizer, epds
                     ) -> Tuple[EdgePolicyModel, float]:
     loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
@@ -345,8 +248,15 @@ def run_optimization(
     # Optimizer
     optimizer_policy = torch.optim.Adam(
         policy_model.parameters(), lr=lr_policy)
-    policy_eval_list = make_eval_set(
-        policy_model, g, n_agents, 100, rng)
+    policy_loss: Optional[float] = None
+
+    # Eval
+    # little less agents for evaluation
+    eval_n_agents = int(np.ceil(n_agents * .7))
+    eval = Eval(g, map_img,
+                n_agents=eval_n_agents, n_eval=10,
+                iterator_type=ITERATOR_TYPE, radius=RADIUS,
+                rng=rng)
 
     # Data for policy
     epds = EdgePolicyDataset(f"multi_optim/results/{prefix}_data")
@@ -360,7 +270,7 @@ def run_optimization(
         "policy_success",
         "policy_accuracy",
         "general_new_data_percentage",
-        "general_length",
+        # "general_length",
         "n_policy_data_len"])
     stats.add_statics({
         # metadata
@@ -426,32 +336,31 @@ def run_optimization(
         if optimize_policy_now:
             policy_model, policy_loss = optimize_policy(
                 policy_model, batch_size_policy, optimizer_policy, epds)
-            if i_r % stats_and_eval_every == 0:
-                # also eval now
-                rng_test = Random(1)
-                n_eval = 10
-                # little less agents for evaluation
-                eval_n_agents = int(np.ceil(n_agents * .7))
-                (regret, success, general_length) = eval_full_scenario(
-                    policy_model, g, eval_n_agents, n_eval, rng_test)
-                policy_accuracy = policy_model.accuracy(policy_eval_list)
 
+        if i_r % stats_and_eval_every == 0:
+            if optimize_policy_now:
+                # also eval now
+                (policy_regret, policy_success, policy_accuracy
+                 ) = eval.evaluate_policy(policy_model)
+
+                assert policy_loss is not None
                 stats.add("policy_loss", i_r, float(policy_loss))
-                if regret is not None:
-                    stats.add("policy_regret", i_r, float(regret))
-                stats.add("policy_success", i_r, float(success))
+                if policy_regret is not None:
+                    stats.add("policy_regret", i_r, float(policy_regret))
+                stats.add("policy_success", i_r, float(policy_success))
                 stats.add("policy_accuracy", i_r, policy_accuracy)
-                stats.add("general_length", i_r, float(general_length))
+                # stats.add("general_length", i_r, float(general_length))
                 stats.add("general_new_data_percentage",
                           i_r, float(new_data_percentage))
                 stats.add("n_policy_data_len", i_r, float(data_len))
                 logger.info(f"Loss: {policy_loss:.3f}")
-                logger.info(f"Regret: {regret:e}")
-                logger.info(f"Success: {success}")
+                logger.info(f"Regret: {policy_regret:e}")
+                logger.info(f"Success: {policy_success}")
                 logger.info(f"Accuracy: {policy_accuracy:.3f}")
-                logger.info(f"Length: {general_length:.3f}")
-                logger.info(f"New data: {new_data_percentage*100:.1f}%")
-                logger.info(f"Data length: {data_len}")
+                # logger.info(f"Length: {general_length:.3f}")
+
+        logger.info(f"New data: {new_data_percentage*100:.1f}%")
+        logger.info(f"Data length: {data_len}")
 
         pb.progress()
     runtime = pb.end()
