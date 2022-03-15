@@ -42,7 +42,7 @@ class Policy(object):
         if type == PolicyType.RANDOM:
             return RandomPolicy(agent)
         elif type == PolicyType.LEARNED:
-            nn = EdgePolicyModel(gpu="cpu")
+            nn = EdgePolicyModel(gpu=torch.device("cpu"))
             nn.load_state_dict(torch.load(
                 "sim/decentralized/policy_model.pt", map_location="cpu"))
             return LearnedPolicy(agent, nn, **kwargs)
