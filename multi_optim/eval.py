@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
+import torch
 from definitions import (DEFAULT_TIMEOUT_S, IDX_AVERAGE_LENGTH, IDX_SUCCESS,
                          INVALID, MAP_IMG, POS, SCENARIO_RESULT, C)
 from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
@@ -25,6 +26,8 @@ class Eval(object):
     def __init__(self, roadmap: nx.Graph, map_img: MAP_IMG, n_agents: int,
                  n_eval: int, iterator_type: IteratorType, radius: float,
                  rng: Random) -> None:
+        torch.manual_seed(0)
+        np.random.seed(0)
         self.first_roadmap = roadmap
         self.map_img = map_img
         self.n_agents = n_agents
@@ -33,8 +36,9 @@ class Eval(object):
         self.radius = radius
         pos = nx.get_node_attributes(self.first_roadmap, POS)
         pos_np = np.array([pos[n] for n in self.first_roadmap.nodes])
-        flann = FLANN()
-        flann.build_index(np.array(pos_np, dtype=np.float32))
+        flann = FLANN(random_seed=0)
+        flann.build_index(np.array(pos_np, dtype=np.float32),
+                          random_seed=0)
         self.untrained_policy = EdgePolicyModel()
 
         self.starts_corrds_s = []  # type: List[List[Tuple[float, float]]]
@@ -55,11 +59,12 @@ class Eval(object):
                 starts_goals_coord: Optional[np.ndarray] = None
                 while not unique:
                     starts_goals_coord = sample_points(
-                        n_agents * 2, map_img, rng).detach().numpy()
+                        n_agents * 2, map_img, rng
+                    ).detach().numpy()
                     nearest, _ = flann.nn_index(
                         starts_goals_coord,
                         1,
-                        random_seed=rng.randint(0, 2**32))
+                        random_seed=0)
                     starts = nearest[:n_agents].tolist()
                     goals = nearest[n_agents:].tolist()
                     assert starts is not None
@@ -71,7 +76,8 @@ class Eval(object):
                 # make agents (only possible if single-agent sovable)
                 agents = to_agent_objects(
                     self.first_roadmap, starts, goals,
-                    policy=PolicyType.OPTIMAL, radius=self.radius)
+                    policy=PolicyType.OPTIMAL, radius=self.radius,
+                    rng=rng)
                 if agents is None:
                     continue
                 # genereally solvable?
@@ -121,6 +127,7 @@ class Eval(object):
         :param model: The model to evaluate.
         :return: The average regret, success and accuracy.
         """
+        model.eval()
         success_s = np.zeros(self.n_eval)
         regret_s = np.zeros(self.n_eval)
         for i_e in range(self.n_eval):

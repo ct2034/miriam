@@ -66,7 +66,8 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
     flann = FLANN()
     pos = graph.nodes.data(POS)
     pos_np = np.array([pos[n] for n in graph.nodes])
-    flann.build_index(np.array(pos_np, dtype=np.float32))
+    flann.build_index(np.array(pos_np, dtype=np.float32),
+                      random_index=0)
 
     starts_coord: Optional[List[Tuple[float, float]]] = None
     goals_coord: Optional[List[Tuple[float, float]]] = None
@@ -79,7 +80,7 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
             result, _ = flann.nn_index(
                 starts_goals_coord.detach().numpy(),
                 1,
-                random_seed=rng.randint(0, 2**32))
+                random_seed=0)
             starts_coord = [
                 starts_goals_coord[i, :2].detach().numpy().astype(float)
                 for i in range(n_agents)
@@ -212,7 +213,7 @@ def run_optimization(
         load_policy_model: Optional[str] = None,
         rng: Random = Random(0),
         prefix: str = "noname"):
-    logger.info("run_optimization")
+    logger.info(f"run_optimization {prefix}")
     torch.manual_seed(rng.randint(0, 2 ** 32))
 
     # multiprocessing
@@ -342,7 +343,6 @@ def run_optimization(
                 # also eval now
                 (policy_regret, policy_success, policy_accuracy
                  ) = eval.evaluate_policy(policy_model)
-
                 assert policy_loss is not None
                 stats.add("policy_loss", i_r, float(policy_loss))
                 if policy_regret is not None:
@@ -350,17 +350,17 @@ def run_optimization(
                 stats.add("policy_success", i_r, float(policy_success))
                 stats.add("policy_accuracy", i_r, policy_accuracy)
                 # stats.add("general_length", i_r, float(general_length))
-                stats.add("general_new_data_percentage",
-                          i_r, float(new_data_percentage))
-                stats.add("n_policy_data_len", i_r, float(data_len))
-                logger.info(f"Loss: {policy_loss:.3f}")
-                logger.info(f"Regret: {policy_regret:e}")
-                logger.info(f"Success: {policy_success}")
-                logger.info(f"Accuracy: {policy_accuracy:.3f}")
+                logger.info(f"(P) Loss: {policy_loss:.3f}")
+                logger.info(f"(P) Regret: {policy_regret:e}")
+                logger.info(f"(P) Success: {policy_success}")
+                logger.info(f"(P) Accuracy: {policy_accuracy:.3f}")
                 # logger.info(f"Length: {general_length:.3f}")
 
-        logger.info(f"New data: {new_data_percentage*100:.1f}%")
-        logger.info(f"Data length: {data_len}")
+            stats.add("general_new_data_percentage",
+                      i_r, float(new_data_percentage))
+            stats.add("n_policy_data_len", i_r, float(data_len))
+            logger.info(f"New data: {new_data_percentage*100:.1f}%")
+            logger.info(f"Data length: {data_len}")
 
         pb.progress()
     runtime = pb.end()
@@ -411,10 +411,10 @@ if __name__ == "__main__":
     run_optimization(
         n_nodes=8,
         n_runs_pose=2,
-        n_runs_policy=16,
-        n_epochs_per_run_policy=4,
+        n_runs_policy=32,
+        n_epochs_per_run_policy=8,
         batch_size_policy=16,
-        stats_and_eval_every=1,
+        stats_and_eval_every=2,
         lr_pos=1e-4,
         lr_policy=1e-3,
         n_agents=4,

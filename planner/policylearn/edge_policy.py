@@ -149,6 +149,7 @@ class EdgePolicyModel(nn.Module):
         return big_from_small[node_small]
 
     def accuracy(self, eval_list: EVAL_LIST) -> float:
+        self.eval()
         results = torch.zeros(len(eval_list))
         for i, (data, bfs) in enumerate(eval_list):
             pred = self.predict(data.x, data.edge_index, bfs)

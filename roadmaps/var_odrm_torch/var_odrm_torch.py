@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import enum
 from functools import lru_cache, reduce
-from random import Random
+from random import Random, random
 from typing import List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
@@ -90,8 +90,8 @@ def make_graph_and_flann(
         map_img: MAP_IMG) -> Tuple[nx.Graph, FLANN]:
     """Convert array of node positions into graph by Delaunay Triangulation."""
     pos_np = pos.detach().numpy()
-    flann = FLANN()
-    flann.build_index(np.array(pos_np))
+    flann = FLANN(random_seed=0)
+    flann.build_index(np.array(pos_np), random_seed=0)
     cells, _ = voronoi_frames(pos_np, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells)
     g: nx.Graph = delaunay.to_networkx()  # type: ignore
@@ -212,8 +212,8 @@ def make_paths(
     """Make `n_paths` path between random coordinates on `g`."""
     pos = nx.get_node_attributes(g, POS)
     pos_np = np.array([pos[n] for n in g.nodes()])
-    flann = FLANN()
-    flann.build_index(np.array(pos_np))
+    flann = FLANN(random_seed=0)
+    flann.build_index(np.array(pos_np), random_seed=0)
     paths = []
     for i in range(n_paths):
         start = (rng.random(), rng.random())
