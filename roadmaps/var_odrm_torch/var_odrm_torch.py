@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-import enum
-from functools import lru_cache, reduce
-from random import Random, random
+from functools import reduce
+from random import Random
 from typing import List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
