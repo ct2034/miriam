@@ -303,7 +303,11 @@ def optimize_poses_from_paths(
         optimizer.step()
         optimizer.zero_grad()
     g, flann = make_graph_and_flann(pos, map_img)
-    return g, pos, flann, training_length
+    if len(paths) != 0:
+        avg_len = training_length.item() / len(paths)
+    else:
+        avg_len = 0.
+    return g, pos, flann, avg_len
 
 
 if __name__ == "__main__":

@@ -264,8 +264,8 @@ def run_optimization(
 
     # Visualization and analysis
     stats = StatCollector([
-        # "poses_test_length",
-        "poses_training_length",
+        "roadmap_test_length",
+        "roadmap_training_length",
         "policy_loss",
         "policy_regret",
         "policy_success",
@@ -306,8 +306,8 @@ def run_optimization(
 
     # Run optimization
     pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
-    # poses_test_length = 0
-    poses_training_length = 0
+    # roadmap_test_length = 0
+    roadmap_training_length = 0
     for i_r in range(n_runs):
         optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
         optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
@@ -325,13 +325,12 @@ def run_optimization(
 
         # Optimizing Poses
         if optimize_poses_now:
-            (g, pos, flann, poses_training_length
+            (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
                 g, pos, paths_s, map_img, optimizer_pos)
             if i_r % stats_and_eval_every == 0:
-                # stats.add("poses_test_length", i_r, float(poses_test_length))
-                stats.add("poses_training_length", i_r,
-                          float(poses_training_length))
+                stats.add("roadmap_training_length", i_r,
+                          float(roadmap_training_length))
 
         # Optimizing Policy
         if optimize_policy_now:
@@ -349,16 +348,26 @@ def run_optimization(
                     stats.add("policy_regret", i_r, float(policy_regret))
                 stats.add("policy_success", i_r, float(policy_success))
                 stats.add("policy_accuracy", i_r, policy_accuracy)
-                # stats.add("general_length", i_r, float(general_length))
                 logger.info(f"(P) Loss: {policy_loss:.3f}")
                 logger.info(f"(P) Regret: {policy_regret:e}")
                 logger.info(f"(P) Success: {policy_success}")
                 logger.info(f"(P) Accuracy: {policy_accuracy:.3f}")
-                # logger.info(f"Length: {general_length:.3f}")
 
+            if optimize_poses_now:
+                # eval the current roadmap
+                roadmap_test_length = eval.evaluate_roadmap(g, flann)
+                stats.add("roadmap_test_length", i_r, roadmap_test_length)
+                stats.add("roadmap_training_length", i_r,
+                          roadmap_training_length)
+                logger.info(f"(R) Test Length: {roadmap_test_length:.3f}")
+                logger.info(
+                    f"(R) Training Length: {roadmap_training_length:.3f}")
+
+            # stats.add("general_length", i_r, float(general_length))
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
             stats.add("n_policy_data_len", i_r, float(data_len))
+            # logger.info(f"Length: {general_length:.3f}")
             logger.info(f"New data: {new_data_percentage*100:.1f}%")
             logger.info(f"Data length: {data_len}")
 
@@ -367,7 +376,7 @@ def run_optimization(
     stats.add_static("runtime", str(runtime))
 
     # Plot stats
-    prefixes = ["poses", "policy", "general"]
+    prefixes = ["roadmap", "policy", "general"]
     _, axs = plt.subplots(len(prefixes), 1, sharex=True,
                           figsize=(20, 30), dpi=200)
     for i_x, part in enumerate(prefixes):
@@ -410,12 +419,12 @@ if __name__ == "__main__":
     ).setLevel(logging.DEBUG)
     run_optimization(
         n_nodes=8,
-        n_runs_pose=2,
+        n_runs_pose=16,
         n_runs_policy=32,
         n_epochs_per_run_policy=8,
         batch_size_policy=16,
-        stats_and_eval_every=2,
-        lr_pos=1e-4,
+        stats_and_eval_every=4,
+        lr_pos=1e-2,
         lr_policy=1e-3,
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",

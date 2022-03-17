@@ -1,3 +1,4 @@
+import logging
 from random import Random
 from typing import List, Optional, Tuple
 
@@ -9,7 +10,7 @@ from definitions import (DEFAULT_TIMEOUT_S, IDX_AVERAGE_LENGTH, IDX_SUCCESS,
 from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy import BFS_TYPE, EdgePolicyModel
 from pyflann import FLANN
-from roadmaps.var_odrm_torch.var_odrm_torch import sample_points
+from roadmaps.var_odrm_torch.var_odrm_torch import get_path_len, sample_points
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import LearnedPolicy, PolicyType
@@ -17,6 +18,8 @@ from sim.decentralized.runner import run_a_scenario, to_agent_objects
 from torch_geometric.data import Data
 
 from multi_optim.state import ScenarioState
+
+logger = logging.getLogger(__name__)
 
 
 class Eval(object):
@@ -143,6 +146,37 @@ class Eval(object):
         accuracy = model.accuracy(self.eval_set_accuracy)
         return np.mean(regret_s), np.mean(success_s), accuracy
 
+    def evaluate_roadmap(self, graph: nx.Graph, flann: FLANN) -> float:
+        """
+        Evaluate the roadmap for lengths of optimal paths.
+
+        :param graph: The roadmap to evaluate.
+        :return: The average length of the optimal paths.
+        """
+        pos = nx.get_node_attributes(graph, POS)
+        pos_t = torch.tensor([pos[n].tolist() for n in graph.nodes])
+        path_lens = []
+        for i_e in range(self.n_eval):
+            starts, _ = flann.nn_index(
+                np.array(self.starts_corrds_s[i_e], dtype=np.float32),
+                1, random_seed=0)
+            goals, _ = flann.nn_index(
+                np.array(self.goals_corrds_s[i_e], dtype=np.float32),
+                1, random_seed=0)
+            paths = plan_cbsr(graph, starts, goals, self.radius,
+                              DEFAULT_TIMEOUT_S, skip_cache=False)
+            if paths == INVALID:
+                logger.warning("No paths")
+                continue
+            assert paths is not None
+            for i_a in range(self.n_agents):
+                path = (
+                    self.starts_corrds_s[i_e][i_a],
+                    self.goals_corrds_s[i_e][i_a],
+                    [n for n, _ in paths[i_a]])
+                path_lens.append(
+                    get_path_len(pos_t, path, training=False).item())
+        return float(np.mean(path_lens))
 
 # def eval_full_scenario(
 #     model, g: nx.Graph, n_agents, n_eval, rng
