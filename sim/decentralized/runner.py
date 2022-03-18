@@ -35,9 +35,9 @@ def initialize_environment_random_fill(size: int, fill: float, rng: random.Rando
     return environment
 
 
-def get_int_tuple_pos(a: Agent, pos: int) -> Tuple[int, int]:
+def get_int_tuple_pos(a: Agent, node: int) -> Tuple[int, int]:
     assert a.has_gridmap
-    pos_coord_f = a.env.nodes()[pos][POS]
+    pos_coord_f = a.env.nodes()[node][POS]
     pos_coord = (int(pos_coord_f[0]), int(pos_coord_f[1]))
     return pos_coord
 

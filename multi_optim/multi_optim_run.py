@@ -271,7 +271,9 @@ def run_optimization(
         "policy_success",
         "policy_accuracy",
         "general_new_data_percentage",
-        # "general_length",
+        "general_length",
+        "general_regret",
+        "general_success",
         "n_policy_data_len"])
     stats.add_statics({
         # metadata
@@ -363,13 +365,21 @@ def run_optimization(
                 logger.info(
                     f"(R) Training Length: {roadmap_training_length:.3f}")
 
-            # stats.add("general_length", i_r, float(general_length))
+            if optimize_policy_now and optimize_poses_now:
+                (general_regret, general_success, general_length
+                 ) = eval.evaluate_both(policy_model, g, flann, rng)
+                stats.add("general_regret", i_r, general_regret)
+                stats.add("general_success", i_r, general_success)
+                stats.add("general_length", i_r, general_length)
+                logger.info(f"(G) Regret: {general_regret:e}")
+                logger.info(f"(G) Success: {general_success}")
+                logger.info(f"(G) Length: {general_length:.3f}")
+
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
             stats.add("n_policy_data_len", i_r, float(data_len))
-            # logger.info(f"Length: {general_length:.3f}")
-            logger.info(f"New data: {new_data_percentage*100:.1f}%")
-            logger.info(f"Data length: {data_len}")
+            logger.info(f"(G) New data: {new_data_percentage*100:.1f}%")
+            logger.info(f"(G) Data length: {data_len}")
 
         pb.progress()
     runtime = pb.end()

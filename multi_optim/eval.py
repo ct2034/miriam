@@ -27,10 +27,10 @@ class Eval(object):
     during its run."""
 
     def __init__(self, roadmap: nx.Graph, map_img: MAP_IMG, n_agents: int,
-                 n_eval: int, iterator_type: IteratorType, radius: float,
-                 rng: Random) -> None:
+                 n_eval: int, iterator_type: IteratorType, radius: float) -> None:
         torch.manual_seed(0)
         np.random.seed(0)
+        self.rng = Random(0)
         self.first_roadmap = roadmap
         self.map_img = map_img
         self.n_agents = n_agents
@@ -62,7 +62,7 @@ class Eval(object):
                 starts_goals_coord: Optional[np.ndarray] = None
                 while not unique:
                     starts_goals_coord = sample_points(
-                        n_agents * 2, map_img, rng
+                        n_agents * 2, map_img, self.rng
                     ).detach().numpy()
                     nearest, _ = flann.nn_index(
                         starts_goals_coord,
@@ -80,7 +80,7 @@ class Eval(object):
                 agents = to_agent_objects(
                     self.first_roadmap, starts, goals,
                     policy=PolicyType.OPTIMAL, radius=self.radius,
-                    rng=rng)
+                    rng=self.rng)
                 if agents is None:
                     continue
                 # genereally solvable?
@@ -105,7 +105,7 @@ class Eval(object):
                 self.states.append(state)
                 observation = state.observe()
                 assert observation is not None
-                i_a = rng.sample(
+                i_a = self.rng.sample(
                     list(observation.keys()), 1)[0]
                 data, big_from_small = observation[i_a]
                 self.eval_set_accuracy.append(
@@ -177,6 +177,51 @@ class Eval(object):
                 path_lens.append(
                     get_path_len(pos_t, path, training=False).item())
         return float(np.mean(path_lens))
+
+    def evaluate_both(self, model: EdgePolicyModel,
+                      graph: nx.Graph, flann: FLANN
+                      ) -> Tuple[float, float, float]:
+        """
+        Evaluate both the policy and the roadmap.
+
+        :param model: The model to evaluate.
+        :param graph: The roadmap to evaluate.
+        :return: The average regret and success.
+        """
+        model.eval()
+        success_s = np.zeros(self.n_eval)
+        regret_s = []
+        lenght_s = []
+        for i_e in range(self.n_eval):
+            starts, _ = flann.nn_index(
+                np.array(self.starts_corrds_s[i_e], dtype=np.float32),
+                1, random_seed=0)
+            goals, _ = flann.nn_index(
+                np.array(self.goals_corrds_s[i_e], dtype=np.float32),
+                1, random_seed=0)
+            # run sim with optimal policy
+            agents = to_agent_objects(
+                self.first_roadmap, starts.tolist(), goals.tolist(),
+                policy=PolicyType.OPTIMAL, radius=self.radius,
+                rng=self.rng)
+            if agents is None:
+                continue
+            try:
+                res_optimal = run_a_scenario(
+                    graph, agents, False, self.iterator_type)
+            except RuntimeError:
+                continue
+            # run sim with learned policy
+            for i_a, a in enumerate(agents):
+                a.policy = LearnedPolicy(a, model)
+                a.back_to_the_start()
+            res_policy = run_a_scenario(
+                graph, agents, False, self.iterator_type)
+            success_s[i_e] = res_policy[IDX_SUCCESS]
+            regret_s.append(res_policy[IDX_AVERAGE_LENGTH] -
+                            res_optimal[IDX_AVERAGE_LENGTH])
+            lenght_s.append(res_policy[IDX_AVERAGE_LENGTH])
+        return np.mean(regret_s), np.mean(success_s), np.mean(lenght_s)
 
 # def eval_full_scenario(
 #     model, g: nx.Graph, n_agents, n_eval, rng
