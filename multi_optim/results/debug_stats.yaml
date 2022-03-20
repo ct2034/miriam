@@ -1,233 +1,326 @@
+general_length:
+  t:
+  - 0
+  - 4
+  - 8
+  - 12
+  - 16
+  - 20
+  - 24
+  - 28
+  x:
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - &id001 !!python/object/apply:numpy.dtype
+      args:
+      - f8
+      - false
+      - true
+      state: !!python/tuple
+      - 3
+      - <
+      - null
+      - null
+      - null
+      - -1
+      - -1
+      - 0
+    - !!binary |
+      AAAAAAAAAAA=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      YRiG8YEeyD8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      VlVVCcp6uj8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      9hLaC0FF1D8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAJjch2z8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AQAAguPv2T8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      qqqq/gZQ3T8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      uG3bBgt73j8=
 general_new_data_percentage:
   t:
   - 0
-  - 2
   - 4
-  - 6
   - 8
-  - 10
   - 12
-  - 14
   - 16
-  - 18
   - 20
-  - 22
   - 24
-  - 26
   - 28
-  - 30
   x:
   - 1.0
-  - 0.27835051546391754
-  - 0.20134228187919462
-  - 0.1339712918660287
-  - 0.13120567375886524
-  - 0.1570048309178744
-  - 0.03734439834024896
-  - 0.0984182776801406
-  - 0.0671875
-  - 0.04113475177304964
-  - 0.036036036036036036
-  - 0.03597122302158273
-  - 0.03344120819848975
-  - 0.034102306920762285
-  - 0.031161473087818695
-  - 0.027653880463871544
+  - 0.1464968152866242
+  - 0.16058394160583941
+  - 0.05506607929515418
+  - 0.05864197530864197
+  - 0.018666666666666668
+  - 0.03236994219653179
+  - 0.02182952182952183
+general_regret:
+  t:
+  - 0
+  - 4
+  - 8
+  - 12
+  - 16
+  - 20
+  - 24
+  - 28
+  x:
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      VVWVf6Kf4b8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      qaqqWqJv2L8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      VVVVo4Y13b8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      yHEcdz8q0b8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      VlVVDVqIxb8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      VVVVGRKfzb8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      qqqqupqCwr8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      9TzPs9PDzL8=
+general_success:
+  t:
+  - 0
+  - 4
+  - 8
+  - 12
+  - 16
+  - 20
+  - 24
+  - 28
+  x:
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAAAAA=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      mpmZmZmZyT8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      mpmZmZmZuT8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      mpmZmZmZ2T8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      mpmZmZmZ2T8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      mpmZmZmZ2T8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAA4D8=
+  - !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      mpmZmZmZ2T8=
 n_policy_data_len:
   t:
   - 0
-  - 2
   - 4
-  - 6
   - 8
-  - 10
   - 12
-  - 14
   - 16
-  - 18
   - 20
-  - 22
   - 24
-  - 26
   - 28
-  - 30
   x:
   - 41.0
-  - 97.0
-  - 149.0
-  - 209.0
-  - 282.0
-  - 414.0
-  - 482.0
-  - 569.0
-  - 640.0
-  - 705.0
-  - 777.0
-  - 834.0
-  - 927.0
-  - 997.0
-  - 1059.0
-  - 1121.0
+  - 157.0
+  - 274.0
+  - 454.0
+  - 648.0
+  - 750.0
+  - 865.0
+  - 962.0
 policy_accuracy:
   t:
   - 0
-  - 2
   - 4
-  - 6
   - 8
-  - 10
   - 12
-  - 14
   - 16
-  - 18
   - 20
-  - 22
   - 24
-  - 26
   - 28
-  - 30
   x:
-  - 0.6000000238418579
   - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
-  - 0.5
+  - 0.30000001192092896
+  - 0.30000001192092896
+  - 0.30000001192092896
+  - 0.20000000298023224
+  - 0.30000001192092896
+  - 0.30000001192092896
+  - 0.30000001192092896
 policy_loss:
   t:
   - 0
-  - 2
   - 4
-  - 6
   - 8
-  - 10
   - 12
-  - 14
   - 16
-  - 18
   - 20
-  - 22
   - 24
-  - 26
   - 28
-  - 30
   x:
-  - 0.37538160880406696
-  - 0.3767701472554888
-  - 0.3767701417207718
-  - 0.37677014086927685
-  - 0.37677014039622414
-  - 0.37677014905672807
-  - 0.37677014643146145
-  - 0.37677014867464703
-  - 0.3767701476812363
-  - 0.37677014668782555
-  - 0.3767701502965421
-  - 0.3767701477374671
-  - 0.3767701505587019
-  - 0.37677014489022514
-  - 0.3767701503056199
-  - 0.37677014923431507
+  - 0.37919652462005615
+  - 0.3479467689990997
+  - 0.28950093272659516
+  - 0.2493234271633214
+  - 0.2279010229721302
+  - 0.21305627185613552
+  - 0.19694984832947904
+  - 0.18842786819231314
 policy_regret:
   t:
   - 0
-  - 2
   - 4
-  - 6
   - 8
-  - 10
   - 12
-  - 14
   - 16
-  - 18
   - 20
-  - 22
   - 24
-  - 26
   - 28
-  - 30
   x:
-  - -0.4329363723595937
-  - -0.21564586088061333
-  - -0.21564586088061333
-  - -0.21564586088061333
-  - -0.21564586088061333
-  - -0.21564586088061333
-  - -0.21564586088061333
-  - -0.21564586088061333
-  - -0.2156637277454138
-  - -0.2156637277454138
-  - -0.2156637277454138
-  - -0.2156637277454138
-  - -0.2156637277454138
-  - -0.2156637277454138
-  - -0.2156637277454138
-  - -0.2156637277454138
+  - -0.5637992406884829
+  - -0.45539564415812495
+  - -0.3729651120801767
+  - -0.3231812213857969
+  - -0.3719557330012322
+  - -0.2601367001732191
+  - -0.3355462680260341
+  - -0.3181971624493599
 policy_success:
   t:
   - 0
-  - 2
   - 4
-  - 6
   - 8
-  - 10
   - 12
-  - 14
   - 16
-  - 18
   - 20
-  - 22
   - 24
-  - 26
   - 28
-  - 30
   x:
+  - 0.0
   - 0.1
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
-poses_training_length:
+  - 0.3
+  - 0.4
+  - 0.3
+  - 0.5
+  - 0.3
+  - 0.3
+roadmap_test_length:
   t:
   - 0
+  - 4
+  - 8
+  - 12
   - 16
+  - 20
+  - 24
+  - 28
   x:
-  - 20.67801856994629
-  - 10.450072288513184
+  - 0.8079984349509081
+  - 0.8223340170724052
+  - 0.804994368304809
+  - 0.821654979829435
+  - 0.8231804755826791
+  - 0.8976608961820602
+  - 0.8371130141119162
+  - 0.9266885817050934
+roadmap_training_length:
+  t:
+  - 0
+  - 0
+  - 4
+  - 4
+  - 8
+  - 8
+  - 12
+  - 12
+  - 16
+  - 16
+  - 20
+  - 20
+  - 24
+  - 24
+  - 28
+  - 28
+  x:
+  - 1.7231682141621907
+  - 1.7231682141621907
+  - 1.8480021953582764
+  - 1.8480021953582764
+  - 1.7291862964630127
+  - 1.7291862964630127
+  - 1.6111371994018555
+  - 1.6111371994018555
+  - 1.9435402552286785
+  - 1.9435402552286785
+  - 1.0995393594106038
+  - 1.0995393594106038
+  - 1.8085018396377563
+  - 1.8085018396377563
+  - 1.3631155014038085
+  - 1.3631155014038085
 static:
   batch_size_policy: 16
-  git_hash: 6cba6fdb19c43e8fc6d82648661ad50751bfc2dd
+  git_hash: 7fdd82ce61395762c75f3be0f4befd5e05f0e8cc
   hostname: maus
   load_policy_model: None
   lr_policy: 0.001
-  lr_pos: 0.0001
+  lr_pos: 0.01
   map_fname: roadmaps/odrm/odrm_eval/maps/x.png
   n_agents: 4
   n_nodes: 8
   n_runs_policy: 32
-  n_runs_pose: 2
+  n_runs_pose: 16
   prefix: debug
-  runtime: '0:03:30.791712'
-  started_at: '2022-03-15T22:56:03.920442'
-  stats_every: 2
+  runtime: '0:22:53.653941'
+  started_at: '2022-03-18T10:19:32.351821'
+  stats_every: 4
