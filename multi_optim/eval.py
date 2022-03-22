@@ -27,7 +27,8 @@ class Eval(object):
     during its run."""
 
     def __init__(self, roadmap: nx.Graph, map_img: MAP_IMG, n_agents: int,
-                 n_eval: int, iterator_type: IteratorType, radius: float) -> None:
+                 n_eval: int, iterator_type: IteratorType, radius: float
+                 ) -> None:
         torch.manual_seed(0)
         np.random.seed(0)
         self.rng = Random(0)
