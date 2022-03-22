@@ -1,6 +1,7 @@
 import os
 from random import Random
 
+from definitions import INVALID
 from planner.dhc import generate_scenarios
 from planner.dhc.DHC import test
 from scenarios.generators import tracing_pathes_in_the_dark
@@ -11,7 +12,12 @@ def eval(env, starts, goals):
     res = test.test_model(337500, fname)
     if os.path.exists(fname):
         os.remove(fname)
-    return res
+    if res is None:
+        return INVALID
+    elif res[0][0] == False:
+        return INVALID
+    else:
+        return res[0]  # only one case was tested
 
 
 if __name__ == "__main__":
@@ -21,6 +27,8 @@ if __name__ == "__main__":
     n_agents = 5
     env, starts, goals = tracing_pathes_in_the_dark(
         size, fill, n_agents, rng)
+    print(f"{starts=}")
+    print(f"{goals=}")
 
-    res = eval(env, starts, goals)
-    print(res)
+    success, steps, paths = eval(env, starts, goals)
+    print(f"{success=}\n{steps=}\n{paths=}")

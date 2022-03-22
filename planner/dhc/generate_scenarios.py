@@ -12,8 +12,8 @@ def generate_file(scen: SCENARIO_TYPE):
     Generate a file for Scenario scen.
     :param scen: The type of scenario to generate.
     """
-    hash = hasher(scen)
-    fname = f"planner/dhc/DHC/test_set/{hash}.pth"
+    hashnr = abs(hash(hasher(scen)))
+    fname = f"planner/dhc/DHC/test_set/{hashnr}.pth"
     tests = [scen]
     with open(fname, 'wb') as f:
         pickle.dump(tests, f)
