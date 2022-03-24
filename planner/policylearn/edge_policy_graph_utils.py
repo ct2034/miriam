@@ -23,7 +23,9 @@ def t_to_data(t: int, path_i: int) -> float:
         return 1. + (t - path_i) * .1
 
 
-def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TYPE]:
+def agents_to_data(agents, i_self: int,
+                   hop_dist: int = 3,
+                   with_optimal=True) -> Tuple[Data, BFS_TYPE]:
     own_node = agents[i_self].pos
     g = agents[i_self].env
     g_sml = nx.ego_graph(g, own_node, radius=hop_dist)
@@ -80,10 +82,13 @@ def agents_to_data(agents, i_self: int, hop_dist: int = 3) -> Tuple[Data, BFS_TY
     edge_index = to_undirected(edge_index)
 
     # get optimal y
-    node_to_go = small_from_big[get_optimal_edge(agents, i_self)]
-    assert torch.tensor([node_to_go, small_from_big[own_node]]) in edge_index.T
-    y = torch.zeros(len(small_from_big), dtype=torch.float32)
-    y[node_to_go] = 1.
+    y = None
+    if with_optimal:
+        node_to_go = small_from_big[get_optimal_edge(agents, i_self)]
+        assert torch.tensor(
+            [node_to_go, small_from_big[own_node]]) in edge_index.T
+        y = torch.zeros(len(small_from_big), dtype=torch.float32)
+        y[node_to_go] = 1.
 
     d = Data(
         edge_index=edge_index,
