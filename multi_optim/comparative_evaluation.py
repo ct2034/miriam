@@ -37,7 +37,7 @@ def gridmap_from_origin_and_size(origin, size, n_rows_cols):
     return pos_s
 
 
-def make_gridmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
+def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
     """
     Creates a gridmap with n_nodes on an map_img.
     """
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     graph_fname = f"multi_optim/results/{results_name}_graph.gpickle"
     g = nx.read_gpickle(graph_fname)
     assert isinstance(g, nx.Graph)
-    pos_graph = nx.get_node_attributes(g, POS)
+    pos_our = nx.get_node_attributes(g, POS)
     n_nodes = g.number_of_nodes()
 
     # load policy
@@ -145,13 +145,13 @@ if __name__ == '__main__':
 
     # make equivalent gridmap
     logger.info(f"{n_nodes=}")
-    (pos_grid, edgelist, gridmap, coords_from_node
-     ) = make_gridmap_with_n_nodes_on_img(
+    (pos_dhc, edgelist, gridmap, coords_from_node
+     ) = make_dhcmap_with_n_nodes_on_img(
         n_nodes, map_img, rng)
-    g_grid = nx.from_edgelist(edgelist)
-    assert isinstance(g_grid, nx.Graph)
-    pos_dict = {i: pos_grid[i, :] for i in range(g_grid.number_of_nodes())}
-    nx.set_node_attributes(g_grid, pos_dict, POS)
+    g_dhc = nx.from_edgelist(edgelist)
+    assert isinstance(g_dhc, nx.Graph)
+    pos_dict = {i: pos_dhc[i, :] for i in range(g_dhc.number_of_nodes())}
+    nx.set_node_attributes(g_dhc, pos_dict, POS)
 
     # plot
     plt.imshow(
@@ -161,31 +161,33 @@ if __name__ == '__main__':
         alpha=.5,
         extent=(0, 1, 0, 1))
     nx.draw_networkx(
-        g_grid,
+        g_dhc,
         pos=pos_dict,
         with_labels=False,
         node_size=5,
         edge_color='r',
         node_color='r',)
-    plt.savefig(f"multi_optim/results/{results_name}_gridmap.png")
+    plt.savefig(f"multi_optim/results/{results_name}_dhcmap.png")
 
+    lens_our = [None] * n_eval  # type: List[Optional[float]]
+    lens_dhc = [None] * n_eval  # type: List[Optional[float]]
     for i_e in range(n_eval):
         # sampling agents
         points: np.ndarray = sample_points(
             n_agents * 2, map_img, rng).detach().numpy()
-        pos_graph_np = np.array([pos_graph[i] for i in range(n_nodes)])
-        nn_graph, _ = flann.nn(pos_graph_np, points, 1)
-        pos_grid_np = np.array([pos_grid[i]
-                                for i in range(n_nodes)], dtype=np.float32)
-        nn_grid, _ = flann.nn(pos_grid_np, points, 1)
+        pos_our_np = np.array([pos_our[i] for i in range(n_nodes)])
+        nn_our, _ = flann.nn(pos_our_np, points, 1)
+        pos_dhc_np = np.array([pos_dhc[i]
+                               for i in range(n_nodes)], dtype=np.float32)
+        nn_dhc, _ = flann.nn(pos_dhc_np, points, 1)
 
         # eval ours
-        starts = nn_graph[:n_agents]
-        goals = nn_graph[n_agents:]
+        starts_our = nn_our[:n_agents]
+        goals_our = nn_our[n_agents:]
         agents = to_agent_objects(
             g,
-            starts.tolist(),
-            goals.tolist(),
+            starts_our.tolist(),
+            goals_our.tolist(),
             radius=RADIUS,
             rng=rng)
         assert agents is not None
@@ -193,59 +195,69 @@ if __name__ == '__main__':
             agent.policy = LearnedPolicy(
                 agent, policy_nn)
         paths: List[PATH] = []
-        res_sim = run_a_scenario(
+        res_our = run_a_scenario(
             g, agents, False, ITERATOR_TYPE, paths_out=paths)
-        logger.info(f"{res_sim=}")
+        logger.info(f"{res_our=}")
         logger.info(f"{paths=}")
-        total_lenght_graph = None  # type: Optional[float]
-        if res_sim[IDX_SUCCESS]:
-            total_lenght_graph = res_sim[IDX_AVERAGE_LENGTH] * n_agents
+        total_lenght_our = None  # type: Optional[float]
+        if res_our[IDX_SUCCESS]:
+            total_lenght_our = res_our[IDX_AVERAGE_LENGTH] * n_agents
             for i_a in range(n_agents):
                 # before start
-                total_lenght_graph += float(np.linalg.norm(
+                total_lenght_our += float(np.linalg.norm(
                     np.array(points[i_a]) -
-                    pos_graph_np[starts[i_a]]))
+                    pos_our_np[starts_our[i_a]]))
                 # after goal
-                total_lenght_graph += float(np.linalg.norm(
+                total_lenght_our += float(np.linalg.norm(
                     np.array(points[i_a + n_agents]) -
-                    np.array(pos_graph[goals[i_a]], dtype=np.float32)))
+                    np.array(pos_our[goals_our[i_a]], dtype=np.float32)))
 
         # eval dhc
-        starts = nn_grid[:n_agents]
-        goals = nn_grid[n_agents:]
+        starts_dhc = nn_dhc[:n_agents]
+        goals_dhc = nn_dhc[n_agents:]
         res_dhc = dhc_eval(gridmap,
                            np.array(
-                               [coords_from_node[n] for n in starts]),
+                               [coords_from_node[n] for n in starts_dhc]),
                            np.array(
-                               [coords_from_node[n] for n in goals]))
+                               [coords_from_node[n] for n in goals_dhc]))
         logger.info(f"{res_dhc=}")
-        total_lenght_grid = None  # type: Optional[float]
+        total_lenght_dhc = None  # type: Optional[float]
         if res_dhc != INVALID:
-            _, _, paths_grid = res_dhc
-            total_lenght_grid = 0.
-            assert isinstance(paths_grid, np.ndarray)
-            for i_a, path in enumerate(paths_grid):
+            _, _, paths_dhc = res_dhc
+            total_lenght_dhc = 0.
+            assert isinstance(paths_dhc, np.ndarray)
+            for i_a, path in enumerate(paths_dhc):
                 # before start
-                total_lenght_grid += float(np.linalg.norm(
+                total_lenght_dhc += float(np.linalg.norm(
                     np.array(points[i_a]) -
-                    pos_grid_np[starts[i_a]]))
+                    pos_dhc_np[starts_dhc[i_a]]))
                 # path itself
                 prev_pos = None  # type: Optional[np.ndarray]
                 assert isinstance(path, np.ndarray)
                 for pos in path.tolist():
-                    coord_pos = pos_grid_np[
+                    coord_pos = pos_dhc_np[
                         coords_from_node.index(tuple(pos))]
                     if prev_pos is not None:
-                        total_lenght_grid += float(np.linalg.norm(
+                        total_lenght_dhc += float(np.linalg.norm(
                             coord_pos -
                             prev_pos))
                     prev_pos = coord_pos
                 # after goal
-                total_lenght_grid += float(np.linalg.norm(
+                total_lenght_dhc += float(np.linalg.norm(
                     np.array(points[i_a + n_agents]) -
-                    pos_grid_np[goals[i_a]]))
+                    pos_dhc_np[goals_dhc[i_a]]))
 
         # print results
-        logger.info("="*80)
-        logger.info(f"{total_lenght_graph=}")
-        logger.info(f"{total_lenght_grid=}")
+        logger.info("="*60)
+        logger.info(f"{total_lenght_our=}")
+        logger.info(f"{total_lenght_dhc=}")
+
+        lens_our[i_e] = total_lenght_our
+        lens_dhc[i_e] = total_lenght_dhc
+
+    # plot
+    plt.clf()
+    plt.plot(lens_our, label='ours')
+    plt.plot(lens_dhc, label='dhc')
+    plt.legend()
+    plt.savefig(f"multi_optim/results/{results_name}_lens.png")
