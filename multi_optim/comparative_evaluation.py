@@ -1,4 +1,5 @@
 import logging
+from cProfile import label
 from mmap import mmap
 from platform import node
 from random import Random
@@ -252,12 +253,12 @@ if __name__ == '__main__':
         logger.info(f"{total_lenght_our=}")
         logger.info(f"{total_lenght_dhc=}")
 
-        lens_our[i_e] = total_lenght_our
-        lens_dhc[i_e] = total_lenght_dhc
+        lens_our[i_e] = total_lenght_our if total_lenght_our is not None else 0.0
+        lens_dhc[i_e] = total_lenght_dhc if total_lenght_dhc is not None else 0.0
 
     # plot
     plt.clf()
-    plt.plot(lens_our, label='ours')
-    plt.plot(lens_dhc, label='dhc')
+    plt.bar(range(n_eval), lens_our, color='b', alpha=.5, label='our')
+    plt.bar(range(n_eval), lens_dhc, color='r', alpha=.5, label='dhc')
     plt.legend()
     plt.savefig(f"multi_optim/results/{results_name}_lens.png")
