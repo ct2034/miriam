@@ -10,7 +10,7 @@ import numpy as np
 import torch
 import yaml
 from definitions import (FREE, IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID,
-                         OBSTACLE, PATH, POS)
+                         OBSTACLE, PATH, POS, N)
 from matplotlib import pyplot as plt
 from planner.dhc.eval import eval as dhc_eval
 from planner.policylearn.edge_policy import EdgePolicyModel
@@ -101,11 +101,11 @@ def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
             y = n // n_rows_cols
             gridmap[x, y] = FREE
             coords_from_node.append((x, y))
-            # TODO: Checking edges here makes no real sense, because edges are 
-            # not defined in the gridmap. I think instead we would have to 
-            # change the grid shape until all these edges are actually valid. 
+            # TODO: Checking edges here makes no real sense, because edges are
+            # not defined in the gridmap. I think instead we would have to
+            # change the grid shape until all these edges are actually valid.
             # But lets test it with more nodes first ...
-            
+
             # check edge left
             if n > 0:
                 if check_edge(pos_s_grid, map_img, n, n-1):
@@ -230,6 +230,7 @@ if __name__ == '__main__':
                                [coords_from_node[n] for n in goals_dhc]))
         logger.info(f"{res_dhc=}")
         total_lenght_dhc = None  # type: Optional[float]
+        paths_dhc = None  # type: Optional[np.ndarray]
         if res_dhc != INVALID:
             _, _, paths_dhc = res_dhc
             total_lenght_dhc = 0.
@@ -292,6 +293,7 @@ if __name__ == '__main__':
                 # path
                 for pos in paths_our[i_a]:
                     coordpaths_our.append(pos_our_np[pos])
+                assert paths_dhc is not None
                 for pos in paths_dhc[i_a]:
                     coordpaths_dhc.append(
                         pos_dhc_np[coords_from_node.index(tuple(pos))])
@@ -320,8 +322,10 @@ if __name__ == '__main__':
         logger.info(f"{total_lenght_our=}")
         logger.info(f"{total_lenght_dhc=}")
 
-        lens_our[i_e] = total_lenght_our if total_lenght_our is not None else 0.0
-        lens_dhc[i_e] = total_lenght_dhc if total_lenght_dhc is not None else 0.0
+        lens_our[i_e] = (
+            total_lenght_our if total_lenght_our is not None else 0.0)
+        lens_dhc[i_e] = (
+            total_lenght_dhc if total_lenght_dhc is not None else 0.0)
 
     # plot
     plt.clf()

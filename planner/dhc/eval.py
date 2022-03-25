@@ -32,5 +32,7 @@ if __name__ == "__main__":
     print(f"{starts=}")
     print(f"{goals=}")
 
-    success, steps, paths = eval(env, starts, goals)
+    res = eval(env, starts, goals)
+    assert isinstance(res, tuple)
+    success, steps, paths = res
     print(f"{success=}\n{steps=}\n{paths=}")
