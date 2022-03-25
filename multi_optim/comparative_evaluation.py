@@ -101,6 +101,11 @@ def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
             y = n // n_rows_cols
             gridmap[x, y] = FREE
             coords_from_node.append((x, y))
+            # TODO: Checking edges here makes no real sense, because edges are 
+            # not defined in the gridmap. I think instead we would have to 
+            # change the grid shape until all these edges are actually valid. 
+            # But lets test it with more nodes first ...
+            
             # check edge left
             if n > 0:
                 if check_edge(pos_s_grid, map_img, n, n-1):
