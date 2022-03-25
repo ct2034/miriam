@@ -17,6 +17,7 @@ from planner.policylearn.edge_policy import EdgePolicyModel
 from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (check_edge, is_coord_free,
                                                     read_map, sample_points)
+from scenarios.visualization import get_colors
 from sim.decentralized.policy import LearnedPolicy
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
@@ -128,10 +129,10 @@ if __name__ == '__main__':
 
     # load graph
     graph_fname = f"multi_optim/results/{results_name}_graph.gpickle"
-    g = nx.read_gpickle(graph_fname)
-    assert isinstance(g, nx.Graph)
-    pos_our = nx.get_node_attributes(g, POS)
-    n_nodes = g.number_of_nodes()
+    g_our = nx.read_gpickle(graph_fname)
+    assert isinstance(g_our, nx.Graph)
+    pos_our = nx.get_node_attributes(g_our, POS)
+    n_nodes = g_our.number_of_nodes()
 
     # load policy
     policy_nn = EdgePolicyModel()
@@ -151,8 +152,8 @@ if __name__ == '__main__':
         n_nodes, map_img, rng)
     g_dhc = nx.from_edgelist(edgelist)
     assert isinstance(g_dhc, nx.Graph)
-    pos_dict = {i: pos_dhc[i, :] for i in range(g_dhc.number_of_nodes())}
-    nx.set_node_attributes(g_dhc, pos_dict, POS)
+    pos_dhc_dict = {i: pos_dhc[i, :] for i in range(g_dhc.number_of_nodes())}
+    nx.set_node_attributes(g_dhc, pos_dhc_dict, POS)
 
     # plot
     plt.imshow(
@@ -163,7 +164,7 @@ if __name__ == '__main__':
         extent=(0, 1, 0, 1))
     nx.draw_networkx(
         g_dhc,
-        pos=pos_dict,
+        pos=pos_dhc_dict,
         with_labels=False,
         node_size=5,
         edge_color='r',
@@ -186,7 +187,7 @@ if __name__ == '__main__':
         starts_our = nn_our[:n_agents]
         goals_our = nn_our[n_agents:]
         agents = to_agent_objects(
-            g,
+            g_our,
             starts_our.tolist(),
             goals_our.tolist(),
             radius=RADIUS,
@@ -195,11 +196,11 @@ if __name__ == '__main__':
         for agent in agents:
             agent.policy = LearnedPolicy(
                 agent, policy_nn)
-        paths: List[PATH] = []
+        paths_our: List[PATH] = []
         res_our = run_a_scenario(
-            g, agents, False, ITERATOR_TYPE, paths_out=paths)
+            g_our, agents, False, ITERATOR_TYPE, paths_out=paths_our)
         logger.info(f"{res_our=}")
-        logger.info(f"{paths=}")
+        logger.info(f"{paths_our=}")
         total_lenght_our = None  # type: Optional[float]
         if res_our[IDX_SUCCESS]:
             total_lenght_our = res_our[IDX_AVERAGE_LENGTH] * n_agents
@@ -247,6 +248,66 @@ if __name__ == '__main__':
                 total_lenght_dhc += float(np.linalg.norm(
                     np.array(points[i_a + n_agents]) -
                     pos_dhc_np[goals_dhc[i_a]]))
+
+        colors = get_colors(n_agents)
+        if total_lenght_our is not None and total_lenght_dhc is not None:
+            f_our, ax_our = plt.subplots()
+            f_dhc, ax_dhc = plt.subplots()
+            for ax in [ax_our, ax_dhc]:
+                ax.imshow(
+                    np.swapaxes(np.array(map_img), 0, 1),
+                    cmap='gray',
+                    origin='lower',
+                    alpha=.5,
+                    extent=(0, 1, 0, 1))
+            nx.draw_networkx(
+                g_our,
+                pos=nx.get_node_attributes(g_our, POS),
+                with_labels=False,
+                node_size=5,
+                edge_color='k',
+                node_color='k',
+                ax=ax_our)
+            nx.draw_networkx(
+                g_dhc,
+                pos=pos_dhc_dict,
+                with_labels=False,
+                node_size=5,
+                edge_color='k',
+                node_color='k',
+                ax=ax_dhc)
+
+            for i_a in range(n_agents):
+                coordpaths_our = []
+                coordpaths_dhc = []
+                # start
+                coordpaths_our.append(points[i_a])
+                coordpaths_dhc.append(points[i_a])
+                # path
+                for pos in paths_our[i_a]:
+                    coordpaths_our.append(pos_our_np[pos])
+                for pos in paths_dhc[i_a]:
+                    coordpaths_dhc.append(
+                        pos_dhc_np[coords_from_node.index(tuple(pos))])
+                # goal
+                coordpaths_our.append(points[i_a + n_agents])
+                coordpaths_dhc.append(points[i_a + n_agents])
+
+                ax_our.plot(
+                    [coordpaths_our[i][0] for i in range(len(coordpaths_our))],
+                    [coordpaths_our[i][1] for i in range(len(coordpaths_our))],
+                    c=colors[i_a],
+                    linewidth=2)
+                ax_dhc.plot(
+                    [coordpaths_dhc[i][0] for i in range(len(coordpaths_dhc))],
+                    [coordpaths_dhc[i][1] for i in range(len(coordpaths_dhc))],
+                    c=colors[i_a],
+                    linewidth=2)
+
+            f_our.savefig(
+                f"multi_optim/results/{results_name}_paths_our_{i_e}.png")
+            f_dhc.savefig(
+                f"multi_optim/results/{results_name}_paths_dhc_{i_e}.png")
 
         # print results
         logger.info("="*60)
