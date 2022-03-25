@@ -9,8 +9,8 @@ import networkx as nx
 import numpy as np
 import torch
 import yaml
-from definitions import (FREE, IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, PATH,
-                         POS)
+from definitions import (FREE, IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID,
+                         OBSTACLE, PATH, POS)
 from matplotlib import pyplot as plt
 from planner.dhc.eval import eval as dhc_eval
 from planner.policylearn.edge_policy import EdgePolicyModel
@@ -48,7 +48,7 @@ def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
     n_nodes_free = 0
     max_tries_per_size = 100
     try_nr = 0
-    pos_s = None
+    pos_s_grid = None
     while n_nodes_free < n_nodes:
         if try_nr > max_tries_per_size:
             n_rows_cols += 1
@@ -58,9 +58,9 @@ def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
         size = res * (n_rows_cols - 1)
         origin = np.array([rng.uniform(0, 1.0 - size),
                           rng.uniform(0, 1.0 - size)])
-        pos_s = gridmap_from_origin_and_size(origin, size, n_rows_cols)
+        pos_s_grid = gridmap_from_origin_and_size(origin, size, n_rows_cols)
         n_nodes_free = 0
-        for pos in pos_s:
+        for pos in pos_s_grid:
             if is_coord_free(map_img, pos):
                 n_nodes_free += 1
         logger.debug(f"{origin=}")
@@ -75,9 +75,9 @@ def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
         size = res * (n_rows_cols - 1)
         origin = np.array([rng.uniform(0, 1.0 - size),
                           rng.uniform(0, 1.0 - size)])
-        pos_s = gridmap_from_origin_and_size(origin, size, n_rows_cols)
+        pos_s_grid = gridmap_from_origin_and_size(origin, size, n_rows_cols)
         n_nodes_free = 0
-        for pos in pos_s:
+        for pos in pos_s_grid:
             if is_coord_free(map_img, pos):
                 n_nodes_free += 1
         logger.debug(f"{origin=}")
@@ -86,30 +86,31 @@ def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
         logger.debug(f"{n_rows_cols=}")
         logger.debug(f"{n_nodes_free=}")
         logger.debug(f"------------------")
-    assert pos_s is not None
+    assert pos_s_grid is not None
     pos_out = []
     nodes_out = []
     edgelist_out = []
-    gridmap = np.ones((n_rows_cols, n_rows_cols))
+    gridmap = np.full((n_rows_cols, n_rows_cols),
+                      OBSTACLE, dtype=np.int8)
     coords_from_node = []
-    for n, pos in enumerate(pos_s):
+    for n, pos in enumerate(pos_s_grid):
         if is_coord_free(map_img, pos):
             pos_out.append(pos)
             nodes_out.append(n)
-            x = nodes_out.index(n) % n_rows_cols
-            y = nodes_out.index(n) // n_rows_cols
+            x = n % n_rows_cols
+            y = n // n_rows_cols
             gridmap[x, y] = FREE
             coords_from_node.append((x, y))
             # check edge left
             if n > 0:
-                if check_edge(pos_s, map_img, n, n-1):
+                if check_edge(pos_s_grid, map_img, n, n-1):
                     edgelist_out.append(
                         (nodes_out.index(n),
                          nodes_out.index(n-1))
                     )
             # check edge up
             if n >= n_rows_cols:
-                if check_edge(pos_s, map_img, n, n-n_rows_cols):
+                if check_edge(pos_s_grid, map_img, n, n-n_rows_cols):
                     edgelist_out.append(
                         (nodes_out.index(n),
                          nodes_out.index(n-n_rows_cols))

@@ -14,6 +14,8 @@ def eval(env, starts, goals):
         os.remove(fname)
     if res is None:
         return INVALID
+    elif res[0] is None:
+        return INVALID
     elif res[0][0] == False:
         return INVALID
     else:
