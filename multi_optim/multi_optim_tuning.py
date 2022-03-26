@@ -1,6 +1,8 @@
 import logging
 import os
+import queue
 import subprocess
+import time
 from typing import Dict, List, Union
 
 logger = logging.getLogger(__name__)
@@ -10,7 +12,7 @@ def params_debug():
     n_nodes_s = [4]
     parameter_experiments = {
         "n_nodes": n_nodes_s,
-        "n_runs_pose": [2, 4],
+        "n_runs_pose": [2],
         "n_runs_policy": [2, 4],
         "n_epochs_per_run_policy": [2],
         "batch_size_policy": [2],
@@ -46,33 +48,6 @@ def params_run():
     return parameter_experiments, n_runs
 
 
-def run(params_to_run):
-    logger.error("Creating processes")
-    import_str = "from multi_optim.multi_optim_run import run_optimization"
-    processes = []
-    for kwargs in params_to_run:
-        kwargs_str = repr(kwargs)
-        process = subprocess.Popen(
-            ["/usr/bin/python3",
-             "-c",
-             f"{import_str}; kwargs = {kwargs_str};"
-             + "run_optimization(**kwargs)"],
-            cwd=str(os.getcwd()),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        processes.append(process)
-    logger.error(f"{len(processes)=}")
-
-    logger.error("Running processes")
-    for process in processes:
-        try:
-            outs, errs = process.communicate()
-            logger.error(f"outs: {outs.decode('utf-8')}")
-            logger.error(f"errs: {errs.decode('utf-8')}")
-        except Exception as e:
-            logger.error(f"Exception: {e}")
-
-
 def make_kwargs(parameter_experiments, n_runs):
     seed_s = range(n_runs)
 
@@ -98,9 +73,69 @@ def make_kwargs(parameter_experiments, n_runs):
     return params_to_run
 
 
+def start_process(kwargs):
+    import_str = "from multi_optim.multi_optim_run import run_optimization"
+    kwargs_str = repr(kwargs)
+    process = subprocess.Popen(
+        ["/usr/bin/python3",
+         "-c",
+         f"{import_str}; kwargs = {kwargs_str};"
+         + "run_optimization(**kwargs)"],
+        cwd=str(os.getcwd()),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+
+    return process
+
+
+def clean_str(inp: str) -> str:
+    return inp.replace("[1m", "").replace("[0m", "").replace("[31m", "")
+
+
+def run(params_to_run):
+    logger.info("Creating processes")
+    cpus = os.cpu_count()
+    assert isinstance(cpus, int)
+    logger.info(f"{cpus=}")
+    max_active_processes: int = min(cpus, 12)
+    logger.info(f"{max_active_processes=}")
+    active_processes = set()
+
+    while len(params_to_run) > 0 or len(active_processes) > 0:
+        if (len(active_processes) < max_active_processes
+                and len(params_to_run) > 0):
+            if len(params_to_run) > 0:
+                kwargs = params_to_run.pop()
+                prefix = kwargs["prefix"]
+                process = start_process(kwargs)
+                active_processes.add(process)
+                logger.info("Started process "
+                            + f"\"{prefix}\" @ [{process.pid}]")
+            logger.debug(f"active_processes: {active_processes}")
+        else:
+            to_remove = set()
+            for process in active_processes:
+                if process.poll() is not None:
+                    outs, errs = process.communicate()
+                    logger.info("Finished process "
+                                + f"[{process.pid}]")
+                    logger.info(f"outs: [{process.pid}] >>>>>"
+                                + f"{clean_str(outs.decode('utf-8'))}"
+                                + f"<<<<< [{process.pid}]")
+                    logger.error(f"errs: [{process.pid}] >>>>>"
+                                 + f"{clean_str(errs.decode('utf-8'))}"
+                                 + f"<<<<< [{process.pid}]")
+                    to_remove.add(process)
+            active_processes -= to_remove
+        time.sleep(0.1)
+    logger.info("Done")
+
+
 if __name__ == "__main__":
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    # parameter_experiments, n_runs = params_debug()
-    parameter_experiments, n_runs = params_run()
+    logging.basicConfig(filename="multi_optim/multi_optim_tuning.log",
+                        filemode='w',
+                        level=logging.DEBUG)
+    parameter_experiments, n_runs = params_debug()
+    # parameter_experiments, n_runs = params_run()
     params_to_run = make_kwargs(parameter_experiments, n_runs)
     run(params_to_run)
