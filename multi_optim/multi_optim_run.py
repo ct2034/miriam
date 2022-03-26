@@ -136,12 +136,12 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
     return these_ds, paths
 
 
-def _get_data_folder(prefix):
-    return f"multi_optim/results/{prefix}_data"
+def _get_data_folder(save_folder, prefix):
+    return f"{save_folder}/{prefix}_data"
 
 
-def _get_path_data(prefix, hash) -> str:
-    folder = _get_data_folder(prefix)
+def _get_path_data(save_folder, prefix, hash) -> str:
+    folder = _get_data_folder(save_folder, prefix)
     if not os.path.exists(folder):
         os.makedirs(folder)
     return folder+f"/{hash}.pkl"
@@ -149,7 +149,7 @@ def _get_path_data(prefix, hash) -> str:
 
 def sample_trajectories_in_parallel(
         model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, flann,
-        n_agents: int, n_episodes: int, prefix: str, require_paths: bool,
+        n_agents: int, n_episodes: int, prefix: str, require_paths: bool, save_folder,
         pool, rng: Random
 ) -> Tuple[str, List[List[PATH_W_COORDS]]]:
     model_copy = EdgePolicyModel()
@@ -165,7 +165,7 @@ def sample_trajectories_in_parallel(
         "n_agents": n_agents,
         "model": model_copy
     })
-    new_fname: str = _get_path_data(prefix, generation_hash)
+    new_fname: str = _get_path_data(save_folder, prefix, generation_hash)
     # only create file if this data does not exist or if paths are required
     paths_s: List[List[PATH_W_COORDS]] = []
     if os.path.exists(new_fname) and not require_paths:
@@ -200,21 +200,26 @@ def optimize_policy(model, batch_size, optimizer, epds
 
 
 def run_optimization(
-        n_nodes: int = 32,
-        n_runs_pose: int = 1024,
-        n_runs_policy: int = 128,
-        n_epochs_per_run_policy: int = 64,
-        batch_size_policy: int = 32,
-        stats_and_eval_every: int = 1,
-        lr_pos: float = 1e-4,
-        lr_policy: float = 4e-4,
-        n_agents: int = 8,
-        map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png",
+        n_nodes: int,
+        n_runs_pose: int,
+        n_runs_policy: int,
+        n_epochs_per_run_policy: int,
+        batch_size_policy: int,
+        stats_and_eval_every: int,
+        lr_pos: float,
+        lr_policy: float,
+        n_agents: int,
+        map_fname: str,
+        seed: int,
         load_policy_model: Optional[str] = None,
-        rng: Random = Random(0),
-        prefix: str = "noname"):
+        prefix: str = "noname",
+        save_images: bool = True,
+        save_folder: Optional[str] = None):
+    rng = Random(seed)
     logger.info(f"run_optimization {prefix}")
     torch.manual_seed(rng.randint(0, 2 ** 32))
+    if save_folder is None:
+        save_folder = "multi_optim/results"  # default
 
     # multiprocessing
     n_processes = min(tmp.cpu_count(), 8)
@@ -256,11 +261,10 @@ def run_optimization(
     eval_n_agents = int(np.ceil(n_agents * .7))
     eval = Eval(g, map_img,
                 n_agents=eval_n_agents, n_eval=10,
-                iterator_type=ITERATOR_TYPE, radius=RADIUS,
-                rng=rng)
+                iterator_type=ITERATOR_TYPE, radius=RADIUS)
 
     # Data for policy
-    epds = EdgePolicyDataset(f"multi_optim/results/{prefix}_data")
+    epds = EdgePolicyDataset(f"{save_folder}/{prefix}_data")
 
     # Visualization and analysis
     stats = StatCollector([
@@ -294,8 +298,9 @@ def run_optimization(
             load_policy_model if load_policy_model else "None"),
         "prefix": prefix
     })
-    draw_graph(g, map_img, title="Start")
-    plt.savefig(f"multi_optim/results/{prefix}_start.png")
+    if save_images:
+        draw_graph(g, map_img, title="Start")
+        plt.savefig(f"{save_folder}/{prefix}_start.png")
 
     # Making sense of two n_runs
     n_runs = max(n_runs_pose, n_runs_policy)
@@ -320,10 +325,13 @@ def run_optimization(
         old_data_len = len(epds)
         new_fname, paths_s = sample_trajectories_in_parallel(
             policy_model, g, map_img, flann, n_agents, n_epochs_per_run_policy,
-            prefix, optimize_poses_now, pool, rng)
+            prefix, optimize_poses_now, save_folder,  pool, rng)
         epds.add_file(new_fname)
         data_len = len(epds)
-        new_data_percentage = (data_len - old_data_len) / data_len
+        if data_len > 0:
+            new_data_percentage = (data_len - old_data_len) / data_len
+        else:
+            new_data_percentage = 0.
 
         # Optimizing Poses
         if optimize_poses_now:
@@ -367,7 +375,7 @@ def run_optimization(
 
             if optimize_policy_now and optimize_poses_now:
                 (general_regret, general_success, general_length
-                 ) = eval.evaluate_both(policy_model, g, flann, rng)
+                 ) = eval.evaluate_both(policy_model, g, flann)
                 stats.add("general_regret", i_r, general_regret)
                 stats.add("general_success", i_r, general_success)
                 stats.add("general_length", i_r, general_length)
@@ -386,25 +394,27 @@ def run_optimization(
     stats.add_static("runtime", str(runtime))
 
     # Plot stats
-    prefixes = ["roadmap", "policy", "general"]
-    _, axs = plt.subplots(len(prefixes), 1, sharex=True,
-                          figsize=(20, 30), dpi=200)
-    for i_x, part in enumerate(prefixes):
-        for k, v in stats.get_stats_wildcard(f"{part}.*").items():
-            axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
-        axs[i_x].legend()  # type: ignore
-        axs[i_x].xaxis.set_major_locator(  # type: ignore
-            MaxNLocator(integer=True))
-    plt.xlabel("Run")
-    plt.savefig(f"multi_optim/results/{prefix}_stats.png")
+    if save_images:
+        prefixes = ["roadmap", "policy", "general"]
+        _, axs = plt.subplots(len(prefixes), 1, sharex=True,
+                              figsize=(20, 30), dpi=200)
+        for i_x, part in enumerate(prefixes):
+            for k, v in stats.get_stats_wildcard(f"{part}.*").items():
+                axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
+            axs[i_x].legend()  # type: ignore
+            axs[i_x].xaxis.set_major_locator(  # type: ignore
+                MaxNLocator(integer=True))
+        plt.xlabel("Run")
+        plt.savefig(f"{save_folder}/{prefix}_stats.png")
 
     # Save results
-    draw_graph(g, map_img, title="End")
-    plt.savefig(f"multi_optim/results/{prefix}_end.png")
-    stats.to_yaml(f"multi_optim/results/{prefix}_stats.yaml")
-    nx.write_gpickle(g, f"multi_optim/results/{prefix}_graph.gpickle")
+    if save_images:
+        draw_graph(g, map_img, title="End")
+        plt.savefig(f"{save_folder}/{prefix}_end.png")
+    stats.to_yaml(f"{save_folder}/{prefix}_stats.yaml")
+    nx.write_gpickle(g, f"{save_folder}/{prefix}_graph.gpickle")
     torch.save(policy_model.state_dict(),
-               f"multi_optim/results/{prefix}_policy_model.pt")
+               f"{save_folder}/{prefix}_policy_model.pt")
 
     logger.info(stats.get_statics())
 
@@ -417,9 +427,8 @@ if __name__ == "__main__":
     tmp.set_start_method('spawn')
 
     # debug run
-    for d in os.listdir("multi_optim/results/debug_data"):
-        os.remove(f"multi_optim/results/debug_data/{d}")
-    rng = Random(0)
+    for d in os.listdir("{save_folder}/debug_data"):
+        os.remove(f"{save_folder}/debug_data/{d}")
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -438,11 +447,10 @@ if __name__ == "__main__":
         lr_policy=1e-3,
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        rng=rng,
+        seed=0,
         prefix="debug")
 
     # tiny run
-    rng = Random(0)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -458,12 +466,11 @@ if __name__ == "__main__":
         lr_policy=1e-3,
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
-        rng=rng,
+        seed=0,
+        load_policy_model="{save_folder}/tiny_model_to_load.pt",
         prefix="tiny")
 
     # tiny_varpose run
-    rng = Random(0)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -479,12 +486,11 @@ if __name__ == "__main__":
         lr_policy=1e-3,
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
-        rng=rng,
+        seed=0,
+        load_policy_model="{save_folder}/tiny_model_to_load.pt",
         prefix="tiny_varpose")
 
     # medium run
-    rng = Random(0)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -500,12 +506,11 @@ if __name__ == "__main__":
         lr_policy=1e-3,
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
-        rng=rng,
+        seed=0,
+        # load_policy_model="{save_folder}/medium_model_to_load.pt",
         prefix="medium")
 
     # large run
-    rng = Random(0)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -521,6 +526,6 @@ if __name__ == "__main__":
         lr_policy=1e-3,
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
-        rng=rng,
+        seed=0,
+        # load_policy_model="{save_folder}/medium_model_to_load.pt",
         prefix="large")
