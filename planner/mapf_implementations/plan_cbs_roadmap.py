@@ -11,8 +11,8 @@ import yaml
 from definitions import INVALID, POS
 from planner.mapf_implementations.libMultiRobotPlanning.tools import \
     annotate_roadmap
-from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph, read_map,
-                                                    sample_points)
+from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph_and_flann,
+                                                    read_map, sample_points)
 from scenarios.visualization import plot_with_paths
 from tools import hasher
 
@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
-    g = make_graph(pos, map_img)
+    g, _ = make_graph_and_flann(pos, map_img)
     starts = rng.sample(range(n), n_agents)
     goals = rng.sample(range(n), n_agents)
     for i_a in range(n_agents):

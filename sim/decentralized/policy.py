@@ -42,7 +42,7 @@ class Policy(object):
         if type == PolicyType.RANDOM:
             return RandomPolicy(agent)
         elif type == PolicyType.LEARNED:
-            nn = EdgePolicyModel(gpu="cpu")
+            nn = EdgePolicyModel(gpu=torch.device("cpu"))
             nn.load_state_dict(torch.load(
                 "sim/decentralized/policy_model.pt", map_location="cpu"))
             return LearnedPolicy(agent, nn, **kwargs)
@@ -80,14 +80,15 @@ class RandomPolicy(Policy):
 
 
 class LearnedPolicy(Policy):
-    def __init__(self, agent, nn) -> None:
+    def __init__(self, agent, nn: EdgePolicyModel) -> None:
         super().__init__(agent)
-        self.nn = nn
+        self.nn: EdgePolicyModel = nn
         self.nn.eval()
 
     def get_edge(self, agents, _):
         i_a_self = agents.index(self.a)
-        data, big_from_small = agents_to_data(agents, i_a_self)
+        data, big_from_small = agents_to_data(
+            agents, i_a_self, with_optimal=False)
         node_to_go = self.nn.predict(
             data.x,
             data.edge_index,

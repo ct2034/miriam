@@ -52,7 +52,7 @@ class Agent(object):
         pos: Union[C, C_grid, np.ndarray],
         policy: PolicyType = PolicyType.LEARNED,
         radius: Optional[float] = None,
-        rng: random.Random = random.Random()
+        rng: random.Random = random.Random(0)
     ):
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""

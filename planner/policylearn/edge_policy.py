@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch_geometric
 from planner.policylearn.edge_policy_graph_utils import BFS_TYPE
 from torch.nn.modules.module import T
@@ -58,13 +59,14 @@ class EdgePolicyDataset(Dataset):
 class EdgePolicyModel(nn.Module):
     def __init__(
             self,
-            num_node_features=4,
-            num_conv_channels=128,
-            num_conv_layers=4,
-            num_readout_layers=2,
-            cheb_filter_size=5,
-            dropout_p=.2,
-            gpu=torch.device("cpu")):
+            num_node_features=4,  # type: int
+            num_conv_channels=128,  # type: int
+            num_conv_layers=4,  # type: int
+            num_readout_layers=2,  # type: int
+            cheb_filter_size=5,  # type: int
+            dropout_p=.2,  # type: float
+            gpu=torch.device("cpu")  # type: torch.device
+    ):
         super().__init__()
         self.num_node_features = num_node_features
         self.num_conv_channels = num_conv_channels
@@ -147,6 +149,7 @@ class EdgePolicyModel(nn.Module):
         return big_from_small[node_small]
 
     def accuracy(self, eval_list: EVAL_LIST) -> float:
+        self.eval()
         results = torch.zeros(len(eval_list))
         for i, (data, bfs) in enumerate(eval_list):
             pred = self.predict(data.x, data.edge_index, bfs)
@@ -157,14 +160,13 @@ class EdgePolicyModel(nn.Module):
                 results[i] = 0
         return torch.mean(results).item()
 
-    def learn(self, databatch: Batch, optimizer):
-        databatch.to(self.gpu)
+    def learn(self, databatch: Data, optimizer):
+        databatch.to(self.gpu)  # type: ignore
         self.train()
-        # databatch.to(self.gpu)
         y_out_batched = self.forward(
             databatch.x, databatch.edge_index, databatch.batch)
 
-        loss = torch.nn.functional.binary_cross_entropy(
+        loss = F.binary_cross_entropy(
             y_out_batched, databatch.y)
         try:
             loss.backward()
@@ -177,14 +179,3 @@ class EdgePolicyModel(nn.Module):
                             f"loss {loss}")
             return None
         return float(loss)
-
-    # def train(self: T, mode: bool = True) -> T:
-    #     if mode:  # train
-    #         self.to(self.gpu)  # type: ignore
-    #         for p in self.parameters():
-    #             p.to(self.gpu)  # type: ignore
-    #     else:  # eval
-    #         self.to("cpu")
-    #         for p in self.parameters():
-    #             p.to("cpu")
-    #     return super().train(mode)  # type: ignore

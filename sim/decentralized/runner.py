@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 TIME_LIMIT = 100
 
 
-def initialize_environment_random_fill(size: int, fill: float, rng: random.Random = random.Random()
+def initialize_environment_random_fill(size: int, fill: float, rng: random.Random = random.Random(0)
                                        ) -> np.ndarray:
     """Make a square map with edge length `size` and `fill` (0..1) obstacle
     ratio.
@@ -35,9 +35,9 @@ def initialize_environment_random_fill(size: int, fill: float, rng: random.Rando
     return environment
 
 
-def get_int_tuple_pos(a: Agent, pos: int) -> Tuple[int, int]:
+def get_int_tuple_pos(a: Agent, node: int) -> Tuple[int, int]:
     assert a.has_gridmap
-    pos_coord_f = a.env.nodes()[pos][POS]
+    pos_coord_f = a.env.nodes()[node][POS]
     pos_coord = (int(pos_coord_f[0]), int(pos_coord_f[1]))
     return pos_coord
 
@@ -45,7 +45,7 @@ def get_int_tuple_pos(a: Agent, pos: int) -> Tuple[int, int]:
 def initialize_new_agent(
         gridmap: np.ndarray, agents: List[Agent], policy: PolicyType,
         tight_placement: bool = False,
-        rng: random.Random = random.Random()) -> Optional[Agent]:
+        rng: random.Random = random.Random(0)) -> Optional[Agent]:
     """Place new agent in the environment, where no obstacle or other agent
     is.
 
@@ -113,7 +113,7 @@ def initialize_new_agent(
 
 def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
                      radius: Optional[float] = None,
-                     rng: random.Random = random.Random()) -> Optional[List[Agent]]:
+                     rng: random.Random = random.Random(0)) -> Optional[List[Agent]]:
     n_agents = np.array(starts).shape[0]
     agents = []
     for i_a in range(n_agents):
@@ -133,7 +133,7 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
 
 def initialize_agents(
         env: np.ndarray, n_agents: int, policy: PolicyType,
-        tight_placement: bool = False, rng: random.Random = random.Random()
+        tight_placement: bool = False, rng: random.Random = random.Random(0)
 ) -> Optional[Tuple[Agent, ...]]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other). Returns None if one agent
