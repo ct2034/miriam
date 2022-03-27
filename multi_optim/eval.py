@@ -222,4 +222,8 @@ class Eval(object):
             regret_s.append(res_policy[IDX_AVERAGE_LENGTH] -
                             res_optimal[IDX_AVERAGE_LENGTH])
             lenght_s.append(res_policy[IDX_AVERAGE_LENGTH])
-        return np.mean(regret_s), np.mean(success_s), np.mean(lenght_s)
+        return (
+            float(np.mean(regret_s)),
+            float(np.mean(success_s)),
+            float(np.mean(lenght_s))
+        )

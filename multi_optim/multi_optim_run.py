@@ -149,8 +149,8 @@ def _get_path_data(save_folder, prefix, hash) -> str:
 
 def sample_trajectories_in_parallel(
         model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, flann,
-        n_agents: int, n_episodes: int, prefix: str, require_paths: bool, save_folder,
-        pool, rng: Random
+        n_agents: int, n_episodes: int, prefix: str, require_paths: bool,
+        save_folder, pool, rng: Random
 ) -> Tuple[str, List[List[PATH_W_COORDS]]]:
     model_copy = EdgePolicyModel()
     model_copy.load_state_dict(copy.deepcopy(model.state_dict()))
@@ -188,6 +188,8 @@ def sample_trajectories_in_parallel(
 
 def optimize_policy(model, batch_size, optimizer, epds
                     ) -> Tuple[EdgePolicyModel, float]:
+    if len(epds) == 0:
+        return model, 0.0
     loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
     loss_s = []
     for _, batch in enumerate(loader):
@@ -427,8 +429,8 @@ if __name__ == "__main__":
     tmp.set_start_method('spawn')
 
     # debug run
-    for d in os.listdir("{save_folder}/debug_data"):
-        os.remove(f"{save_folder}/debug_data/{d}")
+    for d in os.listdir("multi_optim/results/debug_data"):
+        os.remove(f"multi_optim/results/debug_data/{d}")
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -467,7 +469,7 @@ if __name__ == "__main__":
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        load_policy_model="{save_folder}/tiny_model_to_load.pt",
+        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
         prefix="tiny")
 
     # tiny_varpose run
@@ -487,7 +489,7 @@ if __name__ == "__main__":
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        load_policy_model="{save_folder}/tiny_model_to_load.pt",
+        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
         prefix="tiny_varpose")
 
     # medium run
@@ -507,7 +509,7 @@ if __name__ == "__main__":
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        # load_policy_model="{save_folder}/medium_model_to_load.pt",
+        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
         prefix="medium")
 
     # large run
@@ -527,5 +529,5 @@ if __name__ == "__main__":
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        # load_policy_model="{save_folder}/medium_model_to_load.pt",
+        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
         prefix="large")
