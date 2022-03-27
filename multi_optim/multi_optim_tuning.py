@@ -84,12 +84,15 @@ def make_kwargs(parameter_experiments, n_runs):
 def start_process(kwargs):
     import_str = "from multi_optim.multi_optim_run import run_optimization"
     kwargs_str = repr(kwargs)
+    my_env = os.environ.copy()
+    my_env["CUDA_VISIBLE_DEVICES"] = "-1"
     process = subprocess.Popen(
         ["/usr/bin/python3",
          "-c",
          f"{import_str}; kwargs = {kwargs_str};"
          + "run_optimization(**kwargs)"],
         cwd=str(os.getcwd()),
+        env=my_env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
 
@@ -217,9 +220,10 @@ def plot_data():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename="multi_optim/multi_optim_tuning.log",
+    logging.basicConfig(filename=os.path.join(TUNING_RES_FOLDER, "_tuning_stats.log"),
                         filemode='w',
                         level=logging.DEBUG)
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
     # parameter_experiments, n_runs = params_debug()
     parameter_experiments, n_runs = params_run()
     params_to_run = make_kwargs(parameter_experiments, n_runs)
