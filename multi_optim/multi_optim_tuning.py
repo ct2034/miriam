@@ -220,9 +220,11 @@ def plot_data():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename=os.path.join(TUNING_RES_FOLDER, "_tuning_stats.log"),
-                        filemode='w',
-                        level=logging.DEBUG)
+    logging.basicConfig(
+        filename=os.path.join(
+            TUNING_RES_FOLDER, "_tuning_stats.log"),
+        filemode='w',
+        level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
     # parameter_experiments, n_runs = params_debug()
     parameter_experiments, n_runs = params_run()
