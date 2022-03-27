@@ -3,9 +3,17 @@ import os
 import queue
 import subprocess
 import time
+from cmath import e
+from ntpath import join
 from typing import Dict, List, Union
 
+import numpy as np
+import yaml
+from matplotlib import pyplot as plt
+
 logger = logging.getLogger(__name__)
+
+TUNING_RES_FOLDER = "multi_optim/results/tuning"
 
 
 def params_debug():
@@ -22,7 +30,7 @@ def params_debug():
         "n_agents": [2],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
-        "save_folder": ["multi_optim/results/tuning"]
+        "save_folder": [TUNING_RES_FOLDER]
     }  # type: Dict[str, Union[List[int], List[float], List[str]]]
     n_runs = 2
     return parameter_experiments, n_runs
@@ -42,7 +50,7 @@ def params_run():
         "n_agents": [4],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
-        "save_folder": ["multi_optim/results/tuning"]
+        "save_folder": [TUNING_RES_FOLDER]
     }  # type: Dict[str, Union[List[int], List[float], List[str]]]
     n_runs = 8
     return parameter_experiments, n_runs
@@ -131,11 +139,89 @@ def run(params_to_run):
     logger.info("Done")
 
 
+def plot_data():
+    fnames = os.listdir(TUNING_RES_FOLDER)
+    fnames_json = [f for f in fnames if f.endswith(".yaml")]
+
+    fnames_json = sorted(fnames_json)
+
+    data = {}
+
+    for i_f, fname in enumerate(fnames_json):
+        with open(os.path.join(TUNING_RES_FOLDER, fname), "r") as f:
+            stats = yaml.load(f, Loader=yaml.SafeLoader)
+        exp = fname.split("_seed")[0]
+        seed = int(fname.split("seed_")[1].split("_stats")[0])
+        if exp not in data:
+            data[exp] = {}
+        data[exp][seed] = stats
+
+    exps = list(data.keys())
+    exps.sort()
+    n_exps = len(exps)
+    params = list(data[list(data.keys())[0]][0].keys())
+    params.remove("static")
+    params.sort()
+    n_params = len(params)
+    fig, (axs) = plt.subplots(
+        n_params,
+        n_exps,
+        figsize=(5*n_exps, 5*n_params),
+        dpi=500)
+
+    top_lim_per_param = {}
+
+    for i_exp, exp in enumerate(exps):
+        for i_param, param in enumerate(params):
+            ax = axs[i_param, i_exp]
+
+            # consolidate data
+            n_seeds = len(data[exp])
+            t = data[exp][0][param]['t']
+            n_t = len(t)
+            this_data = np.zeros((n_seeds, n_t))
+            for i_seed, seed in enumerate(data[exp].keys()):
+                this_data[i_seed, :] = data[exp][seed][param]['x']
+            mean = np.mean(this_data, axis=0)
+            std = np.std(this_data, axis=0)
+
+            # plot
+            ax.plot(t, mean, label=exp)
+            ax.fill_between(t, mean - std, mean + std, alpha=0.2)
+
+            # labels
+            if i_exp == 0:
+                ax.set_ylabel(param)
+            if i_param == 0:
+                ax.set_title(exp)
+            if i_param == len(params) - 1:
+                ax.set_xlabel("epoch")
+            ax.set_xlim(0, t[-1])
+            ax.grid()
+
+            # find toplim
+            top_lim = max(np.max(mean + std), 1)
+            if param not in top_lim_per_param:
+                top_lim_per_param[param] = top_lim
+            top_lim_per_param[param] = max(top_lim, top_lim_per_param[param])
+
+    # cosmetics
+    plt.tight_layout()
+
+    for i_exp, exp in enumerate(exps):
+        for i_param, param in enumerate(params):
+            ax = axs[i_param, i_exp]
+            ax.set_ylim(0, top_lim_per_param[param])
+
+    plt.savefig(os.path.join(TUNING_RES_FOLDER, "_tuning_stats.png"))
+
+
 if __name__ == "__main__":
     logging.basicConfig(filename="multi_optim/multi_optim_tuning.log",
                         filemode='w',
                         level=logging.DEBUG)
-    parameter_experiments, n_runs = params_debug()
-    # parameter_experiments, n_runs = params_run()
+    # parameter_experiments, n_runs = params_debug()
+    parameter_experiments, n_runs = params_run()
     params_to_run = make_kwargs(parameter_experiments, n_runs)
     run(params_to_run)
+    plot_data()
