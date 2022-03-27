@@ -40,12 +40,12 @@ def params_run():
     n_nodes_s = [8]
     parameter_experiments = {
         "n_nodes": n_nodes_s,
-        "n_runs_pose": [64],
+        "n_runs_pose": [64, 128],
         "n_runs_policy": [128],
         "n_epochs_per_run_policy":  [128],
         "batch_size_policy":  [128],
-        "stats_and_eval_every": [1],
-        "lr_pos": [1E-4],
+        "stats_and_eval_every": [2],
+        "lr_pos": [1E-4, 1E-3, 1E-2],
         "lr_policy": [1E-3],
         "n_agents": [4],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
