@@ -228,4 +228,4 @@ if __name__ == "__main__":
     parameter_experiments, n_runs = params_run()
     params_to_run = make_kwargs(parameter_experiments, n_runs)
     run(params_to_run)
-    plot_data()
+    plot_data(
