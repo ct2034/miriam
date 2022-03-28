@@ -78,8 +78,19 @@ def write_infile(fname, data, starts, goals):
 
 
 def read_outfile(fname):
+    delete = False
     with open(fname, 'r') as f:
-        data = yaml.load(f, Loader=yaml.SafeLoader)
+        try:
+            data = yaml.load(f, Loader=yaml.SafeLoader)
+        except (yaml.reader.ReaderError):
+            # trying to delete probelmatic file
+            delete = True
+            data = None
+    if delete:
+        try:
+            os.remove(fname)
+        except:
+            pass
     if data is None:
         return INVALID
     if data['statistics']['success'] == 0:
