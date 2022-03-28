@@ -58,7 +58,10 @@ def has_result(scenario: SCENARIO_TYPE, result_type: ResultType,
     key_str = to_key_string(result_type, solver_params)
     if has_file(scenario):
         with open(get_filepath(scenario), 'rb') as f:
-            data = pkl.load(f)
+            try:
+                data = pkl.load(f)
+            except EOFError:
+                return False
             assert isinstance(data, dict)
             return key_str in data.keys()
     else:
@@ -81,7 +84,11 @@ def save_result(scenario: SCENARIO_TYPE, result_type: ResultType,
     key_str = to_key_string(result_type, solver_params)
     if has_file(scenario):
         with open(get_filepath(scenario), 'rb') as f:
-            data: dict = pkl.load(f)
+            try:
+                data: dict = pkl.load(f)
+            except EOFError:
+                # new file
+                data = {}
         data[key_str] = result
         with open(get_filepath(scenario), 'wb') as f:
             pkl.dump(data, f)

@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Tuple
 
 import networkx as nx
@@ -8,8 +9,8 @@ from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected
 
 TIMEOUT = 120
-
 BFS_TYPE = Dict[int, int]
+logger = logging.getLogger(__name__)
 
 
 def t_to_data(t: int, path_i: int) -> float:

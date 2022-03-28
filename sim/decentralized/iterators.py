@@ -183,8 +183,13 @@ def iterate_edge_policy(
             if i_a in agents_with_colissions:
                 assert hasattr(a.policy, "get_edge"), \
                     "Needs edge-based policy"
-                next_nodes[i_a] = a.policy.get_edge(  # type: ignore
-                    agents, agents_with_colissions)  # type: ignore
+                try:
+                    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+                        agents, agents_with_colissions)  # type: ignore
+                except RuntimeError:
+                    logger.exception(f"{a.policy} failed")
+                    raise SimIterationException(
+                        f"{a.policy} failed")
             else:
                 next_nodes[i_a] = a.what_is_next_step()
         next_collisions = check_for_colissions(
