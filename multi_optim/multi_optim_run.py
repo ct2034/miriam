@@ -322,8 +322,8 @@ def run_optimization(
         optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
 
         # Sample runs for both optimizations
-        assert n_runs_policy >= n_runs_pose, \
-            "otherwise we dont need optiomal solution that often"
+        # assert n_runs_policy >= n_runs_pose, \
+        #     "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
         new_fname, paths_s = sample_trajectories_in_parallel(
             policy_model, g, map_img, flann, n_agents, n_epochs_per_run_policy,
