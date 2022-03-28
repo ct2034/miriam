@@ -37,15 +37,15 @@ def params_debug():
 
 
 def params_run():
-    n_nodes_s = [8]
+    n_nodes_s = [32, 64]
     parameter_experiments = {
         "n_nodes": n_nodes_s,
-        "n_runs_pose": [64, 128],
-        "n_runs_policy": [128],
+        "n_runs_pose": [128],
+        "n_runs_policy": [4],
         "n_epochs_per_run_policy":  [128],
         "batch_size_policy":  [128],
-        "stats_and_eval_every": [2],
-        "lr_pos": [1E-4, 1E-3, 1E-2],
+        "stats_and_eval_every": [16],
+        "lr_pos": [1E-4, 3E-4, 1E-3, 3E-3, 1E-2],
         "lr_policy": [1E-3],
         "n_agents": [4],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
@@ -220,7 +220,7 @@ def plot_data():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename=os.path.join(TUNING_RES_FOLDER, "_tuning_stats.log"),
+    logging.basicConfig(filename=os.path.join(TUNING_RES_FOLDER, "_tuning.log"),
                         filemode='w',
                         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
