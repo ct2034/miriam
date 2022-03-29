@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 import socket
+import time
 import tracemalloc
 from optparse import Option
 from random import Random
@@ -270,17 +271,18 @@ def run_optimization(
 
     # Visualization and analysis
     stats = StatCollector([
-        "roadmap_test_length",
-        "roadmap_training_length",
+        "general_eval_time_perc",
+        "general_length",
+        "general_new_data_percentage",
+        "general_regret",
+        "general_success",
+        "n_policy_data_len",
+        "policy_accuracy",
         "policy_loss",
         "policy_regret",
         "policy_success",
-        "policy_accuracy",
-        "general_new_data_percentage",
-        "general_length",
-        "general_regret",
-        "general_success",
-        "n_policy_data_len"])
+        "roadmap_test_length",
+        "roadmap_training_length"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -318,6 +320,7 @@ def run_optimization(
     # roadmap_test_length = 0
     roadmap_training_length = 0
     for i_r in range(n_runs):
+        start_time = time.process_time()
         optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
         optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
 
@@ -350,6 +353,8 @@ def run_optimization(
                 policy_model, batch_size_policy, optimizer_policy, epds)
 
         if i_r % stats_and_eval_every == 0:
+            end_optimization_time = time.process_time()
+
             if optimize_policy_now:
                 # also eval now
                 (policy_regret, policy_success, policy_accuracy
@@ -385,11 +390,17 @@ def run_optimization(
                 logger.info(f"(G) Success: {general_success}")
                 logger.info(f"(G) Length: {general_length:.3f}")
 
+            end_eval_time = time.process_time()
+            eval_time_perc = (end_eval_time - end_optimization_time) / \
+                (end_eval_time - start_time)
+
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
             stats.add("n_policy_data_len", i_r, float(data_len))
+            stats.add("general_eval_time_perc", i_r, float(eval_time_perc))
             logger.info(f"(G) New data: {new_data_percentage*100:.1f}%")
             logger.info(f"(G) Data length: {data_len}")
+            logger.info(f"(G) Eval time: {eval_time_perc*100:.1f}%")
 
         pb.progress()
     runtime = pb.end()
@@ -444,7 +455,7 @@ if __name__ == "__main__":
         n_runs_policy=32,
         n_epochs_per_run_policy=8,
         batch_size_policy=16,
-        stats_and_eval_every=4,
+        stats_and_eval_every=8,
         lr_pos=1e-2,
         lr_policy=1e-3,
         n_agents=4,
