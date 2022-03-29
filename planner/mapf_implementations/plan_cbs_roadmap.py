@@ -130,7 +130,7 @@ def plan_cbsr(g, starts, goals, radius: float, timeout: float, skip_cache: bool)
         try:
             with open(fname_roadmap, 'r') as f:
                 data = yaml.load(f, Loader=yaml.SafeLoader)
-        except yaml.YAMLError as e:
+        except (yaml.YAMLError, FileNotFoundError) as e:
             pass
     if not data:  # nothing was loaded
         if os.path.exists(fname_roadmap):
