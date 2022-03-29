@@ -72,7 +72,7 @@ def params_ablation():
         "save_images": [True],
         "save_folder": [ABLATION_RES_FOLDER]
     }  # type: Dict[str, Union[List[int], List[float], List[str]]]
-    n_runs = 8
+    n_runs = 4
     return parameter_experiments, n_runs
 
 
