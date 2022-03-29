@@ -131,11 +131,13 @@ def plan_cbsr(g, starts, goals, radius: float, timeout: float, skip_cache: bool)
             with open(fname_roadmap, 'r') as f:
                 data = yaml.load(f, Loader=yaml.SafeLoader)
         except yaml.YAMLError as e:
-            logger.warning(e.__class__)
-            logger.warning(e)
+            pass
     if not data:  # nothing was loaded
         if os.path.exists(fname_roadmap):
-            os.remove(fname_roadmap)
+            try:
+                os.remove(fname_roadmap)
+            except FileNotFoundError:
+                pass
         data = write_roadmap_file(fname_roadmap, g, radius)
     if data is None:  # error
         logging.warning("no annotated roadmap")
