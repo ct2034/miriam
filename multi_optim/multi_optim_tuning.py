@@ -61,9 +61,9 @@ def params_ablation():
     parameter_experiments = {
         "n_nodes": [16],
         "n_runs_pose": [64, 1],
-        "n_runs_policy": [64, 1],
-        "n_epochs_per_run_policy": [64],
-        "batch_size_policy": [32],
+        "n_runs_policy": [128, 1],
+        "n_epochs_per_run_policy": [128],
+        "batch_size_policy": [128],
         "stats_and_eval_every": [8],
         "lr_pos": [1E-2],
         "lr_policy": [1E-3],
