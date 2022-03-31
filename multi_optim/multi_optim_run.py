@@ -17,7 +17,7 @@ import tools
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import (INVALID, MAP_IMG, PATH_W_COORDS, POS)
+from definitions import INVALID, MAP_IMG, PATH_W_COORDS, POS
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
@@ -33,10 +33,10 @@ from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
     from eval import Eval
-    from state import ScenarioState
+    from state import ACTION, ScenarioState
 else:
     from multi_optim.eval import Eval
-    from multi_optim.state import ScenarioState
+    from multi_optim.state import ACTION, ScenarioState
 
 logger = logging.getLogger(__name__)
 
