@@ -187,7 +187,7 @@ def iterate_edge_policy(
                     next_nodes[i_a] = a.policy.get_edge(  # type: ignore
                         agents, agents_with_colissions)  # type: ignore
                 except RuntimeError:
-                    logger.exception(f"{a.policy} failed")
+                    logger.warn(f"{a.policy} failed")
                     raise SimIterationException(
                         f"{a.policy} failed")
             else:
