@@ -17,7 +17,7 @@ import tools
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import (INVALID, MAP_IMG, PATH_W_COORDS, POS)
+from definitions import INVALID, MAP_IMG, PATH_W_COORDS, POS
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
@@ -33,10 +33,10 @@ from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
     from eval import Eval
-    from state import ScenarioState
+    from state import ACTION, ScenarioState
 else:
     from multi_optim.eval import Eval
-    from multi_optim.state import ScenarioState
+    from multi_optim.state import ACTION, ScenarioState
 
 logger = logging.getLogger(__name__)
 
@@ -371,7 +371,7 @@ def run_optimization(
                 logger.info(
                     f"(R) Training Length: {roadmap_training_length:.3f}")
 
-            if optimize_policy_now and optimize_poses_now:
+            if optimize_policy_now or optimize_poses_now:
                 (general_regret, general_success, general_length
                  ) = eval.evaluate_both(policy_model, g, flann)
                 stats.add("general_regret", i_r, general_regret)

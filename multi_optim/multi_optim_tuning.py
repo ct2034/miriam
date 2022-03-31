@@ -5,7 +5,7 @@ import subprocess
 import time
 from cmath import e
 from ntpath import join
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import yaml
@@ -61,9 +61,9 @@ def params_ablation():
     parameter_experiments = {
         "n_nodes": [16],
         "n_runs_pose": [64, 1],
-        "n_runs_policy": [64, 1],
-        "n_epochs_per_run_policy": [64],
-        "batch_size_policy": [32],
+        "n_runs_policy": [128, 1],
+        "n_epochs_per_run_policy": [128],
+        "batch_size_policy": [128],
         "stats_and_eval_every": [8],
         "lr_pos": [1E-2],
         "lr_policy": [1E-3],
@@ -194,7 +194,7 @@ def plot_data(path: str):
         figsize=(5*n_exps, 5*n_params),
         dpi=500)
 
-    top_lim_per_param = {}
+    lims_per_param = {}  # type: Dict[str, List[float]]
 
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
@@ -224,11 +224,18 @@ def plot_data(path: str):
             ax.set_xlim(0, t[-1])
             ax.grid()
 
-            # find toplim
+            # find limits
+            bottom_lim = min(np.max(mean + std), 0)
             top_lim = max(np.max(mean + std), 1)
-            if param not in top_lim_per_param:
-                top_lim_per_param[param] = top_lim
-            top_lim_per_param[param] = max(top_lim, top_lim_per_param[param])
+            if param not in lims_per_param:
+                lims_per_param[param] = [0., 0.]
+                lims_per_param[param][0] = bottom_lim
+                lims_per_param[param][1] = top_lim
+            else:
+                lims_per_param[param][0] = min(lims_per_param[param][0],
+                                               bottom_lim)
+                lims_per_param[param][1] = max(lims_per_param[param][1],
+                                               top_lim)
 
     # cosmetics
     plt.tight_layout()
@@ -236,7 +243,7 @@ def plot_data(path: str):
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
             ax = axs[i_param, i_exp]  # type: ignore
-            ax.set_ylim(0, top_lim_per_param[param])
+            ax.set_ylim(lims_per_param[param][0], lims_per_param[param][1])
 
     plt.savefig(os.path.join(path, "_tuning_stats.png"))
 
