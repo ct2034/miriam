@@ -371,7 +371,7 @@ def run_optimization(
                 logger.info(
                     f"(R) Training Length: {roadmap_training_length:.3f}")
 
-            if optimize_policy_now and optimize_poses_now:
+            if optimize_policy_now or optimize_poses_now:
                 (general_regret, general_success, general_length
                  ) = eval.evaluate_both(policy_model, g, flann)
                 stats.add("general_regret", i_r, general_regret)
