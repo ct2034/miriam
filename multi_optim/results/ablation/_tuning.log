@@ -1,0 +1,3544 @@
+INFO:__main__:Creating processes
+DEBUG:__main__:len(params_to_run)=12
+INFO:__main__:cpus=4
+INFO:__main__:max_active_processes=4
+INFO:__main__:Started process "n_runs_policy_1_seed_3" @ [31214]
+DEBUG:__main__:len(active_processes)=1
+DEBUG:__main__:len(params_to_run)=11
+INFO:__main__:Started process "n_runs_policy_1_seed_2" @ [31218]
+DEBUG:__main__:len(active_processes)=2
+DEBUG:__main__:len(params_to_run)=10
+INFO:__main__:Started process "n_runs_policy_1_seed_1" @ [31222]
+DEBUG:__main__:len(active_processes)=3
+DEBUG:__main__:len(params_to_run)=9
+INFO:__main__:Started process "n_runs_policy_1_seed_0" @ [31229]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=8
+INFO:__main__:Finished process [31229]
+INFO:__main__:outs: [31229] >>>>>n_runs_policy_1_seed_0 Optimization started.
+n_runs_policy_1_seed_0 Optimization progress: 2%
+ > took: 0:04:03.148043, eta: 4:15:18.326709
+n_runs_policy_1_seed_0 Optimization progress: 3%
+ > took: 0:06:10.345390, eta: 3:11:20.707090
+n_runs_policy_1_seed_0 Optimization progress: 5%
+ > took: 0:11:59.108282, eta: 4:03:41.868401
+n_runs_policy_1_seed_0 Optimization progress: 6%
+ > took: 0:21:48.177418, eta: 5:27:02.661270
+n_runs_policy_1_seed_0 Optimization progress: 8%
+ > took: 0:33:21.043439, eta: 6:33:32.312580
+n_runs_policy_1_seed_0 Optimization progress: 9%
+ > took: 0:42:32.826191, eta: 6:51:17.319846
+n_runs_policy_1_seed_0 Optimization progress: 11%
+ > took: 0:53:28.372264, eta: 7:15:25.317007
+n_runs_policy_1_seed_0 Optimization progress: 12%
+ > took: 1:00:22.512500, eta: 7:02:37.587500
+n_runs_policy_1_seed_0 Optimization progress: 14%
+ > took: 1:07:27.319366, eta: 6:52:13.618348
+n_runs_policy_1_seed_0 Optimization progress: 16%
+ > took: 1:17:58.519771, eta: 7:01:04.006763
+n_runs_policy_1_seed_0 Optimization progress: 17%
+ > took: 1:28:18.588781, eta: 7:05:29.564127
+n_runs_policy_1_seed_0 Optimization progress: 19%
+ > took: 1:38:01.581609, eta: 7:04:46.853639
+n_runs_policy_1_seed_0 Optimization progress: 20%
+ > took: 1:47:46.658537, eta: 7:02:49.198876
+n_runs_policy_1_seed_0 Optimization progress: 22%
+ > took: 1:57:33.443441, eta: 6:59:50.869432
+n_runs_policy_1_seed_0 Optimization progress: 23%
+ > took: 2:08:40.260230, eta: 7:00:19.516751
+n_runs_policy_1_seed_0 Optimization progress: 25%
+ > took: 2:20:58.827195, eta: 7:02:56.481585
+n_runs_policy_1_seed_0 Optimization progress: 27%
+ > took: 2:29:45.953055, eta: 6:54:03.517270
+n_runs_policy_1_seed_0 Optimization progress: 28%
+ > took: 2:36:47.860522, eta: 6:40:42.310223
+n_runs_policy_1_seed_0 Optimization progress: 30%
+ > took: 2:45:38.331546, eta: 6:32:18.153662
+n_runs_policy_1_seed_0 Optimization progress: 31%
+ > took: 2:51:03.657234, eta: 6:16:20.045915
+n_runs_policy_1_seed_0 Optimization progress: 33%
+ > took: 2:59:27.996729, eta: 6:07:28.755207
+n_runs_policy_1_seed_0 Optimization progress: 34%
+ > took: 3:07:23.526095, eta: 5:57:44.913454
+n_runs_policy_1_seed_0 Optimization progress: 36%
+ > took: 3:16:07.822656, eta: 5:49:37.422995
+n_runs_policy_1_seed_0 Optimization progress: 37%
+ > took: 3:23:13.453440, eta: 5:38:42.422400
+n_runs_policy_1_seed_0 Optimization progress: 39%
+ > took: 3:33:53.051933, eta: 5:33:39.561015
+n_runs_policy_1_seed_0 Optimization progress: 41%
+ > took: 3:44:13.286958, eta: 5:27:42.496323
+n_runs_policy_1_seed_0 Optimization progress: 42%
+ > took: 3:51:06.796135, eta: 5:16:42.646555
+n_runs_policy_1_seed_0 Optimization progress: 44%
+ > took: 4:00:31.896585, eta: 5:09:15.295609
+n_runs_policy_1_seed_0 Optimization progress: 45%
+ > took: 4:10:33.422837, eta: 5:02:23.786183
+n_runs_policy_1_seed_0 Optimization progress: 47%
+ > took: 4:20:26.502127, eta: 4:55:10.035744
+n_runs_policy_1_seed_0 Optimization progress: 48%
+ > took: 4:32:11.312578, eta: 4:49:44.945648
+n_runs_policy_1_seed_0 Optimization progress: 50%
+ > took: 4:41:46.605343, eta: 4:41:46.605343
+n_runs_policy_1_seed_0 Optimization progress: 52%
+ > took: 4:53:40.160092, eta: 4:35:52.271602
+n_runs_policy_1_seed_0 Optimization progress: 53%
+ > took: 5:01:49.686709, eta: 4:26:19.135331
+n_runs_policy_1_seed_0 Optimization progress: 55%
+ > took: 5:13:02.347031, eta: 4:19:22.516111
+n_runs_policy_1_seed_0 Optimization progress: 56%
+ > took: 5:19:14.820049, eta: 4:08:18.193371
+n_runs_policy_1_seed_0 Optimization progress: 58%
+ > took: 5:28:27.403850, eta: 3:59:41.078485
+n_runs_policy_1_seed_0 Optimization progress: 59%
+ > took: 5:35:39.902762, eta: 3:49:39.933469
+n_runs_policy_1_seed_0 Optimization progress: 61%
+ > took: 5:42:39.627013, eta: 3:39:39.248085
+n_runs_policy_1_seed_0 Optimization progress: 62%
+ > took: 5:50:09.138492, eta: 3:30:05.483095
+n_runs_policy_1_seed_0 Optimization progress: 64%
+ > took: 6:00:23.633656, eta: 3:22:10.331075
+n_runs_policy_1_seed_0 Optimization progress: 66%
+ > took: 6:09:54.805662, eta: 3:13:45.850585
+n_runs_policy_1_seed_0 Optimization progress: 67%
+ > took: 6:21:17.314105, eta: 3:06:12.641772
+n_runs_policy_1_seed_0 Optimization progress: 69%
+ > took: 6:32:46.726504, eta: 2:58:32.148411
+n_runs_policy_1_seed_0 Optimization progress: 70%
+ > took: 6:42:37.645729, eta: 2:49:59.894863
+n_runs_policy_1_seed_0 Optimization progress: 72%
+ > took: 6:51:13.416708, eta: 2:40:54.815234
+n_runs_policy_1_seed_0 Optimization progress: 73%
+ > took: 6:57:30.497748, eta: 2:31:00.818334
+n_runs_policy_1_seed_0 Optimization progress: 75%
+ > took: 7:08:25.496719, eta: 2:22:48.498906
+n_runs_policy_1_seed_0 Optimization progress: 77%
+ > took: 7:20:49.743134, eta: 2:14:56.860143
+n_runs_policy_1_seed_0 Optimization progress: 78%
+ > took: 7:33:11.032608, eta: 2:06:53.489130
+n_runs_policy_1_seed_0 Optimization progress: 80%
+ > took: 7:44:22.644217, eta: 1:58:22.242644
+n_runs_policy_1_seed_0 Optimization progress: 81%
+ > took: 7:55:42.553277, eta: 1:49:46.743064
+n_runs_policy_1_seed_0 Optimization progress: 83%
+ > took: 8:04:54.416030, eta: 1:40:38.463704
+n_runs_policy_1_seed_0 Optimization progress: 84%
+ > took: 8:16:21.738251, eta: 1:31:55.136713
+n_runs_policy_1_seed_0 Optimization progress: 86%
+ > took: 8:27:25.723107, eta: 1:23:02.027418
+n_runs_policy_1_seed_0 Optimization progress: 87%
+ > took: 8:36:18.345106, eta: 1:13:45.477872
+n_runs_policy_1_seed_0 Optimization progress: 89%
+ > took: 8:45:17.350632, eta: 1:04:30.551832
+n_runs_policy_1_seed_0 Optimization progress: 91%
+ > took: 8:55:32.399105, eta: 0:55:24.041287
+n_runs_policy_1_seed_0 Optimization progress: 92%
+ > took: 9:04:55.234579, eta: 0:46:10.782591
+n_runs_policy_1_seed_0 Optimization progress: 94%
+ > took: 9:13:02.819629, eta: 0:36:52.187975
+n_runs_policy_1_seed_0 Optimization progress: 95%
+ > took: 9:24:43.992847, eta: 0:27:46.425878
+n_runs_policy_1_seed_0 Optimization progress: 97%
+ > took: 9:32:45.856033, eta: 0:18:28.576001
+n_runs_policy_1_seed_0 Optimization progress: 98%
+ > took: 9:41:54.116558, eta: 0:09:14.192326
+n_runs_policy_1_seed_0 Optimization progress: 100%
+ > took: 9:50:16.186536, eta: 0:00:00
+n_runs_policy_1_seed_0 Optimization finished. elapsed time: 9:50:16.186744
+<<<<< [31229]
+ERROR:__main__:errs: [31229] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [31229]
+INFO:__main__:Started process "n_runs_pose_1_seed_3" @ [188687]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=7
+INFO:__main__:Finished process [31218]
+INFO:__main__:outs: [31218] >>>>>n_runs_policy_1_seed_2 Optimization started.
+n_runs_policy_1_seed_2 Optimization progress: 2%
+ > took: 0:02:58.439710, eta: 3:07:21.701730
+n_runs_policy_1_seed_2 Optimization progress: 3%
+ > took: 0:13:43.534348, eta: 7:05:29.564788
+n_runs_policy_1_seed_2 Optimization progress: 5%
+ > took: 0:28:19.263416, eta: 9:35:51.689459
+n_runs_policy_1_seed_2 Optimization progress: 6%
+ > took: 0:36:59.198706, eta: 9:14:47.980590
+n_runs_policy_1_seed_2 Optimization progress: 8%
+ > took: 0:46:12.969418, eta: 9:05:21.039132
+n_runs_policy_1_seed_2 Optimization progress: 9%
+ > took: 0:51:59.027019, eta: 8:22:30.594517
+n_runs_policy_1_seed_2 Optimization progress: 11%
+ > took: 0:59:32.845259, eta: 8:04:53.168538
+n_runs_policy_1_seed_2 Optimization progress: 12%
+ > took: 1:07:15.384106, eta: 7:50:47.688742
+n_runs_policy_1_seed_2 Optimization progress: 14%
+ > took: 1:16:16.256752, eta: 7:46:06.013484
+n_runs_policy_1_seed_2 Optimization progress: 16%
+ > took: 1:20:22.969497, eta: 7:14:04.035284
+n_runs_policy_1_seed_2 Optimization progress: 17%
+ > took: 1:34:32.966938, eta: 7:35:33.386156
+n_runs_policy_1_seed_2 Optimization progress: 19%
+ > took: 1:45:54.433010, eta: 7:38:55.876377
+n_runs_policy_1_seed_2 Optimization progress: 20%
+ > took: 1:56:43.882724, eta: 7:37:56.770686
+n_runs_policy_1_seed_2 Optimization progress: 22%
+ > took: 2:09:05.421142, eta: 7:41:02.218364
+n_runs_policy_1_seed_2 Optimization progress: 23%
+ > took: 2:25:28.005089, eta: 7:55:11.483291
+n_runs_policy_1_seed_2 Optimization progress: 25%
+ > took: 2:38:20.597435, eta: 7:55:01.792305
+n_runs_policy_1_seed_2 Optimization progress: 27%
+ > took: 2:51:06.238123, eta: 7:53:03.128928
+n_runs_policy_1_seed_2 Optimization progress: 28%
+ > took: 3:03:08.721429, eta: 7:48:02.288096
+n_runs_policy_1_seed_2 Optimization progress: 30%
+ > took: 3:18:04.576825, eta: 7:49:07.681954
+n_runs_policy_1_seed_2 Optimization progress: 31%
+ > took: 3:27:56.924745, eta: 7:37:29.234439
+n_runs_policy_1_seed_2 Optimization progress: 33%
+ > took: 3:42:03.836984, eta: 7:34:42.142396
+n_runs_policy_1_seed_2 Optimization progress: 34%
+ > took: 3:57:35.599304, eta: 7:33:35.235035
+n_runs_policy_1_seed_2 Optimization progress: 36%
+ > took: 4:08:35.145770, eta: 7:23:07.868547
+n_runs_policy_1_seed_2 Optimization progress: 37%
+ > took: 4:19:52.550217, eta: 7:13:07.583695
+n_runs_policy_1_seed_2 Optimization progress: 39%
+ > took: 4:35:40.990949, eta: 7:10:03.945880
+n_runs_policy_1_seed_2 Optimization progress: 41%
+ > took: 4:46:58.660192, eta: 6:59:25.734127
+n_runs_policy_1_seed_2 Optimization progress: 42%
+ > took: 5:01:53.866858, eta: 6:53:42.706435
+n_runs_policy_1_seed_2 Optimization progress: 44%
+ > took: 5:16:13.453288, eta: 6:46:34.439942
+n_runs_policy_1_seed_2 Optimization progress: 45%
+ > took: 5:30:22.339098, eta: 6:38:43.512704
+n_runs_policy_1_seed_2 Optimization progress: 47%
+ > took: 5:41:51.299908, eta: 6:27:26.139896
+n_runs_policy_1_seed_2 Optimization progress: 48%
+ > took: 6:00:21.761156, eta: 6:23:36.713489
+n_runs_policy_1_seed_2 Optimization progress: 50%
+ > took: 6:17:34.643028, eta: 6:17:34.643028
+n_runs_policy_1_seed_2 Optimization progress: 52%
+ > took: 6:31:56.257972, eta: 6:08:11.030216
+n_runs_policy_1_seed_2 Optimization progress: 53%
+ > took: 6:46:04.382279, eta: 5:58:17.984364
+n_runs_policy_1_seed_2 Optimization progress: 55%
+ > took: 7:01:40.973646, eta: 5:49:23.663878
+n_runs_policy_1_seed_2 Optimization progress: 56%
+ > took: 7:14:42.970237, eta: 5:38:06.754629
+n_runs_policy_1_seed_2 Optimization progress: 58%
+ > took: 7:26:37.603568, eta: 5:25:55.008009
+n_runs_policy_1_seed_2 Optimization progress: 59%
+ > took: 7:40:08.464945, eta: 5:14:50.002331
+n_runs_policy_1_seed_2 Optimization progress: 61%
+ > took: 7:49:15.082968, eta: 5:00:48.130108
+n_runs_policy_1_seed_2 Optimization progress: 62%
+ > took: 7:57:00.716982, eta: 4:46:12.430189
+n_runs_policy_1_seed_2 Optimization progress: 64%
+ > took: 8:05:10.676463, eta: 4:32:10.379479
+n_runs_policy_1_seed_2 Optimization progress: 66%
+ > took: 8:11:42.404660, eta: 4:17:33.640536
+n_runs_policy_1_seed_2 Optimization progress: 67%
+ > took: 8:20:13.894303, eta: 4:04:17.948381
+n_runs_policy_1_seed_2 Optimization progress: 69%
+ > took: 8:28:52.238448, eta: 3:51:18.290204
+n_runs_policy_1_seed_2 Optimization progress: 70%
+ > took: 8:40:40.078239, eta: 3:39:50.255256
+n_runs_policy_1_seed_2 Optimization progress: 72%
+ > took: 8:47:51.409482, eta: 3:26:33.160232
+n_runs_policy_1_seed_2 Optimization progress: 73%
+ > took: 8:55:28.717570, eta: 3:13:41.025504
+n_runs_policy_1_seed_2 Optimization progress: 75%
+ > took: 9:09:19.903454, eta: 3:03:06.634485
+n_runs_policy_1_seed_2 Optimization progress: 77%
+ > took: 9:17:20.366859, eta: 2:50:36.846998
+n_runs_policy_1_seed_2 Optimization progress: 78%
+ > took: 9:23:22.905631, eta: 2:37:44.813577
+n_runs_policy_1_seed_2 Optimization progress: 80%
+ > took: 9:29:13.572987, eta: 2:25:05.812722
+n_runs_policy_1_seed_2 Optimization progress: 81%
+ > took: 9:41:10.730534, eta: 2:14:07.091662
+n_runs_policy_1_seed_2 Optimization progress: 83%
+ > took: 9:52:43.648127, eta: 2:03:01.134517
+n_runs_policy_1_seed_2 Optimization progress: 84%
+ > took: 10:03:39.492208, eta: 1:51:47.313372
+n_runs_policy_1_seed_2 Optimization progress: 86%
+ > took: 10:15:48.583847, eta: 1:40:46.131902
+n_runs_policy_1_seed_2 Optimization progress: 87%
+ > took: 10:28:34.034658, eta: 1:29:47.719237
+n_runs_policy_1_seed_2 Optimization progress: 89%
+ > took: 10:40:11.895878, eta: 1:18:37.250371
+n_runs_policy_1_seed_2 Optimization progress: 91%
+ > took: 10:50:26.271724, eta: 1:07:17.200523
+n_runs_policy_1_seed_2 Optimization progress: 92%
+ > took: 11:02:29.157839, eta: 0:56:08.572698
+n_runs_policy_1_seed_2 Optimization progress: 94%
+ > took: 11:11:03.296915, eta: 0:44:44.219794
+n_runs_policy_1_seed_2 Optimization progress: 95%
+ > took: 11:23:31.574897, eta: 0:33:36.962700
+n_runs_policy_1_seed_2 Optimization progress: 97%
+ > took: 11:36:19.812075, eta: 0:22:27.735873
+n_runs_policy_1_seed_2 Optimization progress: 98%
+ > took: 11:51:06.163762, eta: 0:11:17.240695
+n_runs_policy_1_seed_2 Optimization progress: 100%
+ > took: 12:06:02.652363, eta: 0:00:00
+n_runs_policy_1_seed_2 Optimization finished. elapsed time: 12:06:02.653276
+<<<<< [31218]
+ERROR:__main__:errs: [31218] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+<<<<< [31218]
+INFO:__main__:Started process "n_runs_pose_1_seed_2" @ [225000]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=6
+INFO:__main__:Finished process [31222]
+INFO:__main__:outs: [31222] >>>>>n_runs_policy_1_seed_1 Optimization started.
+n_runs_policy_1_seed_1 Optimization progress: 2%
+ > took: 0:01:53.204647, eta: 1:58:51.892761
+n_runs_policy_1_seed_1 Optimization progress: 3%
+ > took: 0:02:08.343594, eta: 1:06:18.651414
+n_runs_policy_1_seed_1 Optimization progress: 5%
+ > took: 0:05:00.320786, eta: 1:41:46.522649
+n_runs_policy_1_seed_1 Optimization progress: 6%
+ > took: 0:07:58.065937, eta: 1:59:30.989055
+n_runs_policy_1_seed_1 Optimization progress: 8%
+ > took: 0:11:44.444912, eta: 2:18:32.449962
+n_runs_policy_1_seed_1 Optimization progress: 9%
+ > took: 0:15:20.006950, eta: 2:28:13.400517
+n_runs_policy_1_seed_1 Optimization progress: 11%
+ > took: 0:19:46.358562, eta: 2:41:00.348291
+n_runs_policy_1_seed_1 Optimization progress: 12%
+ > took: 0:23:51.324876, eta: 2:46:59.274132
+n_runs_policy_1_seed_1 Optimization progress: 14%
+ > took: 0:26:55.075456, eta: 2:44:29.905564
+n_runs_policy_1_seed_1 Optimization progress: 16%
+ > took: 0:30:49.151110, eta: 2:46:25.415994
+n_runs_policy_1_seed_1 Optimization progress: 17%
+ > took: 0:36:27.009482, eta: 2:55:37.409322
+n_runs_policy_1_seed_1 Optimization progress: 19%
+ > took: 0:44:44.659555, eta: 3:13:53.524738
+n_runs_policy_1_seed_1 Optimization progress: 20%
+ > took: 0:51:30.819401, eta: 3:22:05.522265
+n_runs_policy_1_seed_1 Optimization progress: 22%
+ > took: 0:56:53.865505, eta: 3:23:12.376804
+n_runs_policy_1_seed_1 Optimization progress: 23%
+ > took: 1:03:04.164640, eta: 3:26:01.604491
+n_runs_policy_1_seed_1 Optimization progress: 25%
+ > took: 1:08:58.541343, eta: 3:26:55.624029
+n_runs_policy_1_seed_1 Optimization progress: 27%
+ > took: 1:20:01.713290, eta: 3:41:15.324978
+n_runs_policy_1_seed_1 Optimization progress: 28%
+ > took: 1:51:44.029242, eta: 4:45:32.519174
+n_runs_policy_1_seed_1 Optimization progress: 30%
+ > took: 2:13:37.476415, eta: 5:16:28.759930
+n_runs_policy_1_seed_1 Optimization progress: 31%
+ > took: 2:26:11.154058, eta: 5:21:36.538928
+n_runs_policy_1_seed_1 Optimization progress: 33%
+ > took: 2:44:14.995769, eta: 5:36:19.277051
+n_runs_policy_1_seed_1 Optimization progress: 34%
+ > took: 2:58:23.566287, eta: 5:40:34.081093
+n_runs_policy_1_seed_1 Optimization progress: 36%
+ > took: 3:20:52.707905, eta: 5:58:05.261918
+n_runs_policy_1_seed_1 Optimization progress: 37%
+ > took: 3:38:58.315683, eta: 6:04:57.192805
+n_runs_policy_1_seed_1 Optimization progress: 39%
+ > took: 4:02:12.269776, eta: 6:17:50.340851
+n_runs_policy_1_seed_1 Optimization progress: 41%
+ > took: 4:22:43.654663, eta: 6:23:59.187584
+n_runs_policy_1_seed_1 Optimization progress: 42%
+ > took: 4:46:17.420562, eta: 6:32:19.428178
+n_runs_policy_1_seed_1 Optimization progress: 44%
+ > took: 4:59:13.002744, eta: 6:24:42.432099
+n_runs_policy_1_seed_1 Optimization progress: 45%
+ > took: 5:18:13.075446, eta: 6:24:03.366918
+n_runs_policy_1_seed_1 Optimization progress: 47%
+ > took: 5:34:27.234791, eta: 6:19:02.866096
+n_runs_policy_1_seed_1 Optimization progress: 48%
+ > took: 5:47:12.098792, eta: 6:09:36.105166
+n_runs_policy_1_seed_1 Optimization progress: 50%
+ > took: 6:06:46.607601, eta: 6:06:46.607601
+n_runs_policy_1_seed_1 Optimization progress: 52%
+ > took: 6:23:51.323635, eta: 6:00:35.485839
+n_runs_policy_1_seed_1 Optimization progress: 53%
+ > took: 6:38:12.588360, eta: 5:51:21.695612
+n_runs_policy_1_seed_1 Optimization progress: 55%
+ > took: 6:57:07.168769, eta: 5:45:36.796980
+n_runs_policy_1_seed_1 Optimization progress: 56%
+ > took: 7:11:22.974980, eta: 5:35:31.202762
+n_runs_policy_1_seed_1 Optimization progress: 58%
+ > took: 7:24:45.369380, eta: 5:24:33.107385
+n_runs_policy_1_seed_1 Optimization progress: 59%
+ > took: 7:37:20.478413, eta: 5:12:55.064177
+n_runs_policy_1_seed_1 Optimization progress: 61%
+ > took: 7:48:52.517746, eta: 5:00:33.665222
+n_runs_policy_1_seed_1 Optimization progress: 62%
+ > took: 8:00:49.204858, eta: 4:48:29.522915
+n_runs_policy_1_seed_1 Optimization progress: 64%
+ > took: 8:13:05.511590, eta: 4:36:36.750404
+n_runs_policy_1_seed_1 Optimization progress: 66%
+ > took: 8:20:34.988298, eta: 4:22:12.612918
+n_runs_policy_1_seed_1 Optimization progress: 67%
+ > took: 8:28:09.144298, eta: 4:08:10.047215
+n_runs_policy_1_seed_1 Optimization progress: 69%
+ > took: 8:36:48.501080, eta: 3:54:54.773218
+n_runs_policy_1_seed_1 Optimization progress: 70%
+ > took: 8:41:06.973399, eta: 3:40:01.610991
+n_runs_policy_1_seed_1 Optimization progress: 72%
+ > took: 8:53:19.301727, eta: 3:28:41.465893
+n_runs_policy_1_seed_1 Optimization progress: 73%
+ > took: 9:01:59.297850, eta: 3:16:02.299222
+n_runs_policy_1_seed_1 Optimization progress: 75%
+ > took: 9:12:05.607036, eta: 3:04:01.869012
+n_runs_policy_1_seed_1 Optimization progress: 77%
+ > took: 9:21:59.258874, eta: 2:52:02.222104
+n_runs_policy_1_seed_1 Optimization progress: 78%
+ > took: 9:25:12.593889, eta: 2:38:15.526289
+n_runs_policy_1_seed_1 Optimization progress: 80%
+ > took: 9:28:31.420959, eta: 2:24:55.068088
+n_runs_policy_1_seed_1 Optimization progress: 81%
+ > took: 9:35:40.681624, eta: 2:12:50.926529
+n_runs_policy_1_seed_1 Optimization progress: 83%
+ > took: 9:46:06.554331, eta: 2:01:38.718823
+n_runs_policy_1_seed_1 Optimization progress: 84%
+ > took: 9:52:10.661501, eta: 1:49:39.752130
+n_runs_policy_1_seed_1 Optimization progress: 86%
+ > took: 9:59:00.453874, eta: 1:38:01.165179
+n_runs_policy_1_seed_1 Optimization progress: 87%
+ > took: 10:06:28.282218, eta: 1:26:38.326031
+n_runs_policy_1_seed_1 Optimization progress: 89%
+ > took: 10:15:13.510028, eta: 1:15:33.238074
+n_runs_policy_1_seed_1 Optimization progress: 91%
+ > took: 10:23:41.516037, eta: 1:04:31.191314
+n_runs_policy_1_seed_1 Optimization progress: 92%
+ > took: 10:35:37.493704, eta: 0:53:51.990992
+n_runs_policy_1_seed_1 Optimization progress: 94%
+ > took: 10:43:10.849547, eta: 0:42:52.723303
+n_runs_policy_1_seed_1 Optimization progress: 95%
+ > took: 11:10:08.227240, eta: 0:32:57.453799
+n_runs_policy_1_seed_1 Optimization progress: 97%
+ > took: 11:30:06.549272, eta: 0:22:15.695138
+n_runs_policy_1_seed_1 Optimization progress: 98%
+ > took: 11:49:39.668234, eta: 0:11:15.867750
+n_runs_policy_1_seed_1 Optimization progress: 100%
+ > took: 12:10:03.008952, eta: 0:00:00
+n_runs_policy_1_seed_1 Optimization finished. elapsed time: 12:10:03.009948
+<<<<< [31222]
+ERROR:__main__:errs: [31222] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [31222]
+INFO:__main__:Started process "n_runs_pose_1_seed_1" @ [225588]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=5
+INFO:__main__:Finished process [31214]
+INFO:__main__:outs: [31214] >>>>>n_runs_policy_1_seed_3 Optimization started.
+n_runs_policy_1_seed_3 Optimization progress: 2%
+ > took: 0:04:03.076590, eta: 4:15:13.825170
+n_runs_policy_1_seed_3 Optimization progress: 3%
+ > took: 0:08:04.435717, eta: 4:10:17.507227
+n_runs_policy_1_seed_3 Optimization progress: 5%
+ > took: 0:14:04.446734, eta: 4:46:10.416925
+n_runs_policy_1_seed_3 Optimization progress: 6%
+ > took: 0:20:04.327515, eta: 5:01:04.912725
+n_runs_policy_1_seed_3 Optimization progress: 8%
+ > took: 0:25:17.689920, eta: 4:58:28.741056
+n_runs_policy_1_seed_3 Optimization progress: 9%
+ > took: 0:40:21.385422, eta: 6:30:06.725746
+n_runs_policy_1_seed_3 Optimization progress: 11%
+ > took: 0:51:43.638150, eta: 7:01:12.482079
+n_runs_policy_1_seed_3 Optimization progress: 12%
+ > took: 1:10:41.039106, eta: 8:14:47.273742
+n_runs_policy_1_seed_3 Optimization progress: 14%
+ > took: 1:29:10.589295, eta: 9:04:58.045692
+n_runs_policy_1_seed_3 Optimization progress: 16%
+ > took: 1:46:15.478790, eta: 9:33:47.585466
+n_runs_policy_1_seed_3 Optimization progress: 17%
+ > took: 2:07:28.442946, eta: 10:14:11.588740
+n_runs_policy_1_seed_3 Optimization progress: 19%
+ > took: 2:33:32.917591, eta: 11:05:22.642894
+n_runs_policy_1_seed_3 Optimization progress: 20%
+ > took: 3:00:01.598423, eta: 11:46:15.501506
+n_runs_policy_1_seed_3 Optimization progress: 22%
+ > took: 3:26:34.111330, eta: 12:17:44.683321
+n_runs_policy_1_seed_3 Optimization progress: 23%
+ > took: 3:54:42.314874, eta: 12:46:42.228588
+n_runs_policy_1_seed_3 Optimization progress: 25%
+ > took: 4:13:29.044996, eta: 12:40:27.134988
+n_runs_policy_1_seed_3 Optimization progress: 27%
+ > took: 4:39:22.889272, eta: 12:52:24.458576
+n_runs_policy_1_seed_3 Optimization progress: 28%
+ > took: 4:59:13.916422, eta: 12:44:42.230856
+n_runs_policy_1_seed_3 Optimization progress: 30%
+ > took: 5:26:05.894921, eta: 12:52:20.277444
+n_runs_policy_1_seed_3 Optimization progress: 31%
+ > took: 5:39:25.551700, eta: 12:26:44.213740
+n_runs_policy_1_seed_3 Optimization progress: 33%
+ > took: 5:55:45.809313, eta: 12:08:28.085736
+n_runs_policy_1_seed_3 Optimization progress: 34%
+ > took: 6:11:15.142906, eta: 11:48:45.272821
+n_runs_policy_1_seed_3 Optimization progress: 36%
+ > took: 6:32:10.983079, eta: 11:39:06.535054
+n_runs_policy_1_seed_3 Optimization progress: 37%
+ > took: 6:54:15.870126, eta: 11:30:26.450210
+n_runs_policy_1_seed_3 Optimization progress: 39%
+ > took: 7:04:49.299532, eta: 11:02:43.307270
+n_runs_policy_1_seed_3 Optimization progress: 41%
+ > took: 7:16:52.121010, eta: 10:38:30.023015
+n_runs_policy_1_seed_3 Optimization progress: 42%
+ > took: 7:28:41.551602, eta: 10:14:52.496640
+n_runs_policy_1_seed_3 Optimization progress: 44%
+ > took: 7:40:37.617317, eta: 9:52:14.079408
+n_runs_policy_1_seed_3 Optimization progress: 45%
+ > took: 7:51:58.930673, eta: 9:29:38.019778
+n_runs_policy_1_seed_3 Optimization progress: 47%
+ > took: 8:05:43.467525, eta: 9:10:29.263195
+n_runs_policy_1_seed_3 Optimization progress: 48%
+ > took: 8:15:41.559871, eta: 8:47:40.370185
+n_runs_policy_1_seed_3 Optimization progress: 50%
+ > took: 8:27:09.856201, eta: 8:27:09.856201
+n_runs_policy_1_seed_3 Optimization progress: 52%
+ > took: 8:41:02.592088, eta: 8:09:27.889537
+n_runs_policy_1_seed_3 Optimization progress: 53%
+ > took: 8:52:34.182630, eta: 7:49:54.867026
+n_runs_policy_1_seed_3 Optimization progress: 55%
+ > took: 9:02:13.987487, eta: 7:29:16.732489
+n_runs_policy_1_seed_3 Optimization progress: 56%
+ > took: 9:15:13.262193, eta: 7:11:50.315039
+n_runs_policy_1_seed_3 Optimization progress: 58%
+ > took: 9:25:21.722571, eta: 6:52:33.689444
+n_runs_policy_1_seed_3 Optimization progress: 59%
+ > took: 9:38:55.867344, eta: 6:36:06.646077
+n_runs_policy_1_seed_3 Optimization progress: 61%
+ > took: 9:50:59.797916, eta: 6:18:50.639690
+n_runs_policy_1_seed_3 Optimization progress: 62%
+ > took: 10:02:20.569372, eta: 6:01:24.341623
+n_runs_policy_1_seed_3 Optimization progress: 64%
+ > took: 10:10:44.706692, eta: 5:42:36.786681
+n_runs_policy_1_seed_3 Optimization progress: 66%
+ > took: 10:21:01.046844, eta: 5:25:17.691204
+n_runs_policy_1_seed_3 Optimization progress: 67%
+ > took: 10:29:17.055714, eta: 5:07:19.492325
+n_runs_policy_1_seed_3 Optimization progress: 69%
+ > took: 10:48:10.472442, eta: 4:54:37.487474
+n_runs_policy_1_seed_3 Optimization progress: 70%
+ > took: 11:07:30.173197, eta: 4:41:50.073128
+n_runs_policy_1_seed_3 Optimization progress: 72%
+ > took: 11:22:00.298379, eta: 4:26:52.290670
+n_runs_policy_1_seed_3 Optimization progress: 73%
+ > took: 11:38:21.412116, eta: 4:12:35.829914
+n_runs_policy_1_seed_3 Optimization progress: 75%
+ > took: 12:00:40.865063, eta: 4:00:13.621688
+n_runs_policy_1_seed_3 Optimization progress: 77%
+ > took: 12:14:32.550474, eta: 3:44:51.597084
+n_runs_policy_1_seed_3 Optimization progress: 78%
+ > took: 12:31:23.436857, eta: 3:30:23.362320
+n_runs_policy_1_seed_3 Optimization progress: 80%
+ > took: 12:53:56.723816, eta: 3:17:16.811953
+n_runs_policy_1_seed_3 Optimization progress: 81%
+ > took: 13:13:29.347461, eta: 3:03:06.772491
+n_runs_policy_1_seed_3 Optimization progress: 83%
+ > took: 13:45:48.791417, eta: 2:51:23.711426
+n_runs_policy_1_seed_3 Optimization progress: 84%
+ > took: 14:05:52.953435, eta: 2:36:38.695081
+n_runs_policy_1_seed_3 Optimization progress: 86%
+ > took: 14:29:01.659511, eta: 2:22:12.271556
+n_runs_policy_1_seed_3 Optimization progress: 87%
+ > took: 14:46:38.624130, eta: 2:06:39.803447
+n_runs_policy_1_seed_3 Optimization progress: 89%
+ > took: 15:08:49.631776, eta: 1:51:36.621446
+n_runs_policy_1_seed_3 Optimization progress: 91%
+ > took: 15:15:25.766651, eta: 1:34:41.975860
+n_runs_policy_1_seed_3 Optimization progress: 92%
+ > took: 15:24:31.927542, eta: 1:18:21.010809
+n_runs_policy_1_seed_3 Optimization progress: 94%
+ > took: 15:32:09.884132, eta: 1:02:08.658942
+n_runs_policy_1_seed_3 Optimization progress: 95%
+ > took: 15:40:29.321572, eta: 0:46:15.212536
+n_runs_policy_1_seed_3 Optimization progress: 97%
+ > took: 15:55:47.696163, eta: 0:30:49.925683
+n_runs_policy_1_seed_3 Optimization progress: 98%
+ > took: 16:11:36.541149, eta: 0:15:25.341923
+n_runs_policy_1_seed_3 Optimization progress: 100%
+ > took: 16:32:40.814088, eta: 0:00:00
+n_runs_policy_1_seed_3 Optimization finished. elapsed time: 16:32:40.814864
+<<<<< [31214]
+ERROR:__main__:errs: [31214] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [31214]
+INFO:__main__:Started process "n_runs_pose_1_seed_0" @ [276632]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=4
+INFO:__main__:Finished process [188687]
+INFO:__main__:outs: [188687] >>>>>n_runs_pose_1_seed_3 Optimization started.
+n_runs_pose_1_seed_3 Optimization progress: 2%
+ > took: 0:02:58.443622, eta: 3:07:21.948186
+n_runs_pose_1_seed_3 Optimization progress: 3%
+ > took: 0:07:12.122176, eta: 3:43:15.787456
+n_runs_pose_1_seed_3 Optimization progress: 5%
+ > took: 0:11:55.435889, eta: 4:02:27.196410
+n_runs_pose_1_seed_3 Optimization progress: 6%
+ > took: 0:16:56.155154, eta: 4:14:02.327310
+n_runs_pose_1_seed_3 Optimization progress: 8%
+ > took: 0:20:45.903525, eta: 4:05:01.661595
+n_runs_pose_1_seed_3 Optimization progress: 9%
+ > took: 0:26:24.107562, eta: 4:15:13.039766
+n_runs_pose_1_seed_3 Optimization progress: 11%
+ > took: 0:30:34.922210, eta: 4:09:01.509424
+n_runs_pose_1_seed_3 Optimization progress: 12%
+ > took: 0:36:23.567727, eta: 4:14:44.974089
+n_runs_pose_1_seed_3 Optimization progress: 14%
+ > took: 0:45:29.916569, eta: 4:38:02.823477
+n_runs_pose_1_seed_3 Optimization progress: 16%
+ > took: 0:50:29.766511, eta: 4:32:40.739159
+n_runs_pose_1_seed_3 Optimization progress: 17%
+ > took: 0:59:00.191675, eta: 4:44:17.287161
+n_runs_pose_1_seed_3 Optimization progress: 19%
+ > took: 1:04:44.360752, eta: 4:40:32.229925
+n_runs_pose_1_seed_3 Optimization progress: 20%
+ > took: 1:12:34.221286, eta: 4:44:41.945045
+n_runs_pose_1_seed_3 Optimization progress: 22%
+ > took: 1:18:09.360783, eta: 4:39:07.717082
+n_runs_pose_1_seed_3 Optimization progress: 23%
+ > took: 1:24:14.413174, eta: 4:35:11.083035
+n_runs_pose_1_seed_3 Optimization progress: 25%
+ > took: 1:30:56.565463, eta: 4:32:49.696389
+n_runs_pose_1_seed_3 Optimization progress: 27%
+ > took: 1:37:18.276492, eta: 4:29:01.117360
+n_runs_pose_1_seed_3 Optimization progress: 28%
+ > took: 1:42:57.840939, eta: 4:23:07.815733
+n_runs_pose_1_seed_3 Optimization progress: 30%
+ > took: 1:48:15.082584, eta: 4:16:23.090331
+n_runs_pose_1_seed_3 Optimization progress: 31%
+ > took: 1:57:00.241982, eta: 4:17:24.532360
+n_runs_pose_1_seed_3 Optimization progress: 33%
+ > took: 2:04:23.571442, eta: 4:14:42.551048
+n_runs_pose_1_seed_3 Optimization progress: 34%
+ > took: 2:11:27.124979, eta: 4:10:57.238596
+n_runs_pose_1_seed_3 Optimization progress: 36%
+ > took: 2:17:17.311242, eta: 4:04:43.902649
+n_runs_pose_1_seed_3 Optimization progress: 37%
+ > took: 2:22:59.194295, eta: 3:58:18.657158
+n_runs_pose_1_seed_3 Optimization progress: 39%
+ > took: 2:30:54.364224, eta: 3:55:24.808189
+n_runs_pose_1_seed_3 Optimization progress: 41%
+ > took: 2:36:04.065490, eta: 3:48:05.941870
+n_runs_pose_1_seed_3 Optimization progress: 42%
+ > took: 2:43:22.967601, eta: 3:43:53.696342
+n_runs_pose_1_seed_3 Optimization progress: 44%
+ > took: 2:51:06.880567, eta: 3:40:00.275015
+n_runs_pose_1_seed_3 Optimization progress: 45%
+ > took: 2:56:17.832996, eta: 3:32:46.350168
+n_runs_pose_1_seed_3 Optimization progress: 47%
+ > took: 3:06:36.552849, eta: 3:31:29.426562
+n_runs_pose_1_seed_3 Optimization progress: 48%
+ > took: 3:13:52.190442, eta: 3:26:22.654341
+n_runs_pose_1_seed_3 Optimization progress: 50%
+ > took: 3:19:36.065243, eta: 3:19:36.065243
+n_runs_pose_1_seed_3 Optimization progress: 52%
+ > took: 3:27:04.175785, eta: 3:14:31.195434
+n_runs_pose_1_seed_3 Optimization progress: 53%
+ > took: 3:34:32.342320, eta: 3:09:17.949106
+n_runs_pose_1_seed_3 Optimization progress: 55%
+ > took: 3:43:45.864161, eta: 3:05:24.287448
+n_runs_pose_1_seed_3 Optimization progress: 56%
+ > took: 3:50:53.257447, eta: 2:59:34.755792
+n_runs_pose_1_seed_3 Optimization progress: 58%
+ > took: 3:56:28.795865, eta: 2:52:33.986172
+n_runs_pose_1_seed_3 Optimization progress: 59%
+ > took: 4:05:21.344366, eta: 2:47:52.498777
+n_runs_pose_1_seed_3 Optimization progress: 61%
+ > took: 4:12:46.856375, eta: 2:42:02.343830
+n_runs_pose_1_seed_3 Optimization progress: 62%
+ > took: 4:19:23.179579, eta: 2:35:37.907747
+n_runs_pose_1_seed_3 Optimization progress: 64%
+ > took: 4:27:47.435015, eta: 2:30:13.439155
+n_runs_pose_1_seed_3 Optimization progress: 66%
+ > took: 4:34:42.637842, eta: 2:23:53.762679
+n_runs_pose_1_seed_3 Optimization progress: 67%
+ > took: 4:43:22.835569, eta: 2:18:23.710394
+n_runs_pose_1_seed_3 Optimization progress: 69%
+ > took: 4:52:37.440737, eta: 2:13:00.654880
+n_runs_pose_1_seed_3 Optimization progress: 70%
+ > took: 5:00:47.005283, eta: 2:06:59.846675
+n_runs_pose_1_seed_3 Optimization progress: 72%
+ > took: 5:09:09.111654, eta: 2:00:58.348039
+n_runs_pose_1_seed_3 Optimization progress: 73%
+ > took: 5:17:07.202760, eta: 1:54:42.179722
+n_runs_pose_1_seed_3 Optimization progress: 75%
+ > took: 5:26:48.530140, eta: 1:48:56.176713
+n_runs_pose_1_seed_3 Optimization progress: 77%
+ > took: 5:35:04.528869, eta: 1:42:34.447613
+n_runs_pose_1_seed_3 Optimization progress: 78%
+ > took: 5:43:14.044138, eta: 1:36:06.332359
+n_runs_pose_1_seed_3 Optimization progress: 80%
+ > took: 5:50:20.688862, eta: 1:29:18.214808
+n_runs_pose_1_seed_3 Optimization progress: 81%
+ > took: 6:00:22.533845, eta: 1:23:09.815503
+n_runs_pose_1_seed_3 Optimization progress: 83%
+ > took: 6:10:51.922362, eta: 1:16:58.323509
+n_runs_pose_1_seed_3 Optimization progress: 84%
+ > took: 6:19:31.468360, eta: 1:10:16.938585
+n_runs_pose_1_seed_3 Optimization progress: 86%
+ > took: 6:31:00.357447, eta: 1:03:58.967582
+n_runs_pose_1_seed_3 Optimization progress: 87%
+ > took: 6:41:15.204219, eta: 0:57:19.314888
+n_runs_pose_1_seed_3 Optimization progress: 89%
+ > took: 6:50:08.088924, eta: 0:50:22.046008
+n_runs_pose_1_seed_3 Optimization progress: 91%
+ > took: 6:56:58.668529, eta: 0:43:08.138124
+n_runs_pose_1_seed_3 Optimization progress: 92%
+ > took: 7:07:18.532222, eta: 0:36:12.756968
+n_runs_pose_1_seed_3 Optimization progress: 94%
+ > took: 7:18:39.882324, eta: 0:29:14.658822
+n_runs_pose_1_seed_3 Optimization progress: 95%
+ > took: 7:28:08.246669, eta: 0:22:02.372787
+n_runs_pose_1_seed_3 Optimization progress: 97%
+ > took: 7:37:10.298658, eta: 0:14:44.848344
+n_runs_pose_1_seed_3 Optimization progress: 98%
+ > took: 7:42:56.390409, eta: 0:07:20.895086
+n_runs_pose_1_seed_3 Optimization progress: 100%
+ > took: 7:50:18.695927, eta: 0:00:00
+n_runs_pose_1_seed_3 Optimization finished. elapsed time: 7:50:18.695963
+<<<<< [188687]
+ERROR:__main__:errs: [188687] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [188687]
+INFO:__main__:Started process "default_seed_3" @ [289461]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=3
+INFO:__main__:Finished process [225588]
+INFO:__main__:outs: [225588] >>>>>n_runs_pose_1_seed_1 Optimization started.
+n_runs_pose_1_seed_1 Optimization progress: 2%
+ > took: 0:00:57.200492, eta: 1:00:03.630996
+n_runs_pose_1_seed_1 Optimization progress: 3%
+ > took: 0:01:40.567609, eta: 0:51:57.595879
+n_runs_pose_1_seed_1 Optimization progress: 5%
+ > took: 0:04:29.580562, eta: 1:31:21.471427
+n_runs_pose_1_seed_1 Optimization progress: 6%
+ > took: 0:07:26.250989, eta: 1:51:33.764835
+n_runs_pose_1_seed_1 Optimization progress: 8%
+ > took: 0:09:24.883123, eta: 1:51:05.620851
+n_runs_pose_1_seed_1 Optimization progress: 9%
+ > took: 0:11:01.468191, eta: 1:46:34.192513
+n_runs_pose_1_seed_1 Optimization progress: 11%
+ > took: 0:13:23.094045, eta: 1:48:59.480081
+n_runs_pose_1_seed_1 Optimization progress: 12%
+ > took: 0:15:21.997002, eta: 1:47:33.979014
+n_runs_pose_1_seed_1 Optimization progress: 14%
+ > took: 0:18:00.522032, eta: 1:50:03.190196
+n_runs_pose_1_seed_1 Optimization progress: 16%
+ > took: 0:22:30.426279, eta: 2:01:32.301907
+n_runs_pose_1_seed_1 Optimization progress: 17%
+ > took: 0:27:01.775373, eta: 2:10:14.008615
+n_runs_pose_1_seed_1 Optimization progress: 19%
+ > took: 0:30:20.181486, eta: 2:11:27.453106
+n_runs_pose_1_seed_1 Optimization progress: 20%
+ > took: 0:33:44.111328, eta: 2:12:20.744441
+n_runs_pose_1_seed_1 Optimization progress: 22%
+ > took: 0:37:13.292585, eta: 2:12:56.044946
+n_runs_pose_1_seed_1 Optimization progress: 23%
+ > took: 0:41:34.257649, eta: 2:15:47.908320
+n_runs_pose_1_seed_1 Optimization progress: 25%
+ > took: 0:44:14.899167, eta: 2:12:44.697501
+n_runs_pose_1_seed_1 Optimization progress: 27%
+ > took: 0:47:45.268292, eta: 2:12:01.624101
+n_runs_pose_1_seed_1 Optimization progress: 28%
+ > took: 0:51:10.346135, eta: 2:10:46.440123
+n_runs_pose_1_seed_1 Optimization progress: 30%
+ > took: 0:55:22.742077, eta: 2:11:09.652288
+n_runs_pose_1_seed_1 Optimization progress: 31%
+ > took: 0:58:41.088464, eta: 2:09:06.394621
+n_runs_pose_1_seed_1 Optimization progress: 33%
+ > took: 1:00:15.905125, eta: 2:03:23.996208
+n_runs_pose_1_seed_1 Optimization progress: 34%
+ > took: 1:05:41.364229, eta: 2:05:24.422619
+n_runs_pose_1_seed_1 Optimization progress: 36%
+ > took: 1:11:23.793766, eta: 2:07:16.328018
+n_runs_pose_1_seed_1 Optimization progress: 37%
+ > took: 1:18:26.288711, eta: 2:10:43.814518
+n_runs_pose_1_seed_1 Optimization progress: 39%
+ > took: 1:23:04.723953, eta: 2:09:36.169367
+n_runs_pose_1_seed_1 Optimization progress: 41%
+ > took: 1:29:09.704278, eta: 2:10:18.798560
+n_runs_pose_1_seed_1 Optimization progress: 42%
+ > took: 1:32:38.044681, eta: 2:06:56.579748
+n_runs_pose_1_seed_1 Optimization progress: 44%
+ > took: 1:36:50.737856, eta: 2:04:30.948672
+n_runs_pose_1_seed_1 Optimization progress: 45%
+ > took: 1:43:30.431537, eta: 2:04:55.348407
+n_runs_pose_1_seed_1 Optimization progress: 47%
+ > took: 1:49:25.352956, eta: 2:04:00.733350
+n_runs_pose_1_seed_1 Optimization progress: 48%
+ > took: 1:56:01.560142, eta: 2:03:30.693054
+n_runs_pose_1_seed_1 Optimization progress: 50%
+ > took: 2:02:55.341056, eta: 2:02:55.341056
+n_runs_pose_1_seed_1 Optimization progress: 52%
+ > took: 2:09:20.198544, eta: 2:01:29.883481
+n_runs_pose_1_seed_1 Optimization progress: 53%
+ > took: 2:15:40.116563, eta: 1:59:42.455791
+n_runs_pose_1_seed_1 Optimization progress: 55%
+ > took: 2:21:26.078575, eta: 1:57:11.322248
+n_runs_pose_1_seed_1 Optimization progress: 56%
+ > took: 2:28:15.443034, eta: 1:55:18.677915
+n_runs_pose_1_seed_1 Optimization progress: 58%
+ > took: 2:35:43.012273, eta: 1:53:37.873821
+n_runs_pose_1_seed_1 Optimization progress: 59%
+ > took: 2:44:10.442755, eta: 1:52:19.776622
+n_runs_pose_1_seed_1 Optimization progress: 61%
+ > took: 2:53:59.315443, eta: 1:51:31.868874
+n_runs_pose_1_seed_1 Optimization progress: 62%
+ > took: 2:59:51.308556, eta: 1:47:54.785134
+n_runs_pose_1_seed_1 Optimization progress: 64%
+ > took: 3:09:29.061891, eta: 1:46:17.766427
+n_runs_pose_1_seed_1 Optimization progress: 66%
+ > took: 3:16:16.612116, eta: 1:42:48.701585
+n_runs_pose_1_seed_1 Optimization progress: 67%
+ > took: 3:24:04.179981, eta: 1:39:39.715805
+n_runs_pose_1_seed_1 Optimization progress: 69%
+ > took: 3:30:41.697152, eta: 1:35:46.225978
+n_runs_pose_1_seed_1 Optimization progress: 70%
+ > took: 3:38:54.905806, eta: 1:32:25.849118
+n_runs_pose_1_seed_1 Optimization progress: 72%
+ > took: 3:45:07.092266, eta: 1:28:05.383930
+n_runs_pose_1_seed_1 Optimization progress: 73%
+ > took: 3:54:40.632610, eta: 1:24:52.994774
+n_runs_pose_1_seed_1 Optimization progress: 75%
+ > took: 4:04:50.596534, eta: 1:21:36.865511
+n_runs_pose_1_seed_1 Optimization progress: 77%
+ > took: 4:14:57.277885, eta: 1:18:02.840169
+n_runs_pose_1_seed_1 Optimization progress: 78%
+ > took: 4:23:51.926699, eta: 1:13:52.939476
+n_runs_pose_1_seed_1 Optimization progress: 80%
+ > took: 4:30:16.307366, eta: 1:08:53.568544
+n_runs_pose_1_seed_1 Optimization progress: 81%
+ > took: 4:37:58.212009, eta: 1:04:08.818156
+n_runs_pose_1_seed_1 Optimization progress: 83%
+ > took: 4:46:03.970003, eta: 0:59:22.333397
+n_runs_pose_1_seed_1 Optimization progress: 84%
+ > took: 4:56:17.982653, eta: 0:54:52.219010
+n_runs_pose_1_seed_1 Optimization progress: 86%
+ > took: 5:04:41.429467, eta: 0:49:51.506640
+n_runs_pose_1_seed_1 Optimization progress: 87%
+ > took: 5:13:28.423628, eta: 0:44:46.917661
+n_runs_pose_1_seed_1 Optimization progress: 89%
+ > took: 5:22:02.668933, eta: 0:39:32.959343
+n_runs_pose_1_seed_1 Optimization progress: 91%
+ > took: 5:30:57.723142, eta: 0:34:14.247222
+n_runs_pose_1_seed_1 Optimization progress: 92%
+ > took: 5:42:09.224805, eta: 0:28:59.764814
+n_runs_pose_1_seed_1 Optimization progress: 94%
+ > took: 5:55:36.250241, eta: 0:23:42.416683
+n_runs_pose_1_seed_1 Optimization progress: 95%
+ > took: 6:06:58.073125, eta: 0:18:02.856055
+n_runs_pose_1_seed_1 Optimization progress: 97%
+ > took: 6:17:45.044650, eta: 0:12:11.130473
+n_runs_pose_1_seed_1 Optimization progress: 98%
+ > took: 6:29:48.309270, eta: 0:06:11.243004
+n_runs_pose_1_seed_1 Optimization progress: 100%
+ > took: 6:35:14.473104, eta: 0:00:00
+n_runs_pose_1_seed_1 Optimization finished. elapsed time: 6:35:14.473148
+<<<<< [225588]
+ERROR:__main__:errs: [225588] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [225588]
+INFO:__main__:Started process "default_seed_2" @ [301194]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=2
+INFO:__main__:Finished process [225000]
+INFO:__main__:outs: [225000] >>>>>n_runs_pose_1_seed_2 Optimization started.
+n_runs_pose_1_seed_2 Optimization progress: 2%
+ > took: 0:01:19.703260, eta: 1:23:41.305380
+n_runs_pose_1_seed_2 Optimization progress: 3%
+ > took: 0:03:35.629495, eta: 1:51:24.514345
+n_runs_pose_1_seed_2 Optimization progress: 5%
+ > took: 0:13:16.458648, eta: 4:29:54.659176
+n_runs_pose_1_seed_2 Optimization progress: 6%
+ > took: 0:24:41.775780, eta: 6:10:26.636700
+n_runs_pose_1_seed_2 Optimization progress: 8%
+ > took: 0:36:16.316480, eta: 7:08:00.534464
+n_runs_pose_1_seed_2 Optimization progress: 9%
+ > took: 0:45:15.188450, eta: 7:17:26.821683
+n_runs_pose_1_seed_2 Optimization progress: 11%
+ > took: 0:53:10.427596, eta: 7:12:59.196139
+n_runs_pose_1_seed_2 Optimization progress: 12%
+ > took: 1:04:03.593898, eta: 7:28:25.157286
+n_runs_pose_1_seed_2 Optimization progress: 14%
+ > took: 1:18:15.896432, eta: 7:58:17.144862
+n_runs_pose_1_seed_2 Optimization progress: 16%
+ > took: 1:27:43.829191, eta: 7:53:44.677631
+n_runs_pose_1_seed_2 Optimization progress: 17%
+ > took: 1:36:40.895399, eta: 7:45:49.768741
+n_runs_pose_1_seed_2 Optimization progress: 19%
+ > took: 1:41:44.422492, eta: 7:20:52.497465
+n_runs_pose_1_seed_2 Optimization progress: 20%
+ > took: 1:51:33.713744, eta: 7:17:39.953919
+n_runs_pose_1_seed_2 Optimization progress: 22%
+ > took: 2:04:32.213342, eta: 7:24:46.476221
+n_runs_pose_1_seed_2 Optimization progress: 23%
+ > took: 2:15:18.339071, eta: 7:21:59.907632
+n_runs_pose_1_seed_2 Optimization progress: 25%
+ > took: 2:30:08.383891, eta: 7:30:25.151673
+n_runs_pose_1_seed_2 Optimization progress: 27%
+ > took: 2:40:41.863120, eta: 7:24:16.915685
+n_runs_pose_1_seed_2 Optimization progress: 28%
+ > took: 2:48:37.891905, eta: 7:10:56.834868
+n_runs_pose_1_seed_2 Optimization progress: 30%
+ > took: 2:58:40.547815, eta: 7:03:10.771141
+n_runs_pose_1_seed_2 Optimization progress: 31%
+ > took: 3:04:35.010756, eta: 6:46:05.023663
+n_runs_pose_1_seed_2 Optimization progress: 33%
+ > took: 3:20:54.904727, eta: 6:51:23.852536
+n_runs_pose_1_seed_2 Optimization progress: 34%
+ > took: 3:36:48.921317, eta: 6:53:55.213423
+n_runs_pose_1_seed_2 Optimization progress: 36%
+ > took: 3:47:30.479239, eta: 6:45:33.462991
+n_runs_pose_1_seed_2 Optimization progress: 37%
+ > took: 3:58:29.159596, eta: 6:37:28.599327
+n_runs_pose_1_seed_2 Optimization progress: 39%
+ > took: 4:05:55.576259, eta: 6:23:38.698964
+n_runs_pose_1_seed_2 Optimization progress: 41%
+ > took: 4:20:13.927236, eta: 6:20:20.355191
+n_runs_pose_1_seed_2 Optimization progress: 42%
+ > took: 4:33:00.943142, eta: 6:14:07.959121
+n_runs_pose_1_seed_2 Optimization progress: 44%
+ > took: 4:39:51.836128, eta: 5:59:49.503593
+n_runs_pose_1_seed_2 Optimization progress: 45%
+ > took: 4:50:10.184250, eta: 5:50:12.291336
+n_runs_pose_1_seed_2 Optimization progress: 47%
+ > took: 5:04:17.542893, eta: 5:44:51.881945
+n_runs_pose_1_seed_2 Optimization progress: 48%
+ > took: 5:15:25.933301, eta: 5:35:46.961256
+n_runs_pose_1_seed_2 Optimization progress: 50%
+ > took: 5:30:11.047168, eta: 5:30:11.047168
+n_runs_pose_1_seed_2 Optimization progress: 52%
+ > took: 5:46:22.828397, eta: 5:25:23.263040
+n_runs_pose_1_seed_2 Optimization progress: 53%
+ > took: 6:03:06.747239, eta: 5:20:23.600505
+n_runs_pose_1_seed_2 Optimization progress: 55%
+ > took: 6:13:57.741734, eta: 5:09:51.271722
+n_runs_pose_1_seed_2 Optimization progress: 56%
+ > took: 6:24:54.366503, eta: 4:59:22.285058
+n_runs_pose_1_seed_2 Optimization progress: 58%
+ > took: 6:37:32.218792, eta: 4:50:05.673173
+n_runs_pose_1_seed_2 Optimization progress: 59%
+ > took: 6:54:35.610575, eta: 4:43:40.154604
+n_runs_pose_1_seed_2 Optimization progress: 61%
+ > took: 7:04:45.983504, eta: 4:32:17.168913
+n_runs_pose_1_seed_2 Optimization progress: 62%
+ > took: 7:19:54.133526, eta: 4:23:56.480116
+n_runs_pose_1_seed_2 Optimization progress: 64%
+ > took: 7:37:04.935819, eta: 4:16:24.720094
+n_runs_pose_1_seed_2 Optimization progress: 66%
+ > took: 7:47:20.505857, eta: 4:04:47.884020
+n_runs_pose_1_seed_2 Optimization progress: 67%
+ > took: 7:57:46.442489, eta: 3:53:19.890518
+n_runs_pose_1_seed_2 Optimization progress: 69%
+ > took: 8:10:43.162356, eta: 3:43:03.255616
+n_runs_pose_1_seed_2 Optimization progress: 70%
+ > took: 8:27:18.728594, eta: 3:34:11.907629
+n_runs_pose_1_seed_2 Optimization progress: 72%
+ > took: 8:41:57.588317, eta: 3:24:14.708472
+n_runs_pose_1_seed_2 Optimization progress: 73%
+ > took: 8:53:00.022966, eta: 3:12:47.242349
+n_runs_pose_1_seed_2 Optimization progress: 75%
+ > took: 9:10:15.853570, eta: 3:03:25.284523
+n_runs_pose_1_seed_2 Optimization progress: 77%
+ > took: 9:23:27.448537, eta: 2:52:29.218940
+n_runs_pose_1_seed_2 Optimization progress: 78%
+ > took: 9:37:07.019161, eta: 2:41:35.565365
+n_runs_pose_1_seed_2 Optimization progress: 80%
+ > took: 9:48:47.639531, eta: 2:30:05.084586
+n_runs_pose_1_seed_2 Optimization progress: 81%
+ > took: 9:59:37.903137, eta: 2:18:22.593032
+n_runs_pose_1_seed_2 Optimization progress: 83%
+ > took: 10:12:23.673907, eta: 2:07:06.045528
+n_runs_pose_1_seed_2 Optimization progress: 84%
+ > took: 10:24:30.635504, eta: 1:55:39.006575
+n_runs_pose_1_seed_2 Optimization progress: 86%
+ > took: 10:37:20.963986, eta: 1:44:17.612289
+n_runs_pose_1_seed_2 Optimization progress: 87%
+ > took: 10:52:23.488868, eta: 1:33:11.926981
+n_runs_pose_1_seed_2 Optimization progress: 89%
+ > took: 11:04:01.678817, eta: 1:21:32.837749
+n_runs_pose_1_seed_2 Optimization progress: 91%
+ > took: 11:16:36.775858, eta: 1:09:59.666468
+n_runs_pose_1_seed_2 Optimization progress: 92%
+ > took: 11:34:41.012282, eta: 0:58:52.289176
+n_runs_pose_1_seed_2 Optimization progress: 94%
+ > took: 11:48:43.855833, eta: 0:47:14.923722
+n_runs_pose_1_seed_2 Optimization progress: 95%
+ > took: 12:01:59.383739, eta: 0:35:30.461495
+n_runs_pose_1_seed_2 Optimization progress: 97%
+ > took: 12:15:43.802767, eta: 0:23:43.993638
+n_runs_pose_1_seed_2 Optimization progress: 98%
+ > took: 12:33:54.246804, eta: 0:11:58.003918
+n_runs_pose_1_seed_2 Optimization progress: 100%
+ > took: 12:45:44.242979, eta: 0:00:00
+n_runs_pose_1_seed_2 Optimization finished. elapsed time: 12:45:44.243024
+<<<<< [225000]
+ERROR:__main__:errs: [225000] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [225000]
+INFO:__main__:Started process "default_seed_1" @ [372589]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=1
+INFO:__main__:Finished process [276632]
+INFO:__main__:outs: [276632] >>>>>n_runs_pose_1_seed_0 Optimization started.
+n_runs_pose_1_seed_0 Optimization progress: 2%
+ > took: 0:01:07.856492, eta: 1:11:14.958996
+n_runs_pose_1_seed_0 Optimization progress: 3%
+ > took: 0:02:03.034538, eta: 1:03:34.070678
+n_runs_pose_1_seed_0 Optimization progress: 5%
+ > took: 0:07:06.188286, eta: 2:24:25.828482
+n_runs_pose_1_seed_0 Optimization progress: 6%
+ > took: 0:15:39.256246, eta: 3:54:48.843690
+n_runs_pose_1_seed_0 Optimization progress: 8%
+ > took: 0:22:51.805494, eta: 4:29:47.304829
+n_runs_pose_1_seed_0 Optimization progress: 9%
+ > took: 0:29:44.972481, eta: 4:47:34.733983
+n_runs_pose_1_seed_0 Optimization progress: 11%
+ > took: 0:35:29.041565, eta: 4:48:56.481315
+n_runs_pose_1_seed_0 Optimization progress: 12%
+ > took: 0:41:59.019621, eta: 4:53:53.137347
+n_runs_pose_1_seed_0 Optimization progress: 14%
+ > took: 0:48:42.500150, eta: 4:57:39.723139
+n_runs_pose_1_seed_0 Optimization progress: 16%
+ > took: 0:55:30.090876, eta: 4:59:42.490730
+n_runs_pose_1_seed_0 Optimization progress: 17%
+ > took: 1:01:20.925502, eta: 4:55:35.368328
+n_runs_pose_1_seed_0 Optimization progress: 19%
+ > took: 1:05:54.224207, eta: 4:45:34.971564
+n_runs_pose_1_seed_0 Optimization progress: 20%
+ > took: 1:15:33.543517, eta: 4:56:25.439951
+n_runs_pose_1_seed_0 Optimization progress: 22%
+ > took: 1:22:58.265820, eta: 4:56:19.520786
+n_runs_pose_1_seed_0 Optimization progress: 23%
+ > took: 1:34:25.144624, eta: 5:08:26.139105
+n_runs_pose_1_seed_0 Optimization progress: 25%
+ > took: 1:42:24.207685, eta: 5:07:12.623055
+n_runs_pose_1_seed_0 Optimization progress: 27%
+ > took: 1:53:22.812448, eta: 5:13:27.775592
+n_runs_pose_1_seed_0 Optimization progress: 28%
+ > took: 2:03:35.366921, eta: 5:15:50.382131
+n_runs_pose_1_seed_0 Optimization progress: 30%
+ > took: 2:09:46.634805, eta: 5:07:22.029801
+n_runs_pose_1_seed_0 Optimization progress: 31%
+ > took: 2:14:47.696482, eta: 4:56:32.932260
+n_runs_pose_1_seed_0 Optimization progress: 33%
+ > took: 2:23:28.170560, eta: 4:53:46.254004
+n_runs_pose_1_seed_0 Optimization progress: 34%
+ > took: 2:33:56.204498, eta: 4:53:52.754042
+n_runs_pose_1_seed_0 Optimization progress: 36%
+ > took: 2:39:05.287204, eta: 4:43:35.511972
+n_runs_pose_1_seed_0 Optimization progress: 37%
+ > took: 2:48:48.129640, eta: 4:41:20.216067
+n_runs_pose_1_seed_0 Optimization progress: 39%
+ > took: 2:57:47.544144, eta: 4:37:21.368865
+n_runs_pose_1_seed_0 Optimization progress: 41%
+ > took: 3:07:23.547016, eta: 4:33:52.876408
+n_runs_pose_1_seed_0 Optimization progress: 42%
+ > took: 3:16:46.595944, eta: 4:29:39.409257
+n_runs_pose_1_seed_0 Optimization progress: 44%
+ > took: 3:24:08.355296, eta: 4:22:27.885381
+n_runs_pose_1_seed_0 Optimization progress: 45%
+ > took: 3:33:05.699936, eta: 4:17:11.017164
+n_runs_pose_1_seed_0 Optimization progress: 47%
+ > took: 3:42:46.820540, eta: 4:12:29.063279
+n_runs_pose_1_seed_0 Optimization progress: 48%
+ > took: 3:54:03.697318, eta: 4:09:09.742306
+n_runs_pose_1_seed_0 Optimization progress: 50%
+ > took: 4:03:01.518414, eta: 4:03:01.518414
+n_runs_pose_1_seed_0 Optimization progress: 52%
+ > took: 4:14:01.380560, eta: 3:58:37.660526
+n_runs_pose_1_seed_0 Optimization progress: 53%
+ > took: 4:25:08.733489, eta: 3:53:57.117784
+n_runs_pose_1_seed_0 Optimization progress: 55%
+ > took: 4:35:31.304919, eta: 3:48:17.366933
+n_runs_pose_1_seed_0 Optimization progress: 56%
+ > took: 4:41:49.634394, eta: 3:39:11.937862
+n_runs_pose_1_seed_0 Optimization progress: 58%
+ > took: 4:51:34.916789, eta: 3:32:46.560900
+n_runs_pose_1_seed_0 Optimization progress: 59%
+ > took: 5:04:31.708173, eta: 3:28:21.695066
+n_runs_pose_1_seed_0 Optimization progress: 61%
+ > took: 5:18:07.630977, eta: 3:23:55.660883
+n_runs_pose_1_seed_0 Optimization progress: 62%
+ > took: 5:29:03.687956, eta: 3:17:26.212774
+n_runs_pose_1_seed_0 Optimization progress: 64%
+ > took: 5:36:56.719424, eta: 3:09:01.086506
+n_runs_pose_1_seed_0 Optimization progress: 66%
+ > took: 5:47:00.154683, eta: 3:01:45.795310
+n_runs_pose_1_seed_0 Optimization progress: 67%
+ > took: 5:58:45.394304, eta: 2:55:12.401869
+n_runs_pose_1_seed_0 Optimization progress: 69%
+ > took: 6:08:20.380769, eta: 2:47:25.627622
+n_runs_pose_1_seed_0 Optimization progress: 70%
+ > took: 6:21:51.023092, eta: 2:41:13.543083
+n_runs_pose_1_seed_0 Optimization progress: 72%
+ > took: 6:33:20.028968, eta: 2:33:54.793944
+n_runs_pose_1_seed_0 Optimization progress: 73%
+ > took: 6:45:13.266873, eta: 2:26:34.160358
+n_runs_pose_1_seed_0 Optimization progress: 75%
+ > took: 6:52:40.606423, eta: 2:17:33.535474
+n_runs_pose_1_seed_0 Optimization progress: 77%
+ > took: 7:07:10.272110, eta: 2:10:46.001666
+n_runs_pose_1_seed_0 Optimization progress: 78%
+ > took: 7:16:10.596307, eta: 2:02:07.766966
+n_runs_pose_1_seed_0 Optimization progress: 80%
+ > took: 7:27:35.011238, eta: 1:54:05.395021
+n_runs_pose_1_seed_0 Optimization progress: 81%
+ > took: 7:37:17.214541, eta: 1:45:31.664894
+n_runs_pose_1_seed_0 Optimization progress: 83%
+ > took: 7:47:04.855038, eta: 1:36:56.479348
+n_runs_pose_1_seed_0 Optimization progress: 84%
+ > took: 7:57:42.988892, eta: 1:28:27.960906
+n_runs_pose_1_seed_0 Optimization progress: 86%
+ > took: 8:07:16.372898, eta: 1:19:44.133747
+n_runs_pose_1_seed_0 Optimization progress: 87%
+ > took: 8:18:45.091921, eta: 1:11:15.013132
+n_runs_pose_1_seed_0 Optimization progress: 89%
+ > took: 8:31:40.395789, eta: 1:02:50.224044
+n_runs_pose_1_seed_0 Optimization progress: 91%
+ > took: 8:40:13.591873, eta: 0:53:48.992263
+n_runs_pose_1_seed_0 Optimization progress: 92%
+ > took: 8:51:04.656646, eta: 0:45:00.394631
+n_runs_pose_1_seed_0 Optimization progress: 94%
+ > took: 9:06:22.142220, eta: 0:36:25.476148
+n_runs_pose_1_seed_0 Optimization progress: 95%
+ > took: 9:20:23.060720, eta: 0:27:33.593150
+n_runs_pose_1_seed_0 Optimization progress: 97%
+ > took: 9:31:20.741420, eta: 0:18:25.830368
+n_runs_pose_1_seed_0 Optimization progress: 98%
+ > took: 9:40:45.154367, eta: 0:09:13.097688
+n_runs_pose_1_seed_0 Optimization progress: 100%
+ > took: 9:52:40.305447, eta: 0:00:00
+n_runs_pose_1_seed_0 Optimization finished. elapsed time: 9:52:40.305490
+<<<<< [276632]
+ERROR:__main__:errs: [276632] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [276632]
+INFO:__main__:Started process "default_seed_0" @ [395542]
+DEBUG:__main__:len(active_processes)=4
+DEBUG:__main__:len(params_to_run)=0
+INFO:__main__:Finished process [301194]
+INFO:__main__:outs: [301194] >>>>>default_seed_2 Optimization started.
+default_seed_2 Optimization progress: 2%
+ > took: 0:01:19.294242, eta: 1:23:15.537246
+default_seed_2 Optimization progress: 3%
+ > took: 0:06:20.750904, eta: 3:16:43.278024
+default_seed_2 Optimization progress: 5%
+ > took: 0:17:48.672041, eta: 6:02:09.664834
+default_seed_2 Optimization progress: 6%
+ > took: 0:25:44.608522, eta: 6:26:09.127830
+default_seed_2 Optimization progress: 8%
+ > took: 0:31:25.667128, eta: 6:10:50.872110
+default_seed_2 Optimization progress: 9%
+ > took: 0:36:47.070055, eta: 5:55:35.010532
+default_seed_2 Optimization progress: 11%
+ > took: 0:42:19.670953, eta: 5:44:40.177760
+default_seed_2 Optimization progress: 12%
+ > took: 0:47:58.662693, eta: 5:35:50.638851
+default_seed_2 Optimization progress: 14%
+ > took: 0:53:09.665809, eta: 5:24:52.402166
+default_seed_2 Optimization progress: 16%
+ > took: 0:58:23.922057, eta: 5:15:21.179108
+default_seed_2 Optimization progress: 17%
+ > took: 1:14:45.953955, eta: 6:00:14.141783
+default_seed_2 Optimization progress: 19%
+ > took: 1:36:34.538596, eta: 6:58:29.667249
+default_seed_2 Optimization progress: 20%
+ > took: 1:55:47.266296, eta: 7:34:14.660084
+default_seed_2 Optimization progress: 22%
+ > took: 2:09:13.464813, eta: 7:41:30.945761
+default_seed_2 Optimization progress: 23%
+ > took: 2:24:32.741185, eta: 7:52:10.954538
+default_seed_2 Optimization progress: 25%
+ > took: 2:37:02.378069, eta: 7:51:07.134207
+default_seed_2 Optimization progress: 27%
+ > took: 2:49:06.856447, eta: 7:47:33.073706
+default_seed_2 Optimization progress: 28%
+ > took: 3:00:04.942499, eta: 7:40:12.630831
+default_seed_2 Optimization progress: 30%
+ > took: 3:10:44.666457, eta: 7:31:45.788977
+default_seed_2 Optimization progress: 31%
+ > took: 3:22:34.700831, eta: 7:25:40.341828
+default_seed_2 Optimization progress: 33%
+ > took: 3:34:52.523102, eta: 7:19:58.975876
+default_seed_2 Optimization progress: 34%
+ > took: 3:47:02.472072, eta: 7:13:26.537592
+default_seed_2 Optimization progress: 36%
+ > took: 3:58:49.086840, eta: 7:05:43.154802
+default_seed_2 Optimization progress: 37%
+ > took: 4:09:30.901308, eta: 6:55:51.502180
+default_seed_2 Optimization progress: 39%
+ > took: 4:22:33.168679, eta: 6:49:34.943139
+default_seed_2 Optimization progress: 41%
+ > took: 4:35:23.091598, eta: 6:42:29.133874
+default_seed_2 Optimization progress: 42%
+ > took: 4:48:16.357909, eta: 6:35:02.416394
+default_seed_2 Optimization progress: 44%
+ > took: 4:58:34.515510, eta: 6:23:52.948513
+default_seed_2 Optimization progress: 45%
+ > took: 5:12:07.416853, eta: 6:16:42.054823
+default_seed_2 Optimization progress: 47%
+ > took: 5:25:26.984050, eta: 6:08:50.581923
+default_seed_2 Optimization progress: 48%
+ > took: 5:40:07.281793, eta: 6:02:03.880618
+default_seed_2 Optimization progress: 50%
+ > took: 5:53:46.605434, eta: 5:53:46.605434
+default_seed_2 Optimization progress: 52%
+ > took: 6:24:12.908203, eta: 6:00:55.762251
+default_seed_2 Optimization progress: 53%
+ > took: 6:40:00.422941, eta: 5:52:56.843771
+default_seed_2 Optimization progress: 55%
+ > took: 6:47:21.720566, eta: 5:37:31.711326
+default_seed_2 Optimization progress: 56%
+ > took: 6:52:14.755728, eta: 5:20:38.143344
+default_seed_2 Optimization progress: 58%
+ > took: 6:57:56.122603, eta: 5:04:58.792170
+default_seed_2 Optimization progress: 59%
+ > took: 7:05:18.881157, eta: 4:51:00.287107
+default_seed_2 Optimization progress: 61%
+ > took: 7:11:28.990520, eta: 4:36:35.506744
+default_seed_2 Optimization progress: 62%
+ > took: 7:16:47.458313, eta: 4:22:04.474988
+default_seed_2 Optimization progress: 64%
+ > took: 7:23:24.207886, eta: 4:08:44.311741
+default_seed_2 Optimization progress: 66%
+ > took: 7:31:09.650019, eta: 3:56:19.340486
+default_seed_2 Optimization progress: 67%
+ > took: 7:36:52.373585, eta: 3:43:07.438262
+default_seed_2 Optimization progress: 69%
+ > took: 7:42:12.535756, eta: 3:30:05.698071
+default_seed_2 Optimization progress: 70%
+ > took: 7:54:41.897215, eta: 3:20:25.689935
+default_seed_2 Optimization progress: 72%
+ > took: 8:07:56.504157, eta: 3:10:56.023366
+default_seed_2 Optimization progress: 73%
+ > took: 8:18:58.773176, eta: 3:00:28.917957
+default_seed_2 Optimization progress: 75%
+ > took: 8:29:04.481916, eta: 2:49:41.493972
+default_seed_2 Optimization progress: 77%
+ > took: 8:51:50.822394, eta: 2:42:48.619100
+default_seed_2 Optimization progress: 78%
+ > took: 9:09:54.100516, eta: 2:33:58.348144
+default_seed_2 Optimization progress: 80%
+ > took: 9:25:25.155696, eta: 2:24:07.588707
+default_seed_2 Optimization progress: 81%
+ > took: 9:40:30.777485, eta: 2:13:57.871727
+default_seed_2 Optimization progress: 83%
+ > took: 9:55:23.664444, eta: 2:03:34.345451
+default_seed_2 Optimization progress: 84%
+ > took: 10:07:53.595281, eta: 1:52:34.369496
+default_seed_2 Optimization progress: 86%
+ > took: 10:17:00.003634, eta: 1:40:57.818776
+default_seed_2 Optimization progress: 87%
+ > took: 10:31:13.289748, eta: 1:30:10.469964
+default_seed_2 Optimization progress: 89%
+ > took: 10:45:47.153100, eta: 1:19:18.422311
+default_seed_2 Optimization progress: 91%
+ > took: 10:59:08.432875, eta: 1:08:11.217194
+default_seed_2 Optimization progress: 92%
+ > took: 11:18:59.570896, eta: 0:57:32.506008
+default_seed_2 Optimization progress: 94%
+ > took: 11:34:13.675919, eta: 0:46:16.911728
+default_seed_2 Optimization progress: 95%
+ > took: 11:54:24.000746, eta: 0:35:08.065610
+default_seed_2 Optimization progress: 97%
+ > took: 12:15:15.112012, eta: 0:23:43.068129
+default_seed_2 Optimization progress: 98%
+ > took: 12:34:40.684120, eta: 0:11:58.741018
+default_seed_2 Optimization progress: 100%
+ > took: 12:52:02.698413, eta: 0:00:00
+default_seed_2 Optimization finished. elapsed time: 12:52:02.698461
+<<<<< [301194]
+ERROR:__main__:errs: [301194] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [301194]
+INFO:__main__:Finished process [289461]
+INFO:__main__:outs: [289461] >>>>>default_seed_3 Optimization started.
+default_seed_3 Optimization progress: 2%
+ > took: 0:03:29.576496, eta: 3:40:03.319248
+default_seed_3 Optimization progress: 3%
+ > took: 0:07:04.110449, eta: 3:39:07.423919
+default_seed_3 Optimization progress: 5%
+ > took: 0:12:36.807981, eta: 4:16:28.428947
+default_seed_3 Optimization progress: 6%
+ > took: 0:18:28.486040, eta: 4:37:07.290600
+default_seed_3 Optimization progress: 8%
+ > took: 0:22:03.635631, eta: 4:20:18.900446
+default_seed_3 Optimization progress: 9%
+ > took: 0:25:50.257911, eta: 4:09:45.826473
+default_seed_3 Optimization progress: 11%
+ > took: 0:36:47.062157, eta: 4:59:31.791850
+default_seed_3 Optimization progress: 12%
+ > took: 0:46:10.435741, eta: 5:23:13.050187
+default_seed_3 Optimization progress: 14%
+ > took: 1:06:47.993112, eta: 6:48:13.291240
+default_seed_3 Optimization progress: 16%
+ > took: 1:23:21.283248, eta: 7:30:06.929539
+default_seed_3 Optimization progress: 17%
+ > took: 1:51:09.346950, eta: 8:55:34.126214
+default_seed_3 Optimization progress: 19%
+ > took: 2:21:25.441017, eta: 10:12:50.244407
+default_seed_3 Optimization progress: 20%
+ > took: 2:49:46.090556, eta: 11:06:00.816797
+default_seed_3 Optimization progress: 22%
+ > took: 3:18:45.513358, eta: 11:49:51.119136
+default_seed_3 Optimization progress: 23%
+ > took: 3:47:18.106502, eta: 12:22:31.147907
+default_seed_3 Optimization progress: 25%
+ > took: 4:14:29.660200, eta: 12:43:28.980600
+default_seed_3 Optimization progress: 27%
+ > took: 4:45:00.057375, eta: 13:07:56.629213
+default_seed_3 Optimization progress: 28%
+ > took: 5:16:37.554088, eta: 13:29:09.304892
+default_seed_3 Optimization progress: 30%
+ > took: 5:46:00.094656, eta: 13:39:28.645238
+default_seed_3 Optimization progress: 31%
+ > took: 6:01:51.596368, eta: 13:16:05.512010
+default_seed_3 Optimization progress: 33%
+ > took: 6:19:20.103694, eta: 12:56:44.021850
+default_seed_3 Optimization progress: 34%
+ > took: 6:32:24.075782, eta: 12:29:07.781038
+default_seed_3 Optimization progress: 36%
+ > took: 6:53:25.305572, eta: 12:16:58.153411
+default_seed_3 Optimization progress: 37%
+ > took: 7:10:09.209102, eta: 11:56:55.348503
+default_seed_3 Optimization progress: 39%
+ > took: 7:32:09.089019, eta: 11:45:21.378870
+default_seed_3 Optimization progress: 41%
+ > took: 7:40:32.432590, eta: 11:13:05.863016
+default_seed_3 Optimization progress: 42%
+ > took: 7:49:54.225738, eta: 10:43:56.531567
+default_seed_3 Optimization progress: 44%
+ > took: 7:59:05.033095, eta: 10:15:57.899694
+default_seed_3 Optimization progress: 45%
+ > took: 8:12:24.930804, eta: 9:54:17.675108
+default_seed_3 Optimization progress: 47%
+ > took: 8:24:36.679421, eta: 9:31:53.570010
+default_seed_3 Optimization progress: 48%
+ > took: 8:34:00.006286, eta: 9:07:09.684111
+default_seed_3 Optimization progress: 50%
+ > took: 8:44:54.572583, eta: 8:44:54.572583
+default_seed_3 Optimization progress: 52%
+ > took: 8:59:20.415842, eta: 8:26:39.178518
+default_seed_3 Optimization progress: 53%
+ > took: 9:10:55.289487, eta: 8:06:06.431900
+default_seed_3 Optimization progress: 55%
+ > took: 9:22:36.275275, eta: 7:46:09.485228
+default_seed_3 Optimization progress: 56%
+ > took: 9:37:11.645434, eta: 7:28:55.724226
+default_seed_3 Optimization progress: 58%
+ > took: 9:52:17.439666, eta: 7:12:12.726243
+default_seed_3 Optimization progress: 59%
+ > took: 10:04:36.533865, eta: 6:53:40.786329
+default_seed_3 Optimization progress: 61%
+ > took: 10:16:24.224550, eta: 6:35:07.836250
+default_seed_3 Optimization progress: 62%
+ > took: 10:32:52.227859, eta: 6:19:43.336715
+default_seed_3 Optimization progress: 64%
+ > took: 10:49:22.297331, eta: 6:04:16.898503
+default_seed_3 Optimization progress: 66%
+ > took: 11:03:48.004342, eta: 5:47:42.287989
+default_seed_3 Optimization progress: 67%
+ > took: 11:20:57.409723, eta: 5:32:33.618702
+default_seed_3 Optimization progress: 69%
+ > took: 11:38:49.868399, eta: 5:17:39.031090
+default_seed_3 Optimization progress: 70%
+ > took: 11:56:12.514343, eta: 5:02:23.950500
+default_seed_3 Optimization progress: 72%
+ > took: 12:09:35.776516, eta: 4:45:29.651680
+default_seed_3 Optimization progress: 73%
+ > took: 12:25:45.172902, eta: 4:29:44.424241
+default_seed_3 Optimization progress: 75%
+ > took: 12:43:57.336596, eta: 4:14:39.112199
+default_seed_3 Optimization progress: 77%
+ > took: 13:05:28.720494, eta: 4:00:27.159335
+default_seed_3 Optimization progress: 78%
+ > took: 13:22:06.186899, eta: 3:44:35.332332
+default_seed_3 Optimization progress: 80%
+ > took: 13:39:23.534021, eta: 3:28:51.881221
+default_seed_3 Optimization progress: 81%
+ > took: 13:56:43.984914, eta: 3:13:05.534980
+default_seed_3 Optimization progress: 83%
+ > took: 14:11:46.675739, eta: 2:56:47.045908
+default_seed_3 Optimization progress: 84%
+ > took: 14:29:09.393711, eta: 2:40:57.295132
+default_seed_3 Optimization progress: 86%
+ > took: 14:39:03.708256, eta: 2:23:50.788624
+default_seed_3 Optimization progress: 87%
+ > took: 14:48:48.922690, eta: 2:06:58.417527
+default_seed_3 Optimization progress: 89%
+ > took: 14:59:05.853475, eta: 1:50:24.929374
+default_seed_3 Optimization progress: 91%
+ > took: 15:10:02.266312, eta: 1:34:08.510308
+default_seed_3 Optimization progress: 92%
+ > took: 15:18:12.895800, eta: 1:17:48.889475
+default_seed_3 Optimization progress: 94%
+ > took: 15:28:58.027603, eta: 1:01:55.868507
+default_seed_3 Optimization progress: 95%
+ > took: 15:34:51.114887, eta: 0:45:58.579421
+default_seed_3 Optimization progress: 97%
+ > took: 15:43:45.139442, eta: 0:30:26.617401
+default_seed_3 Optimization progress: 98%
+ > took: 15:55:47.322562, eta: 0:15:10.274961
+default_seed_3 Optimization progress: 100%
+ > took: 16:05:19.541557, eta: 0:00:00
+default_seed_3 Optimization finished. elapsed time: 16:05:19.541603
+<<<<< [289461]
+ERROR:__main__:errs: [289461] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/ch/.local/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+<<<<< [289461]
+INFO:__main__:Finished process [372589]
+INFO:__main__:outs: [372589] >>>>>default_seed_1 Optimization started.
+default_seed_1 Optimization progress: 2%
+ > took: 0:01:13.776734, eta: 1:17:27.934242
+default_seed_1 Optimization progress: 3%
+ > took: 0:01:52.370760, eta: 0:58:03.493560
+default_seed_1 Optimization progress: 5%
+ > took: 0:06:05.018259, eta: 2:03:42.037933
+default_seed_1 Optimization progress: 6%
+ > took: 0:08:19.909816, eta: 2:04:58.647240
+default_seed_1 Optimization progress: 8%
+ > took: 0:13:04.319463, eta: 2:34:14.969663
+default_seed_1 Optimization progress: 9%
+ > took: 0:15:26.329418, eta: 2:29:14.517707
+default_seed_1 Optimization progress: 11%
+ > took: 0:20:45.553053, eta: 2:49:02.360574
+default_seed_1 Optimization progress: 12%
+ > took: 0:25:36.352984, eta: 2:59:14.470888
+default_seed_1 Optimization progress: 14%
+ > took: 0:29:33.112785, eta: 3:00:35.689242
+default_seed_1 Optimization progress: 16%
+ > took: 0:34:46.390851, eta: 3:07:46.510595
+default_seed_1 Optimization progress: 17%
+ > took: 0:41:31.919020, eta: 3:20:06.518915
+default_seed_1 Optimization progress: 19%
+ > took: 0:53:34.634008, eta: 3:52:10.080701
+default_seed_1 Optimization progress: 20%
+ > took: 1:07:22.243756, eta: 4:24:18.033197
+default_seed_1 Optimization progress: 22%
+ > took: 1:17:00.740699, eta: 4:35:02.645354
+default_seed_1 Optimization progress: 23%
+ > took: 1:30:44.457391, eta: 4:56:25.227477
+default_seed_1 Optimization progress: 25%
+ > took: 1:48:38.662481, eta: 5:25:55.987443
+default_seed_1 Optimization progress: 27%
+ > took: 2:10:08.631857, eta: 5:59:48.570428
+default_seed_1 Optimization progress: 28%
+ > took: 2:35:52.650400, eta: 6:38:21.217689
+default_seed_1 Optimization progress: 30%
+ > took: 3:05:33.991431, eta: 7:19:29.979705
+default_seed_1 Optimization progress: 31%
+ > took: 3:31:22.007769, eta: 7:45:00.417092
+default_seed_1 Optimization progress: 33%
+ > took: 3:42:42.834088, eta: 7:36:01.993609
+default_seed_1 Optimization progress: 34%
+ > took: 3:52:42.914948, eta: 7:24:16.473992
+default_seed_1 Optimization progress: 36%
+ > took: 4:04:58.254279, eta: 7:16:41.235889
+default_seed_1 Optimization progress: 37%
+ > took: 4:17:20.478725, eta: 7:08:54.131208
+default_seed_1 Optimization progress: 39%
+ > took: 4:29:37.562438, eta: 7:00:36.997403
+default_seed_1 Optimization progress: 41%
+ > took: 4:38:45.566326, eta: 6:47:25.058476
+default_seed_1 Optimization progress: 42%
+ > took: 4:50:42.471089, eta: 6:38:22.645566
+default_seed_1 Optimization progress: 44%
+ > took: 5:05:11.591468, eta: 6:32:23.474745
+default_seed_1 Optimization progress: 45%
+ > took: 5:17:07.338706, eta: 6:22:44.029473
+default_seed_1 Optimization progress: 47%
+ > took: 5:31:10.652974, eta: 6:15:20.073371
+default_seed_1 Optimization progress: 48%
+ > took: 5:45:46.115979, eta: 6:08:04.575074
+default_seed_1 Optimization progress: 50%
+ > took: 5:58:29.386421, eta: 5:58:29.386421
+default_seed_1 Optimization progress: 52%
+ > took: 6:15:56.532198, eta: 5:53:09.469641
+default_seed_1 Optimization progress: 53%
+ > took: 6:31:03.024132, eta: 5:45:02.668352
+default_seed_1 Optimization progress: 55%
+ > took: 6:43:44.450914, eta: 5:34:31.687900
+default_seed_1 Optimization progress: 56%
+ > took: 6:56:35.079970, eta: 5:24:00.617754
+default_seed_1 Optimization progress: 58%
+ > took: 7:07:29.006792, eta: 5:11:56.842794
+default_seed_1 Optimization progress: 59%
+ > took: 7:17:08.453129, eta: 4:59:05.783720
+default_seed_1 Optimization progress: 61%
+ > took: 7:28:21.256113, eta: 4:47:24.394944
+default_seed_1 Optimization progress: 62%
+ > took: 7:38:43.289964, eta: 4:35:13.973978
+default_seed_1 Optimization progress: 64%
+ > took: 7:49:57.878230, eta: 4:23:38.321934
+default_seed_1 Optimization progress: 66%
+ > took: 8:03:03.338558, eta: 4:13:01.748768
+default_seed_1 Optimization progress: 67%
+ > took: 8:13:58.635157, eta: 4:01:14.682286
+default_seed_1 Optimization progress: 69%
+ > took: 8:23:39.927214, eta: 3:48:56.330552
+default_seed_1 Optimization progress: 70%
+ > took: 8:35:22.587744, eta: 3:37:36.203714
+default_seed_1 Optimization progress: 72%
+ > took: 8:46:47.119834, eta: 3:26:08.003413
+default_seed_1 Optimization progress: 73%
+ > took: 9:10:26.820207, eta: 3:19:05.871139
+default_seed_1 Optimization progress: 75%
+ > took: 9:19:26.286935, eta: 3:06:28.762312
+default_seed_1 Optimization progress: 77%
+ > took: 9:24:58.100223, eta: 2:52:56.969456
+default_seed_1 Optimization progress: 78%
+ > took: 9:29:00.463897, eta: 2:39:19.329891
+default_seed_1 Optimization progress: 80%
+ > took: 9:31:46.712376, eta: 2:25:44.848253
+default_seed_1 Optimization progress: 81%
+ > took: 9:40:36.633657, eta: 2:13:59.223152
+default_seed_1 Optimization progress: 83%
+ > took: 9:53:47.102118, eta: 2:03:14.304213
+default_seed_1 Optimization progress: 84%
+ > took: 10:00:48.178193, eta: 1:51:15.588554
+default_seed_1 Optimization progress: 86%
+ > took: 10:08:20.105781, eta: 1:39:32.744582
+default_seed_1 Optimization progress: 87%
+ > took: 10:14:17.537575, eta: 1:27:45.362511
+default_seed_1 Optimization progress: 89%
+ > took: 10:27:07.889846, eta: 1:17:00.968928
+default_seed_1 Optimization progress: 91%
+ > took: 10:38:25.233121, eta: 1:06:02.610323
+default_seed_1 Optimization progress: 92%
+ > took: 10:46:04.296008, eta: 0:54:45.109831
+default_seed_1 Optimization progress: 94%
+ > took: 10:55:01.421686, eta: 0:43:40.094779
+default_seed_1 Optimization progress: 95%
+ > took: 11:02:41.996399, eta: 0:32:35.508020
+default_seed_1 Optimization progress: 97%
+ > took: 11:12:21.505736, eta: 0:21:41.338895
+default_seed_1 Optimization progress: 98%
+ > took: 11:19:46.554885, eta: 0:10:47.405633
+default_seed_1 Optimization progress: 100%
+ > took: 11:27:21.121846, eta: 0:00:00
+default_seed_1 Optimization finished. elapsed time: 11:27:21.121888
+<<<<< [372589]
+ERROR:__main__:errs: [372589] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [372589]
+INFO:__main__:Finished process [395542]
+INFO:__main__:outs: [395542] >>>>>default_seed_0 Optimization started.
+default_seed_0 Optimization progress: 2%
+ > took: 0:01:04.080401, eta: 1:07:17.065263
+default_seed_0 Optimization progress: 3%
+ > took: 0:03:43.208846, eta: 1:55:19.474226
+default_seed_0 Optimization progress: 5%
+ > took: 0:09:53.259253, eta: 3:21:02.938144
+default_seed_0 Optimization progress: 6%
+ > took: 0:18:59.221190, eta: 4:44:48.317850
+default_seed_0 Optimization progress: 8%
+ > took: 0:30:48.344670, eta: 6:03:30.467106
+default_seed_0 Optimization progress: 9%
+ > took: 0:41:49.037737, eta: 6:44:14.031458
+default_seed_0 Optimization progress: 11%
+ > took: 0:53:29.487774, eta: 7:15:34.400445
+default_seed_0 Optimization progress: 12%
+ > took: 1:00:58.188813, eta: 7:06:47.321691
+default_seed_0 Optimization progress: 14%
+ > took: 1:13:24.716721, eta: 7:28:37.713295
+default_seed_0 Optimization progress: 16%
+ > took: 1:24:15.807331, eta: 7:35:01.359587
+default_seed_0 Optimization progress: 17%
+ > took: 1:33:01.396489, eta: 7:28:12.183083
+default_seed_0 Optimization progress: 19%
+ > took: 1:44:42.889656, eta: 7:33:45.855176
+default_seed_0 Optimization progress: 20%
+ > took: 1:56:03.524029, eta: 7:35:18.440421
+default_seed_0 Optimization progress: 22%
+ > took: 2:07:04.471439, eta: 7:33:50.255139
+default_seed_0 Optimization progress: 23%
+ > took: 2:17:26.621590, eta: 7:28:58.963861
+default_seed_0 Optimization progress: 25%
+ > took: 2:27:57.053484, eta: 7:23:51.160452
+default_seed_0 Optimization progress: 27%
+ > took: 2:41:27.115271, eta: 7:26:22.024573
+default_seed_0 Optimization progress: 28%
+ > took: 2:47:05.631633, eta: 7:07:01.058618
+default_seed_0 Optimization progress: 30%
+ > took: 2:56:16.301277, eta: 6:57:29.134603
+default_seed_0 Optimization progress: 31%
+ > took: 3:04:47.734485, eta: 6:46:33.015867
+default_seed_0 Optimization progress: 33%
+ > took: 3:13:23.150216, eta: 6:35:58.831395
+default_seed_0 Optimization progress: 34%
+ > took: 3:22:17.587858, eta: 6:26:11.758638
+default_seed_0 Optimization progress: 36%
+ > took: 3:30:00.896262, eta: 6:14:22.467250
+default_seed_0 Optimization progress: 37%
+ > took: 3:37:40.841132, eta: 6:02:48.068553
+default_seed_0 Optimization progress: 39%
+ > took: 3:45:15.947967, eta: 5:51:24.878829
+default_seed_0 Optimization progress: 41%
+ > took: 3:56:30.057411, eta: 5:45:39.314678
+default_seed_0 Optimization progress: 42%
+ > took: 4:06:22.821226, eta: 5:37:37.940199
+default_seed_0 Optimization progress: 44%
+ > took: 4:16:08.453731, eta: 5:29:19.440511
+default_seed_0 Optimization progress: 45%
+ > took: 4:29:05.917240, eta: 5:24:46.451841
+default_seed_0 Optimization progress: 47%
+ > took: 4:38:03.238228, eta: 5:15:07.669992
+default_seed_0 Optimization progress: 48%
+ > took: 4:50:32.073850, eta: 5:09:16.723776
+default_seed_0 Optimization progress: 50%
+ > took: 4:59:05.984800, eta: 4:59:05.984800
+default_seed_0 Optimization progress: 52%
+ > took: 5:09:55.920364, eta: 4:51:08.894887
+default_seed_0 Optimization progress: 53%
+ > took: 5:17:49.232775, eta: 4:40:25.793625
+default_seed_0 Optimization progress: 55%
+ > took: 5:26:19.879774, eta: 4:30:23.328956
+default_seed_0 Optimization progress: 56%
+ > took: 5:32:50.209844, eta: 4:18:52.385434
+default_seed_0 Optimization progress: 58%
+ > took: 5:40:55.328401, eta: 4:08:46.861266
+default_seed_0 Optimization progress: 59%
+ > took: 5:48:39.379094, eta: 3:58:33.259380
+default_seed_0 Optimization progress: 61%
+ > took: 6:01:44.912376, eta: 3:51:53.405369
+default_seed_0 Optimization progress: 62%
+ > took: 6:10:06.357468, eta: 3:42:03.814481
+default_seed_0 Optimization progress: 64%
+ > took: 6:21:40.830946, eta: 3:34:06.807604
+default_seed_0 Optimization progress: 66%
+ > took: 6:28:40.326201, eta: 3:23:35.408962
+default_seed_0 Optimization progress: 67%
+ > took: 6:48:08.384765, eta: 3:19:19.443722
+default_seed_0 Optimization progress: 69%
+ > took: 7:03:44.953152, eta: 3:12:36.796887
+default_seed_0 Optimization progress: 70%
+ > took: 7:22:27.674946, eta: 3:06:49.018311
+default_seed_0 Optimization progress: 72%
+ > took: 7:36:55.568652, eta: 2:58:47.831212
+default_seed_0 Optimization progress: 73%
+ > took: 7:46:19.066357, eta: 2:48:40.087831
+default_seed_0 Optimization progress: 75%
+ > took: 8:03:45.421615, eta: 2:41:15.140538
+default_seed_0 Optimization progress: 77%
+ > took: 8:28:40.427505, eta: 2:35:42.988012
+default_seed_0 Optimization progress: 78%
+ > took: 8:40:36.125723, eta: 2:25:46.115202
+default_seed_0 Optimization progress: 80%
+ > took: 8:52:59.101513, eta: 2:15:51.535680
+default_seed_0 Optimization progress: 81%
+ > took: 9:02:44.210816, eta: 2:05:14.817881
+default_seed_0 Optimization progress: 83%
+ > took: 9:17:13.697634, eta: 1:55:39.069320
+default_seed_0 Optimization progress: 84%
+ > took: 9:24:58.212561, eta: 1:44:37.446771
+default_seed_0 Optimization progress: 86%
+ > took: 9:45:58.372560, eta: 1:35:53.188237
+default_seed_0 Optimization progress: 87%
+ > took: 10:05:35.873237, eta: 1:26:30.839034
+default_seed_0 Optimization progress: 89%
+ > took: 10:14:38.805167, eta: 1:15:28.976073
+default_seed_0 Optimization progress: 91%
+ > took: 10:27:52.469962, eta: 1:04:57.152065
+default_seed_0 Optimization progress: 92%
+ > took: 10:39:46.385048, eta: 0:54:13.083479
+default_seed_0 Optimization progress: 94%
+ > took: 10:51:33.182412, eta: 0:43:26.212161
+default_seed_0 Optimization progress: 95%
+ > took: 11:05:06.792133, eta: 0:32:42.629121
+default_seed_0 Optimization progress: 97%
+ > took: 11:11:20.862590, eta: 0:21:39.382664
+default_seed_0 Optimization progress: 98%
+ > took: 11:18:05.831425, eta: 0:10:45.806848
+default_seed_0 Optimization progress: 100%
+ > took: 11:23:30.397246, eta: 0:00:00
+default_seed_0 Optimization finished. elapsed time: 11:23:30.397284
+<<<<< [395542]
+ERROR:__main__:errs: [395542] >>>>>WARNING:multi_optim.multi_optim_run:GPU not available, using CPU
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+ERROR:sim.decentralized.iterators:OptimalPolicy failed
+Traceback (most recent call last):
+  File "/home/ch/src/miriam/sim/decentralized/iterators.py", line 187, in iterate_edge_policy
+    next_nodes[i_a] = a.policy.get_edge(  # type: ignore
+  File "/home/ch/src/miriam/sim/decentralized/policy.py", line 104, in get_edge
+    return get_optimal_edge(agents, agents.index(self.a))
+  File "/home/ch/src/miriam/planner/policylearn/edge_policy_graph_utils.py", line 114, in get_optimal_edge
+    raise RuntimeError("No paths found")
+RuntimeError: No paths found
+<<<<< [395542]
+INFO:__main__:Done
