@@ -5,11 +5,8 @@ import os
 import pickle
 import socket
 import time
-import tracemalloc
-from optparse import Option
 from random import Random
 from typing import Dict, List, Optional, Tuple
-from unittest import result
 
 import git.repo
 import networkx as nx
@@ -20,32 +17,26 @@ import tools
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import (IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, MAP_IMG,
-                         PATH, PATH_W_COORDS, POS, C)
+from definitions import (INVALID, MAP_IMG, PATH_W_COORDS, POS)
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import BFS_TYPE, TIMEOUT
+from planner.policylearn.edge_policy_graph_utils import TIMEOUT
 from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     make_graph_and_flann,
                                                     optimize_poses_from_paths,
                                                     read_map, sample_points)
-from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
-from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
-from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
     from eval import Eval
-    from state import ScenarioState, make_a_state_with_an_upcoming_decision
+    from state import ScenarioState
 else:
     from multi_optim.eval import Eval
-    from multi_optim.state import (ACTION, ScenarioState,
-                                   make_a_state_with_an_upcoming_decision)
+    from multi_optim.state import ScenarioState
 
 logger = logging.getLogger(__name__)
 
@@ -433,8 +424,6 @@ def run_optimization(
 
 
 if __name__ == "__main__":
-    tracemalloc.start()
-
     # multiprocessing
     tmp.set_sharing_strategy('file_system')
     tmp.set_start_method('spawn')
