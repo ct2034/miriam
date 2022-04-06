@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Tuple, Union
 import numpy as np
 import yaml
 from matplotlib import pyplot as plt
+from tools import ProgressBar
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +131,9 @@ def run(params_to_run):
     logger.info(f"{max_active_processes=}")
     active_processes = set()
 
+    n_initial = len(params_to_run)
+    pb = ProgressBar("Running", n_initial, 5)
+
     while len(params_to_run) > 0 or len(active_processes) > 0:
         if (len(active_processes) < max_active_processes
                 and len(params_to_run) > 0):
@@ -156,8 +160,10 @@ def run(params_to_run):
                                  + f"{clean_str(errs.decode('utf-8'))}"
                                  + f"<<<<< [{process.pid}]")
                     to_remove.add(process)
+            pb.progress(n_initial - len(params_to_run))
             active_processes -= to_remove
         time.sleep(0.1)
+    pb.end()
     logger.info("Done")
 
 
@@ -256,8 +262,8 @@ if __name__ == "__main__":
 
     if tuning:
         folder = TUNING_RES_FOLDER
-        # parameter_experiments, n_runs = params_debug()
-        parameter_experiments, n_runs = params_run()
+        parameter_experiments, n_runs = params_debug()
+        # parameter_experiments, n_runs = params_run()
     elif ablation:
         folder = ABLATION_RES_FOLDER
         parameter_experiments, n_runs = params_ablation()
@@ -270,6 +276,6 @@ if __name__ == "__main__":
         filemode='w',
         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
-    # params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
-    # run(params_to_run)
+    params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
+    run(params_to_run)
     plot_data(folder)
