@@ -227,6 +227,9 @@ def plot_data(path: str):
             ax.grid()
 
             # find limits
+            mean = mean[np.logical_not(np.isnan(mean))]
+            std = std[np.logical_not(np.isnan(std))]
+
             bottom_lim = min(np.min(mean - std), 0)
             top_lim = max(np.max(mean + std), 1)
             if param not in lims_per_param:
