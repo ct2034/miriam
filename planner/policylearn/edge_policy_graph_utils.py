@@ -4,11 +4,10 @@ from typing import Dict, Tuple
 import networkx as nx
 import scenarios
 import torch
-from definitions import INVALID, POS
+from definitions import DEFAULT_TIMEOUT_S, INVALID, POS
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected
 
-TIMEOUT = 120
 BFS_TYPE = Dict[int, int]
 logger = logging.getLogger(__name__)
 
@@ -109,7 +108,7 @@ def get_optimal_edge(agents, i_agent: int) -> int:
     radius = agents[i_agent].radius
     import scenarios.solvers
     paths = scenarios.solvers.cached_cbsr(
-        agents[0].env, starts, goals, radius=radius, timeout=TIMEOUT)
+        agents[0].env, starts, goals, radius=radius, timeout=DEFAULT_TIMEOUT_S)
     if paths is INVALID:
         raise RuntimeError("No paths found")
     else:
