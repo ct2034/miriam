@@ -1,10 +1,7 @@
 import logging
 import os
-import queue
 import subprocess
 import time
-from cmath import e
-from ntpath import join
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
@@ -183,8 +180,9 @@ def plot_data(path: str):
 
     exps = list(data.keys())
     exps.sort()
+    first_available_seed = min(data[exps[0]].keys())
     n_exps = len(exps)
-    params = list(data[list(data.keys())[0]][0].keys())
+    params = list(data[exps[0]][first_available_seed].keys())
     params.remove("static")
     params.sort()
     n_params = len(params)
@@ -202,7 +200,8 @@ def plot_data(path: str):
 
             # consolidate data
             n_seeds = len(data[exp])
-            t = data[exp][0][param]['t']
+            first_available_seed = min(data[exp].keys())
+            t = data[exp][first_available_seed][param]['t']
             n_t = len(t)
             this_data = np.zeros((n_seeds, n_t))
             for i_seed, seed in enumerate(data[exp].keys()):
@@ -225,7 +224,10 @@ def plot_data(path: str):
             ax.grid()
 
             # find limits
-            bottom_lim = min(np.max(mean + std), 0)
+            mean = mean[np.logical_not(np.isnan(mean))]
+            std = std[np.logical_not(np.isnan(std))]
+
+            bottom_lim = min(np.min(mean - std), 0)
             top_lim = max(np.max(mean + std), 1)
             if param not in lims_per_param:
                 lims_per_param[param] = [0., 0.]
@@ -249,8 +251,8 @@ def plot_data(path: str):
 
 
 if __name__ == "__main__":
-    tuning = False
-    ablation = True
+    tuning = True
+    ablation = False
 
     if tuning:
         folder = TUNING_RES_FOLDER
@@ -268,6 +270,6 @@ if __name__ == "__main__":
         filemode='w',
         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
-    params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
-    run(params_to_run)
+    # params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
+    # run(params_to_run)
     plot_data(folder)
