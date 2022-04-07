@@ -5,7 +5,7 @@ import subprocess
 import time
 from cmath import e
 from ntpath import join
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import yaml
@@ -14,6 +14,7 @@ from matplotlib import pyplot as plt
 logger = logging.getLogger(__name__)
 
 TUNING_RES_FOLDER = "multi_optim/results/tuning"
+ABLATION_RES_FOLDER = "multi_optim/results/ablation"
 
 
 def params_debug():
@@ -56,7 +57,26 @@ def params_run():
     return parameter_experiments, n_runs
 
 
-def make_kwargs(parameter_experiments, n_runs):
+def params_ablation():
+    parameter_experiments = {
+        "n_nodes": [16],
+        "n_runs_pose": [64, 1],
+        "n_runs_policy": [128, 1],
+        "n_epochs_per_run_policy": [128],
+        "batch_size_policy": [128],
+        "stats_and_eval_every": [8],
+        "lr_pos": [1E-2],
+        "lr_policy": [1E-3],
+        "n_agents": [4],
+        "map_fname": ["roadmaps/odrm/odrm_eval/maps/c.png"],
+        "save_images": [True],
+        "save_folder": [ABLATION_RES_FOLDER]
+    }  # type: Dict[str, Union[List[int], List[float], List[str]]]
+    n_runs = 4
+    return parameter_experiments, n_runs
+
+
+def make_kwargs_for_tuning(parameter_experiments, n_runs):
     seed_s = range(n_runs)
 
     # prepare multithreading
@@ -105,6 +125,7 @@ def clean_str(inp: str) -> str:
 
 def run(params_to_run):
     logger.info("Creating processes")
+    logger.debug(f"{len(params_to_run)=}")
     cpus = os.cpu_count()
     assert isinstance(cpus, int)
     logger.info(f"{cpus=}")
@@ -122,7 +143,8 @@ def run(params_to_run):
                 active_processes.add(process)
                 logger.info("Started process "
                             + f"\"{prefix}\" @ [{process.pid}]")
-            logger.debug(f"active_processes: {active_processes}")
+            logger.debug(f"{len(active_processes)=}")
+            logger.debug(f"{len(params_to_run)=}")
         else:
             to_remove = set()
             for process in active_processes:
@@ -142,16 +164,16 @@ def run(params_to_run):
     logger.info("Done")
 
 
-def plot_data():
-    fnames = os.listdir(TUNING_RES_FOLDER)
+def plot_data(path: str):
+    fnames = os.listdir(path)
     fnames_json = [f for f in fnames if f.endswith(".yaml")]
 
     fnames_json = sorted(fnames_json)
 
-    data = {}
+    data = {}  # type: Dict[str, Dict[int, Any]]
 
     for i_f, fname in enumerate(fnames_json):
-        with open(os.path.join(TUNING_RES_FOLDER, fname), "r") as f:
+        with open(os.path.join(path, fname), "r") as f:
             stats = yaml.load(f, Loader=yaml.SafeLoader)
         exp = fname.split("_seed")[0]
         seed = int(fname.split("seed_")[1].split("_stats")[0])
@@ -172,11 +194,11 @@ def plot_data():
         figsize=(5*n_exps, 5*n_params),
         dpi=500)
 
-    top_lim_per_param = {}
+    lims_per_param = {}  # type: Dict[str, List[float]]
 
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
-            ax = axs[i_param, i_exp]
+            ax = axs[i_param, i_exp]  # type: ignore
 
             # consolidate data
             n_seeds = len(data[exp])
@@ -202,31 +224,50 @@ def plot_data():
             ax.set_xlim(0, t[-1])
             ax.grid()
 
-            # find toplim
+            # find limits
+            bottom_lim = min(np.max(mean + std), 0)
             top_lim = max(np.max(mean + std), 1)
-            if param not in top_lim_per_param:
-                top_lim_per_param[param] = top_lim
-            top_lim_per_param[param] = max(top_lim, top_lim_per_param[param])
+            if param not in lims_per_param:
+                lims_per_param[param] = [0., 0.]
+                lims_per_param[param][0] = bottom_lim
+                lims_per_param[param][1] = top_lim
+            else:
+                lims_per_param[param][0] = min(lims_per_param[param][0],
+                                               bottom_lim)
+                lims_per_param[param][1] = max(lims_per_param[param][1],
+                                               top_lim)
 
     # cosmetics
     plt.tight_layout()
 
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
-            ax = axs[i_param, i_exp]
-            ax.set_ylim(0, top_lim_per_param[param])
+            ax = axs[i_param, i_exp]  # type: ignore
+            ax.set_ylim(lims_per_param[param][0], lims_per_param[param][1])
 
-    plt.savefig(os.path.join(TUNING_RES_FOLDER, "_tuning_stats.png"))
+    plt.savefig(os.path.join(path, "_tuning_stats.png"))
 
 
 if __name__ == "__main__":
+    tuning = False
+    ablation = True
+
+    if tuning:
+        folder = TUNING_RES_FOLDER
+        # parameter_experiments, n_runs = params_debug()
+        parameter_experiments, n_runs = params_run()
+    elif ablation:
+        folder = ABLATION_RES_FOLDER
+        parameter_experiments, n_runs = params_ablation()
+    else:
+        raise ValueError("No tuning or ablation")
+
     logging.basicConfig(
-        filename=os.path.join(TUNING_RES_FOLDER, "_tuning.log"),
+        filename=os.path.join(
+            folder, "_tuning.log"),
         filemode='w',
         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
-    # parameter_experiments, n_runs = params_debug()
-    parameter_experiments, n_runs = params_run()
-    params_to_run = make_kwargs(parameter_experiments, n_runs)
+    params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
     run(params_to_run)
-    plot_data()
+    plot_data(folder)

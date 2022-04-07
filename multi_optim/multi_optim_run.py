@@ -4,11 +4,9 @@ import logging
 import os
 import pickle
 import socket
-import tracemalloc
-from optparse import Option
+import time
 from random import Random
 from typing import Dict, List, Optional, Tuple
-from unittest import result
 
 import git.repo
 import networkx as nx
@@ -19,32 +17,26 @@ import tools
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import (IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID, MAP_IMG,
-                         PATH, PATH_W_COORDS, POS, C)
+from definitions import INVALID, MAP_IMG, PATH_W_COORDS, POS
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import BFS_TYPE, TIMEOUT
+from planner.policylearn.edge_policy_graph_utils import TIMEOUT
 from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     make_graph_and_flann,
                                                     optimize_poses_from_paths,
                                                     read_map, sample_points)
-from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
-from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
-from sim.decentralized.runner import run_a_scenario
 from tools import ProgressBar, StatCollector
-from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
     from eval import Eval
-    from state import ScenarioState, make_a_state_with_an_upcoming_decision
+    from state import ACTION, ScenarioState
 else:
     from multi_optim.eval import Eval
-    from multi_optim.state import (ACTION, ScenarioState,
-                                   make_a_state_with_an_upcoming_decision)
+    from multi_optim.state import ACTION, ScenarioState
 
 logger = logging.getLogger(__name__)
 
@@ -270,17 +262,18 @@ def run_optimization(
 
     # Visualization and analysis
     stats = StatCollector([
-        "roadmap_test_length",
-        "roadmap_training_length",
+        "general_eval_time_perc",
+        "general_length",
+        "general_new_data_percentage",
+        "general_regret",
+        "general_success",
+        "n_policy_data_len",
+        "policy_accuracy",
         "policy_loss",
         "policy_regret",
         "policy_success",
-        "policy_accuracy",
-        "general_new_data_percentage",
-        "general_length",
-        "general_regret",
-        "general_success",
-        "n_policy_data_len"])
+        "roadmap_test_length",
+        "roadmap_training_length"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -318,6 +311,7 @@ def run_optimization(
     # roadmap_test_length = 0
     roadmap_training_length = 0
     for i_r in range(n_runs):
+        start_time = time.process_time()
         optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
         optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
 
@@ -350,6 +344,8 @@ def run_optimization(
                 policy_model, batch_size_policy, optimizer_policy, epds)
 
         if i_r % stats_and_eval_every == 0:
+            end_optimization_time = time.process_time()
+
             if optimize_policy_now:
                 # also eval now
                 (policy_regret, policy_success, policy_accuracy
@@ -375,7 +371,7 @@ def run_optimization(
                 logger.info(
                     f"(R) Training Length: {roadmap_training_length:.3f}")
 
-            if optimize_policy_now and optimize_poses_now:
+            if optimize_policy_now or optimize_poses_now:
                 (general_regret, general_success, general_length
                  ) = eval.evaluate_both(policy_model, g, flann)
                 stats.add("general_regret", i_r, general_regret)
@@ -385,11 +381,17 @@ def run_optimization(
                 logger.info(f"(G) Success: {general_success}")
                 logger.info(f"(G) Length: {general_length:.3f}")
 
+            end_eval_time = time.process_time()
+            eval_time_perc = (end_eval_time - end_optimization_time) / \
+                (end_eval_time - start_time)
+
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
             stats.add("n_policy_data_len", i_r, float(data_len))
+            stats.add("general_eval_time_perc", i_r, float(eval_time_perc))
             logger.info(f"(G) New data: {new_data_percentage*100:.1f}%")
             logger.info(f"(G) Data length: {data_len}")
+            logger.info(f"(G) Eval time: {eval_time_perc*100:.1f}%")
 
         pb.progress()
     runtime = pb.end()
@@ -422,8 +424,6 @@ def run_optimization(
 
 
 if __name__ == "__main__":
-    tracemalloc.start()
-
     # multiprocessing
     tmp.set_sharing_strategy('file_system')
     tmp.set_start_method('spawn')
@@ -444,7 +444,7 @@ if __name__ == "__main__":
         n_runs_policy=32,
         n_epochs_per_run_policy=8,
         batch_size_policy=16,
-        stats_and_eval_every=4,
+        stats_and_eval_every=8,
         lr_pos=1e-2,
         lr_policy=1e-3,
         n_agents=4,
