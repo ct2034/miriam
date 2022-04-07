@@ -113,7 +113,7 @@ class MultiOptimTest(unittest.TestCase):
                           new=patch_init):
             with patch.object(multi_optim.state.ScenarioState, 'step',
                               new=patch_step):
-                ds, paths = sample_trajectory(
+                ds, paths, t = sample_trajectory(
                     seed=0,
                     graph=self.g,
                     n_agents=len(starts),
@@ -122,6 +122,7 @@ class MultiOptimTest(unittest.TestCase):
                     max_steps=10)
                 print(f"{ds=}")
                 print(f"{paths=}")
+                print(f"{t=}")
 
         # we have some data from collisions
         self.assertTrue(len(ds) > 0)

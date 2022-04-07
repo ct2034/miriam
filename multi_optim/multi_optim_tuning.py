@@ -1,15 +1,13 @@
 import logging
 import os
-import queue
 import subprocess
 import time
-from cmath import e
-from ntpath import join
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import yaml
 from matplotlib import pyplot as plt
+from tools import ProgressBar
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +132,9 @@ def run(params_to_run):
     logger.info(f"{max_active_processes=}")
     active_processes = set()
 
+    n_initial = len(params_to_run)
+    pb = ProgressBar("Running", n_initial, 5, logger.info)
+
     while len(params_to_run) > 0 or len(active_processes) > 0:
         if (len(active_processes) < max_active_processes
                 and len(params_to_run) > 0):
@@ -160,8 +161,10 @@ def run(params_to_run):
                                  + f"{clean_str(errs.decode('utf-8'))}"
                                  + f"<<<<< [{process.pid}]")
                     to_remove.add(process)
+            pb.progress(n_initial - len(params_to_run) - len(active_processes))
             active_processes -= to_remove
         time.sleep(0.1)
+    pb.end()
     logger.info("Done")
 
 
@@ -184,8 +187,9 @@ def plot_data(path: str):
 
     exps = list(data.keys())
     exps.sort()
+    first_available_seed = min(data[exps[0]].keys())
     n_exps = len(exps)
-    params = list(data[list(data.keys())[0]][0].keys())
+    params = list(data[exps[0]][first_available_seed].keys())
     params.remove("static")
     params.sort()
     n_params = len(params)
@@ -203,7 +207,8 @@ def plot_data(path: str):
 
             # consolidate data
             n_seeds = len(data[exp])
-            t = data[exp][0][param]['t']
+            first_available_seed = min(data[exp].keys())
+            t = data[exp][first_available_seed][param]['t']
             n_t = len(t)
             this_data = np.zeros((n_seeds, n_t))
             for i_seed, seed in enumerate(data[exp].keys()):
@@ -226,8 +231,11 @@ def plot_data(path: str):
             ax.grid()
 
             # find limits
-            bottom_lim = min(np.max(mean + std), 0)
-            top_lim = max(np.max(mean + std), 1)
+            mean = mean[np.logical_not(np.isnan(mean))]
+            std = std[np.logical_not(np.isnan(std))]
+
+            bottom_lim = float(np.min(mean - std))
+            top_lim = float(np.max(mean + std))
             if param not in lims_per_param:
                 lims_per_param[param] = [0., 0.]
                 lims_per_param[param][0] = bottom_lim
@@ -250,13 +258,13 @@ def plot_data(path: str):
 
 
 if __name__ == "__main__":
-    tuning = False
-    ablation = True
+    tuning = True
+    ablation = False
 
     if tuning:
         folder = TUNING_RES_FOLDER
-        # parameter_experiments, n_runs = params_debug()
-        parameter_experiments, n_runs = params_run()
+        parameter_experiments, n_runs = params_debug()
+        # parameter_experiments, n_runs = params_run()
     elif ablation:
         folder = ABLATION_RES_FOLDER
         parameter_experiments, n_runs = params_ablation()

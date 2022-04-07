@@ -190,7 +190,8 @@ class Eval(object):
         :return: The average regret and success.
         """
         model.eval()
-        success_s = np.zeros(self.n_eval)
+        n_success_optimal = 0
+        n_success_policy = 0
         regret_s = []
         lenght_s = []
         for i_e in range(self.n_eval):
@@ -212,18 +213,23 @@ class Eval(object):
                     graph, agents, False, self.iterator_type)
             except RuntimeError:
                 continue
+            if res_optimal[IDX_SUCCESS]:
+                n_success_optimal += 1
+            else:
+                continue
             # run sim with learned policy
             for i_a, a in enumerate(agents):
                 a.policy = LearnedPolicy(a, model)
                 a.back_to_the_start()
             res_policy = run_a_scenario(
                 graph, agents, False, self.iterator_type)
-            success_s[i_e] = res_policy[IDX_SUCCESS]
+            if res_policy[IDX_SUCCESS]:
+                n_success_policy += 1
             regret_s.append(res_policy[IDX_AVERAGE_LENGTH] -
                             res_optimal[IDX_AVERAGE_LENGTH])
             lenght_s.append(res_policy[IDX_AVERAGE_LENGTH])
         return (
             float(np.mean(regret_s)),
-            float(np.mean(success_s)),
+            float(n_success_policy)/n_success_optimal,
             float(np.mean(lenght_s))
         )

@@ -17,11 +17,10 @@ import tools
 import torch
 import torch.multiprocessing as tmp
 from cuda_util import pick_gpu_lowest_memory
-from definitions import INVALID, MAP_IMG, PATH_W_COORDS, POS
+from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import TIMEOUT
 from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     make_graph_and_flann,
@@ -52,6 +51,7 @@ def sample_trajectory_proxy(args):
 def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
                       max_steps=MAX_STEPS):
     """Sample a trajectory using the given policy."""
+    start_time = time.process_time()
     rng = Random(seed)
     starts = None
     goals = None
@@ -88,9 +88,8 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
         # is this solvable?
         optimal_paths = scenarios.solvers.cached_cbsr(
             graph, starts, goals, radius=RADIUS,
-            timeout=int(TIMEOUT*.9))
-        if optimal_paths != INVALID:
-            solvable = True
+            timeout=int(DEFAULT_TIMEOUT_S*.9))
+        solvable = (optimal_paths != INVALID)
 
     assert starts_coord is not None
     assert goals_coord is not None
@@ -125,7 +124,7 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
         except RuntimeError as e:
             logger.warning("RuntimeError: {}".format(e))
             break
-    return these_ds, paths
+    return these_ds, paths, time.process_time() - start_time
 
 
 def _get_data_folder(save_folder, prefix):
@@ -143,7 +142,7 @@ def sample_trajectories_in_parallel(
         model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, flann,
         n_agents: int, n_episodes: int, prefix: str, require_paths: bool,
         save_folder, pool, rng: Random
-) -> Tuple[str, List[List[PATH_W_COORDS]]]:
+) -> Tuple[str, List[List[PATH_W_COORDS]], float, float]:
     model_copy = EdgePolicyModel()
     model_copy.load_state_dict(copy.deepcopy(model.state_dict()))
     model_copy.eval()
@@ -160,6 +159,7 @@ def sample_trajectories_in_parallel(
     new_fname: str = _get_path_data(save_folder, prefix, generation_hash)
     # only create file if this data does not exist or if paths are required
     paths_s: List[List[PATH_W_COORDS]] = []
+    ts: List[float] = []
     if os.path.exists(new_fname) and not require_paths:
         pass
     else:
@@ -167,15 +167,23 @@ def sample_trajectories_in_parallel(
             sample_trajectory_proxy, params)
         # results_s = map(sample_trajectory_proxy, params)
         new_ds = []
-        for ds, paths in results_s:
+        for ds, paths, t in results_s:
             new_ds.extend(ds)
+            ts.append(t)
             if paths is not None:
                 paths_s.append(paths)
         with open(new_fname, "wb") as f:
             pickle.dump(new_ds, f)
 
-    # add this to the dataset
-    return new_fname, paths_s
+    # runtime stats
+    if len(ts) > 0:
+        ts_max: float = max(ts)
+        ts_mean: float = float(np.mean(ts))
+    else:
+        ts_max = 0.
+        ts_mean = 0.
+
+    return new_fname, paths_s, ts_max, ts_mean
 
 
 def optimize_policy(model, batch_size, optimizer, epds
@@ -267,6 +275,8 @@ def run_optimization(
         "general_new_data_percentage",
         "general_regret",
         "general_success",
+        "general_runtime_generation_mean",
+        "general_runtime_generation_max",
         "n_policy_data_len",
         "policy_accuracy",
         "policy_loss",
@@ -307,10 +317,14 @@ def run_optimization(
         n_runs_per_run_policy = n_runs // n_runs_policy
 
     # Run optimization
-    pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
+    pb = ProgressBar(
+        name=f"{prefix} Optimization",
+        total=n_runs,
+        step_perc=1,
+        print_func=logger.info)
     # roadmap_test_length = 0
     roadmap_training_length = 0
-    for i_r in range(n_runs):
+    for i_r in range(1, n_runs+1):
         start_time = time.process_time()
         optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
         optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
@@ -319,7 +333,7 @@ def run_optimization(
         # assert n_runs_policy >= n_runs_pose, \
         #     "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
-        new_fname, paths_s = sample_trajectories_in_parallel(
+        new_fname, paths_s, ts_max, ts_mean = sample_trajectories_in_parallel(
             policy_model, g, map_img, flann, n_agents, n_epochs_per_run_policy,
             prefix, optimize_poses_now, save_folder,  pool, rng)
         epds.add_file(new_fname)
@@ -334,9 +348,6 @@ def run_optimization(
             (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
                 g, pos, paths_s, map_img, optimizer_pos)
-            if i_r % stats_and_eval_every == 0:
-                stats.add("roadmap_training_length", i_r,
-                          float(roadmap_training_length))
 
         # Optimizing Policy
         if optimize_policy_now:
@@ -389,9 +400,13 @@ def run_optimization(
                       i_r, float(new_data_percentage))
             stats.add("n_policy_data_len", i_r, float(data_len))
             stats.add("general_eval_time_perc", i_r, float(eval_time_perc))
+            stats.add("general_runtime_generation_mean", i_r, ts_mean)
+            stats.add("general_runtime_generation_max", i_r, ts_max)
             logger.info(f"(G) New data: {new_data_percentage*100:.1f}%")
             logger.info(f"(G) Data length: {data_len}")
             logger.info(f"(G) Eval time: {eval_time_perc*100:.1f}%")
+            logger.info(f"(G) Runtime generation mean: {ts_mean:.3f}s")
+            logger.info(f"(G) Runtime generation max: {ts_max:.3f}s")
 
         pb.progress()
     runtime = pb.end()
