@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 OBSERVATION = Tuple[Data, Dict[int, int]]
 ACTION = int
+TIME_LIMIT_STEPS = 20
 
 
 class ScenarioState():
@@ -44,6 +45,7 @@ class ScenarioState():
             plot=False,
             iterator=IteratorType.LOOKAHEAD2,
             pause_on=PolicyCalledException,
+            time_limit=TIME_LIMIT_STEPS,
             paths_out=self.paths_out)
         self.is_agents_to_consider = None
         if not has_exception(scenario_result):
