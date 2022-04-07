@@ -9,12 +9,11 @@ from contextlib import contextmanager
 from datetime import datetime
 from hashlib import sha256
 from itertools import product
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 import networkx as nx
 import numpy as np
 import yaml
-from yaml.loader import Loader
 
 from definitions import POS
 
@@ -304,7 +303,8 @@ BLUE_SEQ = "\033[;34m"
 
 
 class ProgressBar(object):
-    def __init__(self, name: str, total: int, step_perc: int = 0):
+    def __init__(self, name: str, total: int, step_perc: int = 0,
+                 print_func: Callable = print):
         """Track progress of something.
         :param name: What is this tracking progress of?
         :param total: How many iterations are there in total?
@@ -316,7 +316,8 @@ class ProgressBar(object):
         self.i = 0
         self.start_time = datetime.now()
         self.t_format = "%H:%M:%S"
-        print(BOLD_SEQ + "{} started.".format(
+        self.print_func = print_func
+        self.print_func(BOLD_SEQ + "{} started.".format(
             self.name) + RESET_SEQ)
 
     def progress(self, i=None):
@@ -331,7 +332,7 @@ class ProgressBar(object):
         eta_time = (elapsed_time / progress) - elapsed_time
         if progress-self.last_print >= self.step_perc:
             self.last_print += self.step_perc
-            print("{} progress: {}%\n > took: {}, eta: {}".format(
+            self.print_func("{} progress: {}%\n > took: {}, eta: {}".format(
                 self.name,
                 int(round(progress * 100 - 1E-6)),
                 str(elapsed_time),
@@ -340,7 +341,7 @@ class ProgressBar(object):
     def end(self):
         """call this at the end to get total time."""
         elapsed_time = datetime.now() - self.start_time
-        print(BOLD_SEQ + "{} finished. elapsed time: {}".format(
+        self.print_func(BOLD_SEQ + "{} finished. elapsed time: {}".format(
             self.name,
             str(elapsed_time))+RESET_SEQ)
         return elapsed_time
@@ -348,8 +349,9 @@ class ProgressBar(object):
 
 class StatCollector(object):
     def __init__(self, names: List[str]):
-        self.stats: Dict[
-            str, Dict[str, List[float]]] = {}
+        self.stats: Dict[str,
+                         Dict[str,
+                              Union[List[float], Union[float, str]]]] = {}
         for name in names:
             self.stats[name] = {
                 "t": [],
@@ -359,8 +361,12 @@ class StatCollector(object):
 
     def add(self, name: str, t: int, x: float):
         assert name in self.stats.keys()
-        self.stats[name]["t"].append(t)
-        self.stats[name]["x"].append(x)
+        assert "t" in self.stats[name].keys()
+        assert isinstance(self.stats[name]["t"], list)
+        assert "x" in self.stats[name].keys()
+        assert isinstance(self.stats[name]["x"], list)
+        self.stats[name]["t"].append(t)  # type: ignore
+        self.stats[name]["x"].append(x)  # type: ignore
 
     def add_static(self, name: str, x: Union[float, str]):
         self.stats[STATIC][name] = x

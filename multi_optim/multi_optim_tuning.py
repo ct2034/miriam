@@ -160,7 +160,7 @@ def run(params_to_run):
                                  + f"{clean_str(errs.decode('utf-8'))}"
                                  + f"<<<<< [{process.pid}]")
                     to_remove.add(process)
-            pb.progress(n_initial - len(params_to_run))
+            pb.progress(n_initial - len(params_to_run) - len(active_processes))
             active_processes -= to_remove
         time.sleep(0.1)
     pb.end()
