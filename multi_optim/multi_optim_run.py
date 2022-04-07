@@ -317,7 +317,11 @@ def run_optimization(
         n_runs_per_run_policy = n_runs // n_runs_policy
 
     # Run optimization
-    pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
+    pb = ProgressBar(
+        name=f"{prefix} Optimization",
+        total=n_runs,
+        step_perc=1,
+        print_func=logger.info)
     # roadmap_test_length = 0
     roadmap_training_length = 0
     for i_r in range(1, n_runs+1):
