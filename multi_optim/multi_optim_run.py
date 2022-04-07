@@ -320,7 +320,7 @@ def run_optimization(
     pb = ProgressBar(f"{prefix} Optimization", n_runs, 1)
     # roadmap_test_length = 0
     roadmap_training_length = 0
-    for i_r in range(n_runs):
+    for i_r in range(1, n_runs+1):
         start_time = time.process_time()
         optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
         optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
@@ -344,9 +344,6 @@ def run_optimization(
             (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
                 g, pos, paths_s, map_img, optimizer_pos)
-            if i_r % stats_and_eval_every == 0:
-                stats.add("roadmap_training_length", i_r,
-                          float(roadmap_training_length))
 
         # Optimizing Policy
         if optimize_policy_now:
