@@ -57,7 +57,7 @@ def params_run():
 
 def params_ablation():
     parameter_experiments = {
-        "n_nodes": [16],
+        "n_nodes": [16, 8, 32],
         "n_runs_pose": [64, 1],
         "n_runs_policy": [128, 1],
         "n_epochs_per_run_policy": [128],
@@ -65,7 +65,7 @@ def params_ablation():
         "stats_and_eval_every": [8],
         "lr_pos": [1E-2],
         "lr_policy": [1E-3],
-        "n_agents": [4],
+        "n_agents": [4, 3, 5, 6],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/c.png"],
         "save_images": [True],
         "save_folder": [ABLATION_RES_FOLDER]
