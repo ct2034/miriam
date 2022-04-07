@@ -263,8 +263,8 @@ if __name__ == "__main__":
 
     if tuning:
         folder = TUNING_RES_FOLDER
-        parameter_experiments, n_runs = params_debug()
-        # parameter_experiments, n_runs = params_run()
+        # parameter_experiments, n_runs = params_debug()
+        parameter_experiments, n_runs = params_run()
     elif ablation:
         folder = ABLATION_RES_FOLDER
         parameter_experiments, n_runs = params_ablation()
