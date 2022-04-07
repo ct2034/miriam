@@ -257,12 +257,12 @@ def plot_data(path: str):
 
 
 if __name__ == "__main__":
-    tuning = True
-    ablation = False
+    tuning = False
+    ablation = True
 
     if tuning:
         folder = TUNING_RES_FOLDER
-        parameter_experiments, n_runs = params_debug()
+        # parameter_experiments, n_runs = params_debug()
         # parameter_experiments, n_runs = params_run()
     elif ablation:
         folder = ABLATION_RES_FOLDER
