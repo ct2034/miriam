@@ -128,7 +128,7 @@ def run(params_to_run):
     cpus = os.cpu_count()
     assert isinstance(cpus, int)
     logger.info(f"{cpus=}")
-    max_active_processes: int = min(cpus, 12)
+    max_active_processes: int = min(cpus, 8)
     logger.info(f"{max_active_processes=}")
     active_processes = set()
 
