@@ -103,7 +103,10 @@ def read_outfile(fname):
     for k, v in schedule.items():
         i_a = int(k.replace('agent', ''))
         for pose in v:
-            paths[i_a].append((pose['v'], pose['t']))
+            try:
+                paths[i_a].append((pose['v'], pose['t']))
+            except KeyError:
+                return INVALID
     return paths
 
 

@@ -132,7 +132,7 @@ def run(params_to_run):
     active_processes = set()
 
     n_initial = len(params_to_run)
-    pb = ProgressBar("Running", n_initial, 5)
+    pb = ProgressBar("Running", n_initial, 5, logger.info)
 
     while len(params_to_run) > 0 or len(active_processes) > 0:
         if (len(active_processes) < max_active_processes
@@ -196,7 +196,7 @@ def plot_data(path: str):
         n_params,
         n_exps,
         figsize=(5*n_exps, 5*n_params),
-        dpi=500)
+        dpi=300)
 
     lims_per_param = {}  # type: Dict[str, List[float]]
 
@@ -233,8 +233,8 @@ def plot_data(path: str):
             mean = mean[np.logical_not(np.isnan(mean))]
             std = std[np.logical_not(np.isnan(std))]
 
-            bottom_lim = min(np.min(mean - std), 0)
-            top_lim = max(np.max(mean + std), 1)
+            bottom_lim = float(np.min(mean - std))
+            top_lim = float(np.max(mean + std))
             if param not in lims_per_param:
                 lims_per_param[param] = [0., 0.]
                 lims_per_param[param][0] = bottom_lim
