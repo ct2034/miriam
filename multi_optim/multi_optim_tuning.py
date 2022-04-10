@@ -196,7 +196,7 @@ def plot_data(path: str):
         n_params,
         n_exps,
         figsize=(5*n_exps, 5*n_params),
-        dpi=500)
+        dpi=300)
 
     lims_per_param = {}  # type: Dict[str, List[float]]
 
