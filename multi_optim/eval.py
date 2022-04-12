@@ -1,4 +1,5 @@
 import logging
+from builtins import float
 from random import Random
 from typing import List, Optional, Tuple
 
@@ -228,8 +229,11 @@ class Eval(object):
             regret_s.append(res_policy[IDX_AVERAGE_LENGTH] -
                             res_optimal[IDX_AVERAGE_LENGTH])
             lenght_s.append(res_policy[IDX_AVERAGE_LENGTH])
+        optimal: float = 0.
+        if n_success_optimal > 0:
+            optimal = float(n_success_policy)/n_success_optimal
         return (
             float(np.mean(regret_s)),
-            float(n_success_policy)/n_success_optimal,
+            optimal,
             float(np.mean(lenght_s))
         )
