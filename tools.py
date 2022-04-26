@@ -262,12 +262,14 @@ def get_map_str(grid):
     return map_str
 
 
-def run_command(bashCommand, timeout=None) -> Tuple[str, str, int]:
+def run_command(bashCommand, timeout=None, cwd=None) -> Tuple[str, str, int]:
     """executes given command as subprocess with optional timeout. Returns
     tuple of stdout, stderr and returncode."""
     process = subprocess.Popen(bashCommand.split(" "),
-                               stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                               stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               cwd=cwd)
     out = process.communicate(timeout=timeout)
     return (out[0].decode(),
             out[1].decode(),
