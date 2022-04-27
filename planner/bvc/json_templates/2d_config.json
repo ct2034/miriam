@@ -2,8 +2,8 @@
     "base_path": "/home/ch/src/mr-nav-stack/lib/bvc/",
     "robots": "examples/inputs/demo_descriptions/2d/demo_new_start_goal_single_integrator/",
     "goal_reach_distance": 0.01,
-    "discretization_timestep": 0.1,
-    "simulation_timestep": 0.02,
+    "discretization_timestep": 0.2,
+    "simulation_timestep": 0.1,
     "workspace": [
         [
             -1.0,
