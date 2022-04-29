@@ -1,7 +1,7 @@
 {
     "discrete_search_grid_cell_size": 0.05,
-    "obstacle_check_distance": 3.0,
-    "robot_check_distance": 3.0,
+    "obstacle_check_distance": 1.0,
+    "robot_check_distance": 1.0,
     "system_type": "single-integrator",
     "number_of_input_steps_to_plan_for": 25,
     "distance_to_goal_weights": [
@@ -59,12 +59,12 @@
         1
     ],
     "input_upper_bounds": [
-        2.1213203435596424,
-        2.1213203435596424
+        1.0,
+        1.0
     ],
     "input_lower_bounds": [
-        -2.1213203435596424,
-        -2.1213203435596424
+        -1.0,
+        -1.0
     ],
     "state_upper_bounds": [
         "inf",
@@ -74,5 +74,5 @@
         "-inf",
         "-inf"
     ],
-    "maximum_velocity": 3.0
+    "maximum_velocity": 1.0
 }

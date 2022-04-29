@@ -1,11 +1,11 @@
 import json
 import os
+import subprocess
 from functools import reduce
 from typing import List
 
 import numpy as np
 from definitions import INVALID, MAP_IMG
-from matplotlib import pyplot as plt
 from tools import hasher, run_command
 
 SCENARIOS_FOLDER = '.scenarios_cache'
@@ -23,6 +23,8 @@ STR_ROBOT_POSITIONS = "robot_positions"
 STR_ROBOT_ID = "robot_id"
 STR_POSITION = "position"
 STR_PLANNING_FAIL = "planning_fail"
+STR_OBSTACLES = "obstacles"
+STR_RESOLUTION = "resolution"
 
 
 def get_scenario_folder(hash: str = ""):
@@ -54,7 +56,10 @@ def get_average_path_length(paths: np.ndarray) -> float:
     """
     Get the average path length of a set of paths.
     """
-    return np.mean(np.sum(np.abs(paths[1:] - paths[:-1]), axis=0))
+    return np.mean(np.sum(np.linalg.norm(
+        paths[:, 1:, :] - paths[:, :-1, :],
+        axis=2
+    ), axis=1))
 
 
 def plan(map_img: MAP_IMG, starts, goals, radius: float):
@@ -99,22 +104,42 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
     assert content is not None
     content[STR_BASE_PATH] = scenario_folder
     content[STR_ROBOTS] = f"/{STR_ROBOTS}"
+    # Obstacles
+    width = len(map_img)
+    content[STR_RESOLUTION] = 1./width
+    content[STR_OBSTACLES] = []
+    for i_x in range(width):
+        assert len(map_img[i_x]) == width
+        for i_y in range(width):
+            if map_img[i_x][i_y] == 0:
+                content[STR_OBSTACLES].append([i_x, i_y])
     with open(os.path.join(scenario_folder, "2d_config.json"), 'w') as f:
         json.dump(content, f, indent=2)
 
     # Run the planner.
-    stdout, stderr, retcode = run_command(
-        "./../../mr-nav-stack/lib/bvc/build/examples/bvc_2d_sim --config 2d_config.json",
-        timeout=60,
-        cwd=scenario_folder)
-    print(f"{retcode=}")
-    print(f"{stdout=}")
-    print(f"{stderr=}")
+    try:
+        timeout_s = 120
+        stdout, stderr, retcode = run_command(
+            "./../../mr-nav-stack/lib/bvc/build/examples/bvc_2d_sim --config 2d_config.json",
+            timeout=timeout_s,
+            cwd=scenario_folder)
+        print(f"{retcode=}")
+        print(f"{stdout=}")
+        print(f"{stderr=}")
+    except subprocess.TimeoutExpired:
+        print(f"Timeout ({timeout_s}s)")
+        return INVALID
+
+    if retcode != 0:
+        return INVALID
 
     # Check if successful.
-    with open(os.path.join(scenario_folder, STATISTICS_FNAME), 'r') as f:
-        content = f.readlines()
-    assert content is not None
+    try:
+        with open(os.path.join(scenario_folder, STATISTICS_FNAME), 'r') as f:
+            content = f.readlines()
+        assert content is not None
+    except FileNotFoundError:
+        return INVALID
     lines = reduce(lambda x, y: x + y, content)
     if STR_PLANNING_FAIL in lines:
         return INVALID
@@ -135,14 +160,3 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
             paths_s.append(paths_np)
     all_paths = merge_paths_s(paths_s)
     return all_paths
-
-    # fig = plt.figure()
-    # ax = fig.add_subplot(projection='3d')
-    # for i_a in range(n_agents):
-    #     ax.plot(
-    #         all_paths[i_a, :, 0],
-    #         all_paths[i_a, :, 1],
-    #         range(all_paths.shape[1]),
-    #         label=f"robot_{i_a}")
-    # ax.legend()
-    # plt.show()
