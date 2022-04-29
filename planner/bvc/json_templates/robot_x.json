@@ -1,7 +1,7 @@
 {
     "discrete_search_grid_cell_size": 0.05,
-    "obstacle_check_distance": 1.0,
-    "robot_check_distance": 1.0,
+    "obstacle_check_distance": 0.5,
+    "robot_check_distance": 0.5,
     "system_type": "single-integrator",
     "number_of_input_steps_to_plan_for": 25,
     "distance_to_goal_weights": [

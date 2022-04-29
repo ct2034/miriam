@@ -9,28 +9,27 @@ from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 
 if __name__ == "__main__":
     random.seed(0)
-    # map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png"
-    # map_img: MAP_IMG = read_map(map_fname)
-    # map_img_np: np.ndarray = np.array(map_img)
-    # width = len(map_img)
-    # print(f"{width=}")
-    # desired_width = width // 16
-    # print(f"{desired_width=}")
-    # bin_size = width // desired_width
-    # map_img_np = map_img_np.reshape((desired_width, bin_size,
-    #                                  desired_width, bin_size)).max(3).max(1)
+    map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png"
+    map_img_np: np.ndarray = np.array(read_map(map_fname))
+    width = map_img_np.shape[1]
+    print(f"{width=}")
+    desired_width = width // 32
+    print(f"{desired_width=}")
+    bin_size = width // desired_width
+    map_img_np = map_img_np.reshape((desired_width, bin_size,
+                                     desired_width, bin_size)).max(3).max(1)
 
     # starts = [[.1, .2], [.3, .4]]
     # goals = [[.9, .9], [.8, .8]]
 
-    map_img_np = np.full((10, 10), 255)
-    map_img_np[4, 2:7] = 0
-    map_img: MAP_IMG = tuple([tuple(map_img_np[i, :].tolist())
-                             for i in range(map_img_np.shape[0])])
+    # map_img_np = np.full((10, 10), 255)
+    # map_img_np[4, 2:7] = 0
+    map_img = tuple([tuple(map_img_np[i, :].tolist())
+                     for i in range(map_img_np.shape[0])])
 
-    n_agents = 3
+    n_agents = 4
     paths = INVALID
-    for _ in range(10):
+    for _ in range(20):
         starts = [[random.random(), random.random()] for _ in range(n_agents)]
         goals = [[random.random(), random.random()] for _ in range(n_agents)]
         paths = plan(map_img, starts, goals, radius=0.01)

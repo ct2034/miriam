@@ -111,8 +111,8 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
     for i_x in range(width):
         assert len(map_img[i_x]) == width
         for i_y in range(width):
-            if map_img[i_x][i_y] == 0:
-                content[STR_OBSTACLES].append([i_x, i_y])
+            if map_img[i_x][i_y] != 255:
+                content[STR_OBSTACLES].append([i_y, i_x])
     with open(os.path.join(scenario_folder, "2d_config.json"), 'w') as f:
         json.dump(content, f, indent=2)
 
@@ -131,6 +131,9 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
         return INVALID
 
     if retcode != 0:
+        # Cleanup.
+        if os.path.exists(scenario_folder):
+            os.system(f"rm -rf {scenario_folder}")
         return INVALID
 
     # Check if successful.
@@ -139,6 +142,9 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
             content = f.readlines()
         assert content is not None
     except FileNotFoundError:
+        # Cleanup.
+        if os.path.exists(scenario_folder):
+            os.system(f"rm -rf {scenario_folder}")
         return INVALID
     lines = reduce(lambda x, y: x + y, content)
     if STR_PLANNING_FAIL in lines:
@@ -158,5 +164,11 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
             os.remove(os.path.join(scenario_folder, file))
             paths_np = np.array(paths)
             paths_s.append(paths_np)
+
+    # Cleanup.
+    if os.path.exists(scenario_folder):
+        os.system(f"rm -rf {scenario_folder}")
+    if len(paths_s) == 0:
+        return INVALID
     all_paths = merge_paths_s(paths_s)
     return all_paths
