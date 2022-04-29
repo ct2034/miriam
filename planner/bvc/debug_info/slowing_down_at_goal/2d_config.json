@@ -1,0 +1,19 @@
+{
+  "base_path": "/home/ch/src/miriam/planner/bvc/.scenarios_cache/5fa6752230ffea4c8847c30e43cd344f773db2ebabafbded0de39c637fc033db",
+  "robots": "/robots",
+  "goal_reach_distance": 0.01,
+  "discretization_timestep": 0.2,
+  "simulation_timestep": 0.1,
+  "workspace": [
+    [
+      -1.0,
+      -1.0
+    ],
+    [
+      1.0,
+      1.0
+    ]
+  ],
+  "resolution": 0.1,
+  "obstacles": []
+}
