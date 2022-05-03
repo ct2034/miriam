@@ -1,0 +1,17 @@
+{
+    "counters": [
+        {
+            "id": "planning_success",
+            "value": 11
+        }
+    ],
+    "timers": [
+        {
+            "count": 11,
+            "id": "planning",
+            "max": 704754,
+            "mean": 573289.2727272727,
+            "min": 431545
+        }
+    ]
+}
