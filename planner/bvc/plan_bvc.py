@@ -25,6 +25,7 @@ STR_POSITION = "position"
 STR_PLANNING_FAIL = "planning_fail"
 STR_OBSTACLES = "obstacles"
 STR_RESOLUTION = "resolution"
+STR_GOAL_REACH_DISTANCE = "goal_reach_distance"
 
 
 def get_scenario_folder(hash: str = ""):
@@ -104,6 +105,7 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
     assert content is not None
     content[STR_BASE_PATH] = scenario_folder
     content[STR_ROBOTS] = f"/{STR_ROBOTS}"
+    goal_reach_distance = content[STR_GOAL_REACH_DISTANCE]
     # Obstacles
     width = len(map_img)
     content[STR_RESOLUTION] = 1./width
@@ -136,20 +138,6 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
             os.system(f"rm -rf {scenario_folder}")
         return INVALID
 
-    # Check if successful.
-    try:
-        with open(os.path.join(scenario_folder, STATISTICS_FNAME), 'r') as f:
-            content = f.readlines()
-        assert content is not None
-    except FileNotFoundError:
-        # Cleanup.
-        if os.path.exists(scenario_folder):
-            os.system(f"rm -rf {scenario_folder}")
-        return INVALID
-    lines = reduce(lambda x, y: x + y, content)
-    if STR_PLANNING_FAIL in lines:
-        return INVALID
-
     # Read the paths.
     paths_s = []
     for file in os.listdir(scenario_folder):
@@ -171,4 +159,13 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
     if len(paths_s) == 0:
         return INVALID
     all_paths = merge_paths_s(paths_s)
+
+    # Check if successful.
+    dists_from_goals = list(map(
+        lambda i_a: np.linalg.norm(all_paths[i_a, -1, :] - goals[i_a]),
+        range(n_agents)
+    ))
+    if max(dists_from_goals) > goal_reach_distance * 2:
+        return INVALID
+
     return all_paths
