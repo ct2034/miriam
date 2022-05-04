@@ -146,7 +146,7 @@ class Eval(object):
             regret_s[i_e] = res[IDX_AVERAGE_LENGTH] - \
                 self.res_optimal_policy[i_e][IDX_AVERAGE_LENGTH]
         accuracy = model.accuracy(self.eval_set_accuracy)
-        return np.mean(regret_s), np.mean(success_s), accuracy
+        return (float(np.mean(regret_s)), float(np.mean(success_s)), accuracy)
 
     def evaluate_roadmap(self, graph: nx.Graph, flann: FLANN) -> float:
         """
