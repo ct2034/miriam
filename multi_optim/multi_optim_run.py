@@ -139,7 +139,7 @@ def _get_path_data(save_folder, prefix, hash) -> str:
 
 
 def write_stats_png(prefix, save_folder, stats):
-    prefixes = ["roadmap", "policy", "general", "general_runtime_"]
+    prefixes = ["roadmap", "policy", "general", "runtime_"]
     _, axs = plt.subplots(len(prefixes), 1, sharex=True,
                           figsize=(20, 40), dpi=200)
     for i_x, part in enumerate(prefixes):
@@ -284,25 +284,25 @@ def run_optimization(
 
     # Visualization and analysis
     stats = StatCollector([
-        "general_eval_time_perc",
         "general_length",
         "general_new_data_percentage",
         "general_regret",
         "general_success",
-        "general_runtime_generation_mean",
-        "general_runtime_generation_max",
-        "general_runtime_full",
-        "general_runtime_generation_all",
-        "general_runtime_optim_poses",
-        "general_runtime_optim_policy",
-        "general_runtime_eval",
         "n_policy_data_len",
         "policy_accuracy",
         "policy_loss",
         "policy_regret",
         "policy_success",
         "roadmap_test_length",
-        "roadmap_training_length"])
+        "roadmap_training_length",
+        "runtime_eval_time_perc",
+        "runtime_eval",
+        "runtime_full",
+        "runtime_generation_all",
+        "runtime_generation_max",
+        "runtime_generation_mean",
+        "runtime_optim_policy",
+        "runtime_optim_poses"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -362,7 +362,7 @@ def run_optimization(
         else:
             new_data_percentage = 0.
         end_time_generation = time.process_time()
-        stats.add("general_runtime_generation_all", i_r, (
+        stats.add("runtime_generation_all", i_r, (
             end_time_generation - start_time
         ))
 
@@ -372,7 +372,7 @@ def run_optimization(
              ) = optimize_poses_from_paths(
                 g, pos, paths_s, map_img, optimizer_pos)
             end_time_optim_poses = time.process_time()
-            stats.add("general_runtime_optim_poses", i_r, (
+            stats.add("runtime_optim_poses", i_r, (
                 end_time_optim_poses - end_time_generation
             ))
 
@@ -382,7 +382,7 @@ def run_optimization(
             policy_model, policy_loss = optimize_policy(
                 policy_model, batch_size_policy, optimizer_policy, epds)
             end_time_optim_policy = time.process_time()
-            stats.add("general_runtime_optim_policy", i_r, (
+            stats.add("runtime_optim_policy", i_r, (
                 end_time_optim_policy - start_time_optim_policy
             ))
 
@@ -427,19 +427,19 @@ def run_optimization(
             end_eval_time = time.process_time()
             eval_time_perc = (end_eval_time - end_optimization_time) / \
                 (end_eval_time - start_time)
-            stats.add("general_runtime_eval", i_r, (
+            stats.add("runtime_eval", i_r, (
                 end_eval_time - end_optimization_time
             ))
-            stats.add("general_runtime_full", i_r, (
+            stats.add("runtime_full", i_r, (
                 end_eval_time - start_time
             ))
 
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
             stats.add("n_policy_data_len", i_r, float(data_len))
-            stats.add("general_eval_time_perc", i_r, float(eval_time_perc))
-            stats.add("general_runtime_generation_mean", i_r, ts_mean)
-            stats.add("general_runtime_generation_max", i_r, ts_max)
+            stats.add("runtime_eval_time_perc", i_r, float(eval_time_perc))
+            stats.add("runtime_generation_mean", i_r, ts_mean)
+            stats.add("runtime_generation_max", i_r, ts_max)
             logger.info(f"(G) New data: {new_data_percentage*100:.1f}%")
             logger.info(f"(G) Data length: {data_len}")
             logger.info(f"(G) Eval time: {eval_time_perc*100:.1f}%")
