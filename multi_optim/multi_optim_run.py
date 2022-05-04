@@ -138,6 +138,20 @@ def _get_path_data(save_folder, prefix, hash) -> str:
     return folder+f"/{hash}.pkl"
 
 
+def write_stats_png(prefix, save_folder, stats):
+    prefixes = ["roadmap", "policy", "general", "general_runtime_"]
+    _, axs = plt.subplots(len(prefixes), 1, sharex=True,
+                          figsize=(20, 40), dpi=200)
+    for i_x, part in enumerate(prefixes):
+        for k, v in stats.get_stats_wildcard(f"{part}.*").items():
+            axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
+        axs[i_x].legend()  # type: ignore
+        axs[i_x].xaxis.set_major_locator(  # type: ignore
+            MaxNLocator(integer=True))
+    plt.xlabel("Run")
+    plt.savefig(f"{save_folder}/{prefix}_stats.png")
+
+
 def sample_trajectories_in_parallel(
         model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, flann,
         n_agents: int, n_episodes: int, prefix: str, require_paths: bool,
@@ -277,6 +291,11 @@ def run_optimization(
         "general_success",
         "general_runtime_generation_mean",
         "general_runtime_generation_max",
+        "general_runtime_full",
+        "general_runtime_generation_all",
+        "general_runtime_optim_poses",
+        "general_runtime_optim_policy",
+        "general_runtime_eval",
         "n_policy_data_len",
         "policy_accuracy",
         "policy_loss",
@@ -342,17 +361,30 @@ def run_optimization(
             new_data_percentage = (data_len - old_data_len) / data_len
         else:
             new_data_percentage = 0.
+        end_time_generation = time.process_time()
+        stats.add("general_runtime_generation_all", i_r, (
+            end_time_generation - start_time
+        ))
 
         # Optimizing Poses
         if optimize_poses_now:
             (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
                 g, pos, paths_s, map_img, optimizer_pos)
+            end_time_optim_poses = time.process_time()
+            stats.add("general_runtime_optim_poses", i_r, (
+                end_time_optim_poses - end_time_generation
+            ))
 
         # Optimizing Policy
         if optimize_policy_now:
+            start_time_optim_policy = time.process_time()
             policy_model, policy_loss = optimize_policy(
                 policy_model, batch_size_policy, optimizer_policy, epds)
+            end_time_optim_policy = time.process_time()
+            stats.add("general_runtime_optim_policy", i_r, (
+                end_time_optim_policy - start_time_optim_policy
+            ))
 
         if i_r % stats_and_eval_every == 0:
             end_optimization_time = time.process_time()
@@ -395,6 +427,12 @@ def run_optimization(
             end_eval_time = time.process_time()
             eval_time_perc = (end_eval_time - end_optimization_time) / \
                 (end_eval_time - start_time)
+            stats.add("general_runtime_eval", i_r, (
+                end_eval_time - end_optimization_time
+            ))
+            stats.add("general_runtime_full", i_r, (
+                end_eval_time - start_time
+            ))
 
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
@@ -414,17 +452,7 @@ def run_optimization(
 
     # Plot stats
     if save_images:
-        prefixes = ["roadmap", "policy", "general"]
-        _, axs = plt.subplots(len(prefixes), 1, sharex=True,
-                              figsize=(20, 30), dpi=200)
-        for i_x, part in enumerate(prefixes):
-            for k, v in stats.get_stats_wildcard(f"{part}.*").items():
-                axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
-            axs[i_x].legend()  # type: ignore
-            axs[i_x].xaxis.set_major_locator(  # type: ignore
-                MaxNLocator(integer=True))
-        plt.xlabel("Run")
-        plt.savefig(f"{save_folder}/{prefix}_stats.png")
+        write_stats_png(prefix, save_folder, stats)
 
     # Save results
     if save_images:

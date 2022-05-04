@@ -400,7 +400,10 @@ class StatCollector(object):
         with open(filename, 'w') as f:
             yaml.dump(self.stats, f)
 
-    def from_yaml(self, filename: str):
+    @classmethod
+    def from_yaml(cls, filename: str):
+        obj = StatCollector([])
         assert filename.endswith(".yaml")
         with open(filename, 'r') as f:
-            self.stats = yaml.load(f, Loader=yaml.SafeLoader)
+            obj.stats = yaml.load(f, Loader=yaml.SafeLoader)
+        return obj
