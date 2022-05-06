@@ -140,18 +140,22 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
 
     # Read the paths.
     paths_s = []
-    for file in os.listdir(scenario_folder):
-        if file.startswith("vis") and file.endswith(".json"):
-            paths = [list() for _ in range(n_agents)]
-            with open(os.path.join(scenario_folder, file), 'r') as f:
-                content = json.load(f)
-                for frame in content[STR_FRAMES]:
-                    for position in frame[STR_ROBOT_POSITIONS]:
-                        paths[position[STR_ROBOT_ID]].append(
-                            position[STR_POSITION])
-            os.remove(os.path.join(scenario_folder, file))
-            paths_np = np.array(paths)
-            paths_s.append(paths_np)
+    try:
+        for file in os.listdir(scenario_folder):
+            if file.startswith("vis") and file.endswith(".json"):
+                paths = [list() for _ in range(n_agents)]
+                with open(os.path.join(scenario_folder, file), 'r') as f:
+                    content = json.load(f)
+                    for frame in content[STR_FRAMES]:
+                        for position in frame[STR_ROBOT_POSITIONS]:
+                            paths[position[STR_ROBOT_ID]].append(
+                                position[STR_POSITION])
+                os.remove(os.path.join(scenario_folder, file))
+                paths_np = np.array(paths)
+                paths_s.append(paths_np)
+    except KeyError:
+        print(f"KeyError: {file}")
+        return INVALID
 
     # Cleanup.
     if os.path.exists(scenario_folder):

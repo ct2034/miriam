@@ -25,11 +25,14 @@ if __name__ == "__main__":
                      for i in range(map_img_np.shape[0])])
 
     possible_starts_and_goals = [
-        [.8, .7], [.8, .3],
-        [.7, .8], [.3, .8],
-        [.2, .7], [.2, .3],
-        [.7, .2], [.3, .2],
+        [.7, .6], [.7, .4],
+        [.6, .7], [.4, .7],
+        [.3, .6], [.3, .4],
+        [.6, .3], [.4, .3],
     ]
+    for i_p in range(len(possible_starts_and_goals)):
+        possible_starts_and_goals[i_p][0] += random.gauss(0, .1)
+        possible_starts_and_goals[i_p][1] += random.gauss(0, .1)
     n_agents_s = range(1, len(possible_starts_and_goals))
     n_trials = 10
 
