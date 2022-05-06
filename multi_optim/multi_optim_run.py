@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 import socket
+import sys
 import time
 from random import Random
 from typing import Dict, List, Optional, Tuple
@@ -27,7 +28,7 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     optimize_poses_from_paths,
                                                     read_map, sample_points)
 from sim.decentralized.iterators import IteratorType
-from tools import ProgressBar, StatCollector
+from tools import ProgressBar, StatCollector, set_ulimit
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
@@ -468,12 +469,15 @@ def run_optimization(
 
 if __name__ == "__main__":
     # multiprocessing
-    tmp.set_sharing_strategy('file_system')
+    # tmp.set_sharing_strategy('file_system')
     tmp.set_start_method('spawn')
+    # set_ulimit()  # fix `RuntimeError: received 0 items of ancdata`
 
     # debug run
-    for d in os.listdir("multi_optim/results/debug_data"):
-        os.remove(f"multi_optim/results/debug_data/{d}")
+    debug_data_folder = "multi_optim/results/debug_data"
+    if os.path.exists(debug_data_folder):
+        for d in os.listdir(debug_data_folder):
+            os.remove(f"{debug_data_folder}/{d}")
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -494,6 +498,46 @@ if __name__ == "__main__":
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix="debug")
+
+    # tiny_r64_e256 run
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=16,
+        n_runs_pose=64,
+        n_runs_policy=64,
+        n_epochs_per_run_policy=256,
+        batch_size_policy=128,
+        stats_and_eval_every=2,
+        lr_pos=1e-4,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        seed=0,
+        prefix="tiny_r64_e256")
+
+    # tiny_r256_e64 run
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=16,
+        n_runs_pose=64,
+        n_runs_policy=256,
+        n_epochs_per_run_policy=64,
+        batch_size_policy=128,
+        stats_and_eval_every=2,
+        lr_pos=1e-4,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        seed=0,
+        prefix="tiny_r256_e64")
+
+    sys.exit()
 
     # tiny run
     logging.getLogger(__name__).setLevel(logging.INFO)
