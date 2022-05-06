@@ -12,7 +12,7 @@ from tools import ProgressBar
 
 if __name__ == "__main__":
     random.seed(0)
-    map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png"
+    map_fname: str = "roadmaps/odrm/odrm_eval/maps/plain.png"
     map_img_np: np.ndarray = np.array(read_map(map_fname))
     width = map_img_np.shape[1]
     print(f"{width=}")
@@ -25,12 +25,12 @@ if __name__ == "__main__":
                      for i in range(map_img_np.shape[0])])
 
     possible_starts_and_goals = [
-        [.9, .7], [.9, .3],
-        [.7, .9], [.3, .9],
-        [.1, .7], [.1, .3],
-        [.7, .1], [.3, .1],
+        [.8, .7], [.8, .3],
+        [.7, .8], [.3, .8],
+        [.2, .7], [.2, .3],
+        [.7, .2], [.3, .2],
     ]
-    n_agents_s = range(1, len(possible_starts_and_goals) + 1)
+    n_agents_s = range(1, len(possible_starts_and_goals))
     n_trials = 10
 
     path_lengths = [list() for _ in range(len(n_agents_s))]
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     ax2.set_title("Average path length")
     ax2.set_xlabel("Number of agents")
 
-    plt.savefig("bvc_eval.png")
+    plt.savefig("planner/bvc/bvc_eval.png")
 
     # figure for paths
     fig = plt.figure()
@@ -96,4 +96,4 @@ if __name__ == "__main__":
     ax.set_zlim((0., valid_paths_for_plotting.shape[1]))
     ax.legend()
 
-    plt.savefig("bvc_eval_paths.png")
+    plt.savefig("planner/bvc/bvc_eval_paths.png")
