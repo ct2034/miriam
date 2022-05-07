@@ -2,9 +2,10 @@ import json
 import os
 import subprocess
 from functools import reduce
-from typing import List
+from typing import List, Optional, Tuple
 
 import numpy as np
+import numpy.typing as npt
 from definitions import INVALID, MAP_IMG
 from tools import hasher, run_command
 
@@ -35,25 +36,15 @@ def get_scenario_folder(hash: str = ""):
     return os.path.join(os.path.dirname(__file__), SCENARIOS_FOLDER, hash)
 
 
-def merge_paths_s(paths_s_in: List[np.ndarray]) -> np.ndarray:
+def return_longest_path(paths_s_in: List[np.ndarray]) -> np.ndarray:
     """
-    Merge paths_s into one set of paths.
+    Return the path set from paths_s that is the longest.
     """
-    paths_s = [paths_s_in[0]]
-    for i_p in range(1, len(paths_s_in)):
-        next_paths = paths_s_in[i_p]
-        prev_paths = paths_s[-1]
-        i_n = 0
-        i_p = 0
-        while (next_paths[:, i_n] != prev_paths[:, i_p]).any():
-            i_p += 1
-        pass
-
-    paths = np.concatenate(paths_s_in, axis=1)
-    return paths
+    lengths = [len(p) for p in paths_s_in]
+    return paths_s_in[np.argmax(lengths)]
 
 
-def get_average_path_length(paths: np.ndarray) -> float:
+def get_average_path_length(paths: npt.NDArray[np.float64]) -> float:
     """
     Get the average path length of a set of paths.
     """
@@ -61,6 +52,12 @@ def get_average_path_length(paths: np.ndarray) -> float:
         paths[:, 1:, :] - paths[:, :-1, :],
         axis=2
     ), axis=1))
+
+
+def cleanup(scenario_folder):
+    """Remove the `scenario_folder`."""
+    if os.path.exists(scenario_folder):
+        os.system(f"rm -rf {scenario_folder}")
 
 
 def plan(map_img: MAP_IMG, starts, goals, radius: float):
@@ -119,8 +116,8 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
         json.dump(content, f, indent=2)
 
     # Run the planner.
+    timeout_s = 120
     try:
-        timeout_s = 120
         stdout, stderr, retcode = run_command(
             "./../../mr-nav-stack/lib/bvc/build/examples/bvc_2d_sim --config 2d_config.json",
             timeout=timeout_s,
@@ -130,46 +127,48 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
         print(f"{stderr=}")
     except subprocess.TimeoutExpired:
         print(f"Timeout ({timeout_s}s)")
+        cleanup(scenario_folder)
         return INVALID
 
     if retcode != 0:
         # Cleanup.
-        if os.path.exists(scenario_folder):
-            os.system(f"rm -rf {scenario_folder}")
+        cleanup(scenario_folder)
         return INVALID
 
     # Read the paths.
     paths_s = []
-    try:
-        for file in os.listdir(scenario_folder):
-            if file.startswith("vis") and file.endswith(".json"):
-                paths = [list() for _ in range(n_agents)]
+    file: Optional[str] = None
+    # TODO: check all files for start and goal
+    for file in os.listdir(scenario_folder):
+        if file.startswith("vis") and file.endswith(".json"):
+            try:
+                paths: List[List[Tuple[float, float]]] = [
+                    list() for _ in range(n_agents)]
                 with open(os.path.join(scenario_folder, file), 'r') as f:
                     content = json.load(f)
                     for frame in content[STR_FRAMES]:
                         for position in frame[STR_ROBOT_POSITIONS]:
                             paths[position[STR_ROBOT_ID]].append(
                                 position[STR_POSITION])
-                os.remove(os.path.join(scenario_folder, file))
                 paths_np = np.array(paths)
                 paths_s.append(paths_np)
-    except KeyError:
-        print(f"KeyError: {file}")
-        return INVALID
+            except KeyError:
+                print(f"KeyError: {file}")
 
-    # Cleanup.
-    if os.path.exists(scenario_folder):
-        os.system(f"rm -rf {scenario_folder}")
     if len(paths_s) == 0:
+        cleanup(scenario_folder)
         return INVALID
-    all_paths = merge_paths_s(paths_s)
+    final_paths = return_longest_path(paths_s)
 
     # Check if successful.
-    dists_from_goals = list(map(
-        lambda i_a: np.linalg.norm(all_paths[i_a, -1, :] - goals[i_a]),
+    dists_from_goals: List[float] = list(map(
+        lambda i_a: float(np.linalg.norm(
+            final_paths[i_a, -1, :] - goals[i_a])),
         range(n_agents)
     ))
     if max(dists_from_goals) > goal_reach_distance * 2:
+        cleanup(scenario_folder)
         return INVALID
 
-    return all_paths
+    cleanup(scenario_folder)
+    return final_paths

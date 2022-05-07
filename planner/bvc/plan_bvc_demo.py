@@ -1,10 +1,7 @@
 import random
-from tracemalloc import start
-from turtle import width
 from typing import List
 
 import numpy as np
-from definitions import INVALID, MAP_IMG
 from matplotlib import pyplot as plt
 from planner.bvc.plan_bvc import get_average_path_length, plan
 from roadmaps.var_odrm_torch.var_odrm_torch import read_map
@@ -14,7 +11,8 @@ if __name__ == "__main__":
     random.seed(0)
     map_fname: str = "roadmaps/odrm/odrm_eval/maps/plain.png"
     map_img_np: np.ndarray = np.array(read_map(map_fname))
-    width = map_img_np.shape[1]
+    assert len(map_img_np.shape) == 2, "Map image must be 2D."
+    width: int = map_img_np.shape[1]
     print(f"{width=}")
     desired_width = width // 32
     print(f"{desired_width=}")
