@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 from functools import reduce
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -36,12 +36,27 @@ def get_scenario_folder(hash: str = ""):
     return os.path.join(os.path.dirname(__file__), SCENARIOS_FOLDER, hash)
 
 
-def return_longest_path(paths_s_in: List[np.ndarray]) -> np.ndarray:
+def return_succesful_path(paths_s: List[npt.NDArray[np.float64]],
+                          goals,
+                          goal_reach_distance
+                          ) -> Union[np.ndarray, Literal[-1]]:
     """
-    Return the path set from paths_s that is the longest.
+    Return the first set of paths that actually reaches the goals and INVALID 
+    if none of them do.
     """
-    lengths = [len(p) for p in paths_s_in]
-    return paths_s_in[np.argmax(lengths)]
+    n_agents = len(goals)
+    for paths in paths_s:
+        assert len(paths.shape) == 3, "Paths must be 3D."
+
+        # Check if successful.
+        dists_from_goals: List[float] = list(map(
+            lambda i_a: float(np.linalg.norm(
+                paths[i_a, -1, :] - goals[i_a])),
+            range(n_agents)
+        ))
+        if max(dists_from_goals) <= goal_reach_distance * 2:
+            return paths
+    return INVALID  # type: ignore # (because is -1)
 
 
 def get_average_path_length(paths: npt.NDArray[np.float64]) -> float:
@@ -158,17 +173,7 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
     if len(paths_s) == 0:
         cleanup(scenario_folder)
         return INVALID
-    final_paths = return_longest_path(paths_s)
-
-    # Check if successful.
-    dists_from_goals: List[float] = list(map(
-        lambda i_a: float(np.linalg.norm(
-            final_paths[i_a, -1, :] - goals[i_a])),
-        range(n_agents)
-    ))
-    if max(dists_from_goals) > goal_reach_distance * 2:
-        cleanup(scenario_folder)
-        return INVALID
+    final_paths = return_succesful_path(paths_s, goals, goal_reach_distance)
 
     cleanup(scenario_folder)
     return final_paths
