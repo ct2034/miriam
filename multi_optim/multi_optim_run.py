@@ -313,6 +313,7 @@ def run_optimization(
         "n_nodes": n_nodes,
         "n_runs_pose": n_runs_pose,
         "n_runs_policy": n_runs_policy,
+        "n_epochs_per_run_policy": n_epochs_per_run_policy,
         "batch_size_policy": batch_size_policy,
         "stats_every": stats_and_eval_every,
         "lr_pos": lr_pos,
