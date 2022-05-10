@@ -468,6 +468,13 @@ def run_optimization(
     logger.info(stats.get_statics())
 
 
+def clear_data_folder(prefix):
+    data_folder = f"multi_optim/results/{prefix}_data"
+    if os.path.exists(data_folder):
+        for f in os.listdir(data_folder):
+            os.remove(os.path.join(data_folder, f))
+
+
 if __name__ == "__main__":
     # multiprocessing
     # tmp.set_sharing_strategy('file_system')
@@ -475,10 +482,8 @@ if __name__ == "__main__":
     # set_ulimit()  # fix `RuntimeError: received 0 items of ancdata`
 
     # debug run
-    debug_data_folder = "multi_optim/results/debug_data"
-    if os.path.exists(debug_data_folder):
-        for d in os.listdir(debug_data_folder):
-            os.remove(f"{debug_data_folder}/{d}")
+    prefix = "debug"
+    clear_data_folder(prefix)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -498,9 +503,11 @@ if __name__ == "__main__":
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        prefix="debug")
+        prefix=prefix)
 
     # tiny_r64_e256 run
+    prefix = "tiny_r64_e256"
+    clear_data_folder(prefix)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -517,9 +524,11 @@ if __name__ == "__main__":
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        prefix="tiny_r64_e256")
+        prefix=prefix)
 
     # tiny_r256_e64 run
+    prefix = "tiny_r256_e64"
+    clear_data_folder(prefix)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -536,7 +545,7 @@ if __name__ == "__main__":
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        prefix="tiny_r256_e64")
+        prefix=prefix)
 
     sys.exit()
 
