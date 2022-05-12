@@ -226,6 +226,8 @@ class Eval(object):
                 graph, agents, False, self.iterator_type)
             if res_policy[IDX_SUCCESS]:
                 n_success_policy += 1
+            else:
+                continue
             # we are better than optimal
             # if res_policy[IDX_AVERAGE_LENGTH] < res_optimal[IDX_AVERAGE_LENGTH]:
             #     print("better than optimal ??\n")
