@@ -229,7 +229,10 @@ class Eval(object):
             else:
                 continue
             # we are better than optimal
-            # if res_policy[IDX_AVERAGE_LENGTH] < res_optimal[IDX_AVERAGE_LENGTH]:
+            # if (
+            #         res_policy[IDX_AVERAGE_LENGTH] < res_optimal[IDX_AVERAGE_LENGTH] and
+            #         res_policy[IDX_SUCCESS] and
+            #         res_optimal[IDX_SUCCESS]):
             #     print("better than optimal ??\n")
             #     print("="*80)
             #     print(f"{self.starts_corrds_s[i_e]=}")
@@ -237,12 +240,12 @@ class Eval(object):
             #     print(f"{starts=}")
             #     print(f"{goals=}")
             #     print(f"{self.radius=}")
-            #     fname_roadmap = f"{self.rng.randint(0,1000)}.gpickle"
+            #     fname_roadmap = f"optimality.gpickle"
             #     print(f"{fname_roadmap=}")
             #     nx.write_gpickle(self.first_roadmap, fname_roadmap)
             #     print("="*80)
             #     torch.save(model.state_dict(),
-            #                fname_roadmap.split(".")[0] + ".pt")
+            #                f"optimality.pt")
             #     raise Exception("stop this")
             regret_s.append(res_policy[IDX_AVERAGE_LENGTH] -
                             res_optimal[IDX_AVERAGE_LENGTH])

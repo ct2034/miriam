@@ -60,8 +60,7 @@ def plot_env_with_arrows(env: POTENTIAL_ENV_TYPE, starts, goals):
     ax.set_aspect('equal')
 
 
-def plot_with_paths(env, paths):
-    fig = plt.figure()
+def plot_with_paths(env, paths, fig=plt.figure()):
     ax = fig.add_subplot(111, projection='3d')
     colors = get_colors(len(paths))
     legend_str = []
@@ -126,9 +125,11 @@ def plot_with_paths(env, paths):
                     [0, 0],
                     color='grey',
                     alpha=0.5,
-                    linewidth=0.5)
+                    linewidth=0.5,
+                    zorder=10)
         assert paths is not None, "Paths have not been set"
-        for t, path in enumerate(paths):  # pathset per agent
+        for t, path in enumerate(paths):
+            # pathset per agent
             p = np.array(list(map(
                 lambda s: tuple(pos[s[0]]) + (s[1],), path)))
             ax.plot(xs=p[:, 0],
@@ -136,8 +137,20 @@ def plot_with_paths(env, paths):
                     zs=p[:, 2],
                     color=colors[t],
                     alpha=1,
-                    zorder=100)
+                    zorder=100,
+                    marker="o")
             legend_str.append("Agent " + str(t))
+            # projection lines to graph
+            for pose in p.tolist():
+                ax.plot(
+                    [pose[0], pose[0]],
+                    [pose[1], pose[1]],
+                    [pose[2], 0.],
+                    color=colors[t],
+                    alpha=0.5,
+                    linewidth=0.5,
+                    zorder=50
+                )
         ax.grid(False)
     plt.tight_layout()
 
