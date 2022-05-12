@@ -226,6 +226,22 @@ class Eval(object):
                 graph, agents, False, self.iterator_type)
             if res_policy[IDX_SUCCESS]:
                 n_success_policy += 1
+            # we are better than optimal
+            # if res_policy[IDX_AVERAGE_LENGTH] < res_optimal[IDX_AVERAGE_LENGTH]:
+            #     print("better than optimal ??\n")
+            #     print("="*80)
+            #     print(f"{self.starts_corrds_s[i_e]=}")
+            #     print(f"{self.goals_corrds_s[i_e]=}")
+            #     print(f"{starts=}")
+            #     print(f"{goals=}")
+            #     print(f"{self.radius=}")
+            #     fname_roadmap = f"{self.rng.randint(0,1000)}.gpickle"
+            #     print(f"{fname_roadmap=}")
+            #     nx.write_gpickle(self.first_roadmap, fname_roadmap)
+            #     print("="*80)
+            #     torch.save(model.state_dict(),
+            #                fname_roadmap.split(".")[0] + ".pt")
+            #     raise Exception("stop this")
             regret_s.append(res_policy[IDX_AVERAGE_LENGTH] -
                             res_optimal[IDX_AVERAGE_LENGTH])
             lenght_s.append(res_policy[IDX_AVERAGE_LENGTH])
