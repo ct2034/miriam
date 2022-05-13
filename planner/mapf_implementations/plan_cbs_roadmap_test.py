@@ -49,12 +49,14 @@ class PlanCbsrTest(unittest.TestCase):
         # same start
         starts = [0, 0, 1, 2]
         goals = [2, 3, 0, 1]
-        paths = plan_cbsr(g, starts, goals, .2, 60, skip_cache=True)
+        paths = plan_cbsr(g, starts, goals, .2, 1,
+                          skip_cache=True, ignore_finished_agents=False)
         self.assertEqual(paths, INVALID)
         # same goal
         starts = [0, 1, 2, 3]
         goals = [0, 1, 0, 2]
-        paths = plan_cbsr(g, starts, goals, .2, 60, skip_cache=True)
+        paths = plan_cbsr(g, starts, goals, .2, 1,
+                          skip_cache=True, ignore_finished_agents=False)
         self.assertEqual(paths, INVALID)
 
     def test_scenario_solvable_with_waiting(self):
@@ -104,15 +106,15 @@ class PlanCbsrTest(unittest.TestCase):
             2: (2, 0),
             3: (3, 0)
         }, POS)
-        starts = [0, 2]
-        goals = [3, 1]
+        starts = [0, 3]
+        goals = [2, 1]
 
         # solvable
-        paths = plan_cbsr(g, starts, goals, .2, 60,
+        paths = plan_cbsr(g, starts, goals, .2, 1,
                           skip_cache=True, ignore_finished_agents=True)
         self.assertNotEqual(paths, INVALID)
 
         # not solvable
-        paths = plan_cbsr(g, starts, goals, .2, 60,
+        paths = plan_cbsr(g, starts, goals, .2, 1,
                           skip_cache=True, ignore_finished_agents=False)
         self.assertEqual(paths, INVALID)

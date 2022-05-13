@@ -121,10 +121,11 @@ def plan_cbsr(g, starts, goals, radius: float, timeout: float,
     assert len(starts) == len(goals), "starts and goals must have same length"
     assert len(starts) > 0, "there must be at least one start"
     assert len(goals) > 0, "there must be at least one goal"
-    if not len(starts) == len(np.unique(starts)):  # starts must be unique
-        return INVALID
-    if not len(goals) == len(np.unique(goals)):  # goals must be unique
-        return INVALID
+    if not ignore_finished_agents:
+        if not len(starts) == len(np.unique(starts)):  # starts must be unique
+            return INVALID
+        if not len(goals) == len(np.unique(goals)):  # goals must be unique
+            return INVALID
 
     # make roadmap (with caching)
     hash_roadmap = hasher([g, radius])
@@ -161,7 +162,7 @@ def plan_cbsr(g, starts, goals, radius: float, timeout: float,
             "-i", fname_infile,
             "-o", fname_outfile]
         if ignore_finished_agents:
-            cmd_cbsr += "--disappear-at-goal"
+            cmd_cbsr += ["--disappear-at-goal",]
         logger.debug("call cbs_roadmap")
         success_cbsr = call_subprocess(cmd_cbsr, timeout)
         logger.debug("success_cbsr: " + str(success_cbsr))
@@ -183,6 +184,29 @@ def plan_cbsr(g, starts, goals, radius: float, timeout: float,
 
 
 if __name__ == "__main__":
+    g = nx.Graph()
+    g.add_edges_from([
+        (0, 1),
+        (1, 2),
+        (2, 3)
+    ])
+    nx.set_node_attributes(g, {
+        0: (0, 0),
+        1: (1, 0),
+        2: (2, 0),
+        3: (3, 0)
+    }, POS)
+    starts = [0, 3]
+    goals = [2, 1]
+
+    paths = plan_cbsr(g, starts, goals, 0.01, 1, True,
+                      ignore_finished_agents=True)
+
+    # plot
+    if paths is not INVALID:
+        plot_with_paths(g, paths)
+        plt.show()
+
     map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png"
     rng = Random(1)
     n = 20
@@ -193,10 +217,13 @@ if __name__ == "__main__":
     g, _ = make_graph_and_flann(pos, map_img)
     starts = rng.sample(range(n), n_agents)
     goals = rng.sample(range(n), n_agents)
+    starts = [0, 0]
+    goals = [1, 0]
     for i_a in range(n_agents):
         assert nx.has_path(g, starts[i_a], goals[i_a])
 
-    paths = plan_cbsr(g, starts, goals, 0.01, 30, True)
+    paths = plan_cbsr(g, starts, goals, 0.01, 30, True,
+                      ignore_finished_agents=True)
 
     # plot
     if paths is not INVALID:
