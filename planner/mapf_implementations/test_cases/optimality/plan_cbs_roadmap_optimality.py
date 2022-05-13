@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # run
     paths_cbsr_raw = plan_cbsr(
-        graph, starts, goals, radius, 60, skip_cache=True)
+        graph, starts, goals, radius, 60, skip_cache=True, ignore_finished_agents=True)
     assert(isinstance(paths_cbsr_raw, list))
     max_len = max(map(len, paths_cbsr_raw))
     paths_cbsr = []
