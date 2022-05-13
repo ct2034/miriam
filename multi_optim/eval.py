@@ -230,7 +230,8 @@ class Eval(object):
                 continue
             # we are better than optimal
             # if (
-            #         res_policy[IDX_AVERAGE_LENGTH] < res_optimal[IDX_AVERAGE_LENGTH] and
+            #         res_policy[IDX_AVERAGE_LENGTH] <
+            #     res_optimal[IDX_AVERAGE_LENGTH] and
             #         res_policy[IDX_SUCCESS] and
             #         res_optimal[IDX_SUCCESS]):
             #     print("better than optimal ??\n")

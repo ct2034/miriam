@@ -412,7 +412,8 @@ class StatCollector(object):
 def set_ulimit(value: int = 2**16):  # 65536
     """
     Workaround for the issue "RuntimeError: received 0 items of ancdata"
-    courtesy of https://github.com/pytorch/pytorch/issues/973#issuecomment-345088750
+    courtesy of
+    https://github.com/pytorch/pytorch/issues/973#issuecomment-345088750
     and https://github.com/fastai/fastai/issues/23#issuecomment-345091054
     """
     import resource

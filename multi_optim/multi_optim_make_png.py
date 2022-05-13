@@ -16,7 +16,7 @@ if __name__ == "__main__":
     save_folder = os.path.dirname(fpath)
     fname = os.path.basename(fpath)
     prefix = fname.replace("_stats.yaml", "")
-    
+
     print(f"{fname=}")
     print(f"{prefix=}")
     print(f"{save_folder=}")
