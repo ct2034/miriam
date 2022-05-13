@@ -54,6 +54,7 @@ class Eval(object):
         self.agents_s = []  # type: List[List[Agent]]
         self.states = []  # type: List[ScenarioState]
         self.eval_set_accuracy = []  # type: List[Tuple[Data, BFS_TYPE]]
+        self.first_lengths = []  # type: List[Optional[float]]
 
         for i_e in range(self.n_eval):
             solvable_and_interesting = False
@@ -123,6 +124,7 @@ class Eval(object):
                 self.goals_s.append(goals)
                 self.res_optimal_policy.append(res)
                 self.agents_s.append(agents)
+                self.first_lengths.append(None)
                 solvable_and_interesting = True
 
     def evaluate_policy(self, model: EdgePolicyModel
@@ -158,8 +160,9 @@ class Eval(object):
         """
         pos = nx.get_node_attributes(graph, POS)
         pos_t = torch.tensor([pos[n].tolist() for n in graph.nodes])
-        path_lens = []
+        all_e_lengths = []
         for i_e in range(self.n_eval):
+            this_e_lens = []
             starts, _ = flann.nn_index(
                 np.array(self.starts_corrds_s[i_e], dtype=np.float32),
                 1, random_seed=0)
@@ -178,9 +181,16 @@ class Eval(object):
                     self.starts_corrds_s[i_e][i_a],
                     self.goals_corrds_s[i_e][i_a],
                     [n for n, _ in paths[i_a]])
-                path_lens.append(
-                    get_path_len(pos_t, path, training=False).item())
-        return float(np.mean(path_lens))
+                this_e_lens.append(get_path_len(
+                    pos_t, path, training=False).item())
+            this_e_len = float(np.mean(this_e_lens))
+            if self.first_lengths[i_e] is None:
+                self.first_lengths[i_e] = this_e_len
+                all_e_lengths.append(1.)
+            else:
+                assert self.first_lengths[i_e] is not None
+                all_e_lengths.append(this_e_len / self.first_lengths[i_e])
+        return float(np.mean(all_e_lengths))
 
     def evaluate_both(self, model: EdgePolicyModel,
                       graph: nx.Graph, flann: FLANN
@@ -196,7 +206,7 @@ class Eval(object):
         n_success_optimal = 0
         n_success_policy = 0
         regret_s = []
-        lenght_s = []
+        all_e_lens = []
         for i_e in range(self.n_eval):
             starts, _ = flann.nn_index(
                 np.array(self.starts_corrds_s[i_e], dtype=np.float32),
@@ -252,12 +262,19 @@ class Eval(object):
             #     raise Exception("stop this")
             regret_s.append(res_policy[IDX_AVERAGE_LENGTH] -
                             res_optimal[IDX_AVERAGE_LENGTH])
-            lenght_s.append(res_policy[IDX_AVERAGE_LENGTH])
+            if self.first_lengths[i_e] is None:
+                self.first_lengths[i_e] = res_policy[IDX_AVERAGE_LENGTH]
+                all_e_lens.append(1.)
+            else:
+                assert self.first_lengths[i_e] is not None
+                all_e_lens.append(
+                    res_policy[IDX_AVERAGE_LENGTH] /
+                    self.first_lengths[i_e])
         optimal: float = 0.
         if n_success_optimal > 0:
             optimal = float(n_success_policy)/n_success_optimal
         return (
             float(np.mean(regret_s)),
             optimal,
-            float(np.mean(lenght_s))
+            float(np.mean(all_e_lens))
         )
