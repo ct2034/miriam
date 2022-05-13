@@ -272,6 +272,9 @@ if __name__ == "__main__":
     else:
         raise ValueError("No tuning or ablation")
 
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
     logging.basicConfig(
         filename=os.path.join(
             folder, "_tuning.log"),
