@@ -65,7 +65,7 @@ class Agent(object):
             (self.env, self.coord_to_node
              ) = gridmap_to_graph(env)
             assert isinstance(pos, tuple)
-            self.pos = self.coord_to_node[pos]
+            self.pos = self.coord_to_node[pos]  # type: ignore
             assert len(pos) == 2  # (x, y)self.pos: C = pos
             if radius is None:
                 self.radius = .4  # good for gridmaps
@@ -122,7 +122,7 @@ class Agent(object):
         if self.has_gridmap:
             assert isinstance(goal, tuple)
             assert len(goal) == 2  # (x, y)
-            goal = self.coord_to_node[goal]
+            goal = self.coord_to_node[goal]  # type: ignore
         elif self.has_roadmap:
             assert isinstance(goal, int)  # (node)
         assert isinstance(goal, int)

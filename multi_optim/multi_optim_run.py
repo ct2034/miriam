@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 import socket
+import sys
 import time
 from random import Random
 from typing import Dict, List, Optional, Tuple
@@ -27,7 +28,7 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     optimize_poses_from_paths,
                                                     read_map, sample_points)
 from sim.decentralized.iterators import IteratorType
-from tools import ProgressBar, StatCollector
+from tools import ProgressBar, StatCollector, set_ulimit
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
@@ -136,6 +137,20 @@ def _get_path_data(save_folder, prefix, hash) -> str:
     if not os.path.exists(folder):
         os.makedirs(folder)
     return folder+f"/{hash}.pkl"
+
+
+def write_stats_png(prefix, save_folder, stats):
+    prefixes = ["roadmap", "policy", "general", "runtime_"]
+    _, axs = plt.subplots(len(prefixes), 1, sharex=True,
+                          figsize=(20, 40), dpi=200)
+    for i_x, part in enumerate(prefixes):
+        for k, v in stats.get_stats_wildcard(f"{part}.*").items():
+            axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
+        axs[i_x].legend()  # type: ignore
+        axs[i_x].xaxis.set_major_locator(  # type: ignore
+            MaxNLocator(integer=True))
+    plt.xlabel("Run")
+    plt.savefig(f"{save_folder}/{prefix}_stats.png")
 
 
 def sample_trajectories_in_parallel(
@@ -270,20 +285,25 @@ def run_optimization(
 
     # Visualization and analysis
     stats = StatCollector([
-        "general_eval_time_perc",
         "general_length",
         "general_new_data_percentage",
         "general_regret",
         "general_success",
-        "general_runtime_generation_mean",
-        "general_runtime_generation_max",
         "n_policy_data_len",
         "policy_accuracy",
         "policy_loss",
         "policy_regret",
         "policy_success",
         "roadmap_test_length",
-        "roadmap_training_length"])
+        "roadmap_training_length",
+        "runtime_eval_time_perc",
+        "runtime_eval",
+        "runtime_full",
+        "runtime_generation_all",
+        "runtime_generation_max",
+        "runtime_generation_mean",
+        "runtime_optim_policy",
+        "runtime_optim_poses"])
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -293,6 +313,7 @@ def run_optimization(
         "n_nodes": n_nodes,
         "n_runs_pose": n_runs_pose,
         "n_runs_policy": n_runs_policy,
+        "n_epochs_per_run_policy": n_epochs_per_run_policy,
         "batch_size_policy": batch_size_policy,
         "stats_every": stats_and_eval_every,
         "lr_pos": lr_pos,
@@ -342,17 +363,30 @@ def run_optimization(
             new_data_percentage = (data_len - old_data_len) / data_len
         else:
             new_data_percentage = 0.
+        end_time_generation = time.process_time()
+        stats.add("runtime_generation_all", i_r, (
+            end_time_generation - start_time
+        ))
 
         # Optimizing Poses
         if optimize_poses_now:
             (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
                 g, pos, paths_s, map_img, optimizer_pos)
+            end_time_optim_poses = time.process_time()
+            stats.add("runtime_optim_poses", i_r, (
+                end_time_optim_poses - end_time_generation
+            ))
 
         # Optimizing Policy
         if optimize_policy_now:
+            start_time_optim_policy = time.process_time()
             policy_model, policy_loss = optimize_policy(
                 policy_model, batch_size_policy, optimizer_policy, epds)
+            end_time_optim_policy = time.process_time()
+            stats.add("runtime_optim_policy", i_r, (
+                end_time_optim_policy - start_time_optim_policy
+            ))
 
         if i_r % stats_and_eval_every == 0:
             end_optimization_time = time.process_time()
@@ -395,13 +429,19 @@ def run_optimization(
             end_eval_time = time.process_time()
             eval_time_perc = (end_eval_time - end_optimization_time) / \
                 (end_eval_time - start_time)
+            stats.add("runtime_eval", i_r, (
+                end_eval_time - end_optimization_time
+            ))
+            stats.add("runtime_full", i_r, (
+                end_eval_time - start_time
+            ))
 
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
             stats.add("n_policy_data_len", i_r, float(data_len))
-            stats.add("general_eval_time_perc", i_r, float(eval_time_perc))
-            stats.add("general_runtime_generation_mean", i_r, ts_mean)
-            stats.add("general_runtime_generation_max", i_r, ts_max)
+            stats.add("runtime_eval_time_perc", i_r, float(eval_time_perc))
+            stats.add("runtime_generation_mean", i_r, ts_mean)
+            stats.add("runtime_generation_max", i_r, ts_max)
             logger.info(f"(G) New data: {new_data_percentage*100:.1f}%")
             logger.info(f"(G) Data length: {data_len}")
             logger.info(f"(G) Eval time: {eval_time_perc*100:.1f}%")
@@ -414,17 +454,7 @@ def run_optimization(
 
     # Plot stats
     if save_images:
-        prefixes = ["roadmap", "policy", "general"]
-        _, axs = plt.subplots(len(prefixes), 1, sharex=True,
-                              figsize=(20, 30), dpi=200)
-        for i_x, part in enumerate(prefixes):
-            for k, v in stats.get_stats_wildcard(f"{part}.*").items():
-                axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
-            axs[i_x].legend()  # type: ignore
-            axs[i_x].xaxis.set_major_locator(  # type: ignore
-                MaxNLocator(integer=True))
-        plt.xlabel("Run")
-        plt.savefig(f"{save_folder}/{prefix}_stats.png")
+        write_stats_png(prefix, save_folder, stats)
 
     # Save results
     if save_images:
@@ -438,14 +468,22 @@ def run_optimization(
     logger.info(stats.get_statics())
 
 
+def clear_data_folder(prefix):
+    data_folder = f"multi_optim/results/{prefix}_data"
+    if os.path.exists(data_folder):
+        for f in os.listdir(data_folder):
+            os.remove(os.path.join(data_folder, f))
+
+
 if __name__ == "__main__":
     # multiprocessing
-    tmp.set_sharing_strategy('file_system')
+    # tmp.set_sharing_strategy('file_system')
     tmp.set_start_method('spawn')
+    # set_ulimit()  # fix `RuntimeError: received 0 items of ancdata`
 
     # debug run
-    for d in os.listdir("multi_optim/results/debug_data"):
-        os.remove(f"multi_optim/results/debug_data/{d}")
+    prefix = "debug"
+    clear_data_folder(prefix)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -465,7 +503,51 @@ if __name__ == "__main__":
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        prefix="debug")
+        prefix=prefix)
+
+    # tiny_r64_e256 run
+    prefix = "tiny_r64_e256"
+    clear_data_folder(prefix)
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=16,
+        n_runs_pose=64,
+        n_runs_policy=64,
+        n_epochs_per_run_policy=256,
+        batch_size_policy=128,
+        stats_and_eval_every=2,
+        lr_pos=1e-3,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        seed=0,
+        prefix=prefix)
+
+    # tiny_r256_e64 run
+    prefix = "tiny_r256_e64"
+    clear_data_folder(prefix)
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=16,
+        n_runs_pose=64,
+        n_runs_policy=256,
+        n_epochs_per_run_policy=64,
+        batch_size_policy=128,
+        stats_and_eval_every=2,
+        lr_pos=1e-3,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        seed=0,
+        prefix=prefix)
+
+    sys.exit()
 
     # tiny run
     logging.getLogger(__name__).setLevel(logging.INFO)

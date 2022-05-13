@@ -400,7 +400,22 @@ class StatCollector(object):
         with open(filename, 'w') as f:
             yaml.dump(self.stats, f)
 
-    def from_yaml(self, filename: str):
+    @classmethod
+    def from_yaml(cls, filename: str):
+        obj = StatCollector([])
         assert filename.endswith(".yaml")
         with open(filename, 'r') as f:
-            self.stats = yaml.load(f, Loader=yaml.SafeLoader)
+            obj.stats = yaml.load(f, Loader=yaml.SafeLoader)
+        return obj
+
+
+def set_ulimit(value: int = 2**16):  # 65536
+    """
+    Workaround for the issue "RuntimeError: received 0 items of ancdata"
+    courtesy of
+    https://github.com/pytorch/pytorch/issues/973#issuecomment-345088750
+    and https://github.com/fastai/fastai/issues/23#issuecomment-345091054
+    """
+    import resource
+    r_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
+    resource.setrlimit(resource.RLIMIT_NOFILE, (value, r_limit[1]))

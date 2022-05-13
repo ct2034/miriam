@@ -1,7 +1,6 @@
 from typing import Any, List, Set, Tuple, TypeVar
 
 import numpy as np
-from libpysal.cg.kdtree import DISTANCE_METRICS
 
 FREE = 0
 INVALID = -1

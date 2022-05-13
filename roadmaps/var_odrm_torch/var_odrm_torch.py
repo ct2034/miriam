@@ -120,6 +120,7 @@ def draw_graph(
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_title(title)
+    g_cpy = nx.subgraph_view(g, filter_edge=lambda x, y: x != y)
 
     # Map Image
     if map_img:
@@ -132,8 +133,8 @@ def draw_graph(
         )
 
     # Graph
-    N = g.number_of_nodes()
-    pos = nx.get_node_attributes(g, POS)
+    N = g_cpy.number_of_nodes()
+    pos = nx.get_node_attributes(g_cpy, POS)
     pos_np = np.array([pos[i] for i in range(N)])
     options = {
         "ax": ax,
@@ -145,7 +146,7 @@ def draw_graph(
         "with_labels": False
     }
     pos_dict = {i: pos_np[i] for i in range(N)}
-    nx.draw_networkx(g, pos_dict, **options)
+    nx.draw_networkx(g_cpy, pos_dict, **options)
 
     # Paths
     colors = get_colors(len(paths))
