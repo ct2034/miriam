@@ -281,6 +281,7 @@ def run_optimization(
                 iterator_type=ITERATOR_TYPE, radius=RADIUS)
 
     # Data for policy
+    clear_data_folder(prefix)
     epds = EdgePolicyDataset(f"{save_folder}/{prefix}_data")
 
     # Visualization and analysis
@@ -483,7 +484,6 @@ if __name__ == "__main__":
 
     # debug run
     prefix = "debug"
-    clear_data_folder(prefix)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -507,7 +507,6 @@ if __name__ == "__main__":
 
     # tiny_r64_e256 run
     prefix = "tiny_r64_e256"
-    clear_data_folder(prefix)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
@@ -528,7 +527,6 @@ if __name__ == "__main__":
 
     # tiny_r256_e64 run
     prefix = "tiny_r256_e64"
-    clear_data_folder(prefix)
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
