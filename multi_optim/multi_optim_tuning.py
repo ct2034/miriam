@@ -37,16 +37,16 @@ def params_debug():
 
 
 def params_run():
-    n_nodes_s = [16, 32, 64]
-    n_agents_s = [4, 3, 5, 6]
+    n_nodes_s = [8]
+    n_agents_s = [4, 3, 5]
     parameter_experiments = {
         "n_nodes": n_nodes_s,
         "n_runs_pose": [64],
         "n_runs_policy": [64],
-        "n_epochs_per_run_policy":  [128],
+        "n_epochs_per_run_policy":  [256],
         "batch_size_policy":  [128],
         "stats_and_eval_every": [16],
-        "lr_pos": [3E-4, 1E-3, 3E-3],
+        "lr_pos": [1E-3, 3E-3, 3E-4],
         "lr_policy": [1E-3],
         "n_agents": n_agents_s,
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
@@ -129,7 +129,7 @@ def run(params_to_run):
     cpus = os.cpu_count()
     assert isinstance(cpus, int)
     logger.info(f"{cpus=}")
-    max_active_processes: int = min(cpus, 8)
+    max_active_processes: int = 2  # min(cpus, 8)
     logger.info(f"{max_active_processes=}")
     active_processes = set()
 
@@ -259,8 +259,8 @@ def plot_data(path: str):
 
 
 if __name__ == "__main__":
-    tuning = False
-    ablation = True
+    tuning = True
+    ablation = False
 
     if tuning:
         folder = TUNING_RES_FOLDER
