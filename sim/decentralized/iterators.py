@@ -9,8 +9,8 @@ import torch
 from definitions import POS, C
 from planner.mapf_implementations.libMultiRobotPlanning.tools.annotate_roadmap import \
     check_edges
-from planner.mapf_implementations.libMultiRobotPlanning.tools.collision import \
-    precheck_bounding_box
+from planner.mapf_implementations.libMultiRobotPlanning.tools.collision import (
+    precheck_bounding_box, precheck_indices)
 from sim.decentralized.agent import Agent
 
 logging.basicConfig()
@@ -136,12 +136,18 @@ def check_motion_col(g: nx.Graph, radius: float,
     ]] = []
     for i_a1 in range(n_agents):
         for i_a2 in range(i_a1 + 1, n_agents):
-            p0 = np.array(pos_s[node_s_start[i_a1]])
-            p1 = np.array(pos_s[node_s_end[i_a1]])
-            q0 = np.array(pos_s[node_s_start[i_a2]])
-            q1 = np.array(pos_s[node_s_end[i_a2]])
-            if precheck_bounding_box(E, p0, p1, q0, q1):
-                edges_to_check.append((i_a1, i_a2, E, p0, p1, q0, q1))
+            if precheck_indices(
+                    edge_a=(node_s_start[i_a1], node_s_end[i_a1]),
+                    edge_b=(node_s_start[i_a2], node_s_end[i_a2])):
+                colliding_agents.add(i_a1)
+                colliding_agents.add(i_a2)
+            else:
+                p0 = np.array(pos_s[node_s_start[i_a1]])
+                p1 = np.array(pos_s[node_s_end[i_a1]])
+                q0 = np.array(pos_s[node_s_start[i_a2]])
+                q1 = np.array(pos_s[node_s_end[i_a2]])
+                if precheck_bounding_box(E, p0, p1, q0, q1):
+                    edges_to_check.append((i_a1, i_a2, E, p0, p1, q0, q1))
     results = [check_edges(*edge[2:]) for edge in edges_to_check]
     for result, (i_a1, i_a2, _, _, _, _, _) in zip(results, edges_to_check):
         if result:
