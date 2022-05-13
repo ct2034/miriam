@@ -310,6 +310,7 @@ def run_optimization(
         "hostname": socket.gethostname(),
         "git_hash": git.repo.Repo(".").head.object.hexsha,
         "started_at": datetime.datetime.now().isoformat(),
+        "gpu": str(gpu),
         # parameters
         "n_nodes": n_nodes,
         "n_runs_pose": n_runs_pose,
