@@ -110,7 +110,8 @@ def read_outfile(fname):
     return paths
 
 
-def plan_cbsr(g, starts, goals, radius: float, timeout: float, skip_cache: bool):
+def plan_cbsr(g, starts, goals, radius: float, timeout: float,
+              skip_cache: bool, ignore_finished_agents: bool = True):
     this_dir = os.path.dirname(__file__)
     cache_dir = os.path.join(this_dir, 'cache')
     if not os.path.exists(cache_dir):
@@ -147,7 +148,7 @@ def plan_cbsr(g, starts, goals, radius: float, timeout: float, skip_cache: bool)
         return INVALID
 
     # write infile
-    hash = hasher([g, starts, goals])
+    hash = hasher([g, starts, goals, ignore_finished_agents])
     fname_infile = f"{cache_dir}/{hash}_infile.yaml"
     fname_outfile = f"{cache_dir}/{hash}_outfile.yaml"
     if not os.path.exists(fname_infile) or skip_cache:
@@ -159,6 +160,8 @@ def plan_cbsr(g, starts, goals, radius: float, timeout: float, skip_cache: bool)
             this_dir + "/libMultiRobotPlanning/build/cbs_roadmap",
             "-i", fname_infile,
             "-o", fname_outfile]
+        if ignore_finished_agents:
+            cmd_cbsr += "--disappear-at-goal"
         logger.debug("call cbs_roadmap")
         success_cbsr = call_subprocess(cmd_cbsr, timeout)
         logger.debug("success_cbsr: " + str(success_cbsr))
@@ -193,7 +196,7 @@ if __name__ == "__main__":
     for i_a in range(n_agents):
         assert nx.has_path(g, starts[i_a], goals[i_a])
 
-    paths = plan_cbsr(g, starts, goals)
+    paths = plan_cbsr(g, starts, goals, 0.01, 30, True)
 
     # plot
     if paths is not INVALID:

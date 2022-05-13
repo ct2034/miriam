@@ -89,3 +89,30 @@ class PlanCbsrTest(unittest.TestCase):
                         waited = True
                 prev_node = node
         self.assertTrue(waited)
+
+    def test_requires_ignore_finished_agent(self):
+        """Specific scenarios should be solvable iff finished agents are ignored."""
+        g = nx.Graph()
+        g.add_edges_from([
+            (0, 1),
+            (1, 2),
+            (2, 3)
+        ])
+        nx.set_node_attributes(g, {
+            0: (0, 0),
+            1: (1, 0),
+            2: (2, 0),
+            3: (3, 0)
+        }, POS)
+        starts = [0, 2]
+        goals = [3, 1]
+
+        # solvable
+        paths = plan_cbsr(g, starts, goals, .2, 60,
+                          skip_cache=True, ignore_finished_agents=True)
+        self.assertNotEqual(paths, INVALID)
+
+        # not solvable
+        paths = plan_cbsr(g, starts, goals, .2, 60,
+                          skip_cache=True, ignore_finished_agents=False)
+        self.assertEqual(paths, INVALID)
