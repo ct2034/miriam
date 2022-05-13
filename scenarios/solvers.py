@@ -86,15 +86,18 @@ def _ecbs_data_to_paths(data):
 def cached_cbsr(env, starts, goals,
                 timeout=DEFAULT_TIMEOUT_S,
                 radius: float = 0.1,
-                skip_cache=False):
+                ignore_finished_agents: bool = True,
+                skip_cache: bool = False):
     if skip_cache:
         paths = plan_cbsr(env, starts, goals, radius=radius,
-                          timeout=timeout, skip_cache=skip_cache)
+                          timeout=timeout, skip_cache=skip_cache,
+                          ignore_finished_agents=ignore_finished_agents)
     else:
         scenario = (env, starts, goals)
         solver_params = {
             "radius": radius,
-            "timeout": timeout
+            "timeout": timeout,
+            "ignore_finished_agents": ignore_finished_agents
         }
         if storage.has_result(scenario, ResultType.CBSR_PATHS,
                               solver_params):
@@ -102,7 +105,8 @@ def cached_cbsr(env, starts, goals,
                 scenario, ResultType.CBSR_PATHS, solver_params)
         else:
             paths = plan_cbsr(env, starts, goals, radius=radius,
-                              timeout=timeout, skip_cache=skip_cache)
+                              timeout=timeout, skip_cache=skip_cache,
+                              ignore_finished_agents=ignore_finished_agents)
             storage.save_result(scenario, ResultType.CBSR_PATHS,
                                 solver_params, paths)
     return paths

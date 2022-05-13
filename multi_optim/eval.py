@@ -88,7 +88,8 @@ class Eval(object):
                 # genereally solvable?
                 res_cbsr = plan_cbsr(self.first_roadmap, starts, goals,
                                      self.radius, DEFAULT_TIMEOUT_S,
-                                     skip_cache=False)
+                                     skip_cache=False,
+                                     ignore_finished_agents=True)
                 if res_cbsr == INVALID:
                     continue
                 # solvable by policy
@@ -166,7 +167,8 @@ class Eval(object):
                 np.array(self.goals_corrds_s[i_e], dtype=np.float32),
                 1, random_seed=0)
             paths = plan_cbsr(graph, starts, goals, self.radius,
-                              DEFAULT_TIMEOUT_S, skip_cache=False)
+                              DEFAULT_TIMEOUT_S, skip_cache=False,
+                              ignore_finished_agents=True)
             if paths == INVALID:
                 logger.warning("No paths")
                 continue

@@ -3,6 +3,7 @@ import logging
 import os
 import subprocess
 from random import Random
+from typing import List
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -45,8 +46,8 @@ def call_subprocess(cmd, timeout):
     return success
 
 
-def write_roadmap_file(fname, g, radius):
-    data = {}
+def write_roadmap_file(fname: str, g: nx.Graph, radius: float):
+    data = {}  # type: ignore
     data["roadmap"] = {}
     data["roadmap"]["undirected"] = True
     data["roadmap"]["allow_wait_actions"] = True
@@ -110,7 +111,8 @@ def read_outfile(fname):
     return paths
 
 
-def plan_cbsr(g, starts, goals, radius: float, timeout: float,
+def plan_cbsr(g: nx.Graph, starts: List[int], goals: List[int],
+              radius: float, timeout: float,
               skip_cache: bool, ignore_finished_agents: bool = True):
     this_dir = os.path.dirname(__file__)
     cache_dir = os.path.join(this_dir, 'cache')
@@ -162,7 +164,7 @@ def plan_cbsr(g, starts, goals, radius: float, timeout: float,
             "-i", fname_infile,
             "-o", fname_outfile]
         if ignore_finished_agents:
-            cmd_cbsr += ["--disappear-at-goal",]
+            cmd_cbsr += ["--disappear-at-goal", ]
         logger.debug("call cbs_roadmap")
         success_cbsr = call_subprocess(cmd_cbsr, timeout)
         logger.debug("success_cbsr: " + str(success_cbsr))
