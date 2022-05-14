@@ -129,9 +129,24 @@ def run(params_to_run):
     cpus = os.cpu_count()
     assert isinstance(cpus, int)
     logger.info(f"{cpus=}")
-    max_active_processes: int = 2  # min(cpus, 8)
+    max_active_processes: int = 1  # min(cpus, 8)
     logger.info(f"{max_active_processes=}")
     active_processes = set()
+
+    # finish out what ran before
+    ran_prefixes = set()
+    suffix = "_stats.yaml"
+    for f in os.listdir(params_to_run[0]["save_folder"]):
+        if f.endswith(suffix):
+            prefix = f.replace(suffix, "")
+            ran_prefixes.add(prefix)
+
+    # not running them again
+    logger.info(f"(all) {len(params_to_run)=}")
+    logger.info(f"{len(ran_prefixes)=}")
+    params_to_run = [
+        p for p in params_to_run if p["prefix"] not in ran_prefixes]
+    logger.info(f"(remaining) {len(params_to_run)=}")
 
     n_initial = len(params_to_run)
     pb = ProgressBar("Running", n_initial, 5, logger.info)
