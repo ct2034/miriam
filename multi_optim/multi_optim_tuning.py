@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import logging
 import os
 import subprocess
@@ -37,16 +38,17 @@ def params_debug():
 
 def params_run():
     n_nodes_s = [8]
+    n_agents_s = [4, 3, 5]
     parameter_experiments = {
         "n_nodes": n_nodes_s,
         "n_runs_pose": [64],
-        "n_runs_policy": [128],
-        "n_epochs_per_run_policy":  [128],
+        "n_runs_policy": [64],
+        "n_epochs_per_run_policy":  [256],
         "batch_size_policy":  [128],
         "stats_and_eval_every": [16],
-        "lr_pos": [1E-4],
+        "lr_pos": [1E-3, 3E-3, 3E-4],
         "lr_policy": [1E-3],
-        "n_agents": [4],
+        "n_agents": n_agents_s,
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
         "save_folder": [TUNING_RES_FOLDER]
@@ -210,8 +212,8 @@ def plot_data(path: str):
     fig, (axs) = plt.subplots(
         n_params,
         n_exps,
-        figsize=(5*n_exps, 5*n_params),
-        dpi=300)
+        figsize=(4*n_exps, 4*n_params),
+        dpi=200)
 
     lims_per_param = {}  # type: Dict[str, List[float]]
 
@@ -222,17 +224,38 @@ def plot_data(path: str):
             # consolidate data
             n_seeds = len(data[exp])
             first_available_seed = min(data[exp].keys())
-            t = data[exp][first_available_seed][param]['t']
-            n_t = len(t)
-            this_data = np.zeros((n_seeds, n_t))
+            t_raw = data[exp][first_available_seed][param]['t']
+            n_t = len(t_raw)
+            this_data_raw = np.zeros((n_seeds, n_t))
             for i_seed, seed in enumerate(data[exp].keys()):
-                this_data[i_seed, :] = data[exp][seed][param]['x']
-            mean = np.mean(this_data, axis=0)
-            std = np.std(this_data, axis=0)
+                this_data_raw[i_seed, :] = data[exp][seed][param]['x']
+
+            means = np.empty((0,))
+            stds = np.empty((0,))
+            mins = np.empty((0,))
+            maxs = np.empty((0,))
+            ts = np.empty((0,))
+            for i_t, t in enumerate(t_raw):
+                t_slice = this_data_raw[:, i_t]
+                if not np.isnan(t_slice).all():
+                    mean = np.mean(
+                        t_slice[np.logical_not(np.isnan(t_slice))])
+                    means = np.append(means, mean)
+                    std = np.std(
+                        t_slice[np.logical_not(np.isnan(t_slice))])
+                    stds = np.append(stds, std)
+                    min_ = np.min(t_slice[np.logical_not(np.isnan(t_slice))])
+                    mins = np.append(mins, min_)
+                    max_ = np.max(t_slice[np.logical_not(np.isnan(t_slice))])
+                    maxs = np.append(maxs, max_)
+                    ts = np.append(ts, t)
 
             # plot
-            ax.plot(t, mean, label=exp)
-            ax.fill_between(t, mean - std, mean + std, alpha=0.2)
+            ax.plot(ts, means, label=exp, color='black')
+            ax.fill_between(ts, means - stds, means +
+                            stds, alpha=0.2, color='grey')
+            ax.plot(ts, mins, label=exp, color='green')
+            ax.plot(ts, maxs, label=exp, color='red')
 
             # labels
             if i_exp == 0:
@@ -241,15 +264,12 @@ def plot_data(path: str):
                 ax.set_title(exp)
             if i_param == len(params) - 1:
                 ax.set_xlabel("epoch")
-            ax.set_xlim(0, t[-1])
+            ax.set_xlim(0, ts[-1])
             ax.grid()
 
             # find limits
-            mean = mean[np.logical_not(np.isnan(mean))]
-            std = std[np.logical_not(np.isnan(std))]
-
-            bottom_lim = float(np.min(mean - std))
-            top_lim = float(np.max(mean + std))
+            bottom_lim = float(np.min(mins))
+            top_lim = float(np.max(maxs))
             if param not in lims_per_param:
                 lims_per_param[param] = [0., 0.]
                 lims_per_param[param][0] = bottom_lim
@@ -272,13 +292,13 @@ def plot_data(path: str):
 
 
 if __name__ == "__main__":
-    tuning = False
-    ablation = True
+    tuning = True
+    ablation = False
 
     if tuning:
         folder = TUNING_RES_FOLDER
         # parameter_experiments, n_runs = params_debug()
-        # parameter_experiments, n_runs = params_run()
+        parameter_experiments, n_runs = params_run()
     elif ablation:
         folder = ABLATION_RES_FOLDER
         parameter_experiments, n_runs = params_ablation()
