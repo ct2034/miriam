@@ -281,7 +281,7 @@ def run_optimization(
                 iterator_type=ITERATOR_TYPE, radius=RADIUS)
 
     # Data for policy
-    clear_data_folder(prefix)
+    clear_data_folder(prefix, save_folder)
     epds = EdgePolicyDataset(f"{save_folder}/{prefix}_data")
 
     # Visualization and analysis
@@ -470,8 +470,8 @@ def run_optimization(
     logger.info(stats.get_statics())
 
 
-def clear_data_folder(prefix):
-    data_folder = f"multi_optim/results/{prefix}_data"
+def clear_data_folder(prefix, save_folder):
+    data_folder = f"{save_folder}/{prefix}_data"
     if os.path.exists(data_folder):
         for f in os.listdir(data_folder):
             os.remove(os.path.join(data_folder, f))
