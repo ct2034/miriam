@@ -229,6 +229,7 @@ def plot_data(path: str):
             this_data = np.zeros((n_seeds, n_t))
             for i_seed, seed in enumerate(data[exp].keys()):
                 this_data[i_seed, :] = data[exp][seed][param]['x']
+            this_data[np.isnan(this_data)] = 1.
             mean = np.mean(this_data, axis=0)
             std = np.std(this_data, axis=0)
 
@@ -247,8 +248,8 @@ def plot_data(path: str):
             ax.grid()
 
             # find limits
-            mean = mean[np.logical_not(np.isnan(mean))]
-            std = std[np.logical_not(np.isnan(std))]
+            # mean = mean[np.logical_not(np.isnan(mean))]
+            # std = std[np.logical_not(np.isnan(std))]
 
             bottom_lim = float(np.min(mean - std))
             top_lim = float(np.max(mean + std))
@@ -297,5 +298,5 @@ if __name__ == "__main__":
         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
     params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
-    run(params_to_run)
+    # run(params_to_run)
     plot_data(folder)
