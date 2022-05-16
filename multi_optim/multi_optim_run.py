@@ -507,13 +507,53 @@ if __name__ == "__main__":
         prefix=prefix)
 
     # tiny_r64_e256 run
-    prefix = "tiny_r64_e256"
+    # prefix = "tiny_r64_e256"
+    # logging.getLogger(__name__).setLevel(logging.INFO)
+    # logging.getLogger(
+    #     "planner.mapf_implementations.plan_cbs_roadmap"
+    # ).setLevel(logging.INFO)
+    # run_optimization(
+    #     n_nodes=16,
+    #     n_runs_pose=64,
+    #     n_runs_policy=64,
+    #     n_epochs_per_run_policy=256,
+    #     batch_size_policy=128,
+    #     stats_and_eval_every=2,
+    #     lr_pos=1e-3,
+    #     lr_policy=1e-3,
+    #     n_agents=4,
+    #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+    #     seed=0,
+    #     prefix=prefix)
+
+    # tiny_r256_e64 run
+    # prefix = "tiny_r256_e64"
+    # logging.getLogger(__name__).setLevel(logging.INFO)
+    # logging.getLogger(
+    #     "planner.mapf_implementations.plan_cbs_roadmap"
+    # ).setLevel(logging.INFO)
+    # run_optimization(
+    #     n_nodes=16,
+    #     n_runs_pose=64,
+    #     n_runs_policy=256,
+    #     n_epochs_per_run_policy=64,
+    #     batch_size_policy=128,
+    #     stats_and_eval_every=2,
+    #     lr_pos=1e-3,
+    #     lr_policy=1e-3,
+    #     n_agents=4,
+    #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+    #     seed=0,
+    #     prefix=prefix)
+
+    # small_r64_e256 run
+    prefix = "small_r64_e256"
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.INFO)
     run_optimization(
-        n_nodes=16,
+        n_nodes=32,
         n_runs_pose=64,
         n_runs_policy=64,
         n_epochs_per_run_policy=256,
@@ -526,17 +566,17 @@ if __name__ == "__main__":
         seed=0,
         prefix=prefix)
 
-    # tiny_r256_e64 run
-    prefix = "tiny_r256_e64"
+    # medium_r64_e256 run
+    prefix = "medium_r64_e256"
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.INFO)
     run_optimization(
-        n_nodes=16,
+        n_nodes=64,
         n_runs_pose=64,
-        n_runs_policy=256,
-        n_epochs_per_run_policy=64,
+        n_runs_policy=64,
+        n_epochs_per_run_policy=256,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
@@ -547,66 +587,6 @@ if __name__ == "__main__":
         prefix=prefix)
 
     sys.exit()
-
-    # tiny run
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=16,
-        n_runs_pose=2,
-        n_runs_policy=128,
-        n_epochs_per_run_policy=128,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-4,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
-        prefix="tiny")
-
-    # tiny_varpose run
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=16,
-        n_runs_pose=64,
-        n_runs_policy=128,
-        n_epochs_per_run_policy=128,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-4,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
-        prefix="tiny_varpose")
-
-    # medium run
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=64,
-        n_runs_pose=2,
-        n_runs_policy=128,
-        n_epochs_per_run_policy=128,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-4,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
-        prefix="medium")
 
     # large run
     logging.getLogger(__name__).setLevel(logging.INFO)
