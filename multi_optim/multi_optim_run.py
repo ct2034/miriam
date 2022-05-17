@@ -506,25 +506,25 @@ if __name__ == "__main__":
         seed=0,
         prefix=prefix)
 
-    # tiny_r64_e256 run
-    # prefix = "tiny_r64_e256"
-    # logging.getLogger(__name__).setLevel(logging.INFO)
-    # logging.getLogger(
-    #     "planner.mapf_implementations.plan_cbs_roadmap"
-    # ).setLevel(logging.INFO)
-    # run_optimization(
-    #     n_nodes=16,
-    #     n_runs_pose=64,
-    #     n_runs_policy=64,
-    #     n_epochs_per_run_policy=256,
-    #     batch_size_policy=128,
-    #     stats_and_eval_every=2,
-    #     lr_pos=1e-3,
-    #     lr_policy=1e-3,
-    #     n_agents=4,
-    #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-    #     seed=0,
-    #     prefix=prefix)
+    tiny_r64_e256 run
+    prefix = "tiny_r64_e256"
+    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger(
+        "planner.mapf_implementations.plan_cbs_roadmap"
+    ).setLevel(logging.INFO)
+    run_optimization(
+        n_nodes=16,
+        n_runs_pose=64,
+        n_runs_policy=64,
+        n_epochs_per_run_policy=256,
+        batch_size_policy=128,
+        stats_and_eval_every=2,
+        lr_pos=1e-3,
+        lr_policy=1e-3,
+        n_agents=4,
+        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+        seed=0,
+        prefix=prefix)
 
     # tiny_r256_e64 run
     # prefix = "tiny_r256_e64"
@@ -586,24 +586,22 @@ if __name__ == "__main__":
         seed=0,
         prefix=prefix)
 
-    sys.exit()
-
-    # large run
+    # large_r64_e256 run
+    prefix = "large_r64_e256"
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
         "planner.mapf_implementations.plan_cbs_roadmap"
     ).setLevel(logging.INFO)
     run_optimization(
-        n_nodes=256,
-        n_runs_pose=2,
-        n_runs_policy=128,
-        n_epochs_per_run_policy=128,
+        n_nodes=128,
+        n_runs_pose=64,
+        n_runs_policy=64,
+        n_epochs_per_run_policy=256,
         batch_size_policy=128,
         stats_and_eval_every=2,
-        lr_pos=1e-4,
+        lr_pos=1e-3,
         lr_policy=1e-3,
         n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
-        prefix="large")
+        prefix=prefix)
