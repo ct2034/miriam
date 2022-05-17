@@ -506,7 +506,7 @@ if __name__ == "__main__":
         seed=0,
         prefix=prefix)
 
-    tiny_r64_e256 run
+    # tiny_r64_e256 run
     prefix = "tiny_r64_e256"
     logging.getLogger(__name__).setLevel(logging.INFO)
     logging.getLogger(
