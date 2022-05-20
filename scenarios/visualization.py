@@ -1,7 +1,7 @@
 
 from functools import reduce
 from itertools import product
-
+from typing import List
 import networkx as nx
 import numpy as np
 from matplotlib import cm
@@ -14,7 +14,7 @@ from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
 _ = Axes3D
 
 
-def get_colors(n_agents):
+def get_colors(n_agents) -> List[float]:
     cmap = plt.get_cmap('hsv')
     colors = [cmap(i) for i in np.linspace(0, 1, n_agents+1)]
     return colors
