@@ -1,4 +1,5 @@
 import logging
+from math import pi
 from typing import Dict, Tuple
 
 import networkx as nx
@@ -73,6 +74,11 @@ def agents_to_data(agents, i_self: int,
         relative_pos[:, 1], relative_pos[:, 0])
     # if not own node, add own angle
     relative_angle[relative_distance != 0] -= own_angle
+    for i_n in range(len(relative_angle)):
+        while relative_angle[i_n] > pi:
+            relative_angle[i_n] -= 2*pi
+        while relative_angle[i_n] < -pi:
+            relative_angle[i_n] += 2*pi
 
     # edge index
     edge_index = torch.tensor([(

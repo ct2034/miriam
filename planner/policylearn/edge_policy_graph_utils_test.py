@@ -5,9 +5,10 @@ from random import Random
 
 import networkx as nx
 import numpy as np
-from learn.delaunay_benchmark.delaunay_implementations import (
-    read_map, run_delaunay_libpysal)
 from planner.policylearn.edge_policy_graph_utils import *
+from planner.policylearn.edge_policy_graph_utils_angle_demo import demo
+from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph_and_flann,
+                                                    read_map, sample_points)
 from scenarios.test_helper import make_cache_folder_and_set_envvar
 from sim.decentralized.agent import Agent
 from sim.decentralized.runner import to_agent_objects
@@ -88,27 +89,7 @@ class TestEdgePolicyGraphUtils(unittest.TestCase):
             self.assertAlmostEqual(data.x[small_from_big[n], 3], a, places=3)
 
     def test_angles_of_random_graphs(self):
-        n_nodes = 32
-        n_smpls = 100
-        n_agents = 2
-        rng = Random(0)
-        map_fname: str = "roadmaps/odrm/odrm_eval/maps/plain.png"
-        map_img = read_map(map_fname)
-        for _ in range(n_smpls):
-            pos = np.array(
-                [(rng.randint(0, map_img.shape[0]-1),
-                    rng.randint(0, map_img.shape[1]-1))
-                    for _ in range(n_nodes)],
-                dtype=np.int32)
-            g = run_delaunay_libpysal(pos, map_img)
-            starts = rng.sample(range(g.number_of_nodes()), k=n_agents)
-            goals = rng.sample(range(g.number_of_nodes()), k=n_agents)
-            agents = to_agent_objects(g, starts, goals, radius=.1)
-            assert agents is not None
-            data, big_from_small = agents_to_data(agents, 0)
-            for n in range(n_nodes):
-                self.assertGreaterEqual(data.x[n, 3], -pi/2)
-                self.assertLessEqual(data.x[n, 3], pi/2)
+        demo()
 
     def test_get_optimal_edge(self):
         agents = self.agents.copy()
