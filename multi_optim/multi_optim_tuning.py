@@ -105,7 +105,7 @@ def start_process(kwargs):
     import_str = "from multi_optim.multi_optim_run import run_optimization"
     kwargs_str = repr(kwargs)
     my_env = os.environ.copy()
-    my_env["CUDA_VISIBLE_DEVICES"] = "-1"
+    # my_env["CUDA_VISIBLE_DEVICES"] = "-1"
     process = subprocess.Popen(
         ["/usr/bin/python3",
          "-c",
@@ -129,7 +129,7 @@ def run(params_to_run):
     cpus = os.cpu_count()
     assert isinstance(cpus, int)
     logger.info(f"{cpus=}")
-    max_active_processes: int = 1  # min(cpus, 8)
+    max_active_processes: int = 4  # min(cpus, 8)
     logger.info(f"{max_active_processes=}")
     active_processes = set()
 
