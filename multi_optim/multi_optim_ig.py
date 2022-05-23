@@ -13,13 +13,14 @@ from planner.policylearn.generate_data_demo import plot_graph_wo_pos_data
 
 if __name__ == "__main__":
     # Definitions
-    prefix: str = "tiny_r256_e64"
+    prefix: str = "medium_r64_e256"
     save_folder: str = "multi_optim/results"
 
     # Load the model
     model = EdgePolicyModel()
     model.load_state_dict(torch.load(
-        f"{save_folder}/{prefix}_policy_model.pt"))
+        f"{save_folder}/{prefix}_policy_model.pt",
+        map_location=torch.device('cpu')))
     model.eval()
 
     # Load the dataset
@@ -49,6 +50,9 @@ if __name__ == "__main__":
         if ex_good is not None and ex_bad is not None:
             break
     assert isinstance(ex_good, torch_geometric.data.Data)
+
+    print(f"Good example: {ex_good.x}")
+    print(f"Bad example: {ex_bad.x}")
 
     # Run IG
     ig = IntegratedGradients(model)
@@ -80,6 +84,7 @@ if __name__ == "__main__":
         } for d in [ex_good, ex_bad]
     ]
     highlight_nodes_s[1][y_out_bad] = "red"  # wrong next node
+    print(f"Highlight nodes: {highlight_nodes_s}")
 
     f, axs = plt.subplots(2, 2, figsize=(9, 9))
     for i_smpl, d in enumerate([ex_good, ex_bad]):
