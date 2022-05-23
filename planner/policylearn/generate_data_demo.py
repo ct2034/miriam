@@ -54,7 +54,8 @@ def plot_graph(ax, data_edge_index, data_pos, data_x,
             'k'
         )
     # nodes
-    ax.scatter(data_pos[:, 0], data_pos[:, 1], color='k')
+    ax.scatter(data_pos[:, 0], data_pos[:, 1], marker='o', color='white',
+               edgecolor='k', zorder=90)
     for n, color in highlight_nodes.items():
         ax.scatter(data_pos[n, 0], data_pos[n, 1],
                    color=color, zorder=100, marker="x")

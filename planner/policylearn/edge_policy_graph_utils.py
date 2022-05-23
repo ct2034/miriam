@@ -3,6 +3,7 @@ from math import pi
 from typing import Dict, Tuple
 
 import networkx as nx
+import numpy as np
 import scenarios
 import torch
 from definitions import DEFAULT_TIMEOUT_S, INVALID, POS
@@ -102,7 +103,11 @@ def agents_to_data(agents, i_self: int,
                      x_layer_other_paths,
                      relative_distance.view(-1, 1),
                      relative_angle.view(-1, 1)], dim=1),
-        y=y
+        y=y,
+        pos=torch.tensor(np.array([
+            pos[big_from_small[i]]
+            for i in range(len(small_from_big))
+        ]))
     )
     return d, big_from_small
 
