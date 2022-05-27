@@ -22,7 +22,7 @@ def print_matrix_with_row_numbers(X, prec=2):
 
 if __name__ == "__main__":
     # Definitions
-    prefix: str = "default_seed_2"
+    prefix: str = "default_seed_3"
     save_folder: str = "multi_optim/results/tuning"
 
     # Load the model
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     ig = IntegratedGradients(model)
     ig_good = ig.attribute(
         ex_good.x,
-        baselines=torch.zeros_like(ex_good.x),
+        baselines=torch.ones_like(ex_good.x) * -1,
         additional_forward_args=(
             ex_good.edge_index,
             torch.tensor([0, ]*ex_good.num_nodes)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         internal_batch_size=1)
     ig_bad = ig.attribute(
         ex_bad.x,
-        baselines=torch.zeros_like(ex_bad.x),
+        baselines=torch.ones_like(ex_bad.x) * -1,
         additional_forward_args=(
             ex_bad.edge_index,
             torch.tensor([0, ]*ex_bad.num_nodes)
