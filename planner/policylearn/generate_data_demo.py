@@ -89,7 +89,7 @@ def plot_graph(ax, data_edge_index, data_pos, data_x,
                 data_pos[i_n, 1] + dp*(i_x+1),
                 color=color_middle_a,
                 edgecolor=color,
-                s=40)
+                s=60)
     for n in range(n_nodes):
         ax.text(
             data_pos[n, 0] - dp,

@@ -22,7 +22,7 @@ def print_matrix_with_row_numbers(X, prec=2):
 
 if __name__ == "__main__":
     # Definitions
-    prefix: str = "default_seed_3"
+    prefix: str = "default_seed_2"
     save_folder: str = "multi_optim/results/tuning"
 
     # Load the model
