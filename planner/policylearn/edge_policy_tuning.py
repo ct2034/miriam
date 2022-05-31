@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 import numpy as np
 import torch
 import torch.multiprocessing as mp
-from cuda_util import pick_gpu_lowest_memory
+from cuda_util import pick_gpu_low_memory
 from matplotlib import pyplot as plt
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from scenarios.visualization import get_colors
@@ -34,7 +34,7 @@ def learning(
     n_epochs = 100
 
     if torch.cuda.is_available():
-        gpu = torch.device(pick_gpu_lowest_memory())
+        gpu = torch.device(pick_gpu_low_memory())
         torch.cuda.set_device(gpu)
     else:
         gpu = torch.device("cpu")
