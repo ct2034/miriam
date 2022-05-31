@@ -29,14 +29,16 @@ def learning(
     torch.manual_seed(seed)
 
     # run to learn from
-    run_prefix_data: str = "tiny"
+    run_prefix_data: str = "large_r64_e256"
     n_test = 100
     n_epochs = 100
 
-    gpu = torch.device("cpu")
-    # gpu = torch.device(pick_gpu_lowest_memory())
+    if torch.cuda.is_available():
+        gpu = torch.device(pick_gpu_lowest_memory())
+        torch.cuda.set_device(gpu)
+    else:
+        gpu = torch.device("cpu")
     print(f"Using GPU {gpu}")
-    # torch.cuda.set_device(gpu)
 
     # load previously trained model
     model = EdgePolicyModel(
@@ -97,17 +99,18 @@ def learning(
 
 
 def learning_proxy(kwargs):
+    print("a")
     learning(**kwargs)
 
 
 def tuning():
-    lr_s = [1E-3, 3E-3]
+    lr_s = [1E-3, 1E-2, 1E-4]
     batch_size_s = [64, 128]
-    conv_channels_s = [128, 64]
-    conv_layers_s = [4, 3]
-    readout_layers_s = [2, 1]
-    cheb_filter_size_s = [5, 4]
-    dropout_p_s = [0.2, 0.3, 0.4, 0.1]
+    conv_channels_s = [128, 256]
+    conv_layers_s = [4, 5]
+    readout_layers_s = [2, 3]
+    cheb_filter_size_s = [5, 6]
+    dropout_p_s = [0.2, 0.3]
     parameter_experiments = {
         "lr": lr_s,
         "batch_size": batch_size_s,
@@ -116,7 +119,7 @@ def tuning():
         "readout_layers": readout_layers_s,
         "cheb_filter_size": cheb_filter_size_s,
         "dropout_p": dropout_p_s
-    }  # type: Dict[str, Union[str, List[Union[float, int]]]]
+    }  # type: Dict[str, Union[str, List[float], List[int]]]
 
     seed_s = range(8)
 
@@ -141,8 +144,10 @@ def tuning():
                 params_to_run.append(kwargs.copy())
 
     mp.set_start_method("spawn")
-    p = mp.Pool(16)
-    p.map(learning_proxy, params_to_run)
+    # p = mp.Pool(16)
+    # p.map(learning_proxy, params_to_run)
+    for p in params_to_run:
+        learning_proxy(p)
 
 
 def rolling_average(data: List[float], n: int = 10) -> List[float]:
