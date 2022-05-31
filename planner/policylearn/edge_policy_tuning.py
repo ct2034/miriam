@@ -99,7 +99,6 @@ def learning(
 
 
 def learning_proxy(kwargs):
-    print("a")
     learning(**kwargs)
 
 
@@ -144,10 +143,10 @@ def tuning():
                 params_to_run.append(kwargs.copy())
 
     mp.set_start_method("spawn")
-    # p = mp.Pool(16)
-    # p.map(learning_proxy, params_to_run)
-    for p in params_to_run:
-        learning_proxy(p)
+    p = mp.Pool(16)
+    p.map(learning_proxy, params_to_run)
+    # for p in params_to_run:
+    #     learning_proxy(p)
 
 
 def rolling_average(data: List[float], n: int = 10) -> List[float]:
