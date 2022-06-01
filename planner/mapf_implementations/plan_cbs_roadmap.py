@@ -103,9 +103,11 @@ def read_outfile(fname):
     paths = [list() for _ in range(n_agents)]
     for k, v in schedule.items():
         i_a = int(k.replace('agent', ''))
+        t = 0
         for pose in v:
             try:
-                paths[i_a].append((pose['v'], pose['t']))
+                paths[i_a].append((pose['v'], t))
+                t += 1
             except KeyError:
                 return INVALID
     return paths
