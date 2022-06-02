@@ -103,8 +103,8 @@ def learning_proxy(kwargs):
 
 
 def tuning():
-    lr_s = [1E-3, 1E-2, 1E-4]
-    batch_size_s = [64, 128]
+    lr_s = [1E-4, 3E-4, 3E-5]
+    batch_size_s = [64]
     conv_channels_s = [128, 256]
     conv_layers_s = [4, 5]
     readout_layers_s = [2, 3]
@@ -120,7 +120,7 @@ def tuning():
         "dropout_p": dropout_p_s
     }  # type: Dict[str, Union[str, List[float], List[int]]]
 
-    seed_s = range(8)
+    seed_s = range(6)
 
     # prepare multithreading
     params_to_run = []
@@ -143,7 +143,7 @@ def tuning():
                 params_to_run.append(kwargs.copy())
 
     mp.set_start_method("spawn")
-    p = mp.Pool(16)
+    p = mp.Pool(8)
     p.map(learning_proxy, params_to_run)
     # for p in params_to_run:
     #     learning_proxy(p)
