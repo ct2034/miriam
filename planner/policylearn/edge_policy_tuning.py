@@ -24,6 +24,7 @@ def learning(
     cheb_filter_size: int,
     dropout_p: float,
     seed: int,
+    base_folder: str,
 ):
     rng = Random(seed)
     torch.manual_seed(seed)
@@ -56,15 +57,17 @@ def learning(
     dataset = EdgePolicyDataset(f"multi_optim/results/{run_prefix_data}_data")
     test_set_i_s = range(len(dataset) - n_test, len(dataset))
     test_set = dataset[test_set_i_s]
-    test_set = [(d, {n: n for n in range(d.num_nodes)}) for d in test_set]
+    test_set = [(d, {n: n for n in range(d.num_nodes)})
+                for d in test_set]  # type: ignore
+    exclude_keys = list(map(str, test_set_i_s))
     loader = DataLoader(dataset, batch_size=batch_size,
-                        shuffle=True, exclude_keys=test_set_i_s)
+                        shuffle=True, exclude_keys=exclude_keys)
 
     # stat collection
     stats = {
         "accuracy": [],
         "loss": [],
-    }
+    }  # type: Dict[str, List[float]]
     n_stat_points_desired = 200
     n_stat_points_per_epoch = n_stat_points_desired // n_epochs
     stats_every_x_batch = len(loader) // n_stat_points_per_epoch
@@ -75,6 +78,8 @@ def learning(
     for i_e in range(n_epochs):
         for i_b, batch in enumerate(loader):
             loss = model.learn(batch, optimizer)
+            if loss is None:
+                loss = 0.  # TODO: fix this
             pb.progress()
             if i_b % stats_every_x_batch == 0:
                 accuracy = model.accuracy(test_set)
@@ -86,23 +91,23 @@ def learning(
 
     # save model
     torch.save(model.state_dict(),
-               f"planner/policylearn/results/edge_policy_{name}.pt")
+               f"{base_folder}/edge_policy_{name}.pt")
 
     # save stats
-    with open(f"planner/policylearn/results/edge_policy_{name}.json", "w") as f:
+    with open(f"{base_folder}/edge_policy_{name}.json", "w") as f:
         json.dump(stats, f)
     plt.figure(figsize=(20, 20), dpi=500)
     plt.plot(stats["accuracy"], label="accuracy")
     plt.plot(stats["loss"], label="loss")
     plt.legend()
-    plt.savefig(f"planner/policylearn/results/edge_policy_{name}.png")
+    plt.savefig(f"{base_folder}/edge_policy_{name}.png")
 
 
 def learning_proxy(kwargs):
     learning(**kwargs)
 
 
-def tuning():
+def tuning(base_folder):
     lr_s = [1E-4, 3E-4, 3E-5]
     batch_size_s = [64]
     conv_channels_s = [128, 256]
@@ -130,6 +135,7 @@ def tuning():
         kwargs = {k: v[0] for k, v in parameter_experiments.items()}
         kwargs["name"] = f"default_seed_{seed}"
         kwargs["seed"] = seed
+        kwargs["base_folder"] = base_folder
         params_to_run.append(kwargs.copy())
 
     # experimental runs
@@ -140,6 +146,7 @@ def tuning():
                 kwargs[name] = value
                 kwargs["name"] = f"{name}_{value}_seed_{seed}"
                 kwargs["seed"] = seed
+                kwargs["base_folder"] = base_folder
                 params_to_run.append(kwargs.copy())
 
     mp.set_start_method("spawn")
@@ -153,8 +160,8 @@ def rolling_average(data: List[float], n: int = 10) -> List[float]:
     return [sum(data[i:i + n]) / n for i in range(len(data) - n)]
 
 
-def plot_results():
-    fnames = os.listdir("planner/policylearn/results")
+def plot_results(base_folder):
+    fnames = os.listdir(f"{base_folder}")
     fnames_json = [f for f in fnames if f.endswith(".json")]
 
     fnames_json = sorted(fnames_json)
@@ -162,7 +169,7 @@ def plot_results():
     data = {}
 
     for i_f, fname in enumerate(fnames_json):
-        with open(f"planner/policylearn/results/{fname}", "r") as f:
+        with open(f"{base_folder}/{fname}", "r") as f:
             stats = json.load(f)
         label = fname.split("edge_policy_")[1].split("_seed")[0]
         seed = int(fname.split("edge_policy_")[
@@ -179,6 +186,7 @@ def plot_results():
         dpi=500,
         sharex=True,
         sharey=True)
+    assert isinstance(axs, np.ndarray)
 
     for i_l, label in enumerate(experiments):
         # collect data over seeds
@@ -219,9 +227,10 @@ def plot_results():
         axs[0, i_l].legend()
         axs[1, i_l].legend()
 
-    plt.savefig("planner/policylearn/results/_edge_policy_results.png")
+    plt.savefig("f{base_folder}/_edge_policy_results.png")
 
 
 if __name__ == "__main__":
-    tuning()
-    plot_results()
+    base_folder = "planner/policylearn/results"
+    tuning(base_folder=base_folder)
+    plot_results(base_folder)
