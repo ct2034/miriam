@@ -168,31 +168,42 @@ def plot_results(base_folder):
 
     data = {}
 
+    # stats over seeds
+    max_seed = 0  # type: int
+
     for i_f, fname in enumerate(fnames_json):
         with open(f"{base_folder}/{fname}", "r") as f:
             stats = json.load(f)
         label = fname.split("edge_policy_")[1].split("_seed")[0]
         seed = int(fname.split("edge_policy_")[
                    1].split("seed_")[1].split(".")[0])
+        max_seed = max(max_seed, seed)
         if label not in data:
             data[label] = {}
         data[label][seed] = stats
 
+    n_seeds = max_seed + 1
+
     n_labels = len(data)
     experiments = sorted(data.keys())
     fig, (axs) = plt.subplots(
-        2, n_labels,
+        3, n_labels,
         figsize=(5*n_labels, 10),
         dpi=500,
-        sharex=True,
-        sharey=True)
+        sharex=True)
+    # sharey=True)
     assert isinstance(axs, np.ndarray)
+
+    maxloss = 0.  # type: float
 
     for i_l, label in enumerate(experiments):
         # collect data over seeds
+        existing_seeds = 0  # type: int
         d_acc = []
         d_loss = []
         for i_s, seed in enumerate(sorted(data[label].keys())):
+            max_seed = max(max_seed, seed)
+            existing_seeds += 1
             d_acc.append(data[label][seed]["accuracy"])
             d_loss.append(data[label][seed]["loss"])
 
@@ -203,34 +214,48 @@ def plot_results(base_folder):
         loss_mean = np.mean(np_loss, axis=0)
         acc_std = np.std(np_acc, axis=0)
         loss_std = np.std(np_loss, axis=0)
+        maxloss = max(maxloss, np.max(loss_mean) + np.max(loss_std))
+
+        # barplots
+        n_epochs = len(acc_mean)
+        axs[0, i_l].bar(0, existing_seeds / n_seeds,
+                        width=n_epochs/8., label="existing seeds")
+        axs[0, i_l].set_yticks([0, 1])
+        axs[0, i_l].set_yticklabels(["0%", "100%"])
 
         # plotting statistics
-        axs[0, i_l].plot(acc_mean, label=label)
-        axs[0, i_l].fill_between(
+        axs[1, i_l].plot(acc_mean, label=label)
+        axs[1, i_l].fill_between(
             range(len(acc_mean)), acc_mean - acc_std, acc_mean + acc_std,
             alpha=0.3)
-        axs[1, i_l].plot(loss_mean, label=label)
-        axs[1, i_l].fill_between(
+        axs[2, i_l].plot(loss_mean, label=label)
+        axs[2, i_l].fill_between(
             range(len(loss_mean)), loss_mean - loss_std, loss_mean + loss_std,
             alpha=0.3)
 
         # labels with means
-        axs[0, i_l].text(len(acc_mean), acc_mean[-1], f"{acc_mean[-1]:.3f}")
-        axs[1, i_l].text(len(loss_mean), loss_mean[-1], f"{loss_mean[-1]:.3f}")
+        axs[1, i_l].text(len(acc_mean), acc_mean[-1], f"{acc_mean[-1]:.3f}")
+        axs[2, i_l].text(len(loss_mean), loss_mean[-1], f"{loss_mean[-1]:.3f}")
 
         # additional text
-        axs[0, i_l].set_title(label)
-        axs[0, i_l].set_ylim(0, 1)
-        axs[0, i_l].set_ylabel("accuracy")
-        axs[1, i_l].set_ylabel("loss")
-        axs[1, i_l].set_xlabel("epoch")
-        axs[0, i_l].legend()
-        axs[1, i_l].legend()
+        axs[1, i_l].set_title(label)
+        axs[2, i_l].set_xlabel("epoch")
 
-    plt.savefig("f{base_folder}/_edge_policy_results.png")
+        axs[1, i_l].set_ylim(0, 1)
+        axs[1, i_l].set_ylabel("accuracy")
+        axs[2, i_l].set_ylabel("loss")
+
+        # legend
+        for ax in axs[:, i_l]:
+            ax.legend()
+
+    for ax in axs[2, :]:
+        ax.set_ylim(0, maxloss)
+
+    plt.savefig(f"{base_folder}/_edge_policy_results.png")
 
 
 if __name__ == "__main__":
     base_folder = "planner/policylearn/results"
-    tuning(base_folder=base_folder)
+    # tuning(base_folder=base_folder)
     plot_results(base_folder)
