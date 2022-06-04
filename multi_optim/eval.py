@@ -216,7 +216,7 @@ class Eval(object):
                 1, random_seed=0)
             # run sim with optimal policy
             agents = to_agent_objects(
-                self.first_roadmap, starts.tolist(), goals.tolist(),
+                graph, starts.tolist(), goals.tolist(),
                 policy=PolicyType.OPTIMAL, radius=self.radius,
                 rng=self.rng)
             if agents is None:
