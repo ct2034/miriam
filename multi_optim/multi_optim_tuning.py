@@ -37,17 +37,16 @@ def params_debug():
 
 
 def params_run():
-    n_agents_s = [4, 3, 5]
     parameter_experiments = {
         "n_nodes": [64],  # medium
         "n_runs_pose": [128],
         "n_runs_policy": [128],
-        "n_epochs_per_run_policy":  [256],
-        "batch_size_policy":  [128],
+        "n_epochs_per_run_policy":  [128, 256],
+        "batch_size_policy":  [64],
         "stats_and_eval_every": [4],
         "lr_pos": [1E-3, 1E-2, 1E-3],
-        "lr_policy": [1E-3],
-        "n_agents": n_agents_s,
+        "lr_policy": [1E-4],
+        "n_agents": [4],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
         "save_folder": [TUNING_RES_FOLDER]
