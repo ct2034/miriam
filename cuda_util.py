@@ -1,4 +1,5 @@
 import os
+import random
 import re
 import subprocess
 import sys
@@ -61,6 +62,16 @@ def pick_gpu_lowest_memory():
                       for (gpu_id, memory) in gpu_memory_map().items()]
     best_memory, best_gpu = sorted(memory_gpu_map)[0]
     return best_gpu
+
+
+def pick_gpu_low_memory():
+    """Returns GPU with little allocated memory"""
+    N = 4  # select randomly between N lowest gpus
+    memory_gpu_map = [(memory, gpu_id)
+                      for (gpu_id, memory) in gpu_memory_map().items()]
+    n_best_gpus = sorted(memory_gpu_map)[0:N+1]
+    _, good_gpu = random.choice(n_best_gpus)
+    return good_gpu
 
 
 def setup_one_gpu():

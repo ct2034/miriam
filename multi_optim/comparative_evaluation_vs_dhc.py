@@ -7,19 +7,19 @@ import networkx as nx
 import numpy as np
 import torch
 import yaml
-from matplotlib import pyplot as plt
-from pyflann import FLANN
-
 from definitions import (FREE, IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID,
                          MAP_IMG, OBSTACLE, PATH, POS, N)
-from multi_optim.multi_optim_run import ITERATOR_TYPE, RADIUS
+from matplotlib import pyplot as plt
 from planner.dhc.eval import eval as dhc_eval
 from planner.policylearn.edge_policy import EdgePolicyModel
+from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (check_edge, is_coord_free,
                                                     read_map, sample_points)
 from scenarios.visualization import get_colors
 from sim.decentralized.policy import LearnedPolicy
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
+
+from multi_optim.multi_optim_run import ITERATOR_TYPE, RADIUS
 
 logger = logging.getLogger(__name__)
 
@@ -243,6 +243,7 @@ if __name__ == '__main__':
         dtype=np.float32)
 
     # plot
+    plt.figure()
     plt.imshow(
         np.swapaxes(np.array(map_img), 0, 1),
         cmap='gray',
@@ -256,7 +257,24 @@ if __name__ == '__main__':
         node_size=5,
         edge_color='r',
         node_color='r',)
-    plt.savefig(f"{base_folder}/{results_name}_dhcmap.png")
+    plt.savefig(f"multi_optim/results/{results_name}_dhcmap_by_nodes.png")
+
+    plt.figure()
+    plt.imshow(
+        np.swapaxes(np.array(map_img), 0, 1),
+        cmap='gray',
+        origin='lower',
+        alpha=.5,
+        extent=(0, 1, 0, 1))
+    nx.draw_networkx(
+        g_dhc_by_edge_len,
+        pos=pos_dhc_by_edge_len_dict,
+        with_labels=False,
+        node_size=5,
+        edge_color='r',
+        node_color='r',)
+    plt.savefig(
+        f"multi_optim/results/{results_name}_dhcmap_by_edge_len.png")
 
     lens_our = [None] * n_eval  # type: List[Optional[float]]
     lens_dhc_by_nodes = [None] * n_eval  # type: List[Optional[float]]
@@ -279,27 +297,27 @@ if __name__ == '__main__':
             goals_our.tolist(),
             radius=RADIUS,
             rng=rng)
-        assert agents is not None
-        for agent in agents:
-            agent.policy = LearnedPolicy(
-                agent, policy_nn)
-        paths_our: List[PATH] = []
-        res_our = run_a_scenario(
-            g_our, agents, False, ITERATOR_TYPE, paths_out=paths_our)
-        logger.info(f"{res_our=}")
-        logger.info(f"{paths_our=}")
         total_lenght_our = None  # type: Optional[float]
-        if res_our[IDX_SUCCESS]:
-            total_lenght_our = res_our[IDX_AVERAGE_LENGTH] * n_agents
-            for i_a in range(n_agents):
-                # before start
-                total_lenght_our += float(np.linalg.norm(
-                    np.array(points[i_a]) -
-                    pos_our_np[starts_our[i_a]]))
-                # after goal
-                total_lenght_our += float(np.linalg.norm(
-                    np.array(points[i_a + n_agents]) -
-                    np.array(pos_our[goals_our[i_a]], dtype=np.float32)))
+        if agents is not None:
+            for agent in agents:
+                agent.policy = LearnedPolicy(
+                    agent, policy_nn)
+            paths_our: List[PATH] = []
+            res_our = run_a_scenario(
+                g_our, agents, False, ITERATOR_TYPE, paths_out=paths_our)
+            logger.info(f"{res_our=}")
+            logger.info(f"{paths_our=}")
+            if res_our[IDX_SUCCESS]:
+                total_lenght_our = res_our[IDX_AVERAGE_LENGTH] * n_agents
+                for i_a in range(n_agents):
+                    # before start
+                    total_lenght_our += float(np.linalg.norm(
+                        np.array(points[i_a]) -
+                        pos_our_np[starts_our[i_a]]))
+                    # after goal
+                    total_lenght_our += float(np.linalg.norm(
+                        np.array(points[i_a + n_agents]) -
+                        np.array(pos_our[goals_our[i_a]], dtype=np.float32)))
 
         # eval dhc by nodes
         starts_dhc_by_nodes = nn_dhc_by_nodes[:n_agents]
@@ -356,7 +374,7 @@ if __name__ == '__main__':
                     alpha=.5,
                     extent=(0, 1, 0, 1))
             nx.draw_networkx(
-                g_our,
+                nx.subgraph_view(g_our, filter_edge=lambda a, b: a != b),
                 pos=nx.get_node_attributes(g_our, POS),
                 with_labels=False,
                 node_size=5,

@@ -3,851 +3,421 @@ DEBUG:__main__:len(params_to_run)=40
 INFO:__main__:cpus=128
 INFO:__main__:max_active_processes=4
 INFO:__main__:(all) len(params_to_run)=40
-INFO:__main__:len(ran_prefixes)=2
-INFO:__main__:(remaining) len(params_to_run)=38
+INFO:__main__:len(ran_prefixes)=28
+INFO:__main__:(remaining) len(params_to_run)=12
 INFO:__main__:[1mRunning started.[0m
-INFO:__main__:Started process "n_agents_5_seed_5" @ [876815]
+INFO:__main__:Started process "lr_pos_0.0003_seed_2" @ [89951]
 DEBUG:__main__:len(active_processes)=1
-DEBUG:__main__:len(params_to_run)=37
-INFO:__main__:Started process "n_agents_5_seed_4" @ [876819]
-DEBUG:__main__:len(active_processes)=2
-DEBUG:__main__:len(params_to_run)=36
-INFO:__main__:Started process "n_agents_5_seed_3" @ [876823]
-DEBUG:__main__:len(active_processes)=3
-DEBUG:__main__:len(params_to_run)=35
-INFO:__main__:Started process "n_agents_5_seed_2" @ [876829]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=34
-INFO:__main__:Finished process [876829]
-INFO:__main__:outs: [876829] >>>>><<<<< [876829]
-ERROR:__main__:errs: [876829] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-<<<<< [876829]
-INFO:__main__:Started process "n_agents_5_seed_1" @ [2870617]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=33
-INFO:__main__:Running progress: 5%
- > took: 1:37:55.952940, eta: 1 day, 5:22:47.152920
-INFO:__main__:Finished process [876819]
-INFO:__main__:outs: [876819] >>>>><<<<< [876819]
-ERROR:__main__:errs: [876819] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-<<<<< [876819]
-INFO:__main__:Started process "n_agents_5_seed_0" @ [3251696]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=32
-INFO:__main__:Finished process [876815]
-INFO:__main__:outs: [876815] >>>>><<<<< [876815]
-ERROR:__main__:errs: [876815] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [876815]
-INFO:__main__:Started process "n_agents_3_seed_7" @ [3521221]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=31
-INFO:__main__:Running progress: 11%
- > took: 2:20:33.953411, eta: 19:54:48.603994
-INFO:__main__:Finished process [876823]
-INFO:__main__:outs: [876823] >>>>><<<<< [876823]
-ERROR:__main__:errs: [876823] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [876823]
-INFO:__main__:Started process "n_agents_3_seed_6" @ [3618523]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=30
-INFO:__main__:Finished process [2870617]
-INFO:__main__:outs: [2870617] >>>>><<<<< [2870617]
-ERROR:__main__:errs: [2870617] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [2870617]
-INFO:__main__:Started process "n_agents_3_seed_5" @ [3694973]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=29
-INFO:__main__:Running progress: 16%
- > took: 2:31:19.894001, eta: 13:27:06.101339
-INFO:__main__:Finished process [3251696]
-INFO:__main__:outs: [3251696] >>>>><<<<< [3251696]
-ERROR:__main__:errs: [3251696] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-<<<<< [3251696]
-INFO:__main__:Started process "n_agents_3_seed_4" @ [4072725]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=28
-INFO:__main__:Finished process [3618523]
-INFO:__main__:outs: [3618523] >>>>><<<<< [3618523]
-ERROR:__main__:errs: [3618523] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [3618523]
-INFO:__main__:Started process "n_agents_3_seed_3" @ [4188020]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=27
-INFO:__main__:Running progress: 21%
- > took: 2:48:43.068403, eta: 10:32:41.506511
-INFO:__main__:Finished process [4188020]
-INFO:__main__:outs: [4188020] >>>>><<<<< [4188020]
-ERROR:__main__:errs: [4188020] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [4188020]
-INFO:__main__:Started process "n_agents_3_seed_2" @ [718247]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=26
-INFO:__main__:Finished process [3694973]
-INFO:__main__:outs: [3694973] >>>>><<<<< [3694973]
-ERROR:__main__:errs: [3694973] >>>>>WARNING:multi_optim.eval:No paths
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-<<<<< [3694973]
-INFO:__main__:Started process "n_agents_3_seed_1" @ [776825]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=25
-INFO:__main__:Running progress: 26%
- > took: 3:13:32.169793, eta: 9:01:54.075420
-INFO:__main__:Finished process [4072725]
-INFO:__main__:outs: [4072725] >>>>><<<<< [4072725]
-ERROR:__main__:errs: [4072725] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [4072725]
-INFO:__main__:Started process "n_agents_3_seed_0" @ [778632]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=24
-INFO:__main__:Finished process [3521221]
-INFO:__main__:outs: [3521221] >>>>><<<<< [3521221]
-ERROR:__main__:errs: [3521221] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [3521221]
-INFO:__main__:Started process "lr_pos_0.0003_seed_7" @ [927643]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=23
-INFO:__main__:Running progress: 32%
- > took: 3:20:11.709547, eta: 7:13:45.370685
-INFO:__main__:Finished process [778632]
-INFO:__main__:outs: [778632] >>>>><<<<< [778632]
-ERROR:__main__:errs: [778632] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-<<<<< [778632]
-INFO:__main__:Started process "lr_pos_0.0003_seed_6" @ [1218968]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=22
-INFO:__main__:Finished process [776825]
-INFO:__main__:outs: [776825] >>>>><<<<< [776825]
-ERROR:__main__:errs: [776825] >>>>><<<<< [776825]
-INFO:__main__:Started process "lr_pos_0.0003_seed_5" @ [1376233]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=21
-INFO:__main__:Running progress: 37%
- > took: 3:37:16.773934, eta: 6:12:28.755315
-INFO:__main__:Finished process [718247]
-INFO:__main__:outs: [718247] >>>>><<<<< [718247]
-ERROR:__main__:errs: [718247] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [718247]
-INFO:__main__:Started process "lr_pos_0.0003_seed_4" @ [1851285]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=20
-INFO:__main__:Finished process [1218968]
-INFO:__main__:outs: [1218968] >>>>><<<<< [1218968]
-ERROR:__main__:errs: [1218968] >>>>><<<<< [1218968]
-INFO:__main__:Started process "lr_pos_0.0003_seed_3" @ [2610932]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=19
-INFO:__main__:Running progress: 42%
- > took: 4:04:18.341708, eta: 5:35:55.219849
-INFO:__main__:Finished process [1376233]
-INFO:__main__:outs: [1376233] >>>>><<<<< [1376233]
-ERROR:__main__:errs: [1376233] >>>>>WARNING:multi_optim.eval:No paths
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-<<<<< [1376233]
-INFO:__main__:Started process "lr_pos_0.0003_seed_2" @ [3857354]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=18
-INFO:__main__:Finished process [2610932]
-INFO:__main__:outs: [2610932] >>>>><<<<< [2610932]
-ERROR:__main__:errs: [2610932] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [2610932]
-INFO:__main__:Started process "lr_pos_0.0003_seed_1" @ [690303]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=17
-INFO:__main__:Running progress: 47%
- > took: 5:22:17.212199, eta: 5:58:05.791332
-INFO:__main__:Finished process [1851285]
-INFO:__main__:outs: [1851285] >>>>><<<<< [1851285]
-ERROR:__main__:errs: [1851285] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [1851285]
-INFO:__main__:Started process "lr_pos_0.0003_seed_0" @ [1394124]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=16
-INFO:__main__:Running progress: 50%
- > took: 5:54:21.532896, eta: 5:54:21.532896
-INFO:__main__:Finished process [690303]
-INFO:__main__:outs: [690303] >>>>><<<<< [690303]
-ERROR:__main__:errs: [690303] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-<<<<< [690303]
-INFO:__main__:Started process "lr_pos_0.003_seed_7" @ [1411446]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=15
-INFO:__main__:Finished process [3857354]
-INFO:__main__:outs: [3857354] >>>>><<<<< [3857354]
-ERROR:__main__:errs: [3857354] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [3857354]
-INFO:__main__:Started process "lr_pos_0.003_seed_6" @ [1586927]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=14
-INFO:__main__:Running progress: 55%
- > took: 6:04:57.136944, eta: 4:55:26.253717
-INFO:__main__:Finished process [927643]
-INFO:__main__:outs: [927643] >>>>><<<<< [927643]
-ERROR:__main__:errs: [927643] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-<<<<< [927643]
-INFO:__main__:Started process "lr_pos_0.003_seed_5" @ [1657855]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=13
-INFO:__main__:Finished process [1394124]
-INFO:__main__:outs: [1394124] >>>>><<<<< [1394124]
-ERROR:__main__:errs: [1394124] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [1394124]
-INFO:__main__:Started process "lr_pos_0.003_seed_4" @ [2073860]
-DEBUG:__main__:len(active_processes)=4
-DEBUG:__main__:len(params_to_run)=12
-INFO:__main__:Running progress: 61%
- > took: 6:29:56.613091, eta: 4:14:18.660712
-INFO:__main__:Finished process [1586927]
-INFO:__main__:outs: [1586927] >>>>><<<<< [1586927]
-ERROR:__main__:errs: [1586927] >>>>>/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [1586927]
-INFO:__main__:Started process "lr_pos_0.003_seed_3" @ [2196536]
-DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=11
-INFO:__main__:Finished process [1411446]
-INFO:__main__:outs: [1411446] >>>>><<<<< [1411446]
-ERROR:__main__:errs: [1411446] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [1411446]
-INFO:__main__:Started process "lr_pos_0.003_seed_2" @ [2820783]
-DEBUG:__main__:len(active_processes)=4
+INFO:__main__:Started process "lr_pos_0.003_seed_2" @ [89957]
+DEBUG:__main__:len(active_processes)=2
 DEBUG:__main__:len(params_to_run)=10
-INFO:__main__:Running progress: 66%
- > took: 7:03:45.219282, eta: 3:40:21.114027
-INFO:__main__:Finished process [2196536]
-INFO:__main__:outs: [2196536] >>>>><<<<< [2196536]
-ERROR:__main__:errs: [2196536] >>>>><<<<< [2196536]
-INFO:__main__:Started process "lr_pos_0.003_seed_1" @ [2959693]
-DEBUG:__main__:len(active_processes)=4
+INFO:__main__:Started process "lr_pos_0.003_seed_1" @ [89963]
+DEBUG:__main__:len(active_processes)=3
 DEBUG:__main__:len(params_to_run)=9
-INFO:__main__:Finished process [1657855]
-INFO:__main__:outs: [1657855] >>>>><<<<< [1657855]
-ERROR:__main__:errs: [1657855] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-<<<<< [1657855]
-INFO:__main__:Started process "lr_pos_0.003_seed_0" @ [3073228]
+INFO:__main__:Started process "lr_pos_0.003_seed_0" @ [89972]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=8
-INFO:__main__:Running progress: 71%
- > took: 7:22:43.281341, eta: 3:00:22.077583
-INFO:__main__:Finished process [2820783]
-INFO:__main__:outs: [2820783] >>>>><<<<< [2820783]
-ERROR:__main__:errs: [2820783] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+INFO:__main__:Running progress: 8%
+ > took: 0:00:00.420227, eta: 0:00:04.622497
+INFO:__main__:Finished process [89972]
+INFO:__main__:outs: [89972] >>>>><<<<< [89972]
+ERROR:__main__:errs: [89972] >>>>>WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [2820783]
-INFO:__main__:Started process "default_seed_7" @ [3219949]
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+<<<<< [89972]
+INFO:__main__:Started process "default_seed_7" @ [672300]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=7
-INFO:__main__:Finished process [2073860]
-INFO:__main__:outs: [2073860] >>>>><<<<< [2073860]
-ERROR:__main__:errs: [2073860] >>>>>WARNING:multi_optim.eval:No paths
+INFO:__main__:Running progress: 17%
+ > took: 0:43:15.353537, eta: 3:36:16.767685
+INFO:__main__:Running progress: 17%
+ > took: 0:43:15.453977, eta: 3:36:17.269885
+INFO:__main__:Finished process [89957]
+INFO:__main__:outs: [89957] >>>>><<<<< [89957]
+ERROR:__main__:errs: [89957] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-<<<<< [2073860]
-INFO:__main__:Started process "default_seed_6" @ [3337722]
+<<<<< [89957]
+INFO:__main__:Started process "default_seed_6" @ [672808]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=6
-INFO:__main__:Running progress: 76%
- > took: 7:46:01.499756, eta: 2:24:37.706821
-INFO:__main__:Finished process [3073228]
-INFO:__main__:outs: [3073228] >>>>><<<<< [3073228]
-ERROR:__main__:errs: [3073228] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
+INFO:__main__:Running progress: 25%
+ > took: 0:43:16.963517, eta: 2:09:50.890551
+INFO:__main__:Finished process [672808]
+INFO:__main__:outs: [672808] >>>>><<<<< [672808]
+ERROR:__main__:errs: [672808] >>>>>/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
   return _methods._mean(a, axis=axis, dtype=dtype,
 /home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
   ret = ret.dtype.type(ret / rcount)
-<<<<< [3073228]
-INFO:__main__:Started process "default_seed_5" @ [3588947]
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [672808]
+INFO:__main__:Started process "default_seed_5" @ [1415895]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=5
-INFO:__main__:Finished process [3337722]
-INFO:__main__:outs: [3337722] >>>>><<<<< [3337722]
-ERROR:__main__:errs: [3337722] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
+INFO:__main__:Running progress: 33%
+ > took: 1:14:42.090359, eta: 2:29:24.180718
+INFO:__main__:Running progress: 33%
+ > took: 1:14:42.190654, eta: 2:29:24.381308
+INFO:__main__:Finished process [89951]
+INFO:__main__:outs: [89951] >>>>><<<<< [89951]
+ERROR:__main__:errs: [89951] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [3337722]
-INFO:__main__:Started process "default_seed_4" @ [82464]
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [89951]
+INFO:__main__:Started process "default_seed_4" @ [1770095]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=4
-INFO:__main__:Running progress: 82%
- > took: 8:19:34.909916, eta: 1:52:48.528046
-INFO:__main__:Finished process [3588947]
-INFO:__main__:outs: [3588947] >>>>><<<<< [3588947]
-ERROR:__main__:errs: [3588947] >>>>><<<<< [3588947]
-INFO:__main__:Started process "default_seed_3" @ [1234539]
+INFO:__main__:Running progress: 42%
+ > took: 1:28:55.985395, eta: 2:04:30.379553
+INFO:__main__:Running progress: 42%
+ > took: 1:28:56.085716, eta: 2:04:30.520002
+INFO:__main__:Finished process [89963]
+INFO:__main__:outs: [89963] >>>>><<<<< [89963]
+ERROR:__main__:errs: [89963] >>>>>WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+<<<<< [89963]
+INFO:__main__:Started process "default_seed_3" @ [2899400]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=3
-INFO:__main__:Finished process [82464]
-INFO:__main__:outs: [82464] >>>>><<<<< [82464]
-ERROR:__main__:errs: [82464] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-<<<<< [82464]
-INFO:__main__:Started process "default_seed_2" @ [1709345]
+INFO:__main__:Running progress: 50%
+ > took: 2:11:04.039844, eta: 2:11:04.039844
+INFO:__main__:Running progress: 50%
+ > took: 2:11:04.140480, eta: 2:11:04.140480
+INFO:__main__:Finished process [1415895]
+INFO:__main__:outs: [1415895] >>>>><<<<< [1415895]
+ERROR:__main__:errs: [1415895] >>>>>WARNING:multi_optim.eval:No paths
+<<<<< [1415895]
+INFO:__main__:Started process "default_seed_2" @ [3210340]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=2
-INFO:__main__:Running progress: 87%
- > took: 9:25:03.886626, eta: 1:25:36.952519
-INFO:__main__:Finished process [2959693]
-INFO:__main__:outs: [2959693] >>>>><<<<< [2959693]
-ERROR:__main__:errs: [2959693] >>>>>WARNING:multi_optim.eval:No paths
+INFO:__main__:Running progress: 58%
+ > took: 2:23:37.885010, eta: 1:42:35.632150
+INFO:__main__:Finished process [1770095]
+INFO:__main__:outs: [1770095] >>>>><<<<< [1770095]
+ERROR:__main__:errs: [1770095] >>>>>WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
 /home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
   return _methods._mean(a, axis=axis, dtype=dtype,
 /home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
   ret = ret.dtype.type(ret / rcount)
-<<<<< [2959693]
-INFO:__main__:Started process "default_seed_1" @ [1797347]
+<<<<< [1770095]
+INFO:__main__:Started process "default_seed_1" @ [3464073]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=1
-INFO:__main__:Finished process [3219949]
-INFO:__main__:outs: [3219949] >>>>><<<<< [3219949]
-ERROR:__main__:errs: [3219949] >>>>>WARNING:multi_optim.eval:No paths
+INFO:__main__:Running progress: 67%
+ > took: 2:33:57.826405, eta: 1:16:58.913203
+INFO:__main__:Running progress: 67%
+ > took: 2:33:57.926788, eta: 1:16:58.963394
+INFO:__main__:Finished process [672300]
+INFO:__main__:outs: [672300] >>>>><<<<< [672300]
+ERROR:__main__:errs: [672300] >>>>>WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [3219949]
-INFO:__main__:Started process "default_seed_0" @ [1898167]
+<<<<< [672300]
+INFO:__main__:Started process "default_seed_0" @ [3879517]
 DEBUG:__main__:len(active_processes)=4
 DEBUG:__main__:len(params_to_run)=0
+INFO:__main__:Running progress: 75%
+ > took: 2:54:48.099719, eta: 0:58:16.033240
+INFO:__main__:Finished process [2899400]
+INFO:__main__:outs: [2899400] >>>>><<<<< [2899400]
+ERROR:__main__:errs: [2899400] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+<<<<< [2899400]
+INFO:__main__:Running progress: 83%
+ > took: 2:59:38.854707, eta: 0:35:55.770941
+INFO:__main__:Running progress: 83%
+ > took: 2:59:38.955010, eta: 0:35:55.791002
+INFO:__main__:Finished process [3210340]
+INFO:__main__:outs: [3210340] >>>>><<<<< [3210340]
+ERROR:__main__:errs: [3210340] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+<<<<< [3210340]
 INFO:__main__:Running progress: 92%
- > took: 9:44:20.750654, eta: 0:50:05.207199
-INFO:__main__:Finished process [1234539]
-INFO:__main__:outs: [1234539] >>>>><<<<< [1234539]
-ERROR:__main__:errs: [1234539] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [1234539]
-INFO:__main__:Finished process [1709345]
-INFO:__main__:outs: [1709345] >>>>><<<<< [1709345]
-ERROR:__main__:errs: [1709345] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [1709345]
-INFO:__main__:Running progress: 97%
- > took: 10:06:19.833166, eta: 0:16:23.238734
-INFO:__main__:Finished process [1898167]
-INFO:__main__:outs: [1898167] >>>>><<<<< [1898167]
-ERROR:__main__:errs: [1898167] >>>>>WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
+ > took: 3:01:44.891706, eta: 0:16:31.353791
+INFO:__main__:Running progress: 92%
+ > took: 3:01:44.992227, eta: 0:16:31.362930
+INFO:__main__:Finished process [3464073]
+INFO:__main__:outs: [3464073] >>>>><<<<< [3464073]
+ERROR:__main__:errs: [3464073] >>>>>WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:multi_optim.eval:No paths
-WARNING:multi_optim.eval:No paths
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
-WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:multi_optim.eval:No paths
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
 WARNING:sim.decentralized.iterators:OptimalPolicy failed
-<<<<< [1898167]
-INFO:__main__:Finished process [1797347]
-INFO:__main__:outs: [1797347] >>>>><<<<< [1797347]
-ERROR:__main__:errs: [1797347] >>>>>/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/home/chenkel/.local/lib/python3.8/site-packages/numpy/core/_methods.py:170: RuntimeWarning: invalid value encountered in double_scalars
-  ret = ret.dtype.type(ret / rcount)
-<<<<< [1797347]
-INFO:__main__:[1mRunning finished. elapsed time: 10:32:01.907576[0m
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [3464073]
+INFO:__main__:Running progress: 100%
+ > took: 3:08:02.617254, eta: 0:00:00
+INFO:__main__:Finished process [3879517]
+INFO:__main__:outs: [3879517] >>>>><<<<< [3879517]
+ERROR:__main__:errs: [3879517] >>>>>WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [3879517]
+INFO:__main__:[1mRunning finished. elapsed time: 3:22:13.377046[0m
 INFO:__main__:Done

@@ -3,7 +3,7 @@
 import argparse
 import logging
 import pickle
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import torch
 from matplotlib import pyplot as plt
@@ -35,9 +35,13 @@ def plot_fovs(X, Y):
     plt.show()
 
 
-def plot_graph_wo_pos_data(ax, data_edge_index, pos, data_x,
+def plot_graph_wo_pos_data(ax, data_edge_index,
+                           pos: Union[Dict[Any, Any], torch.Tensor], data_x,
                            highlight_nodes: Dict[int, str] = {}):
-    data_pos = torch.tensor([list(p) for _, p in pos.items()])
+    if isinstance(pos, torch.Tensor):
+        data_pos = pos
+    else:
+        data_pos = torch.tensor([list(p) for _, p in pos.items()])
     plot_graph(ax, data_edge_index, data_pos, data_x, highlight_nodes)
 
 
@@ -56,16 +60,19 @@ def plot_graph(ax, data_edge_index, data_pos, data_x,
     # nodes
     ax.scatter(data_pos[:, 0], data_pos[:, 1], marker='o', color='white',
                edgecolor='k', zorder=90)
+    # highlight nodes
     for n, color in highlight_nodes.items():
-        ax.scatter(data_pos[n, 0], data_pos[n, 1],
+        rnd = torch.rand_like(data_x[n, 0]) * 0.01
+        ax.scatter(data_pos[n, 0] + rnd, data_pos[n, 1],
                    color=color, zorder=100, marker="x")
+    # node features
     n_node_features = data_x.shape[1]
     max_d = torch.max(data_x).item()
     min_d = torch.min(data_x).item()
     max_data = max(max_d, abs(min_d))
     n_nodes = data_x.shape[0]
     colors = get_colors(n_node_features)
-    dp = .2/(n_node_features+2)
+    dp = .15/(n_node_features+2)
     for i_x in range(n_node_features):
         color = colors[i_x]
         for i_n in range(n_nodes):
@@ -82,7 +89,14 @@ def plot_graph(ax, data_edge_index, data_pos, data_x,
                 data_pos[i_n, 1] + dp*(i_x+1),
                 color=color_middle_a,
                 edgecolor=color,
-                s=40)
+                s=60)
+    for n in range(n_nodes):
+        ax.text(
+            data_pos[n, 0] - dp,
+            data_pos[n, 1] + dp,
+            f"{n}",
+            color='k',
+            fontsize=10)
 
 
 if __name__ == "__main__":
