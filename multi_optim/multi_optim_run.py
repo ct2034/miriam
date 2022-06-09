@@ -252,7 +252,7 @@ def run_optimization(
 
     # GPU or CPU?
     if torch.cuda.is_available():
-        gpu = torch.device(pick_gpu_lowest_memory())
+        gpu = torch.device("cuda:0")
         logger.info(f"Using GPU {gpu}")
         torch.cuda.empty_cache()
     else:

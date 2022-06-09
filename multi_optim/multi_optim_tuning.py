@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 import time
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import yaml
@@ -99,11 +99,11 @@ def make_kwargs_for_tuning(parameter_experiments, n_runs):
     return params_to_run
 
 
-def start_process(kwargs):
+def start_process(kwargs, gpu):
     import_str = "from multi_optim.multi_optim_run import run_optimization"
     kwargs_str = repr(kwargs)
     my_env = os.environ.copy()
-    # my_env["CUDA_VISIBLE_DEVICES"] = "-1"
+    my_env["CUDA_VISIBLE_DEVICES"] = str(gpu)
     process = subprocess.Popen(
         ["/usr/bin/python3",
          "-c",
@@ -121,15 +121,16 @@ def clean_str(inp: str) -> str:
     return inp.replace("[1m", "").replace("[0m", "").replace("[31m", "")
 
 
-def run(params_to_run):
+def run(params_to_run, gpus_to_use):
     logger.info("Creating processes")
     logger.debug(f"{len(params_to_run)=}")
     cpus = os.cpu_count()
     assert isinstance(cpus, int)
     logger.info(f"{cpus=}")
-    max_active_processes: int = 4  # min(cpus, 8)
+    max_active_processes: int = len(gpus_to_use)
     logger.info(f"{max_active_processes=}")
     active_processes = set()
+    used_gpus: Dict[int, Optional[int]] = {gpu: None for gpu in gpus_to_use}
 
     # finish out what ran before
     ran_prefixes = set()
@@ -152,10 +153,17 @@ def run(params_to_run):
     while len(params_to_run) > 0 or len(active_processes) > 0:
         if (len(active_processes) < max_active_processes
                 and len(params_to_run) > 0):
-            if len(params_to_run) > 0:
+            if len(params_to_run) > 0:  # start new process
+                gpu_to_use = None
+                for gpu in gpus_to_use:
+                    if used_gpus[gpu] is None:
+                        gpu_to_use = gpu
+                        break
+                assert gpu_to_use is not None, "No free GPU found"
                 kwargs = params_to_run.pop()
                 prefix = kwargs["prefix"]
-                process = start_process(kwargs)
+                process = start_process(kwargs, gpu_to_use)
+                used_gpus[gpu_to_use] = process.pid
                 active_processes.add(process)
                 logger.info("Started process "
                             + f"\"{prefix}\" @ [{process.pid}]")
@@ -164,7 +172,7 @@ def run(params_to_run):
         else:
             to_remove = set()
             for process in active_processes:
-                if process.poll() is not None:
+                if process.poll() is not None:  # process finished
                     outs, errs = process.communicate()
                     logger.info("Finished process "
                                 + f"[{process.pid}]")
@@ -175,6 +183,11 @@ def run(params_to_run):
                                  + f"{clean_str(errs.decode('utf-8'))}"
                                  + f"<<<<< [{process.pid}]")
                     to_remove.add(process)
+                    # free gpu
+                    for gpu, pid in used_gpus.items():
+                        if pid == process.pid:
+                            used_gpus[gpu] = None
+                            break
             pb.progress(n_initial - len(params_to_run) - len(active_processes))
             active_processes -= to_remove
         time.sleep(0.1)
@@ -313,5 +326,6 @@ if __name__ == "__main__":
         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
     params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
-    run(params_to_run)
+    gpus_to_use = [3, 4, 5, 6]
+    run(params_to_run, gpus_to_use)
     plot_data(folder)
