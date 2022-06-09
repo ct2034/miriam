@@ -65,7 +65,7 @@ def pick_gpu_lowest_memory():
     for mem, gpu in memory_gpu_map:
         if mem <= best_memory+8:
             best_gpus.append(gpu)
-    return best_gpu
+    return random.choice(best_gpus)
 
 
 def pick_gpu_low_memory():
