@@ -43,7 +43,7 @@ def params_run():
         "n_runs_pose": [128],
         "n_runs_policy": [128],
         "n_epochs_per_run_policy":  [256],
-        "batch_size_policy":  [128],
+        "batch_size_policy":  [128, 64],
         "stats_and_eval_every": [4],
         "lr_pos": [1E-3, 1E-2, 1E-3],
         "lr_policy": [1E-3],
