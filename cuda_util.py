@@ -61,6 +61,10 @@ def pick_gpu_lowest_memory():
     memory_gpu_map = [(memory, gpu_id)
                       for (gpu_id, memory) in gpu_memory_map().items()]
     best_memory, best_gpu = sorted(memory_gpu_map)[0]
+    best_gpus = []
+    for mem, gpu in memory_gpu_map:
+        if mem <= best_memory+8:
+            best_gpus.append(gpu)
     return best_gpu
 
 
