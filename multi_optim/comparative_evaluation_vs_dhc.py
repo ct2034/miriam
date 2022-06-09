@@ -100,7 +100,7 @@ def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
         res = 1.0 / (n_rows_cols + try_nr / max_tries_per_size)
         size = res * (n_rows_cols - 1)
         origin = np.array([rng.uniform(0, 1.0 - size),
-                          rng.uniform(0, 1.0 - size)])
+                           rng.uniform(0, 1.0 - size)])
         pos_s_grid = gridmap_from_origin_and_size(origin, size, n_rows_cols)
         n_nodes_free = 0
         for pos in pos_s_grid:
@@ -117,7 +117,7 @@ def make_dhcmap_with_n_nodes_on_img(n_nodes, map_img, rng: Random):
         res = 1.0 / (n_rows_cols + try_nr / max_tries_per_size)
         size = res * (n_rows_cols - 1)
         origin = np.array([rng.uniform(0, 1.0 - size),
-                          rng.uniform(0, 1.0 - size)])
+                           rng.uniform(0, 1.0 - size)])
         pos_s_grid = gridmap_from_origin_and_size(origin, size, n_rows_cols)
         n_nodes_free = 0
         for pos in pos_s_grid:
@@ -177,7 +177,8 @@ def get_total_len(n_agents, coords_from_node_by_nodes, points, pos_dhc_np,
 if __name__ == '__main__':
     # parameters
     logger.setLevel(logging.INFO)
-    results_name: str = 'small_r64_e256'
+    results_name: str = 'default_seed_0'
+    base_folder: str = 'multi_optim/results/tuning'
     n_agents: int = 4
     n_eval: int = 10
 
@@ -185,7 +186,7 @@ if __name__ == '__main__':
     flann = FLANN(random_seed=0)
 
     # load graph
-    graph_fname = f"multi_optim/results/{results_name}_graph.gpickle"
+    graph_fname = f"{base_folder}/{results_name}_graph.gpickle"
     g_our = nx.read_gpickle(graph_fname)
     assert isinstance(g_our, nx.Graph)
     n_nodes = g_our.number_of_nodes()
@@ -202,11 +203,12 @@ if __name__ == '__main__':
     # load policy
     policy_nn = EdgePolicyModel()
     policy_nn.load_state_dict(
-        torch.load(f"multi_optim/results/{results_name}_policy_model.pt",
-                   map_location='cpu'))
+        torch.load(
+            f"{base_folder}/{results_name}_policy_model.pt",
+            map_location=torch.device("cpu")))
 
     # get map image
-    yaml_fname = f"multi_optim/results/{results_name}_stats.yaml"
+    yaml_fname = f"{base_folder}/{results_name}_stats.yaml"
     with open(yaml_fname, 'r') as f:
         stats = yaml.load(f, Loader=yaml.SafeLoader)
     map_img = read_map(stats['static']['map_fname'])
@@ -218,7 +220,7 @@ if __name__ == '__main__':
     g_dhc_by_nodes = nx.from_edgelist(edgelist_dhc_by_nodes)
     assert isinstance(g_dhc_by_nodes, nx.Graph)
     pos_dhc_by_nodes_dict = {i: pos_dhc_by_nodes[i, :]
-                             for i in range(g_dhc_by_nodes.number_of_nodes())}
+                             for i in range(pos_dhc_by_nodes.shape[0])}
     nx.set_node_attributes(g_dhc_by_nodes, pos_dhc_by_nodes_dict, POS)
     pos_dhc_by_nodes_np = np.array(
         [pos_dhc_by_nodes[i] for i in range(n_nodes)],
@@ -271,7 +273,8 @@ if __name__ == '__main__':
         node_size=5,
         edge_color='r',
         node_color='r',)
-    plt.savefig(f"multi_optim/results/{results_name}_dhcmap_by_edge_len.png")
+    plt.savefig(
+        f"multi_optim/results/{results_name}_dhcmap_by_edge_len.png")
 
     lens_our = [None] * n_eval  # type: List[Optional[float]]
     lens_dhc_by_nodes = [None] * n_eval  # type: List[Optional[float]]
@@ -445,13 +448,13 @@ if __name__ == '__main__':
                     linewidth=2)
 
             f_our.savefig(
-                f"multi_optim/results/{results_name}"
+                f"{base_folder}/{results_name}"
                 + f"_paths_our_{i_e}.png")
             f_dhc_by_nodes.savefig(
-                f"multi_optim/results/{results_name}"
+                f"{base_folder}/{results_name}"
                 + f"_paths_dhc_by_nodes_{i_e}.png")
             f_dhc_by_edge_len.savefig(
-                f"multi_optim/results/{results_name}"
+                f"{base_folder}/{results_name}"
                 + f"_paths_dhc_by_edge_len_{i_e}.png")
 
         # print results
@@ -484,4 +487,4 @@ if __name__ == '__main__':
     plt.bar(xs, lens_dhc_by_nodes, width,
             color='b', alpha=.5, label='dhc_by_nodes')
     plt.legend()
-    plt.savefig(f"multi_optim/results/{results_name}_lens.png")
+    plt.savefig(f"{base_folder}/{results_name}_lens.png")
