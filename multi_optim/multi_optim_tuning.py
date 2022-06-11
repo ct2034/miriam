@@ -189,6 +189,8 @@ def plot_data(path: str):
     fnames_json = sorted(fnames_json)
 
     data = {}  # type: Dict[str, Dict[int, Any]]
+    max_seed = 0
+    n_existing_seeds = {}  # type: Dict[str, int]
 
     for i_f, fname in enumerate(fnames_json):
         with open(os.path.join(path, fname), "r") as f:
@@ -198,6 +200,12 @@ def plot_data(path: str):
         if exp not in data:
             data[exp] = {}
         data[exp][seed] = stats
+        # count existing seeds
+        if exp not in n_existing_seeds:
+            n_existing_seeds[exp] = 0
+        n_existing_seeds[exp] += 1
+        max_seed = max(max_seed, seed)
+    n_seeds = max_seed + 1
 
     exps = list(data.keys())
     exps.sort()
@@ -208,7 +216,7 @@ def plot_data(path: str):
     params.sort()
     n_params = len(params)
     fig, (axs) = plt.subplots(
-        n_params,
+        n_params + 1,
         n_exps,
         figsize=(4*n_exps, 4*n_params),
         dpi=200)
@@ -217,7 +225,7 @@ def plot_data(path: str):
 
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
-            ax = axs[i_param, i_exp]  # type: ignore
+            ax = axs[i_param + 1, i_exp]  # type: ignore
 
             # consolidate data
             n_seeds = len(data[exp])
@@ -269,22 +277,26 @@ def plot_data(path: str):
             bottom_lim = float(np.min(mins))
             top_lim = float(np.max(maxs))
             if param not in lims_per_param:
-                lims_per_param[param] = [0., 0.]
-                lims_per_param[param][0] = bottom_lim
-                lims_per_param[param][1] = top_lim
+                lims_per_param[param] = [bottom_lim, top_lim]
             else:
                 lims_per_param[param][0] = min(lims_per_param[param][0],
                                                bottom_lim)
                 lims_per_param[param][1] = max(lims_per_param[param][1],
                                                top_lim)
 
+    # barplots
+    for i_exp, exp in enumerate(exps):
+        ax = axs[0, i_exp]  # type: ignore
+        ax.bar(0, n_existing_seeds[exp], label=exp, color='black')
+
     # cosmetics
     plt.tight_layout()
 
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
-            ax = axs[i_param, i_exp]  # type: ignore
-            ax.set_ylim(lims_per_param[param][0], lims_per_param[param][1])
+            ax = axs[i_param + 1, i_exp]  # type: ignore
+            d = (lims_per_param[param][1] - lims_per_param[param][0])*.05
+            ax.set_ylim(lims_per_param[param][0]-d, lims_per_param[param][1]+d)
 
     plt.savefig(os.path.join(path, "_tuning_stats.png"))
 
@@ -313,5 +325,5 @@ if __name__ == "__main__":
         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
     params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
-    run(params_to_run)
+    # run(params_to_run)
     plot_data(folder)
