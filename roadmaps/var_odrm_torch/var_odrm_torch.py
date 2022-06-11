@@ -235,7 +235,7 @@ def get_path_len(
     """Get the length of a path. With the sections from start coordinates to
     first node and from last node to goal coordinates beeing weighted
     `TAIL_WEIGHT` times more (if training is true, else once)."""
-    TAIL_WEIGHT = 3
+    TAIL_WEIGHT = 4
     (start, goal, path_vs) = path
     sections = torch.zeros(len(path_vs)+1)
     for i in range(len(path_vs)-1):
@@ -312,22 +312,22 @@ def optimize_poses_from_paths(
 
 
 if __name__ == "__main__":
-    n = 100
-    epochs = 300
-    learning_rate = 1e-4
-    stats_every = int(epochs / 50)
-    map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png"
+    n = 64
+    epochs = 2**14
+    learning_rate = 1e-5
+    stats_every = int(epochs / 64)
+    map_fname: str = "roadmaps/odrm/odrm_eval/maps/x.png"
     rng = Random(0)
 
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
     g, flann = make_graph_and_flann(pos, map_img)
-    test_paths = make_paths(g, 20, map_img, rng)
 
     optimizer = torch.optim.Adam([pos], lr=learning_rate)
     test_costs = []
 
-    draw_graph(g, map_img, test_paths[:4])
+    vis_paths = make_paths(g, 3, map_img, Random(0))
+    draw_graph(g, map_img, vis_paths)
     plt.savefig("roadmaps/var_odrm_torch/pre_training.png")
     pb = ProgressBar("Training", epochs)
     for i_e in range(epochs):
@@ -340,7 +340,8 @@ if __name__ == "__main__":
             pb.progress(i_e)
     pb.end()
 
-    draw_graph(g, map_img, test_paths[:4])
+    vis_paths = make_paths(g, 3, map_img, Random(0))
+    draw_graph(g, map_img, vis_paths)
     plt.savefig("roadmaps/var_odrm_torch/post_training.png")
 
     plt.figure()
