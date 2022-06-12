@@ -288,6 +288,7 @@ def plot_data(path: str):
     for i_exp, exp in enumerate(exps):
         ax = axs[0, i_exp]  # type: ignore
         ax.bar(0, n_existing_seeds[exp], label=exp, color='black')
+        ax.set_ylim(0, n_seeds)
 
     # cosmetics
     plt.tight_layout()
@@ -325,5 +326,5 @@ if __name__ == "__main__":
         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
     params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
-    # run(params_to_run)
+    run(params_to_run)
     plot_data(folder)
