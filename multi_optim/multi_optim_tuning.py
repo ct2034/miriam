@@ -51,7 +51,7 @@ def params_run():
         "save_images": [False],
         "save_folder": [TUNING_RES_FOLDER]
     }  # type: Dict[str, Union[List[int], List[float], List[str]]]
-    n_runs = 8
+    n_runs = 4
     return parameter_experiments, n_runs
 
 
