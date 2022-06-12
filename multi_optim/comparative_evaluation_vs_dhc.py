@@ -1,4 +1,5 @@
 import logging
+import os
 from math import floor
 from random import Random
 from typing import List, Optional
@@ -16,7 +17,7 @@ from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (check_edge, is_coord_free,
                                                     read_map, sample_points)
 from scenarios.visualization import get_colors
-from sim.decentralized.policy import LearnedPolicy
+from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 from multi_optim.multi_optim_run import ITERATOR_TYPE, RADIUS
@@ -175,11 +176,16 @@ def get_total_len(n_agents, coords_from_node_by_nodes, points, pos_dhc_np,
 
 
 if __name__ == '__main__':
+    logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
+
     # parameters
     logger.setLevel(logging.INFO)
     results_name: str = 'default_seed_0'
     base_folder: str = 'multi_optim/results/tuning'
-    n_agents: int = 4
+    figure_folder: str = f'{base_folder}/eval_vs_dhc'
+    if not os.path.exists(figure_folder):
+        os.makedirs(figure_folder)
+    n_agents: int = 2
     n_eval: int = 10
 
     rng = Random(0)
@@ -243,8 +249,8 @@ if __name__ == '__main__':
         dtype=np.float32)
 
     # plot
-    plt.figure()
-    plt.imshow(
+    f, ax = plt.subplots(1, 1)
+    ax.imshow(
         np.swapaxes(np.array(map_img), 0, 1),
         cmap='gray',
         origin='lower',
@@ -256,11 +262,13 @@ if __name__ == '__main__':
         with_labels=False,
         node_size=5,
         edge_color='r',
-        node_color='r',)
-    plt.savefig(f"multi_optim/results/{results_name}_dhcmap_by_nodes.png")
+        node_color='r',
+        ax=ax)
+    f.savefig(f"{figure_folder}/{results_name}_dhcmap_by_nodes.png")
+    plt.close(f)
 
-    plt.figure()
-    plt.imshow(
+    f, ax = plt.subplots(1, 1)
+    ax.imshow(
         np.swapaxes(np.array(map_img), 0, 1),
         cmap='gray',
         origin='lower',
@@ -272,9 +280,11 @@ if __name__ == '__main__':
         with_labels=False,
         node_size=5,
         edge_color='r',
-        node_color='r',)
-    plt.savefig(
-        f"multi_optim/results/{results_name}_dhcmap_by_edge_len.png")
+        node_color='r',
+        ax=ax)
+    f.savefig(
+        f"{figure_folder}/{results_name}_dhcmap_by_edge_len.png")
+    plt.close(f)
 
     lens_our = [None] * n_eval  # type: List[Optional[float]]
     lens_dhc_by_nodes = [None] * n_eval  # type: List[Optional[float]]
@@ -282,29 +292,37 @@ if __name__ == '__main__':
 
     for i_e in range(n_eval):
         # sampling agents
-        points: np.ndarray = sample_points(
-            n_agents * 2, map_img, rng).detach().numpy()
-        nn_our, _ = flann.nn(pos_our_np, points, 1)
-        nn_dhc_by_nodes, _ = flann.nn(pos_dhc_by_nodes_np, points, 1)
-        nn_dhc_by_edge_len, _ = flann.nn(pos_dhc_by_edge_len_np, points, 1)
+        unique_starts_and_goals = False
+        while not unique_starts_and_goals:
+            points: np.ndarray = sample_points(
+                n_agents * 2, map_img, rng).detach().numpy()
+            nn_our, _ = flann.nn(pos_our_np, points, 1)
+            nn_dhc_by_nodes, _ = flann.nn(pos_dhc_by_nodes_np, points, 1)
+            nn_dhc_by_edge_len, _ = flann.nn(pos_dhc_by_edge_len_np, points, 1)
+            starts_our = nn_our[:n_agents]
+            goals_our = nn_our[n_agents:]
+            unique_starts_and_goals = (
+                len(set(nn_our)) == 2 * n_agents)
 
         # eval ours
-        starts_our = nn_our[:n_agents]
-        goals_our = nn_our[n_agents:]
         agents = to_agent_objects(
             g_our,
             starts_our.tolist(),
             goals_our.tolist(),
-            radius=RADIUS,
+            radius=RADIUS/100,
             rng=rng)
         total_lenght_our = None  # type: Optional[float]
         if agents is not None:
             for agent in agents:
-                agent.policy = LearnedPolicy(
-                    agent, policy_nn)
+                # agent.policy = LearnedPolicy(
+                #     agent, policy_nn)
+                agent.policy = OptimalPolicy(agent, None)
             paths_our: List[PATH] = []
             res_our = run_a_scenario(
-                g_our, agents, False, ITERATOR_TYPE, paths_out=paths_our)
+                g_our, agents,
+                plot=False,
+                iterator=ITERATOR_TYPE,
+                paths_out=paths_our)
             logger.info(f"{res_our=}")
             logger.info(f"{paths_our=}")
             if res_our[IDX_SUCCESS]:
@@ -448,14 +466,17 @@ if __name__ == '__main__':
                     linewidth=2)
 
             f_our.savefig(
-                f"{base_folder}/{results_name}"
+                f"{figure_folder}/{results_name}"
                 + f"_paths_our_{i_e}.png")
             f_dhc_by_nodes.savefig(
-                f"{base_folder}/{results_name}"
+                f"{figure_folder}/{results_name}"
                 + f"_paths_dhc_by_nodes_{i_e}.png")
             f_dhc_by_edge_len.savefig(
-                f"{base_folder}/{results_name}"
+                f"{figure_folder}/{results_name}"
                 + f"_paths_dhc_by_edge_len_{i_e}.png")
+            plt.close(f_our)
+            plt.close(f_dhc_by_nodes)
+            plt.close(f_dhc_by_edge_len)
 
         # print results
         logger.info("="*60)
@@ -474,17 +495,21 @@ if __name__ == '__main__':
             if total_lenght_dhc_by_edge_len is not None else 0.0)
 
     # plot
-    plt.clf()
+    f, ax = plt.subplots(1, 1)
     n_maps = 3
     width = 1./(n_maps+1)
     xs = np.arange(float(n_eval))
-    plt.bar(xs, lens_our, width,
-            color='r', alpha=.5, label='our')
+    ax.bar(xs, lens_our, width,
+           color='r', alpha=.5, label='our')
     xs += width
-    plt.bar(xs, lens_dhc_by_edge_len, width,
-            color='g', alpha=.5, label='dhc_by_edge_len')
+    ax.bar(xs, lens_dhc_by_edge_len, width,
+           color='g', alpha=.5, label='dhc_by_edge_len')
     xs += width
-    plt.bar(xs, lens_dhc_by_nodes, width,
-            color='b', alpha=.5, label='dhc_by_nodes')
-    plt.legend()
-    plt.savefig(f"{base_folder}/{results_name}_lens.png")
+    ax.bar(xs, lens_dhc_by_nodes, width,
+           color='b', alpha=.5, label='dhc_by_nodes')
+    ax.set_xticks(xs)
+    ax.set_xlabel('Trials')
+    ax.set_ylabel('Total Pathlength')
+    ax.legend()
+    f.savefig(f"{figure_folder}/{results_name}_lens.png")
+    plt.close(f)
