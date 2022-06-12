@@ -1,3 +1,4 @@
+import logging
 import random
 from typing import Any, List
 
@@ -9,11 +10,17 @@ from libpysal import weights
 from libpysal.cg import voronoi_frames
 from scenarios.visualization import plot_env_with_arrows, plot_with_paths
 from sim.decentralized.agent import Agent
+from sim.decentralized.iterators import IteratorType
+from sim.decentralized.policy import OptimalPolicy
 from sim.decentralized.runner import run_a_scenario, will_agents_collide
 
 if __name__ == '__main__':
+    logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
+    logging.getLogger("sim.decentralized.iterators").setLevel(logging.DEBUG)
+
+    # params
     n_agents = 8
-    n_nodes = 64
+    n_nodes = 32
     rng = random.Random(0)
 
     # random points for node positions
@@ -35,9 +42,10 @@ if __name__ == '__main__':
     plot_env_with_arrows(g, starts, goals)
 
     # initialize agents
-    agents = tuple([Agent(g, start) for start in starts])
+    agents = tuple([Agent(g, start, radius=.01) for start in starts])
     for i, agent in enumerate(agents):
         agent.give_a_goal(goals[i])
+        agent.policy = OptimalPolicy(agent, None)
 
     # independent paths
     do_collide, paths = will_agents_collide(
@@ -47,10 +55,13 @@ if __name__ == '__main__':
 
     # run the scenario
     paths_run: List[Any] = []
-    run_a_scenario(env=g,
-                   agents=agents,
-                   plot=False,
-                   paths_out=paths_run)
+    res = run_a_scenario(env=g,
+                         agents=agents,
+                         plot=False,
+                         iterator=IteratorType.LOOKAHEAD2,
+                         paths_out=paths_run)
+    print(f"{res=}")
+
     plot_with_paths(g, paths_run)
 
     plt.show()

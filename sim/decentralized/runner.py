@@ -6,6 +6,7 @@ from typing import Iterable, List, Optional, Tuple, Type, Union
 import numpy as np
 from definitions import BLOCKED_NODES_TYPE, INVALID, POS, SCENARIO_RESULT
 from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
+from scenarios.visualization import plot_with_paths
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
@@ -252,7 +253,7 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
         while not are_all_agents_at_their_goals(agents):
             poses_before_moving = list(map(lambda a: a.pos, agents))
             if plot:  # pragma: no cover
-                plot_env_agents(env, agents)  # type: ignore
+                plot_with_paths(env, [a.path for a in agents])  # type: ignore
             time_slice, space_slice = get_iterator_fun(
                 iterator)(agents, ignore_finished_agents)
             time_progress += time_slice

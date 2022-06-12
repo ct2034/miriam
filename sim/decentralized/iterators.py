@@ -121,7 +121,8 @@ def has_at_least_one_agent_moved(
 
 
 def check_motion_col(g: nx.Graph, radius: float,
-                     node_s_start: List[C], node_s_end: List[C]) -> Set[int]:
+                     node_s_start: List[C], node_s_end: List[C],
+                     ignored_agents: Set[int]) -> Set[int]:
     pos_s = nx.get_node_attributes(g, POS)
     n_agents = len(node_s_start)
     assert len(node_s_end) == n_agents,\
@@ -133,7 +134,11 @@ def check_motion_col(g: nx.Graph, radius: float,
         np.ndarray, np.ndarray, np.ndarray, np.ndarray  # p0, p1, q0, q1
     ]] = []
     for i_a1 in range(n_agents):
+        if i_a1 in ignored_agents:
+            continue
         for i_a2 in range(i_a1 + 1, n_agents):
+            if i_a2 in ignored_agents:
+                continue
             if precheck_indices(
                     edge_a=(node_s_start[i_a1], node_s_end[i_a1]),
                     edge_b=(node_s_start[i_a2], node_s_end[i_a2])):
@@ -165,7 +170,7 @@ def iterate_edge_policy(
     assert all(a.radius == agents[0].radius for a in agents),\
         "all radii must be equal"
 
-    RETRIES = 3
+    RETRIES = 5
     i_try = 0
     space_slice: List[float] = [0.] * len(agents)
     time_slice: List[int] = [1] * len(agents)
@@ -179,6 +184,15 @@ def iterate_edge_policy(
     agents_with_colissions = get_agents_in_col(all_colissions)
     logger.debug(f"all_colissions: {all_colissions}")
 
+    # for motion checking we need a list of finished agents to ignore them
+    if ignore_finished_agents:
+        ignored_agents = set([i_a for i_a in range(
+            len(agents)) if agents[i_a].is_at_goal()])
+    else:
+        ignored_agents = set()
+    agents_except_ignored = [a for i_a, a in enumerate(
+        agents) if i_a not in ignored_agents]
+
     # calling the policy for each agent that has colissions
     next_nodes: List[C] = [-1] * len(agents)
     solved = False
@@ -190,7 +204,7 @@ def iterate_edge_policy(
                     "Needs edge-based policy"
                 try:
                     next_nodes[i_a] = a.policy.get_edge(  # type: ignore
-                        agents, agents_with_colissions)  # type: ignore
+                        agents_except_ignored, agents_with_colissions)  # type: ignore
                 except RuntimeError:
                     logger.warn(f"{a.policy} failed")
                     raise SimIterationException(
@@ -201,25 +215,30 @@ def iterate_edge_policy(
             agents, 0, next_nodes, ignore_finished_agents)
         new_agents_with_colissions = get_agents_in_col([next_collisions])
         new_agents_with_colissions.update(check_motion_col(
-            agents[0].env, agents[0].radius, next_nodes, poses_at_beginning))
+            agents[0].env, agents[0].radius, next_nodes, poses_at_beginning, ignored_agents))
         solved = not any(new_agents_with_colissions)
         logger.debug(
-            f"try {i_try}, solved: {solved}, next_collisions: {next_collisions}")
+            f"{i_try=}, {solved=}, {next_collisions=}, {new_agents_with_colissions=}")
         agents_with_colissions.update(new_agents_with_colissions)
         i_try += 1
     if i_try == RETRIES:
         raise SimIterationException(f"Failed to solve after {RETRIES} tries")
-    else:
-        for i_a, a in enumerate(agents):
-            if not a.is_at_goal():
-                time_slice[i_a] = 1
-            space_slice[i_a] = float(np.linalg.norm(
-                np.array(pos[a.pos], dtype=np.float32) -
-                np.array(pos[next_nodes[i_a]], dtype=np.float32)
-            ))
-            a.make_this_step(next_nodes[i_a])
+    for i_a, a in enumerate(agents):
+        logger.debug(f". {i_a=}, {a.pos=}, {a.goal=}, {a.is_at_goal()=}")
+        logger.debug(f"  {a.path_i=}, {a.path=}")
+        logger.debug(f"  {a.what_is_next_step()=}, {next_nodes[i_a]=}")
+
+        if not a.is_at_goal():
+            time_slice[i_a] = 1
+        space_slice[i_a] = float(np.linalg.norm(
+            np.array(pos[a.pos], dtype=np.float32) -
+            np.array(pos[next_nodes[i_a]], dtype=np.float32)
+        ))
+        would_be_next_path_step = a.what_is_next_step()
+        a.make_this_step(next_nodes[i_a])
+        if would_be_next_path_step != next_nodes[i_a]:
             a.replan()
-            a.policy.step()  # type: ignore
+        a.policy.step()  # type: ignore
 
     return time_slice, space_slice
 
