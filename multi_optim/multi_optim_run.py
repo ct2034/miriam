@@ -290,7 +290,7 @@ def run_optimization(
         "general_new_data_percentage",
         "general_regret",
         "general_success",
-        "n_policy_data_len",
+        "general_data_len",
         "policy_accuracy",
         "policy_loss",
         "policy_regret",
@@ -440,7 +440,7 @@ def run_optimization(
 
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
-            stats.add("n_policy_data_len", i_r, float(data_len))
+            stats.add("general_data_len", i_r, float(data_len))
             stats.add("runtime_eval_time_perc", i_r, float(eval_time_perc))
             stats.add("runtime_generation_mean", i_r, ts_mean)
             stats.add("runtime_generation_max", i_r, ts_max)
