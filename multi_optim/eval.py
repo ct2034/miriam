@@ -144,8 +144,9 @@ class Eval(object):
                 a.policy = LearnedPolicy(a, model)
                 a.back_to_the_start()
             res = run_a_scenario(self.first_roadmap,
-                                 self.agents_s[i_e], 
-                                 False, self.iterator_type)
+                                 self.agents_s[i_e],
+                                 False,
+                                 self.iterator_type)
             success_s[i_e] = res[IDX_SUCCESS]
             regret_s[i_e] = res[IDX_AVERAGE_LENGTH] - \
                 self.res_optimal_policy[i_e][IDX_AVERAGE_LENGTH]
