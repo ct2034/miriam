@@ -185,7 +185,7 @@ if __name__ == '__main__':
     figure_folder: str = f'{base_folder}/eval_vs_dhc'
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder)
-    n_agents: int = 2
+    n_agents: int = 4
     n_eval: int = 10
 
     rng = Random(0)
@@ -314,9 +314,9 @@ if __name__ == '__main__':
         total_lenght_our = None  # type: Optional[float]
         if agents is not None:
             for agent in agents:
-                # agent.policy = LearnedPolicy(
-                #     agent, policy_nn)
-                agent.policy = OptimalPolicy(agent, None)
+                agent.policy = LearnedPolicy(
+                    agent, policy_nn)
+                # agent.policy = OptimalPolicy(agent, None)
             paths_our: List[PATH] = []
             res_our = run_a_scenario(
                 g_our, agents,
