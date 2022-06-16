@@ -346,16 +346,16 @@ def run_optimization(
         optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
 
         # n_agents
-        current_acc_str = f"policy_accuracy_{n_agents}"
-        current_acc: float = 0.
+        current_succ_str = f"general_success_{n_agents}"
+        current_succ: float = 0.
         try:
-            current_acc_stats = stats.get_stats(current_acc_str)
-            current_acc = current_acc_stats[
-                current_acc_str][1][-1]  # type: ignore
+            current_succ_stats = stats.get_stats(current_succ_str)
+            current_succ = current_succ_stats[
+                current_succ_str][1][-1]  # type: ignore
         except KeyError:
             # in case we don't have any data yet
             pass
-        if current_acc >= .9:
+        if current_succ >= .8:
             i_n_agents = min(i_n_agents + 1, len(n_agents_s)-1)
         n_agents = n_agents_s[i_n_agents]
 
