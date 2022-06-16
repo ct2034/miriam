@@ -107,7 +107,8 @@ def agents_to_data(agents, i_self: int,
         pos=torch.tensor(np.array([
             pos[big_from_small[i]]
             for i in range(len(small_from_big))
-        ]))
+        ])),
+        num_agents=len(agents)
     )
     return d, big_from_small
 

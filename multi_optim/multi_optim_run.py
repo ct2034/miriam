@@ -140,16 +140,17 @@ def _get_path_data(save_folder, prefix, hash) -> str:
 
 
 def write_stats_png(prefix, save_folder, stats):
-    prefixes = ["roadmap", "policy", "general", "runtime_"]
+    prefixes = ["roadmap", "policy", "general", "runtime_", "data_"]
     _, axs = plt.subplots(len(prefixes), 1, sharex=True,
-                          figsize=(20, 40), dpi=200)
+                          figsize=(20, 12*len(prefixes)), dpi=200)
     for i_x, part in enumerate(prefixes):
         for k, v in stats.get_stats_wildcard(f"{part}.*").items():
             axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
         axs[i_x].legend()  # type: ignore
         axs[i_x].xaxis.set_major_locator(  # type: ignore
             MaxNLocator(integer=True))
-    plt.xlabel("Run")
+    plt.xlabel(f"Run {prefix}")
+    plt.tight_layout()
     plt.savefig(f"{save_folder}/{prefix}_stats.png")
 
 
@@ -213,7 +214,7 @@ def optimize_policy(model, batch_size, optimizer, epds
 
     if len(loss_s) == 0:
         loss_s = [0]
-    return model, np.mean(loss_s)
+    return model, float(np.mean(loss_s))
 
 
 def run_optimization(
@@ -225,7 +226,7 @@ def run_optimization(
         stats_and_eval_every: int,
         lr_pos: float,
         lr_policy: float,
-        n_agents: int,
+        max_n_agents: int,
         map_fname: str,
         seed: int,
         load_policy_model: Optional[str] = None,
@@ -241,6 +242,11 @@ def run_optimization(
     # multiprocessing
     n_processes = min(tmp.cpu_count(), 16)
     pool = tmp.Pool(processes=n_processes)
+
+    # n_agents
+    n_agents_s = list(range(2, max_n_agents+1, 2))  # e.g. 2, 4, 6, ...
+    i_n_agents: int = 0
+    n_agents: int = n_agents_s[i_n_agents]
 
     # Roadmap
     map_img: MAP_IMG = read_map(map_fname)
@@ -275,9 +281,8 @@ def run_optimization(
 
     # Eval
     # little less agents for evaluation
-    eval_n_agents = int(np.ceil(n_agents * .7))
     eval = Eval(g, map_img,
-                n_agents=eval_n_agents, n_eval=10,
+                n_agents_s=n_agents_s, n_eval_per_n_agents=8,
                 iterator_type=ITERATOR_TYPE, radius=RADIUS)
 
     # Data for policy
@@ -285,26 +290,7 @@ def run_optimization(
     epds = EdgePolicyDataset(f"{save_folder}/{prefix}_data")
 
     # Visualization and analysis
-    stats = StatCollector([
-        "general_length",
-        "general_new_data_percentage",
-        "general_regret",
-        "general_success",
-        "general_data_len",
-        "policy_accuracy",
-        "policy_loss",
-        "policy_regret",
-        "policy_success",
-        "roadmap_test_length",
-        "roadmap_training_length",
-        "runtime_eval_time_perc",
-        "runtime_eval",
-        "runtime_full",
-        "runtime_generation_all",
-        "runtime_generation_max",
-        "runtime_generation_mean",
-        "runtime_optim_policy",
-        "runtime_optim_poses"])
+    stats = StatCollector()
     stats.add_statics({
         # metadata
         "hostname": socket.gethostname(),
@@ -320,7 +306,7 @@ def run_optimization(
         "stats_every": stats_and_eval_every,
         "lr_pos": lr_pos,
         "lr_policy": lr_policy,
-        "n_agents": n_agents,
+        "max_n_agents": max_n_agents,
         "map_fname": map_fname,
         "load_policy_model": (
             load_policy_model if load_policy_model else "None"),
@@ -342,15 +328,29 @@ def run_optimization(
     # Run optimization
     pb = ProgressBar(
         name=f"{prefix} Optimization",
-        total=n_runs,
+        total=n_runs+1,
         step_perc=1,
         print_func=logger.info)
     # roadmap_test_length = 0
     roadmap_training_length = 0
-    for i_r in range(1, n_runs+1):
+    for i_r in range(0, n_runs+1):
         start_time = time.process_time()
         optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
         optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
+
+        # n_agents
+        current_acc_str = f"policy_accuracy_{n_agents}"
+        current_acc: float = 0.
+        try:
+            current_acc_stats = stats.get_stats(current_acc_str)
+            current_acc = current_acc_stats[
+                current_acc_str][1][-1]  # type: ignore
+        except KeyError:
+            # in case we don't have any data yet
+            pass
+        if current_acc >= .9:
+            i_n_agents = min(i_n_agents + 1, len(n_agents_s)-1)
+        n_agents = n_agents_s[i_n_agents]
 
         # Sample runs for both optimizations
         # assert n_runs_policy >= n_runs_pose, \
@@ -393,22 +393,17 @@ def run_optimization(
         if i_r % stats_and_eval_every == 0:
             end_optimization_time = time.process_time()
 
-            if optimize_policy_now:
+            if optimize_policy_now or i_r == 0:
                 # also eval now
-                (policy_regret, policy_success, policy_accuracy
-                 ) = eval.evaluate_policy(policy_model)
-                assert policy_loss is not None
-                stats.add("policy_loss", i_r, float(policy_loss))
-                if policy_regret is not None:
-                    stats.add("policy_regret", i_r, float(policy_regret))
-                stats.add("policy_success", i_r, float(policy_success))
-                stats.add("policy_accuracy", i_r, policy_accuracy)
-                logger.info(f"(P) Loss: {policy_loss:.3f}")
-                logger.info(f"(P) Regret: {policy_regret:e}")
-                logger.info(f"(P) Success: {policy_success}")
-                logger.info(f"(P) Accuracy: {policy_accuracy:.3f}")
+                policy_results = eval.evaluate_policy(policy_model)
+                names = sorted(policy_results.keys())
+                for name in names:
+                    stats.add(f"policy_{name}", i_r, policy_results[name])
+                    logging.info(f"(P) {name}: {policy_results[name]}")
+                if policy_loss is not None:
+                    stats.add("(P) loss", i_r, policy_loss)
 
-            if optimize_poses_now:
+            if optimize_poses_now or i_r == 0:
                 # eval the current roadmap
                 roadmap_test_length = eval.evaluate_roadmap(g, flann)
                 stats.add("roadmap_test_length", i_r, roadmap_test_length)
@@ -419,14 +414,11 @@ def run_optimization(
                     f"(R) Training Length: {roadmap_training_length:.3f}")
 
             if optimize_policy_now or optimize_poses_now or i_r == 0:
-                (general_regret, general_success, general_length
-                 ) = eval.evaluate_both(policy_model, g, flann)
-                stats.add("general_regret", i_r, general_regret)
-                stats.add("general_success", i_r, general_success)
-                stats.add("general_length", i_r, general_length)
-                logger.info(f"(G) Regret: {general_regret:e}")
-                logger.info(f"(G) Success: {general_success}")
-                logger.info(f"(G) Length: {general_length:.3f}")
+                general_results = eval.evaluate_both(policy_model, g, flann)
+                names = sorted(general_results.keys())
+                for name in names:
+                    stats.add(f"general_{name}", i_r, general_results[name])
+                    logging.info(f"(G) {name}: {general_results[name]}")
 
             end_eval_time = time.process_time()
             eval_time_perc = (end_eval_time - end_optimization_time) / \
@@ -438,15 +430,18 @@ def run_optimization(
                 end_eval_time - start_time
             ))
 
+            stats.add("data_len", i_r, float(data_len))
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
-            stats.add("general_data_len", i_r, float(data_len))
+            stats.add("general_generation_n_agents_percentage",
+                      i_r, float(n_agents / max_n_agents))
             stats.add("runtime_eval_time_perc", i_r, float(eval_time_perc))
             stats.add("runtime_generation_mean", i_r, ts_mean)
             stats.add("runtime_generation_max", i_r, ts_max)
             logger.info(f"(G) New data: {new_data_percentage*100:.1f}%")
             logger.info(f"(G) Data length: {data_len}")
             logger.info(f"(G) Eval time: {eval_time_perc*100:.1f}%")
+            logger.info(f"(G) Generation n_agents: {n_agents}")
             logger.info(f"(G) Runtime generation mean: {ts_mean:.3f}s")
             logger.info(f"(G) Runtime generation max: {ts_max:.3f}s")
 
@@ -495,13 +490,13 @@ if __name__ == "__main__":
     run_optimization(
         n_nodes=8,
         n_runs_pose=16,
-        n_runs_policy=32,
+        n_runs_policy=64,
         n_epochs_per_run_policy=8,
         batch_size_policy=16,
-        stats_and_eval_every=8,
+        stats_and_eval_every=16,
         lr_pos=1e-2,
         lr_policy=1e-3,
-        n_agents=4,
+        max_n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix=prefix)
@@ -521,30 +516,10 @@ if __name__ == "__main__":
         stats_and_eval_every=2,
         lr_pos=1e-3,
         lr_policy=1e-3,
-        n_agents=4,
+        max_n_agents=4,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix=prefix)
-
-    # tiny_r256_e64 run
-    # prefix = "tiny_r256_e64"
-    # logging.getLogger(__name__).setLevel(logging.INFO)
-    # logging.getLogger(
-    #     "planner.mapf_implementations.plan_cbs_roadmap"
-    # ).setLevel(logging.INFO)
-    # run_optimization(
-    #     n_nodes=16,
-    #     n_runs_pose=64,
-    #     n_runs_policy=256,
-    #     n_epochs_per_run_policy=64,
-    #     batch_size_policy=128,
-    #     stats_and_eval_every=2,
-    #     lr_pos=1e-3,
-    #     lr_policy=1e-3,
-    #     n_agents=4,
-    #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-    #     seed=0,
-    #     prefix=prefix)
 
     # small_r64_e256 run
     prefix = "small_r64_e256"
@@ -561,7 +536,7 @@ if __name__ == "__main__":
         stats_and_eval_every=2,
         lr_pos=1e-3,
         lr_policy=3e-4,
-        n_agents=4,
+        max_n_agents=6,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix=prefix)
@@ -581,7 +556,7 @@ if __name__ == "__main__":
         stats_and_eval_every=2,
         lr_pos=1e-3,
         lr_policy=1e-4,
-        n_agents=4,
+        max_n_agents=10,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix=prefix)
@@ -601,7 +576,7 @@ if __name__ == "__main__":
         stats_and_eval_every=2,
         lr_pos=1e-3,
         lr_policy=1e-4,
-        n_agents=4,
+        max_n_agents=12,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix=prefix)
