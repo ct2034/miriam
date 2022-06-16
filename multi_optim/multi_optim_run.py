@@ -140,16 +140,17 @@ def _get_path_data(save_folder, prefix, hash) -> str:
 
 
 def write_stats_png(prefix, save_folder, stats):
-    prefixes = ["roadmap", "policy", "general", "runtime_"]
+    prefixes = ["roadmap", "policy", "general", "runtime_", "data_"]
     _, axs = plt.subplots(len(prefixes), 1, sharex=True,
-                          figsize=(20, 40), dpi=200)
+                          figsize=(20, 12*len(prefixes)), dpi=200)
     for i_x, part in enumerate(prefixes):
         for k, v in stats.get_stats_wildcard(f"{part}.*").items():
             axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
         axs[i_x].legend()  # type: ignore
         axs[i_x].xaxis.set_major_locator(  # type: ignore
             MaxNLocator(integer=True))
-    plt.xlabel("Run")
+    plt.xlabel(f"Run {prefix}")
+    plt.tight_layout()
     plt.savefig(f"{save_folder}/{prefix}_stats.png")
 
 
@@ -213,7 +214,7 @@ def optimize_policy(model, batch_size, optimizer, epds
 
     if len(loss_s) == 0:
         loss_s = [0]
-    return model, np.mean(loss_s)
+    return model, float(np.mean(loss_s))
 
 
 def run_optimization(
@@ -305,7 +306,7 @@ def run_optimization(
         "stats_every": stats_and_eval_every,
         "lr_pos": lr_pos,
         "lr_policy": lr_policy,
-        "n_agents": max_n_agents,
+        "max_n_agents": max_n_agents,
         "map_fname": map_fname,
         "load_policy_model": (
             load_policy_model if load_policy_model else "None"),
@@ -327,7 +328,7 @@ def run_optimization(
     # Run optimization
     pb = ProgressBar(
         name=f"{prefix} Optimization",
-        total=n_runs,
+        total=n_runs+1,
         step_perc=1,
         print_func=logger.info)
     # roadmap_test_length = 0
@@ -342,9 +343,8 @@ def run_optimization(
         current_acc: float = 0.
         try:
             current_acc_stats = stats.get_stats(current_acc_str)
-            assert isinstance(current_acc_stats[current_acc_str][1], list)
-            assert isinstance(current_acc_stats[current_acc_str][1][-1], float)
-            current_acc = current_acc_stats[current_acc_str][1][-1]
+            current_acc = current_acc_stats[
+                current_acc_str][1][-1]  # type: ignore
         except KeyError:
             # in case we don't have any data yet
             pass
@@ -430,10 +430,11 @@ def run_optimization(
                 end_eval_time - start_time
             ))
 
+            stats.add("data_len", i_r, float(data_len))
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
-            stats.add("general_data_len", i_r, float(data_len))
-            stats.add("general_generation_n_agents", i_r, float(n_agents))
+            stats.add("general_generation_n_agents_percentage",
+                      i_r, float(n_agents / max_n_agents))
             stats.add("runtime_eval_time_perc", i_r, float(eval_time_perc))
             stats.add("runtime_generation_mean", i_r, ts_mean)
             stats.add("runtime_generation_max", i_r, ts_max)
@@ -489,10 +490,10 @@ if __name__ == "__main__":
     run_optimization(
         n_nodes=8,
         n_runs_pose=16,
-        n_runs_policy=32,
+        n_runs_policy=64,
         n_epochs_per_run_policy=8,
         batch_size_policy=16,
-        stats_and_eval_every=8,
+        stats_and_eval_every=16,
         lr_pos=1e-2,
         lr_policy=1e-3,
         max_n_agents=4,

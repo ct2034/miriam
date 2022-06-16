@@ -170,8 +170,9 @@ class Eval(object):
         return_results: Dict[str, float] = {}
         for n_agents, measures in results.items():
             for measure_name, measure_values in measures.items():
-                return_results[f"{measure_name}_{n_agents}"] = np.mean(
-                    measure_values)
+                if len(measure_values) > 0:
+                    return_results[f"{measure_name}_{n_agents}"] = float(np.mean(
+                        measure_values))
         return return_results
 
     def evaluate_roadmap(self, graph: nx.Graph, flann: FLANN) -> float:
@@ -287,6 +288,7 @@ class Eval(object):
         return_results: Dict[str, float] = {}
         for n_agents, measures in results.items():
             for measure_name, measure_values in measures.items():
-                return_results[f"{measure_name}_{n_agents}"] = np.mean(
-                    measure_values)
+                if len(measure_values) > 0:
+                    return_results[f"{measure_name}_{n_agents}"] = float(np.mean(
+                        measure_values))
         return return_results
