@@ -202,15 +202,17 @@ def sample_trajectories_in_parallel(
     return new_fname, paths_s, ts_max, ts_mean
 
 
-def optimize_policy(model, batch_size, optimizer, epds
+def optimize_policy(model, batch_size, optimizer, epds, n_epochs
                     ) -> Tuple[EdgePolicyModel, float]:
     if len(epds) == 0:
         return model, 0.0
     loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
     loss_s = []
-    for _, batch in enumerate(loader):
-        loss = model.learn(batch, optimizer)
-        loss_s.append(loss)
+    for _ in range(n_epochs):
+        for _, batch in enumerate(loader):
+            loss = model.learn(batch, optimizer)
+            loss_s.append(loss)
+        loader.dataset.shuffle()
 
     if len(loss_s) == 0:
         loss_s = [0]
@@ -221,7 +223,8 @@ def run_optimization(
         n_nodes: int,
         n_runs_pose: int,
         n_runs_policy: int,
-        n_epochs_per_run_policy: int,
+        n_episodes_per_run_policy: int,  # how many episodes to sample per run
+        n_epochs_per_run_policy: int,  # how often to learn same data
         batch_size_policy: int,
         stats_and_eval_every: int,
         lr_pos: float,
@@ -301,6 +304,7 @@ def run_optimization(
         "n_nodes": n_nodes,
         "n_runs_pose": n_runs_pose,
         "n_runs_policy": n_runs_policy,
+        "n_episodes_per_run_policy": n_episodes_per_run_policy,
         "n_epochs_per_run_policy": n_epochs_per_run_policy,
         "batch_size_policy": batch_size_policy,
         "stats_every": stats_and_eval_every,
@@ -357,7 +361,7 @@ def run_optimization(
         #     "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
         new_fname, paths_s, ts_max, ts_mean = sample_trajectories_in_parallel(
-            policy_model, g, map_img, flann, n_agents, n_epochs_per_run_policy,
+            policy_model, g, map_img, flann, n_agents, n_episodes_per_run_policy,
             prefix, optimize_poses_now, save_folder,  pool, rng)
         epds.add_file(new_fname)
         data_len = len(epds)
@@ -384,7 +388,7 @@ def run_optimization(
         if optimize_policy_now:
             start_time_optim_policy = time.process_time()
             policy_model, policy_loss = optimize_policy(
-                policy_model, batch_size_policy, optimizer_policy, epds)
+                policy_model, batch_size_policy, optimizer_policy, epds, n_epochs_per_run_policy)
             end_time_optim_policy = time.process_time()
             stats.add("runtime_optim_policy", i_r, (
                 end_time_optim_policy - start_time_optim_policy
@@ -491,7 +495,8 @@ if __name__ == "__main__":
         n_nodes=8,
         n_runs_pose=16,
         n_runs_policy=64,
-        n_epochs_per_run_policy=8,
+        n_episodes_per_run_policy=8,
+        n_epochs_per_run_policy=4,
         batch_size_policy=16,
         stats_and_eval_every=16,
         lr_pos=1e-2,
@@ -511,7 +516,8 @@ if __name__ == "__main__":
         n_nodes=16,
         n_runs_pose=64,
         n_runs_policy=64,
-        n_epochs_per_run_policy=256,
+        n_episodes_per_run_policy=256,
+        n_epochs_per_run_policy=4,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
@@ -531,7 +537,8 @@ if __name__ == "__main__":
         n_nodes=32,
         n_runs_pose=64,
         n_runs_policy=64,
-        n_epochs_per_run_policy=256,
+        n_episodes_per_run_policy=256,
+        n_epochs_per_run_policy=4,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
@@ -551,7 +558,8 @@ if __name__ == "__main__":
         n_nodes=64,
         n_runs_pose=64,
         n_runs_policy=64,
-        n_epochs_per_run_policy=256,
+        n_episodes_per_run_policy=256,
+        n_epochs_per_run_policy=4,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
@@ -571,7 +579,8 @@ if __name__ == "__main__":
         n_nodes=128,
         n_runs_pose=64,
         n_runs_policy=64,
-        n_epochs_per_run_policy=256,
+        n_episodes_per_run_policy=256,
+        n_epochs_per_run_policy=4,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
