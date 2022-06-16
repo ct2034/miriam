@@ -348,18 +348,21 @@ class ProgressBar(object):
 
 
 class StatCollector(object):
-    def __init__(self, names: List[str]):
+    def __init__(self):
         self.stats: Dict[str,
                          Dict[str,
                               Union[List[float], Union[float, str]]]] = {}
-        for name in names:
-            self.stats[name] = {
-                "t": [],
-                "x": []
-            }
         self.stats[STATIC] = {}
 
+    def add_name(self, name):
+        self.stats[name] = {
+            "t": [],
+            "x": []
+        }
+
     def add(self, name: str, t: int, x: float):
+        if name not in self.stats:
+            self.add_name(name)
         assert name in self.stats.keys()
         assert "t" in self.stats[name].keys()
         assert isinstance(self.stats[name]["t"], list)

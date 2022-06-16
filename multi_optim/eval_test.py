@@ -37,7 +37,7 @@ class EvalTest(unittest.TestCase):
         eval = Eval(
             self.sq_graph,
             map_img=((255,),),
-            n_agents=n_agents,
+            n_agents_s=n_agents,
             n_eval=10,
             iterator_type=IteratorType.LOOKAHEAD2,
             radius=self.radius,
