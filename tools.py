@@ -405,7 +405,7 @@ class StatCollector(object):
 
     @classmethod
     def from_yaml(cls, filename: str):
-        obj = StatCollector([])
+        obj = StatCollector()
         assert filename.endswith(".yaml")
         with open(filename, 'r') as f:
             obj.stats = yaml.load(f, Loader=yaml.SafeLoader)
