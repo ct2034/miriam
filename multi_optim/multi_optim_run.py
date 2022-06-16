@@ -142,9 +142,12 @@ def _get_path_data(save_folder, prefix, hash) -> str:
 def write_stats_png(prefix, save_folder, stats):
     prefixes = ["roadmap", "policy", "general", "runtime_", "data_"]
     _, axs = plt.subplots(len(prefixes), 1, sharex=True,
-                          figsize=(20, 12*len(prefixes)), dpi=200)
+                          figsize=(10, 6*len(prefixes)), dpi=200)
     for i_x, part in enumerate(prefixes):
-        for k, v in stats.get_stats_wildcard(f"{part}.*").items():
+        subset = stats.get_stats_wildcard(f"{part}.*")
+        keys = subset.keys()
+        for k in sorted(keys):
+            v = subset[k]
             axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
         axs[i_x].legend()  # type: ignore
         axs[i_x].xaxis.set_major_locator(  # type: ignore
