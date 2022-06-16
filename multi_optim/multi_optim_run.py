@@ -399,7 +399,7 @@ def run_optimization(
                 names = sorted(policy_results.keys())
                 for name in names:
                     stats.add(f"policy_{name}", i_r, policy_results[name])
-                    logging.info(f"(P) {name}: {policy_results[name]}")
+                    logger.info(f"(P) {name}: {policy_results[name]}")
                 if policy_loss is not None:
                     stats.add("(P) loss", i_r, policy_loss)
 
@@ -418,7 +418,7 @@ def run_optimization(
                 names = sorted(general_results.keys())
                 for name in names:
                     stats.add(f"general_{name}", i_r, general_results[name])
-                    logging.info(f"(G) {name}: {general_results[name]}")
+                    logger.info(f"(G) {name}: {general_results[name]}")
 
             end_eval_time = time.process_time()
             eval_time_perc = (end_eval_time - end_optimization_time) / \
