@@ -61,7 +61,7 @@ class Eval(object):
         self.first_lengths = []  # type: List[Optional[float]]
         # per n_agents ...
         self.eval_set_accuracy: List[
-            List[Tuple[Data, BFS_TYPE]]] = [list(), ] * len(n_agents_s)
+            List[Tuple[Data, BFS_TYPE]]] = [list() for _ in n_agents_s]
 
         for i_na, n_agents in enumerate(self.n_agents_s):
             for _ in range(n_eval_per_n_agents):
