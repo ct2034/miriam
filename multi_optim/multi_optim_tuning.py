@@ -27,7 +27,7 @@ def params_debug():
         "stats_and_eval_every": [1],
         "lr_pos": [1E-4],
         "lr_policy": [1E-3],
-        "n_agents": [2],
+        "max_n_agents": [2],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
         "save_folder": [TUNING_RES_FOLDER]
@@ -47,7 +47,7 @@ def params_run():
         "stats_and_eval_every": [4],
         "lr_pos": [1E-3],
         "lr_policy": [1E-4],
-        "n_agents": [4],
+        "max_n_agents": [4],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
         "save_folder": [TUNING_RES_FOLDER]
@@ -66,7 +66,7 @@ def params_ablation():
         "stats_and_eval_every": [8],
         "lr_pos": [1E-2],
         "lr_policy": [1E-3],
-        "n_agents": [4, 3, 5, 6],
+        "max_n_agents": [4, 3, 5, 6],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/c.png"],
         "save_images": [True],
         "save_folder": [ABLATION_RES_FOLDER]
