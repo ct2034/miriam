@@ -63,7 +63,7 @@ def pick_gpu_lowest_memory():
     best_memory, best_gpu = sorted(memory_gpu_map)[0]
     best_gpus = []
     for mem, gpu in memory_gpu_map:
-        if mem <= best_memory+8:
+        if mem <= best_memory+2048:  # allow 10% difference
             best_gpus.append(gpu)
     return random.choice(best_gpus)
 

@@ -41,13 +41,13 @@ def params_run():
         "n_nodes": [64],  # medium
         "n_runs_pose": [128],
         "n_runs_policy": [128],
-        "n_epochs_per_run_policy":  [1, 2, 4, 6, 8],
+        "n_epochs_per_run_policy":  [1, 2, 4, 6],
         "n_episodes_per_run_policy":  [256],
         "batch_size_policy":  [64],
         "stats_and_eval_every": [4],
         "lr_pos": [1E-3],
         "lr_policy": [1E-4],
-        "max_n_agents": [4],
+        "max_n_agents": [8],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
         "save_folder": [TUNING_RES_FOLDER]
@@ -128,7 +128,7 @@ def run(params_to_run):
     cpus = os.cpu_count()
     assert isinstance(cpus, int)
     logger.info(f"{cpus=}")
-    max_active_processes: int = 4  # min(cpus, 8)
+    max_active_processes: int = 6  # min(cpus, 8)
     logger.info(f"{max_active_processes=}")
     active_processes = set()
 
