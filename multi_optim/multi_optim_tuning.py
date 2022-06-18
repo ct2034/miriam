@@ -221,6 +221,7 @@ def plot_data(path: str):
         n_exps,
         figsize=(4*n_exps, 4*n_params),
         dpi=200)
+    axs = axs.reshape(n_params + 1, n_exps)
 
     lims_per_param = {}  # type: Dict[str, List[float]]
 
@@ -230,19 +231,23 @@ def plot_data(path: str):
 
             # consolidate data
             n_seeds = len(data[exp])
-            first_available_seed = min(data[exp].keys())
-            t_raw = data[exp][first_available_seed][param]['t']
-            n_t = len(t_raw)
-            this_data_raw = np.zeros((n_seeds, n_t))
+            t_min_l = 10E10
             for i_seed, seed in enumerate(data[exp].keys()):
-                this_data_raw[i_seed, :] = data[exp][seed][param]['x']
+                t_raw = data[exp][seed][param]['t']
+                if len(t_raw) < t_min_l:
+                    t_min_l = len(t_raw)
+                    t_min_raw = t_raw
+            this_data_raw = np.zeros((n_seeds, t_min_l))
+            for i_seed, seed in enumerate(data[exp].keys()):
+                this_data_raw[i_seed, :] = data[exp][seed][param]['x'][
+                    :t_min_l]
 
             means = np.empty((0,))
             stds = np.empty((0,))
             mins = np.empty((0,))
             maxs = np.empty((0,))
             ts = np.empty((0,))
-            for i_t, t in enumerate(t_raw):
+            for i_t, t in enumerate(t_min_raw):
                 t_slice = this_data_raw[:, i_t]
                 if not np.isnan(t_slice).all():
                     mean = np.mean(
