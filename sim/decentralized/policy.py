@@ -89,7 +89,7 @@ class LearnedPolicy(Policy):
         i_a_self = agents.index(self.a)
         data, big_from_small = agents_to_data(
             agents, i_a_self, with_optimal=False)
-        node_to_go = self.nn.predict(
+        node_to_go = self.nn.predict_probablilistic(
             data.x,
             data.edge_index,
             big_from_small)

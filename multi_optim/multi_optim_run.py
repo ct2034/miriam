@@ -33,24 +33,24 @@ from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
     from eval import Eval
-    from state import ACTION, ScenarioState
+    from state import ACTION, ITERATOR_TYPE, ScenarioState
 else:
     from multi_optim.eval import Eval
-    from multi_optim.state import ACTION, ScenarioState
+    from multi_optim.state import ACTION, ITERATOR_TYPE, ScenarioState
 
 logger = logging.getLogger(__name__)
 
 MAX_STEPS = 10
 RADIUS = 0.001
-ITERATOR_TYPE = IteratorType.LOOKAHEAD2
 
 
 def sample_trajectory_proxy(args):
     return sample_trajectory(*args)
 
 
-def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
-                      max_steps=MAX_STEPS):
+def sample_trajectory(seed: int, graph: nx.Graph, n_agents: int,
+                      model: EdgePolicyModel, map_img: MAP_IMG,
+                      max_steps: int = MAX_STEPS):
     """Sample a trajectory using the given policy."""
     start_time = time.process_time()
     rng = Random(seed)
@@ -61,6 +61,7 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
     pos_np = np.array([pos[n] for n in graph.nodes])
     flann.build_index(np.array(pos_np, dtype=np.float32),
                       random_index=0)
+    model.train()
 
     starts_coord: Optional[List[Tuple[float, float]]] = None
     goals_coord: Optional[List[Tuple[float, float]]] = None
@@ -118,7 +119,8 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
             assert observations is not None, "observations is None"
             for i_a, (d, bfs) in observations.items():
                 # find actions to take using the policy
-                actions[i_a] = model.predict(d.x, d.edge_index, bfs)
+                actions[i_a] = model.predict_probablilistic(
+                    d.x, d.edge_index, bfs)
                 # observation, action pairs for learning
                 these_ds.append(d)
             state.step(actions)
@@ -364,8 +366,9 @@ def run_optimization(
         #     "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
         new_fname, paths_s, ts_max, ts_mean = sample_trajectories_in_parallel(
-            policy_model, g, map_img, flann, n_agents, n_episodes_per_run_policy,
-            prefix, optimize_poses_now, save_folder,  pool, rng)
+            policy_model, g, map_img, flann, n_agents,
+            n_episodes_per_run_policy, prefix, optimize_poses_now,
+            save_folder,  pool, rng)
         epds.add_file(new_fname)
         data_len = len(epds)
         if data_len > 0:
@@ -391,7 +394,8 @@ def run_optimization(
         if optimize_policy_now:
             start_time_optim_policy = time.process_time()
             policy_model, policy_loss = optimize_policy(
-                policy_model, batch_size_policy, optimizer_policy, epds, n_epochs_per_run_policy)
+                policy_model, batch_size_policy, optimizer_policy, epds,
+                n_epochs_per_run_policy)
             end_time_optim_policy = time.process_time()
             stats.add("runtime_optim_policy", i_r, (
                 end_time_optim_policy - start_time_optim_policy
@@ -499,7 +503,7 @@ if __name__ == "__main__":
         n_runs_pose=16,
         n_runs_policy=64,
         n_episodes_per_run_policy=8,
-        n_epochs_per_run_policy=4,
+        n_epochs_per_run_policy=2,
         batch_size_policy=16,
         stats_and_eval_every=16,
         lr_pos=1e-2,
@@ -520,7 +524,7 @@ if __name__ == "__main__":
         n_runs_pose=64,
         n_runs_policy=64,
         n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
+        n_epochs_per_run_policy=2,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
@@ -541,7 +545,7 @@ if __name__ == "__main__":
         n_runs_pose=64,
         n_runs_policy=64,
         n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
+        n_epochs_per_run_policy=2,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
@@ -562,7 +566,7 @@ if __name__ == "__main__":
         n_runs_pose=64,
         n_runs_policy=64,
         n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
+        n_epochs_per_run_policy=2,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
@@ -583,7 +587,7 @@ if __name__ == "__main__":
         n_runs_pose=64,
         n_runs_policy=64,
         n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
+        n_epochs_per_run_policy=2,
         batch_size_policy=128,
         stats_and_eval_every=2,
         lr_pos=1e-3,
