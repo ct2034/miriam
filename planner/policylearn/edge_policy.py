@@ -1,6 +1,7 @@
 import logging
 import os
 import pickle
+import random
 from typing import List, Tuple
 
 import torch
@@ -86,6 +87,7 @@ class EdgePolicyModel(nn.Module):
             self.readout_layers.append(
                 torch.nn.Linear(num_conv_channels, channels_out)
             )
+        self.rng = random.Random(torch.randint(0, 2**32, (1,)).item())
 
     def __hash__(self) -> int:
         rng = torch.Generator()
@@ -122,7 +124,20 @@ class EdgePolicyModel(nn.Module):
                 x[batch == i_b], dim=0)
         return y_out_batched
 
-    def predict(self, x, edge_index, big_from_small):
+    def predict_probablilistic(self, x, edge_index, big_from_small):
+        targets, score = self.predict_scores_and_targets(x, edge_index)
+        score_potential_targets = score[targets]
+        # if self.training:
+        node_small = self.rng.choices(
+            targets,
+            weights=score_potential_targets.tolist(),
+            k=1)[0].item()
+        # else:  # eval
+        #     node_small = targets[torch.argmax(
+        #         score_potential_targets).item()].item()
+        return big_from_small[node_small]
+
+    def predict_scores_and_targets(self, x, edge_index):
         self.eval()
         n_nodes = x.shape[0]
         node = torch.nonzero(x[:, 0] == 1.).item()
@@ -143,16 +158,13 @@ class EdgePolicyModel(nn.Module):
 
         # read values at potential targets as score
         score = self.forward(x, edge_index, torch.tensor([0]*n_nodes))
-        score_potential_targets = score[targets]
-        node_small = targets[torch.argmax(
-            score_potential_targets).item()].item()
-        return big_from_small[node_small]
+        return targets, score
 
     def accuracy(self, eval_list: EVAL_LIST) -> float:
         self.eval()
         results = torch.zeros(len(eval_list))
         for i, (data, bfs) in enumerate(eval_list):
-            pred = self.predict(data.x, data.edge_index, bfs)
+            pred = self.predict_probablilistic(data.x, data.edge_index, bfs)
             optimal_small = torch.argmax(data.y).item()
             if isinstance(optimal_small, int):
                 results[i] = int(pred == bfs[optimal_small])

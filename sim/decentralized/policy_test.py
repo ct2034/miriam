@@ -7,7 +7,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-from planner.policylearn.train_model import CONVRNN_STR
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import LearnedPolicy, PolicyType

@@ -32,8 +32,9 @@ class Eval(object):
     """This class hold the information to evaluate the roadmap and policy
     during its run."""
 
-    def __init__(self, roadmap: nx.Graph, map_img: MAP_IMG, n_agents_s: List[int],
-                 n_eval_per_n_agents: int, iterator_type: IteratorType, radius: float
+    def __init__(self, roadmap: nx.Graph, map_img: MAP_IMG,
+                 n_agents_s: List[int], n_eval_per_n_agents: int,
+                 iterator_type: IteratorType, radius: float
                  ) -> None:
         torch.manual_seed(0)
         np.random.seed(0)
@@ -171,8 +172,9 @@ class Eval(object):
         for n_agents, measures in results.items():
             for measure_name, measure_values in measures.items():
                 if len(measure_values) > 0:
-                    return_results[f"{measure_name}_{n_agents}"] = float(np.mean(
-                        measure_values))
+                    return_results[
+                        f"{measure_name}_{n_agents}"
+                    ] = float(np.mean(measure_values))
         return return_results
 
     def evaluate_roadmap(self, graph: nx.Graph, flann: FLANN) -> float:
