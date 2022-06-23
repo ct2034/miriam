@@ -30,7 +30,7 @@ def learning(
     torch.manual_seed(seed)
 
     # run to learn from
-    run_prefix_data: str = "large_r64_e256"
+    run_prefix_data: str = "n_epochs_per_run_policy_6_seed_0"
     n_test = 100
     n_epochs = 100
 
@@ -54,7 +54,7 @@ def learning(
     #     f"multi_optim/results/{run_prefix_data}_policy_model.pt"))
 
     # load dataset from previous multi_optim_run
-    dataset = EdgePolicyDataset(f"multi_optim/results/{run_prefix_data}_data")
+    dataset = EdgePolicyDataset(f"multi_optim/results/tuning/{run_prefix_data}_data")
     test_set_i_s = range(len(dataset) - n_test, len(dataset))
     test_set = dataset[test_set_i_s]
     test_set = [(d, {n: n for n in range(d.num_nodes)})
@@ -150,7 +150,7 @@ def tuning(base_folder):
                 params_to_run.append(kwargs.copy())
 
     mp.set_start_method("spawn")
-    p = mp.Pool(8)
+    p = mp.Pool(4)
     p.map(learning_proxy, params_to_run)
     # for p in params_to_run:
     #     learning_proxy(p)
@@ -257,5 +257,5 @@ def plot_results(base_folder):
 
 if __name__ == "__main__":
     base_folder = "planner/policylearn/results"
-    # tuning(base_folder=base_folder)
+    tuning(base_folder=base_folder)
     plot_results(base_folder)
