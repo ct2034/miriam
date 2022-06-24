@@ -3534,3 +3534,2440 @@ INFO:__main__:Running progress: 50%
  > took: 1 day, 18:37:11.912975, eta: 1 day, 18:37:11.912975
 INFO:__main__:Running progress: 50%
  > took: 1 day, 18:37:12.013424, eta: 1 day, 18:37:12.013424
+INFO:__main__:Finished process [1611813]
+INFO:__main__:outs: [1611813] >>>>><<<<< [1611813]
+ERROR:__main__:errs: [1611813] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [1611813]
+INFO:__main__:Started process "default_seed_2" @ [413359]
+DEBUG:__main__:len(active_processes)=6
+DEBUG:__main__:len(params_to_run)=2
+INFO:__main__:Running progress: 56%
+ > took: 1 day, 23:32:56.490634, eta: 1 day, 12:58:57.270493
+INFO:__main__:Finished process [781101]
+INFO:__main__:outs: [781101] >>>>><<<<< [781101]
+ERROR:__main__:errs: [781101] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [781101]
+INFO:__main__:Started process "default_seed_1" @ [775643]
+DEBUG:__main__:len(active_processes)=6
+DEBUG:__main__:len(params_to_run)=1
+INFO:__main__:Running progress: 62%
+ > took: 2 days, 1:41:19.079092, eta: 1 day, 5:48:47.447455
+INFO:__main__:Finished process [687046]
+INFO:__main__:outs: [687046] >>>>><<<<< [687046]
+ERROR:__main__:errs: [687046] >>>>>WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+/home/chenkel/.local/lib/python3.8/site-packages/cvxpy/problems/problem.py:1296: UserWarning: Solution may be inaccurate. Try another solver, adjusting the solver settings, or solve with verbose=True for more information.
+  warnings.warn(
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [687046]
+INFO:__main__:Started process "default_seed_0" @ [969936]
+DEBUG:__main__:len(active_processes)=6
+DEBUG:__main__:len(params_to_run)=0
+INFO:__main__:Running progress: 69%
+ > took: 2 days, 2:47:51.939837, eta: 23:05:23.609017
+INFO:__main__:Finished process [3188478]
+INFO:__main__:outs: [3188478] >>>>><<<<< [3188478]
+ERROR:__main__:errs: [3188478] >>>>>WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [3188478]
+INFO:__main__:Running progress: 75%
+ > took: 2 days, 15:48:53.371980, eta: 21:16:17.790660
+INFO:__main__:Finished process [3814740]
+INFO:__main__:outs: [3814740] >>>>><<<<< [3814740]
+ERROR:__main__:errs: [3814740] >>>>>WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.multi_optim_run:RuntimeError: No paths found
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:multi_optim.eval:No paths
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+WARNING:sim.decentralized.iterators:OptimalPolicy failed
+<<<<< [3814740]
+INFO:__main__:Running progress: 81%
+ > took: 2 days, 15:53:00.620046, eta: 14:44:32.450780
+INFO:__main__:Running progress: 81%
+ > took: 2 days, 15:53:00.720551, eta: 14:44:32.473973
