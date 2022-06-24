@@ -142,7 +142,18 @@ def _get_path_data(save_folder, prefix, hash) -> str:
 
 
 def write_stats_png(prefix, save_folder, stats):
-    prefixes = ["roadmap", "policy", "general", "runtime_", "data_"]
+    prefixes = [
+        "roadmap",
+        "policy_accuracy",
+        "policy_regret",
+        "policy_success",
+        "general_accuracy",
+        "general_regret",
+        "general_success",
+        "general_gen"
+        "runtime_",
+        "data_"
+    ]
     _, axs = plt.subplots(len(prefixes), 1, sharex=True,
                           figsize=(10, 6*len(prefixes)), dpi=200)
     for i_x, part in enumerate(prefixes):
