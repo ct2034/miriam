@@ -54,7 +54,8 @@ def learning(
     #     f"multi_optim/results/{run_prefix_data}_policy_model.pt"))
 
     # load dataset from previous multi_optim_run
-    dataset = EdgePolicyDataset(f"multi_optim/results/tuning/{run_prefix_data}_data")
+    dataset = EdgePolicyDataset(
+        f"multi_optim/results/tuning/{run_prefix_data}_data")
     test_set_i_s = range(len(dataset) - n_test, len(dataset))
     test_set = dataset[test_set_i_s]
     test_set = [(d, {n: n for n in range(d.num_nodes)})
@@ -108,9 +109,9 @@ def learning_proxy(kwargs):
 
 
 def tuning(base_folder):
-    lr_s = [1E-4, 3E-4, 3E-5]
+    lr_s = [3E-4, 1E-4, 3E-5]
     batch_size_s = [64]
-    conv_channels_s = [128, 256]
+    conv_channels_s = [128]
     conv_layers_s = [4, 5]
     readout_layers_s = [2, 3]
     cheb_filter_size_s = [5, 6]
@@ -125,7 +126,7 @@ def tuning(base_folder):
         "dropout_p": dropout_p_s
     }  # type: Dict[str, Union[str, List[float], List[int]]]
 
-    seed_s = range(6)
+    seed_s = range(4)
 
     # prepare multithreading
     params_to_run = []
