@@ -32,7 +32,7 @@ def learning(
     # run to learn from
     run_prefix_data: str = "n_epochs_per_run_policy_6_seed_0"
     n_test = 100
-    n_epochs = 100
+    n_epochs = 200
 
     if torch.cuda.is_available():
         gpu = torch.device(pick_gpu_low_memory())
@@ -109,12 +109,12 @@ def learning_proxy(kwargs):
 
 
 def tuning(base_folder):
-    lr_s = [3E-4, 1E-4, 3E-5]
+    lr_s = [3E-4, 1E-4]
     batch_size_s = [64]
     conv_channels_s = [128]
     conv_layers_s = [4, 5]
     readout_layers_s = [2, 3]
-    cheb_filter_size_s = [6, 7]
+    cheb_filter_size_s = [6]
     dropout_p_s = [0.2, 0.3]
     parameter_experiments = {
         "lr": lr_s,
@@ -126,7 +126,7 @@ def tuning(base_folder):
         "dropout_p": dropout_p_s
     }  # type: Dict[str, Union[str, List[float], List[int]]]
 
-    seed_s = range(4)
+    seed_s = range(8)
 
     # prepare multithreading
     params_to_run = []
