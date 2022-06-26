@@ -64,7 +64,7 @@ class EdgePolicyModel(nn.Module):
             num_conv_channels=128,  # type: int
             num_conv_layers=4,  # type: int
             num_readout_layers=2,  # type: int
-            cheb_filter_size=5,  # type: int
+            cheb_filter_size=6,  # type: int
             dropout_p=.2,  # type: float
             gpu=torch.device("cpu")  # type: torch.device
     ):
