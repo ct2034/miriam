@@ -114,7 +114,7 @@ def tuning(base_folder):
     conv_channels_s = [128]
     conv_layers_s = [4, 5]
     readout_layers_s = [2, 3]
-    cheb_filter_size_s = [5, 6]
+    cheb_filter_size_s = [6, 7]
     dropout_p_s = [0.2, 0.3]
     parameter_experiments = {
         "lr": lr_s,
