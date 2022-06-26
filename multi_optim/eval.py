@@ -1,5 +1,6 @@
 import logging
 from builtins import float
+from copy import deepcopy
 from random import Random
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -39,7 +40,7 @@ class Eval(object):
         torch.manual_seed(0)
         np.random.seed(0)
         self.rng = Random(0)
-        self.first_roadmap = roadmap
+        self.first_roadmap = deepcopy(roadmap)
         self.map_img = map_img
         self.n_agents_s = n_agents_s
         self.n_eval = n_eval_per_n_agents * len(n_agents_s)
@@ -161,13 +162,16 @@ class Eval(object):
             this_res = run_a_scenario(
                 self.first_roadmap,
                 self.agents_s[i_e],
-                False, self.iterator_type)
+                False,
+                self.iterator_type)
             assert n_agents in results.keys()
             results[n_agents][SUCCESS_STR].append(
                 this_res[IDX_SUCCESS])
-            results[n_agents][REGRET_STR].append(
-                this_res[IDX_AVERAGE_LENGTH] -
-                self.res_optimal_policy[i_e][IDX_AVERAGE_LENGTH])
+            assert self.res_optimal_policy[i_e][IDX_SUCCESS]
+            if this_res[IDX_SUCCESS]:
+                results[n_agents][REGRET_STR].append(
+                    this_res[IDX_AVERAGE_LENGTH] -
+                    self.res_optimal_policy[i_e][IDX_AVERAGE_LENGTH])
         return_results: Dict[str, float] = {}
         for n_agents, measures in results.items():
             for measure_name, measure_values in measures.items():
