@@ -80,11 +80,13 @@ class TestIterators(unittest.TestCase):
         # no colissions, radius too small
         starts = [0, 1, 2]
         ends = [1, 2, 0]
-        colliding_agents = check_motion_col(self.g, 0.22, starts, ends)
+        colliding_agents = check_motion_col(
+            self.g, 0.22, starts, ends, ignored_agents=set())
         self.assertEqual(len(colliding_agents), 0)
 
         # all collisions on bigger radius
-        colliding_agents = check_motion_col(self.g, 0.23, starts, ends)
+        colliding_agents = check_motion_col(
+            self.g, 0.23, starts, ends, ignored_agents=set())
         self.assertEqual(len(colliding_agents), 3)
         self.assertIn(0, colliding_agents)
         self.assertIn(1, colliding_agents)
@@ -94,11 +96,13 @@ class TestIterators(unittest.TestCase):
         # no colissions, radius too small
         starts = [0, 1]
         ends = [2, 0]
-        colliding_agents = check_motion_col(self.g, 0.35, starts, ends)
+        colliding_agents = check_motion_col(
+            self.g, 0.35, starts, ends, ignored_agents=set())
         self.assertEqual(len(colliding_agents), 0)
 
         # all collisions on bigger radius
-        colliding_agents = check_motion_col(self.g, 0.36, starts, ends)
+        colliding_agents = check_motion_col(
+            self.g, 0.36, starts, ends, ignored_agents=set())
         self.assertEqual(len(colliding_agents), 2)
         self.assertIn(0, colliding_agents)
         self.assertIn(1, colliding_agents)
@@ -108,7 +112,8 @@ class TestIterators(unittest.TestCase):
         for node in all_nodes:
             starts = [node, node]
             ends = [n for n in all_nodes if n != node]
-            colliding_agents = check_motion_col(self.g, 0.01, starts, ends)
+            colliding_agents = check_motion_col(
+                self.g, 0.01, starts, ends, ignored_agents=set())
             self.assertEqual(len(colliding_agents), 2)
             self.assertIn(0, colliding_agents)
             self.assertIn(1, colliding_agents)
@@ -117,11 +122,13 @@ class TestIterators(unittest.TestCase):
         # and lead to no colission when radius is small
         starts = [0, 1]
         ends = [0, 2]
-        colliding_agents = check_motion_col(self.g, 0.35, starts, ends)
+        colliding_agents = check_motion_col(
+            self.g, 0.35, starts, ends, ignored_agents=set())
         self.assertEqual(len(colliding_agents), 0)
 
         # and lead to colission when radius is big
-        colliding_agents = check_motion_col(self.g, 0.36, starts, ends)
+        colliding_agents = check_motion_col(
+            self.g, 0.36, starts, ends, ignored_agents=set())
         self.assertEqual(len(colliding_agents), 2)
         self.assertIn(0, colliding_agents)
         self.assertIn(1, colliding_agents)
@@ -130,13 +137,15 @@ class TestIterators(unittest.TestCase):
         # the other two should
         starts = [0, 1, 2]
         ends = [0, 2, 1]
-        colliding_agents = check_motion_col(self.g, 0.35, starts, ends)
+        colliding_agents = check_motion_col(
+            self.g, 0.35, starts, ends, ignored_agents=set())
         self.assertEqual(len(colliding_agents), 2)
         self.assertIn(1, colliding_agents)
         self.assertIn(2, colliding_agents)
 
         # if radius is bigger, all collide
-        colliding_agents = check_motion_col(self.g, 0.36, starts, ends)
+        colliding_agents = check_motion_col(
+            self.g, 0.36, starts, ends, ignored_agents=set())
         self.assertEqual(len(colliding_agents), 3)
         self.assertIn(0, colliding_agents)
         self.assertIn(1, colliding_agents)
