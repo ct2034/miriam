@@ -92,6 +92,14 @@ class TestIterators(unittest.TestCase):
         self.assertIn(1, colliding_agents)
         self.assertIn(2, colliding_agents)
 
+        # ignoring agent 0
+        colliding_agents = check_motion_col(
+            self.g, 0.23, starts, ends, ignored_agents=set([0]))
+        self.assertEqual(len(colliding_agents), 2)
+        self.assertNotIn(0, colliding_agents)
+        self.assertIn(1, colliding_agents)
+        self.assertIn(2, colliding_agents)
+
         # looking at only the outer edges
         # no colissions, radius too small
         starts = [0, 1]
