@@ -278,4 +278,4 @@ class TestRunner(unittest.TestCase):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    pytest.main()
+    pytest.main([__file__])

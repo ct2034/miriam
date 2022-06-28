@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from enum import Enum, auto
 from multiprocessing import Pool
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -163,7 +164,8 @@ def check_motion_col(g: nx.Graph, radius: float,
 def iterate_edge_policy(
     agents: Tuple[Agent, ...],
     lookahead: int,
-    ignore_finished_agents: bool
+    ignore_finished_agents: bool,
+    _copying: bool = False  # for testing
 ) -> Tuple[List[int], List[float]]:
     """An iterator that will ask a policy which edge to take in the even of a collision."""
     assert agents[0].radius is not None, "radius must be set"
@@ -190,8 +192,12 @@ def iterate_edge_policy(
             len(agents)) if agents[i_a].is_at_goal()])
     else:
         ignored_agents = set()
-    agents_except_ignored = [a for i_a, a in enumerate(
-        agents) if i_a not in ignored_agents]
+    if _copying:
+        agents_except_ignored = [a.copy() for i_a, a in enumerate(
+            agents) if i_a not in ignored_agents]
+    else:
+        agents_except_ignored = [a for i_a, a in enumerate(
+            agents) if i_a not in ignored_agents]
 
     # calling the policy for each agent that has colissions
     next_nodes: List[C] = [-1] * len(agents)
@@ -203,8 +209,12 @@ def iterate_edge_policy(
                 assert hasattr(a.policy, "get_edge"), \
                     "Needs edge-based policy"
                 try:
+                    if _copying:
+                        agents_copy = [a.copy() for a in agents_except_ignored]
+                    else:
+                        agents_copy = agents_except_ignored
                     next_nodes[i_a] = a.policy.get_edge(  # type: ignore
-                        agents_except_ignored, agents_with_colissions)  # type: ignore
+                        agents_copy, agents_with_colissions)  # type: ignore
                 except RuntimeError:
                     logger.warn(f"{a.policy} failed")
                     raise SimIterationException(
@@ -220,6 +230,9 @@ def iterate_edge_policy(
         logger.debug(
             f"{i_try=}, {solved=}, {next_collisions=}, {new_agents_with_colissions=}")
         agents_with_colissions.update(new_agents_with_colissions)
+        # update agents with new paths in case we ask the policy again
+        for i_a, a in enumerate(agents):
+            a.replan_with_first_step(next_nodes[i_a])
         i_try += 1
     if i_try == RETRIES:
         raise SimIterationException(f"Failed to solve after {RETRIES} tries")
