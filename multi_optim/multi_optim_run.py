@@ -603,7 +603,7 @@ if __name__ == "__main__":
         stats_and_eval_every=2,
         lr_pos=1e-3,
         lr_policy=1e-4,
-        max_n_agents=12,
+        max_n_agents=10,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix=prefix)
