@@ -34,40 +34,40 @@ def run_optimization_sep(
 
     # 1. roadmap
     prefix_sep_roadmap = f"{prefix}_sep_roadmap"
-    # run_optimization(
-    #     n_nodes=n_nodes,
-    #     n_runs_pose=n_runs_pose,
-    #     n_runs_policy=0,
-    #     n_episodes_per_run_policy=n_episodes_per_run_policy,
-    #     n_epochs_per_run_policy=1,
-    #     batch_size_policy=batch_size_policy,
-    #     stats_and_eval_every=stats_and_eval_every,
-    #     lr_pos=lr_pos,
-    #     lr_policy=lr_policy,
-    #     max_n_agents=max_n_agents,
-    #     map_fname=map_fname,
-    #     seed=seed,
-    #     prefix=prefix_sep_roadmap,
-    #     save_folder=save_folder)
+    run_optimization(
+        n_nodes=n_nodes,
+        n_runs_pose=n_runs_pose,
+        n_runs_policy=0,
+        n_episodes_per_run_policy=n_episodes_per_run_policy,
+        n_epochs_per_run_policy=1,
+        batch_size_policy=batch_size_policy,
+        stats_and_eval_every=stats_and_eval_every,
+        lr_pos=lr_pos,
+        lr_policy=lr_policy,
+        max_n_agents=max_n_agents,
+        map_fname=map_fname,
+        seed=seed,
+        prefix=prefix_sep_roadmap,
+        save_folder=save_folder)
 
     # 2. policy
     prefix_sep_policy = f"{prefix}_sep_policy"
-    # run_optimization(
-    #     n_nodes=n_nodes,
-    #     n_runs_pose=0,
-    #     n_runs_policy=n_runs_policy,
-    #     n_episodes_per_run_policy=n_episodes_per_run_policy,
-    #     n_epochs_per_run_policy=n_epochs_per_run_policy,
-    #     batch_size_policy=batch_size_policy,
-    #     stats_and_eval_every=stats_and_eval_every,
-    #     lr_pos=lr_pos,
-    #     lr_policy=lr_policy,
-    #     max_n_agents=max_n_agents,
-    #     map_fname=map_fname,
-    #     seed=seed,
-    #     load_roadmap=f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle",
-    #     prefix=prefix_sep_policy,
-    #     save_folder=save_folder)
+    run_optimization(
+        n_nodes=n_nodes,
+        n_runs_pose=0,
+        n_runs_policy=n_runs_policy,
+        n_episodes_per_run_policy=n_episodes_per_run_policy,
+        n_epochs_per_run_policy=n_epochs_per_run_policy,
+        batch_size_policy=batch_size_policy,
+        stats_and_eval_every=stats_and_eval_every,
+        lr_pos=lr_pos,
+        lr_policy=lr_policy,
+        max_n_agents=max_n_agents,
+        map_fname=map_fname,
+        seed=seed,
+        load_roadmap=f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle",
+        prefix=prefix_sep_policy,
+        save_folder=save_folder)
 
     # 3. evaluate
     prefix_sep_eval = f"{prefix}_sep_eval"
