@@ -27,7 +27,6 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     make_graph_and_flann,
                                                     optimize_poses_from_paths,
                                                     read_map, sample_points)
-from sim.decentralized.iterators import IteratorType
 from tools import ProgressBar, StatCollector, set_ulimit
 from torch_geometric.loader import DataLoader
 
@@ -249,6 +248,7 @@ def run_optimization(
         map_fname: str,
         seed: int,
         load_policy_model: Optional[str] = None,
+        load_roadmap: Optional[str] = None,
         prefix: str = "noname",
         save_images: bool = True,
         save_folder: Optional[str] = None):
@@ -269,7 +269,15 @@ def run_optimization(
 
     # Roadmap
     map_img: MAP_IMG = read_map(map_fname)
-    pos = sample_points(n_nodes, map_img, rng)
+    if load_roadmap is not None:
+        # load graph from file
+        graph_loaded = nx.read_gpickle(load_roadmap)
+        pos_dict = nx.get_node_attributes(graph_loaded, POS)
+        pos = torch.tensor([pos_dict[k] for k in graph_loaded.nodes()],
+                           device=torch.device("cpu"),
+                           dtype=torch.float, requires_grad=True)
+    else:
+        pos = sample_points(n_nodes, map_img, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g: nx.Graph
     flann: FLANN
@@ -340,10 +348,16 @@ def run_optimization(
     n_runs = max(n_runs_pose, n_runs_policy)
     if n_runs_policy > n_runs_pose:
         n_runs_per_run_policy = 1
-        n_runs_per_run_pose = n_runs // n_runs_pose
+        if n_runs_pose > 0:
+            n_runs_per_run_pose = n_runs // n_runs_pose
+        else:
+            n_runs_per_run_pose = 0
     else:  # n_runs_pose > n_runs_policy
         n_runs_per_run_pose = 1
-        n_runs_per_run_policy = n_runs // n_runs_policy
+        if n_runs_policy > 0:
+            n_runs_per_run_policy = n_runs // n_runs_policy
+        else:
+            n_runs_per_run_policy = 0
 
     # Run optimization
     pb = ProgressBar(
@@ -355,8 +369,14 @@ def run_optimization(
     roadmap_training_length = 0
     for i_r in range(0, n_runs+1):
         start_time = time.process_time()
-        optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
-        optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
+        if n_runs_per_run_pose > 0:
+            optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
+        else:
+            optimize_poses_now = False
+        if n_runs_per_run_policy > 0:
+            optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
+        else:
+            optimize_policy_now = False
 
         # n_agents
         current_succ_str = f"general_success_{n_agents}"
