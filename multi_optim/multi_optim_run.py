@@ -273,7 +273,7 @@ def run_optimization(
         # load graph from file
         graph_loaded = nx.read_gpickle(load_roadmap)
         pos_dict = nx.get_node_attributes(graph_loaded, POS)
-        pos = torch.tensor([pos_dict[k] for k in graph_loaded.nodes()],
+        pos = torch.tensor(np.array([pos_dict[k] for k in graph_loaded.nodes()]),
                            device=torch.device("cpu"),
                            dtype=torch.float, requires_grad=True)
     else:
