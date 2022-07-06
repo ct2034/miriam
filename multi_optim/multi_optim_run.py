@@ -399,7 +399,7 @@ def run_optimization(
         new_fname, paths_s, ts_max, ts_mean = sample_trajectories_in_parallel(
             policy_model, g, map_img, flann, n_agents,
             n_episodes_per_run_policy, prefix, optimize_poses_now,
-            save_folder,  pool, rng)
+            save_folder, pool, rng)
         epds.add_file(new_fname)
         data_len = len(epds)
         if data_len > 0:
@@ -490,6 +490,8 @@ def run_optimization(
         pb.progress()
     runtime = pb.end()
     stats.add_static("runtime", str(runtime))
+    pool.close()
+    del pool
 
     # Plot stats
     if save_images:
