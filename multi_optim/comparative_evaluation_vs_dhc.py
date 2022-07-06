@@ -180,8 +180,8 @@ if __name__ == '__main__':
 
     # parameters
     logger.setLevel(logging.INFO)
-    results_name: str = 'default_seed_0'
-    base_folder: str = 'multi_optim/results/tuning'
+    results_name: str = 'large'
+    base_folder: str = 'multi_optim/results'
     figure_folder: str = f'{base_folder}/eval_vs_dhc'
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder)

@@ -30,9 +30,9 @@ def learning(
     torch.manual_seed(seed)
 
     # run to learn from
-    run_prefix_data: str = "large_r64_e256"
+    run_prefix_data: str = "n_epochs_per_run_policy_6_seed_0"
     n_test = 100
-    n_epochs = 100
+    n_epochs = 200
 
     if torch.cuda.is_available():
         gpu = torch.device(pick_gpu_low_memory())
@@ -54,7 +54,8 @@ def learning(
     #     f"multi_optim/results/{run_prefix_data}_policy_model.pt"))
 
     # load dataset from previous multi_optim_run
-    dataset = EdgePolicyDataset(f"multi_optim/results/{run_prefix_data}_data")
+    dataset = EdgePolicyDataset(
+        f"multi_optim/results/tuning/{run_prefix_data}_data")
     test_set_i_s = range(len(dataset) - n_test, len(dataset))
     test_set = dataset[test_set_i_s]
     test_set = [(d, {n: n for n in range(d.num_nodes)})
@@ -108,12 +109,12 @@ def learning_proxy(kwargs):
 
 
 def tuning(base_folder):
-    lr_s = [1E-4, 3E-4, 3E-5]
+    lr_s = [3E-4, 1E-4]
     batch_size_s = [64]
-    conv_channels_s = [128, 256]
+    conv_channels_s = [128]
     conv_layers_s = [4, 5]
     readout_layers_s = [2, 3]
-    cheb_filter_size_s = [5, 6]
+    cheb_filter_size_s = [6]
     dropout_p_s = [0.2, 0.3]
     parameter_experiments = {
         "lr": lr_s,
@@ -125,7 +126,7 @@ def tuning(base_folder):
         "dropout_p": dropout_p_s
     }  # type: Dict[str, Union[str, List[float], List[int]]]
 
-    seed_s = range(6)
+    seed_s = range(8)
 
     # prepare multithreading
     params_to_run = []
@@ -150,7 +151,7 @@ def tuning(base_folder):
                 params_to_run.append(kwargs.copy())
 
     mp.set_start_method("spawn")
-    p = mp.Pool(8)
+    p = mp.Pool(4)
     p.map(learning_proxy, params_to_run)
     # for p in params_to_run:
     #     learning_proxy(p)
@@ -257,5 +258,5 @@ def plot_results(base_folder):
 
 if __name__ == "__main__":
     base_folder = "planner/policylearn/results"
-    # tuning(base_folder=base_folder)
+    tuning(base_folder=base_folder)
     plot_results(base_folder)
