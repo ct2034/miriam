@@ -123,9 +123,10 @@ def get_optimal_edge(agents, i_agent: int) -> int:
         agents[0].env, starts, goals, radius=radius, timeout=DEFAULT_TIMEOUT_S)
     if paths is INVALID:
         raise RuntimeError("No paths found")
-    else:
-        assert not isinstance(paths, str)
-        path = paths[i_agent]
-        if len(path) == 1:  # already at goal
-            return path[0][0]
-        return path[1][0]
+    if len(paths) != len(agents):
+        raise RuntimeError("Number of paths does not match number of agents")
+    assert not isinstance(paths, str)
+    path = paths[i_agent]
+    if len(path) == 1:  # already at goal
+        return path[0][0]
+    return path[1][0]
