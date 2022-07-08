@@ -140,7 +140,10 @@ class EdgePolicyModel(nn.Module):
     def predict_scores_and_targets(self, x, edge_index):
         self.eval()
         n_nodes = x.shape[0]
-        node = torch.nonzero(x[:, 0] == 1.).item()
+        try:
+            node = torch.nonzero(x[:, 0] == 1.).item()
+        except ValueError:
+            raise RuntimeError("Unable to find own position in x")
         relevant_edge_index = edge_index[:,
                                          torch.bitwise_or(edge_index[0] == node,
                                                           edge_index[1] == node)]

@@ -50,7 +50,9 @@ def agents_to_data(agents, i_self: int,
     for t, p in enumerate(agents[i_self].path):
         if p in g_sml.nodes:
             p_sml = small_from_big[p]
-            x_layer_own_path[p_sml] = t_to_data(t, agents[i_self].path_i)
+            if x_layer_own_path[p_sml].item() == 0.:
+                # only save first occurence
+                x_layer_own_path[p_sml] = t_to_data(t, agents[i_self].path_i)
 
     # 2. other paths
     x_layer_other_paths = torch.zeros((len(small_from_big), 1))
