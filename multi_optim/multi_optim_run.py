@@ -533,15 +533,15 @@ if __name__ == "__main__":
     ).setLevel(logging.DEBUG)
     run_optimization(
         n_nodes=8,
-        n_runs_pose=16,
-        n_runs_policy=64,
-        n_episodes_per_run_policy=8,
-        n_epochs_per_run_policy=4,
+        n_runs_pose=8,
+        n_runs_policy=8,
+        n_episodes_per_run_policy=2,
+        n_epochs_per_run_policy=2,
         batch_size_policy=16,
-        stats_and_eval_every=16,
+        stats_and_eval_every=4,
         lr_pos=1e-2,
         lr_policy=1e-3,
-        max_n_agents=4,
+        max_n_agents=2,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix=prefix)
