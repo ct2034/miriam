@@ -92,7 +92,8 @@ class LearnedPolicy(Policy):
         node_to_go = self.nn.predict_probablilistic(
             data.x,
             data.edge_index,
-            big_from_small)
+            big_from_small,
+            rng=self.a.rng)
         return node_to_go
 
 
