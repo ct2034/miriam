@@ -251,7 +251,8 @@ def run_optimization(
         load_roadmap: Optional[str] = None,
         prefix: str = "noname",
         save_images: bool = True,
-        save_folder: Optional[str] = None):
+        save_folder: Optional[str] = None,
+        pool_in: Optional[tmp.Pool] = None):
     rng = Random(seed)
     logger.info(f"run_optimization {prefix}")
     torch.manual_seed(rng.randint(0, 2 ** 32))
@@ -259,8 +260,11 @@ def run_optimization(
         save_folder = "multi_optim/results"  # default
 
     # multiprocessing
-    n_processes = min(tmp.cpu_count(), 16)
-    pool = tmp.Pool(processes=n_processes)
+    if pool_in is None:
+        n_processes = min(tmp.cpu_count(), 16)
+        pool = tmp.Pool(processes=n_processes)
+    else:
+        pool = pool_in
 
     # n_agents
     n_agents_s = list(range(2, max_n_agents+1, 2))  # e.g. 2, 4, 6, ...
@@ -490,8 +494,9 @@ def run_optimization(
         pb.progress()
     runtime = pb.end()
     stats.add_static("runtime", str(runtime))
-    pool.close()
-    del pool
+    if pool_in is None:
+        # we made our own pool, so we need to close it
+        pool.close()
 
     # Plot stats
     if save_images:

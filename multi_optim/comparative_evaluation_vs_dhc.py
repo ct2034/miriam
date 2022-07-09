@@ -4,6 +4,7 @@ from math import floor
 from random import Random
 from typing import List, Optional
 
+import matplotlib
 import networkx as nx
 import numpy as np
 import torch
@@ -22,6 +23,7 @@ from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
 from multi_optim.multi_optim_run import ITERATOR_TYPE, RADIUS
 
+matplotlib.use('cairo')
 logger = logging.getLogger(__name__)
 
 

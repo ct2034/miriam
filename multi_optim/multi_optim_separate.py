@@ -1,9 +1,11 @@
 import logging
 import sys
 
+import matplotlib
 import networkx as nx
 import numpy as np
 import torch
+import torch.multiprocessing as tmp
 import yaml
 from definitions import POS
 from matplotlib import pyplot as plt
@@ -14,6 +16,8 @@ from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 from multi_optim.eval import Eval
 from multi_optim.multi_optim_run import RADIUS, run_optimization
 from multi_optim.state import ITERATOR_TYPE
+
+matplotlib.use('cairo')
 
 
 def run_optimization_sep(
@@ -32,6 +36,8 @@ def run_optimization_sep(
         prefix: str,
         save_folder: str = "multi_optim/results"):
 
+    pool = tmp.Pool(processes=min(tmp.cpu_count(), 16))
+
     # 1. roadmap
     prefix_sep_roadmap = f"{prefix}_sep_roadmap"
     run_optimization(
@@ -48,7 +54,8 @@ def run_optimization_sep(
         map_fname=map_fname,
         seed=seed,
         prefix=prefix_sep_roadmap,
-        save_folder=save_folder)
+        save_folder=save_folder,
+        pool_in=pool)
 
     # 2. policy
     prefix_sep_policy = f"{prefix}_sep_policy"
@@ -67,7 +74,8 @@ def run_optimization_sep(
         seed=seed,
         load_roadmap=f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle",
         prefix=prefix_sep_policy,
-        save_folder=save_folder)
+        save_folder=save_folder,
+        pool_in=pool)
 
     # 3. evaluate
     prefix_sep_eval = f"{prefix}_sep_eval"

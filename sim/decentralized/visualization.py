@@ -64,7 +64,6 @@ def plot_env_agents(environent: np.ndarray,
                     marker='s', color=colormap[i_a], linewidth=0)
 
     ax.legend()
-    plt.show()
 
 
 def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
@@ -126,5 +125,3 @@ def plot_evaluations(evaluations: Dict[PolicyType, np.ndarray],
     print(
         'success for all policies in '
         + f'{np.count_nonzero(all_successfull)} of {data_shape[2]} runs.')
-
-    plt.show()
