@@ -77,6 +77,8 @@ def run_optimization_sep(
         save_folder=save_folder,
         pool_in=pool)
 
+    pool.close()
+
     # 3. evaluate
     prefix_sep_eval = f"{prefix}_sep_eval"
     # load final roadmap
