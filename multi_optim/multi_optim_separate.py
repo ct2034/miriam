@@ -34,8 +34,8 @@ def run_optimization_sep(
         map_fname: str,
         seed: int,
         prefix: str,
-        save_folder: str = "multi_optim/results",
-        pool: tmp.Pool):
+        pool,
+        save_folder: str = "multi_optim/results"):
 
     # 1. roadmap
     prefix_sep_roadmap = f"{prefix}_sep_roadmap"
