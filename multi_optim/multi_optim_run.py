@@ -497,6 +497,7 @@ def run_optimization(
     if pool_in is None:
         # we made our own pool, so we need to close it
         pool.close()
+        pool.terminate()
 
     # Plot stats
     if save_images:
@@ -526,6 +527,8 @@ if __name__ == "__main__":
     # tmp.set_sharing_strategy('file_system')
     tmp.set_start_method('spawn')
     # set_ulimit()  # fix `RuntimeError: received 0 items of ancdata`
+    n_processes = min(tmp.cpu_count(), 16)
+    pool = tmp.Pool(processes=n_processes)
 
     # debug run
     prefix = "debug"
@@ -549,7 +552,8 @@ if __name__ == "__main__":
         max_n_agents=2,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        prefix=prefix)
+        prefix=prefix,
+        pool_in=pool)
 
     # # tiny run
     # prefix = "tiny"
@@ -570,7 +574,8 @@ if __name__ == "__main__":
     #     max_n_agents=4,
     #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
     #     seed=0,
-    #     prefix=prefix)
+    #     prefix=prefix,
+    #     pool_in = pool)
 
     # # small run
     # prefix = "small"
@@ -591,7 +596,8 @@ if __name__ == "__main__":
     #     max_n_agents=6,
     #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
     #     seed=0,
-    #     prefix=prefix)
+    #     prefix=prefix,
+    #     pool_in=pool)
 
     # # medium run
     # prefix = "medium"
@@ -612,7 +618,8 @@ if __name__ == "__main__":
     #     max_n_agents=10,
     #     map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
     #     seed=0,
-    #     prefix=prefix)
+    #     prefix=prefix,
+    #     pool_in=pool)
 
     # large run
     prefix = "large"
@@ -633,4 +640,8 @@ if __name__ == "__main__":
         max_n_agents=10,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        prefix=prefix)
+        prefix=prefix,
+        pool_in=pool)
+
+    pool.close()
+    pool.terminate()

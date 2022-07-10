@@ -34,9 +34,8 @@ def run_optimization_sep(
         map_fname: str,
         seed: int,
         prefix: str,
-        save_folder: str = "multi_optim/results"):
-
-    pool = tmp.Pool(processes=min(tmp.cpu_count(), 16))
+        save_folder: str = "multi_optim/results",
+        pool: tmp.Pool):
 
     # 1. roadmap
     prefix_sep_roadmap = f"{prefix}_sep_roadmap"
@@ -154,6 +153,10 @@ def run_optimization_sep(
 
 
 if __name__ == "__main__":
+    # Multiprocessing
+    tmp.set_start_method('spawn')
+    pool = tmp.Pool(processes=min(tmp.cpu_count(), 16))
+
     # debug run
     prefix = "debug"
     logging.getLogger(__name__).setLevel(logging.DEBUG)
@@ -174,7 +177,8 @@ if __name__ == "__main__":
         max_n_agents=2,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        prefix=prefix)
+        prefix=prefix,
+        pool=pool)
 
     # large run
     prefix = "large"
@@ -191,4 +195,8 @@ if __name__ == "__main__":
         max_n_agents=10,
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
-        prefix=prefix)
+        prefix=prefix,
+        pool=pool)
+
+    pool.close()
+    pool.terminate()
