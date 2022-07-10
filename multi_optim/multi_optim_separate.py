@@ -157,28 +157,30 @@ if __name__ == "__main__":
     tmp.set_start_method('spawn')
     pool = tmp.Pool(processes=min(tmp.cpu_count(), 16))
 
-    # debug run
-    prefix = "debug"
-    logging.getLogger(__name__).setLevel(logging.DEBUG)
-    logging.getLogger("multi_optim.multi_optim_run").setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization_sep(
-        n_nodes=8,
-        n_runs_pose=8,
-        n_runs_policy=8,
-        n_episodes_per_run_policy=2,
-        n_epochs_per_run_policy=2,
-        batch_size_policy=16,
-        stats_and_eval_every=4,
-        lr_pos=1e-2,
-        lr_policy=1e-3,
-        max_n_agents=2,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        prefix=prefix,
-        pool=pool)
+    debug = False
+    if debug:
+        # debug run
+        prefix = "debug"
+        logging.getLogger(__name__).setLevel(logging.DEBUG)
+        logging.getLogger("multi_optim.multi_optim_run").setLevel(logging.INFO)
+        logging.getLogger(
+            "planner.mapf_implementations.plan_cbs_roadmap"
+        ).setLevel(logging.INFO)
+        run_optimization_sep(
+            n_nodes=8,
+            n_runs_pose=8,
+            n_runs_policy=8,
+            n_episodes_per_run_policy=2,
+            n_epochs_per_run_policy=2,
+            batch_size_policy=16,
+            stats_and_eval_every=4,
+            lr_pos=1e-2,
+            lr_policy=1e-3,
+            max_n_agents=2,
+            map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
+            seed=0,
+            prefix=prefix,
+            pool=pool)
 
     # large run
     prefix = "large"
