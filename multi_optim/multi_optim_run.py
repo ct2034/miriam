@@ -17,6 +17,7 @@ import scenarios.solvers
 import tools
 import torch
 import torch.multiprocessing as tmp
+import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
 from matplotlib import pyplot as plt
@@ -56,7 +57,7 @@ def sample_trajectory(seed: int, graph: nx.Graph, n_agents: int,
     starts = None
     goals = None
     flann = FLANN()
-    pos = graph.nodes.data(POS)
+    pos = nx.get_node_attributes(graph, POS)
     pos_np = np.array([pos[n] for n in graph.nodes])
     flann.build_index(np.array(pos_np, dtype=np.float32),
                       random_index=0)
@@ -252,7 +253,14 @@ def run_optimization(
         prefix: str = "noname",
         save_images: bool = True,
         save_folder: Optional[str] = None,
-        pool_in: Optional[tmp.Pool] = None):
+        pool_in: Optional[tmp.Pool] = None):  # type: ignore
+    wandb_run = wandb.init(
+        project="miriam-multi-optim-run",
+        name=f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}-{prefix}",
+        reinit=True, settings=wandb.Settings(
+            start_method="fork"))
+    assert wandb_run is not None
+
     rng = Random(seed)
     logger.info(f"run_optimization {prefix}")
     torch.manual_seed(rng.randint(0, 2 ** 32))
@@ -276,8 +284,10 @@ def run_optimization(
     if load_roadmap is not None:
         # load graph from file
         graph_loaded = nx.read_gpickle(load_roadmap)
+        assert isinstance(graph_loaded, nx.Graph)
         pos_dict = nx.get_node_attributes(graph_loaded, POS)
-        pos = torch.tensor(np.array([pos_dict[k] for k in graph_loaded.nodes()]),
+        pos = torch.tensor(np.array([pos_dict[k]
+                                     for k in graph_loaded.nodes()]),
                            device=torch.device("cpu"),
                            dtype=torch.float, requires_grad=True)
     else:
@@ -321,8 +331,7 @@ def run_optimization(
     epds = EdgePolicyDataset(f"{save_folder}/{prefix}_data")
 
     # Visualization and analysis
-    stats = StatCollector()
-    stats.add_statics({
+    static_stats = {
         # metadata
         "hostname": socket.gethostname(),
         "git_hash": git.repo.Repo(".").head.object.hexsha,
@@ -343,7 +352,11 @@ def run_optimization(
         "load_policy_model": (
             load_policy_model if load_policy_model else "None"),
         "prefix": prefix
-    })
+    }
+    stats = StatCollector()
+    for stat_saver in [wandb.config.update, stats.add_statics]:
+        stat_saver(static_stats)
+
     if save_images:
         draw_graph(g, map_img, title="Start")
         plt.savefig(f"{save_folder}/{prefix}_start.png")
@@ -414,6 +427,9 @@ def run_optimization(
         stats.add("runtime_generation_all", i_r, (
             end_time_generation - start_time
         ))
+        wandb.log(
+            {"runtime_generation_all": (
+                end_time_generation - start_time)}, step=i_r)
 
         # Optimizing Poses
         if optimize_poses_now:
@@ -424,6 +440,10 @@ def run_optimization(
             stats.add("runtime_optim_poses", i_r, (
                 end_time_optim_poses - end_time_generation
             ))
+            wandb.log({
+                "runtime_optim_poses": (
+                    end_time_optim_poses - end_time_generation
+                )}, step=i_r)
 
         # Optimizing Policy
         if optimize_policy_now:
@@ -435,6 +455,10 @@ def run_optimization(
             stats.add("runtime_optim_policy", i_r, (
                 end_time_optim_policy - start_time_optim_policy
             ))
+            wandb.log(
+                {"runtime_optim_policy": (
+                    end_time_optim_policy - start_time_optim_policy
+                )}, step=i_r)
 
         if i_r % stats_and_eval_every == 0:
             end_optimization_time = time.process_time()
@@ -446,8 +470,11 @@ def run_optimization(
                 for name in names:
                     stats.add(f"policy_{name}", i_r, policy_results[name])
                     logger.info(f"(P) {name}: {policy_results[name]}")
+                    wandb.log(
+                        {f"policy_{name}": policy_results[name]}, step=i_r)
                 if policy_loss is not None:
                     stats.add("(P) loss", i_r, policy_loss)
+                    wandb.log({"(P) loss": policy_loss}, step=i_r)
 
             if optimize_poses_now or i_r == 0:
                 # eval the current roadmap
@@ -458,6 +485,10 @@ def run_optimization(
                 logger.info(f"(R) Test Length: {roadmap_test_length:.3f}")
                 logger.info(
                     f"(R) Training Length: {roadmap_training_length:.3f}")
+                wandb.log({
+                    "roadmap_test_length": roadmap_test_length,
+                    "roadmap_training_length": roadmap_training_length},
+                    step=i_r)
 
             if optimize_policy_now or optimize_poses_now or i_r == 0:
                 general_results = eval.evaluate_both(policy_model, g, flann)
@@ -465,16 +496,21 @@ def run_optimization(
                 for name in names:
                     stats.add(f"general_{name}", i_r, general_results[name])
                     logger.info(f"(G) {name}: {general_results[name]}")
+                    wandb.log(
+                        {f"general_{name}": general_results[name]}, step=i_r)
 
             end_eval_time = time.process_time()
-            eval_time_perc = (end_eval_time - end_optimization_time) / \
-                (end_eval_time - start_time)
+            eval_time_perc = ((end_eval_time - end_optimization_time) /
+                              (end_eval_time - start_time))
             stats.add("runtime_eval", i_r, (
                 end_eval_time - end_optimization_time
             ))
             stats.add("runtime_full", i_r, (
                 end_eval_time - start_time
             ))
+            wandb.log({
+                "runtime_eval": end_eval_time - end_optimization_time,
+                "runtime_full": end_eval_time - start_time}, step=i_r)
 
             stats.add("data_len", i_r, float(data_len))
             stats.add("general_new_data_percentage",
@@ -490,6 +526,14 @@ def run_optimization(
             logger.info(f"(G) Generation n_agents: {n_agents}")
             logger.info(f"(G) Runtime generation mean: {ts_mean:.3f}s")
             logger.info(f"(G) Runtime generation max: {ts_max:.3f}s")
+            wandb.log({
+                "data_len": data_len,
+                "general_new_data_percentage": new_data_percentage,
+                "general_generation_n_agents_percentage": (n_agents /
+                                                           max_n_agents),
+                "runtime_eval_time_perc": eval_time_perc,
+                "runtime_generation_mean": ts_mean,
+                "runtime_generation_max": ts_max}, step=i_r)
 
         pb.progress()
     runtime = pb.end()
@@ -512,6 +556,7 @@ def run_optimization(
     torch.save(policy_model.state_dict(),
                f"{save_folder}/{prefix}_policy_model.pt")
 
+    wandb_run.finish()
     logger.info(stats.get_statics())
 
 
