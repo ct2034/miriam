@@ -172,7 +172,7 @@ def iterate_edge_policy(
     assert all(a.radius == agents[0].radius for a in agents),\
         "all radii must be equal"
 
-    RETRIES = 5
+    RETRIES = 10
     i_try = 0
     space_slice: List[float] = [0.] * len(agents)
     time_slice: List[int] = [1] * len(agents)
@@ -188,21 +188,21 @@ def iterate_edge_policy(
 
     # for motion checking we need a list of finished agents to ignore them
     if ignore_finished_agents:
-        ignored_agents = set([i_a for i_a in range(
+        finished_agents = set([i_a for i_a in range(
             len(agents)) if agents[i_a].is_at_goal()])
     else:
-        ignored_agents = set()
+        finished_agents = set()
     if _copying:
-        agents_except_ignored = [a.copy() for i_a, a in enumerate(
-            agents) if i_a not in ignored_agents]
+        agents_except_finished = [a.copy() for i_a, a in enumerate(
+            agents) if i_a not in finished_agents]
     else:
-        agents_except_ignored = [a for i_a, a in enumerate(
-            agents) if i_a not in ignored_agents]
+        agents_except_finished = [a for i_a, a in enumerate(
+            agents) if i_a not in finished_agents]
 
     # calling the policy for each agent that has colissions
     next_nodes: List[C] = [-1] * len(agents)
-    solved = False
-    while (not solved) and i_try < RETRIES:
+    at_least_one_can_move = False
+    while (not at_least_one_can_move):
         logger.debug(f"agents with colissions: {agents_with_colissions}")
         for i_a, a in enumerate(agents):
             if i_a in agents_with_colissions:
@@ -210,9 +210,10 @@ def iterate_edge_policy(
                     "Needs edge-based policy"
                 try:
                     if _copying:
-                        agents_copy = [a.copy() for a in agents_except_ignored]
+                        agents_copy = [a.copy()
+                                       for a in agents_except_finished]
                     else:
-                        agents_copy = agents_except_ignored
+                        agents_copy = agents_except_finished
                     next_nodes[i_a] = a.policy.get_edge(  # type: ignore
                         agents_copy, agents_with_colissions)  # type: ignore
                 except RuntimeError:
@@ -225,17 +226,18 @@ def iterate_edge_policy(
             agents, 0, next_nodes, ignore_finished_agents)
         new_agents_with_colissions = get_agents_in_col([next_collisions])
         new_agents_with_colissions.update(check_motion_col(
-            agents[0].env, agents[0].radius, next_nodes, poses_at_beginning, ignored_agents))
-        solved = not any(new_agents_with_colissions)
+            agents[0].env, agents[0].radius, next_nodes, poses_at_beginning, finished_agents))
+        at_least_one_can_move = not any(new_agents_with_colissions)
         logger.debug(
-            f"{i_try=}, {solved=}, {next_collisions=}, {new_agents_with_colissions=}")
+            f"{i_try=}, {at_least_one_can_move=}, {next_collisions=}, {new_agents_with_colissions=}")
         agents_with_colissions.update(new_agents_with_colissions)
         # update agents with new paths in case we ask the policy again
         for i_a, a in enumerate(agents):
             a.replan_with_first_step(next_nodes[i_a])
         i_try += 1
-    if i_try == RETRIES:
-        raise SimIterationException(f"Failed to solve after {RETRIES} tries")
+        if i_try == RETRIES:
+            raise SimIterationException(
+                f"Failed to solve after {RETRIES} tries")
     for i_a, a in enumerate(agents):
         logger.debug(f". {i_a=}, {a.pos=}, {a.goal=}, {a.is_at_goal()=}")
         logger.debug(f"  {a.path_i=}, {a.path=}")
