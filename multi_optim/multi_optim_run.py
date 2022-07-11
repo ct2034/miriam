@@ -32,9 +32,11 @@ from tools import ProgressBar, StatCollector, set_ulimit
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
+    from configs import configs
     from eval import Eval
     from state import ACTION, ITERATOR_TYPE, ScenarioState
 else:
+    from multi_optim.configs import configs
     from multi_optim.eval import Eval
     from multi_optim.state import ACTION, ITERATOR_TYPE, ScenarioState
 
@@ -576,118 +578,32 @@ if __name__ == "__main__":
     n_processes = min(tmp.cpu_count(), 16)
     pool = tmp.Pool(processes=n_processes)
 
-    # debug run
-    prefix = "debug"
-    logging.getLogger(__name__).setLevel(logging.DEBUG)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.DEBUG)
-    logging.getLogger(
-        "sim.decentralized.policy"
-    ).setLevel(logging.DEBUG)
-    run_optimization(
-        n_nodes=8,
-        n_runs_pose=8,
-        n_runs_policy=8,
-        n_episodes_per_run_policy=2,
-        n_epochs_per_run_policy=2,
-        batch_size_policy=16,
-        stats_and_eval_every=4,
-        lr_pos=1e-2,
-        lr_policy=1e-3,
-        max_n_agents=2,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        prefix=prefix,
-        pool_in=pool)
-
-    # tiny run
-    prefix = "tiny"
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=16,
-        n_runs_pose=64,
-        n_runs_policy=64,
-        n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-3,
-        lr_policy=1e-3,
-        max_n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        prefix=prefix,
-        pool_in=pool)
-
-    # small run
-    prefix = "small"
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=32,
-        n_runs_pose=64,
-        n_runs_policy=64,
-        n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-3,
-        lr_policy=3e-4,
-        max_n_agents=6,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        prefix=prefix,
-        pool_in=pool)
-
-    # medium run
-    prefix = "medium"
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=64,
-        n_runs_pose=64,
-        n_runs_policy=64,
-        n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-3,
-        lr_policy=1e-4,
-        max_n_agents=10,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        prefix=prefix,
-        pool_in=pool)
-
-    # large run
-    prefix = "large"
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=128,
-        n_runs_pose=64,
-        n_runs_policy=64,
-        n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-3,
-        lr_policy=1e-4,
-        max_n_agents=10,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        prefix=prefix,
-        pool_in=pool)
+    for prefix in [
+        "debug",
+        "tiny",
+        "small",
+        "medium",
+        "large"
+    ]:
+        if prefix == "debug":
+            level = logging.DEBUG
+        else:
+            level = logging.INFO
+        for set_fun in [
+            logging.getLogger(__name__).setLevel,
+            logging.getLogger(
+                "planner.mapf_implementations.plan_cbs_roadmap"
+            ).setLevel,
+            logging.getLogger(
+                "sim.decentralized.policy"
+            ).setLevel
+        ]:
+            set_fun(level)
+        
+        # start the actual run
+        run_optimization(
+            **configs[prefix],
+            pool_in=pool)
 
     pool.close()
     pool.terminate()
