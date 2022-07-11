@@ -116,9 +116,13 @@ class Eval(object):
                     if state.finished:
                         continue
                     # get state and observation:
-                    self.states.append(state)
-                    observation = state.observe()
+                    try:
+                        observation = state.observe()
+                    except RuntimeError:
+                        # if no path was found, we can't use this state
+                        continue
                     assert observation is not None
+                    self.states.append(state)
                     i_a = self.rng.sample(
                         list(observation.keys()), 1)[0]
                     data, big_from_small = observation[i_a]
