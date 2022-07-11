@@ -385,6 +385,7 @@ def run_optimization(
     # roadmap_test_length = 0
     roadmap_training_length = 0
     for i_r in range(0, n_runs+1):
+        wandb.log({"general/progress": float(i_r) / n_runs})
         start_time = time.process_time()
         if n_runs_per_run_pose > 0:
             optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
