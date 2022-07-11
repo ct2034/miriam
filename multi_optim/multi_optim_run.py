@@ -428,7 +428,7 @@ def run_optimization(
             end_time_generation - start_time
         ))
         wandb.log(
-            {"runtime_generation_all": (
+            {"runtime/generation/all": (
                 end_time_generation - start_time)}, step=i_r)
 
         # Optimizing Poses
@@ -441,7 +441,7 @@ def run_optimization(
                 end_time_optim_poses - end_time_generation
             ))
             wandb.log({
-                "runtime_optim_poses": (
+                "runtime/optim/poses": (
                     end_time_optim_poses - end_time_generation
                 )}, step=i_r)
 
@@ -456,7 +456,7 @@ def run_optimization(
                 end_time_optim_policy - start_time_optim_policy
             ))
             wandb.log(
-                {"runtime_optim_policy": (
+                {"runtime/optim/policy": (
                     end_time_optim_policy - start_time_optim_policy
                 )}, step=i_r)
 
@@ -471,10 +471,10 @@ def run_optimization(
                     stats.add(f"policy_{name}", i_r, policy_results[name])
                     logger.info(f"(P) {name}: {policy_results[name]}")
                     wandb.log(
-                        {f"policy_{name}": policy_results[name]}, step=i_r)
+                        {f"policy/{name}": policy_results[name]}, step=i_r)
                 if policy_loss is not None:
-                    stats.add("(P) loss", i_r, policy_loss)
-                    wandb.log({"(P) loss": policy_loss}, step=i_r)
+                    stats.add("policy_loss", i_r, policy_loss)
+                    wandb.log({"policy/loss": policy_loss}, step=i_r)
 
             if optimize_poses_now or i_r == 0:
                 # eval the current roadmap
@@ -486,8 +486,8 @@ def run_optimization(
                 logger.info(
                     f"(R) Training Length: {roadmap_training_length:.3f}")
                 wandb.log({
-                    "roadmap_test_length": roadmap_test_length,
-                    "roadmap_training_length": roadmap_training_length},
+                    "roadmap/test_length": roadmap_test_length,
+                    "roadmap/training_length": roadmap_training_length},
                     step=i_r)
 
             if optimize_policy_now or optimize_poses_now or i_r == 0:
@@ -497,7 +497,7 @@ def run_optimization(
                     stats.add(f"general_{name}", i_r, general_results[name])
                     logger.info(f"(G) {name}: {general_results[name]}")
                     wandb.log(
-                        {f"general_{name}": general_results[name]}, step=i_r)
+                        {f"general/{name}": general_results[name]}, step=i_r)
 
             end_eval_time = time.process_time()
             eval_time_perc = ((end_eval_time - end_optimization_time) /
@@ -509,8 +509,8 @@ def run_optimization(
                 end_eval_time - start_time
             ))
             wandb.log({
-                "runtime_eval": end_eval_time - end_optimization_time,
-                "runtime_full": end_eval_time - start_time}, step=i_r)
+                "runtime/eval": end_eval_time - end_optimization_time,
+                "runtime/full": end_eval_time - start_time}, step=i_r)
 
             stats.add("data_len", i_r, float(data_len))
             stats.add("general_new_data_percentage",
@@ -527,13 +527,13 @@ def run_optimization(
             logger.info(f"(G) Runtime generation mean: {ts_mean:.3f}s")
             logger.info(f"(G) Runtime generation max: {ts_max:.3f}s")
             wandb.log({
-                "data_len": data_len,
-                "general_new_data_percentage": new_data_percentage,
-                "general_generation_n_agents_percentage": (n_agents /
+                "general/data_len": data_len,
+                "general/new_data_percentage": new_data_percentage,
+                "general/generation_n_agents_percentage": (n_agents /
                                                            max_n_agents),
-                "runtime_eval_time_perc": eval_time_perc,
-                "runtime_generation_mean": ts_mean,
-                "runtime_generation_max": ts_max}, step=i_r)
+                "runtime/eval_time/perc": eval_time_perc,
+                "runtime/generation/mean": ts_mean,
+                "runtime/generation/max": ts_max}, step=i_r)
 
         pb.progress()
     runtime = pb.end()
