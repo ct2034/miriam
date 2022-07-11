@@ -620,7 +620,7 @@ if __name__ == "__main__":
         map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
         seed=0,
         prefix=prefix,
-        pool_in = pool)
+        pool_in=pool)
 
     # small run
     prefix = "small"
