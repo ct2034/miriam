@@ -13,6 +13,7 @@ from planner.policylearn.edge_policy import EdgePolicyModel
 from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 
+from multi_optim.configs import configs
 from multi_optim.eval import Eval
 from multi_optim.multi_optim_run import RADIUS, run_optimization
 from multi_optim.state import ITERATOR_TYPE
@@ -157,48 +158,16 @@ if __name__ == "__main__":
     tmp.set_start_method('spawn')
     pool = tmp.Pool(processes=min(tmp.cpu_count(), 16))
 
-    debug = False
-    if debug:
-        # debug run
-        prefix = "debug"
-        logging.getLogger(__name__).setLevel(logging.DEBUG)
-        logging.getLogger("multi_optim.multi_optim_run").setLevel(logging.INFO)
-        logging.getLogger(
-            "planner.mapf_implementations.plan_cbs_roadmap"
-        ).setLevel(logging.INFO)
+    for prefix in [
+        # "debug",
+        "tiny",
+        # "small",
+        # "medium",
+        # "large"
+    ]:
         run_optimization_sep(
-            n_nodes=8,
-            n_runs_pose=8,
-            n_runs_policy=8,
-            n_episodes_per_run_policy=2,
-            n_epochs_per_run_policy=2,
-            batch_size_policy=16,
-            stats_and_eval_every=4,
-            lr_pos=1e-2,
-            lr_policy=1e-3,
-            max_n_agents=2,
-            map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-            seed=0,
-            prefix=prefix,
+            **configs[prefix],
             pool=pool)
-
-    # large run
-    prefix = "large"
-    run_optimization_sep(
-        n_nodes=128,
-        n_runs_pose=64,
-        n_runs_policy=64,
-        n_episodes_per_run_policy=256,
-        n_epochs_per_run_policy=4,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-3,
-        lr_policy=1e-4,
-        max_n_agents=10,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        prefix=prefix,
-        pool=pool)
 
     pool.close()
     pool.terminate()
