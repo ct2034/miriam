@@ -1,0 +1,14 @@
+joint:
+  length_2: 1.0
+  length_4: 1.0
+  regret_2: 0.0037677451968193055
+  regret_4: 0.005369216343387962
+  success_2: 1.0
+  success_4: 1.0
+separate:
+  length_2: 1.0
+  length_4: 1.0
+  regret_2: 0.0035321714356541635
+  regret_4: 0.001142929308116436
+  success_2: 1.0
+  success_4: 1.0
