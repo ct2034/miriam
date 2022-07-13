@@ -35,11 +35,11 @@ class Eval(object):
 
     def __init__(self, roadmap: nx.Graph, map_img: MAP_IMG,
                  n_agents_s: List[int], n_eval_per_n_agents: int,
-                 iterator_type: IteratorType, radius: float
-                 ) -> None:
-        torch.manual_seed(0)
-        np.random.seed(0)
-        self.rng = Random(0)
+                 iterator_type: IteratorType, radius: float,
+                 seed: int = 0) -> None:
+        torch.manual_seed(seed)
+        np.random.seed(seed)
+        self.rng = Random(seed)
         self.first_roadmap = deepcopy(roadmap)
         self.map_img = map_img
         self.n_agents_s = n_agents_s
