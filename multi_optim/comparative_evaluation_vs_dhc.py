@@ -187,7 +187,7 @@ if __name__ == '__main__':
     figure_folder: str = f'{base_folder}/eval_vs_dhc'
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder)
-    n_agents: int = 4
+    n_agents_s: List[int] = [2, 4, 6, 8]
     n_eval: int = 10
 
     rng = Random(0)
@@ -288,230 +288,253 @@ if __name__ == '__main__':
         f"{figure_folder}/{results_name}_dhcmap_by_edge_len.png")
     plt.close(f)
 
-    lens_our = [None] * n_eval  # type: List[Optional[float]]
-    lens_dhc_by_nodes = [None] * n_eval  # type: List[Optional[float]]
-    lens_dhc_by_edge_len = [None] * n_eval  # type: List[Optional[float]]
+    lens_our: np.ndarray = np.zeros((len(n_agents_s), n_eval))
+    lens_dhc_by_nodes: np.ndarray = np.zeros((len(n_agents_s), n_eval))
+    lens_dhc_by_edge_len: np.ndarray = np.zeros((len(n_agents_s), n_eval))
 
-    for i_e in range(n_eval):
-        # sampling agents
-        unique_starts_and_goals = False
-        while not unique_starts_and_goals:
-            points: np.ndarray = sample_points(
-                n_agents * 2, map_img, rng).detach().numpy()
-            nn_our, _ = flann.nn(pos_our_np, points, 1)
-            nn_dhc_by_nodes, _ = flann.nn(pos_dhc_by_nodes_np, points, 1)
-            nn_dhc_by_edge_len, _ = flann.nn(pos_dhc_by_edge_len_np, points, 1)
-            starts_our = nn_our[:n_agents]
-            goals_our = nn_our[n_agents:]
-            unique_starts_and_goals = (
-                len(set(nn_our)) == 2 * n_agents)
+    for i_na, n_agents in enumerate(n_agents_s):
+        for i_e in range(n_eval):
+            # sampling agents
+            unique_starts_and_goals = False
+            points: Optional[np.ndarray] = None
+            nn_our: Optional[np.ndarray] = None
+            nn_dhc_by_nodes: Optional[np.ndarray] = None
+            nn_dhc_by_edge_len: Optional[np.ndarray] = None
+            starts_our: Optional[np.ndarray] = None
+            goals_our: Optional[np.ndarray] = None
+            while not unique_starts_and_goals:
+                points = sample_points(
+                    n_agents * 2, map_img, rng).detach().numpy()
+                nn_our, _ = flann.nn(pos_our_np, points, 1)
+                nn_dhc_by_nodes, _ = flann.nn(pos_dhc_by_nodes_np, points, 1)
+                nn_dhc_by_edge_len, _ = flann.nn(
+                    pos_dhc_by_edge_len_np, points, 1)
+                starts_our = nn_our[:n_agents]
+                goals_our = nn_our[n_agents:]
+                unique_starts_and_goals = (
+                    len(set(nn_our)) == 2 * n_agents)
+            assert points is not None
+            assert nn_our is not None
+            assert nn_dhc_by_nodes is not None
+            assert nn_dhc_by_edge_len is not None
+            assert starts_our is not None
+            assert goals_our is not None
 
-        # eval ours
-        agents = to_agent_objects(
-            g_our,
-            starts_our.tolist(),
-            goals_our.tolist(),
-            radius=RADIUS/100,
-            rng=rng)
-        total_lenght_our = None  # type: Optional[float]
-        if agents is not None:
-            for agent in agents:
-                agent.policy = LearnedPolicy(
-                    agent, policy_nn)
-                # agent.policy = OptimalPolicy(agent, None)
-            paths_our: List[PATH] = []
-            res_our = run_a_scenario(
-                g_our, agents,
-                plot=False,
-                iterator=ITERATOR_TYPE,
-                paths_out=paths_our)
-            logger.info(f"{res_our=}")
-            logger.info(f"{paths_our=}")
-            if res_our[IDX_SUCCESS]:
-                total_lenght_our = res_our[IDX_AVERAGE_LENGTH] * n_agents
-                for i_a in range(n_agents):
-                    # before start
-                    total_lenght_our += float(np.linalg.norm(
-                        np.array(points[i_a]) -
-                        pos_our_np[starts_our[i_a]]))
-                    # after goal
-                    total_lenght_our += float(np.linalg.norm(
-                        np.array(points[i_a + n_agents]) -
-                        np.array(pos_our[goals_our[i_a]], dtype=np.float32)))
+            # eval ours
+            agents = to_agent_objects(
+                g_our,
+                starts_our.tolist(),
+                goals_our.tolist(),
+                radius=RADIUS/100,
+                rng=rng)
+            total_lenght_our = None  # type: Optional[float]
+            if agents is not None:
+                for agent in agents:
+                    agent.policy = LearnedPolicy(
+                        agent, policy_nn)
+                    # agent.policy = OptimalPolicy(agent, None)
+                paths_our: List[PATH] = []
+                res_our = run_a_scenario(
+                    g_our, agents,
+                    plot=False,
+                    iterator=ITERATOR_TYPE,
+                    paths_out=paths_our)
+                logger.info(f"{res_our=}")
+                logger.info(f"{paths_our=}")
+                if res_our[IDX_SUCCESS]:
+                    total_lenght_our = res_our[IDX_AVERAGE_LENGTH] * n_agents
+                    for i_a in range(n_agents):
+                        # before start
+                        total_lenght_our += float(np.linalg.norm(
+                            np.array(points[i_a]) -
+                            pos_our_np[starts_our[i_a]]))
+                        # after goal
+                        total_lenght_our += float(np.linalg.norm(
+                            np.array(points[i_a + n_agents]) -
+                            np.array(pos_our[goals_our[i_a]], dtype=np.float32)))
 
-        # eval dhc by nodes
-        starts_dhc_by_nodes = nn_dhc_by_nodes[:n_agents]
-        goals_dhc_by_nodes = nn_dhc_by_nodes[n_agents:]
-        res_dhc_by_nodes = dhc_eval(
-            gridmap_by_nodes,
-            np.array(
-                [coords_from_node_by_nodes[n] for n in starts_dhc_by_nodes]),
-            np.array(
-                [coords_from_node_by_nodes[n] for n in goals_dhc_by_nodes]))
-        logger.info(f"{res_dhc_by_nodes=}")
-        total_lenght_dhc_by_nodes = None  # type: Optional[float]
-        paths_dhc_by_nodes = None  # type: Optional[np.ndarray]
-        if res_dhc_by_nodes != INVALID:
-            _, _, paths_dhc_by_nodes = res_dhc_by_nodes
-            total_lenght_dhc_by_nodes = get_total_len(
-                n_agents, coords_from_node_by_nodes, points,
-                pos_dhc_by_nodes_np, starts_dhc_by_nodes, goals_dhc_by_nodes,
-                paths_dhc_by_nodes)
+            # eval dhc by nodes
+            starts_dhc_by_nodes = nn_dhc_by_nodes[:n_agents]
+            goals_dhc_by_nodes = nn_dhc_by_nodes[n_agents:]
+            res_dhc_by_nodes = dhc_eval(
+                gridmap_by_nodes,
+                np.array(
+                    [coords_from_node_by_nodes[n] for n in starts_dhc_by_nodes]),
+                np.array(
+                    [coords_from_node_by_nodes[n] for n in goals_dhc_by_nodes]))
+            logger.info(f"{res_dhc_by_nodes=}")
+            total_lenght_dhc_by_nodes = None  # type: Optional[float]
+            paths_dhc_by_nodes = None  # type: Optional[np.ndarray]
+            if res_dhc_by_nodes != INVALID:
+                _, _, paths_dhc_by_nodes = res_dhc_by_nodes
+                total_lenght_dhc_by_nodes = get_total_len(
+                    n_agents, coords_from_node_by_nodes, points,
+                    pos_dhc_by_nodes_np, starts_dhc_by_nodes, goals_dhc_by_nodes,
+                    paths_dhc_by_nodes)
 
-        # eval dhc by edge len
-        starts_dhc_by_edge_len = nn_dhc_by_edge_len[:n_agents]
-        goals_dhc_by_edge_len = nn_dhc_by_edge_len[n_agents:]
-        res_dhc_by_edge_len = dhc_eval(
-            gridmap_by_edge_len,
-            np.array(
-                [coords_from_node_by_edge_len[n]
-                 for n in starts_dhc_by_edge_len]),
-            np.array(
-                [coords_from_node_by_edge_len[n]
-                 for n in goals_dhc_by_edge_len]))
-        logger.info(f"{res_dhc_by_edge_len=}")
-        total_lenght_dhc_by_edge_len = None  # type: Optional[float]
-        paths_dhc_by_edge_len = None  # type: Optional[np.ndarray]
-        if res_dhc_by_edge_len != INVALID:
-            _, _, paths_dhc_by_edge_len = res_dhc_by_edge_len
-            total_lenght_dhc_by_edge_len = get_total_len(
-                n_agents, coords_from_node_by_edge_len, points,
-                pos_dhc_by_edge_len_np, starts_dhc_by_edge_len,
-                goals_dhc_by_edge_len, paths_dhc_by_edge_len)
+            # eval dhc by edge len
+            starts_dhc_by_edge_len = nn_dhc_by_edge_len[:n_agents]
+            goals_dhc_by_edge_len = nn_dhc_by_edge_len[n_agents:]
+            res_dhc_by_edge_len = dhc_eval(
+                gridmap_by_edge_len,
+                np.array(
+                    [coords_from_node_by_edge_len[n]
+                     for n in starts_dhc_by_edge_len]),
+                np.array(
+                    [coords_from_node_by_edge_len[n]
+                     for n in goals_dhc_by_edge_len]))
+            logger.info(f"{res_dhc_by_edge_len=}")
+            total_lenght_dhc_by_edge_len = None  # type: Optional[float]
+            paths_dhc_by_edge_len = None  # type: Optional[np.ndarray]
+            if res_dhc_by_edge_len != INVALID:
+                _, _, paths_dhc_by_edge_len = res_dhc_by_edge_len
+                total_lenght_dhc_by_edge_len = get_total_len(
+                    n_agents, coords_from_node_by_edge_len, points,
+                    pos_dhc_by_edge_len_np, starts_dhc_by_edge_len,
+                    goals_dhc_by_edge_len, paths_dhc_by_edge_len)
 
-        colors = get_colors(n_agents)
-        if (total_lenght_our is not None and
-            total_lenght_dhc_by_nodes is not None and
-                total_lenght_dhc_by_edge_len is not None):
-            f_our, ax_our = plt.subplots()
-            f_dhc_by_nodes, ax_dhc_by_nodes = plt.subplots()
-            f_dhc_by_edge_len, ax_dhc_by_edge_len = plt.subplots()
-            for ax in [ax_our, ax_dhc_by_nodes, ax_dhc_by_edge_len]:
-                ax.imshow(
-                    np.swapaxes(np.array(map_img), 0, 1),
-                    cmap='gray',
-                    origin='lower',
-                    alpha=.5,
-                    extent=(0, 1, 0, 1))
-            nx.draw_networkx(
-                nx.subgraph_view(g_our, filter_edge=lambda a, b: a != b),
-                pos=nx.get_node_attributes(g_our, POS),
-                with_labels=False,
-                node_size=5,
-                edge_color='k',
-                node_color='k',
-                ax=ax_our)
-            nx.draw_networkx(
-                g_dhc_by_nodes,
-                pos=pos_dhc_by_nodes_dict,
-                with_labels=False,
-                node_size=5,
-                edge_color='k',
-                node_color='k',
-                ax=ax_dhc_by_nodes)
-            nx.draw_networkx(
-                g_dhc_by_edge_len,
-                pos=pos_dhc_by_edge_len_dict,
-                with_labels=False,
-                node_size=5,
-                edge_color='k',
-                node_color='k',
-                ax=ax_dhc_by_edge_len)
+            if i_e == 0:
+                colors = get_colors(n_agents)
+                if (total_lenght_our is not None and
+                    total_lenght_dhc_by_nodes is not None and
+                        total_lenght_dhc_by_edge_len is not None):
+                    f_our, ax_our = plt.subplots()
+                    f_dhc_by_nodes, ax_dhc_by_nodes = plt.subplots()
+                    f_dhc_by_edge_len, ax_dhc_by_edge_len = plt.subplots()
+                    for ax in [ax_our, ax_dhc_by_nodes, ax_dhc_by_edge_len]:
+                        ax.imshow(
+                            np.swapaxes(np.array(map_img), 0, 1),
+                            cmap='gray',
+                            origin='lower',
+                            alpha=.5,
+                            extent=(0, 1, 0, 1))
+                    nx.draw_networkx(
+                        nx.subgraph_view(
+                            g_our, filter_edge=lambda a, b: a != b),
+                        pos=nx.get_node_attributes(g_our, POS),
+                        with_labels=False,
+                        node_size=5,
+                        edge_color='k',
+                        node_color='k',
+                        ax=ax_our)
+                    nx.draw_networkx(
+                        g_dhc_by_nodes,
+                        pos=pos_dhc_by_nodes_dict,
+                        with_labels=False,
+                        node_size=5,
+                        edge_color='k',
+                        node_color='k',
+                        ax=ax_dhc_by_nodes)
+                    nx.draw_networkx(
+                        g_dhc_by_edge_len,
+                        pos=pos_dhc_by_edge_len_dict,
+                        with_labels=False,
+                        node_size=5,
+                        edge_color='k',
+                        node_color='k',
+                        ax=ax_dhc_by_edge_len)
 
-            for i_a in range(n_agents):
-                coordpaths_our = []
-                coordpaths_dhc_by_nodes = []
-                coordpaths_dhc_by_edge_len = []
-                # start
-                coordpaths_our.append(points[i_a])
-                coordpaths_dhc_by_nodes.append(points[i_a])
-                coordpaths_dhc_by_edge_len.append(points[i_a])
-                # path
-                for node in paths_our[i_a]:
-                    coordpaths_our.append(pos_our_np[node])
-                assert paths_dhc_by_nodes is not None
-                for pos in paths_dhc_by_nodes[i_a]:
-                    coordpaths_dhc_by_nodes.append(
-                        pos_dhc_by_nodes_np[
-                            coords_from_node_by_nodes.index(
-                                tuple(pos))])
-                assert paths_dhc_by_edge_len is not None
-                for pos in paths_dhc_by_edge_len[i_a]:
-                    coordpaths_dhc_by_edge_len.append(
-                        pos_dhc_by_edge_len_np[
-                            coords_from_node_by_edge_len.index(
-                                tuple(pos))])
-                # goal
-                coordpaths_our.append(points[i_a + n_agents])
-                coordpaths_dhc_by_nodes.append(points[i_a + n_agents])
-                coordpaths_dhc_by_edge_len.append(points[i_a + n_agents])
+                    for i_a in range(n_agents):
+                        coordpaths_our = []
+                        coordpaths_dhc_by_nodes = []
+                        coordpaths_dhc_by_edge_len = []
+                        # start
+                        coordpaths_our.append(points[i_a])
+                        coordpaths_dhc_by_nodes.append(points[i_a])
+                        coordpaths_dhc_by_edge_len.append(points[i_a])
+                        # path
+                        for node in paths_our[i_a]:
+                            coordpaths_our.append(pos_our_np[node])
+                        assert paths_dhc_by_nodes is not None
+                        for pos in paths_dhc_by_nodes[i_a]:
+                            coordpaths_dhc_by_nodes.append(
+                                pos_dhc_by_nodes_np[
+                                    coords_from_node_by_nodes.index(
+                                        tuple(pos))])
+                        assert paths_dhc_by_edge_len is not None
+                        for pos in paths_dhc_by_edge_len[i_a]:
+                            coordpaths_dhc_by_edge_len.append(
+                                pos_dhc_by_edge_len_np[
+                                    coords_from_node_by_edge_len.index(
+                                        tuple(pos))])
+                        # goal
+                        coordpaths_our.append(points[i_a + n_agents])
+                        coordpaths_dhc_by_nodes.append(points[i_a + n_agents])
+                        coordpaths_dhc_by_edge_len.append(
+                            points[i_a + n_agents])
 
-                # plot the path
-                ax_our.plot(
-                    [coordpaths_our[i][0] for i in range(len(coordpaths_our))],
-                    [coordpaths_our[i][1] for i in range(len(coordpaths_our))],
-                    c=colors[i_a],
-                    linewidth=2)
-                ax_dhc_by_nodes.plot(
-                    [coordpaths_dhc_by_nodes[i][0]
-                        for i in range(len(coordpaths_dhc_by_nodes))],
-                    [coordpaths_dhc_by_nodes[i][1]
-                        for i in range(len(coordpaths_dhc_by_nodes))],
-                    c=colors[i_a],
-                    linewidth=2)
-                ax_dhc_by_edge_len.plot(
-                    [coordpaths_dhc_by_edge_len[i][0]
-                        for i in range(len(coordpaths_dhc_by_edge_len))],
-                    [coordpaths_dhc_by_edge_len[i][1]
-                        for i in range(len(coordpaths_dhc_by_edge_len))],
-                    c=colors[i_a],
-                    linewidth=2)
+                        # plot the path
+                        ax_our.plot(
+                            [coordpaths_our[i][0]
+                                for i in range(len(coordpaths_our))],
+                            [coordpaths_our[i][1]
+                                for i in range(len(coordpaths_our))],
+                            c=colors[i_a],
+                            linewidth=2)
+                        ax_dhc_by_nodes.plot(
+                            [coordpaths_dhc_by_nodes[i][0]
+                                for i in range(len(coordpaths_dhc_by_nodes))],
+                            [coordpaths_dhc_by_nodes[i][1]
+                                for i in range(len(coordpaths_dhc_by_nodes))],
+                            c=colors[i_a],
+                            linewidth=2)
+                        ax_dhc_by_edge_len.plot(
+                            [coordpaths_dhc_by_edge_len[i][0]
+                                for i in range(len(coordpaths_dhc_by_edge_len))],
+                            [coordpaths_dhc_by_edge_len[i][1]
+                                for i in range(len(coordpaths_dhc_by_edge_len))],
+                            c=colors[i_a],
+                            linewidth=2)
 
-            f_our.savefig(
-                f"{figure_folder}/{results_name}"
-                + f"_paths_our_{i_e}.png")
-            f_dhc_by_nodes.savefig(
-                f"{figure_folder}/{results_name}"
-                + f"_paths_dhc_by_nodes_{i_e}.png")
-            f_dhc_by_edge_len.savefig(
-                f"{figure_folder}/{results_name}"
-                + f"_paths_dhc_by_edge_len_{i_e}.png")
-            plt.close(f_our)
-            plt.close(f_dhc_by_nodes)
-            plt.close(f_dhc_by_edge_len)
+                    f_our.savefig(
+                        f"{figure_folder}/{results_name}"
+                        + f"_paths_our_{n_agents=}.png")
+                    f_dhc_by_nodes.savefig(
+                        f"{figure_folder}/{results_name}"
+                        + f"_paths_dhc_by_nodes_{n_agents=}.png")
+                    f_dhc_by_edge_len.savefig(
+                        f"{figure_folder}/{results_name}"
+                        + f"_paths_dhc_by_edge_len_{n_agents=}.png")
+                    plt.close(f_our)
+                    plt.close(f_dhc_by_nodes)
+                    plt.close(f_dhc_by_edge_len)
 
-        # print results
-        logger.info("="*60)
-        logger.info(f"{total_lenght_our=}")
-        logger.info(f"{total_lenght_dhc_by_nodes=}")
-        logger.info(f"{total_lenght_dhc_by_edge_len=}")
+            # print results
+            logger.info("="*60)
+            logger.info(f"{total_lenght_our=}")
+            logger.info(f"{total_lenght_dhc_by_nodes=}")
+            logger.info(f"{total_lenght_dhc_by_edge_len=}")
 
-        lens_our[i_e] = (
-            total_lenght_our
-            if total_lenght_our is not None else 0.0)
-        lens_dhc_by_nodes[i_e] = (
-            total_lenght_dhc_by_nodes
-            if total_lenght_dhc_by_nodes is not None else 0.0)
-        lens_dhc_by_edge_len[i_e] = (
-            total_lenght_dhc_by_edge_len
-            if total_lenght_dhc_by_edge_len is not None else 0.0)
+            lens_our[i_na][i_e] = total_lenght_our
+            lens_dhc_by_nodes[i_na][i_e] = total_lenght_dhc_by_nodes
+            lens_dhc_by_edge_len[i_na][i_e] = total_lenght_dhc_by_edge_len
 
     # plot
-    f, ax = plt.subplots(1, 1)
+    f, axs = plt.subplots(len(n_agents_s), 1, figsize=(10, len(n_agents_s)*10))
+    assert isinstance(axs, np.ndarray)
     n_maps = 3
     width = 1./(n_maps+1)
     xs = np.arange(float(n_eval))
-    ax.bar(xs, lens_our, width,
-           color='r', alpha=.5, label='our')
-    xs += width
-    ax.bar(xs, lens_dhc_by_edge_len, width,
-           color='g', alpha=.5, label='dhc_by_edge_len')
-    xs += width
-    ax.bar(xs, lens_dhc_by_nodes, width,
-           color='b', alpha=.5, label='dhc_by_nodes')
-    ax.set_xticks(xs)
-    ax.set_xlabel('Trials')
-    ax.set_ylabel('Total Pathlength')
-    ax.legend()
+    for i_na, n_agents in enumerate(n_agents_s):
+        axs[i_na].bar(xs, lens_our[i_na], width,
+                      color='r', alpha=.5, label='our')
+        xs += width
+        axs[i_na].bar(xs, lens_dhc_by_edge_len[i_na], width,
+                      color='g', alpha=.5, label='dhc_by_edge_len')
+        xs += width
+        axs[i_na].bar(xs, lens_dhc_by_nodes[i_na], width,
+                      color='b', alpha=.5, label='dhc_by_nodes')
+        axs[i_na].set_xticks(xs)
+        axs[i_na].set_xlabel('Trials')
+        axs[i_na].set_ylabel('Total Pathlength')
+        axs[i_na].set_title(f"{n_agents=}")
+        axs[i_na].legend()
     f.savefig(f"{figure_folder}/{results_name}_lens.png")
     plt.close(f)
+
+    yaml.dump({
+        'n_agents_s': n_agents_s,
+        'lens_our': lens_our.tolist(),
+        'lens_dhc_by_edge_len': lens_dhc_by_edge_len.tolist(),
+        'lens_dhc_by_nodes': lens_dhc_by_nodes.tolist()
+    }, open(f"{figure_folder}/{results_name}_lens.yaml", 'w'))
