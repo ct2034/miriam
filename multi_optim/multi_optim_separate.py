@@ -1,5 +1,6 @@
 import logging
 import sys
+from itertools import product
 
 import matplotlib
 import networkx as nx
@@ -38,22 +39,22 @@ def run_optimization_sep(
         pool,
         save_folder: str = "multi_optim/results"):
 
-    run_separately(
-        n_nodes,
-        n_runs_pose,
-        n_runs_policy,
-        n_episodes_per_run_policy,
-        n_epochs_per_run_policy,
-        batch_size_policy,
-        stats_and_eval_every,
-        lr_pos,
-        lr_policy,
-        max_n_agents,
-        map_fname,
-        seed,
-        prefix,
-        pool,
-        save_folder)
+    # run_separately(
+    #     n_nodes,
+    #     n_runs_pose,
+    #     n_runs_policy,
+    #     n_episodes_per_run_policy,
+    #     n_epochs_per_run_policy,
+    #     batch_size_policy,
+    #     stats_and_eval_every,
+    #     lr_pos,
+    #     lr_policy,
+    #     max_n_agents,
+    #     map_fname,
+    #     seed,
+    #     prefix,
+    #     pool,
+    #     save_folder)
 
     evaluate(map_fname, prefix, save_folder)
 
@@ -148,46 +149,115 @@ def evaluate(map_fname, prefix, save_folder):
         torch.load(
             f"{save_folder}/{prefix}_policy_model.pt",
             map_location=gpu))
-    # evaluate
-    eval_sep = Eval(
-        roadmap=roadmap_sep,
-        map_img=read_map(map_fname),
-        n_agents_s=[2, 4],
-        n_eval_per_n_agents=10,
-        iterator_type=ITERATOR_TYPE,
-        radius=RADIUS)
-    eval_joint = Eval(
-        roadmap=roadmap_joint,
-        map_img=read_map(map_fname),
-        n_agents_s=[2, 4],
-        n_eval_per_n_agents=10,
-        iterator_type=ITERATOR_TYPE,
-        radius=RADIUS)
-    res_sep = eval_sep.evaluate_both(
-        policy_sep, roadmap_sep, flann_sep)
-    res_joint = eval_joint.evaluate_both(
-        policy_joint, roadmap_joint, flann_joint)
-    # plot
-    assert set(res_sep.keys()) == set(res_joint.keys())
-    keys = sorted(res_sep.keys())
-    f, axs = plt.subplots(1, len(keys), figsize=(5 * len(keys), 5))
-    assert isinstance(axs, np.ndarray)
-    for i_k, key in enumerate(keys):
-        axs[i_k].bar(
-            0, res_sep[key], color="C0", label="separate")
-        axs[i_k].bar(
-            1, res_joint[key], color="C1", label="joint")
-        axs[i_k].set_title(key)
-        axs[i_k].legend()
-    f.tight_layout()
-    f.savefig(f"{save_folder}/{prefix}_joint_vs_sep.png")
-    plt.close(f)
+    # load stats
+    stats_static = yaml.load(
+        open(f"{save_folder}/{prefix}_stats.yaml", "r"), yaml.SafeLoader)["static"]
+    max_n_agents = stats_static["max_n_agents"]
+    map_img = read_map(stats_static["map_fname"])
 
-    # 4. save results
+    # eval roadmap lenghts
+    eval_sep = Eval(
+        roadmap_sep,
+        map_img,
+        [8],
+        1,
+        ITERATOR_TYPE,
+        RADIUS)
+    eval_joint = Eval(
+        roadmap_joint,
+        map_img,
+        [8],
+        1,
+        ITERATOR_TYPE,
+        RADIUS)
+    # first: own
+    _ = eval_sep.evaluate_roadmap(
+        roadmap_sep, flann_sep)
+    _ = eval_joint.evaluate_roadmap(
+        roadmap_joint, flann_joint)
+    # second: the other
+    roadmap_joint_over_sep = eval_sep.evaluate_roadmap(
+        roadmap_joint, flann_joint)
+    roadmap_sep_over_joint = eval_joint.evaluate_roadmap(
+        roadmap_sep, flann_sep)
+
+    # eval policy
+    n_eval = 10
+    n_agents_s = list(range(2, max_n_agents + 1, 2))
+    res_sep_s = {}
+    res_joint_s = {}
+    for metric in ["regret", "success", "accuracy"]:
+        res_sep_s[metric] = {}
+        res_joint_s[metric] = {}
+        for n_agents in n_agents_s:
+            res_sep_s[metric][n_agents] = []
+            res_joint_s[metric][n_agents] = []
+    for i_e, n_agents in product(range(n_eval), n_agents_s):
+        eval_sep = Eval(
+            roadmap_sep,
+            map_img,
+            [n_agents],
+            1,
+            ITERATOR_TYPE,
+            RADIUS,
+            seed=i_e)
+        eval_joint = Eval(
+            roadmap_joint,
+            map_img,
+            [n_agents],
+            1,
+            ITERATOR_TYPE,
+            RADIUS,
+            seed=i_e)
+        res_sep = eval_sep.evaluate_policy(
+            policy_sep)
+        res_joint = eval_joint.evaluate_policy(
+            policy_joint)
+        for metric in ["regret", "success", "accuracy"]:
+            key = f"{metric}_{n_agents}"
+            try:
+                res_sep_s[metric][n_agents].append(res_sep[key])
+            except KeyError:
+                pass
+            try:
+                res_joint_s[metric][n_agents].append(res_joint[key])
+            except KeyError:
+                pass
+
+    # plot
+    fig, axs = plt.subplots(1, 4, figsize=(40, 10))
+    assert isinstance(axs, np.ndarray)
+    axs[0].set_xlim(-0.5, 1.5)
+    axs[0].plot(0, roadmap_joint_over_sep, "o", label="roadmap_joint_over_sep")
+    axs[0].plot(1, roadmap_sep_over_joint, "o", label="roadmap_sep_over_joint")
+    axs[0].legend()
+    axs[0].set_title("Lengths")
+    for i_m, metric in enumerate(["regret", "success", "accuracy"]):
+        data_list = []
+        key_list = []
+        for n_agents in n_agents_s:
+            for i_js, res in enumerate([res_joint_s, res_sep_s]):
+                data_list.append(res[metric][n_agents])
+                js = "j" if i_js == 0 else "s"
+                key_list.append(f"{js}{n_agents}")
+        ticks = np.arange(len(data_list))
+        axs[i_m + 1].violinplot(
+            data_list,
+            positions=ticks,
+            showmeans=True,
+            showmedians=True)
+        axs[i_m + 1].set_title(metric.capitalize())
+        axs[i_m + 1].set_xticks(ticks, key_list)
+    fig.tight_layout()
+    plt.savefig(f"{save_folder}/{prefix}_joint_vs_sep.png")
+
+    # save results
     with open(f"{save_folder}/{prefix}_joint_vs_sep.yaml", "w") as f:
         yaml.dump({
-            "separate": res_sep,
-            "joint": res_joint,
+            "roadmap_joint_over_sep": roadmap_joint_over_sep,
+            "roadmap_sep_over_joint": roadmap_sep_over_joint,
+            "res_sep_s": res_sep_s,
+            "res_joint_s": res_joint_s
         }, f)
 
 
@@ -201,7 +271,7 @@ if __name__ == "__main__":
         "tiny",
         # "small",
         # "medium",
-        # "large"
+        "large"
     ]:
         run_optimization_sep(
             **configs[prefix],
