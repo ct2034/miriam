@@ -318,12 +318,13 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
                 radius=RADIUS/100,
                 rng=rng)
             total_lenght_our = None  # type: Optional[float]
+            paths_our: Optional[List[PATH]] = None
             if agents is not None:
                 for agent in agents:
                     agent.policy = LearnedPolicy(
                         agent, policy_nn)
                     # agent.policy = OptimalPolicy(agent, None)
-                paths_our: List[PATH] = []
+                paths_our = []
                 res_our = run_a_scenario(
                     g_our, agents,
                     plot=False,
@@ -333,15 +334,17 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
                 logger.info(f"{paths_our=}")
                 if res_our[IDX_SUCCESS]:
                     total_lenght_our = res_our[IDX_AVERAGE_LENGTH] * n_agents
+                    assert total_lenght_our is not None
                     for i_a in range(n_agents):
                         # before start
                         total_lenght_our += float(np.linalg.norm(
                             np.array(points[i_a]) -
-                            pos_our_np[starts_our[i_a]]))
+                            pos_our_np[starts_our[i_a]]))  # type: ignore
                         # after goal
                         total_lenght_our += float(np.linalg.norm(
                             np.array(points[i_a + n_agents]) -
-                            np.array(pos_our[goals_our[i_a]], dtype=np.float32)))
+                            np.array(pos_our[goals_our[i_a]],
+                                     dtype=np.float32)))  # type: ignore
 
             # eval dhc by nodes
             starts_dhc_by_nodes = nn_dhc_by_nodes[:n_agents]
@@ -349,9 +352,11 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
             res_dhc_by_nodes = dhc_eval(
                 gridmap_by_nodes,
                 np.array(
-                    [coords_from_node_by_nodes[n] for n in starts_dhc_by_nodes]),
+                    [coords_from_node_by_nodes[n]
+                     for n in starts_dhc_by_nodes]),
                 np.array(
-                    [coords_from_node_by_nodes[n] for n in goals_dhc_by_nodes]))
+                    [coords_from_node_by_nodes[n]
+                     for n in goals_dhc_by_nodes]))
             logger.info(f"{res_dhc_by_nodes=}")
             total_lenght_dhc_by_nodes = None  # type: Optional[float]
             paths_dhc_by_nodes = None  # type: Optional[np.ndarray]
@@ -359,8 +364,8 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
                 _, _, paths_dhc_by_nodes = res_dhc_by_nodes
                 total_lenght_dhc_by_nodes = get_total_len(
                     n_agents, coords_from_node_by_nodes, points,
-                    pos_dhc_by_nodes_np, starts_dhc_by_nodes, goals_dhc_by_nodes,
-                    paths_dhc_by_nodes)
+                    pos_dhc_by_nodes_np, starts_dhc_by_nodes,
+                    goals_dhc_by_nodes, paths_dhc_by_nodes)
 
             # eval dhc by edge len
             starts_dhc_by_edge_len = nn_dhc_by_edge_len[:n_agents]
@@ -433,6 +438,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
                         coordpaths_dhc_by_nodes.append(points[i_a])
                         coordpaths_dhc_by_edge_len.append(points[i_a])
                         # path
+                        assert paths_our is not None
                         for node in paths_our[i_a]:
                             coordpaths_our.append(pos_our_np[node])
                         assert paths_dhc_by_nodes is not None
@@ -456,23 +462,29 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
                         # plot the path
                         ax_our.plot(
                             [coordpaths_our[i][0]
-                                for i in range(len(coordpaths_our))],
+                                for i in range(len(
+                                    coordpaths_our))],
                             [coordpaths_our[i][1]
-                                for i in range(len(coordpaths_our))],
+                                for i in range(len(
+                                    coordpaths_our))],
                             c=colors[i_a],
                             linewidth=2)
                         ax_dhc_by_nodes.plot(
                             [coordpaths_dhc_by_nodes[i][0]
-                                for i in range(len(coordpaths_dhc_by_nodes))],
+                                for i in range(len(
+                                    coordpaths_dhc_by_nodes))],
                             [coordpaths_dhc_by_nodes[i][1]
-                                for i in range(len(coordpaths_dhc_by_nodes))],
+                                for i in range(len(
+                                    coordpaths_dhc_by_nodes))],
                             c=colors[i_a],
                             linewidth=2)
                         ax_dhc_by_edge_len.plot(
                             [coordpaths_dhc_by_edge_len[i][0]
-                                for i in range(len(coordpaths_dhc_by_edge_len))],
+                                for i in range(len(
+                                    coordpaths_dhc_by_edge_len))],
                             [coordpaths_dhc_by_edge_len[i][1]
-                                for i in range(len(coordpaths_dhc_by_edge_len))],
+                                for i in range(len(
+                                    coordpaths_dhc_by_edge_len))],
                             c=colors[i_a],
                             linewidth=2)
 
@@ -509,14 +521,15 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
 
 def plot(figure_folder: str, results_name: str):
     yaml_data = yaml.load(
-        open(f"{figure_folder}/{results_name}_lens.yaml"), Loader=yaml.SafeLoader)
+        open(f"{figure_folder}/{results_name}_lens.yaml"),
+        Loader=yaml.SafeLoader)
     n_agents_s = yaml_data['n_agents_s']
     lens_our = np.array(yaml_data['lens_our'])
     lens_dhc_by_edge_len = np.array(yaml_data['lens_dhc_by_edge_len'])
     lens_dhc_by_nodes = np.array(yaml_data['lens_dhc_by_nodes'])
 
     # plot
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']  # type: ignore
     f, axs = plt.subplots(len(n_agents_s), 1, figsize=(9, len(n_agents_s)*6))
     assert isinstance(axs, np.ndarray)
     n_maps = 3
@@ -553,5 +566,6 @@ if __name__ == '__main__':
     n_agents_s: List[int] = [2, 4, 6, 8]
     n_eval: int = 10
 
-    # eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval)
+    # eval(logger, results_name, base_folder,
+    # figure_folder, n_agents_s, n_eval)
     plot(figure_folder, results_name)
