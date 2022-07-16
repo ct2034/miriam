@@ -4,13 +4,15 @@ from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 from planner.bvc.plan_bvc import get_average_path_length, plan
-from roadmaps.var_odrm_torch.var_odrm_torch import read_map
+from roadmaps.var_odrm_torch.var_odrm_torch import read_map, sample_points
 from tools import ProgressBar
 
 if __name__ == "__main__":
     random.seed(0)
+    rng = random.Random(0)
     map_fname: str = "roadmaps/odrm/odrm_eval/maps/plain.png"
-    map_img_np: np.ndarray = np.array(read_map(map_fname))
+    map_img = read_map(map_fname)
+    map_img_np: np.ndarray = np.array(map_img)
     assert len(map_img_np.shape) == 2, "Map image must be 2D."
     width: int = map_img_np.shape[1]
     print(f"{width=}")
@@ -19,20 +21,11 @@ if __name__ == "__main__":
     bin_size = width // desired_width
     map_img_np = map_img_np.reshape((desired_width, bin_size,
                                      desired_width, bin_size)).max(3).max(1)
-    map_img = tuple([tuple(map_img_np[i, :].tolist())
-                     for i in range(map_img_np.shape[0])])
+    # map_img = tuple([tuple(map_img_np[i, :].tolist())
+    #                  for i in range(map_img_np.shape[0])])
 
-    possible_starts_and_goals = [
-        [.7, .6], [.7, .4],
-        [.6, .7], [.4, .7],
-        [.3, .6], [.3, .4],
-        [.6, .3], [.4, .3],
-    ]
-    for i_p in range(len(possible_starts_and_goals)):
-        possible_starts_and_goals[i_p][0] += random.gauss(0, .1)
-        possible_starts_and_goals[i_p][1] += random.gauss(0, .1)
-    n_agents_s = range(1, len(possible_starts_and_goals))
-    n_trials = 10
+    n_agents_s = range(2, 9, 2)
+    n_trials = 2
 
     path_lengths = [list() for _ in range(len(n_agents_s))]
     success = [0, ] * len(n_agents_s)
@@ -40,17 +33,11 @@ if __name__ == "__main__":
 
     pb = ProgressBar("eval", len(n_agents_s) * n_trials, 1)
     for i_na, n_agents in enumerate(n_agents_s):
+        print(f"{n_agents=}")
         for i_t in range(n_trials):
-            starts = random.sample(possible_starts_and_goals, k=n_agents)
-            goals: List = []
-            for i_a in range(n_agents):
-                remaining_possible_goals = possible_starts_and_goals.copy()
-                remaining_possible_goals.remove(starts[i_a])
-                for g in goals:
-                    if g in remaining_possible_goals:
-                        remaining_possible_goals.remove(g)
-                goals.append(random.choice(remaining_possible_goals))
-            paths = plan(map_img, starts, goals, radius=0.01)
+            starts = sample_points(n_agents, map_img, rng).tolist()
+            goals = sample_points(n_agents, map_img, rng).tolist()
+            paths = plan(map_img, starts, goals, radius=0.001)
             if isinstance(paths, np.ndarray):
                 success[i_na] += 1
                 path_lengths[i_na].append(get_average_path_length(paths))
