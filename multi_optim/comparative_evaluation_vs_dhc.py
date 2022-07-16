@@ -177,19 +177,7 @@ def get_total_len(n_agents, coords_from_node_by_nodes, points, pos_dhc_np,
     return total_lenght_dhc
 
 
-if __name__ == '__main__':
-    logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
-
-    # parameters
-    logger.setLevel(logging.INFO)
-    results_name: str = 'large'
-    base_folder: str = 'multi_optim/results'
-    figure_folder: str = f'{base_folder}/eval_vs_dhc'
-    if not os.path.exists(figure_folder):
-        os.makedirs(figure_folder)
-    n_agents_s: List[int] = [2, 4, 6, 8]
-    n_eval: int = 10
-
+def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
     rng = Random(0)
     flann = FLANN(random_seed=0)
 
@@ -509,8 +497,24 @@ if __name__ == '__main__':
             lens_dhc_by_nodes[i_na][i_e] = total_lenght_dhc_by_nodes
             lens_dhc_by_edge_len[i_na][i_e] = total_lenght_dhc_by_edge_len
 
+    yaml.dump({
+        'n_agents_s': n_agents_s,
+        'lens_our': lens_our.tolist(),
+        'lens_dhc_by_edge_len': lens_dhc_by_edge_len.tolist(),
+        'lens_dhc_by_nodes': lens_dhc_by_nodes.tolist()
+    }, open(f"{figure_folder}/{results_name}_lens.yaml", 'w'))
+
+
+def plot(figure_folder: str, results_name: str):
+    yaml_data = yaml.load(
+        open(f"{figure_folder}/{results_name}_lens.yaml"), Loader=yaml.SafeLoader)
+    n_agents_s = yaml_data['n_agents_s']
+    lens_our = np.array(yaml_data['lens_our'])
+    lens_dhc_by_edge_len = np.array(yaml_data['lens_dhc_by_edge_len'])
+    lens_dhc_by_nodes = np.array(yaml_data['lens_dhc_by_nodes'])
+
     # plot
-    f, axs = plt.subplots(len(n_agents_s), 1, figsize=(10, len(n_agents_s)*10))
+    f, axs = plt.subplots(len(n_agents_s), 1, figsize=(9, len(n_agents_s)*6))
     assert isinstance(axs, np.ndarray)
     n_maps = 3
     width = 1./(n_maps+1)
@@ -532,9 +536,19 @@ if __name__ == '__main__':
     f.savefig(f"{figure_folder}/{results_name}_lens.png")
     plt.close(f)
 
-    yaml.dump({
-        'n_agents_s': n_agents_s,
-        'lens_our': lens_our.tolist(),
-        'lens_dhc_by_edge_len': lens_dhc_by_edge_len.tolist(),
-        'lens_dhc_by_nodes': lens_dhc_by_nodes.tolist()
-    }, open(f"{figure_folder}/{results_name}_lens.yaml", 'w'))
+
+if __name__ == '__main__':
+    logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
+
+    # parameters
+    logger.setLevel(logging.INFO)
+    results_name: str = 'large'
+    base_folder: str = 'multi_optim/results'
+    figure_folder: str = f'{base_folder}/eval_vs_dhc'
+    if not os.path.exists(figure_folder):
+        os.makedirs(figure_folder)
+    n_agents_s: List[int] = [2, 4, 6, 8]
+    n_eval: int = 10
+
+    eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval)
+    plot(figure_folder, results_name)
