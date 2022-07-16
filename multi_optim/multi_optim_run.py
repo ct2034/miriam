@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 import socket
+import sys
 import time
 from random import Random
 from typing import Dict, List, Optional, Tuple
@@ -16,6 +17,7 @@ import scenarios.solvers
 import tools
 import torch
 import torch.multiprocessing as tmp
+import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
 from matplotlib import pyplot as plt
@@ -26,40 +28,42 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     make_graph_and_flann,
                                                     optimize_poses_from_paths,
                                                     read_map, sample_points)
-from sim.decentralized.iterators import IteratorType
-from tools import ProgressBar, StatCollector
+from tools import ProgressBar, StatCollector, set_ulimit
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
+    from configs import configs
     from eval import Eval
-    from state import ACTION, ScenarioState
+    from state import ACTION, ITERATOR_TYPE, ScenarioState
 else:
+    from multi_optim.configs import configs
     from multi_optim.eval import Eval
-    from multi_optim.state import ACTION, ScenarioState
+    from multi_optim.state import ACTION, ITERATOR_TYPE, ScenarioState
 
 logger = logging.getLogger(__name__)
 
 MAX_STEPS = 10
 RADIUS = 0.001
-ITERATOR_TYPE = IteratorType.LOOKAHEAD2
 
 
 def sample_trajectory_proxy(args):
     return sample_trajectory(*args)
 
 
-def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
-                      max_steps=MAX_STEPS):
+def sample_trajectory(seed: int, graph: nx.Graph, n_agents: int,
+                      model: EdgePolicyModel, map_img: MAP_IMG,
+                      max_steps: int = MAX_STEPS):
     """Sample a trajectory using the given policy."""
     start_time = time.process_time()
     rng = Random(seed)
     starts = None
     goals = None
     flann = FLANN()
-    pos = graph.nodes.data(POS)
+    pos = nx.get_node_attributes(graph, POS)
     pos_np = np.array([pos[n] for n in graph.nodes])
     flann.build_index(np.array(pos_np, dtype=np.float32),
                       random_index=0)
+    model.train()
 
     starts_coord: Optional[List[Tuple[float, float]]] = None
     goals_coord: Optional[List[Tuple[float, float]]] = None
@@ -117,7 +121,8 @@ def sample_trajectory(seed, graph, n_agents, model, map_img: MAP_IMG,
             assert observations is not None, "observations is None"
             for i_a, (d, bfs) in observations.items():
                 # find actions to take using the policy
-                actions[i_a] = model.predict(d.x, d.edge_index, bfs)
+                actions[i_a] = model.predict_probablilistic(
+                    d.x, d.edge_index, bfs)
                 # observation, action pairs for learning
                 these_ds.append(d)
             state.step(actions)
@@ -136,6 +141,35 @@ def _get_path_data(save_folder, prefix, hash) -> str:
     if not os.path.exists(folder):
         os.makedirs(folder)
     return folder+f"/{hash}.pkl"
+
+
+def write_stats_png(prefix, save_folder, stats):
+    prefixes = [
+        "roadmap",
+        "policy_accuracy",
+        "policy_regret",
+        "policy_success",
+        "general_accuracy",
+        "general_regret",
+        "general_success",
+        "general_gen"
+        "runtime_",
+        "data_"
+    ]
+    _, axs = plt.subplots(len(prefixes), 1, sharex=True,
+                          figsize=(10, 6*len(prefixes)), dpi=200)
+    for i_x, part in enumerate(prefixes):
+        subset = stats.get_stats_wildcard(f"{part}.*")
+        keys = subset.keys()
+        for k in sorted(keys):
+            v = subset[k]
+            axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
+        axs[i_x].legend()  # type: ignore
+        axs[i_x].xaxis.set_major_locator(  # type: ignore
+            MaxNLocator(integer=True))
+    plt.xlabel(f"Run {prefix}")
+    plt.tight_layout()
+    plt.savefig(f"{save_folder}/{prefix}_stats.png")
 
 
 def sample_trajectories_in_parallel(
@@ -186,37 +220,49 @@ def sample_trajectories_in_parallel(
     return new_fname, paths_s, ts_max, ts_mean
 
 
-def optimize_policy(model, batch_size, optimizer, epds
+def optimize_policy(model, batch_size, optimizer, epds, n_epochs
                     ) -> Tuple[EdgePolicyModel, float]:
     if len(epds) == 0:
         return model, 0.0
     loader = DataLoader(epds, batch_size=batch_size, shuffle=True)
     loss_s = []
-    for _, batch in enumerate(loader):
-        loss = model.learn(batch, optimizer)
-        loss_s.append(loss)
+    for _ in range(n_epochs):
+        for _, batch in enumerate(loader):
+            loss = model.learn(batch, optimizer)
+            loss_s.append(loss)
+        loader.dataset.shuffle()
 
     if len(loss_s) == 0:
         loss_s = [0]
-    return model, np.mean(loss_s)
+    return model, float(np.mean(loss_s))
 
 
 def run_optimization(
         n_nodes: int,
         n_runs_pose: int,
         n_runs_policy: int,
-        n_epochs_per_run_policy: int,
+        n_episodes_per_run_policy: int,  # how many episodes to sample per run
+        n_epochs_per_run_policy: int,  # how often to learn same data
         batch_size_policy: int,
         stats_and_eval_every: int,
         lr_pos: float,
         lr_policy: float,
-        n_agents: int,
+        max_n_agents: int,
         map_fname: str,
         seed: int,
         load_policy_model: Optional[str] = None,
+        load_roadmap: Optional[str] = None,
         prefix: str = "noname",
         save_images: bool = True,
-        save_folder: Optional[str] = None):
+        save_folder: Optional[str] = None,
+        pool_in: Optional[tmp.Pool] = None):  # type: ignore
+    wandb_run = wandb.init(
+        project="miriam-multi-optim-run",
+        name=f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}-{prefix}",
+        reinit=True, settings=wandb.Settings(
+            start_method="fork"))
+    assert wandb_run is not None
+
     rng = Random(seed)
     logger.info(f"run_optimization {prefix}")
     torch.manual_seed(rng.randint(0, 2 ** 32))
@@ -224,12 +270,30 @@ def run_optimization(
         save_folder = "multi_optim/results"  # default
 
     # multiprocessing
-    n_processes = min(tmp.cpu_count(), 8)
-    pool = tmp.Pool(processes=n_processes)
+    if pool_in is None:
+        n_processes = min(tmp.cpu_count(), 16)
+        pool = tmp.Pool(processes=n_processes)
+    else:
+        pool = pool_in
+
+    # n_agents
+    n_agents_s = list(range(2, max_n_agents+1, 2))  # e.g. 2, 4, 6, ...
+    i_n_agents: int = 0
+    n_agents: int = n_agents_s[i_n_agents]
 
     # Roadmap
     map_img: MAP_IMG = read_map(map_fname)
-    pos = sample_points(n_nodes, map_img, rng)
+    if load_roadmap is not None:
+        # load graph from file
+        graph_loaded = nx.read_gpickle(load_roadmap)
+        assert isinstance(graph_loaded, nx.Graph)
+        pos_dict = nx.get_node_attributes(graph_loaded, POS)
+        pos = torch.tensor(np.array([pos_dict[k]
+                                     for k in graph_loaded.nodes()]),
+                           device=torch.device("cpu"),
+                           dtype=torch.float, requires_grad=True)
+    else:
+        pos = sample_points(n_nodes, map_img, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g: nx.Graph
     flann: FLANN
@@ -260,49 +324,41 @@ def run_optimization(
 
     # Eval
     # little less agents for evaluation
-    eval_n_agents = int(np.ceil(n_agents * .7))
     eval = Eval(g, map_img,
-                n_agents=eval_n_agents, n_eval=10,
+                n_agents_s=n_agents_s, n_eval_per_n_agents=8,
                 iterator_type=ITERATOR_TYPE, radius=RADIUS)
 
     # Data for policy
+    clear_data_folder(prefix, save_folder)
     epds = EdgePolicyDataset(f"{save_folder}/{prefix}_data")
 
     # Visualization and analysis
-    stats = StatCollector([
-        "general_eval_time_perc",
-        "general_length",
-        "general_new_data_percentage",
-        "general_regret",
-        "general_success",
-        "general_runtime_generation_mean",
-        "general_runtime_generation_max",
-        "n_policy_data_len",
-        "policy_accuracy",
-        "policy_loss",
-        "policy_regret",
-        "policy_success",
-        "roadmap_test_length",
-        "roadmap_training_length"])
-    stats.add_statics({
+    static_stats = {
         # metadata
         "hostname": socket.gethostname(),
         "git_hash": git.repo.Repo(".").head.object.hexsha,
         "started_at": datetime.datetime.now().isoformat(),
+        "gpu": str(gpu),
         # parameters
         "n_nodes": n_nodes,
         "n_runs_pose": n_runs_pose,
         "n_runs_policy": n_runs_policy,
+        "n_episodes_per_run_policy": n_episodes_per_run_policy,
+        "n_epochs_per_run_policy": n_epochs_per_run_policy,
         "batch_size_policy": batch_size_policy,
         "stats_every": stats_and_eval_every,
         "lr_pos": lr_pos,
         "lr_policy": lr_policy,
-        "n_agents": n_agents,
+        "max_n_agents": max_n_agents,
         "map_fname": map_fname,
         "load_policy_model": (
             load_policy_model if load_policy_model else "None"),
         "prefix": prefix
-    })
+    }
+    stats = StatCollector()
+    for stat_saver in [wandb.config.update, stats.add_statics]:
+        stat_saver(static_stats)
+
     if save_images:
         draw_graph(g, map_img, title="Start")
         plt.savefig(f"{save_folder}/{prefix}_start.png")
@@ -311,68 +367,119 @@ def run_optimization(
     n_runs = max(n_runs_pose, n_runs_policy)
     if n_runs_policy > n_runs_pose:
         n_runs_per_run_policy = 1
-        n_runs_per_run_pose = n_runs // n_runs_pose
+        if n_runs_pose > 0:
+            n_runs_per_run_pose = n_runs // n_runs_pose
+        else:
+            n_runs_per_run_pose = 0
     else:  # n_runs_pose > n_runs_policy
         n_runs_per_run_pose = 1
-        n_runs_per_run_policy = n_runs // n_runs_policy
+        if n_runs_policy > 0:
+            n_runs_per_run_policy = n_runs // n_runs_policy
+        else:
+            n_runs_per_run_policy = 0
 
     # Run optimization
     pb = ProgressBar(
         name=f"{prefix} Optimization",
-        total=n_runs,
+        total=n_runs+1,
         step_perc=1,
         print_func=logger.info)
     # roadmap_test_length = 0
     roadmap_training_length = 0
-    for i_r in range(1, n_runs+1):
+    for i_r in range(0, n_runs+1):
+        wandb.log({"general/progress": float(i_r) / n_runs}, step=i_r)
         start_time = time.process_time()
-        optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
-        optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
+        if n_runs_per_run_pose > 0:
+            optimize_poses_now: bool = i_r % n_runs_per_run_pose == 0
+        else:
+            optimize_poses_now = False
+        if n_runs_per_run_policy > 0:
+            optimize_policy_now: bool = i_r % n_runs_per_run_policy == 0
+        else:
+            optimize_policy_now = False
+
+        # n_agents
+        current_succ_str = f"general_success_{n_agents}"
+        current_succ: float = 0.
+        try:
+            current_succ_stats = stats.get_stats(current_succ_str)
+            current_succ = current_succ_stats[
+                current_succ_str][1][-1]  # type: ignore
+        except KeyError:
+            # in case we don't have any data yet
+            pass
+        if current_succ >= .8:
+            i_n_agents = min(i_n_agents + 1, len(n_agents_s)-1)
+        n_agents = n_agents_s[i_n_agents]
 
         # Sample runs for both optimizations
         # assert n_runs_policy >= n_runs_pose, \
         #     "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
         new_fname, paths_s, ts_max, ts_mean = sample_trajectories_in_parallel(
-            policy_model, g, map_img, flann, n_agents, n_epochs_per_run_policy,
-            prefix, optimize_poses_now, save_folder,  pool, rng)
+            policy_model, g, map_img, flann, n_agents,
+            n_episodes_per_run_policy, prefix, optimize_poses_now,
+            save_folder, pool, rng)
         epds.add_file(new_fname)
         data_len = len(epds)
         if data_len > 0:
             new_data_percentage = (data_len - old_data_len) / data_len
         else:
             new_data_percentage = 0.
+        end_time_generation = time.process_time()
+        stats.add("runtime_generation_all", i_r, (
+            end_time_generation - start_time
+        ))
+        wandb.log(
+            {"runtime/generation/all": (
+                end_time_generation - start_time)}, step=i_r)
 
         # Optimizing Poses
         if optimize_poses_now:
             (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
                 g, pos, paths_s, map_img, optimizer_pos)
+            end_time_optim_poses = time.process_time()
+            stats.add("runtime_optim_poses", i_r, (
+                end_time_optim_poses - end_time_generation
+            ))
+            wandb.log({
+                "runtime/optim/poses": (
+                    end_time_optim_poses - end_time_generation
+                )}, step=i_r)
 
         # Optimizing Policy
         if optimize_policy_now:
+            start_time_optim_policy = time.process_time()
             policy_model, policy_loss = optimize_policy(
-                policy_model, batch_size_policy, optimizer_policy, epds)
+                policy_model, batch_size_policy, optimizer_policy, epds,
+                n_epochs_per_run_policy)
+            end_time_optim_policy = time.process_time()
+            stats.add("runtime_optim_policy", i_r, (
+                end_time_optim_policy - start_time_optim_policy
+            ))
+            wandb.log(
+                {"runtime/optim/policy": (
+                    end_time_optim_policy - start_time_optim_policy
+                )}, step=i_r)
 
         if i_r % stats_and_eval_every == 0:
             end_optimization_time = time.process_time()
 
-            if optimize_policy_now:
+            if optimize_policy_now or i_r == 0:
                 # also eval now
-                (policy_regret, policy_success, policy_accuracy
-                 ) = eval.evaluate_policy(policy_model)
-                assert policy_loss is not None
-                stats.add("policy_loss", i_r, float(policy_loss))
-                if policy_regret is not None:
-                    stats.add("policy_regret", i_r, float(policy_regret))
-                stats.add("policy_success", i_r, float(policy_success))
-                stats.add("policy_accuracy", i_r, policy_accuracy)
-                logger.info(f"(P) Loss: {policy_loss:.3f}")
-                logger.info(f"(P) Regret: {policy_regret:e}")
-                logger.info(f"(P) Success: {policy_success}")
-                logger.info(f"(P) Accuracy: {policy_accuracy:.3f}")
+                policy_results = eval.evaluate_policy(policy_model)
+                names = sorted(policy_results.keys())
+                for name in names:
+                    stats.add(f"policy_{name}", i_r, policy_results[name])
+                    logger.info(f"(P) {name}: {policy_results[name]}")
+                    wandb.log(
+                        {f"policy/{name}": policy_results[name]}, step=i_r)
+                if policy_loss is not None:
+                    stats.add("policy_loss", i_r, policy_loss)
+                    wandb.log({"policy/loss": policy_loss}, step=i_r)
 
-            if optimize_poses_now:
+            if optimize_poses_now or i_r == 0:
                 # eval the current roadmap
                 roadmap_test_length = eval.evaluate_roadmap(g, flann)
                 stats.add("roadmap_test_length", i_r, roadmap_test_length)
@@ -381,50 +488,67 @@ def run_optimization(
                 logger.info(f"(R) Test Length: {roadmap_test_length:.3f}")
                 logger.info(
                     f"(R) Training Length: {roadmap_training_length:.3f}")
+                wandb.log({
+                    "roadmap/test_length": roadmap_test_length,
+                    "roadmap/training_length": roadmap_training_length},
+                    step=i_r)
 
-            if optimize_policy_now or optimize_poses_now:
-                (general_regret, general_success, general_length
-                 ) = eval.evaluate_both(policy_model, g, flann)
-                stats.add("general_regret", i_r, general_regret)
-                stats.add("general_success", i_r, general_success)
-                stats.add("general_length", i_r, general_length)
-                logger.info(f"(G) Regret: {general_regret:e}")
-                logger.info(f"(G) Success: {general_success}")
-                logger.info(f"(G) Length: {general_length:.3f}")
+            if optimize_policy_now or optimize_poses_now or i_r == 0:
+                general_results = eval.evaluate_both(policy_model, g, flann)
+                names = sorted(general_results.keys())
+                for name in names:
+                    stats.add(f"general_{name}", i_r, general_results[name])
+                    logger.info(f"(G) {name}: {general_results[name]}")
+                    wandb.log(
+                        {f"general/{name}": general_results[name]}, step=i_r)
 
             end_eval_time = time.process_time()
-            eval_time_perc = (end_eval_time - end_optimization_time) / \
-                (end_eval_time - start_time)
+            eval_time_perc = ((end_eval_time - end_optimization_time) /
+                              (end_eval_time - start_time))
+            stats.add("runtime_eval", i_r, (
+                end_eval_time - end_optimization_time
+            ))
+            stats.add("runtime_full", i_r, (
+                end_eval_time - start_time
+            ))
+            wandb.log({
+                "runtime/eval": end_eval_time - end_optimization_time,
+                "runtime/full": end_eval_time - start_time}, step=i_r)
 
+            stats.add("data_len", i_r, float(data_len))
             stats.add("general_new_data_percentage",
                       i_r, float(new_data_percentage))
-            stats.add("n_policy_data_len", i_r, float(data_len))
-            stats.add("general_eval_time_perc", i_r, float(eval_time_perc))
-            stats.add("general_runtime_generation_mean", i_r, ts_mean)
-            stats.add("general_runtime_generation_max", i_r, ts_max)
+            stats.add("general_generation_n_agents_percentage",
+                      i_r, float(n_agents / max_n_agents))
+            stats.add("runtime_eval_time_perc", i_r, float(eval_time_perc))
+            stats.add("runtime_generation_mean", i_r, ts_mean)
+            stats.add("runtime_generation_max", i_r, ts_max)
             logger.info(f"(G) New data: {new_data_percentage*100:.1f}%")
             logger.info(f"(G) Data length: {data_len}")
             logger.info(f"(G) Eval time: {eval_time_perc*100:.1f}%")
+            logger.info(f"(G) Generation n_agents: {n_agents}")
             logger.info(f"(G) Runtime generation mean: {ts_mean:.3f}s")
             logger.info(f"(G) Runtime generation max: {ts_max:.3f}s")
+            wandb.log({
+                "general/data_len": data_len,
+                "general/new_data_percentage": new_data_percentage,
+                "general/generation_n_agents_percentage": (n_agents /
+                                                           max_n_agents),
+                "runtime/eval_time/perc": eval_time_perc,
+                "runtime/generation/mean": ts_mean,
+                "runtime/generation/max": ts_max}, step=i_r)
 
         pb.progress()
     runtime = pb.end()
     stats.add_static("runtime", str(runtime))
+    if pool_in is None:
+        # we made our own pool, so we need to close it
+        pool.close()
+        pool.terminate()
 
     # Plot stats
     if save_images:
-        prefixes = ["roadmap", "policy", "general"]
-        _, axs = plt.subplots(len(prefixes), 1, sharex=True,
-                              figsize=(20, 30), dpi=200)
-        for i_x, part in enumerate(prefixes):
-            for k, v in stats.get_stats_wildcard(f"{part}.*").items():
-                axs[i_x].plot(v[0], v[1], label=k)  # type: ignore
-            axs[i_x].legend()  # type: ignore
-            axs[i_x].xaxis.set_major_locator(  # type: ignore
-                MaxNLocator(integer=True))
-        plt.xlabel("Run")
-        plt.savefig(f"{save_folder}/{prefix}_stats.png")
+        write_stats_png(prefix, save_folder, stats)
 
     # Save results
     if save_images:
@@ -435,114 +559,51 @@ def run_optimization(
     torch.save(policy_model.state_dict(),
                f"{save_folder}/{prefix}_policy_model.pt")
 
+    wandb_run.finish()
     logger.info(stats.get_statics())
+
+
+def clear_data_folder(prefix, save_folder):
+    data_folder = f"{save_folder}/{prefix}_data"
+    if os.path.exists(data_folder):
+        for f in os.listdir(data_folder):
+            os.remove(os.path.join(data_folder, f))
 
 
 if __name__ == "__main__":
     # multiprocessing
-    tmp.set_sharing_strategy('file_system')
+    # tmp.set_sharing_strategy('file_system')
     tmp.set_start_method('spawn')
+    # set_ulimit()  # fix `RuntimeError: received 0 items of ancdata`
+    n_processes = min(tmp.cpu_count(), 16)
+    pool = tmp.Pool(processes=n_processes)
 
-    # debug run
-    for d in os.listdir("multi_optim/results/debug_data"):
-        os.remove(f"multi_optim/results/debug_data/{d}")
-    logging.getLogger(__name__).setLevel(logging.DEBUG)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.DEBUG)
-    logging.getLogger(
-        "sim.decentralized.policy"
-    ).setLevel(logging.DEBUG)
-    run_optimization(
-        n_nodes=8,
-        n_runs_pose=16,
-        n_runs_policy=32,
-        n_epochs_per_run_policy=8,
-        batch_size_policy=16,
-        stats_and_eval_every=8,
-        lr_pos=1e-2,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        prefix="debug")
+    for prefix in [
+        "debug",
+        "tiny",
+        "small",
+        "medium",
+        "large"
+    ]:
+        if prefix == "debug":
+            level = logging.DEBUG
+        else:
+            level = logging.INFO
+        for set_fun in [
+            logging.getLogger(__name__).setLevel,
+            logging.getLogger(
+                "planner.mapf_implementations.plan_cbs_roadmap"
+            ).setLevel,
+            logging.getLogger(
+                "sim.decentralized.policy"
+            ).setLevel
+        ]:
+            set_fun(level)
 
-    # tiny run
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=16,
-        n_runs_pose=2,
-        n_runs_policy=128,
-        n_epochs_per_run_policy=128,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-4,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
-        prefix="tiny")
+        # start the actual run
+        run_optimization(
+            **configs[prefix],
+            pool_in=pool)
 
-    # tiny_varpose run
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=16,
-        n_runs_pose=64,
-        n_runs_policy=128,
-        n_epochs_per_run_policy=128,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-4,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        load_policy_model="multi_optim/results/tiny_model_to_load.pt",
-        prefix="tiny_varpose")
-
-    # medium run
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=64,
-        n_runs_pose=2,
-        n_runs_policy=128,
-        n_epochs_per_run_policy=128,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-4,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
-        prefix="medium")
-
-    # large run
-    logging.getLogger(__name__).setLevel(logging.INFO)
-    logging.getLogger(
-        "planner.mapf_implementations.plan_cbs_roadmap"
-    ).setLevel(logging.INFO)
-    run_optimization(
-        n_nodes=256,
-        n_runs_pose=2,
-        n_runs_policy=128,
-        n_epochs_per_run_policy=128,
-        batch_size_policy=128,
-        stats_and_eval_every=2,
-        lr_pos=1e-4,
-        lr_policy=1e-3,
-        n_agents=4,
-        map_fname="roadmaps/odrm/odrm_eval/maps/x.png",
-        seed=0,
-        # load_policy_model="multi_optim/results/medium_model_to_load.pt",
-        prefix="large")
+    pool.close()
+    pool.terminate()

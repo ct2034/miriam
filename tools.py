@@ -350,18 +350,21 @@ class ProgressBar(object):
 
 
 class StatCollector(object):
-    def __init__(self, names: List[str]):
+    def __init__(self):
         self.stats: Dict[str,
                          Dict[str,
                               Union[List[float], Union[float, str]]]] = {}
-        for name in names:
-            self.stats[name] = {
-                "t": [],
-                "x": []
-            }
         self.stats[STATIC] = {}
 
+    def add_name(self, name):
+        self.stats[name] = {
+            "t": [],
+            "x": []
+        }
+
     def add(self, name: str, t: int, x: float):
+        if name not in self.stats:
+            self.add_name(name)
         assert name in self.stats.keys()
         assert "t" in self.stats[name].keys()
         assert isinstance(self.stats[name]["t"], list)
@@ -402,7 +405,22 @@ class StatCollector(object):
         with open(filename, 'w') as f:
             yaml.dump(self.stats, f)
 
-    def from_yaml(self, filename: str):
+    @classmethod
+    def from_yaml(cls, filename: str):
+        obj = StatCollector()
         assert filename.endswith(".yaml")
         with open(filename, 'r') as f:
-            self.stats = yaml.load(f, Loader=yaml.SafeLoader)
+            obj.stats = yaml.load(f, Loader=yaml.SafeLoader)
+        return obj
+
+
+def set_ulimit(value: int = 2**16):  # 65536
+    """
+    Workaround for the issue "RuntimeError: received 0 items of ancdata"
+    courtesy of
+    https://github.com/pytorch/pytorch/issues/973#issuecomment-345088750
+    and https://github.com/fastai/fastai/issues/23#issuecomment-345091054
+    """
+    import resource
+    r_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
+    resource.setrlimit(resource.RLIMIT_NOFILE, (value, r_limit[1]))

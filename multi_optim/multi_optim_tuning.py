@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import logging
 import os
 import subprocess
@@ -26,7 +27,7 @@ def params_debug():
         "stats_and_eval_every": [1],
         "lr_pos": [1E-4],
         "lr_policy": [1E-3],
-        "n_agents": [2],
+        "max_n_agents": [2],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
         "save_folder": [TUNING_RES_FOLDER]
@@ -36,22 +37,22 @@ def params_debug():
 
 
 def params_run():
-    n_nodes_s = [8]
     parameter_experiments = {
-        "n_nodes": n_nodes_s,
-        "n_runs_pose": [64],
+        "n_nodes": [64],  # medium
+        "n_runs_pose": [128],
         "n_runs_policy": [128],
-        "n_epochs_per_run_policy":  [128],
-        "batch_size_policy":  [128],
-        "stats_and_eval_every": [16],
-        "lr_pos": [1E-4],
-        "lr_policy": [1E-3],
-        "n_agents": [4],
+        "n_epochs_per_run_policy":  [1, 2, 4, 6],
+        "n_episodes_per_run_policy":  [256],
+        "batch_size_policy":  [64],
+        "stats_and_eval_every": [4],
+        "lr_pos": [1E-3],
+        "lr_policy": [1E-4],
+        "max_n_agents": [8],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
         "save_images": [False],
         "save_folder": [TUNING_RES_FOLDER]
     }  # type: Dict[str, Union[List[int], List[float], List[str]]]
-    n_runs = 8
+    n_runs = 4
     return parameter_experiments, n_runs
 
 
@@ -65,7 +66,7 @@ def params_ablation():
         "stats_and_eval_every": [8],
         "lr_pos": [1E-2],
         "lr_policy": [1E-3],
-        "n_agents": [4, 3, 5, 6],
+        "max_n_agents": [4, 3, 5, 6],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/c.png"],
         "save_images": [True],
         "save_folder": [ABLATION_RES_FOLDER]
@@ -103,7 +104,7 @@ def start_process(kwargs):
     import_str = "from multi_optim.multi_optim_run import run_optimization"
     kwargs_str = repr(kwargs)
     my_env = os.environ.copy()
-    my_env["CUDA_VISIBLE_DEVICES"] = "-1"
+    # my_env["CUDA_VISIBLE_DEVICES"] = "-1"
     process = subprocess.Popen(
         ["/usr/bin/python3",
          "-c",
@@ -127,9 +128,24 @@ def run(params_to_run):
     cpus = os.cpu_count()
     assert isinstance(cpus, int)
     logger.info(f"{cpus=}")
-    max_active_processes: int = min(cpus, 12)
+    max_active_processes: int = 6  # min(cpus, 8)
     logger.info(f"{max_active_processes=}")
     active_processes = set()
+
+    # finish out what ran before
+    ran_prefixes = set()
+    suffix = "_stats.yaml"
+    for f in os.listdir(params_to_run[0]["save_folder"]):
+        if f.endswith(suffix):
+            prefix = f.replace(suffix, "")
+            ran_prefixes.add(prefix)
+
+    # not running them again
+    logger.info(f"(all) {len(params_to_run)=}")
+    logger.info(f"{len(ran_prefixes)=}")
+    params_to_run = [
+        p for p in params_to_run if p["prefix"] not in ran_prefixes]
+    logger.info(f"(remaining) {len(params_to_run)=}")
 
     n_initial = len(params_to_run)
     pb = ProgressBar("Running", n_initial, 5, logger.info)
@@ -174,6 +190,8 @@ def plot_data(path: str):
     fnames_json = sorted(fnames_json)
 
     data = {}  # type: Dict[str, Dict[int, Any]]
+    max_seed = 0
+    n_existing_seeds = {}  # type: Dict[str, int]
 
     for i_f, fname in enumerate(fnames_json):
         with open(os.path.join(path, fname), "r") as f:
@@ -183,6 +201,12 @@ def plot_data(path: str):
         if exp not in data:
             data[exp] = {}
         data[exp][seed] = stats
+        # count existing seeds
+        if exp not in n_existing_seeds:
+            n_existing_seeds[exp] = 0
+        n_existing_seeds[exp] += 1
+        max_seed = max(max_seed, seed)
+    n_seeds = max_seed + 1
 
     exps = list(data.keys())
     exps.sort()
@@ -193,31 +217,57 @@ def plot_data(path: str):
     params.sort()
     n_params = len(params)
     fig, (axs) = plt.subplots(
-        n_params,
+        n_params + 1,
         n_exps,
-        figsize=(5*n_exps, 5*n_params),
-        dpi=300)
+        figsize=(4*n_exps, 4*n_params),
+        dpi=200)
+    axs = axs.reshape(n_params + 1, n_exps)
 
     lims_per_param = {}  # type: Dict[str, List[float]]
 
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
-            ax = axs[i_param, i_exp]  # type: ignore
+            ax = axs[i_param + 1, i_exp]  # type: ignore
 
             # consolidate data
             n_seeds = len(data[exp])
-            first_available_seed = min(data[exp].keys())
-            t = data[exp][first_available_seed][param]['t']
-            n_t = len(t)
-            this_data = np.zeros((n_seeds, n_t))
+            t_min_l = 10E10
             for i_seed, seed in enumerate(data[exp].keys()):
-                this_data[i_seed, :] = data[exp][seed][param]['x']
-            mean = np.mean(this_data, axis=0)
-            std = np.std(this_data, axis=0)
+                t_raw = data[exp][seed][param]['t']
+                if len(t_raw) < t_min_l:
+                    t_min_l = len(t_raw)
+                    t_min_raw = t_raw
+            this_data_raw = np.zeros((n_seeds, t_min_l))
+            for i_seed, seed in enumerate(data[exp].keys()):
+                this_data_raw[i_seed, :] = data[exp][seed][param]['x'][
+                    :t_min_l]
+
+            means = np.empty((0,))
+            stds = np.empty((0,))
+            mins = np.empty((0,))
+            maxs = np.empty((0,))
+            ts = np.empty((0,))
+            for i_t, t in enumerate(t_min_raw):
+                t_slice = this_data_raw[:, i_t]
+                if not np.isnan(t_slice).all():
+                    mean = np.mean(
+                        t_slice[np.logical_not(np.isnan(t_slice))])
+                    means = np.append(means, mean)
+                    std = np.std(
+                        t_slice[np.logical_not(np.isnan(t_slice))])
+                    stds = np.append(stds, std)
+                    min_ = np.min(t_slice[np.logical_not(np.isnan(t_slice))])
+                    mins = np.append(mins, min_)
+                    max_ = np.max(t_slice[np.logical_not(np.isnan(t_slice))])
+                    maxs = np.append(maxs, max_)
+                    ts = np.append(ts, t)
 
             # plot
-            ax.plot(t, mean, label=exp)
-            ax.fill_between(t, mean - std, mean + std, alpha=0.2)
+            ax.plot(ts, means, label=exp, color='black')
+            ax.fill_between(ts, means - stds, means +
+                            stds, alpha=0.2, color='grey')
+            ax.plot(ts, mins, label=exp, color='green')
+            ax.plot(ts, maxs, label=exp, color='red')
 
             # labels
             if i_exp == 0:
@@ -226,49 +276,54 @@ def plot_data(path: str):
                 ax.set_title(exp)
             if i_param == len(params) - 1:
                 ax.set_xlabel("epoch")
-            ax.set_xlim(0, t[-1])
+            ax.set_xlim(0, ts[-1])
             ax.grid()
 
             # find limits
-            mean = mean[np.logical_not(np.isnan(mean))]
-            std = std[np.logical_not(np.isnan(std))]
-
-            bottom_lim = float(np.min(mean - std))
-            top_lim = float(np.max(mean + std))
+            bottom_lim = float(np.min(mins))
+            top_lim = float(np.max(maxs))
             if param not in lims_per_param:
-                lims_per_param[param] = [0., 0.]
-                lims_per_param[param][0] = bottom_lim
-                lims_per_param[param][1] = top_lim
+                lims_per_param[param] = [bottom_lim, top_lim]
             else:
                 lims_per_param[param][0] = min(lims_per_param[param][0],
                                                bottom_lim)
                 lims_per_param[param][1] = max(lims_per_param[param][1],
                                                top_lim)
 
+    # barplots
+    for i_exp, exp in enumerate(exps):
+        ax = axs[0, i_exp]  # type: ignore
+        ax.bar(0, n_existing_seeds[exp], label=exp, color='black')
+        ax.set_ylim(0, n_seeds)
+
     # cosmetics
     plt.tight_layout()
 
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
-            ax = axs[i_param, i_exp]  # type: ignore
-            ax.set_ylim(lims_per_param[param][0], lims_per_param[param][1])
+            ax = axs[i_param + 1, i_exp]  # type: ignore
+            d = (lims_per_param[param][1] - lims_per_param[param][0])*.05
+            ax.set_ylim(lims_per_param[param][0]-d, lims_per_param[param][1]+d)
 
     plt.savefig(os.path.join(path, "_tuning_stats.png"))
 
 
 if __name__ == "__main__":
-    tuning = False
-    ablation = True
+    tuning = True
+    ablation = False
 
     if tuning:
         folder = TUNING_RES_FOLDER
         # parameter_experiments, n_runs = params_debug()
-        # parameter_experiments, n_runs = params_run()
+        parameter_experiments, n_runs = params_run()
     elif ablation:
         folder = ABLATION_RES_FOLDER
         parameter_experiments, n_runs = params_ablation()
     else:
         raise ValueError("No tuning or ablation")
+
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
     logging.basicConfig(
         filename=os.path.join(

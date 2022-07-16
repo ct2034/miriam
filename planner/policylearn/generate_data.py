@@ -436,7 +436,6 @@ def plot_map_and_paths(gridmap, blocks, data, n_agents):
                      block_coords[ia][:, 1],
                      'x',
                      color=colors[ia])
-    plt.show()
 
 
 def insert_str_before_extension(fname: str, to_insert: str):

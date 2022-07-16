@@ -3,6 +3,7 @@
 import argparse
 import logging
 import pickle
+from typing import Any, Dict, Optional, Union
 
 import torch
 from matplotlib import pyplot as plt
@@ -34,12 +35,18 @@ def plot_fovs(X, Y):
     plt.show()
 
 
-def plot_graph_wo_pos_data(ax, data_edge_index, pos, data_x):
-    data_pos = torch.tensor([list(p) for _, p in pos.items()])
-    plot_graph(ax, data_edge_index, data_pos, data_x)
+def plot_graph_wo_pos_data(ax, data_edge_index,
+                           pos: Union[Dict[Any, Any], torch.Tensor], data_x,
+                           highlight_nodes: Dict[int, str] = {}):
+    if isinstance(pos, torch.Tensor):
+        data_pos = pos
+    else:
+        data_pos = torch.tensor([list(p) for _, p in pos.items()])
+    plot_graph(ax, data_edge_index, data_pos, data_x, highlight_nodes)
 
 
-def plot_graph(ax, data_edge_index, data_pos, data_x):
+def plot_graph(ax, data_edge_index, data_pos, data_x,
+               highlight_nodes: Dict[int, str] = {}):
     # edges
     n_edges = data_edge_index.shape[1]
     for i_e in range(n_edges):
@@ -51,27 +58,45 @@ def plot_graph(ax, data_edge_index, data_pos, data_x):
             'k'
         )
     # nodes
-    ax.scatter(data_pos[:, 0], data_pos[:, 1], color='k')
+    ax.scatter(data_pos[:, 0], data_pos[:, 1], marker='o', color='white',
+               edgecolor='k', zorder=90)
+    # highlight nodes
+    for n, color in highlight_nodes.items():
+        rnd = torch.rand_like(data_x[n, 0]) * 0.01
+        ax.scatter(data_pos[n, 0] + rnd, data_pos[n, 1],
+                   color=color, zorder=100, marker="x")
+    # node features
     n_node_features = data_x.shape[1]
-    max_data = torch.max(data_x).item()
+    max_d = torch.max(data_x).item()
+    min_d = torch.min(data_x).item()
+    max_data = max(max_d, abs(min_d))
     n_nodes = data_x.shape[0]
     colors = get_colors(n_node_features)
-    dp = .3/(n_node_features+2)
+    dp = .15/(n_node_features+2)
     for i_x in range(n_node_features):
         color = colors[i_x]
         for i_n in range(n_nodes):
-            if data_x[i_n, i_x] > 0:
-                ax.scatter(
-                    data_pos[i_n, 0] + dp*(i_x+1),
-                    data_pos[i_n, 1] + dp*(i_x+1),
-                    color=color,
-                    alpha=float(data_x[i_n, i_x])/max_data)
+            strength = float(data_x[i_n, i_x] / max_data)
+            if strength < 0:
+                color_middle = tuple([1 - c for c in color])
             else:
-                ax.scatter(
-                    data_pos[:, 0] + dp*(i_x+1),
-                    data_pos[:, 1] + dp*(i_x+1),
-                    color=color,
-                    alpha=.01)
+                color_middle = color
+            abs_strength = abs(strength)
+            color_middle_a = tuple(
+                list(color_middle[:3]) + [abs_strength, ])
+            ax.scatter(
+                data_pos[i_n, 0] + dp*(i_x+1),
+                data_pos[i_n, 1] + dp*(i_x+1),
+                color=color_middle_a,
+                edgecolor=color,
+                s=60)
+    for n in range(n_nodes):
+        ax.text(
+            data_pos[n, 0] - dp,
+            data_pos[n, 1] + dp,
+            f"{n}",
+            color='k',
+            fontsize=10)
 
 
 if __name__ == "__main__":

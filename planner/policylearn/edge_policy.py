@@ -1,6 +1,7 @@
 import logging
 import os
 import pickle
+import random
 from typing import List, Tuple
 
 import torch
@@ -63,7 +64,7 @@ class EdgePolicyModel(nn.Module):
             num_conv_channels=128,  # type: int
             num_conv_layers=4,  # type: int
             num_readout_layers=2,  # type: int
-            cheb_filter_size=5,  # type: int
+            cheb_filter_size=6,  # type: int
             dropout_p=.2,  # type: float
             gpu=torch.device("cpu")  # type: torch.device
     ):
@@ -122,10 +123,27 @@ class EdgePolicyModel(nn.Module):
                 x[batch == i_b], dim=0)
         return y_out_batched
 
-    def predict(self, x, edge_index, big_from_small):
+    def predict_probablilistic(self, x, edge_index, big_from_small,
+                               rng=random.Random(0)):
+        targets, score = self.predict_scores_and_targets(x, edge_index)
+        score_potential_targets = score[targets]
+        # if self.training:
+        node_small = rng.choices(
+            targets,
+            weights=score_potential_targets.tolist(),
+            k=1)[0].item()
+        # else:  # eval
+        #     node_small = targets[torch.argmax(
+        #         score_potential_targets).item()].item()
+        return big_from_small[node_small]
+
+    def predict_scores_and_targets(self, x, edge_index):
         self.eval()
         n_nodes = x.shape[0]
-        node = torch.nonzero(x[:, 0] == 1.).item()
+        try:
+            node = torch.nonzero(x[:, 0] == 1.).item()
+        except ValueError:
+            raise RuntimeError("Unable to find own position in x")
         relevant_edge_index = edge_index[:,
                                          torch.bitwise_or(edge_index[0] == node,
                                                           edge_index[1] == node)]
@@ -143,16 +161,13 @@ class EdgePolicyModel(nn.Module):
 
         # read values at potential targets as score
         score = self.forward(x, edge_index, torch.tensor([0]*n_nodes))
-        score_potential_targets = score[targets]
-        node_small = targets[torch.argmax(
-            score_potential_targets).item()].item()
-        return big_from_small[node_small]
+        return targets, score
 
     def accuracy(self, eval_list: EVAL_LIST) -> float:
         self.eval()
         results = torch.zeros(len(eval_list))
         for i, (data, bfs) in enumerate(eval_list):
-            pred = self.predict(data.x, data.edge_index, bfs)
+            pred = self.predict_probablilistic(data.x, data.edge_index, bfs)
             optimal_small = torch.argmax(data.y).item()
             if isinstance(optimal_small, int):
                 results[i] = int(pred == bfs[optimal_small])

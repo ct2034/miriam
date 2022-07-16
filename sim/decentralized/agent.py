@@ -65,7 +65,7 @@ class Agent(object):
             (self.env, self.coord_to_node
              ) = gridmap_to_graph(env)
             assert isinstance(pos, tuple)
-            self.pos = self.coord_to_node[pos]
+            self.pos = self.coord_to_node[pos]  # type: ignore
             assert len(pos) == 2  # (x, y)self.pos: C = pos
             if radius is None:
                 self.radius = .4  # good for gridmaps
@@ -114,6 +114,19 @@ class Agent(object):
             f"hash(env): {hasher(self.env)}"
         )
 
+    def copy(self):
+        a = Agent(
+            env=self.env,
+            pos=self.start,
+            radius=self.radius,
+            rng=self.rng)
+        a.policy = self.policy
+        a.pos = self.pos
+        a.goal = self.goal
+        a.path = self.path
+        a.path_i = self.path_i
+        return a
+
     def give_a_goal(self, goal: Union[C, C_grid, np.ndarray]) -> bool:
         """Set a new goal for the agent, this will calculate the path,
         if the goal is new."""
@@ -122,7 +135,7 @@ class Agent(object):
         if self.has_gridmap:
             assert isinstance(goal, tuple)
             assert len(goal) == 2  # (x, y)
-            goal = self.coord_to_node[goal]
+            goal = self.coord_to_node[goal]  # type: ignore
         elif self.has_roadmap:
             assert isinstance(goal, int)  # (node)
         assert isinstance(goal, int)
@@ -178,6 +191,17 @@ class Agent(object):
         self.path_i = 0
         assert self.path is not None, "We must be successful with no blocks"
 
+    def replan_with_first_step(self, step: C):
+        self.check_step(step)
+        assert self.goal is not None, "Should have a goal to plan"
+        path_from_step = self.plan_path(
+            start=step,
+            goal=self.goal
+        )
+        assert path_from_step is not None
+        self.path = [self.pos] + path_from_step
+        self.path_i = 0
+
     def back_to_the_start(self):
         """Reset current progress and place agent at its start as if nothing ever
         happened."""
@@ -201,13 +225,18 @@ class Agent(object):
         """Move agent to the given position. (Ignoring the path)
         Motion must be possible by the environment."""
         if self.pos != pos_to_go_to:
-            if not self.env.has_edge(
-                    self.pos, pos_to_go_to):
-                raise RuntimeError(
-                    "Should have edge from current pos to pos_to_go_to")
+            self.check_step(pos_to_go_to)
         assert self.path_i is not None, "Should have a path_i by now"
         self.path_i += 1
         self.pos = pos_to_go_to
+
+    def check_step(self, pos_to_go_to):
+        if self.pos != pos_to_go_to:
+            if not self.env.has_edge(
+                    self.pos, pos_to_go_to):
+                raise RuntimeError(
+                    f"Should have edge from current pos ({self.pos})" +
+                    f" to pos_to_go_to ({pos_to_go_to}).")
 
     def get_path_i_not_none(self) -> int:
         assert self.path_i is not None

@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from enum import Enum, auto
 from multiprocessing import Pool
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -7,10 +8,8 @@ import networkx as nx
 import numpy as np
 import torch
 from definitions import POS, C
-from planner.mapf_implementations.libMultiRobotPlanning.tools.annotate_roadmap import \
-    check_edges
-from planner.mapf_implementations.libMultiRobotPlanning.tools.collision import \
-    precheck_bounding_box
+from planner.mapf_implementations.libMultiRobotPlanning.tools.collision import (
+    ellipsoid_collision_motion, precheck_bounding_box, precheck_indices)
 from sim.decentralized.agent import Agent
 
 logging.basicConfig()
@@ -123,7 +122,8 @@ def has_at_least_one_agent_moved(
 
 
 def check_motion_col(g: nx.Graph, radius: float,
-                     node_s_start: List[C], node_s_end: List[C]) -> Set[int]:
+                     node_s_start: List[C], node_s_end: List[C],
+                     ignored_agents: Set[int]) -> Set[int]:
     pos_s = nx.get_node_attributes(g, POS)
     n_agents = len(node_s_start)
     assert len(node_s_end) == n_agents,\
@@ -135,14 +135,25 @@ def check_motion_col(g: nx.Graph, radius: float,
         np.ndarray, np.ndarray, np.ndarray, np.ndarray  # p0, p1, q0, q1
     ]] = []
     for i_a1 in range(n_agents):
+        if i_a1 in ignored_agents:
+            continue
         for i_a2 in range(i_a1 + 1, n_agents):
-            p0 = np.array(pos_s[node_s_start[i_a1]])
-            p1 = np.array(pos_s[node_s_end[i_a1]])
-            q0 = np.array(pos_s[node_s_start[i_a2]])
-            q1 = np.array(pos_s[node_s_end[i_a2]])
-            if precheck_bounding_box(E, p0, p1, q0, q1):
-                edges_to_check.append((i_a1, i_a2, E, p0, p1, q0, q1))
-    results = [check_edges(*edge[2:]) for edge in edges_to_check]
+            if i_a2 in ignored_agents:
+                continue
+            if precheck_indices(
+                    edge_a=(node_s_start[i_a1], node_s_end[i_a1]),
+                    edge_b=(node_s_start[i_a2], node_s_end[i_a2])):
+                colliding_agents.add(i_a1)
+                colliding_agents.add(i_a2)
+            else:
+                p0 = np.array(pos_s[node_s_start[i_a1]])
+                p1 = np.array(pos_s[node_s_end[i_a1]])
+                q0 = np.array(pos_s[node_s_start[i_a2]])
+                q1 = np.array(pos_s[node_s_end[i_a2]])
+                if precheck_bounding_box(E, p0, p1, q0, q1):
+                    edges_to_check.append((i_a1, i_a2, E, p0, p1, q0, q1))
+    results = [ellipsoid_collision_motion(
+        *edge[2:]) for edge in edges_to_check]
     for result, (i_a1, i_a2, _, _, _, _, _) in zip(results, edges_to_check):
         if result:
             colliding_agents.add(i_a1)
@@ -153,14 +164,15 @@ def check_motion_col(g: nx.Graph, radius: float,
 def iterate_edge_policy(
     agents: Tuple[Agent, ...],
     lookahead: int,
-    ignore_finished_agents: bool
+    ignore_finished_agents: bool,
+    _copying: bool = False  # for testing
 ) -> Tuple[List[int], List[float]]:
     """An iterator that will ask a policy which edge to take in the even of a collision."""
     assert agents[0].radius is not None, "radius must be set"
     assert all(a.radius == agents[0].radius for a in agents),\
         "all radii must be equal"
 
-    RETRIES = 3
+    RETRIES = 10
     i_try = 0
     space_slice: List[float] = [0.] * len(agents)
     time_slice: List[int] = [1] * len(agents)
@@ -174,18 +186,36 @@ def iterate_edge_policy(
     agents_with_colissions = get_agents_in_col(all_colissions)
     logger.debug(f"all_colissions: {all_colissions}")
 
+    # for motion checking we need a list of finished agents to ignore them
+    if ignore_finished_agents:
+        finished_agents = set([i_a for i_a in range(
+            len(agents)) if agents[i_a].is_at_goal()])
+    else:
+        finished_agents = set()
+    if _copying:
+        agents_except_finished = [a.copy() for i_a, a in enumerate(
+            agents) if i_a not in finished_agents]
+    else:
+        agents_except_finished = [a for i_a, a in enumerate(
+            agents) if i_a not in finished_agents]
+
     # calling the policy for each agent that has colissions
     next_nodes: List[C] = [-1] * len(agents)
-    solved = False
-    while (not solved) and i_try < RETRIES:
+    at_least_one_can_move = False
+    while (not at_least_one_can_move):
         logger.debug(f"agents with colissions: {agents_with_colissions}")
         for i_a, a in enumerate(agents):
             if i_a in agents_with_colissions:
                 assert hasattr(a.policy, "get_edge"), \
                     "Needs edge-based policy"
                 try:
+                    if _copying:
+                        agents_copy = [a.copy()
+                                       for a in agents_except_finished]
+                    else:
+                        agents_copy = agents_except_finished
                     next_nodes[i_a] = a.policy.get_edge(  # type: ignore
-                        agents, agents_with_colissions)  # type: ignore
+                        agents_copy, agents_with_colissions)  # type: ignore
                 except RuntimeError:
                     logger.warn(f"{a.policy} failed")
                     raise SimIterationException(
@@ -196,25 +226,34 @@ def iterate_edge_policy(
             agents, 0, next_nodes, ignore_finished_agents)
         new_agents_with_colissions = get_agents_in_col([next_collisions])
         new_agents_with_colissions.update(check_motion_col(
-            agents[0].env, agents[0].radius, next_nodes, poses_at_beginning))
-        solved = not any(new_agents_with_colissions)
+            agents[0].env, agents[0].radius, next_nodes, poses_at_beginning, finished_agents))
+        at_least_one_can_move = not any(new_agents_with_colissions)
         logger.debug(
-            f"try {i_try}, solved: {solved}, next_collisions: {next_collisions}")
+            f"{i_try=}, {at_least_one_can_move=}, {next_collisions=}, {new_agents_with_colissions=}")
         agents_with_colissions.update(new_agents_with_colissions)
-        i_try += 1
-    if i_try == RETRIES:
-        raise SimIterationException(f"Failed to solve after {RETRIES} tries")
-    else:
+        # update agents with new paths in case we ask the policy again
         for i_a, a in enumerate(agents):
-            if not a.is_at_goal():
-                time_slice[i_a] = 1
-            space_slice[i_a] = float(np.linalg.norm(
-                np.array(pos[a.pos], dtype=np.float32) -
-                np.array(pos[next_nodes[i_a]], dtype=np.float32)
-            ))
-            a.make_this_step(next_nodes[i_a])
+            a.replan_with_first_step(next_nodes[i_a])
+        i_try += 1
+        if i_try == RETRIES:
+            raise SimIterationException(
+                f"Failed to solve after {RETRIES} tries")
+    for i_a, a in enumerate(agents):
+        logger.debug(f". {i_a=}, {a.pos=}, {a.goal=}, {a.is_at_goal()=}")
+        logger.debug(f"  {a.path_i=}, {a.path=}")
+        logger.debug(f"  {a.what_is_next_step()=}, {next_nodes[i_a]=}")
+
+        if not a.is_at_goal():
+            time_slice[i_a] = 1
+        space_slice[i_a] = float(np.linalg.norm(
+            np.array(pos[a.pos], dtype=np.float32) -
+            np.array(pos[next_nodes[i_a]], dtype=np.float32)
+        ))
+        would_be_next_path_step = a.what_is_next_step()
+        a.make_this_step(next_nodes[i_a])
+        if would_be_next_path_step != next_nodes[i_a]:
             a.replan()
-            a.policy.step()  # type: ignore
+        a.policy.step()  # type: ignore
 
     return time_slice, space_slice
 

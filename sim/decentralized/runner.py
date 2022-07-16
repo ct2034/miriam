@@ -1,11 +1,13 @@
 import itertools
 import logging
 import random
+from random import Random
 from typing import Iterable, List, Optional, Tuple, Type, Union
 
 import numpy as np
 from definitions import BLOCKED_NODES_TYPE, INVALID, POS, SCENARIO_RESULT
 from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
+from scenarios.visualization import plot_with_paths
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import (IteratorType, SimIterationException,
                                          get_iterator_fun)
@@ -18,7 +20,7 @@ logger = logging.getLogger(__name__)
 TIME_LIMIT = 100
 
 
-def initialize_environment_random_fill(size: int, fill: float, rng: random.Random = random.Random(0)
+def initialize_environment_random_fill(size: int, fill: float, rng: Random = Random(0)
                                        ) -> np.ndarray:
     """Make a square map with edge length `size` and `fill` (0..1) obstacle
     ratio.
@@ -45,7 +47,7 @@ def get_int_tuple_pos(a: Agent, node: int) -> Tuple[int, int]:
 def initialize_new_agent(
         gridmap: np.ndarray, agents: List[Agent], policy: PolicyType,
         tight_placement: bool = False,
-        rng: random.Random = random.Random(0)) -> Optional[Agent]:
+        rng: Random = Random(0)) -> Optional[Agent]:
     """Place new agent in the environment, where no obstacle or other agent
     is.
 
@@ -113,15 +115,17 @@ def initialize_new_agent(
 
 def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
                      radius: Optional[float] = None,
-                     rng: random.Random = random.Random(0)) -> Optional[List[Agent]]:
+                     rng: Random = Random(0)) -> Optional[List[Agent]]:
     n_agents = np.array(starts).shape[0]
     agents = []
     for i_a in range(n_agents):
         if is_gridmap(env):
-            a = Agent(env, starts[i_a], policy=policy, rng=rng,
+            a = Agent(env, starts[i_a], policy=policy,
+                      rng=Random(rng.randint(0, 2 ** 32 - 1)),
                       radius=radius)
         elif is_roadmap(env):
-            a = Agent(env, int(starts[i_a]), policy=policy, rng=rng,
+            a = Agent(env, int(starts[i_a]), policy=policy,
+                      rng=Random(rng.randint(0, 2 ** 32 - 1)),
                       radius=radius)
         else:
             raise RuntimeError("Unknown environment type")
@@ -133,7 +137,9 @@ def to_agent_objects(env, starts, goals, policy=PolicyType.RANDOM,
 
 def initialize_agents(
         env: np.ndarray, n_agents: int, policy: PolicyType,
-        tight_placement: bool = False, rng: random.Random = random.Random(0)
+        tight_placement: bool = False, rng: Random = Random(0)
+
+
 ) -> Optional[Tuple[Agent, ...]]:
     """Initialize `n_agents` many agents in unique, free spaces of
     `environment`, (not colliding with each other). Returns None if one agent
@@ -204,7 +210,7 @@ def will_agents_collide(agents, ignore_finished_agents):
     return do_collide, agent_paths
 
 
-def sample_and_run_a_scenario(size, n_agents, policy, plot, rng: random.Random, iterator
+def sample_and_run_a_scenario(size, n_agents, policy, plot, rng: Random, iterator
                               ) -> SCENARIO_RESULT:
     env = initialize_environment_random_fill(size, .1, rng)
     agents = initialize_agents(env, n_agents, policy, rng=rng)
@@ -252,7 +258,7 @@ def run_a_scenario(env: POTENTIAL_ENV_TYPE,
         while not are_all_agents_at_their_goals(agents):
             poses_before_moving = list(map(lambda a: a.pos, agents))
             if plot:  # pragma: no cover
-                plot_env_agents(env, agents)  # type: ignore
+                plot_with_paths(env, [a.path for a in agents])  # type: ignore
             time_slice, space_slice = get_iterator_fun(
                 iterator)(agents, ignore_finished_agents)
             time_progress += time_slice
@@ -305,7 +311,7 @@ def has_exception(res: SCENARIO_RESULT):
 
 def evaluate_policies(size=10, n_agents=10, runs=100, plot_eval=True):
     """run the simulation with some policies"""
-    rng = random.Random(0)
+    rng = Random(0)
     evaluations = {}
     evaluation_names = [
         "average_time",

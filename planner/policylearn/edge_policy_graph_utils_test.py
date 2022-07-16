@@ -1,11 +1,17 @@
 import unittest
 from itertools import product
-from math import atan2
+from math import atan2, pi
+from random import Random
 
 import networkx as nx
+import numpy as np
 from planner.policylearn.edge_policy_graph_utils import *
+from planner.policylearn.edge_policy_graph_utils_angle_demo import demo
+from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph_and_flann,
+                                                    read_map, sample_points)
 from scenarios.test_helper import make_cache_folder_and_set_envvar
 from sim.decentralized.agent import Agent
+from sim.decentralized.runner import to_agent_objects
 
 
 class TestEdgePolicyGraphUtils(unittest.TestCase):
@@ -81,6 +87,9 @@ class TestEdgePolicyGraphUtils(unittest.TestCase):
             else:
                 a = atan2(pos[n][1] - pos[24][1], pos[n][0] - pos[24][0])
             self.assertAlmostEqual(data.x[small_from_big[n], 3], a, places=3)
+
+    def test_angles_of_random_graphs(self):
+        demo()
 
     def test_get_optimal_edge(self):
         agents = self.agents.copy()

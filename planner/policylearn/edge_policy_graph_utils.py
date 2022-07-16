@@ -1,7 +1,9 @@
 import logging
+from math import pi
 from typing import Dict, Tuple
 
 import networkx as nx
+import numpy as np
 import scenarios
 import torch
 from definitions import DEFAULT_TIMEOUT_S, INVALID, POS
@@ -48,7 +50,9 @@ def agents_to_data(agents, i_self: int,
     for t, p in enumerate(agents[i_self].path):
         if p in g_sml.nodes:
             p_sml = small_from_big[p]
-            x_layer_own_path[p_sml] = t_to_data(t, agents[i_self].path_i)
+            if x_layer_own_path[p_sml].item() == 0.:
+                # only save first occurence
+                x_layer_own_path[p_sml] = t_to_data(t, agents[i_self].path_i)
 
     # 2. other paths
     x_layer_other_paths = torch.zeros((len(small_from_big), 1))
@@ -73,6 +77,11 @@ def agents_to_data(agents, i_self: int,
         relative_pos[:, 1], relative_pos[:, 0])
     # if not own node, add own angle
     relative_angle[relative_distance != 0] -= own_angle
+    for i_n in range(len(relative_angle)):
+        while relative_angle[i_n] > pi:
+            relative_angle[i_n] -= 2*pi
+        while relative_angle[i_n] < -pi:
+            relative_angle[i_n] += 2*pi
 
     # edge index
     edge_index = torch.tensor([(
@@ -96,7 +105,12 @@ def agents_to_data(agents, i_self: int,
                      x_layer_other_paths,
                      relative_distance.view(-1, 1),
                      relative_angle.view(-1, 1)], dim=1),
-        y=y
+        y=y,
+        pos=torch.tensor(np.array([
+            pos[big_from_small[i]]
+            for i in range(len(small_from_big))
+        ])),
+        num_agents=len(agents)
     )
     return d, big_from_small
 
@@ -111,9 +125,10 @@ def get_optimal_edge(agents, i_agent: int) -> int:
         agents[0].env, starts, goals, radius=radius, timeout=DEFAULT_TIMEOUT_S)
     if paths is INVALID:
         raise RuntimeError("No paths found")
-    else:
-        assert not isinstance(paths, str)
-        path = paths[i_agent]
-        if len(path) == 1:  # already at goal
-            return path[0][0]
-        return path[1][0]
+    if len(paths) != len(agents):
+        raise RuntimeError("Number of paths does not match number of agents")
+    assert not isinstance(paths, str)
+    path = paths[i_agent]
+    if len(path) == 1:  # already at goal
+        return path[0][0]
+    return path[1][0]

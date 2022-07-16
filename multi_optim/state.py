@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 OBSERVATION = Tuple[Data, Dict[int, int]]
 ACTION = int
 TIME_LIMIT_STEPS = 20
+ITERATOR_TYPE = IteratorType.LOOKAHEAD2
 
 
 class ScenarioState():
@@ -43,7 +44,7 @@ class ScenarioState():
             env=self.graph,
             agents=tuple(self.agents),
             plot=False,
-            iterator=IteratorType.LOOKAHEAD2,
+            iterator=ITERATOR_TYPE,
             pause_on=PolicyCalledException,
             time_limit=TIME_LIMIT_STEPS,
             paths_out=self.paths_out)
@@ -77,8 +78,7 @@ class ScenarioState():
                 a.policy = ValueThenRaisingPolicy(
                     a, actions[i_a])
             else:
-                a.policy = RaisingPolicy(
-                    a)
+                a.policy = RaisingPolicy(a)
             a.start = a.pos
             a.back_to_the_start()
         self.run()
