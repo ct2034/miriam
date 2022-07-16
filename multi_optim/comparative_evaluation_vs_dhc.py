@@ -24,6 +24,8 @@ from sim.decentralized.runner import run_a_scenario, to_agent_objects
 from multi_optim.multi_optim_run import ITERATOR_TYPE, RADIUS
 
 matplotlib.use('cairo')
+plt.style.use('bmh')
+
 logger = logging.getLogger(__name__)
 
 
@@ -514,23 +516,24 @@ def plot(figure_folder: str, results_name: str):
     lens_dhc_by_nodes = np.array(yaml_data['lens_dhc_by_nodes'])
 
     # plot
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     f, axs = plt.subplots(len(n_agents_s), 1, figsize=(9, len(n_agents_s)*6))
     assert isinstance(axs, np.ndarray)
     n_maps = 3
     width = 1./(n_maps+1)
-    xs = np.arange(float(n_eval))
     for i_na, n_agents in enumerate(n_agents_s):
-        axs[i_na].bar(xs, lens_our[i_na], width,
-                      color='r', alpha=.5, label='our')
+        xs = np.arange(float(n_eval))
+        axs[i_na].bar(xs, lens_our[i_na]/n_agents, width,
+                      color=colors[0], alpha=1, label='our')
         xs += width
-        axs[i_na].bar(xs, lens_dhc_by_edge_len[i_na], width,
-                      color='g', alpha=.5, label='dhc_by_edge_len')
+        axs[i_na].bar(xs, lens_dhc_by_edge_len[i_na]/n_agents, width,
+                      color=colors[1], alpha=1, label='dhc_by_edge_len')
         xs += width
-        axs[i_na].bar(xs, lens_dhc_by_nodes[i_na], width,
-                      color='b', alpha=.5, label='dhc_by_nodes')
-        axs[i_na].set_xticks(xs)
+        axs[i_na].bar(xs, lens_dhc_by_nodes[i_na]/n_agents, width,
+                      color=colors[3], alpha=1, label='dhc_by_nodes')
+        axs[i_na].set_xticks(np.arange(float(n_eval)))
         axs[i_na].set_xlabel('Trials')
-        axs[i_na].set_ylabel('Total Pathlength')
+        axs[i_na].set_ylabel('Average Pathlength')
         axs[i_na].set_title(f"{n_agents=}")
         axs[i_na].legend()
     f.savefig(f"{figure_folder}/{results_name}_lens.png")
@@ -550,5 +553,5 @@ if __name__ == '__main__':
     n_agents_s: List[int] = [2, 4, 6, 8]
     n_eval: int = 10
 
-    eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval)
+    # eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval)
     plot(figure_folder, results_name)
