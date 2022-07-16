@@ -20,6 +20,7 @@ from multi_optim.multi_optim_run import RADIUS, run_optimization
 from multi_optim.state import ITERATOR_TYPE
 
 matplotlib.use('cairo')
+plt.style.use('bmh')
 
 
 def run_optimization_sep(
@@ -57,6 +58,7 @@ def run_optimization_sep(
     #     save_folder)
 
     evaluate(map_fname, prefix, save_folder)
+    plot(save_folder, prefix)
 
 
 def run_separately(
@@ -182,7 +184,7 @@ def evaluate(map_fname, prefix, save_folder):
         roadmap_sep, flann_sep)
 
     # eval policy
-    n_eval = 10
+    n_eval = 20
     n_agents_s = list(range(2, max_n_agents + 1, 2))
     res_sep_s = {}
     res_joint_s = {}
@@ -224,33 +226,6 @@ def evaluate(map_fname, prefix, save_folder):
             except KeyError:
                 pass
 
-    # plot
-    fig, axs = plt.subplots(1, 4, figsize=(40, 10))
-    assert isinstance(axs, np.ndarray)
-    axs[0].set_xlim(-0.5, 1.5)
-    axs[0].plot(0, roadmap_joint_over_sep, "o", label="roadmap_joint_over_sep")
-    axs[0].plot(1, roadmap_sep_over_joint, "o", label="roadmap_sep_over_joint")
-    axs[0].legend()
-    axs[0].set_title("Lengths")
-    for i_m, metric in enumerate(["regret", "success", "accuracy"]):
-        data_list = []
-        key_list = []
-        for n_agents in n_agents_s:
-            for i_js, res in enumerate([res_joint_s, res_sep_s]):
-                data_list.append(res[metric][n_agents])
-                js = "j" if i_js == 0 else "s"
-                key_list.append(f"{js}{n_agents}")
-        ticks = np.arange(len(data_list))
-        axs[i_m + 1].violinplot(
-            data_list,
-            positions=ticks,
-            showmeans=True,
-            showmedians=True)
-        axs[i_m + 1].set_title(metric.capitalize())
-        axs[i_m + 1].set_xticks(ticks, key_list)
-    fig.tight_layout()
-    plt.savefig(f"{save_folder}/{prefix}_joint_vs_sep.png")
-
     # save results
     with open(f"{save_folder}/{prefix}_joint_vs_sep.yaml", "w") as f:
         yaml.dump({
@@ -259,6 +234,73 @@ def evaluate(map_fname, prefix, save_folder):
             "res_sep_s": res_sep_s,
             "res_joint_s": res_joint_s
         }, f)
+
+
+def plot(save_folder: str, prefix: str):
+    data = yaml.load(open(
+        f"{save_folder}/{prefix}_joint_vs_sep.yaml", "r"),
+        yaml.SafeLoader)
+    roadmap_joint_over_sep = data["roadmap_joint_over_sep"]
+    roadmap_sep_over_joint = data["roadmap_sep_over_joint"]
+    res_sep_s = data["res_sep_s"]
+    res_joint_s = data["res_joint_s"]
+
+    stats_static = yaml.load(
+        open(f"{save_folder}/{prefix}_stats.yaml", "r"), yaml.SafeLoader)["static"]
+    max_n_agents = stats_static["max_n_agents"]
+    n_agents_s = list(range(2, max_n_agents + 1, 2))
+
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']  # type: ignore
+    fig, axs = plt.subplots(1, 4, figsize=(40, 10))
+    assert isinstance(axs, np.ndarray)
+    axs[0].set_xlim(-0.5, 1.5)
+    axs[0].plot(0, roadmap_joint_over_sep, "o", label="roadmap_joint_over_sep")
+    axs[0].plot(1, roadmap_sep_over_joint, "o", label="roadmap_sep_over_joint")
+    axs[0].legend()
+    axs[0].set_title("Lengths")
+    for i_m, metric in enumerate(["regret", "success", "accuracy"]):
+        j_data_list = []
+        s_data_list = []
+        key_list = []
+        n_data = len(n_agents_s) * 2
+        for n_agents in n_agents_s:
+            j_data_list.append(res_joint_s[metric][n_agents])
+            key_list.append(f"j{n_agents}")
+            s_data_list.append(res_sep_s[metric][n_agents])
+            key_list.append(f"s{n_agents}")
+        ticks = np.arange(n_data)
+        j_positions = np.arange(0, n_data, 2)
+        s_positions = np.arange(1, n_data, 2)
+        j_parts = axs[i_m + 1].violinplot(
+            j_data_list,
+            positions=j_positions,
+            showmeans=True)
+        for pc in j_parts['bodies']:
+            pc.set_facecolor(colors[0])
+            pc.set_edgecolor(colors[0])
+            pc.set_alpha(.3)
+            pc.set_linewidths(0)
+        j_parts['cbars'].set_color(colors[0])
+        j_parts['cmeans'].set_color(colors[0])
+        j_parts['cmins'].set_color(colors[0])
+        j_parts['cmaxes'].set_color(colors[0])
+        s_parts = axs[i_m + 1].violinplot(
+            s_data_list,
+            positions=s_positions,
+            showmeans=True)
+        for pc in s_parts['bodies']:
+            pc.set_facecolor(colors[1])
+            pc.set_edgecolor(colors[1])
+            pc.set_alpha(.3)
+            pc.set_linewidths(0)
+        s_parts['cbars'].set_color(colors[1])
+        s_parts['cmeans'].set_color(colors[1])
+        s_parts['cmins'].set_color(colors[1])
+        s_parts['cmaxes'].set_color(colors[1])
+        axs[i_m + 1].set_title(metric.capitalize())
+        axs[i_m + 1].set_xticks(ticks, key_list)
+    fig.tight_layout()
+    plt.savefig(f"{save_folder}/{prefix}_joint_vs_sep.png")
 
 
 if __name__ == "__main__":
