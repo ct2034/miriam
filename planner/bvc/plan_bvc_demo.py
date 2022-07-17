@@ -11,8 +11,7 @@ if __name__ == "__main__":
     random.seed(0)
     rng = random.Random(0)
     map_fname: str = "roadmaps/odrm/odrm_eval/maps/plain.png"
-    map_img = read_map(map_fname)
-    map_img_np: np.ndarray = np.array(map_img)
+    map_img_np: np.ndarray = np.array(read_map(map_fname))
     assert len(map_img_np.shape) == 2, "Map image must be 2D."
     width: int = map_img_np.shape[1]
     print(f"{width=}")
@@ -21,8 +20,8 @@ if __name__ == "__main__":
     bin_size = width // desired_width
     map_img_np = map_img_np.reshape((desired_width, bin_size,
                                      desired_width, bin_size)).max(3).max(1)
-    # map_img = tuple([tuple(map_img_np[i, :].tolist())
-    #                  for i in range(map_img_np.shape[0])])
+    map_img = tuple([tuple(map_img_np[i, :].tolist())
+                     for i in range(map_img_np.shape[0])])
 
     n_agents_s = range(2, 9, 2)
     n_trials = 2
