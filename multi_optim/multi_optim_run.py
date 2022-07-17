@@ -581,6 +581,7 @@ if __name__ == "__main__":
     for prefix in [
         # "debug",
         # "tiny",
+        "tiny_plain",
         # "small",
         # "medium",
         # "large",
