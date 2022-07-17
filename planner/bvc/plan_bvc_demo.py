@@ -1,13 +1,18 @@
+import logging
 import random
 from typing import List
 
 import numpy as np
 from matplotlib import pyplot as plt
+from multi_optim.multi_optim_run import RADIUS
 from planner.bvc.plan_bvc import get_average_path_length, plan
 from roadmaps.var_odrm_torch.var_odrm_torch import read_map, sample_points
 from tools import ProgressBar
 
 if __name__ == "__main__":
+    logging.basicConfig()
+    logging.getLogger("planner.bvc.plan_bvc").setLevel(logging.DEBUG)
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
     random.seed(0)
     rng = random.Random(0)
     map_fname: str = "roadmaps/odrm/odrm_eval/maps/plain.png"
@@ -23,8 +28,8 @@ if __name__ == "__main__":
     map_img = tuple([tuple(map_img_np[i, :].tolist())
                      for i in range(map_img_np.shape[0])])
 
-    n_agents_s = range(2, 9, 2)
-    n_trials = 2
+    n_agents_s = range(2, 10, 1)
+    n_trials = 10
 
     path_lengths = [list() for _ in range(len(n_agents_s))]
     success = [0, ] * len(n_agents_s)
@@ -36,7 +41,7 @@ if __name__ == "__main__":
         for i_t in range(n_trials):
             starts = sample_points(n_agents, map_img, rng).tolist()
             goals = sample_points(n_agents, map_img, rng).tolist()
-            paths = plan(map_img, starts, goals, radius=0.001)
+            paths = plan(map_img, starts, goals, radius=RADIUS)
             if isinstance(paths, np.ndarray):
                 success[i_na] += 1
                 path_lengths[i_na].append(get_average_path_length(paths))

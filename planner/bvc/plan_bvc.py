@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import subprocess
 from functools import reduce
@@ -28,6 +29,8 @@ STR_OBSTACLES = "obstacles"
 STR_RESOLUTION = "resolution"
 STR_GOAL_REACH_DISTANCE = "goal_reach_distance"
 
+logger = logging.getLogger(__name__)
+
 
 def get_scenario_folder(hash: str = ""):
     """
@@ -54,7 +57,7 @@ def return_succesful_path(paths_s: List[npt.NDArray[np.float64]],
                 paths[i_a, -1, :] - goals[i_a])),
             range(n_agents)
         ))
-        if max(dists_from_goals) <= goal_reach_distance * 2:
+        if max(dists_from_goals) <= goal_reach_distance * 10:
             return paths
     return INVALID  # type: ignore # (because is -1)
 
@@ -137,11 +140,11 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
             "./../../mr-nav-stack/lib/bvc/build/examples/bvc_2d_sim --config 2d_config.json",
             timeout=timeout_s,
             cwd=scenario_folder)
-        print(f"{retcode=}")
-        print(f"{stdout=}")
-        print(f"{stderr=}")
+        logger.debug(f"{retcode=}")
+        logger.debug(f"{stdout=}")
+        logger.debug(f"{stderr=}")
     except subprocess.TimeoutExpired:
-        print(f"Timeout ({timeout_s}s)")
+        logger.warn(f"Timeout ({timeout_s}s)")
         cleanup(scenario_folder)
         return INVALID
 
@@ -153,7 +156,6 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
     # Read the paths.
     paths_s = []
     file: Optional[str] = None
-    # TODO: check all files for start and goal
     for file in os.listdir(scenario_folder):
         if file.startswith("vis") and file.endswith(".json"):
             try:
@@ -168,7 +170,7 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
                 paths_np = np.array(paths)
                 paths_s.append(paths_np)
             except KeyError:
-                print(f"KeyError: {file}")
+                logger.warn(f"KeyError: {file}")
 
     if len(paths_s) == 0:
         cleanup(scenario_folder)
