@@ -579,11 +579,12 @@ if __name__ == "__main__":
     pool = tmp.Pool(processes=n_processes)
 
     for prefix in [
-        "debug",
-        "tiny",
-        "small",
-        "medium",
-        "large"
+        # "debug",
+        # "tiny",
+        # "small",
+        # "medium",
+        # "large",
+        "large_plain",
     ]:
         if prefix == "debug":
             level = logging.DEBUG
