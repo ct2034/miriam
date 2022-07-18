@@ -78,16 +78,29 @@ def cleanup(scenario_folder):
         os.system(f"rm -rf {scenario_folder}")
 
 
-def plan(map_img: MAP_IMG, starts, goals, radius: float):
+def plan(map_img_big: MAP_IMG, starts, goals, radius: float):
     """
     Plan a path from start to goal.
     """
+    # Scale down the map
+    map_img_np: np.ndarray = np.array(map_img_big)
+    assert len(map_img_np.shape) == 2, "Map image must be 2D."
+    width: int = map_img_np.shape[1]
+    print(f"{width=}")
+    desired_width = width // 32
+    print(f"{desired_width=}")
+    bin_size = width // desired_width
+    map_img_np = map_img_np.reshape((desired_width, bin_size,
+                                     desired_width, bin_size)).max(3).max(1)
+    map_img_sml = tuple([tuple(map_img_np[i, :].tolist())
+                         for i in range(map_img_np.shape[0])])
+
     # How many agents
     n_agents = len(starts)
     assert len(goals) == n_agents
 
     # Create the scenario folder.
-    hash: str = hasher([map_img, starts, goals])
+    hash: str = hasher([map_img_sml, starts, goals])
     scenario_folder: str = get_scenario_folder(hash)
     robots_folder: str = os.path.join(scenario_folder, STR_ROBOTS)
     if not os.path.exists(robots_folder):
@@ -122,13 +135,13 @@ def plan(map_img: MAP_IMG, starts, goals, radius: float):
     content[STR_ROBOTS] = f"/{STR_ROBOTS}"
     goal_reach_distance = content[STR_GOAL_REACH_DISTANCE]
     # Obstacles
-    width = len(map_img)
+    width = len(map_img_sml)
     content[STR_RESOLUTION] = 1./width
     content[STR_OBSTACLES] = []
     for i_x in range(width):
-        assert len(map_img[i_x]) == width
+        assert len(map_img_sml[i_x]) == width
         for i_y in range(width):
-            if map_img[i_x][i_y] != 255:
+            if map_img_sml[i_x][i_y] != 255:
                 content[STR_OBSTACLES].append([i_y, i_x])
     with open(os.path.join(scenario_folder, "2d_config.json"), 'w') as f:
         json.dump(content, f, indent=2)
