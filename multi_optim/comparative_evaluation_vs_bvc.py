@@ -198,13 +198,13 @@ if __name__ == '__main__':
 
     # parameters
     logger.setLevel(logging.INFO)
-    results_name: str = 'large_plain'
+    results_name: str = 'large'
     base_folder: str = 'multi_optim/results'
     figure_folder: str = f'{base_folder}/eval_vs_bvc'
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder)
-    n_agents_s: List[int] = [2, 4]  # , 6, 8]
-    n_eval: int = 2  # 10
+    n_agents_s: List[int] = [2, 4, 6, 8]
+    n_eval: int = 10
 
     eval(logger, results_name, base_folder,
          figure_folder, n_agents_s, n_eval)
