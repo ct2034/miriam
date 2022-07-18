@@ -41,10 +41,11 @@ def get_total_len(starts_coords, goals_coords, paths_bvc):
         prev_pos = None  # type: Optional[np.ndarray]
         assert isinstance(path, np.ndarray)
         for pos in path.tolist():
+            assert len(pos) == 2, "Position must be 2D."
             if prev_pos is not None:
                 total_lenght += float(np.linalg.norm(
-                    pos -
-                    prev_pos))
+                    np.array(pos) -
+                    np.array(prev_pos)))
             prev_pos = pos
             # after goal
         total_lenght += float(np.linalg.norm(
@@ -149,7 +150,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
             # eval bvc
             res_bvc = plan_bvc(map_img, starts_coords.tolist(),
                                goals_coords.tolist(), radius=RADIUS)
-            if res_bvc != INVALID:
+            if isinstance(res_bvc, np.ndarray):  # not invalid
                 lens_bvc[i_na][i_e] = get_total_len(
                     starts_coords, goals_coords, res_bvc)
 
