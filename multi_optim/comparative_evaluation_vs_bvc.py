@@ -190,6 +190,59 @@ def plot(figure_folder: str, results_name: str):
     f.savefig(f"{figure_folder}/{results_name}_lens.png")
     plt.close(f)
 
+    # plot stats
+    n_samples = np.shape(lens_our)[1]
+    f, axs = plt.subplots(1, 2, figsize=(8, 4.5))
+    assert isinstance(axs, np.ndarray)
+    both_successfull = np.logical_and(lens_our != 0, lens_bvc != 0)
+    # 0:our, 1:bvc
+    data_success = [[0 for _ in range(len(n_agents_s))] for _ in range(2)]
+    data_lenghts = [[list() for _ in range(len(n_agents_s))] for _ in range(2)]
+    for i_na, n_agents in enumerate(n_agents_s):
+        data_success[0][i_na] = np.count_nonzero(
+            lens_our[i_na, :] != 0) / n_samples
+        data_success[1][i_na] = np.count_nonzero(
+            lens_bvc[i_na, :] != 0) / n_samples
+        for i_e in range(n_samples):
+            if both_successfull[i_na, i_e]:
+                data_lenghts[0][i_na].append(lens_our[i_na, i_e])
+                data_lenghts[1][i_na].append(lens_bvc[i_na, i_e])
+    lenghts_min_max = [
+        min(min([min(x) for x in data_lenghts[0] if len(x) > 0]),
+            min([min(x) for x in data_lenghts[1] if len(x) > 0])),
+        max(max([max(x) for x in data_lenghts[0] if len(x) > 0]),
+            max([max(x) for x in data_lenghts[1] if len(x) > 0]))
+    ]
+    for i_na in range(len(n_agents_s)):
+        for i_a in range(2):
+            if(len(data_lenghts[i_a][i_na]) == 0):
+                data_lenghts[i_a][i_na].append(99)
+
+    width = .8
+    axs[0].violinplot(data_lenghts[0], np.array(n_agents_s)-width/2,
+                      widths=width)
+    axs[0].violinplot(data_lenghts[1], np.array(n_agents_s)+width/2,
+                      widths=width)
+    axs[0].plot(0, 99, color=colors[0], label='our')  # for legend
+    axs[0].plot(0, 99, color=colors[1], label='bvc')  # for legend
+    axs[0].set_ylim(lenghts_min_max[0]-.1, lenghts_min_max[1]+.1)
+    axs[0].set_xticks(n_agents_s)
+    axs[0].set_xlabel('Number of Agents')
+    axs[0].set_ylabel('Average Pathlength')
+    axs[0].legend()
+    axs[1].bar(np.array(n_agents_s)-width/2,
+               data_success[0], width=width, label='our')
+    axs[1].bar(np.array(n_agents_s)+width/2,
+               data_success[1], width=width, label='BVC')
+    axs[1].set_xticks(n_agents_s)
+    axs[1].set_xlabel('Number of Agents')
+    axs[1].set_ylabel('Success Rate')
+    axs[1].legend()
+    f.tight_layout()
+    f.savefig(f"{figure_folder}/{results_name}_lens_stats.png")
+    plt.close(f)
+    plt.close(f)
+
 
 if __name__ == '__main__':
     logging.basicConfig()
@@ -206,6 +259,6 @@ if __name__ == '__main__':
     n_agents_s: List[int] = [2, 4, 6, 8]
     n_eval: int = 10
 
-    eval(logger, results_name, base_folder,
-         figure_folder, n_agents_s, n_eval)
+    # eval(logger, results_name, base_folder,
+    #      figure_folder, n_agents_s, n_eval)
     plot(figure_folder, results_name)
