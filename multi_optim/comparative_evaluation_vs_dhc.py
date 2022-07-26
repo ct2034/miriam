@@ -630,7 +630,7 @@ def plot(figure_folder: str, results_name: str):
     axs[1].legend(loc='lower right')
     # done
     f.tight_layout()
-    f.savefig(f"{figure_folder}/{results_name}_lens_stats.png")
+    f.savefig(f"{figure_folder}/{results_name}_lens_stats.pdf")
     plt.close(f)
 
 
