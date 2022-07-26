@@ -524,9 +524,11 @@ def plot(figure_folder: str, results_name: str):
         open(f"{figure_folder}/{results_name}_lens.yaml"),
         Loader=yaml.SafeLoader)
     n_agents_s = yaml_data['n_agents_s']
-    lens_our = np.array(yaml_data['lens_our'])
-    lens_dhc_by_edge_len = np.array(yaml_data['lens_dhc_by_edge_len'])
-    lens_dhc_by_nodes = np.array(yaml_data['lens_dhc_by_nodes'])
+    lens_our = np.array(yaml_data['lens_our'], dtype=np.float64)
+    lens_dhc_by_edge_len = np.array(
+        yaml_data['lens_dhc_by_edge_len'], dtype=np.float64)
+    lens_dhc_by_nodes = np.array(
+        yaml_data['lens_dhc_by_nodes'], dtype=np.float64)
 
     # plot
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']  # type: ignore
@@ -550,6 +552,85 @@ def plot(figure_folder: str, results_name: str):
         axs[i_na].set_title(f"{n_agents=}")
         axs[i_na].legend()
     f.savefig(f"{figure_folder}/{results_name}_lens.png")
+    plt.close(f)
+
+    # plot stats
+    n_samples = np.shape(lens_our)[1]
+    f, axs = plt.subplots(1, 2, figsize=(8, 4.5))
+    assert isinstance(axs, np.ndarray)
+    success_our = np.logical_not(np.isnan(lens_our))
+    success_dhc_by_edge_len = np.logical_not(np.isnan(lens_dhc_by_edge_len))
+    success_dhc_by_nodes = np.logical_not(np.isnan(lens_dhc_by_nodes))
+    diff_vs_dhc_by_edge_len = lens_dhc_by_edge_len - lens_our
+    diff_vs_dhc_by_nodes = lens_dhc_by_nodes - lens_our
+
+    # for i_na, n_agents in enumerate(n_agents_s):
+    #     data_success[0][i_na] = np.count_nonzero(
+    #         lens_our[i_na, :] != 0) / n_samples
+    #     data_success[1][i_na] = np.count_nonzero(
+    #         lens_bvc[i_na, :] != 0) / n_samples
+    #     for i_e in range(n_samples):
+    #         if both_successfull[i_na, i_e]:
+    #             data_lenghts[0][i_na].append(lens_our[i_na, i_e])
+    #             data_lenghts[1][i_na].append(lens_bvc[i_na, i_e])
+    diffs_min_max = [
+        min(min([min(x) for x in diff_vs_dhc_by_edge_len if len(x) > 0]),
+            min([min(x) for x in diff_vs_dhc_by_nodes if len(x) > 0])),
+        max(max([max(x) for x in diff_vs_dhc_by_edge_len if len(x) > 0]),
+            max([max(x) for x in diff_vs_dhc_by_nodes if len(x) > 0]))
+    ]
+    diff_vs_dhc_by_edge_len_list = [list() for _ in range(len(n_agents_s))]
+    diff_vs_dhc_by_nodes_list = [list() for _ in range(len(n_agents_s))]
+    for i_na, n_agents in enumerate(n_agents_s):
+        for i_e in range(n_samples):
+            if success_our[i_na, i_e] and success_dhc_by_edge_len[i_na, i_e]:
+                diff_vs_dhc_by_edge_len_list[i_na].append(
+                    diff_vs_dhc_by_edge_len[i_na, i_e])
+            if success_our[i_na, i_e] and success_dhc_by_nodes[i_na, i_e]:
+                diff_vs_dhc_by_nodes_list[i_na].append(
+                    diff_vs_dhc_by_nodes[i_na, i_e])
+
+    width = .8
+    # lengths
+    axs[0].violinplot(diff_vs_dhc_by_edge_len_list, np.array(n_agents_s)-width/2,
+                      widths=width)
+    axs[0].violinplot(diff_vs_dhc_by_nodes_list, np.array(n_agents_s)+width/2,
+                      widths=width)
+    axs[0].plot(0, 99, color=colors[0], label='dhc_by_edge_len')  # for legend
+    axs[0].plot(0, 99, color=colors[1], label='dhc_by_nodes')  # for legend
+    axs[0].set_xlim(1, max(n_agents_s)+1)
+    axs[0].set_ylim(diffs_min_max[0]-.1, diffs_min_max[1]+.1)
+    axs[0].set_xticks(n_agents_s)
+    axs[0].set_xlabel('Number of Agents')
+    axs[0].set_ylabel('Average Pathlength Difference DHC - Our')
+    axs[0].legend()
+    # success
+    width = 2. / 3.5
+    n_agents_s = np.array(n_agents_s)
+    axs[1].bar(
+        n_agents_s-width,
+        [np.count_nonzero(x)/n_samples for x in success_dhc_by_edge_len],
+        width=width, color=colors[0])
+    axs[1].bar(
+        n_agents_s,
+        [np.count_nonzero(x)/n_samples for x in success_dhc_by_nodes],
+        width=width, color=colors[1])
+    axs[1].bar(
+        n_agents_s+width,
+        [np.count_nonzero(x)/n_samples for x in success_our],
+        width=width, color=colors[2])
+    axs[1].plot(0, 99, color=colors[0], label='dhc_by_edge_len')  # for legend
+    axs[1].plot(0, 99, color=colors[1], label='dhc_by_nodes')  # for legend
+    axs[1].plot(0, 99, color=colors[2], label='our')  # for legend
+    axs[1].set_xlim(1, max(n_agents_s)+1)
+    axs[1].set_ylim(0., 1.04)
+    axs[1].set_xticks(n_agents_s)
+    axs[1].set_xlabel('Number of Agents')
+    axs[1].set_ylabel('Success Rate')
+    axs[1].legend(loc='lower right')
+    # done
+    f.tight_layout()
+    f.savefig(f"{figure_folder}/{results_name}_lens_stats.png")
     plt.close(f)
 
 

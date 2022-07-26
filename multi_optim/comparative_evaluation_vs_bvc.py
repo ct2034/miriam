@@ -225,6 +225,7 @@ def plot(figure_folder: str, results_name: str):
                       widths=width)
     axs[0].plot(0, 99, color=colors[0], label='our')  # for legend
     axs[0].plot(0, 99, color=colors[1], label='bvc')  # for legend
+    axs[0].set_xlim(1, max(n_agents_s)+1)
     axs[0].set_ylim(lenghts_min_max[0]-.1, lenghts_min_max[1]+.1)
     axs[0].set_xticks(n_agents_s)
     axs[0].set_xlabel('Number of Agents')
@@ -234,10 +235,11 @@ def plot(figure_folder: str, results_name: str):
                data_success[0], width=width, label='our')
     axs[1].bar(np.array(n_agents_s)+width/2,
                data_success[1], width=width, label='BVC')
+    axs[1].set_xlim(1, max(n_agents_s)+1)
     axs[1].set_xticks(n_agents_s)
     axs[1].set_xlabel('Number of Agents')
     axs[1].set_ylabel('Success Rate')
-    axs[1].legend()
+    axs[1].legend(loc='lower right')
     f.tight_layout()
     f.savefig(f"{figure_folder}/{results_name}_lens_stats.png")
     plt.close(f)
