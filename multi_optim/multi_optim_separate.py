@@ -40,22 +40,22 @@ def run_optimization_sep(
         pool,
         save_folder: str = "multi_optim/results"):
 
-    # run_separately(
-    #     n_nodes,
-    #     n_runs_pose,
-    #     n_runs_policy,
-    #     n_episodes_per_run_policy,
-    #     n_epochs_per_run_policy,
-    #     batch_size_policy,
-    #     stats_and_eval_every,
-    #     lr_pos,
-    #     lr_policy,
-    #     max_n_agents,
-    #     map_fname,
-    #     seed,
-    #     prefix,
-    #     pool,
-    #     save_folder)
+    run_separately(
+        n_nodes,
+        n_runs_pose,
+        n_runs_policy,
+        n_episodes_per_run_policy,
+        n_epochs_per_run_policy,
+        batch_size_policy,
+        stats_and_eval_every,
+        lr_pos,
+        lr_policy,
+        max_n_agents,
+        map_fname,
+        seed,
+        prefix,
+        pool,
+        save_folder)
 
     evaluate(map_fname, prefix, save_folder)
     plot(save_folder, prefix)
@@ -97,7 +97,7 @@ def run_separately(
         pool_in=pool)
 
     # 2. policy
-    prefix_sep_policy = f"{prefix}_sep_policy"
+    prefix_sep_policy = f"{prefix}_sep_no_rm_policy"  # not use old roadmap
     run_optimization(
         n_nodes=n_nodes,
         n_runs_pose=0,
@@ -111,7 +111,7 @@ def run_separately(
         max_n_agents=max_n_agents,
         map_fname=map_fname,
         seed=seed,
-        load_roadmap=f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle",
+        # load_roadmap=f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle",
         prefix=prefix_sep_policy,
         save_folder=save_folder,
         pool_in=pool)
@@ -121,7 +121,7 @@ def run_separately(
 
 def evaluate(map_fname, prefix, save_folder):
     prefix_sep_roadmap = f"{prefix}_sep_roadmap"
-    prefix_sep_policy = f"{prefix}_sep_policy"
+    prefix_sep_policy = f"{prefix}_sep_no_rm_policy"
     # load final roadmap
     roadmap_sep = nx.read_gpickle(
         f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle")
