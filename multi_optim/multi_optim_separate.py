@@ -130,7 +130,7 @@ def plot(save_folder: str, prefix: str):
         yaml.SafeLoader))
     titles = ["both", "only roadmap", "only policy"]
     assert len(stats) == len(titles)
-    n_agents = 4  # todo
+    n_agents = stats[0]["static"]["max_n_agents"]
 
     metrics = ["path_length", "policy_regret", "overall_success"]
 
