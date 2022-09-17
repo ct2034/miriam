@@ -116,8 +116,6 @@ def run_separately(
         save_folder=save_folder,
         pool_in=pool)
 
-    pool.close()
-
 
 def evaluate(map_fname, prefix, save_folder):
     prefix_sep_roadmap = f"{prefix}_sep_roadmap"
