@@ -1,6 +1,7 @@
 import logging
 import sys
 from itertools import product
+from typing import List
 
 import matplotlib
 import networkx as nx
@@ -38,7 +39,7 @@ def run_optimization_sep(
         seed: int,
         prefix: str,
         pool,
-        save_folder: str = "multi_optim/results"):
+        save_folder: str):
 
     run_separately(
         n_nodes,
@@ -56,9 +57,6 @@ def run_optimization_sep(
         prefix,
         pool,
         save_folder)
-
-    # plot(save_folder, prefix)
-
 
 def run_separately(
         n_nodes,
@@ -116,63 +114,111 @@ def run_separately(
         pool_in=pool)
 
 
-def plot(save_folder: str, prefix: str):
-    # we need three files:
-    stats = []
-    stats.append(yaml.load(
-        open(f"{save_folder}/{prefix}_stats.yaml", "r"),
-        yaml.SafeLoader))
-    stats.append(yaml.load(
-        open(f"{save_folder}/{prefix}_sep_roadmap_stats.yaml", "r"),
-        yaml.SafeLoader))
-    stats.append(yaml.load(
-        open(f"{save_folder}/{prefix}_sep_no_rm_policy_stats.yaml", "r"),
-        yaml.SafeLoader))
+def plot(save_folder: str, prefix_s: List[str]):
     titles = ["both", "only roadmap", "only policy"]
-    assert len(stats) == len(titles)
-    n_agents = stats[0]["static"]["max_n_agents"]
-
     metrics = ["path_length", "policy_regret", "overall_success"]
+    width = .8
+
+    n_nodes_per_prefix = {}
+    n_agents_per_prefix = {}
+    stats_per_prefix = {}
+    for prefix in prefix_s:
+        # we need three files:
+        stats_per_prefix[prefix] = []
+        stats_per_prefix[prefix].append(yaml.load(
+            open(f"{save_folder}/{prefix}_stats.yaml", "r"),
+            yaml.SafeLoader))
+        stats_per_prefix[prefix].append(yaml.load(
+            open(f"{save_folder}/{prefix}_sep_roadmap_stats.yaml", "r"),
+            yaml.SafeLoader))
+        stats_per_prefix[prefix].append(yaml.load(
+            open(f"{save_folder}/{prefix}_sep_no_rm_policy_stats.yaml", "r"),
+            yaml.SafeLoader))
+
+        n_nodes_per_prefix[prefix] = stats_per_prefix[prefix][0]['static']['n_nodes']
+
+        assert len(stats_per_prefix[prefix]) == len(titles)
+
+        n_agents: int = sys.maxsize
+        for s in stats_per_prefix[prefix]:
+            available_n_agents_policy_regret = list(filter(
+                lambda x: x.startswith("policy_regret_"), s.keys()))
+            available_n_agents_general_success = list(filter(
+                lambda x: x.startswith("general_success_"), s.keys()))
+            available_n_agents_policy_regret = map(int, map(
+                lambda x: x.split("_")[-1], available_n_agents_policy_regret))
+            available_n_agents_general_success = map(int, map(
+                lambda x: x.split("_")[-1], available_n_agents_general_success))
+            n_agents = min(
+                n_agents,
+                max(available_n_agents_policy_regret),
+                max(available_n_agents_general_success))
+        n_agents_per_prefix[prefix] = n_agents
+
+    prefixes_sorted_by_n_nodes = sorted(
+        prefix_s, key=lambda x: n_nodes_per_prefix[x])
 
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']  # type: ignore
     fig, axs = plt.subplots(1, len(metrics), figsize=(8, 4.5))
     assert isinstance(axs, np.ndarray)
-    for i, metric in enumerate(metrics):
-        if metric == "path_length":
-            key = "roadmap_test_length"
-        elif metric == "policy_regret":
-            key = f"policy_regret_{n_agents}"
-        elif metric == "overall_success":
-            key = f"general_success_{n_agents}"
-        for j, stat in enumerate(stats):
-            axs[i].plot(stat[key]["t"], stat[key]["x"],
-                        label=titles[j], color=colors[j],
-                        alpha=0.5)
+    for i_m, metric in enumerate(metrics):
+        tick_labels = []
+        for i_p, prefix in enumerate(prefixes_sorted_by_n_nodes):
+            n_nodes = n_nodes_per_prefix[prefix]
+            tick_labels.append(str(n_nodes))
+            n_agents = n_agents_per_prefix[prefix]
+            if metric == "path_length":
+                key = "roadmap_test_length"
+            elif metric == "policy_regret":
+                key = f"policy_regret_{n_agents}"
+            elif metric == "overall_success":
+                key = f"general_success_{n_agents}"
+            assert key is not None
+            for i_s, stat in enumerate(stats_per_prefix[prefix]):
+                if i_p == 0:
+                    title = titles[i_s]
+                else:
+                    title = None
+                axs[i_m].bar(
+                    i_p + (i_s-1) * width / len(prefix_s),
+                    stat[key]['x'][-1],
+                    width=width / len(prefix_s),
+                    label=title,
+                    color=colors[i_s])
         pretty_name = metric.replace("_", " ").capitalize()
-        axs[i].set_title(pretty_name)
-        axs[i].set_xlabel("iterations")
-        axs[i].set_ylabel(pretty_name)
-        axs[i].legend()
+        axs[i_m].set_title(pretty_name)
+        axs[i_m].set_xlabel("n_nodes")
+        axs[i_m].set_xticks(range(len(prefix_s)))
+        axs[i_m].set_xticklabels(tick_labels)
+        axs[i_m].set_ylabel(pretty_name)
+
+    axs[0].legend(loc='lower left')
 
     fig.tight_layout()
-    plt.savefig(f"{save_folder}/{prefix}_sep.png")
+    plt.savefig(f"{save_folder}/all_sep.png")
 
 
 if __name__ == "__main__":
     # Multiprocessing
     tmp.set_start_method('spawn')
     pool = tmp.Pool(processes=min(tmp.cpu_count(), 16))
+    save_folder: str = "multi_optim/results"
 
-    for prefix in [
-        "debug",
-       # "tiny",
-       # "small",
-       # "medium",
+    prefix_s = [
+        # "debug",
+        "tiny",
+        "small",
+        "medium",
         "large"
-    ]:
-        run_optimization_sep(
-            **configs[prefix],
-            pool=pool)
+    ]
+
+    # for prefix in prefix_s:
+    #     run_optimization_sep(
+    #         **configs[prefix],
+    #         pool=pool,
+    #         save_folder=save_folder)
+
+    plot(save_folder, prefix_s)
 
     pool.close()
     pool.terminate()
