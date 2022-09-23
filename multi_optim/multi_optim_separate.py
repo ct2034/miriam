@@ -57,7 +57,7 @@ def run_optimization_sep(
         pool,
         save_folder)
 
-    plot(save_folder, prefix)
+    # plot(save_folder, prefix)
 
 
 def run_separately(
@@ -165,9 +165,9 @@ if __name__ == "__main__":
 
     for prefix in [
         "debug",
-        "tiny",
-        "small",
-        "medium",
+       # "tiny",
+       # "small",
+       # "medium",
         "large"
     ]:
         run_optimization_sep(
