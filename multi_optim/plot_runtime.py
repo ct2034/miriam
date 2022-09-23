@@ -77,8 +77,8 @@ if __name__ == "__main__":
                         2, f"{this_runtime:.1f}s",
                         fontsize='small', va='center')
                 bottom += this_runtime
-    ax.set_xlabel("Number of nodes")
-    ax.set_ylabel("Runtime per iteration [s]")
+    ax.set_xlabel("Number of Nodes")
+    ax.set_ylabel("Runtime per Iteration [s]")
     ax.set_xticks(range(len(n_nodes_s)))
     ax.set_xticklabels(list(map(str, n_nodes_s)))
     ax.legend()

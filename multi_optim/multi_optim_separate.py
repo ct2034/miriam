@@ -58,6 +58,7 @@ def run_optimization_sep(
         pool,
         save_folder)
 
+
 def run_separately(
         n_nodes,
         n_runs_pose,
@@ -116,7 +117,7 @@ def run_separately(
 
 def plot(save_folder: str, prefix_s: List[str]):
     titles = ["both", "only roadmap", "only policy"]
-    metrics = ["path_length", "policy_regret", "overall_success"]
+    metrics = ["path_length", "policy_regret"]  # , "overall_success"]
     width = .8
 
     n_nodes_per_prefix = {}
@@ -165,10 +166,12 @@ def plot(save_folder: str, prefix_s: List[str]):
         tick_labels = []
         for i_p, prefix in enumerate(prefixes_sorted_by_n_nodes):
             n_nodes = n_nodes_per_prefix[prefix]
-            tick_labels.append(str(n_nodes))
+            tick_labels.append(f"{n_nodes} ({n_agents_per_prefix[prefix]})")
             n_agents = n_agents_per_prefix[prefix]
+            # less agents here for less noise in data
+            # less_n_agents = n_agents - 2 if n_agents > 2 else n_agents
             if metric == "path_length":
-                key = "roadmap_test_length"
+                key = f"general_length_{n_agents}"
             elif metric == "policy_regret":
                 key = f"policy_regret_{n_agents}"
             elif metric == "overall_success":
@@ -181,13 +184,14 @@ def plot(save_folder: str, prefix_s: List[str]):
                     title = None
                 axs[i_m].bar(
                     i_p + (i_s-1) * width / len(prefix_s),
-                    stat[key]['x'][-1],
+                    abs(stat[key]['x'][-1]),
                     width=width / len(prefix_s),
                     label=title,
                     color=colors[i_s])
-        pretty_name = metric.replace("_", " ").capitalize()
+        pretty_name = " ".join(
+            map(lambda x: x.capitalize(), metric.split("_")))
         axs[i_m].set_title(pretty_name)
-        axs[i_m].set_xlabel("n_nodes")
+        axs[i_m].set_xlabel("Number of Nodes (Agents)")
         axs[i_m].set_xticks(range(len(prefix_s)))
         axs[i_m].set_xticklabels(tick_labels)
         axs[i_m].set_ylabel(pretty_name)
@@ -195,7 +199,7 @@ def plot(save_folder: str, prefix_s: List[str]):
     axs[0].legend(loc='lower left')
 
     fig.tight_layout()
-    plt.savefig(f"{save_folder}/all_sep.png")
+    plt.savefig(f"{save_folder}/ablation.pdf")
 
 
 if __name__ == "__main__":
@@ -209,7 +213,7 @@ if __name__ == "__main__":
         "tiny",
         "small",
         "medium",
-        "large"
+        # "large"
     ]
 
     # for prefix in prefix_s:
