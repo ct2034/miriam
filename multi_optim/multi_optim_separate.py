@@ -183,9 +183,9 @@ def plot(save_folder: str, prefix_s: List[str]):
                 else:
                     title = None
                 axs[i_m].bar(
-                    i_p + (i_s-1) * width / len(prefix_s),
+                    i_p + (i_s-1) * width / len(titles),
                     abs(stat[key]['x'][-1]),
-                    width=width / len(prefix_s),
+                    width=width / len(titles),
                     label=title,
                     color=colors[i_s])
         pretty_name = " ".join(
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         "tiny",
         "small",
         "medium",
-        # "large"
+        "large"
     ]
 
     # for prefix in prefix_s:
