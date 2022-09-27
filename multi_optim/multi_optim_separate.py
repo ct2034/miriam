@@ -191,7 +191,7 @@ def plot(save_folder: str, prefix_s: List[str]):
         pretty_name = " ".join(
             map(lambda x: x.capitalize(), metric.split("_")))
         axs[i_m].set_title(pretty_name)
-        axs[i_m].set_xlabel("Number of Nodes (Agents)")
+        axs[i_m].set_xlabel("Number of Vertices (Agents)")
         axs[i_m].set_xticks(range(len(prefix_s)))
         axs[i_m].set_xticklabels(tick_labels)
         axs[i_m].set_ylabel(pretty_name)

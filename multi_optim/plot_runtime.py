@@ -1,10 +1,12 @@
 import os
 from typing import Dict
 
+import latextable
 import matplotlib
 import numpy as np
 import yaml
 from matplotlib import pyplot as plt
+from texttable import Texttable
 
 matplotlib.use('cairo')
 plt.style.use('bmh')
@@ -77,10 +79,31 @@ if __name__ == "__main__":
                         2, f"{this_runtime:.1f}s",
                         fontsize='small', va='center')
                 bottom += this_runtime
-    ax.set_xlabel("Number of Nodes")
+    ax.set_xlabel("Number of Vertices")
     ax.set_ylabel("Runtime per Iteration [s]")
     ax.set_xticks(range(len(n_nodes_s)))
     ax.set_xticklabels(list(map(str, n_nodes_s)))
     ax.legend()
     f.tight_layout()
     f.savefig(os.path.join(folder, "runtime.pdf"))
+
+    # make latex table
+    table = Texttable()
+    table.set_deco(Texttable.HEADER)
+    table.header(["Number of Vertices", "At iteration"] +
+                 runtime_keys + ["Total"])
+    table.set_cols_dtype(['t', 't', 't', 't', 't', 't'])
+    table.set_cols_align(['c', 'c', 'r', 'r', 'r', 'r'])
+    for n_nodes in n_nodes_s:
+        this_data = data[n_nodes]
+        for t in runtime_ts:
+            row = [n_nodes, t]
+            total = 0
+            for runtime_key in runtime_keys:
+                value = this_data[runtime_key]['x'][t]
+                row.append(f"{value:.1f}s")
+                total += value
+            row.append(f"{total:.1f}s")
+            table.add_row(row)
+    print(latextable.draw_latex(
+        table, caption="Runtime per Iteration", label="tab:runtime"))

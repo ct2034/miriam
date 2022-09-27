@@ -545,7 +545,7 @@ def plot(figure_folder: str, results_name: str):
                       color=colors[1], alpha=1, label='dhc_by_edge_len')
         xs += width
         axs[i_na].bar(xs, lens_dhc_by_nodes[i_na]/n_agents, width,
-                      color=colors[3], alpha=1, label='dhc_by_nodes')
+                      color=colors[2], alpha=1, label='dhc_by_nodes')
         axs[i_na].set_xticks(np.arange(float(n_eval)))
         axs[i_na].set_xlabel('Trials')
         axs[i_na].set_ylabel('Average Pathlength')
@@ -596,8 +596,10 @@ def plot(figure_folder: str, results_name: str):
                       widths=width)
     axs[0].violinplot(diff_vs_dhc_by_nodes_list, np.array(n_agents_s)+width/2,
                       widths=width)
-    axs[0].plot(0, 99, color=colors[0], label='dhc_by_edge_len')  # for legend
-    axs[0].plot(0, 99, color=colors[1], label='dhc_by_nodes')  # for legend
+    axs[0].plot(0, 99, color=colors[1],
+                label='DHC (by edge length)')  # for legend
+    axs[0].plot(0, 99, color=colors[2],
+                label='DHC (by nr of vertices)')  # for legend
     axs[0].set_xlim(1, max(n_agents_s)+1)
     axs[0].set_ylim(diffs_min_max[0]-.1, diffs_min_max[1]+.1)
     axs[0].set_xticks(n_agents_s)
@@ -609,19 +611,18 @@ def plot(figure_folder: str, results_name: str):
     n_agents_s = np.array(n_agents_s)
     axs[1].bar(
         n_agents_s-width,
-        [np.count_nonzero(x)/n_samples for x in success_dhc_by_edge_len],
-        width=width, color=colors[0])
+        [np.count_nonzero(x)/n_samples for x in success_our],
+        width=width, color=colors[0], label='our')
     axs[1].bar(
         n_agents_s,
-        [np.count_nonzero(x)/n_samples for x in success_dhc_by_nodes],
-        width=width, color=colors[1])
+        [np.count_nonzero(x)/n_samples for x in success_dhc_by_edge_len],
+        width=width, color=colors[1],
+                label='DHC (by edge length)')
     axs[1].bar(
         n_agents_s+width,
-        [np.count_nonzero(x)/n_samples for x in success_our],
-        width=width, color=colors[2])
-    axs[1].plot(0, 99, color=colors[0], label='dhc_by_edge_len')  # for legend
-    axs[1].plot(0, 99, color=colors[1], label='dhc_by_nodes')  # for legend
-    axs[1].plot(0, 99, color=colors[2], label='our')  # for legend
+        [np.count_nonzero(x)/n_samples for x in success_dhc_by_nodes],
+        width=width, color=colors[2],
+                label='DHC (by nr of vertices)')
     axs[1].set_xlim(1, max(n_agents_s)+1)
     axs[1].set_ylim(0., 1.04)
     axs[1].set_xticks(n_agents_s)

@@ -224,7 +224,7 @@ def plot(figure_folder: str, results_name: str):
     axs[0].violinplot(data_lenghts[1], np.array(n_agents_s)+width/2,
                       widths=width)
     axs[0].plot(0, 99, color=colors[0], label='our')  # for legend
-    axs[0].plot(0, 99, color=colors[1], label='bvc')  # for legend
+    axs[0].plot(0, 99, color=colors[1], label='BVC')  # for legend
     axs[0].set_xlim(1, max(n_agents_s)+1)
     axs[0].set_ylim(lenghts_min_max[0]-.1, lenghts_min_max[1]+.1)
     axs[0].set_xticks(n_agents_s)
