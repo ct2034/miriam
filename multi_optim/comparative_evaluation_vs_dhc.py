@@ -592,6 +592,7 @@ def plot(figure_folder: str, results_name: str):
 
     width = .8
     # lengths
+    axs[0].violinplot([0, 1], [-20], widths=width)
     axs[0].violinplot(diff_vs_dhc_by_edge_len_list, np.array(n_agents_s)-width/2,
                       widths=width)
     axs[0].violinplot(diff_vs_dhc_by_nodes_list, np.array(n_agents_s)+width/2,
@@ -617,12 +618,12 @@ def plot(figure_folder: str, results_name: str):
         n_agents_s,
         [np.count_nonzero(x)/n_samples for x in success_dhc_by_edge_len],
         width=width, color=colors[1],
-                label='DHC (by edge length)')
+        label='DHC (by edge length)')
     axs[1].bar(
         n_agents_s+width,
         [np.count_nonzero(x)/n_samples for x in success_dhc_by_nodes],
         width=width, color=colors[2],
-                label='DHC (by nr of vertices)')
+        label='DHC (by nr of vertices)')
     axs[1].set_xlim(1, max(n_agents_s)+1)
     axs[1].set_ylim(0., 1.04)
     axs[1].set_xticks(n_agents_s)
