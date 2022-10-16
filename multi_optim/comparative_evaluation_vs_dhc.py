@@ -180,8 +180,8 @@ def get_total_len(n_agents, coords_from_node_by_nodes, points, pos_dhc_np,
 
 
 def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
-    rng = Random(0)
-    flann = FLANN(random_seed=0)
+    rng = Random(1)
+    flann = FLANN(random_seed=1)
 
     # load graph
     graph_fname = f"{base_folder}/{results_name}_graph.gpickle"
@@ -548,7 +548,7 @@ def plot(figure_folder: str, results_name: str):
                       color=colors[2], alpha=1, label='dhc_by_nodes')
         axs[i_na].set_xticks(np.arange(float(n_eval)))
         axs[i_na].set_xlabel('Trials')
-        axs[i_na].set_ylabel('Average Pathlength')
+        axs[i_na].set_ylabel('Average Path Length')
         axs[i_na].set_title(f"{n_agents=}")
         axs[i_na].legend()
     f.savefig(f"{figure_folder}/{results_name}_lens.png")
@@ -625,15 +625,15 @@ def plot(figure_folder: str, results_name: str):
         el.set_markeredgecolor(colors[2])
 
     axs[0].plot(0, 99, color=colors[1],
-                label='DHC (gridmap by edge length)')  # for legend
+                label='ORDP vs DHC (gridmap by edge length)')  # for legend
     axs[0].plot(0, 99, color=colors[2],
-                label='DHC (gridmap by nr of vertices)')  # for legend
+                label='ORDP vs DHC (gridmap by nr of vertices)')  # for legend
     axs[0].set_xlim(1, max(n_agents_s)+1)
     axs[0].set_ylim(diffs_min_max[0]-.1, diffs_min_max[1]+.1)
     axs[0].set_xticks(n_agents_s)
     axs[0].set_xticklabels(n_agents_s)
     axs[0].set_xlabel('Number of Agents')
-    axs[0].set_ylabel('Average Pathlength Difference DHC - ORDP')
+    axs[0].set_ylabel('Average Pathl Length Difference DHC - ORDP')
     axs[0].legend()
     # success
     # width = 2. / 3.5
@@ -677,6 +677,6 @@ if __name__ == '__main__':
     n_agents_s: List[int] = [2, 4, 6, 8]
     n_eval: int = 10
 
-    # eval(logger, results_name, base_folder,
-    # figure_folder, n_agents_s, n_eval)
+    eval(logger, results_name, base_folder,
+         figure_folder, n_agents_s, n_eval)
     plot(figure_folder, results_name)
