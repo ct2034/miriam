@@ -178,7 +178,7 @@ def plot(figure_folder: str, results_name: str):
     for i_na, n_agents in enumerate(n_agents_s):
         xs = np.arange(float(n_eval))
         axs[i_na].bar(xs, lens_our[i_na]/n_agents, width,
-                      color=colors[0], alpha=1, label='our')
+                      color=colors[0], alpha=1, label='ORDP')
         xs += width
         axs[i_na].bar(xs, lens_bvc[i_na]/n_agents, width,
                       color=colors[1], alpha=1, label='bvc')
@@ -219,27 +219,49 @@ def plot(figure_folder: str, results_name: str):
                 data_lenghts[i_a][i_na].append(99)
 
     width = .8
-    axs[0].violinplot(data_lenghts[0], np.array(n_agents_s)-width/2,
-                      widths=width)
-    axs[0].violinplot(data_lenghts[1], np.array(n_agents_s)+width/2,
-                      widths=width)
-    axs[0].plot(0, 99, color=colors[0], label='our')  # for legend
-    axs[0].plot(0, 99, color=colors[1], label='BVC')  # for legend
+    axs[0].bar(np.array(n_agents_s)-width/2,
+               data_success[0], width=width, label='ORDP')
+    axs[0].bar(np.array(n_agents_s)+width/2,
+               data_success[1], width=width, label='BVC')
     axs[0].set_xlim(1, max(n_agents_s)+1)
-    axs[0].set_ylim(lenghts_min_max[0]-.1, lenghts_min_max[1]+.1)
     axs[0].set_xticks(n_agents_s)
     axs[0].set_xlabel('Number of Agents')
-    axs[0].set_ylabel('Average Pathlength')
-    axs[0].legend()
-    axs[1].bar(np.array(n_agents_s)-width/2,
-               data_success[0], width=width, label='our')
-    axs[1].bar(np.array(n_agents_s)+width/2,
-               data_success[1], width=width, label='BVC')
+    axs[0].set_ylabel('Success Rate')
+    axs[0].legend(loc='center right')
+    elemtns = axs[1].boxplot(data_lenghts[0],
+                             positions=np.array(n_agents_s)-width/2,
+                             widths=width)
+    for el in elemtns['boxes']:
+        el.set_color(colors[0])
+    for el in elemtns['medians']:
+        el.set_color(colors[0])
+    for el in elemtns['whiskers']:
+        el.set_color(colors[0])
+    for el in elemtns['caps']:
+        el.set_color(colors[0])
+    for el in elemtns['fliers']:
+        el.set_markeredgecolor(colors[0])
+    elemtns = axs[1].boxplot(data_lenghts[1],
+                                positions=np.array(n_agents_s)+width/2,
+                                widths=width)
+    for el in elemtns['boxes']:
+        el.set_color(colors[1])
+    for el in elemtns['medians']:
+        el.set_color(colors[1])
+    for el in elemtns['whiskers']:
+        el.set_color(colors[1])
+    for el in elemtns['caps']:
+        el.set_color(colors[1])
+    for el in elemtns['fliers']:
+        el.set_markeredgecolor(colors[1])
+    axs[1].plot(0, 99, color=colors[0], label='ORDP')  # for legend
+    axs[1].plot(0, 99, color=colors[1], label='BVC')  # for legend
     axs[1].set_xlim(1, max(n_agents_s)+1)
+    axs[1].set_ylim(lenghts_min_max[0]-.1, lenghts_min_max[1]+.1)
     axs[1].set_xticks(n_agents_s)
     axs[1].set_xlabel('Number of Agents')
-    axs[1].set_ylabel('Success Rate')
-    axs[1].legend(loc='lower right')
+    axs[1].set_ylabel('Average Pathlength')
+    axs[1].legend()
     f.tight_layout()
     f.savefig(f"{figure_folder}/{results_name}_lens_stats.pdf")
     plt.close(f)
