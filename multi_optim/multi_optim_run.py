@@ -4,7 +4,6 @@ import logging
 import os
 import pickle
 import socket
-import sys
 import time
 from random import Random
 from typing import Dict, List, Optional, Tuple
@@ -32,11 +31,11 @@ from tools import ProgressBar, StatCollector, set_ulimit
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
-    from configs import configs
+    from configs import augment_config_by, configs
     from eval import Eval
     from state import ACTION, ITERATOR_TYPE, ScenarioState
 else:
-    from multi_optim.configs import configs
+    from multi_optim.configs import augment_config_by, configs
     from multi_optim.eval import Eval
     from multi_optim.state import ACTION, ITERATOR_TYPE, ScenarioState
 
@@ -248,7 +247,7 @@ def run_optimization(
         lr_pos: float,
         lr_policy: float,
         max_n_agents: int,
-        map_fname: str,
+        map_name: str,
         seed: int,
         load_policy_model: Optional[str] = None,
         load_roadmap: Optional[str] = None,
@@ -282,6 +281,7 @@ def run_optimization(
     n_agents: int = n_agents_s[i_n_agents]
 
     # Roadmap
+    map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
     map_img: MAP_IMG = read_map(map_fname)
     if load_roadmap is not None:
         # load graph from file
@@ -578,16 +578,30 @@ if __name__ == "__main__":
     n_processes = min(tmp.cpu_count(), 16)
     pool = tmp.Pool(processes=n_processes)
 
+    augmented_configs = augment_config_by(configs, "map_name", [
+        "c", "z"
+    ])
+
     for prefix in [
         "debug",
-        "tiny",
+        "debug_map_name_c",
+        "debug_map_name_z",
+        # "tiny",
+        "tiny_map_name_c",
+        # "tiny_map_name_z",
         # "tiny_plain",
-        "small",
-        "medium",
-        "large",
+        # "small",
+        "small_map_name_c",
+        # "small_map_name_z",
+        # "medium",
+        "medium_map_name_c",
+        # "medium_map_name_z",
+        # "large",
+        "large_map_name_c",
+        # "large_map_name_z",
         # "large_plain",
     ]:
-        if prefix == "debug":
+        if prefix.startswith("debug"):
             level = logging.DEBUG
         else:
             level = logging.INFO
@@ -604,7 +618,7 @@ if __name__ == "__main__":
 
         # start the actual run
         run_optimization(
-            **configs[prefix],
+            **augmented_configs[prefix],
             pool_in=pool)
 
     pool.close()
