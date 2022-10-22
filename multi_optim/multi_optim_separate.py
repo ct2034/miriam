@@ -236,18 +236,18 @@ if __name__ == "__main__":
     save_folder: str = "multi_optim/results"
 
     prefix_s = [
-        # "debug",
-        # "tiny",
+        "debug",
+        "tiny",
         "small",
         "medium",
         "large"
     ]
 
-    # for prefix in prefix_s:
-    #     run_optimization_sep(
-    #         **configs[prefix],
-    #         pool=pool,
-    #         save_folder=save_folder)
+    for prefix in prefix_s:
+        run_optimization_sep(
+            **configs[prefix],
+            pool=pool,
+            save_folder=save_folder)
 
     plot(save_folder, prefix_s)
 
