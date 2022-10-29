@@ -1,0 +1,3 @@
+echo "miriam"
+source $HOME/.bashrc
+source $HOME/src/miriam/setup.sh
