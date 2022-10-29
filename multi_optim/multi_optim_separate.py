@@ -237,11 +237,11 @@ if __name__ == "__main__":
     save_folder: str = "multi_optim/results"
 
     prefix_s = [
-        "debug_c",
-        "tiny_c",
-        "small_c",
-        "medium_c",
-        "large_c"
+        "debug_map_name_c",
+        "tiny_map_name_c",
+        "small_map_name_c",
+        "medium_map_name_c",
+        "large_map_name_c"
     ]
 
     for prefix in prefix_s:
