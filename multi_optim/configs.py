@@ -92,3 +92,8 @@ def augment_config_by(
                 key: value,
                 "prefix": prefix}
     return augmented_configs
+
+
+configs_all_maps = augment_config_by(configs, "map_name", [
+    "c", "z"
+])

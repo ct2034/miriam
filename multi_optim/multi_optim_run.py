@@ -31,11 +31,11 @@ from tools import ProgressBar, StatCollector, set_ulimit
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
-    from configs import augment_config_by, configs
+    from configs import configs_all_maps
     from eval import Eval
     from state import ACTION, ITERATOR_TYPE, ScenarioState
 else:
-    from multi_optim.configs import augment_config_by, configs
+    from multi_optim.configs import configs_all_maps
     from multi_optim.eval import Eval
     from multi_optim.state import ACTION, ITERATOR_TYPE, ScenarioState
 
@@ -257,7 +257,8 @@ def run_optimization(
         pool_in: Optional[tmp.Pool] = None):  # type: ignore
     wandb_run = wandb.init(
         project="miriam-multi-optim-run",
-        name=f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}-{prefix}",
+        name=f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+        + "-{prefix}",
         reinit=True, settings=wandb.Settings(
             start_method="fork"))
     assert wandb_run is not None
@@ -578,10 +579,6 @@ if __name__ == "__main__":
     n_processes = min(tmp.cpu_count(), 16)
     pool = tmp.Pool(processes=n_processes)
 
-    augmented_configs = augment_config_by(configs, "map_name", [
-        "c", "z"
-    ])
-
     for prefix in [
         "debug",
         "debug_map_name_c",
@@ -618,7 +615,7 @@ if __name__ == "__main__":
 
         # start the actual run
         run_optimization(
-            **augmented_configs[prefix],
+            **configs_all_maps[prefix],
             pool_in=pool)
 
     pool.close()

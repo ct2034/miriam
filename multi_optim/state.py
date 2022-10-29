@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 OBSERVATION = Tuple[Data, Dict[int, int]]
 ACTION = int
 TIME_LIMIT_STEPS = 20
-ITERATOR_TYPE = IteratorType.LOOKAHEAD2
+ITERATOR_TYPE: IteratorType = IteratorType.LOOKAHEAD2
 
 
 class ScenarioState():

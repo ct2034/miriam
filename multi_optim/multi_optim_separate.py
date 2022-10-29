@@ -15,7 +15,7 @@ from planner.policylearn.edge_policy import EdgePolicyModel
 from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 
-from multi_optim.configs import configs
+from multi_optim.configs import configs_all_maps
 from multi_optim.eval import Eval
 from multi_optim.multi_optim_run import RADIUS, run_optimization
 from multi_optim.state import ITERATOR_TYPE
@@ -35,7 +35,7 @@ def run_optimization_sep(
         lr_pos: float,
         lr_policy: float,
         max_n_agents: int,
-        map_fname: str,
+        map_name: str,
         seed: int,
         prefix: str,
         pool,
@@ -52,7 +52,7 @@ def run_optimization_sep(
         lr_pos,
         lr_policy,
         max_n_agents,
-        map_fname,
+        map_name,
         seed,
         prefix,
         pool,
@@ -70,11 +70,12 @@ def run_separately(
         lr_pos,
         lr_policy,
         max_n_agents,
-        map_fname,
+        map_name,
         seed,
         prefix,
         pool,
         save_folder):
+
     # 1. roadmap
     prefix_sep_roadmap = f"{prefix}_sep_roadmap"
     run_optimization(
@@ -88,7 +89,7 @@ def run_separately(
         lr_pos=lr_pos,
         lr_policy=lr_policy,
         max_n_agents=max_n_agents,
-        map_fname=map_fname,
+        map_name=map_name,
         seed=seed,
         prefix=prefix_sep_roadmap,
         save_folder=save_folder,
@@ -107,7 +108,7 @@ def run_separately(
         lr_pos=lr_pos,
         lr_policy=lr_policy,
         max_n_agents=max_n_agents,
-        map_fname=map_fname,
+        map_name=map_name,
         seed=seed,
         # load_roadmap=f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle",
         prefix=prefix_sep_policy,
@@ -194,7 +195,7 @@ def plot(save_folder: str, prefix_s: List[str]):
                     np.array(stat[key]['x'])[stat_start:stat_end-1] -
                     np.array(both_stats[key]['x'])[
                         both_stats_start:both_stats_end-1]
-                )
+                )  # type: ignore
                 elements = axs[i_m].boxplot(
                     [data],
                     positions=[i_p + (i_s-.5) * width / len(titles)],
@@ -236,16 +237,16 @@ if __name__ == "__main__":
     save_folder: str = "multi_optim/results"
 
     prefix_s = [
-        "debug",
-        "tiny",
-        "small",
-        "medium",
-        "large"
+        "debug_c",
+        "tiny_c",
+        "small_c",
+        "medium_c",
+        "large_c"
     ]
 
     for prefix in prefix_s:
         run_optimization_sep(
-            **configs[prefix],
+            **configs_all_maps[prefix],
             pool=pool,
             save_folder=save_folder)
 
