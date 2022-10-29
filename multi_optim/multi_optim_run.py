@@ -258,7 +258,7 @@ def run_optimization(
     wandb_run = wandb.init(
         project="miriam-multi-optim-run",
         name=f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-        + "-{prefix}",
+        + f"-{prefix}",
         reinit=True, settings=wandb.Settings(
             start_method="fork"))
     assert wandb_run is not None
