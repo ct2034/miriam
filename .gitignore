@@ -39,36 +39,6 @@ planner/policylearn/data/
 
 # pytorch datasets
 learn/pytorch/data/
-wandb/debug-internal.log
-wandb/debug.log
-wandb/latest-run
-wandb/run-20220710_214224-2iv83cip/run-2iv83cip.wandb
-wandb/run-20220710_214224-2iv83cip/files/config.yaml
-wandb/run-20220710_214224-2iv83cip/files/output.log
-wandb/run-20220710_214224-2iv83cip/files/requirements.txt
-wandb/run-20220710_214224-2iv83cip/files/wandb-metadata.json
-wandb/run-20220710_214224-2iv83cip/files/wandb-summary.json
-wandb/run-20220710_220151-2i1zbq3f/run-2i1zbq3f.wandb
-wandb/run-20220710_220151-2i1zbq3f/files/config.yaml
-wandb/run-20220710_220151-2i1zbq3f/files/output.log
-wandb/run-20220710_220151-2i1zbq3f/files/requirements.txt
-wandb/run-20220710_220151-2i1zbq3f/files/wandb-metadata.json
-wandb/run-20220710_220151-2i1zbq3f/files/wandb-summary.json
-wandb/run-20220710_220315-1ri3uwl2/run-1ri3uwl2.wandb
-wandb/run-20220710_220315-1ri3uwl2/files/config.yaml
-wandb/run-20220710_220315-1ri3uwl2/files/output.log
-wandb/run-20220710_220315-1ri3uwl2/files/requirements.txt
-wandb/run-20220710_220315-1ri3uwl2/files/wandb-metadata.json
-wandb/run-20220710_220315-1ri3uwl2/files/wandb-summary.json
-wandb/run-20220710_220635-fuvyrdgk/run-fuvyrdgk.wandb
-wandb/run-20220710_220635-fuvyrdgk/files/config.yaml
-wandb/run-20220710_220635-fuvyrdgk/files/output.log
-wandb/run-20220710_220635-fuvyrdgk/files/requirements.txt
-wandb/run-20220710_220635-fuvyrdgk/files/wandb-metadata.json
-wandb/run-20220710_220635-fuvyrdgk/files/wandb-summary.json
-wandb/run-20220710_220751-158esvm9/run-158esvm9.wandb
-wandb/run-20220710_220751-158esvm9/files/config.yaml
-wandb/run-20220710_220751-158esvm9/files/output.log
-wandb/run-20220710_220751-158esvm9/files/requirements.txt
-wandb/run-20220710_220751-158esvm9/files/wandb-metadata.json
-wandb/run-20220710_220751-158esvm9/files/wandb-summary.json
+
+# wandb data
+wandb/
