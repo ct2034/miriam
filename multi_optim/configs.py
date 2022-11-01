@@ -103,5 +103,20 @@ configs = {
         "map_fname": "roadmaps/odrm/odrm_eval/maps/plain.png",
         "seed": 0,
         "prefix": "large_plain"
+    },
+    "mapf_benchm_random-32-32-10": {
+        "n_nodes": 64,
+        "n_runs_pose": 64,
+        "n_runs_policy": 64,
+        "n_episodes_per_run_policy": 256,
+        "n_epochs_per_run_policy": 4,
+        "batch_size_policy": 128,
+        "stats_and_eval_every": 2,
+        "lr_pos": 1e-3,
+        "lr_policy": 1e-4,
+        "max_n_agents": 8,
+        "map_fname": "roadmaps/odrm/odrm_eval/maps/mapf_benchm_random-32-32-10.png",
+        "seed": 0,
+        "prefix": "mapf_benchm_random-32-32-10"
     }
 }

@@ -647,6 +647,6 @@ if __name__ == '__main__':
     n_agents_s: List[int] = [2, 4, 6, 8]
     n_eval: int = 10
 
-    # eval(logger, results_name, base_folder,
-    # figure_folder, n_agents_s, n_eval)
+    eval(logger, results_name, base_folder,
+         figure_folder, n_agents_s, n_eval)
     plot(figure_folder, results_name)
