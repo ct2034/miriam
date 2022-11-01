@@ -4,7 +4,6 @@ import logging
 import os
 import pickle
 import socket
-import sys
 import time
 from random import Random
 from typing import Dict, List, Optional, Tuple
@@ -32,11 +31,11 @@ from tools import ProgressBar, StatCollector, set_ulimit
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
-    from configs import configs
+    from configs import configs_all_maps
     from eval import Eval
     from state import ACTION, ITERATOR_TYPE, ScenarioState
 else:
-    from multi_optim.configs import configs
+    from multi_optim.configs import configs_all_maps
     from multi_optim.eval import Eval
     from multi_optim.state import ACTION, ITERATOR_TYPE, ScenarioState
 
@@ -248,7 +247,7 @@ def run_optimization(
         lr_pos: float,
         lr_policy: float,
         max_n_agents: int,
-        map_fname: str,
+        map_name: str,
         seed: int,
         load_policy_model: Optional[str] = None,
         load_roadmap: Optional[str] = None,
@@ -258,7 +257,8 @@ def run_optimization(
         pool_in: Optional[tmp.Pool] = None):  # type: ignore
     wandb_run = wandb.init(
         project="miriam-multi-optim-run",
-        name=f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}-{prefix}",
+        name=f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+        + f"-{prefix}",
         reinit=True, settings=wandb.Settings(
             start_method="fork"))
     assert wandb_run is not None
@@ -282,6 +282,7 @@ def run_optimization(
     n_agents: int = n_agents_s[i_n_agents]
 
     # Roadmap
+    map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
     map_img: MAP_IMG = read_map(map_fname)
     if load_roadmap is not None:
         # load graph from file
@@ -579,15 +580,25 @@ if __name__ == "__main__":
     pool = tmp.Pool(processes=n_processes)
 
     for prefix in [
-        # "debug",
+        "debug",
+        "debug_map_name_c",
+        "debug_map_name_z",
         # "tiny",
-        "tiny_plain",
+        "tiny_map_name_c",
+        # "tiny_map_name_z",
+        # "tiny_plain",
         # "small",
+        "small_map_name_c",
+        # "small_map_name_z",
         # "medium",
+        "medium_map_name_c",
+        # "medium_map_name_z",
         # "large",
-        "large_plain",
+        "large_map_name_c",
+        # "large_map_name_z",
+        # "large_plain",
     ]:
-        if prefix == "debug":
+        if prefix.startswith("debug"):
             level = logging.DEBUG
         else:
             level = logging.INFO
@@ -604,7 +615,7 @@ if __name__ == "__main__":
 
         # start the actual run
         run_optimization(
-            **configs[prefix],
+            **configs_all_maps[prefix],
             pool_in=pool)
 
     pool.close()

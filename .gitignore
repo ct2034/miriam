@@ -40,5 +40,5 @@ planner/policylearn/data/
 # pytorch datasets
 learn/pytorch/data/
 
-# wandb data
+# all wandb files
 wandb/

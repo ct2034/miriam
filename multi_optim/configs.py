@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 configs = {
     "debug": {
         "n_nodes": 8,
@@ -10,7 +12,7 @@ configs = {
         "lr_pos": 1e-2,
         "lr_policy": 1e-3,
         "max_n_agents": 2,
-        "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+        "map_name": "x",
         "seed": 0,
         "prefix": "debug"
     },
@@ -25,24 +27,9 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 1e-3,
         "max_n_agents": 4,
-        "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+        "map_name": "x",
         "seed": 0,
         "prefix": "tiny"
-    },
-    "tiny_plain": {
-        "n_nodes": 16,
-        "n_runs_pose": 64,
-        "n_runs_policy": 64,
-        "n_episodes_per_run_policy": 256,
-        "n_epochs_per_run_policy": 4,
-        "batch_size_policy": 128,
-        "stats_and_eval_every": 2,
-        "lr_pos": 1e-3,
-        "lr_policy": 1e-3,
-        "max_n_agents": 4,
-        "map_fname": "roadmaps/odrm/odrm_eval/maps/plain.png",
-        "seed": 0,
-        "prefix": "tiny_plain"
     },
     "small": {
         "n_nodes": 32,
@@ -55,7 +42,7 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 3e-4,
         "max_n_agents": 6,
-        "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+        "map_name": "x",
         "seed": 0,
         "prefix": "small"
     },
@@ -70,7 +57,7 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 1e-4,
         "max_n_agents": 8,
-        "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+        "map_name": "x",
         "seed": 0,
         "prefix": "medium"
     },
@@ -85,7 +72,7 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 1e-4,
         "max_n_agents": 10,
-        "map_fname": "roadmaps/odrm/odrm_eval/maps/x.png",
+        "map_name": "x",
         "seed": 0,
         "prefix": "large"
     },
@@ -120,3 +107,23 @@ configs = {
         "prefix": "mapf_benchm_random-32-32-10"
     }
 }
+
+
+def augment_config_by(
+        configs: Dict[Any, Any],
+        key: str,
+        values: List[Any]) -> Dict[Any, Any]:
+    augmented_configs = configs.copy()
+    for name, config in configs.items():
+        for value in values:
+            prefix: str = f"{name}_{key}_{value}"
+            augmented_configs[prefix] = {
+                **config,
+                key: value,
+                "prefix": prefix}
+    return augmented_configs
+
+
+configs_all_maps = augment_config_by(configs, "map_name", [
+    "c", "z"
+])

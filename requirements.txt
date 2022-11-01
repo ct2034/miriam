@@ -11,6 +11,7 @@ gitpython
 ipykernel
 iso8601
 keras
+latextable
 libpysal
 matplotlib
 munkres

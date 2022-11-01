@@ -1,6 +1,7 @@
 import logging
 import sys
 from itertools import product
+from typing import List
 
 import matplotlib
 import networkx as nx
@@ -14,7 +15,7 @@ from planner.policylearn.edge_policy import EdgePolicyModel
 from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 
-from multi_optim.configs import configs
+from multi_optim.configs import configs_all_maps
 from multi_optim.eval import Eval
 from multi_optim.multi_optim_run import RADIUS, run_optimization
 from multi_optim.state import ITERATOR_TYPE
@@ -34,31 +35,28 @@ def run_optimization_sep(
         lr_pos: float,
         lr_policy: float,
         max_n_agents: int,
-        map_fname: str,
+        map_name: str,
         seed: int,
         prefix: str,
         pool,
-        save_folder: str = "multi_optim/results"):
+        save_folder: str):
 
-    # run_separately(
-    #     n_nodes,
-    #     n_runs_pose,
-    #     n_runs_policy,
-    #     n_episodes_per_run_policy,
-    #     n_epochs_per_run_policy,
-    #     batch_size_policy,
-    #     stats_and_eval_every,
-    #     lr_pos,
-    #     lr_policy,
-    #     max_n_agents,
-    #     map_fname,
-    #     seed,
-    #     prefix,
-    #     pool,
-    #     save_folder)
-
-    evaluate(map_fname, prefix, save_folder)
-    plot(save_folder, prefix)
+    run_separately(
+        n_nodes,
+        n_runs_pose,
+        n_runs_policy,
+        n_episodes_per_run_policy,
+        n_epochs_per_run_policy,
+        batch_size_policy,
+        stats_and_eval_every,
+        lr_pos,
+        lr_policy,
+        max_n_agents,
+        map_name,
+        seed,
+        prefix,
+        pool,
+        save_folder)
 
 
 def run_separately(
@@ -72,11 +70,12 @@ def run_separately(
         lr_pos,
         lr_policy,
         max_n_agents,
-        map_fname,
+        map_name,
         seed,
         prefix,
         pool,
         save_folder):
+
     # 1. roadmap
     prefix_sep_roadmap = f"{prefix}_sep_roadmap"
     run_optimization(
@@ -90,14 +89,14 @@ def run_separately(
         lr_pos=lr_pos,
         lr_policy=lr_policy,
         max_n_agents=max_n_agents,
-        map_fname=map_fname,
+        map_name=map_name,
         seed=seed,
         prefix=prefix_sep_roadmap,
         save_folder=save_folder,
         pool_in=pool)
 
     # 2. policy
-    prefix_sep_policy = f"{prefix}_sep_policy"
+    prefix_sep_policy = f"{prefix}_sep_no_rm_policy"  # not use old roadmap
     run_optimization(
         n_nodes=n_nodes,
         n_runs_pose=0,
@@ -109,215 +108,149 @@ def run_separately(
         lr_pos=lr_pos,
         lr_policy=lr_policy,
         max_n_agents=max_n_agents,
-        map_fname=map_fname,
+        map_name=map_name,
         seed=seed,
-        load_roadmap=f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle",
+        # load_roadmap=f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle",
         prefix=prefix_sep_policy,
         save_folder=save_folder,
         pool_in=pool)
 
-    pool.close()
 
+def plot(save_folder: str, prefix_s: List[str]):
+    titles = ["only roadmap", "only policy"]
+    metrics = ["path_length", "general_success", "general_regret"]
+    width = .8
 
-def evaluate(map_fname, prefix, save_folder):
-    prefix_sep_roadmap = f"{prefix}_sep_roadmap"
-    prefix_sep_policy = f"{prefix}_sep_policy"
-    # load final roadmap
-    roadmap_sep = nx.read_gpickle(
-        f"{save_folder}/{prefix_sep_roadmap}_graph.gpickle")
-    assert isinstance(roadmap_sep, nx.Graph)
-    flann_sep = FLANN()
-    pos_sep = nx.get_node_attributes(roadmap_sep, POS)
-    pos_sep_np = np.array([pos_sep[i]
-                          for i in roadmap_sep.nodes()], dtype=np.float32)
-    flann_sep.build_index(pos_sep_np, random_seed=0)
-    roadmap_joint = nx.read_gpickle(
-        f"{save_folder}/{prefix}_graph.gpickle")
-    assert isinstance(roadmap_joint, nx.Graph)
-    flann_joint = FLANN()
-    pos_joint = nx.get_node_attributes(roadmap_joint, POS)
-    pos_joint_np = np.array([pos_joint[i]
-                            for i in roadmap_joint.nodes()], dtype=np.float32)
-    flann_joint.build_index(pos_joint_np, random_seed=0)
-    # load final policy
-    gpu = torch.device("cpu")
-    policy_sep = EdgePolicyModel(gpu=gpu)
-    policy_sep.load_state_dict(
-        torch.load(
-            f"{save_folder}/{prefix_sep_policy}_policy_model.pt",
-            map_location=gpu))
-    policy_joint = EdgePolicyModel(gpu=gpu)
-    policy_joint.load_state_dict(
-        torch.load(
-            f"{save_folder}/{prefix}_policy_model.pt",
-            map_location=gpu))
-    # load stats
-    stats_static = yaml.load(
-        open(f"{save_folder}/{prefix}_stats.yaml", "r"), yaml.SafeLoader)["static"]
-    max_n_agents = stats_static["max_n_agents"]
-    map_img = read_map(stats_static["map_fname"])
+    n_nodes_per_prefix = {}
+    n_agents_per_prefix = {}
+    stats_per_prefix = {}
+    both_stats_per_prefix = {}
+    for prefix in prefix_s:
+        # we need three files:
+        both_stats_per_prefix[prefix] = yaml.load(
+            open(f"{save_folder}/{prefix}_stats.yaml", "r"),
+            yaml.SafeLoader)
+        stats_per_prefix[prefix] = []
+        stats_per_prefix[prefix].append(yaml.load(
+            open(f"{save_folder}/{prefix}_sep_roadmap_stats.yaml", "r"),
+            yaml.SafeLoader))
+        stats_per_prefix[prefix].append(yaml.load(
+            open(f"{save_folder}/{prefix}_sep_no_rm_policy_stats.yaml", "r"),
+            yaml.SafeLoader))
 
-    # eval roadmap lenghts
-    eval_sep = Eval(
-        roadmap_sep,
-        map_img,
-        [8],
-        1,
-        ITERATOR_TYPE,
-        RADIUS)
-    eval_joint = Eval(
-        roadmap_joint,
-        map_img,
-        [8],
-        1,
-        ITERATOR_TYPE,
-        RADIUS)
-    # first: own
-    _ = eval_sep.evaluate_roadmap(
-        roadmap_sep, flann_sep)
-    _ = eval_joint.evaluate_roadmap(
-        roadmap_joint, flann_joint)
-    # second: the other
-    roadmap_joint_over_sep = eval_sep.evaluate_roadmap(
-        roadmap_joint, flann_joint)
-    roadmap_sep_over_joint = eval_joint.evaluate_roadmap(
-        roadmap_sep, flann_sep)
+        n_nodes_per_prefix[prefix] = stats_per_prefix[prefix][0]['static']['n_nodes']
 
-    # eval policy
-    n_eval = 20
-    n_agents_s = list(range(2, max_n_agents + 1, 2))
-    res_sep_s = {}
-    res_joint_s = {}
-    for metric in ["regret", "success", "accuracy"]:
-        res_sep_s[metric] = {}
-        res_joint_s[metric] = {}
-        for n_agents in n_agents_s:
-            res_sep_s[metric][n_agents] = []
-            res_joint_s[metric][n_agents] = []
-    for i_e, n_agents in product(range(n_eval), n_agents_s):
-        eval_sep = Eval(
-            roadmap_sep,
-            map_img,
-            [n_agents],
-            1,
-            ITERATOR_TYPE,
-            RADIUS,
-            seed=i_e)
-        eval_joint = Eval(
-            roadmap_joint,
-            map_img,
-            [n_agents],
-            1,
-            ITERATOR_TYPE,
-            RADIUS,
-            seed=i_e)
-        res_sep = eval_sep.evaluate_policy(
-            policy_sep)
-        res_joint = eval_joint.evaluate_policy(
-            policy_joint)
-        for metric in ["regret", "success", "accuracy"]:
-            key = f"{metric}_{n_agents}"
-            try:
-                res_sep_s[metric][n_agents].append(res_sep[key])
-            except KeyError:
-                pass
-            try:
-                res_joint_s[metric][n_agents].append(res_joint[key])
-            except KeyError:
-                pass
+        assert len(stats_per_prefix[prefix]) == len(titles)
 
-    # save results
-    with open(f"{save_folder}/{prefix}_joint_vs_sep.yaml", "w") as f:
-        yaml.dump({
-            "roadmap_joint_over_sep": roadmap_joint_over_sep,
-            "roadmap_sep_over_joint": roadmap_sep_over_joint,
-            "res_sep_s": res_sep_s,
-            "res_joint_s": res_joint_s
-        }, f)
+        n_agents: int = sys.maxsize
+        for s in stats_per_prefix[prefix]:
+            available_n_agents_policy_regret = list(filter(
+                lambda x: x.startswith("policy_regret_"), s.keys()))
+            available_n_agents_general_success = list(filter(
+                lambda x: x.startswith("general_success_"), s.keys()))
+            available_n_agents_policy_regret = map(int, map(
+                lambda x: x.split("_")[-1], available_n_agents_policy_regret))
+            available_n_agents_general_success = map(int, map(
+                lambda x: x.split("_")[-1], available_n_agents_general_success))
+            n_agents = min(
+                n_agents,
+                max(available_n_agents_policy_regret),
+                max(available_n_agents_general_success))
+        n_agents_per_prefix[prefix] = n_agents
 
-
-def plot(save_folder: str, prefix: str):
-    data = yaml.load(open(
-        f"{save_folder}/{prefix}_joint_vs_sep.yaml", "r"),
-        yaml.SafeLoader)
-    roadmap_joint_over_sep = data["roadmap_joint_over_sep"]
-    roadmap_sep_over_joint = data["roadmap_sep_over_joint"]
-    res_sep_s = data["res_sep_s"]
-    res_joint_s = data["res_joint_s"]
-
-    stats_static = yaml.load(
-        open(f"{save_folder}/{prefix}_stats.yaml", "r"), yaml.SafeLoader)["static"]
-    max_n_agents = stats_static["max_n_agents"]
-    n_agents_s = list(range(2, max_n_agents + 1, 2))
+    prefixes_sorted_by_n_nodes = sorted(
+        prefix_s, key=lambda x: n_nodes_per_prefix[x])
 
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']  # type: ignore
-    fig, axs = plt.subplots(1, 4, figsize=(40, 10))
-    assert isinstance(axs, np.ndarray)
-    axs[0].set_xlim(-0.5, 1.5)
-    axs[0].plot(0, roadmap_joint_over_sep, "o", label="roadmap_joint_over_sep")
-    axs[0].plot(1, roadmap_sep_over_joint, "o", label="roadmap_sep_over_joint")
-    axs[0].legend()
-    axs[0].set_title("Lengths")
-    for i_m, metric in enumerate(["regret", "success", "accuracy"]):
-        j_data_list = []
-        s_data_list = []
-        key_list = []
-        n_data = len(n_agents_s) * 2
-        for n_agents in n_agents_s:
-            j_data_list.append(res_joint_s[metric][n_agents])
-            key_list.append(f"j{n_agents}")
-            s_data_list.append(res_sep_s[metric][n_agents])
-            key_list.append(f"s{n_agents}")
-        ticks = np.arange(n_data)
-        j_positions = np.arange(0, n_data, 2)
-        s_positions = np.arange(1, n_data, 2)
-        j_parts = axs[i_m + 1].violinplot(
-            j_data_list,
-            positions=j_positions,
-            showmeans=True)
-        for pc in j_parts['bodies']:
-            pc.set_facecolor(colors[0])
-            pc.set_edgecolor(colors[0])
-            pc.set_alpha(.3)
-            pc.set_linewidths(0)
-        j_parts['cbars'].set_color(colors[0])
-        j_parts['cmeans'].set_color(colors[0])
-        j_parts['cmins'].set_color(colors[0])
-        j_parts['cmaxes'].set_color(colors[0])
-        s_parts = axs[i_m + 1].violinplot(
-            s_data_list,
-            positions=s_positions,
-            showmeans=True)
-        for pc in s_parts['bodies']:
-            pc.set_facecolor(colors[1])
-            pc.set_edgecolor(colors[1])
-            pc.set_alpha(.3)
-            pc.set_linewidths(0)
-        s_parts['cbars'].set_color(colors[1])
-        s_parts['cmeans'].set_color(colors[1])
-        s_parts['cmins'].set_color(colors[1])
-        s_parts['cmaxes'].set_color(colors[1])
-        axs[i_m + 1].set_title(metric.capitalize())
-        axs[i_m + 1].set_xticks(ticks, key_list)
+    f_width = 4.5 * len(metrics)
+    fig, axs = plt.subplots(1, len(metrics), figsize=(f_width, 4.5))
+    axs = [axs] if len(metrics) == 1 else axs
+    # assert isinstance(axs, np.ndarray)
+    for i_m, metric in enumerate(metrics):
+        tick_labels = []
+        for i_p, prefix in enumerate(prefixes_sorted_by_n_nodes):
+            n_nodes = n_nodes_per_prefix[prefix]
+            tick_labels.append(f"{n_nodes} ({n_agents_per_prefix[prefix]})")
+            n_agents = n_agents_per_prefix[prefix]
+            both_stats = both_stats_per_prefix[prefix]
+            # less agents here for less noise in data
+            # less_n_agents = n_agents - 2 if n_agents > 2 else n_agents
+            if metric == "path_length":
+                key = f"general_length_{n_agents}"
+            elif metric == "policy_regret":
+                key = f"policy_regret_{n_agents}"
+            elif metric == "general_regret":
+                key = f"general_regret_{n_agents}"
+            elif metric == "overall_success":
+                key = f"general_success_{n_agents}"
+            elif metric == "policy_success":
+                key = f"policy_success_{n_agents}"
+            assert key is not None
+            for i_s, stat in enumerate(stats_per_prefix[prefix]):
+                stat_end = len(stat[key]['x'])
+                stat_start = int(stat_end * 0.8)
+                both_stats_end = len(both_stats[key]['x'])
+                both_stats_start = both_stats_end - stat_end + stat_start
+                data = (
+                    np.array(stat[key]['x'])[stat_start:stat_end-1] -
+                    np.array(both_stats[key]['x'])[
+                        both_stats_start:both_stats_end-1]
+                )  # type: ignore
+                elements = axs[i_m].boxplot(
+                    [data],
+                    positions=[i_p + (i_s-.5) * width / len(titles)],
+                    widths=[width / len(titles)],
+                    labels=[stat])
+                for el in elements['boxes']:
+                    el.set_color(colors[i_s+2])
+                for el in elements['medians']:
+                    el.set_color(colors[i_s+2])
+                for el in elements['whiskers']:
+                    el.set_color(colors[i_s+2])
+                for el in elements['caps']:
+                    el.set_color(colors[i_s+2])
+                for el in elements['fliers']:
+                    el.set_markeredgecolor(colors[i_s+2])
+        pretty_name = " ".join(
+            map(lambda x: x.capitalize(), metric.split("_")))
+        axs[i_m].plot(-5, 0, color=colors[2],
+                      label='roadmap only - both')  # for legend
+        axs[i_m].plot(-5, 0, color=colors[3],
+                      label='policy only - both')  # for legend
+        axs[i_m].set_xlim(-.5, len(n_agents_per_prefix)-.5)
+        # axs[i_m].set_title("Path Length Surplus")
+        axs[i_m].set_xlabel("Number of Vertices (Agents)")
+        axs[i_m].set_xticks(range(len(prefix_s)))
+        axs[i_m].set_xticklabels(tick_labels)
+        axs[i_m].set_ylabel(pretty_name + " Difference Ablation - Baseline")
+
+    axs[0].legend(loc='upper right')
+
     fig.tight_layout()
-    plt.savefig(f"{save_folder}/{prefix}_joint_vs_sep.png")
+    plt.savefig(f"{save_folder}/ablation.pdf")
 
 
 if __name__ == "__main__":
     # Multiprocessing
     tmp.set_start_method('spawn')
     pool = tmp.Pool(processes=min(tmp.cpu_count(), 16))
+    save_folder: str = "multi_optim/results"
 
-    for prefix in [
-        # "debug",
-        "tiny",
-        # "small",
-        # "medium",
-        "large"
-    ]:
+    prefix_s = [
+        "debug_map_name_c",
+        "tiny_map_name_c",
+        "small_map_name_c",
+        "medium_map_name_c",
+        "large_map_name_c"
+    ]
+
+    for prefix in prefix_s:
         run_optimization_sep(
-            **configs[prefix],
-            pool=pool)
+            **configs_all_maps[prefix],
+            pool=pool,
+            save_folder=save_folder)
+
+    plot(save_folder, prefix_s)
 
     pool.close()
     pool.terminate()

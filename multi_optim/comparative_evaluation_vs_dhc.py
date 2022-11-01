@@ -180,8 +180,8 @@ def get_total_len(n_agents, coords_from_node_by_nodes, points, pos_dhc_np,
 
 
 def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
-    rng = Random(0)
-    flann = FLANN(random_seed=0)
+    rng = Random(1)
+    flann = FLANN(random_seed=1)
 
     # load graph
     graph_fname = f"{base_folder}/{results_name}_graph.gpickle"
@@ -545,10 +545,10 @@ def plot(figure_folder: str, results_name: str):
                       color=colors[1], alpha=1, label='dhc_by_edge_len')
         xs += width
         axs[i_na].bar(xs, lens_dhc_by_nodes[i_na]/n_agents, width,
-                      color=colors[3], alpha=1, label='dhc_by_nodes')
+                      color=colors[2], alpha=1, label='dhc_by_nodes')
         axs[i_na].set_xticks(np.arange(float(n_eval)))
         axs[i_na].set_xlabel('Trials')
-        axs[i_na].set_ylabel('Average Pathlength')
+        axs[i_na].set_ylabel('Average Path Length')
         axs[i_na].set_title(f"{n_agents=}")
         axs[i_na].legend()
     f.savefig(f"{figure_folder}/{results_name}_lens.png")
@@ -556,8 +556,9 @@ def plot(figure_folder: str, results_name: str):
 
     # plot stats
     n_samples = np.shape(lens_our)[1]
-    f, axs = plt.subplots(1, 2, figsize=(8, 4.5))
-    assert isinstance(axs, np.ndarray)
+    f, axs = plt.subplots(1, 1, figsize=(4.5, 4.5))
+    # assert isinstance(axs, np.ndarray)
+    axs = [axs]
     success_our = np.logical_not(np.isnan(lens_our))
     success_dhc_by_edge_len = np.logical_not(np.isnan(lens_dhc_by_edge_len))
     success_dhc_by_nodes = np.logical_not(np.isnan(lens_dhc_by_nodes))
@@ -592,42 +593,71 @@ def plot(figure_folder: str, results_name: str):
 
     width = .8
     # lengths
-    axs[0].violinplot(diff_vs_dhc_by_edge_len_list, np.array(n_agents_s)-width/2,
-                      widths=width)
-    axs[0].violinplot(diff_vs_dhc_by_nodes_list, np.array(n_agents_s)+width/2,
-                      widths=width)
-    axs[0].plot(0, 99, color=colors[0], label='dhc_by_edge_len')  # for legend
-    axs[0].plot(0, 99, color=colors[1], label='dhc_by_nodes')  # for legend
+    axs[0].boxplot([0, 1],
+                   positions=[-20],
+                   widths=width)
+    elemtns = axs[0].boxplot(diff_vs_dhc_by_edge_len_list,
+                             positions=np.array(n_agents_s)-width/2,
+                             widths=width)
+    for el in elemtns['boxes']:
+        el.set_color(colors[1])
+    for el in elemtns['medians']:
+        el.set_color(colors[1])
+    for el in elemtns['whiskers']:
+        el.set_color(colors[1])
+    for el in elemtns['caps']:
+        el.set_color(colors[1])
+    for el in elemtns['fliers']:
+        el.set_markeredgecolor(colors[1])
+
+    elemtns = axs[0].boxplot(diff_vs_dhc_by_nodes_list,
+                             positions=np.array(n_agents_s)+width/2,
+                             widths=width)
+    for el in elemtns['boxes']:
+        el.set_color(colors[2])
+    for el in elemtns['medians']:
+        el.set_color(colors[2])
+    for el in elemtns['whiskers']:
+        el.set_color(colors[2])
+    for el in elemtns['caps']:
+        el.set_color(colors[2])
+    for el in elemtns['fliers']:
+        el.set_markeredgecolor(colors[2])
+
+    axs[0].plot(0, 99, color=colors[1],
+                label='ORDP vs DHC (gridmap by edge length)')  # for legend
+    axs[0].plot(0, 99, color=colors[2],
+                label='ORDP vs DHC (gridmap by nr of vertices)')  # for legend
     axs[0].set_xlim(1, max(n_agents_s)+1)
     axs[0].set_ylim(diffs_min_max[0]-.1, diffs_min_max[1]+.1)
     axs[0].set_xticks(n_agents_s)
+    axs[0].set_xticklabels(n_agents_s)
     axs[0].set_xlabel('Number of Agents')
-    axs[0].set_ylabel('Average Pathlength Difference DHC - Our')
+    axs[0].set_ylabel('Average Pathl Length Difference DHC - ORDP')
     axs[0].legend()
     # success
-    width = 2. / 3.5
-    n_agents_s = np.array(n_agents_s)
-    axs[1].bar(
-        n_agents_s-width,
-        [np.count_nonzero(x)/n_samples for x in success_dhc_by_edge_len],
-        width=width, color=colors[0])
-    axs[1].bar(
-        n_agents_s,
-        [np.count_nonzero(x)/n_samples for x in success_dhc_by_nodes],
-        width=width, color=colors[1])
-    axs[1].bar(
-        n_agents_s+width,
-        [np.count_nonzero(x)/n_samples for x in success_our],
-        width=width, color=colors[2])
-    axs[1].plot(0, 99, color=colors[0], label='dhc_by_edge_len')  # for legend
-    axs[1].plot(0, 99, color=colors[1], label='dhc_by_nodes')  # for legend
-    axs[1].plot(0, 99, color=colors[2], label='our')  # for legend
-    axs[1].set_xlim(1, max(n_agents_s)+1)
-    axs[1].set_ylim(0., 1.04)
-    axs[1].set_xticks(n_agents_s)
-    axs[1].set_xlabel('Number of Agents')
-    axs[1].set_ylabel('Success Rate')
-    axs[1].legend(loc='lower right')
+    # width = 2. / 3.5
+    # n_agents_s = np.array(n_agents_s)
+    # axs[1].bar(
+    #     n_agents_s-width,
+    #     [np.count_nonzero(x)/n_samples for x in success_our],
+    #     width=width, color=colors[0], label='our')
+    # axs[1].bar(
+    #     n_agents_s,
+    #     [np.count_nonzero(x)/n_samples for x in success_dhc_by_edge_len],
+    #     width=width, color=colors[1],
+    #     label='DHC (by edge length)')
+    # axs[1].bar(
+    #     n_agents_s+width,
+    #     [np.count_nonzero(x)/n_samples for x in success_dhc_by_nodes],
+    #     width=width, color=colors[2],
+    #     label='DHC (by nr of vertices)')
+    # axs[1].set_xlim(1, max(n_agents_s)+1)
+    # axs[1].set_ylim(0., 1.04)
+    # axs[1].set_xticks(n_agents_s)
+    # axs[1].set_xlabel('Number of Agents')
+    # axs[1].set_ylabel('Success Rate')
+    # axs[1].legend(loc='lower right')
     # done
     f.tight_layout()
     f.savefig(f"{figure_folder}/{results_name}_lens_stats.pdf")
