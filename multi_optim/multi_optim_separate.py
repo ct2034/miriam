@@ -17,7 +17,7 @@ from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 
 from multi_optim.configs import configs_all_maps
 from multi_optim.eval import Eval
-from multi_optim.multi_optim_run import RADIUS, run_optimization
+from multi_optim.multi_optim_run import run_optimization
 from multi_optim.state import ITERATOR_TYPE
 
 matplotlib.use('cairo')

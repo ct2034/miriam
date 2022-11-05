@@ -12,7 +12,7 @@ configs = {
         "lr_pos": 1e-2,
         "lr_policy": 1e-3,
         "max_n_agents": 2,
-        "map_name": "x",
+        "map_name": "x.png",
         "seed": 0,
         "prefix": "debug"
     },
@@ -27,7 +27,7 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 1e-3,
         "max_n_agents": 4,
-        "map_name": "x",
+        "map_name": "x.png",
         "seed": 0,
         "prefix": "tiny"
     },
@@ -42,7 +42,7 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 3e-4,
         "max_n_agents": 6,
-        "map_name": "x",
+        "map_name": "x.png",
         "seed": 0,
         "prefix": "small"
     },
@@ -57,7 +57,7 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 1e-4,
         "max_n_agents": 8,
-        "map_name": "x",
+        "map_name": "x.png",
         "seed": 0,
         "prefix": "medium"
     },
@@ -72,7 +72,7 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 1e-4,
         "max_n_agents": 10,
-        "map_name": "x",
+        "map_name": "x.png",
         "seed": 0,
         "prefix": "large"
     },
@@ -87,7 +87,7 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 1e-4,
         "max_n_agents": 10,
-        "map_fname": "roadmaps/odrm/odrm_eval/maps/plain.png",
+        "map_name": "plain.png",
         "seed": 0,
         "prefix": "large_plain"
     },
@@ -102,8 +102,9 @@ configs = {
         "lr_pos": 1e-3,
         "lr_policy": 1e-4,
         "max_n_agents": 8,
-        "map_fname": "roadmaps/odrm/odrm_eval/maps/mapf_benchm_random-32-32-10.png",
+        "map_name": "random-32-32-10.map",
         "seed": 0,
+        "radius": 0.25 * (1. / 32),
         "prefix": "mapf_benchm_random-32-32-10"
     }
 }

@@ -9,11 +9,12 @@ import numpy as np
 import png
 import torch
 from bresenham import bresenham
-from definitions import DISTANCE, MAP_IMG, PATH_W_COORDS, POS
 from libpysal import weights
 from libpysal.cg import voronoi_frames
 from networkx.exception import NetworkXNoPath, NodeNotFound
 from pyflann import FLANN
+
+from definitions import DISTANCE, MAP_IMG, PATH_W_COORDS, POS
 from scenarios.visualization import get_colors
 from tools import ProgressBar
 

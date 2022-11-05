@@ -3,7 +3,7 @@ import logging
 import torch.multiprocessing as tmp
 
 from multi_optim.configs import configs
-from multi_optim.multi_optim_run import RADIUS, run_optimization
+from multi_optim.multi_optim_run import run_optimization
 
 if __name__ == "__main__":
     # multiprocessing
@@ -14,8 +14,8 @@ if __name__ == "__main__":
     pool = tmp.Pool(processes=n_processes)
 
     for prefix in [
-        "debug",
-        "random_32_32_10"
+        # "debug",
+        "mapf_benchm_random-32-32-10"
     ]:
         if prefix == "debug":
             level = logging.DEBUG

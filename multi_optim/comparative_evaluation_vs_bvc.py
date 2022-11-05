@@ -21,7 +21,7 @@ from scenarios.visualization import get_colors
 from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
 
-from multi_optim.multi_optim_run import ITERATOR_TYPE, RADIUS
+from multi_optim.multi_optim_run import ITERATOR_TYPE
 
 matplotlib.use('cairo')
 plt.style.use('bmh')

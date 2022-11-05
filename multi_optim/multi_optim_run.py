@@ -11,24 +11,25 @@ from typing import Dict, List, Optional, Tuple
 import git.repo
 import networkx as nx
 import numpy as np
+import torch
+import torch.multiprocessing as tmp
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator
+from pyflann import FLANN
+from torch_geometric.loader import DataLoader
+
 import scenarios
 import scenarios.solvers
 import tools
-import torch
-import torch.multiprocessing as tmp
 import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
-from matplotlib import pyplot as plt
-from matplotlib.ticker import MaxNLocator
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     make_graph_and_flann,
                                                     optimize_poses_from_paths,
                                                     read_map, sample_points)
 from tools import ProgressBar, StatCollector, set_ulimit
-from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
     from configs import configs_all_maps
@@ -42,7 +43,6 @@ else:
 logger = logging.getLogger(__name__)
 
 MAX_STEPS = 10
-RADIUS = 0.001
 
 
 def sample_trajectory_proxy(args):
@@ -50,7 +50,7 @@ def sample_trajectory_proxy(args):
 
 
 def sample_trajectory(seed: int, graph: nx.Graph, n_agents: int,
-                      model: EdgePolicyModel, map_img: MAP_IMG,
+                      model: EdgePolicyModel, map_img: MAP_IMG, radius: float,
                       max_steps: int = MAX_STEPS):
     """Sample a trajectory using the given policy."""
     start_time = time.process_time()
@@ -90,14 +90,14 @@ def sample_trajectory(seed: int, graph: nx.Graph, n_agents: int,
                       len(set(goals)) == n_agents)
         # is this solvable?
         optimal_paths = scenarios.solvers.cached_cbsr(
-            graph, starts, goals, radius=RADIUS,
+            graph, starts, goals, radius=radius,
             timeout=int(DEFAULT_TIMEOUT_S*.9))
         solvable = (optimal_paths != INVALID)
 
     assert starts_coord is not None
     assert goals_coord is not None
 
-    state = ScenarioState(graph, starts, goals, model, RADIUS)
+    state = ScenarioState(graph, starts, goals, model, radius)
     state.run()
 
     # Sample states
@@ -172,7 +172,7 @@ def write_stats_png(prefix, save_folder, stats):
 
 
 def sample_trajectories_in_parallel(
-        model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, flann,
+        model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, radius: float, flann,
         n_agents: int, n_episodes: int, prefix: str, require_paths: bool,
         save_folder, pool, rng: Random
 ) -> Tuple[str, List[List[PATH_W_COORDS]], float, float]:
@@ -180,7 +180,7 @@ def sample_trajectories_in_parallel(
     model_copy.load_state_dict(copy.deepcopy(model.state_dict()))
     model_copy.eval()
 
-    params = [(s, graph, n_agents, model_copy, map_img)
+    params = [(s, graph, n_agents, model_copy, map_img, radius)
               for s in rng.sample(
         range(2**32), k=n_episodes)]
     generation_hash = tools.hasher([], {
@@ -249,6 +249,7 @@ def run_optimization(
         max_n_agents: int,
         map_name: str,
         seed: int,
+        radius: float = 0.001,
         load_policy_model: Optional[str] = None,
         load_roadmap: Optional[str] = None,
         prefix: str = "noname",
@@ -282,7 +283,7 @@ def run_optimization(
     n_agents: int = n_agents_s[i_n_agents]
 
     # Roadmap
-    map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
+    map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}"
     map_img: MAP_IMG = read_map(map_fname)
     if load_roadmap is not None:
         # load graph from file
@@ -327,7 +328,7 @@ def run_optimization(
     # little less agents for evaluation
     eval = Eval(g, map_img,
                 n_agents_s=n_agents_s, n_eval_per_n_agents=8,
-                iterator_type=ITERATOR_TYPE, radius=RADIUS)
+                iterator_type=ITERATOR_TYPE, radius=radius)
 
     # Data for policy
     clear_data_folder(prefix, save_folder)
@@ -352,6 +353,7 @@ def run_optimization(
         "lr_policy": lr_policy,
         "max_n_agents": max_n_agents,
         "map_fname": map_fname,
+        "radius": radius,
         "load_policy_model": (
             load_policy_model if load_policy_model else "None"),
         "prefix": prefix
@@ -418,7 +420,7 @@ def run_optimization(
         #     "otherwise we dont need optiomal solution that often"
         old_data_len = len(epds)
         new_fname, paths_s, ts_max, ts_mean = sample_trajectories_in_parallel(
-            policy_model, g, map_img, flann, n_agents,
+            policy_model, g, map_img, radius, flann, n_agents,
             n_episodes_per_run_policy, prefix, optimize_poses_now,
             save_folder, pool, rng)
         epds.add_file(new_fname)
