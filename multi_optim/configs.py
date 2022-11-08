@@ -92,7 +92,7 @@ configs = {
         "prefix": "large_plain"
     },
     "mapf_benchm_random-32-32-10": {
-        "n_nodes": 64,
+        "n_nodes": 128,
         "n_runs_pose": 64,
         "n_runs_policy": 64,
         "n_episodes_per_run_policy": 256,

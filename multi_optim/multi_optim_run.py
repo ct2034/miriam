@@ -29,6 +29,7 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     make_graph_and_flann,
                                                     optimize_poses_from_paths,
                                                     read_map, sample_points)
+from scenarios.generators import movingai_read_mapfile
 from tools import ProgressBar, StatCollector, set_ulimit
 
 if __name__ == "__main__":
@@ -284,7 +285,12 @@ def run_optimization(
 
     # Roadmap
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}"
-    map_img: MAP_IMG = read_map(map_fname)
+    if os.path.splitext(map_fname)[1] == ".png":
+        map_img: MAP_IMG = read_map(map_fname)
+    elif os.path.splitext(map_fname)[1] == ".map":
+        map_np = movingai_read_mapfile(map_fname)
+        map_img = tuple(map(tuple, (map_np-1)*-255))
+        # TODO: Inflate map
     if load_roadmap is not None:
         # load graph from file
         graph_loaded = nx.read_gpickle(load_roadmap)
