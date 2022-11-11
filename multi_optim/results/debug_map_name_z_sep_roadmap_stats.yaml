@@ -1,0 +1,183 @@
+data_len:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 2.0
+  - 6.0
+  - 6.0
+general_generation_n_agents_percentage:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 1.0
+  - 1.0
+  - 1.0
+general_length_2:
+  t:
+  - 8
+  x:
+  - 0.5896249601938589
+general_new_data_percentage:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 1.0
+  - 0.0
+  - 0.0
+general_regret_2:
+  t:
+  - 8
+  x:
+  - 0.0
+general_success_2:
+  t:
+  - 4
+  - 8
+  x:
+  - 0.0
+  - 1.0
+policy_accuracy_2:
+  t:
+  - 0
+  x:
+  - 0.5
+policy_regret_2:
+  t:
+  - 0
+  x:
+  - 0.31819325452670455
+policy_success_2:
+  t:
+  - 0
+  x:
+  - 1.0
+roadmap_test_length:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - .nan
+  - 1.0
+  - 0.8131549618272033
+roadmap_training_length:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 3.013969898223877
+  - 1.2445392608642578
+  - 2.572296380996704
+runtime_eval:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 1.893341683000001
+  - 2.0908516870000007
+  - 1.609985733000002
+runtime_eval_time_perc:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 0.9492190770655271
+  - 0.9636580393895081
+  - 0.9489921707558224
+runtime_full:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 1.9946308800000008
+  - 2.169702946000001
+  - 1.696521618000002
+runtime_generation_all:
+  t:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  x:
+  - 0.06841891400000044
+  - 0.05165487100000021
+  - 0.05828446499999984
+  - 0.05359916000000098
+  - 0.05442293900000017
+  - 0.0561289649999992
+  - 0.05489059399999974
+  - 0.06413503399999954
+  - 0.060598434000002754
+runtime_generation_max:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 0.07189894899999993
+  - 1.3322574339999997
+  - 0.4214832099999999
+runtime_generation_mean:
+  t:
+  - 0
+  - 4
+  - 8
+  x:
+  - 0.04491746799999996
+  - 0.9553965775
+  - 0.3783521459999999
+runtime_optim_poses:
+  t:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  x:
+  - 0.03269901200000014
+  - 0.032634072999998764
+  - 0.022465189000000052
+  - 0.023299009999998788
+  - 0.024254389999999404
+  - 0.02739881100000119
+  - 0.025490880000001326
+  - 0.02647023100000112
+  - 0.025776341000000258
+static:
+  batch_size_policy: 16
+  git_hash: ad2afa41fed98888def60d6eea886220da355746
+  gpu: cuda:5
+  hostname: hal-9000
+  load_policy_model: None
+  lr_policy: 0.001
+  lr_pos: 0.01
+  map_fname: roadmaps/odrm/odrm_eval/maps/z.png
+  max_n_agents: 2
+  n_episodes_per_run_policy: 2
+  n_epochs_per_run_policy: 1
+  n_nodes: 8
+  n_runs_policy: 0
+  n_runs_pose: 8
+  prefix: debug_map_name_z_sep_roadmap
+  runtime: '0:00:14.979022'
+  started_at: '2022-10-29T13:57:25.147705'
+  stats_every: 4
