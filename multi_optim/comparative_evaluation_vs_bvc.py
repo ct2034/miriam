@@ -9,19 +9,19 @@ import networkx as nx
 import numpy as np
 import torch
 import yaml
+from matplotlib import pyplot as plt
+from pyflann import FLANN
+
 from definitions import (FREE, IDX_AVERAGE_LENGTH, IDX_SUCCESS, INVALID,
                          MAP_IMG, OBSTACLE, PATH, POS, N)
-from matplotlib import pyplot as plt
+from multi_optim.multi_optim_run import ITERATOR_TYPE
 from planner.bvc.plan_bvc import plan as plan_bvc
 from planner.policylearn.edge_policy import EdgePolicyModel
-from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import (check_edge, is_coord_free,
                                                     read_map, sample_points)
 from scenarios.visualization import get_colors
 from sim.decentralized.policy import LearnedPolicy, OptimalPolicy
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
-
-from multi_optim.multi_optim_run import ITERATOR_TYPE
 
 matplotlib.use('cairo')
 plt.style.use('bmh')
@@ -79,6 +79,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
     with open(yaml_fname, 'r') as f:
         stats = yaml.load(f, Loader=yaml.SafeLoader)
     map_img = read_map(stats['static']['map_fname'])
+    radius: float = 0.001
 
     lens_our: np.ndarray = np.zeros((len(n_agents_s), n_eval))
     lens_bvc: np.ndarray = np.zeros((len(n_agents_s), n_eval))
@@ -115,7 +116,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
                 g_our,
                 starts_our.tolist(),
                 goals_our.tolist(),
-                radius=RADIUS/100,
+                radius=radius,
                 rng=rng)
             total_lenght_our = None  # type: Optional[float]
             paths_our: Optional[List[PATH]] = None
@@ -149,7 +150,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
 
             # eval bvc
             res_bvc = plan_bvc(map_img, starts_coords.tolist(),
-                               goals_coords.tolist(), radius=RADIUS)
+                               goals_coords.tolist(), radius=radius)
             if isinstance(res_bvc, np.ndarray):  # not invalid
                 lens_bvc[i_na][i_e] = get_total_len(
                     starts_coords, goals_coords, res_bvc)
@@ -242,8 +243,8 @@ def plot(figure_folder: str, results_name: str):
     for el in elemtns['fliers']:
         el.set_markeredgecolor(colors[0])
     elemtns = axs[1].boxplot(data_lenghts[1],
-                                positions=np.array(n_agents_s)+width/2,
-                                widths=width)
+                             positions=np.array(n_agents_s)+width/2,
+                             widths=width)
     for el in elemtns['boxes']:
         el.set_color(colors[1])
     for el in elemtns['medians']:
@@ -275,14 +276,18 @@ if __name__ == '__main__':
 
     # parameters
     logger.setLevel(logging.INFO)
-    results_name: str = 'large'
-    base_folder: str = 'multi_optim/results'
-    figure_folder: str = f'{base_folder}/eval_vs_bvc'
-    if not os.path.exists(figure_folder):
-        os.makedirs(figure_folder)
-    n_agents_s: List[int] = [2, 4, 6, 8]
-    n_eval: int = 10
+    prefixes: List[str] = [
+        "large",
+        "large_map_name_c",
+        "large_map_name_z"]
+    for prefix in prefixes:
+        base_folder: str = 'multi_optim/results'
+        figure_folder: str = f'{base_folder}/eval_vs_bvc'
+        if not os.path.exists(figure_folder):
+            os.makedirs(figure_folder)
+        n_agents_s: List[int] = [2, 4, 6, 8]
+        n_eval: int = 10
 
-    # eval(logger, results_name, base_folder,
-    #      figure_folder, n_agents_s, n_eval)
-    plot(figure_folder, results_name)
+        eval(logger, prefix, base_folder,
+             figure_folder, n_agents_s, n_eval)
+        plot(figure_folder, prefix)
