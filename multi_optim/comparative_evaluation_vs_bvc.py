@@ -7,6 +7,7 @@ from typing import List, Optional
 import matplotlib
 import networkx as nx
 import numpy as np
+import numpy.typing as npt
 import torch
 import yaml
 from matplotlib import pyplot as plt
@@ -166,7 +167,7 @@ def plot(figure_folder: str, results_name: str):
     yaml_data = yaml.load(
         open(f"{figure_folder}/{results_name}_lens.yaml"),
         Loader=yaml.SafeLoader)
-    n_agents_s = yaml_data['n_agents_s']
+    n_agents_s: List[int] = yaml_data['n_agents_s']
     lens_our = np.array(yaml_data['lens_our'])
     lens_bvc = np.array(yaml_data['lens_bvc'])
 
@@ -198,7 +199,8 @@ def plot(figure_folder: str, results_name: str):
     both_successfull = np.logical_and(lens_our != 0, lens_bvc != 0)
     # 0:our, 1:bvc
     data_success = [[0 for _ in range(len(n_agents_s))] for _ in range(2)]
-    data_lenghts = [[list() for _ in range(len(n_agents_s))] for _ in range(2)]
+    data_lenghts = [[list() for _ in range(len(n_agents_s))]
+                    for _ in range(2)]  # type: List[List[List[float]]]
     for i_na, n_agents in enumerate(n_agents_s):
         data_success[0][i_na] = np.count_nonzero(
             lens_our[i_na, :] != 0) / n_samples
@@ -269,6 +271,105 @@ def plot(figure_folder: str, results_name: str):
     plt.close(f)
 
 
+def plot_multiple_prefixes(figure_folder: str, prefixes: List[str]):
+    n_r = len(prefixes)
+    f, axs = plt.subplots(n_r, 2, figsize=(8, 9))
+    assert isinstance(axs, np.ndarray)
+    assert axs.shape == (n_r, 2)
+    colors = plt.rcParams['axes.prop_cycle'].by_key()[
+        'color']  # type: ignore
+    for i_r, prefix in enumerate(prefixes):
+        yaml_data = yaml.load(
+            open(f"{figure_folder}/{prefix}_lens.yaml"),
+            Loader=yaml.SafeLoader)
+        n_agents_s = yaml_data['n_agents_s']
+        lens_our = np.array(yaml_data['lens_our'])
+        lens_bvc = np.array(yaml_data['lens_bvc'])
+
+        # plot stats
+        n_samples = np.shape(lens_our)[1]
+        assert isinstance(axs, np.ndarray)
+        both_successfull = np.logical_and(lens_our != 0, lens_bvc != 0)
+        # 0:our, 1:bvc
+        data_success = [[0 for _ in range(len(n_agents_s))]
+                        for _ in range(2)]  # List[List[int]]
+        data_lenghts = [[list() for _ in range(len(n_agents_s))]
+                        for _ in range(2)]  # List[List[List[float]]]
+        for i_na, n_agents in enumerate(n_agents_s):
+            data_success[0][i_na] = np.count_nonzero(
+                lens_our[i_na, :] != 0) / n_samples
+            data_success[1][i_na] = np.count_nonzero(
+                lens_bvc[i_na, :] != 0) / n_samples
+            for i_e in range(n_samples):
+                if both_successfull[i_na, i_e]:
+                    data_lenghts[0][i_na].append(lens_our[i_na, i_e])
+                    data_lenghts[1][i_na].append(lens_bvc[i_na, i_e])
+        lenghts_min_max = [
+            min(min([min(x) for x in data_lenghts[0] if len(x) > 0]),
+                min([min(x) for x in data_lenghts[1] if len(x) > 0])),
+            max(max([max(x) for x in data_lenghts[0] if len(x) > 0]),
+                max([max(x) for x in data_lenghts[1] if len(x) > 0]))
+        ]
+        for i_na in range(len(n_agents_s)):
+            for i_a in range(2):
+                if(len(data_lenghts[i_a][i_na]) == 0):
+                    data_lenghts[i_a][i_na].append(99)
+
+        width = .8
+        axs[i_r, 0].bar(np.array(n_agents_s)-width/2,
+                        data_success[0], width=width, label='ORDP')
+        axs[i_r, 0].bar(np.array(n_agents_s)+width/2,
+                        data_success[1], width=width, label='BVC')
+        axs[i_r, 0].set_xlim(1, max(n_agents_s)+1)
+        axs[i_r, 0].set_xticks(n_agents_s)
+        axs[i_r, 0].set_xlabel('Number of Agents')
+        axs[i_r, 0].set_ylabel('Success Rate')
+        axs[i_r, 0].legend(loc='center right')
+        elemtns = axs[i_r, 1].boxplot(data_lenghts[0],
+                                      positions=np.array(
+            n_agents_s)-width/2,
+            widths=width)
+        for el in elemtns['boxes']:
+            el.set_color(colors[0])
+        for el in elemtns['medians']:
+            el.set_color(colors[0])
+        for el in elemtns['whiskers']:
+            el.set_color(colors[0])
+        for el in elemtns['caps']:
+            el.set_color(colors[0])
+        for el in elemtns['fliers']:
+            el.set_markeredgecolor(colors[0])
+        elemtns = axs[i_r, 1].boxplot(data_lenghts[1],
+                                      positions=np.array(
+            n_agents_s)+width/2,
+            widths=width)
+        for el in elemtns['boxes']:
+            el.set_color(colors[1])
+        for el in elemtns['medians']:
+            el.set_color(colors[1])
+        for el in elemtns['whiskers']:
+            el.set_color(colors[1])
+        for el in elemtns['caps']:
+            el.set_color(colors[1])
+        for el in elemtns['fliers']:
+            el.set_markeredgecolor(colors[1])
+        axs[i_r, 1].plot(0, 99, color=colors[0],
+                         label='ORDP')  # for legend
+        axs[i_r, 1].plot(0, 99, color=colors[1],
+                         label='BVC')  # for legend
+        axs[i_r, 1].set_xlim(1, max(n_agents_s)+1)
+        axs[i_r, 1].set_ylim(lenghts_min_max[0]-.1,
+                             lenghts_min_max[1]+.1)
+        axs[i_r, 1].set_xticks(n_agents_s)
+        axs[i_r, 1].set_xlabel('Number of Agents')
+        axs[i_r, 1].set_ylabel('Average Pathlength')
+        axs[i_r, 1].legend()
+        f.tight_layout()
+    shortes_prefix = prefixes[np.argmin([len(x) for x in prefixes])]
+    f.savefig(f"{figure_folder}/{shortes_prefix}_all_maps_lens_stats.pdf")
+    plt.close(f)
+
+
 if __name__ == '__main__':
     logging.basicConfig()
     logging.getLogger("planner.bvc.plan_bvc").setLevel(logging.DEBUG)
@@ -280,14 +381,15 @@ if __name__ == '__main__':
         "large",
         "large_map_name_c",
         "large_map_name_z"]
+    base_folder: str = 'multi_optim/results'
+    figure_folder: str = f'{base_folder}/eval_vs_bvc'
     for prefix in prefixes:
-        base_folder: str = 'multi_optim/results'
-        figure_folder: str = f'{base_folder}/eval_vs_bvc'
         if not os.path.exists(figure_folder):
             os.makedirs(figure_folder)
         n_agents_s: List[int] = [2, 4, 6, 8]
         n_eval: int = 10
 
-        eval(logger, prefix, base_folder,
-             figure_folder, n_agents_s, n_eval)
-        plot(figure_folder, prefix)
+        # eval(logger, prefix, base_folder,
+        #      figure_folder, n_agents_s, n_eval)
+        # plot(figure_folder, prefix)
+    plot_multiple_prefixes(figure_folder, prefixes)
