@@ -164,6 +164,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval):
 
 
 def plot(figure_folder: str, results_name: str):
+    """Plot the results."""
     yaml_data = yaml.load(
         open(f"{figure_folder}/{results_name}_lens.yaml"),
         Loader=yaml.SafeLoader)
@@ -286,6 +287,12 @@ def plot_multiple_prefixes(figure_folder: str, prefixes: List[str]):
         lens_our = np.array(yaml_data['lens_our'])
         lens_bvc = np.array(yaml_data['lens_bvc'])
 
+        yaml_our = yaml.load(
+            open(f"{figure_folder}/../{prefix}_stats.yaml"),
+            Loader=yaml.SafeLoader)
+        map_fname = yaml_our['static']['map_fname']
+        map_name = map_fname.split('/')[-1].split('.')[0]
+
         # plot stats
         n_samples = np.shape(lens_our)[1]
         assert isinstance(axs, np.ndarray)
@@ -325,6 +332,7 @@ def plot_multiple_prefixes(figure_folder: str, prefixes: List[str]):
         axs[i_r, 0].set_xlabel('Number of Agents')
         axs[i_r, 0].set_ylabel('Success Rate')
         axs[i_r, 0].legend(loc='center right')
+        axs[i_r, 0].set_title(f"Map {map_name.upper()}")
         elemtns = axs[i_r, 1].boxplot(data_lenghts[0],
                                       positions=np.array(
             n_agents_s)-width/2,
@@ -361,9 +369,11 @@ def plot_multiple_prefixes(figure_folder: str, prefixes: List[str]):
         axs[i_r, 1].set_ylim(lenghts_min_max[0]-.1,
                              lenghts_min_max[1]+.1)
         axs[i_r, 1].set_xticks(n_agents_s)
+        axs[i_r, 1].set_xticklabels(n_agents_s)
         axs[i_r, 1].set_xlabel('Number of Agents')
         axs[i_r, 1].set_ylabel('Average Pathlength')
         axs[i_r, 1].legend()
+        axs[i_r, 1].set_title(f"Map {map_name.upper()}")
         f.tight_layout()
     shortes_prefix = prefixes[np.argmin([len(x) for x in prefixes])]
     f.savefig(f"{figure_folder}/{shortes_prefix}_all_maps_lens_stats.pdf")
