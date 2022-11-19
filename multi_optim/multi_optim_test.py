@@ -3,17 +3,19 @@ from random import Random
 from unittest.mock import patch
 
 import networkx as nx
+import numpy as np
 import torch
+
+import multi_optim.state
 from definitions import POS
+from multi_optim.multi_optim_run import (inflate_map, optimize_policy,
+                                         sample_trajectory)
 from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.edge_policy_test import make_data
 from scenarios.test_helper import make_cache_folder_and_set_envvar
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import RaisingPolicy, RandomPolicy
 from sim.decentralized.runner import to_agent_objects
-
-import multi_optim.state
-from multi_optim.multi_optim_run import optimize_policy, sample_trajectory
 
 
 class MultiOptimTest(unittest.TestCase):
@@ -67,7 +69,7 @@ class MultiOptimTest(unittest.TestCase):
             for _ in range(n_data):
                 datas.append(make_data(rng, num_node_features, n_nodes))
             policy, loss = optimize_policy(
-                policy, batch_size=5, optimizer=optimizer, epds=datas)
+                policy, batch_size=5, optimizer=optimizer, epds=datas, n_epochs=1)
             test_acc = policy.accuracy(test_data)
             print(test_acc)
 
@@ -119,7 +121,8 @@ class MultiOptimTest(unittest.TestCase):
                     n_agents=len(starts),
                     model=model,
                     map_img=((255,),),
-                    max_steps=10)
+                    max_steps=10,
+                    radius=.1)
                 print(f"{ds=}")
                 print(f"{paths=}")
                 print(f"{t=}")
@@ -136,3 +139,16 @@ class MultiOptimTest(unittest.TestCase):
             self.assertEqual(len(path), 4)
             self.assertEqual(path[0], starts[i_a])
             self.assertEqual(path[3], goals[i_a])
+
+    def test_inflate_map(self):
+        img = np.array(
+            [[255, 0, 0, 0, 0],
+             [255, 0, 0, 0, 0],
+             [255, 0, 0, 255, 0],
+             [0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0]])
+        inflated = inflate_map(img, 3)
+
+
+if __name__ == '__main__':
+    unittest.main()

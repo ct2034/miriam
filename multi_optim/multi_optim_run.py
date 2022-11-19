@@ -287,10 +287,15 @@ def run_optimization(
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}"
     if os.path.splitext(map_fname)[1] == ".png":
         map_img: MAP_IMG = read_map(map_fname)
+        map_img_inflated = map_img  # no difference here TODO: maybe yes?
     elif os.path.splitext(map_fname)[1] == ".map":
         map_np = movingai_read_mapfile(map_fname)
         map_img = gridmap_to_map_img(map_np)
-        # TODO: Inflate map
+        # lets inflate the map a bit
+        SUPER_RES_MULTIPLIER = 3
+        map_np_inflated = inflate_map(map_np, SUPER_RES_MULTIPLIER)
+        map_img_inflated = gridmap_to_map_img(map_np_inflated)
+
     if load_roadmap is not None:
         # load graph from file
         graph_loaded = nx.read_gpickle(load_roadmap)
@@ -301,11 +306,11 @@ def run_optimization(
                            device=torch.device("cpu"),
                            dtype=torch.float, requires_grad=True)
     else:
-        pos = sample_points(n_nodes, map_img, rng)
+        pos = sample_points(n_nodes, map_img_inflated, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g: nx.Graph
     flann: FLANN
-    (g, flann) = make_graph_and_flann(pos, map_img)
+    (g, flann) = make_graph_and_flann(pos, map_img_inflated)
 
     # GPU or CPU?
     if torch.cuda.is_available():
@@ -447,7 +452,7 @@ def run_optimization(
         if optimize_poses_now:
             (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
-                g, pos, paths_s, map_img, optimizer_pos)
+                g, pos, paths_s, map_img_inflated, optimizer_pos)
             end_time_optim_poses = time.process_time()
             stats.add("runtime_optim_poses", i_r, (
                 end_time_optim_poses - end_time_generation
@@ -570,6 +575,31 @@ def run_optimization(
 
     wandb_run.finish()
     logger.info(stats.get_statics())
+
+
+def inflate_map(map_np, SUPER_RES_MULTIPLIER):
+    map_np_superres = np.repeat(np.repeat(
+        map_np, SUPER_RES_MULTIPLIER, axis=0),
+        SUPER_RES_MULTIPLIER, axis=1)
+    map_np_inflated = np.zeros_like(map_np_superres)
+    for x in range(map_np_inflated.shape[0]):
+        for y in range(map_np_inflated.shape[1]):
+            potential = map_np_superres[x, y]
+            if x > 0:
+                potential = max(potential,
+                                map_np_superres[x-1, y])
+            if x < map_np_inflated.shape[0]-1:
+                potential = max(potential,
+                                map_np_superres[x+1, y])
+            if y > 0:
+                potential = max(potential,
+                                map_np_superres[x, y-1])
+            if y < map_np_inflated.shape[1]-1:
+                potential = max(potential,
+                                map_np_superres[x, y+1])
+            map_np_inflated[x, y] = potential
+
+    return map_np_inflated
 
 
 def gridmap_to_map_img(map_np: np.ndarray) -> MAP_IMG:
