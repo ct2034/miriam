@@ -780,113 +780,82 @@ def plot(figure_folder: str, results_name: str):
     plt.close(f)
 
     # plot stats
-    # n_samples = np.shape(lens_our)[1]
-    # f, axs = plt.subplots(1, 1, figsize=(4.5, 4.5))
-    # # assert isinstance(axs, np.ndarray)
-    # axs = [axs]
-    # success_our = np.logical_not(np.isnan(lens_our))
-    # success_dhc_by_edge_len = np.logical_not(np.isnan(lens_dhc_by_edge_len))
-    # success_dhc_by_nodes = np.logical_not(np.isnan(lens_dhc_by_nodes))
-    # diff_vs_dhc_by_edge_len = lens_dhc_by_edge_len - lens_our
-    # diff_vs_dhc_by_nodes = lens_dhc_by_nodes - lens_our
+    n_samples = np.shape(yaml_data["lens_our"])[1]
+    f, ax = plt.subplots(1, 1, figsize=(4.5, 4.5))
+    success = {}
+    for key in yaml_data.keys():
+        if key.startswith('lens_'):
+            success[key] = np.logical_not(np.isnan(yaml_data[key]))
+    diffs = {}
+    diffs_list = {}
+    for key in yaml_data.keys():
+        if key.startswith('lens_'):
+            if key != 'lens_our':
+                diffs[key] = yaml_data[key] - yaml_data['lens_our']
+                diffs_list[key] = [list() for _ in range(len(n_agents_s))]
+                for i_na, n_agents in enumerate(n_agents_s):
+                    for i_s in range(n_samples):
+                        if success[key][i_na, i_s] and success['lens_our'][i_na, i_s]:
+                            diffs_list[key][i_na].append(diffs[key][i_na, i_s])
 
-    # # for i_na, n_agents in enumerate(n_agents_s):
-    # #     data_success[0][i_na] = np.count_nonzero(
-    # #         lens_our[i_na, :] != 0) / n_samples
-    # #     data_success[1][i_na] = np.count_nonzero(
-    # #         lens_bvc[i_na, :] != 0) / n_samples
-    # #     for i_e in range(n_samples):
-    # #         if both_successfull[i_na, i_e]:
-    # #             data_lenghts[0][i_na].append(lens_our[i_na, i_e])
-    # #             data_lenghts[1][i_na].append(lens_bvc[i_na, i_e])
-    # diffs_min_max = [
-    #     min(min([min(x) for x in diff_vs_dhc_by_edge_len if len(x) > 0]),
-    #         min([min(x) for x in diff_vs_dhc_by_nodes if len(x) > 0])),
-    #     max(max([max(x) for x in diff_vs_dhc_by_edge_len if len(x) > 0]),
-    #         max([max(x) for x in diff_vs_dhc_by_nodes if len(x) > 0]))
-    # ]
-    # diff_vs_dhc_by_edge_len_list = [list() for _ in range(len(n_agents_s))]
-    # diff_vs_dhc_by_nodes_list = [list() for _ in range(len(n_agents_s))]
-    # for i_na, n_agents in enumerate(n_agents_s):
-    #     for i_e in range(n_samples):
-    #         if success_our[i_na, i_e] and success_dhc_by_edge_len[i_na, i_e]:
-    #             diff_vs_dhc_by_edge_len_list[i_na].append(
-    #                 diff_vs_dhc_by_edge_len[i_na, i_e])
-    #         if success_our[i_na, i_e] and success_dhc_by_nodes[i_na, i_e]:
-    #             diff_vs_dhc_by_nodes_list[i_na].append(
-    #                 diff_vs_dhc_by_nodes[i_na, i_e])
+    diffs_min_max = [1000, -1000]
+    for diff in diffs_list.values():
+        diffs_min_max = [
+            min(min([min(x) for x in diff if len(x) > 0]),
+                diffs_min_max[0]),
+            max(max([max(x) for x in diff if len(x) > 0]),
+                diffs_min_max[1])
+        ]
 
-    # width = .8
-    # # lengths
-    # axs[0].boxplot([0, 1],
-    #                positions=[-20],
-    #                widths=width)
-    # elemtns = axs[0].boxplot(diff_vs_dhc_by_edge_len_list,
-    #                          positions=np.array(n_agents_s)-width/2,
-    #                          widths=width)
-    # for el in elemtns['boxes']:
-    #     el.set_color(colors[1])
-    # for el in elemtns['medians']:
-    #     el.set_color(colors[1])
-    # for el in elemtns['whiskers']:
-    #     el.set_color(colors[1])
-    # for el in elemtns['caps']:
-    #     el.set_color(colors[1])
-    # for el in elemtns['fliers']:
-    #     el.set_markeredgecolor(colors[1])
+    width = .8
+    # lengths
+    ax.boxplot([0, 1],
+               positions=[-20],
+               widths=width)
+    elemtns = ax.boxplot(diffs_list['lens_dhc'],
+                         positions=np.array(n_agents_s)-width/2,
+                         widths=width)
+    for el in elemtns['boxes']:
+        el.set_color(colors[1])
+    for el in elemtns['medians']:
+        el.set_color(colors[1])
+    for el in elemtns['whiskers']:
+        el.set_color(colors[1])
+    for el in elemtns['caps']:
+        el.set_color(colors[1])
+    for el in elemtns['fliers']:
+        el.set_markeredgecolor(colors[1])
 
-    # elemtns = axs[0].boxplot(diff_vs_dhc_by_nodes_list,
-    #                          positions=np.array(n_agents_s)+width/2,
-    #                          widths=width)
-    # for el in elemtns['boxes']:
-    #     el.set_color(colors[2])
-    # for el in elemtns['medians']:
-    #     el.set_color(colors[2])
-    # for el in elemtns['whiskers']:
-    #     el.set_color(colors[2])
-    # for el in elemtns['caps']:
-    #     el.set_color(colors[2])
-    # for el in elemtns['fliers']:
-    #     el.set_markeredgecolor(colors[2])
+    elemtns = ax.boxplot(diffs_list['lens_dhc'],
+                         positions=np.array(n_agents_s)+width/2,
+                         widths=width)
+    for el in elemtns['boxes']:
+        el.set_color(colors[2])
+    for el in elemtns['medians']:
+        el.set_color(colors[2])
+    for el in elemtns['whiskers']:
+        el.set_color(colors[2])
+    for el in elemtns['caps']:
+        el.set_color(colors[2])
+    for el in elemtns['fliers']:
+        el.set_markeredgecolor(colors[2])
 
-    # axs[0].plot(0, 99, color=colors[1],
-    #             label='ORDP vs DHC (gridmap by edge length)')  # for legend
-    # axs[0].plot(0, 99, color=colors[2],
-    #             label='ORDP vs DHC (gridmap by nr of vertices)')  # for legend
-    # axs[0].set_xlim(1, max(n_agents_s)+1)
-    # axs[0].set_ylim(diffs_min_max[0]-.1, diffs_min_max[1]+.1)
-    # axs[0].set_xticks(n_agents_s)
-    # axs[0].set_xticklabels(n_agents_s)
-    # axs[0].set_xlabel('Number of Agents')
-    # axs[0].set_ylabel('Average Pathl Length Difference DHC - ORDP')
-    # axs[0].legend()
-    # # success
-    # # width = 2. / 3.5
-    # # n_agents_s = np.array(n_agents_s)
-    # # axs[1].bar(
-    # #     n_agents_s-width,
-    # #     [np.count_nonzero(x)/n_samples for x in success_our],
-    # #     width=width, color=colors[0], label='our')
-    # # axs[1].bar(
-    # #     n_agents_s,
-    # #     [np.count_nonzero(x)/n_samples for x in success_dhc_by_edge_len],
-    # #     width=width, color=colors[1],
-    # #     label='DHC (by edge length)')
-    # # axs[1].bar(
-    # #     n_agents_s+width,
-    # #     [np.count_nonzero(x)/n_samples for x in success_dhc_by_nodes],
-    # #     width=width, color=colors[2],
-    # #     label='DHC (by nr of vertices)')
-    # # axs[1].set_xlim(1, max(n_agents_s)+1)
-    # # axs[1].set_ylim(0., 1.04)
-    # # axs[1].set_xticks(n_agents_s)
-    # # axs[1].set_xlabel('Number of Agents')
-    # # axs[1].set_ylabel('Success Rate')
-    # # axs[1].legend(loc='lower right')
-    # # done
-    # f.tight_layout()
-    # f.savefig(f"{figure_folder}/{results_name}_lens_stats.pdf")
-    # plt.close(f)
+    # TODO: naming / why two times?
+    ax.plot(0, 99, color=colors[1],
+            label='ORDP vs DHC (gridmap by edge length)')  # for legend
+    ax.plot(0, 99, color=colors[2],
+            label='ORDP vs DHC (gridmap by nr of vertices)')  # for legend
+    ax.set_xlim(1, max(n_agents_s)+1)
+    ax.set_ylim(diffs_min_max[0]-.1, diffs_min_max[1]+.1)
+    ax.set_xticks(n_agents_s)
+    ax.set_xticklabels(n_agents_s)
+    ax.set_xlabel('Number of Agents')
+    ax.set_ylabel('Average Pathl Length Difference DHC - ORDP')
+    ax.legend()
+
+    f.tight_layout()
+    f.savefig(f"{figure_folder}/{results_name}_lens_stats.pdf")
+    plt.close(f)
 
 
 if __name__ == '__main__':
@@ -903,6 +872,6 @@ if __name__ == '__main__':
     n_eval: int = 10
     radius: float = 1. / 32 / 2
 
-    eval(logger, results_name, base_folder,
-         figure_folder, n_agents_s, n_eval, radius)
+    # eval(logger, results_name, base_folder,
+    #      figure_folder, n_agents_s, n_eval, radius)
     plot(figure_folder, results_name)
