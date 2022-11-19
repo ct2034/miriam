@@ -289,7 +289,7 @@ def run_optimization(
         map_img: MAP_IMG = read_map(map_fname)
     elif os.path.splitext(map_fname)[1] == ".map":
         map_np = movingai_read_mapfile(map_fname)
-        map_img = tuple(map(tuple, (map_np-1)*-255))
+        map_img = gridmap_to_map_img(map_np)
         # TODO: Inflate map
     if load_roadmap is not None:
         # load graph from file
@@ -570,6 +570,11 @@ def run_optimization(
 
     wandb_run.finish()
     logger.info(stats.get_statics())
+
+
+def gridmap_to_map_img(map_np: np.ndarray) -> MAP_IMG:
+    map_img = tuple(map(tuple, (map_np-1)*-255))
+    return map_img
 
 
 def clear_data_folder(prefix, save_folder):
