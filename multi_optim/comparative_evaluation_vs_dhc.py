@@ -553,6 +553,22 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
     elif map_fname.endswith(".map"):
         map_grid = movingai_read_mapfile(map_fname)
         map_img = gridmap_to_map_img(np.array(map_grid))
+        grid_size = map_grid.shape[0]
+
+        g_dhc = nx.Graph()
+        pos_dhc_dict = {}
+        for x in range(map_grid.shape[0]):
+            for y in range(map_grid.shape[1]):
+                if map_grid[x, y] == 0:
+                    g_dhc.add_node((x, y))
+                    if x > 0 and map_grid[x-1, y] == 0:
+                        g_dhc.add_edge((x, y), (x-1, y))
+                    if y > 0 and map_grid[x, y-1] == 0:
+                        g_dhc.add_edge((x, y), (x, y-1))
+                    # define posittion
+                    pos_dhc_dict[(x, y)] = (
+                        (x + .5) / (grid_size),
+                        (y + .5) / (grid_size))
 
         lens_our: np.ndarray = np.zeros((len(n_agents_s), n_eval))
         lens_dhc: np.ndarray = np.zeros((len(n_agents_s), n_eval))
@@ -618,7 +634,6 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
                 # find grid coordinates of sampled points
                 assert map_grid.shape[0] == map_grid.shape[1], \
                     "map must be square"
-                grid_size = map_grid.shape[0]
                 grid_coords = np.array([
                     (int(np.floor(p[0] * grid_size)),
                      int(np.floor(p[1] * grid_size)))
@@ -637,88 +652,86 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
                     total_lenght_dhc = get_total_len_in_grid(
                         grid_width=grid_size, paths=paths_dhc, points=points)
 
-                # print graphs and paths as example TODO: maybe not uninteresting
-                # if i_e == 0:
-                #     colors = get_colors(n_agents)
-                #     if (total_lenght_our is not None and
-                #         total_lenght_dhc is not None):
-                #         f_our, ax_our = plt.subplots()
-                #         f_dhc, ax_dhc = plt.subplots()
-                #         for ax in [ax_our, ax_dhc]:
-                #             ax.imshow(
-                #                 np.swapaxes(np.array(map_img), 0, 1),
-                #                 cmap='gray',
-                #                 origin='lower',
-                #                 alpha=.5,
-                #                 extent=(0, 1, 0, 1))
-                #         nx.draw_networkx(
-                #             nx.subgraph_view(
-                #                 g_our, filter_edge=lambda a, b: a != b),
-                #             pos=nx.get_node_attributes(g_our, POS),
-                #             with_labels=False,
-                #             node_size=5,
-                #             edge_color='k',
-                #             node_color='k',
-                #             ax=ax_our)
-                #         nx.draw_networkx(
-                #             g_dhc,
-                #             pos=pos_dhc_dict,
-                #             with_labels=False,
-                #             node_size=5,
-                #             edge_color='k',
-                #             node_color='k',
-                #             ax=ax_dhc)
+                # print graphs and paths as example
+                if i_e == 0:
+                    colors = get_colors(n_agents)
+                    if (total_lenght_our is not None and
+                            total_lenght_dhc is not None):
+                        f_our, ax_our = plt.subplots()
+                        f_dhc, ax_dhc = plt.subplots()
+                        for ax in [ax_our, ax_dhc]:
+                            ax.imshow(
+                                np.swapaxes(np.array(map_img), 0, 1),
+                                cmap='gray',
+                                origin='lower',
+                                alpha=.5,
+                                extent=(0, 1, 0, 1))
+                        nx.draw_networkx(
+                            nx.subgraph_view(
+                                g_our, filter_edge=lambda a, b: a != b),
+                            pos=nx.get_node_attributes(g_our, POS),
+                            with_labels=False,
+                            node_size=5,
+                            edge_color='k',
+                            node_color='k',
+                            ax=ax_our)
+                        nx.draw_networkx(
+                            g_dhc,
+                            pos=pos_dhc_dict,
+                            with_labels=False,
+                            node_size=5,
+                            edge_color='k',
+                            node_color='k',
+                            ax=ax_dhc)
 
-                #         for i_a in range(n_agents):
-                #             coordpaths_our = []
-                #             coordpaths_dhc = []
-                #             coordpaths_dhc_by_edge_len = []
-                #             # start
-                #             coordpaths_our.append(points[i_a])
-                #             coordpaths_dhc.append(points[i_a])
-                #             coordpaths_dhc_by_edge_len.append(points[i_a])
-                #             # path
-                #             assert paths_our is not None
-                #             for node in paths_our[i_a]:
-                #                 coordpaths_our.append(pos_our_np[node])
-                #             assert paths_dhc is not None
-                #             for pos in paths_dhc[i_a]:
-                #                 coordpaths_dhc.append(
-                #                     pos_dhc_np[
-                #                         coords_from_node.index(
-                #                             tuple(pos))])
-                #             # goal
-                #             coordpaths_our.append(points[i_a + n_agents])
-                #             coordpaths_dhc.append(points[i_a + n_agents])
+                        for i_a in range(n_agents):
+                            coordpaths_our = []
+                            coordpaths_dhc = []
+                            coordpaths_dhc_by_edge_len = []
+                            # start
+                            coordpaths_our.append(points[i_a])
+                            coordpaths_dhc.append(points[i_a])
+                            coordpaths_dhc_by_edge_len.append(points[i_a])
+                            # path
+                            assert paths_our is not None
+                            for node in paths_our[i_a]:
+                                coordpaths_our.append(pos_our_np[node])
+                            assert paths_dhc is not None
+                            for pos in paths_dhc[i_a]:
+                                coordpaths_dhc.append(
+                                    pos_dhc_dict[tuple(pos)])
+                            # goal
+                            coordpaths_our.append(points[i_a + n_agents])
+                            coordpaths_dhc.append(points[i_a + n_agents])
 
-                #             # plot the path
-                #             ax_our.plot(
-                #                 [coordpaths_our[i][0]
-                #                     for i in range(len(
-                #                         coordpaths_our))],
-                #                 [coordpaths_our[i][1]
-                #                     for i in range(len(
-                #                         coordpaths_our))],
-                #                 c=colors[i_a],
-                #                 linewidth=2)
-                #             ax_dhc.plot(
-                #                 [coordpaths_dhc[i][0]
-                #                     for i in range(len(
-                #                         coordpaths_dhc))],
-                #                 [coordpaths_dhc[i][1]
-                #                     for i in range(len(
-                #                         coordpaths_dhc))],
-                #                 c=colors[i_a],
-                #                 linewidth=2)
+                            # plot the path
+                            ax_our.plot(
+                                [coordpaths_our[i][0]
+                                    for i in range(len(
+                                        coordpaths_our))],
+                                [coordpaths_our[i][1]
+                                    for i in range(len(
+                                        coordpaths_our))],
+                                c=colors[i_a],
+                                linewidth=2)
+                            ax_dhc.plot(
+                                [coordpaths_dhc[i][0]
+                                    for i in range(len(
+                                        coordpaths_dhc))],
+                                [coordpaths_dhc[i][1]
+                                    for i in range(len(
+                                        coordpaths_dhc))],
+                                c=colors[i_a],
+                                linewidth=2)
 
-                #         f_our.savefig(
-                #             f"{figure_folder}/{results_name}"
-                #             + f"_paths_our_{n_agents=}.png")
-                #         f_dhc.savefig(
-                #             f"{figure_folder}/{results_name}"
-                #             + f"_paths_dhc_{n_agents=}.png")
-                #         plt.close(f_our)
-                #         plt.close(f_dhc)
+                        f_our.savefig(
+                            f"{figure_folder}/{results_name}"
+                            + f"_paths_our_{n_agents=}.png")
+                        f_dhc.savefig(
+                            f"{figure_folder}/{results_name}"
+                            + f"_paths_dhc_{n_agents=}.png")
+                        plt.close(f_our)
+                        plt.close(f_dhc)
 
                 # print results
                 logger.info("="*60)
