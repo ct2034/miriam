@@ -14,7 +14,7 @@ if __name__ == "__main__":
     pool = tmp.Pool(processes=n_processes)
 
     for prefix in [
-        # "debug",
+        "mapf_benchm_random-32-32-10_debug",
         "mapf_benchm_random-32-32-10"
     ]:
         if prefix == "debug":
@@ -32,12 +32,9 @@ if __name__ == "__main__":
         ]:
             set_fun(level)
 
-        config = configs[prefix]
-        config["n_runs_policy"] = 0
-
         # start the actual run
         run_optimization(
-            **config,
+            **configs[prefix],
             pool_in=pool)
 
     pool.close()

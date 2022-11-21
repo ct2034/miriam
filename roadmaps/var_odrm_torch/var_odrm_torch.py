@@ -114,9 +114,12 @@ def make_graph_and_flann(
     # remove isolated nodes
     subgraphs = list(nx.connected_components(g))
     i_main_graph = np.argmax([len(x) for x in subgraphs])
-    g = g.subgraph(subgraphs[i_main_graph])
+    g = g.subgraph(subgraphs[i_main_graph]).copy()
+    remapping = {x: i for i, x in enumerate(g.nodes())}
+    g = nx.relabel_nodes(g, remapping)
+    pos_new = list(nx.get_node_attributes(g, POS).values())
     flann = FLANN(random_seed=0)
-    flann.build_index(np.array(pos_np), random_seed=0)
+    flann.build_index(np.array(pos_new), random_seed=0)
     return g, flann
 
 
@@ -142,9 +145,8 @@ def draw_graph(
         )
 
     # Graph
-    N = g_cpy.number_of_nodes()
     pos = nx.get_node_attributes(g_cpy, POS)
-    pos_np = np.array([pos[i] for i in range(N)])
+    pos_np = np.array([pos[i] for i in g_cpy.nodes()])
     options = {
         "ax": ax,
         "node_size": 20,
@@ -154,7 +156,7 @@ def draw_graph(
         "width": 1,
         "with_labels": False
     }
-    pos_dict = {i: pos_np[i] for i in range(N)}
+    pos_dict = {i: pos[i] for i in g_cpy.nodes()}
     nx.draw_networkx(g_cpy, pos_dict, **options)
 
     # Paths

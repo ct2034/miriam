@@ -7,19 +7,19 @@ from typing import Dict, List, Optional, Tuple, Union
 import networkx as nx
 import numpy as np
 import torch
+from pyflann import FLANN
+from torch_geometric.data import Data
+
 from definitions import (DEFAULT_TIMEOUT_S, IDX_AVERAGE_LENGTH, IDX_SUCCESS,
                          INVALID, MAP_IMG, POS, SCENARIO_RESULT, C)
+from multi_optim.state import ScenarioState
 from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy import BFS_TYPE, EdgePolicyModel
-from pyflann import FLANN
 from roadmaps.var_odrm_torch.var_odrm_torch import get_path_len, sample_points
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import LearnedPolicy, PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
-from torch_geometric.data import Data
-
-from multi_optim.state import ScenarioState
 
 logger = logging.getLogger(__name__)
 
