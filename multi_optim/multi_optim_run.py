@@ -173,8 +173,9 @@ def write_stats_png(prefix, save_folder, stats):
 
 
 def sample_trajectories_in_parallel(
-        model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG, radius: float, flann,
-        n_agents: int, n_episodes: int, prefix: str, require_paths: bool,
+        model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG,
+        radius: float, flann, n_agents: int, n_episodes: int, prefix: str,
+        require_paths: bool,
         save_folder, pool, rng: Random
 ) -> Tuple[str, List[List[PATH_W_COORDS]], float, float]:
     model_copy = EdgePolicyModel()
@@ -310,7 +311,7 @@ def run_optimization(
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g: nx.Graph
     flann: FLANN
-    (g, flann) = make_graph_and_flann(pos, map_img_inflated)
+    (g, flann) = make_graph_and_flann(pos, map_img_inflated, n_nodes)
 
     # GPU or CPU?
     if torch.cuda.is_available():
@@ -452,7 +453,7 @@ def run_optimization(
         if optimize_poses_now:
             (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
-                g, pos, paths_s, map_img_inflated, optimizer_pos)
+                g, pos, paths_s, map_img_inflated, n_nodes, optimizer_pos)
             end_time_optim_poses = time.process_time()
             stats.add("runtime_optim_poses", i_r, (
                 end_time_optim_poses - end_time_generation
@@ -460,6 +461,13 @@ def run_optimization(
             wandb.log({
                 "runtime/optim/poses": (
                     end_time_optim_poses - end_time_generation
+                )}, step=i_r)
+            stats.add("roadmap_nodes_precentage", i_r, (
+                len(g.nodes) / n_nodes
+            ))
+            wandb.log({
+                "roadmap/nodes_precentage": (
+                    len(g.nodes) / n_nodes
                 )}, step=i_r)
 
         # Optimizing Policy

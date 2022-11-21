@@ -32,9 +32,12 @@ if __name__ == "__main__":
         ]:
             set_fun(level)
 
+        config = configs[prefix]
+        config["n_runs_policy"] = 0
+
         # start the actual run
         run_optimization(
-            **configs[prefix],
+            **config,
             pool_in=pool)
 
     pool.close()

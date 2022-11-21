@@ -15,7 +15,7 @@ if __name__ == "__main__":
     map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png"
     map_img = read_map(map_fname)
     pos = sample_points(n_nodes, map_img, rng)
-    g, _ = make_graph_and_flann(pos, map_img)
+    g, _ = make_graph_and_flann(pos, map_img, n_nodes)
     n_agents = 3
     n_demo = 10
     success_rate = 0.0

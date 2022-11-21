@@ -5,10 +5,9 @@ from random import Random
 
 import networkx as nx
 import numpy as np
+
 from planner.policylearn.edge_policy_graph_utils import *
 from planner.policylearn.edge_policy_graph_utils_angle_demo import demo
-from roadmaps.var_odrm_torch.var_odrm_torch import (make_graph_and_flann,
-                                                    read_map, sample_points)
 from scenarios.test_helper import make_cache_folder_and_set_envvar
 from sim.decentralized.agent import Agent
 from sim.decentralized.runner import to_agent_objects

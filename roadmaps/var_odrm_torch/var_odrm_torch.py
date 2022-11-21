@@ -87,11 +87,13 @@ def sample_points(
 
 def make_graph_and_flann(
         pos: torch.Tensor,
-        map_img: MAP_IMG) -> Tuple[nx.Graph, FLANN]:
+        map_img: MAP_IMG,
+        n_nodes: int) -> Tuple[nx.Graph, FLANN]:
     """Convert array of node positions into graph by Delaunay Triangulation."""
+    # add points in case they are not enough
+    while pos.shape[0] < n_nodes:
+        pos = torch.cat((pos, sample_points(1, map_img, rng)), dim=0)
     pos_np = pos.detach().numpy()
-    flann = FLANN(random_seed=0)
-    flann.build_index(np.array(pos_np), random_seed=0)
     cells, _ = voronoi_frames(pos_np, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells)
     g: nx.Graph = delaunay.to_networkx()  # type: ignore
@@ -109,6 +111,12 @@ def make_graph_and_flann(
         if not g.has_edge(node, node):
             g.add_edge(node, node)
             g.edges[(node, node)][DISTANCE] = 0.
+    # remove isolated nodes
+    subgraphs = list(nx.connected_components(g))
+    i_main_graph = np.argmax([len(x) for x in subgraphs])
+    g = g.subgraph(subgraphs[i_main_graph])
+    flann = FLANN(random_seed=0)
+    flann.build_index(np.array(pos_np), random_seed=0)
     return g, flann
 
 
@@ -278,6 +286,7 @@ def optimize_poses(
         pos: torch.Tensor,
         map_img: MAP_IMG,
         optimizer: torch.optim.Optimizer,
+        n_nodes: int,
         rng: Random):
     """Optimize the poses of the nodes on `g` using `optimizer`."""
     test_paths = make_paths(g, 20, map_img, Random(0))
@@ -286,7 +295,7 @@ def optimize_poses(
     training_length = get_paths_len(pos, training_paths, True)
     _ = training_length.backward()
     optimizer.step()
-    g, flann = make_graph_and_flann(pos, map_img)
+    g, flann = make_graph_and_flann(pos, map_img, n_nodes)
     optimizer.zero_grad()
     return g, pos, test_length, training_length
 
@@ -296,6 +305,7 @@ def optimize_poses_from_paths(
         pos: torch.Tensor,
         path_set: List[List[PATH_W_COORDS]],
         map_img: MAP_IMG,
+        n_nodes: int,
         optimizer: torch.optim.Optimizer):
     paths: List[PATH_W_COORDS]
     paths = reduce(lambda x, y: x + y, path_set, [])
@@ -304,7 +314,7 @@ def optimize_poses_from_paths(
         _ = training_length.backward()
         optimizer.step()
         optimizer.zero_grad()
-    g, flann = make_graph_and_flann(pos, map_img)
+    g, flann = make_graph_and_flann(pos, map_img, n_nodes)
     if len(paths) != 0:
         avg_len = training_length.item() / len(paths)
     else:
@@ -322,7 +332,7 @@ if __name__ == "__main__":
 
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
-    g, flann = make_graph_and_flann(pos, map_img)
+    g, flann = make_graph_and_flann(pos, map_img, n)
 
     optimizer = torch.optim.Adam([pos], lr=learning_rate)
     test_costs = []
@@ -333,7 +343,7 @@ if __name__ == "__main__":
     pb = ProgressBar("Training", epochs)
     for i_e in range(epochs):
         g, pos, test_length, training_length = optimize_poses(
-            g, pos, map_img, optimizer, rng)
+            g, pos, map_img, optimizer, n, rng)
         if i_e % stats_every == stats_every-1:
             print(f"test_length: {test_length}")
             print(f"training_length: {training_length}")

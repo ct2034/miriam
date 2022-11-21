@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import yaml
+
 from definitions import INVALID, POS
 from planner.mapf_implementations.libMultiRobotPlanning.tools import \
     annotate_roadmap
@@ -218,7 +219,7 @@ if __name__ == "__main__":
 
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
-    g, _ = make_graph_and_flann(pos, map_img)
+    g, _ = make_graph_and_flann(pos, map_img, n)
     starts = rng.sample(range(n), n_agents)
     goals = rng.sample(range(n), n_agents)
     starts = [0, 0]
