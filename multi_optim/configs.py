@@ -92,14 +92,14 @@ configs = {
         "prefix": "large_plain"
     },
     "mapf_benchm_random-32-32-10": {
-        "n_nodes": 128,
+        "n_nodes": 200,
         "n_runs_pose": 64,
         "n_runs_policy": 64,
         "n_episodes_per_run_policy": 256,
         "n_epochs_per_run_policy": 4,
         "batch_size_policy": 128,
         "stats_and_eval_every": 2,
-        "lr_pos": 1e-3,
+        "lr_pos": 3e-4,
         "lr_policy": 1e-4,
         "max_n_agents": 8,
         "map_name": "random-32-32-10.map",
