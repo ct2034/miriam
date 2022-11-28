@@ -155,5 +155,5 @@ for experiment_name, experiment in experiments.items():
     results[experiment_name] = {"A": A, "B": B}
 
 draw(results)
-plt.savefig("learn/reaction-diffusion.png")
+plt.savefig("learn/reaction_diffusion/overview.png")
 plt.show()
