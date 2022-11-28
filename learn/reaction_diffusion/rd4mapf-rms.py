@@ -3,23 +3,13 @@ from typing import Dict
 
 import numpy as np
 from matplotlib import pyplot as plt
+from scipy.ndimage import laplace
 from tqdm import tqdm
 
 # src: https://github.com/benmaier/reaction-diffusion/blob/master/gray_scott.ipynb
 
 
-def discrete_laplacian(M):
-    """Get the discrete Laplacian of matrix M"""
-    L = -4*M
-    L += np.roll(M, (0, -1), (0, 1))  # right neighbor
-    L += np.roll(M, (0, +1), (0, 1))  # left neighbor
-    L += np.roll(M, (-1, 0), (0, 1))  # top neighbor
-    L += np.roll(M, (+1, 0), (0, 1))  # bottom neighbor
-
-    return L
-
-
-def gray_scott_update(A, B, DA, DB, f, k, delta_t):
+def gray_scott_update(A, B, A_bg, B_bg, DA, DB, f, k, delta_t):
     """
     Updates a concentration configuration according to a Gray-Scott model
     with diffusion coefficients DA and DB, as well as feed rate f and
@@ -27,8 +17,8 @@ def gray_scott_update(A, B, DA, DB, f, k, delta_t):
     """
 
     # Let's get the discrete Laplacians first
-    LA = discrete_laplacian(A)
-    LB = discrete_laplacian(B)
+    LA = laplace(A, mode="constant", cval=A_bg)
+    LB = laplace(B, mode="constant", cval=B_bg)
 
     # Now apply the update formula
     diff_A = (DA*LA - A*B**2 + f*(1-A)) * delta_t
@@ -72,7 +62,8 @@ def draw(d: Dict[str, Dict[str, np.ndarray]]):
                              figsize=(ncols*3, nrows*3))
     for i, (key, value) in enumerate(d.items()):
         for j, (key2, value2) in enumerate(value.items()):
-            axes[j, i].imshow(value2, cmap="gray")
+            pos = axes[j, i].imshow(value2, cmap="hot")
+            fig.colorbar(pos, ax=axes[j, i])
             axes[j, i].set_title(f"{key} {key2}")
             axes[j, i].axis("off")
     fig.tight_layout()
@@ -95,42 +86,16 @@ N = 200
 # simulation steps
 N_simulation_steps = 10000
 
+# "background" values for A and B
+A_bg = 1.0
+B_bg = 0.0
+
 experiments = {
     "base": {
         "DA": 0.14,
         "DB": 0.06,
         "f": 0.035,
         "k": 0.065,
-    },
-    "faster": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.045,
-        "k": 0.065,
-    },
-    "slower": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.025,
-        "k": 0.065,
-    },
-    "more kill": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.035,
-        "k": 0.075,
-    },
-    "less kill": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.035,
-        "k": 0.055,
-    },
-    "even less kill": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.035,
-        "k": 0.045,
     },
     "more diffusion": {
         "DA": 0.16,
@@ -151,9 +116,9 @@ results = {}
 for experiment_name, experiment in experiments.items():
     A, B = get_initial_configuration(N)
     for i in tqdm(range(N_simulation_steps)):
-        A, B = gray_scott_update(A, B, **experiment, delta_t=delta_t)
+        A, B = gray_scott_update(
+            A, B, A_bg, B_bg, **experiment, delta_t=delta_t)
     results[experiment_name] = {"A": A, "B": B}
 
 draw(results)
-plt.savefig("learn/reaction_diffusion/overview.png")
-plt.show()
+plt.savefig("learn/reaction_diffusion/rd4mapf-rms.png")
