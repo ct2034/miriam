@@ -9,7 +9,7 @@ from tqdm import tqdm
 # src: https://github.com/benmaier/reaction-diffusion/blob/master/gray_scott.ipynb
 
 
-def gray_scott_update(A, B, A_bg, B_bg, DA, DB, f, k, delta_t):
+def gray_scott_update(A, B, A_bg, B_bg, mask, DA, DB, f, k, delta_t):
     """
     Updates a concentration configuration according to a Gray-Scott model
     with diffusion coefficients DA and DB, as well as feed rate f and
@@ -26,6 +26,8 @@ def gray_scott_update(A, B, A_bg, B_bg, DA, DB, f, k, delta_t):
 
     A += diff_A
     B += diff_B
+    A[mask] = A_bg
+    B[mask] = B_bg
 
     return A, B
 
@@ -113,11 +115,14 @@ experiments = {
 
 results = {}
 
+mask = np.zeros((N, N), dtype=bool)
+mask[N//3:2*N//3, 0:N//6] = True
+
 for experiment_name, experiment in experiments.items():
     A, B = get_initial_configuration(N)
     for i in tqdm(range(N_simulation_steps)):
         A, B = gray_scott_update(
-            A, B, A_bg, B_bg, **experiment, delta_t=delta_t)
+            A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
     results[experiment_name] = {"A": A, "B": B}
 
 draw(results)
