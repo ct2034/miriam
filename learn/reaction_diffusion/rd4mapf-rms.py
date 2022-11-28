@@ -89,7 +89,7 @@ N = 200
 N_simulation_steps = 10000
 
 # "background" values for A and B
-A_bg = 1.0
+A_bg = 0.0
 B_bg = 0.0
 
 experiments = {
