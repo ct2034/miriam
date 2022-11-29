@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import pickle as pkl
 from typing import Dict
 
 import numpy as np
@@ -57,7 +58,8 @@ def get_initial_configuration(N, random_influence=0.2):
     return A, B
 
 
-def draw(d: Dict[str, Dict[str, np.ndarray]]):
+def draw():
+    d = pkl.load(open("learn/reaction_diffusion/rd4mapf-rms.pkl", "rb"))
     ncols = len(d)
     nrows = len(d[list(d.keys())[0]])
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,
@@ -69,61 +71,68 @@ def draw(d: Dict[str, Dict[str, np.ndarray]]):
             axes[j, i].set_title(f"{key} {key2}")
             axes[j, i].axis("off")
     fig.tight_layout()
+    plt.savefig("learn/reaction_diffusion/rd4mapf-rms.png")
 
 
-# update in time
-delta_t = 1.0
+def sim(gray_scott_update, get_initial_configuration, delta_t, N, N_simulation_steps, A_bg, B_bg, experiments):
+    results: Dict[str, Dict[str, np.ndarray]] = {}
 
-# Diffusion coefficients
-DA = 0.14
-DB = 0.06
+    mask = np.zeros((N, N), dtype=bool)
+    mask[N//3:2*N//3, 0:N//6] = True
 
-# define feed/kill rates
-f = 0.035
-k = 0.065
+    for experiment_name, experiment in experiments.items():
+        A, B = get_initial_configuration(N)
+        for i in tqdm(range(N_simulation_steps)):
+            A, B = gray_scott_update(
+                A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
+        results[experiment_name] = {"A": A, "B": B}
 
-# grid size
-N = 200
+    pkl.dump(results, open("learn/reaction_diffusion/rd4mapf-rms.pkl", "wb"))
 
-# simulation steps
-N_simulation_steps = 10000
 
-# "background" values for A and B
-A_bg = 0.0
-B_bg = 0.0
+if __name__ == "__main__":
+    # update in time
+    delta_t = 1.0
 
-experiments = {
-    "base": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.035,
-        "k": 0.065,
-    },
-    "more diffusion": {
-        "DA": 0.16,
-        "DB": 0.08,
-        "f": 0.035,
-        "k": 0.065,
-    },
-    "less diffusion": {
-        "DA": 0.12,
-        "DB": 0.04,
-        "f": 0.035,
-        "k": 0.065,
-    },
-}
+    # Diffusion coefficients
+    DA = 0.14
+    DB = 0.06
 
-results = {}
+    # define feed/kill rates
+    f = 0.035
+    k = 0.065
 
-mask = np.zeros((N, N), dtype=bool)
-mask[N//3:2*N//3, 0:N//6] = True
+    # grid size
+    N = 200
 
-for experiment_name, experiment in experiments.items():
-    A, B = get_initial_configuration(N)
-    for i in tqdm(range(N_simulation_steps)):
-        A, B = gray_scott_update(
-            A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
-    results[experiment_name] = {"A": A, "B": B}
+    # simulation steps
+    N_simulation_steps = 10000
 
-draw(results)
-plt.savefig("learn/reaction_diffusion/rd4mapf-rms.png")
+    # "background" values for A and B
+    A_bg = 0.0
+    B_bg = 0.0
+
+    experiments = {
+        "base": {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.065,
+        },
+        "more diffusion": {
+            "DA": 0.16,
+            "DB": 0.08,
+            "f": 0.035,
+            "k": 0.065,
+        },
+        "less diffusion": {
+            "DA": 0.12,
+            "DB": 0.04,
+            "f": 0.035,
+            "k": 0.065,
+        },
+    }
+
+    # sim(gray_scott_update, get_initial_configuration,
+    #     delta_t, N, N_simulation_steps, A_bg, B_bg, experiments)
+    draw()
