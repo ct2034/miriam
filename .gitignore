@@ -30,10 +30,14 @@ cache/
 # sphinx build folder
 docs/sphinx/build
 
+# caches
+.scenario_cache/*.pkl
+multi_optim/results/*_data/*.pkl
+multi_optim/results/tuning/*_data/*.pkl
+
 # of ecbs ..
 tmp_jobs.csv
 htmlcov/
-*.pkl
 miriam_env/
 planner/policylearn/data/
 
