@@ -58,6 +58,33 @@ def get_initial_configuration(N, random_influence=0.2):
     return A, B
 
 
+def bitmap_to_point_poses(bitmap: np.ndarray) -> np.ndarray:
+    """
+    Convert a bitmap to a list of point poses.
+    """
+    assert bitmap.ndim == 2
+
+    point_poses = np.array([[1, 2]])
+    return point_poses
+
+
+def sim(gray_scott_update, get_initial_configuration, delta_t, N,
+        N_simulation_steps, A_bg, B_bg, experiments):
+    results: Dict[str, Dict[str, np.ndarray]] = {}
+
+    mask = np.zeros((N, N), dtype=bool)
+    mask[N//3:2*N//3, 0:N//6] = True
+
+    for experiment_name, experiment in experiments.items():
+        A, B = get_initial_configuration(N)
+        for i in tqdm(range(N_simulation_steps)):
+            A, B = gray_scott_update(
+                A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
+        results[experiment_name] = {"A": A, "B": B}
+
+    pkl.dump(results, open("learn/reaction_diffusion/rd4mapf-rms.pkl", "wb"))
+
+
 def draw():
     d = pkl.load(open("learn/reaction_diffusion/rd4mapf-rms.pkl", "rb"))
     ncols = len(d)
@@ -74,20 +101,23 @@ def draw():
     plt.savefig("learn/reaction_diffusion/rd4mapf-rms.png")
 
 
-def sim(gray_scott_update, get_initial_configuration, delta_t, N, N_simulation_steps, A_bg, B_bg, experiments):
-    results: Dict[str, Dict[str, np.ndarray]] = {}
-
-    mask = np.zeros((N, N), dtype=bool)
-    mask[N//3:2*N//3, 0:N//6] = True
-
-    for experiment_name, experiment in experiments.items():
-        A, B = get_initial_configuration(N)
-        for i in tqdm(range(N_simulation_steps)):
-            A, B = gray_scott_update(
-                A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
-        results[experiment_name] = {"A": A, "B": B}
-
-    pkl.dump(results, open("learn/reaction_diffusion/rd4mapf-rms.pkl", "wb"))
+def processing():
+    d = pkl.load(open("learn/reaction_diffusion/rd4mapf-rms.pkl", "rb"))
+    ncols = len(d)
+    fig, axes = plt.subplots(nrows=2, ncols=ncols)
+    for i, (experiment, data) in enumerate(d.items()):
+        assert "A" in data.keys()
+        bitmap = data["A"] < data["A"].mean()
+        pos = axes[0, i].imshow(bitmap, cmap="gray")
+        fig.colorbar(pos, ax=axes[0, i])
+        axes[0, i].set_title(f"{experiment} bitmap")
+        axes[0, i].axis("off")
+        axes[1, i].set_title(f"{experiment} poses")
+        axes[1, i].axis("off")
+        point_poses = bitmap_to_point_poses(bitmap)
+        axes[1, i].scatter(point_poses[:, 1], point_poses[:, 0])
+    fig.tight_layout()
+    plt.savefig("learn/reaction_diffusion/rd4mapf-rms-poses.png")
 
 
 if __name__ == "__main__":
@@ -136,3 +166,4 @@ if __name__ == "__main__":
     # sim(gray_scott_update, get_initial_configuration,
     #     delta_t, N, N_simulation_steps, A_bg, B_bg, experiments)
     draw()
+    processing()
