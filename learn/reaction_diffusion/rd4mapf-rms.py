@@ -80,7 +80,7 @@ def bitmap_to_point_poses(bitmap: np.ndarray) -> np.ndarray:
             int_poses.append((x, y))
 
     model = AgglomerativeClustering(
-        n_clusters=None, distance_threshold=2, linkage="single")
+        n_clusters=None, distance_threshold=1.1, linkage="single")
     model.fit(int_poses)
     # return model.children_
     y_predict = model.fit_predict(int_poses)
@@ -138,8 +138,12 @@ def processing():
         axes[0, i].scatter(
             point_poses[:, 1] * bitmap.shape[0],
             point_poses[:, 0] * bitmap.shape[0],
+            s=1,
+            c="red",
             marker=".",
-            alpha=0.7)
+            alpha=0.9)
+
+        axes[1, i].set_title(f"{len(point_poses)} points ...")
 
         # g = make_graph_and_flann(pos=torch.Tensor(point_poses),
         #                             map_img=((255,),),
