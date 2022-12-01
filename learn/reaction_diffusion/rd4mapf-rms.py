@@ -144,22 +144,26 @@ def processing():
             alpha=0.9)
 
         axes[1, i].set_title(f"{len(point_poses)} points ...")
-
-        # g = make_graph_and_flann(pos=torch.Tensor(point_poses),
-        #                             map_img=((255,),),
-        #                             desired_n_nodes=len(point_poses))
-        # pos = nx.get_node_attributes(g, POS)
-        # options = {
-        #     "ax": axes[1, i],
-        #     "node_size": 20,
-        #     "node_color": "black",
-        #     "edgecolors": "grey",
-        #     "linewidths": 1,
-        #     "width": 1,
-        #     "with_labels": False
-        # }
-        # pos_dict = {i: pos[i] for i in g.nodes()}
-        # nx.draw_networkx(g, pos_dict, **options)
+        g, _ = make_graph_and_flann(pos=torch.Tensor(point_poses),
+                                    map_img=((255,),),
+                                    desired_n_nodes=len(point_poses))
+        pos = nx.get_node_attributes(g, POS)
+        options = {
+            "ax": axes[1, i],
+            "node_size": 20,
+            "node_color": "red",
+            "edgecolors": "grey",
+            "linewidths": 0.1,
+            "width": 1,
+            "with_labels": False
+        }
+        pos_dict = {i: pos[i] for i in g.nodes()}
+        for e in g.edges():
+            a, b = e
+            if a == b:
+                g.remove_edge(a, b)
+        nx.draw_networkx(g, pos_dict, **options)
+        axes[1, i].axis("off")
 
     fig.tight_layout()
     plt.savefig("learn/reaction_diffusion/rd4mapf-rms-poses.png", dpi=300)
