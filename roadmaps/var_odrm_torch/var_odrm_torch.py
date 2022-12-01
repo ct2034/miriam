@@ -88,10 +88,10 @@ def sample_points(
 def make_graph_and_flann(
         pos: torch.Tensor,
         map_img: MAP_IMG,
-        n_nodes: int) -> Tuple[nx.Graph, FLANN]:
+        desired_n_nodes: int) -> Tuple[nx.Graph, FLANN]:
     """Convert array of node positions into graph by Delaunay Triangulation."""
     # add points in case they are not enough
-    while pos.shape[0] < n_nodes:
+    while pos.shape[0] < desired_n_nodes:
         pos = torch.cat((pos, sample_points(1, map_img, rng)), dim=0)
     pos_np = pos.detach().numpy()
     cells, _ = voronoi_frames(pos_np, clip="bbox")

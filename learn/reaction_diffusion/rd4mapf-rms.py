@@ -1,11 +1,19 @@
 #!/usr/bin/python3
 import pickle as pkl
+from itertools import product
 from typing import Dict
 
+import networkx as nx
 import numpy as np
+import torch
 from matplotlib import pyplot as plt
 from scipy.ndimage import laplace
+from sklearn.cluster import *
+from sklearn.neighbors import NearestCentroid
 from tqdm import tqdm
+
+from definitions import POS
+from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
 
 # src: https://github.com/benmaier/reaction-diffusion/blob/master/gray_scott.ipynb
 
@@ -63,9 +71,24 @@ def bitmap_to_point_poses(bitmap: np.ndarray) -> np.ndarray:
     Convert a bitmap to a list of point poses.
     """
     assert bitmap.ndim == 2
+    assert bitmap.shape[0] == bitmap.shape[1]
+    width = bitmap.shape[0]
 
-    point_poses = np.array([[1, 2]])
-    return point_poses
+    int_poses = []
+    for x, y in product(range(bitmap.shape[0]), repeat=2):
+        if bitmap[x, y]:
+            int_poses.append((x, y))
+
+    model = AgglomerativeClustering(
+        n_clusters=None, distance_threshold=2, linkage="single")
+    model.fit(int_poses)
+    # return model.children_
+    y_predict = model.fit_predict(int_poses)
+    # ...
+    clf = NearestCentroid()
+    clf.fit(int_poses, y_predict)
+    points = clf.centroids_ / width
+    return np.unique(points, axis=0)
 
 
 def sim(gray_scott_update, get_initial_configuration, delta_t, N,
@@ -106,18 +129,36 @@ def processing():
     ncols = len(d)
     fig, axes = plt.subplots(nrows=2, ncols=ncols)
     for i, (experiment, data) in enumerate(d.items()):
-        assert "A" in data.keys()
-        bitmap = data["A"] < data["A"].mean()
+        assert "B" in data.keys()
+        bitmap = data["B"] > data["B"].mean()
         pos = axes[0, i].imshow(bitmap, cmap="gray")
-        fig.colorbar(pos, ax=axes[0, i])
         axes[0, i].set_title(f"{experiment} bitmap")
         axes[0, i].axis("off")
-        axes[1, i].set_title(f"{experiment} poses")
-        axes[1, i].axis("off")
         point_poses = bitmap_to_point_poses(bitmap)
-        axes[1, i].scatter(point_poses[:, 1], point_poses[:, 0])
+        axes[0, i].scatter(
+            point_poses[:, 1] * bitmap.shape[0],
+            point_poses[:, 0] * bitmap.shape[0],
+            marker=".",
+            alpha=0.7)
+
+        # g = make_graph_and_flann(pos=torch.Tensor(point_poses),
+        #                             map_img=((255,),),
+        #                             desired_n_nodes=len(point_poses))
+        # pos = nx.get_node_attributes(g, POS)
+        # options = {
+        #     "ax": axes[1, i],
+        #     "node_size": 20,
+        #     "node_color": "black",
+        #     "edgecolors": "grey",
+        #     "linewidths": 1,
+        #     "width": 1,
+        #     "with_labels": False
+        # }
+        # pos_dict = {i: pos[i] for i in g.nodes()}
+        # nx.draw_networkx(g, pos_dict, **options)
+
     fig.tight_layout()
-    plt.savefig("learn/reaction_diffusion/rd4mapf-rms-poses.png")
+    plt.savefig("learn/reaction_diffusion/rd4mapf-rms-poses.png", dpi=300)
 
 
 if __name__ == "__main__":
@@ -165,5 +206,5 @@ if __name__ == "__main__":
 
     # sim(gray_scott_update, get_initial_configuration,
     #     delta_t, N, N_simulation_steps, A_bg, B_bg, experiments)
-    draw()
+    # draw()
     processing()
