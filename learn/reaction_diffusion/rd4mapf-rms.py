@@ -128,7 +128,7 @@ def processing(mask):
     map_img = tuple((np.logical_not(mask) * 255).astype(np.uint8))
     for i, (experiment, data) in enumerate(d.items()):
         assert "B" in data.keys()
-        bitmap = data["B"] > data["B"].mean()
+        bitmap = data["B"] > data["B"].mean() * 1.7
         pos = axes[0, i].imshow(bitmap, cmap="gray")
         axes[0, i].set_title(f"{experiment} bitmap")
         axes[0, i].axis("off")
@@ -212,9 +212,10 @@ if __name__ == "__main__":
     }
 
     mask = np.zeros((N, N), dtype=bool)
-    mask[N//3:2*N//3, 0:N//6] = True
+    mask[N//3:N//3*2, 0:N//6] = True
+    mask[N//6*1:N//6*5, N//6*4:N//6*5] = True
 
     # sim(gray_scott_update, get_initial_configuration,
     #     delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
-    # draw()
+    draw()
     processing(mask)
