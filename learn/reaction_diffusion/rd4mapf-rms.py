@@ -92,11 +92,8 @@ def bitmap_to_point_poses(bitmap: np.ndarray) -> np.ndarray:
 
 
 def sim(gray_scott_update, get_initial_configuration, delta_t, N,
-        N_simulation_steps, A_bg, B_bg, experiments):
+        N_simulation_steps, A_bg, B_bg, experiments, mask):
     results: Dict[str, Dict[str, np.ndarray]] = {}
-
-    mask = np.zeros((N, N), dtype=bool)
-    mask[N//3:2*N//3, 0:N//6] = True
 
     for experiment_name, experiment in experiments.items():
         A, B = get_initial_configuration(N)
@@ -124,10 +121,11 @@ def draw():
     plt.savefig("learn/reaction_diffusion/rd4mapf-rms.png")
 
 
-def processing():
+def processing(mask):
     d = pkl.load(open("learn/reaction_diffusion/rd4mapf-rms.pkl", "rb"))
     ncols = len(d)
     fig, axes = plt.subplots(nrows=2, ncols=ncols)
+    map_img = tuple((np.logical_not(mask) * 255).astype(np.uint8))
     for i, (experiment, data) in enumerate(d.items()):
         assert "B" in data.keys()
         bitmap = data["B"] > data["B"].mean()
@@ -145,7 +143,7 @@ def processing():
 
         axes[1, i].set_title(f"{len(point_poses)} points ...")
         g, _ = make_graph_and_flann(pos=torch.Tensor(point_poses),
-                                    map_img=((255,),),
+                                    map_img=map_img,
                                     desired_n_nodes=len(point_poses))
         pos = nx.get_node_attributes(g, POS)
         options = {
@@ -157,12 +155,13 @@ def processing():
             "width": 1,
             "with_labels": False
         }
-        pos_dict = {i: pos[i] for i in g.nodes()}
+        pos_dict = {i: [pos[i][1], -pos[i][0]] for i in g.nodes()}
         for e in g.edges():
             a, b = e
             if a == b:
                 g.remove_edge(a, b)
         nx.draw_networkx(g, pos_dict, **options)
+        axes[1, i].set_aspect("equal")
         axes[1, i].axis("off")
 
     fig.tight_layout()
@@ -212,7 +211,10 @@ if __name__ == "__main__":
         },
     }
 
+    mask = np.zeros((N, N), dtype=bool)
+    mask[N//3:2*N//3, 0:N//6] = True
+
     # sim(gray_scott_update, get_initial_configuration,
-    #     delta_t, N, N_simulation_steps, A_bg, B_bg, experiments)
+    #     delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
     # draw()
-    processing()
+    processing(mask)
