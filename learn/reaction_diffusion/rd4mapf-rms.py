@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 import pickle as pkl
 from itertools import product
-from typing import Dict
+from typing import Dict, Tuple
 
 import networkx as nx
 import numpy as np
 import torch
+from bresenham import bresenham
 from matplotlib import pyplot as plt
 from scipy.ndimage import laplace
 from sklearn.cluster import *
@@ -41,7 +42,7 @@ def gray_scott_update(A, B, A_bg, B_bg, mask, DA, DB, f, k, delta_t):
     return A, B
 
 
-def get_initial_configuration(N, random_influence=0.2):
+def get_initial_configuration(N, random_influence=0.2) -> Tuple[np.ndarray, np.ndarray]:
     """
     Initialize a concentration configuration. N is the side length
     of the (N x N)-sized grid.
@@ -91,7 +92,53 @@ def bitmap_to_point_poses(bitmap: np.ndarray) -> np.ndarray:
     return np.unique(points, axis=0)
 
 
-def sim(gray_scott_update, get_initial_configuration, delta_t, N,
+def is_free(bitmap, ax, ay, bx, by):
+    for x, y in bresenham(ax, ay, bx, by):
+        if not bitmap[x, y]:
+            return False
+    return True
+
+
+def find_radius(point_poses, bitmap):
+    # find radius
+    radiuss = [0] * len(point_poses)
+    for i_p, point_pose in enumerate(point_poses):
+        c_x, c_y = (point_pose * bitmap.shape[0]).astype(int)
+        for x, y in product(
+            range(c_x-10, c_x+10),
+            range(c_y-10, c_y+10)
+        ):
+            if x < 0 or y < 0 or x >= bitmap.shape[0] or y >= bitmap.shape[0]:
+                continue
+            if is_free(bitmap, x, y, c_x, c_y):
+                radiuss[i_p] = max(radiuss[i_p], np.linalg.norm(
+                    np.array([x, y]) - point_pose*bitmap.shape[0]))
+    return np.mean(radiuss)
+
+
+def poses_to_reaction_diffusion(
+        point_poses: np.ndarray,
+        A_min_max: Tuple[float, float], B_min_max: Tuple[float, float],
+        width: int, radius: float) -> Tuple[np.ndarray, np.ndarray]:
+    A_bg = A_min_max[1]
+    A_fg = A_min_max[0] + .3
+    B_bg = B_min_max[0]
+    B_fg = B_min_max[1] - .1
+    A = (np.random.rand(width, width) / 4 + 3 / 4) * A_bg
+    B = (np.random.rand(width, width) / 4 + 3 / 4) * B_bg
+    for i_p, point_pose in enumerate(point_poses):
+        c_x, c_y = (point_pose * width).astype(int)
+        for x, y in product(
+            range(c_x-10, c_x+10),
+            range(c_y-10, c_y+10)
+        ):
+            if np.linalg.norm(np.array([x, y]) - point_pose*width) < radius:
+                A[x, y] = A_fg
+                B[x, y] = B_fg
+    return A, B
+
+
+def sim(delta_t, N,
         N_simulation_steps, A_bg, B_bg, experiments, mask):
     results: Dict[str, Dict[str, np.ndarray]] = {}
 
@@ -105,8 +152,8 @@ def sim(gray_scott_update, get_initial_configuration, delta_t, N,
     pkl.dump(results, open("learn/reaction_diffusion/rd4mapf-rms.pkl", "wb"))
 
 
-def draw():
-    d = pkl.load(open("learn/reaction_diffusion/rd4mapf-rms.pkl", "rb"))
+def draw(file: str):
+    d = pkl.load(open(f"{file}.pkl", "rb"))
     ncols = len(d)
     nrows = len(d[list(d.keys())[0]])
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols,
@@ -117,34 +164,52 @@ def draw():
             fig.colorbar(pos, ax=axes[j, i])
             axes[j, i].set_title(f"{key} {key2}")
             axes[j, i].axis("off")
-    fig.tight_layout()
-    plt.savefig("learn/reaction_diffusion/rd4mapf-rms.png")
+    fig.tight_lfile: strayout()
+    plt.savefig(f"{file}.png")
 
 
-def processing(mask):
+def processing(mask, experiments):
     d = pkl.load(open("learn/reaction_diffusion/rd4mapf-rms.pkl", "rb"))
     ncols = len(d)
-    fig, axes = plt.subplots(nrows=2, ncols=ncols)
+    fig, axes = plt.subplots(nrows=4, ncols=ncols, figsize=(ncols*5, 4*5))
     map_img = tuple((np.logical_not(mask) * 255).astype(np.uint8))
+    results: Dict[str, Dict[str, np.ndarray]] = {}
     for i, (experiment, data) in enumerate(d.items()):
+        assert "A" in data.keys()
         assert "B" in data.keys()
-        bitmap = data["B"] > data["B"].mean() * 1.7
+        A = data["A"]
+        B = data["B"]
+        results[experiment] = {"A0": A, "B0": B}
+
+        A_min_max = (A.min(), A.max())
+        B_min_max = (B.min(), B.max())
+        A_bg = A_min_max[1]
+        B_bg = B_min_max[0]
+
+        # raction diffusion to poses
+        bitmap = B > B.mean() * 1.7
+        point_poses = bitmap_to_point_poses(bitmap)
+        radius = find_radius(point_poses, bitmap)
+
+        # display poses
         pos = axes[0, i].imshow(bitmap, cmap="gray")
         axes[0, i].set_title(f"{experiment} bitmap")
         axes[0, i].axis("off")
-        point_poses = bitmap_to_point_poses(bitmap)
         axes[0, i].scatter(
             point_poses[:, 1] * bitmap.shape[0],
             point_poses[:, 0] * bitmap.shape[0],
-            s=1,
+            s=20,
             c="red",
             marker=".",
             alpha=0.9)
 
-        axes[1, i].set_title(f"{len(point_poses)} points ...")
+        # make a graph from that
         g, _ = make_graph_and_flann(pos=torch.Tensor(point_poses),
                                     map_img=map_img,
                                     desired_n_nodes=len(point_poses))
+
+        # display graph
+        axes[1, i].set_title(f"{len(point_poses)} points ...")
         pos = nx.get_node_attributes(g, POS)
         options = {
             "ax": axes[1, i],
@@ -164,6 +229,45 @@ def processing(mask):
         axes[1, i].set_aspect("equal")
         axes[1, i].axis("off")
 
+        # make poses into raction diffusion
+        A, B = poses_to_reaction_diffusion(
+            point_poses, A_min_max, B_min_max, bitmap.shape[0], radius)
+        bitmap = B > B.mean() * 1.7
+        point_poses = bitmap_to_point_poses(bitmap)
+        pos = axes[2, i].imshow(bitmap, cmap="gray")
+        axes[2, i].set_title(f"{experiment} bitmap")
+        axes[2, i].axis("off")
+        axes[2, i].scatter(
+            point_poses[:, 1] * bitmap.shape[0],
+            point_poses[:, 0] * bitmap.shape[0],
+            s=20,
+            c="red",
+            marker=".",
+            alpha=0.9)
+        results[experiment]["A1"] = A.copy()
+        results[experiment]["B1"] = B.copy()
+
+        # make poses into raction diffusion
+        for _ in range(100):
+            A, B = gray_scott_update(
+                A, B, A_bg, B_bg, mask, **experiments[experiment], delta_t=1)
+        bitmap = B > B.mean() * 1.7
+        point_poses = bitmap_to_point_poses(bitmap)
+        pos = axes[3, i].imshow(bitmap, cmap="gray")
+        axes[3, i].set_title(f"{experiment} bitmap")
+        axes[3, i].axis("off")
+        axes[3, i].scatter(
+            point_poses[:, 1] * bitmap.shape[0],
+            point_poses[:, 0] * bitmap.shape[0],
+            s=20,
+            c="red",
+            marker=".",
+            alpha=0.9)
+        results[experiment]["A2"] = A.copy()
+        results[experiment]["B2"] = B.copy()
+
+    pkl.dump(results, open(
+        "learn/reaction_diffusion/rd4mapf-rms-processed.pkl", "wb"))
     fig.tight_layout()
     plt.savefig("learn/reaction_diffusion/rd4mapf-rms-poses.png", dpi=300)
 
@@ -215,7 +319,7 @@ if __name__ == "__main__":
     mask[N//3:N//3*2, 0:N//6] = True
     mask[N//6*1:N//6*5, N//6*4:N//6*5] = True
 
-    # sim(gray_scott_update, get_initial_configuration,
-    #     delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
-    draw()
-    processing(mask)
+    # sim(delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
+    # draw("learn/reaction_diffusion/rd4mapf-rms")
+    processing(mask, experiments)
+    draw("learn/reaction_diffusion/rd4mapf-rms-processed")
