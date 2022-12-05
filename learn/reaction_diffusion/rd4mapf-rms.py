@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 from definitions import POS
 from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
+from scenarios.generators import movingai_read_mapfile
 
 # src: https://github.com/benmaier/reaction-diffusion/blob/master/gray_scott.ipynb
 
@@ -286,7 +287,7 @@ if __name__ == "__main__":
     k = 0.065
 
     # grid size
-    N = 200
+    N = 256
 
     # simulation steps
     N_simulation_steps = 10000
@@ -316,11 +317,13 @@ if __name__ == "__main__":
         },
     }
 
-    mask = np.zeros((N, N), dtype=bool)
-    mask[N//3:N//3*2, 0:N//6] = True
-    mask[N//6*1:N//6*5, N//6*4:N//6*5] = True
+    map_np = movingai_read_mapfile(
+        "roadmaps/odrm/odrm_eval/maps/random-32-32-10.map").astype(np.bool8)
+    rep = N // map_np.shape[0]
+    mask = np.repeat(map_np, rep, axis=0).repeat(rep, axis=1)
+    assert mask.shape == (N, N)
 
-    # sim(delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
-    # draw("learn/reaction_diffusion/rd4mapf-rms")
+    sim(delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
+    draw("learn/reaction_diffusion/rd4mapf-rms")
     processing_back_and_forth(mask, experiments)
     draw("learn/reaction_diffusion/rd4mapf-rms-processed")
