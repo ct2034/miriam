@@ -4,4 +4,4 @@
 - [x] Make blocking at the edges
 - [x] Make blocking internal structures possible
 - [x] Make a way to convert to 
-- [ ] and from graph poses
+- [x] and from graph poses
