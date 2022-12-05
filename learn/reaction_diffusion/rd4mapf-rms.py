@@ -228,6 +228,7 @@ def processing_back_and_forth(mask, experiments):
 
         # display graph
         axes[1, i].set_title(f"{len(point_poses)} points ...")
+        axes[1, i].imshow(np.logical_not(mask), cmap="gray", alpha=0.5)
         pos = nx.get_node_attributes(g, POS)
         options = {
             "ax": axes[1, i],
@@ -238,7 +239,8 @@ def processing_back_and_forth(mask, experiments):
             "width": 1,
             "with_labels": False
         }
-        pos_dict = {i: [pos[i][1], -pos[i][0]] for i in g.nodes()}
+        pos_dict = {i: [pos[i][1]*mask.shape[0],
+                        pos[i][0]*mask.shape[0]] for i in g.nodes()}
         for e in g.edges():
             a, b = e
             if a == b:
@@ -323,7 +325,7 @@ if __name__ == "__main__":
     mask = np.repeat(map_np, rep, axis=0).repeat(rep, axis=1)
     assert mask.shape == (N, N)
 
-    sim(delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
+    # sim(delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
     draw("learn/reaction_diffusion/rd4mapf-rms")
     processing_back_and_forth(mask, experiments)
     draw("learn/reaction_diffusion/rd4mapf-rms-processed")
