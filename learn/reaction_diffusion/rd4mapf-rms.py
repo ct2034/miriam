@@ -193,7 +193,7 @@ def plot_bitmap_and_poses(ax, bitmap, point_poses, title=""):
 
 
 def processing_back_and_forth(mask, experiments):
-    """Experiment to turn reaction diffusion into poses and back again.""""
+    """Experiment to turn reaction diffusion into poses and back again."""
     d = pkl.load(open("learn/reaction_diffusion/rd4mapf-rms.pkl", "rb"))
     ncols = len(d)
     fig, axes = plt.subplots(nrows=4, ncols=ncols, figsize=(ncols*5, 4*5))
