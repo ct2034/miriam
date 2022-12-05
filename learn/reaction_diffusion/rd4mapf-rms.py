@@ -22,8 +22,8 @@ from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
 def gray_scott_update(A, B, A_bg, B_bg, mask, DA, DB, f, k, delta_t):
     """
     Updates a concentration configuration according to a Gray-Scott model
-    with diffusion coefficients DA and DB, as well as feed rate f and
-    kill rate k.
+    with diffusion coefficients `DA` and `DB`, as well as feed rate `f` and
+    kill rate `k`.
     """
 
     # Let's get the discrete Laplacians first
@@ -44,8 +44,8 @@ def gray_scott_update(A, B, A_bg, B_bg, mask, DA, DB, f, k, delta_t):
 
 def get_initial_configuration(N, random_influence=0.2) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Initialize a concentration configuration. N is the side length
-    of the (N x N)-sized grid.
+    Initialize a concentration configuration. `N` is the side length
+    of the (`N` x `N`)-sized grid.
     `random_influence` describes how much noise is added.
     """
 
@@ -93,6 +93,7 @@ def bitmap_to_point_poses(bitmap: np.ndarray) -> np.ndarray:
 
 
 def is_free(bitmap, ax, ay, bx, by):
+    """Check if a line between two points is free in a `bitmap`."""
     for x, y in bresenham(ax, ay, bx, by):
         if not bitmap[x, y]:
             return False
@@ -100,7 +101,8 @@ def is_free(bitmap, ax, ay, bx, by):
 
 
 def find_radius(point_poses, bitmap):
-    # find radius
+    """Find the radius of the circles centred around `point_poses` in the
+    `bitmap`."""
     radiuss = [0] * len(point_poses)
     for i_p, point_pose in enumerate(point_poses):
         c_x, c_y = (point_pose * bitmap.shape[0]).astype(int)
@@ -120,6 +122,8 @@ def poses_to_reaction_diffusion(
         point_poses: np.ndarray,
         A_min_max: Tuple[float, float], B_min_max: Tuple[float, float],
         width: int, radius: float) -> Tuple[np.ndarray, np.ndarray]:
+    """Regenerate A and B for reaction diffusion by making circles around 
+    the `point_poses`."""
     A_bg = A_min_max[1]
     A_fg = A_min_max[0] + .3
     B_bg = B_min_max[0]
@@ -140,19 +144,19 @@ def poses_to_reaction_diffusion(
 
 def sim(delta_t, N,
         N_simulation_steps, A_bg, B_bg, experiments, mask):
+    """Run the simulations based on the params defined in `experiments`."""
     results: Dict[str, Dict[str, np.ndarray]] = {}
-
     for experiment_name, experiment in experiments.items():
         A, B = get_initial_configuration(N)
         for i in tqdm(range(N_simulation_steps)):
             A, B = gray_scott_update(
                 A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
         results[experiment_name] = {"A": A, "B": B}
-
     pkl.dump(results, open("learn/reaction_diffusion/rd4mapf-rms.pkl", "wb"))
 
 
 def draw(file: str):
+    """Draw the reaction diffusion A and B from the `file`."""
     d = pkl.load(open(f"{file}.pkl", "rb"))
     ncols = len(d)
     nrows = len(d[list(d.keys())[0]])
@@ -168,7 +172,28 @@ def draw(file: str):
     plt.savefig(f"{file}.png")
 
 
-def processing(mask, experiments):
+def reaction_difussion_to_bitmap(B):
+    """Convert a reaction diffusion data B to a binary bitmap."""
+    bitmap = B > B.mean() * 1.7
+    return bitmap
+
+
+def plot_bitmap_and_poses(ax, bitmap, point_poses, title=""):
+    """Plot a `bitmap` and the `point_poses` on the `ax`."""
+    ax.imshow(bitmap, cmap="gray")
+    ax.set_title(f"{title} bitmap, poses")
+    ax.axis("off")
+    ax.scatter(
+        point_poses[:, 1] * bitmap.shape[0],
+        point_poses[:, 0] * bitmap.shape[0],
+        s=20,
+        c="red",
+        marker=".",
+        alpha=0.9)
+
+
+def processing_back_and_forth(mask, experiments):
+    """Experiment to turn reaction diffusion into poses and back again.""""
     d = pkl.load(open("learn/reaction_diffusion/rd4mapf-rms.pkl", "rb"))
     ncols = len(d)
     fig, axes = plt.subplots(nrows=4, ncols=ncols, figsize=(ncols*5, 4*5))
@@ -187,21 +212,13 @@ def processing(mask, experiments):
         B_bg = B_min_max[0]
 
         # raction diffusion to poses
-        bitmap = B > B.mean() * 1.7
+        bitmap = reaction_difussion_to_bitmap(B)
         point_poses = bitmap_to_point_poses(bitmap)
         radius = find_radius(point_poses, bitmap)
 
         # display poses
-        pos = axes[0, i].imshow(bitmap, cmap="gray")
-        axes[0, i].set_title(f"{experiment} bitmap")
-        axes[0, i].axis("off")
-        axes[0, i].scatter(
-            point_poses[:, 1] * bitmap.shape[0],
-            point_poses[:, 0] * bitmap.shape[0],
-            s=20,
-            c="red",
-            marker=".",
-            alpha=0.9)
+        plot_bitmap_and_poses(axes[0, i], bitmap,
+                              point_poses, title=experiment)
 
         # make a graph from that
         g, _ = make_graph_and_flann(pos=torch.Tensor(point_poses),
@@ -229,21 +246,13 @@ def processing(mask, experiments):
         axes[1, i].set_aspect("equal")
         axes[1, i].axis("off")
 
-        # make poses into raction diffusion
+        # make poses into reaction diffusion
         A, B = poses_to_reaction_diffusion(
             point_poses, A_min_max, B_min_max, bitmap.shape[0], radius)
-        bitmap = B > B.mean() * 1.7
+        bitmap = reaction_difussion_to_bitmap(B)
         point_poses = bitmap_to_point_poses(bitmap)
-        pos = axes[2, i].imshow(bitmap, cmap="gray")
-        axes[2, i].set_title(f"{experiment} bitmap")
-        axes[2, i].axis("off")
-        axes[2, i].scatter(
-            point_poses[:, 1] * bitmap.shape[0],
-            point_poses[:, 0] * bitmap.shape[0],
-            s=20,
-            c="red",
-            marker=".",
-            alpha=0.9)
+        plot_bitmap_and_poses(axes[2, i], bitmap,
+                              point_poses, title=experiment)
         results[experiment]["A1"] = A.copy()
         results[experiment]["B1"] = B.copy()
 
@@ -251,18 +260,10 @@ def processing(mask, experiments):
         for _ in range(100):
             A, B = gray_scott_update(
                 A, B, A_bg, B_bg, mask, **experiments[experiment], delta_t=1)
-        bitmap = B > B.mean() * 1.7
+        bitmap = reaction_difussion_to_bitmap(B)
         point_poses = bitmap_to_point_poses(bitmap)
-        pos = axes[3, i].imshow(bitmap, cmap="gray")
-        axes[3, i].set_title(f"{experiment} bitmap")
-        axes[3, i].axis("off")
-        axes[3, i].scatter(
-            point_poses[:, 1] * bitmap.shape[0],
-            point_poses[:, 0] * bitmap.shape[0],
-            s=20,
-            c="red",
-            marker=".",
-            alpha=0.9)
+        plot_bitmap_and_poses(axes[3, i], bitmap,
+                              point_poses, title=experiment)
         results[experiment]["A2"] = A.copy()
         results[experiment]["B2"] = B.copy()
 
@@ -321,5 +322,5 @@ if __name__ == "__main__":
 
     # sim(delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
     # draw("learn/reaction_diffusion/rd4mapf-rms")
-    processing(mask, experiments)
+    processing_back_and_forth(mask, experiments)
     draw("learn/reaction_diffusion/rd4mapf-rms-processed")
