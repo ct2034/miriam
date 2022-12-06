@@ -200,6 +200,7 @@ def processing_back_and_forth(mask, experiments):
     fig, axes = plt.subplots(nrows=4, ncols=ncols, figsize=(ncols*5, 4*5))
     map_img = tuple((np.logical_not(mask) * 255).astype(np.uint8))
     results: Dict[str, Dict[str, np.ndarray]] = {}
+    poses_results: Dict[str, np.ndarray] = {}
     for i, (experiment, data) in enumerate(d.items()):
         assert "A" in data.keys()
         assert "B" in data.keys()
@@ -215,6 +216,7 @@ def processing_back_and_forth(mask, experiments):
         # raction diffusion to poses
         bitmap = reaction_difussion_to_bitmap(B)
         point_poses = bitmap_to_point_poses(bitmap)
+        poses_results[experiment] = point_poses
         radius = find_radius(point_poses, bitmap)
 
         # display poses
@@ -272,6 +274,8 @@ def processing_back_and_forth(mask, experiments):
 
     pkl.dump(results, open(
         "learn/reaction_diffusion/rd4mapf-rms-processed.pkl", "wb"))
+    pkl.dump(poses_results, open(
+        "learn/reaction_diffusion/rd4mapf-rms-poses.pkl", "wb"))
     fig.tight_layout()
     plt.savefig("learn/reaction_diffusion/rd4mapf-rms-poses.png", dpi=300)
 
