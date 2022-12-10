@@ -38,6 +38,7 @@ if __name__ == '__main__':
         POS)
     draw_graph(g_dhc, map_img, title="DHC")
     plt.savefig(f"{eval_results_folder}/{map_name}_dhc.png")
+    print('start eval init')
     eval = Eval(roadmap=g_dhc,
                 map_img=map_img,
                 n_agents_s=[1],
@@ -45,6 +46,7 @@ if __name__ == '__main__':
                 iterator_type=IteratorType.LOOKAHEAD3,
                 radius=.01,
                 seed=0)
+    print('done eval init')
 
     # evaluate
     results = {}
