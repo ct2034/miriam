@@ -58,12 +58,14 @@ def get_initial_configuration(N, random_influence=0.2) -> Tuple[np.ndarray, np.n
     # Let's assume there's only a bit of B everywhere
     B = random_influence * np.random.random((N, N))
 
-    # Now let's add a disturbance in the center
-    N2 = N//2
+    # Now let's add four distrubances
+    N4 = N//4
+    N3 = N//4*3
     radius = r = int(N/10.0)
 
-    A[N2-r:N2+r, N2-r:N2+r] = 0.50
-    B[N2-r:N2+r, N2-r:N2+r] = 0.25
+    for n1, n2 in product([N4, N3], repeat=2):
+        A[n1-r:n1+r, n2-r:n2+r] = 0.50
+        B[n1-r:n1+r, n2-r:n2+r] = 0.25
 
     return A, B
 
@@ -329,7 +331,7 @@ if __name__ == "__main__":
     mask = np.repeat(map_np, rep, axis=0).repeat(rep, axis=1)
     assert mask.shape == (N, N)
 
-    # sim(delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
+    sim(delta_t, N, N_simulation_steps, A_bg, B_bg, experiments, mask)
     draw("learn/reaction_diffusion/rd4mapf-rms")
     processing_back_and_forth(mask, experiments)
     draw("learn/reaction_diffusion/rd4mapf-rms-processed")
