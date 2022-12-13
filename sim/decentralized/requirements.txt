@@ -6,4 +6,4 @@ timeout_decorator
 pycodestyle
 pytest-pycodestyle
 pytest-cov
-tensorflow==2.4.0  # https://stackoverflow.com/questions/61137954/attributeerror-module-tensorflow-python-keras-utils-generic-utils-has-no-attr
+# tensorflow==2.4.0  # https://stackoverflow.com/questions/61137954/attributeerror-module-tensorflow-python-keras-utils-generic-utils-has-no-attr

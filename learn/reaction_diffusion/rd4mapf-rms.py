@@ -9,7 +9,7 @@ import torch
 from bresenham import bresenham
 from matplotlib import pyplot as plt
 from scipy.ndimage import laplace
-from sklearn.cluster import *
+from sklearn.cluster import *  # scikit-learn
 from sklearn.neighbors import NearestCentroid
 from tqdm import tqdm
 
