@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import copy
 import datetime
 import logging
@@ -25,10 +27,9 @@ import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
-                                                    make_graph_and_flann,
-                                                    optimize_poses_from_paths,
-                                                    read_map, sample_points)
+from roadmaps.var_odrm_torch.var_odrm_torch import (
+    draw_graph, make_graph_and_flann, optimize_poses_from_paths, read_map,
+    sample_points, sample_points_reaction_diffusion)
 from scenarios.generators import movingai_read_mapfile
 from tools import ProgressBar, StatCollector, set_ulimit
 
@@ -174,7 +175,7 @@ def write_stats_png(prefix, save_folder, stats):
 
 def sample_trajectories_in_parallel(
         model: EdgePolicyModel, graph: nx.Graph, map_img: MAP_IMG,
-        radius: float, flann, n_agents: int, n_episodes: int, prefix: str,
+        radius: float, _, n_agents: int, n_episodes: int, prefix: str,
         require_paths: bool,
         save_folder, pool, rng: Random
 ) -> Tuple[str, List[List[PATH_W_COORDS]], float, float]:
@@ -296,6 +297,8 @@ def run_optimization(
         SUPER_RES_MULTIPLIER = 3
         map_np_inflated = inflate_map(map_np, SUPER_RES_MULTIPLIER)
         map_img_inflated = gridmap_to_map_img(map_np_inflated)
+    else:
+        raise ValueError(f"Unknown map file extension {map_fname}")
 
     if load_roadmap is not None:
         # load graph from file
@@ -307,11 +310,15 @@ def run_optimization(
                            device=torch.device("cpu"),
                            dtype=torch.float, requires_grad=True)
     else:
-        pos = sample_points(n_nodes, map_img_inflated, rng)
+        # pos = sample_points(n_nodes, map_img_inflated, rng)
+        pos = sample_points_reaction_diffusion(n_nodes, map_img_inflated, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g: nx.Graph
     flann: FLANN
-    (g, flann) = make_graph_and_flann(pos, map_img_inflated, n_nodes)
+    (g, flann) = make_graph_and_flann(pos, map_img_inflated, n_nodes, rng)
+    if save_images:
+        draw_graph(g, map_img, title="Start")
+        plt.savefig(f"{save_folder}/{prefix}_start.png")
 
     # GPU or CPU?
     if torch.cuda.is_available():
@@ -373,10 +380,6 @@ def run_optimization(
     stats = StatCollector()
     for stat_saver in [wandb.config.update, stats.add_statics]:
         stat_saver(static_stats)
-
-    if save_images:
-        draw_graph(g, map_img, title="Start")
-        plt.savefig(f"{save_folder}/{prefix}_start.png")
 
     # Making sense of two n_runs
     n_runs = max(n_runs_pose, n_runs_policy)
@@ -453,7 +456,8 @@ def run_optimization(
         if optimize_poses_now:
             (g, pos, flann, roadmap_training_length
              ) = optimize_poses_from_paths(
-                g, pos, paths_s, map_img_inflated, n_nodes, optimizer_pos)
+                g, pos, paths_s, map_img_inflated,
+                n_nodes, optimizer_pos, rng)
             end_time_optim_poses = time.process_time()
             stats.add("runtime_optim_poses", i_r, (
                 end_time_optim_poses - end_time_generation
@@ -632,21 +636,21 @@ if __name__ == "__main__":
 
     for prefix in [
         "debug",
-        "debug_map_name_c",
-        "debug_map_name_z",
+        "debug_map_name_c.png",
+        "debug_map_name_z.png",
         # "tiny",
-        "tiny_map_name_c",
-        # "tiny_map_name_z",
+        "tiny_map_name_c.png",
+        # "tiny_map_name_z.png",
         # "tiny_plain",
         # "small",
-        "small_map_name_c",
-        # "small_map_name_z",
+        "small_map_name_c.png",
+        # "small_map_name_z.png",
         # "medium",
-        "medium_map_name_c",
-        # "medium_map_name_z",
+        "medium_map_name_c.png",
+        # "medium_map_name_z.png",
         # "large",
-        "large_map_name_c",
-        # "large_map_name_z",
+        "large_map_name_c.png",
+        # "large_map_name_z.png",
         # "large_plain",
     ]:
         if prefix.startswith("debug"):

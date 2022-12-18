@@ -15,7 +15,9 @@ if __name__ == "__main__":
 
     for prefix in [
         "mapf_benchm_random-32-32-10_debug",
-        "mapf_benchm_random-32-32-10"
+        "mapf_benchm_random-32-32-10_200",
+        "mapf_benchm_random-32-32-10_300",
+        "mapf_benchm_random-32-32-10_400"
     ]:
         if prefix == "debug":
             level = logging.DEBUG

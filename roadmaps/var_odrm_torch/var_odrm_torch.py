@@ -3,6 +3,7 @@ from functools import reduce
 from random import Random
 from typing import List, Optional, Tuple, Union
 
+import cv2
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -15,6 +16,7 @@ from networkx.exception import NetworkXNoPath, NodeNotFound
 from pyflann import FLANN
 
 from definitions import DISTANCE, MAP_IMG, PATH_W_COORDS, POS
+from roadmaps.reaction_diffusion.rd import *
 from scenarios.visualization import get_colors
 from tools import ProgressBar
 
@@ -85,14 +87,55 @@ def sample_points(
                         dtype=torch.float, requires_grad=True)
 
 
+def sample_points_reaction_diffusion(
+        n: int,
+        map_img: MAP_IMG,
+        rng: Random) -> torch.Tensor:
+    """Sample roughly `n` random points (0 <= x <= 1) from a map using
+    reaction-diffusion."""
+    alpha = 0.5
+    n_searches = 10
+    for i in range(n_searches):
+        point_poses = []
+        try:
+            delta_t, experiment, N_simulation_steps, size = get_experiments(
+                alpha)
+            mask = cv2.resize(np.array(map_img).astype(
+                np.float32), (size, size))
+            mask = mask < 128
+            assert mask.shape[0] == mask.shape[1], "Mask must be square."
+            A, B = get_initial_configuration(mask.shape[0], rng=rng)
+            A_bg = 0.0
+            B_bg = 0.0
+            for i in tqdm(range(N_simulation_steps)):
+                A, B = gray_scott_update(
+                    A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
+            bitmap = reaction_difussion_to_bitmap(B)
+            point_poses = bitmap_to_point_poses(bitmap)
+            print(f"Found {len(point_poses)} points, when {n} were requested.")
+        except Exception as e:
+            print(f"Exception: {e}")
+            assert len(point_poses) != 0, "No points found."
+        if abs(len(point_poses) - n) < 0.2 * n:
+            break
+        elif len(point_poses) > n:
+            alpha *= (1 + 0.0003 * (n_searches - i) / n_searches)
+        else:
+            alpha *= (1 - 0.0003 * (n_searches - i) / n_searches)
+        print(f"New alpha: {alpha}")
+    return torch.tensor(point_poses, device=torch.device("cpu"),
+                        dtype=torch.float, requires_grad=True)
+
+
 def make_graph_and_flann(
         pos: torch.Tensor,
         map_img: MAP_IMG,
-        desired_n_nodes: int) -> Tuple[nx.Graph, FLANN]:
+        desired_n_nodes: int,
+        rng: Random) -> Tuple[nx.Graph, FLANN]:
     """Convert array of node positions into graph by Delaunay Triangulation."""
     # add points in case they are not enough
-    while pos.shape[0] < desired_n_nodes:
-        pos = torch.cat((pos, sample_points(1, map_img, rng)), dim=0)
+    # while pos.shape[0] < desired_n_nodes:
+    #     pos = torch.cat((pos, sample_points(1, map_img, rng)), dim=0)
     pos_np = pos.detach().numpy()
     cells, _ = voronoi_frames(pos_np, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells)
@@ -297,7 +340,7 @@ def optimize_poses(
     training_length = get_paths_len(pos, training_paths, True)
     _ = training_length.backward()
     optimizer.step()
-    g, flann = make_graph_and_flann(pos, map_img, n_nodes)
+    g, flann = make_graph_and_flann(pos, map_img, n_nodes, rng)
     optimizer.zero_grad()
     return g, pos, test_length, training_length
 
@@ -308,7 +351,8 @@ def optimize_poses_from_paths(
         path_set: List[List[PATH_W_COORDS]],
         map_img: MAP_IMG,
         n_nodes: int,
-        optimizer: torch.optim.Optimizer):
+        optimizer: torch.optim.Optimizer,
+        rng: Random):
     paths: List[PATH_W_COORDS]
     paths = reduce(lambda x, y: x + y, path_set, [])
     training_length = get_paths_len(pos, paths, True)
@@ -316,7 +360,7 @@ def optimize_poses_from_paths(
         _ = training_length.backward()
         optimizer.step()
         optimizer.zero_grad()
-    g, flann = make_graph_and_flann(pos, map_img, n_nodes)
+    g, flann = make_graph_and_flann(pos, map_img, n_nodes, rng)
     if len(paths) != 0:
         avg_len = training_length.item() / len(paths)
     else:
@@ -334,7 +378,7 @@ if __name__ == "__main__":
 
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
-    g, flann = make_graph_and_flann(pos, map_img, n)
+    g, flann = make_graph_and_flann(pos, map_img, n, rng)
 
     optimizer = torch.optim.Adam([pos], lr=learning_rate)
     test_costs = []

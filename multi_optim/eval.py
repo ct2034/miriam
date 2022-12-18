@@ -1,22 +1,23 @@
 import logging
 from builtins import float
 from copy import deepcopy
+from pprint import pprint
 from random import Random
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
 import torch
 from pyflann import FLANN
 from torch_geometric.data import Data
+from tqdm import tqdm
 
 from definitions import (DEFAULT_TIMEOUT_S, IDX_AVERAGE_LENGTH, IDX_SUCCESS,
-                         INVALID, MAP_IMG, POS, SCENARIO_RESULT, C)
+                         INVALID, MAP_IMG, POS, C)
 from multi_optim.state import ScenarioState
 from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy import BFS_TYPE, EdgePolicyModel
 from roadmaps.var_odrm_torch.var_odrm_torch import get_path_len, sample_points
-from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import LearnedPolicy, PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
@@ -65,13 +66,41 @@ class Eval(object):
         self.eval_set_accuracy: List[
             List[Tuple[Data, BFS_TYPE]]] = [list() for _ in n_agents_s]
 
+        N_TRIES = 100
+
+        # progress bar
+        pb_t = tqdm(total=self.n_eval, desc="eval", unit="sc")
+
+        # stats
+        stats_prototype = {
+            "failed_generating_agents": 0,
+            "failed_cbsr": 0,
+            "failed_policy": 0,
+            "failed_state_construction": 0,
+            "failed_state_observe": 0,
+            "success": 0
+        }
+        stats = {}
+
         for i_na, n_agents in enumerate(self.n_agents_s):
-            for _ in range(n_eval_per_n_agents):
+            stats[n_agents] = {}
+            for i_e in range(n_eval_per_n_agents):
+                stats[n_agents][i_e] = deepcopy(stats_prototype)
+                this_stats = stats[n_agents][i_e]
                 solvable_and_interesting = False
+                pb_t.update(1)
+                remaining_tries = N_TRIES
                 while not solvable_and_interesting:
+                    remaining_tries -= 1
+                    if remaining_tries == 0:
+                        logger.error(f"Failed to generate a scenario for "
+                                     f"{n_agents} agents after "
+                                     f"{N_TRIES} tries."
+                                     f"stats: {stats}")
+                        raise RuntimeError("Failed to generate a scenario")
                     unique = False
-                    starts = None  # type: Optional[List[C]]
-                    goals = None  # type: Optional[List[C]]
+                    starts: Optional[List[C]] = None
+                    goals: Optional[List[C]] = None
                     starts_goals_coord: Optional[np.ndarray] = None
                     while not unique:
                         starts_goals_coord = sample_points(
@@ -95,6 +124,7 @@ class Eval(object):
                         policy=PolicyType.OPTIMAL, radius=self.radius,
                         rng=self.rng)
                     if agents is None:
+                        this_stats["failed_generating_agents"] += 1
                         continue
                     # genereally solvable?
                     res_cbsr = plan_cbsr(self.first_roadmap, starts, goals,
@@ -102,11 +132,13 @@ class Eval(object):
                                          skip_cache=False,
                                          ignore_finished_agents=True)
                     if res_cbsr == INVALID:
+                        this_stats["failed_cbsr"] += 1
                         continue
                     # solvable by policy
                     res = run_a_scenario(self.first_roadmap,
                                          agents, False, self.iterator_type)
                     if not res[IDX_SUCCESS]:
+                        this_stats["failed_policy"] += 1
                         continue
                     # maybe we can also make a state:
                     state = ScenarioState(
@@ -114,12 +146,14 @@ class Eval(object):
                         self.untrained_policy, self.radius)
                     state.run()
                     if state.finished:
+                        this_stats["failed_state_construction"] += 1
                         continue
                     # get state and observation:
                     try:
                         observation = state.observe()
                     except RuntimeError:
                         # if no path was found, we can't use this state
+                        this_stats["failed_state_observe"] += 1
                         continue
                     assert observation is not None
                     self.states.append(state)
@@ -140,6 +174,9 @@ class Eval(object):
                     self.agents_s.append(agents)
                     self.first_lengths.append(None)
                     solvable_and_interesting = True
+                    this_stats["success"] += 1
+        pb_t.close()
+        pprint(stats)
 
     def evaluate_policy(self, model: EdgePolicyModel
                         ) -> Dict[str, float]:
