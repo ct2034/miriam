@@ -14,9 +14,14 @@ from libpysal import weights
 from libpysal.cg import voronoi_frames
 from networkx.exception import NetworkXNoPath, NodeNotFound
 from pyflann import FLANN
+from tqdm import tqdm
 
 from definitions import DISTANCE, MAP_IMG, PATH_W_COORDS, POS
-from roadmaps.reaction_diffusion.rd import *
+from roadmaps.reaction_diffusion.rd import (bitmap_to_point_poses,
+                                            get_experiments,
+                                            get_initial_configuration,
+                                            gray_scott_update,
+                                            reaction_difussion_to_bitmap)
 from scenarios.visualization import get_colors
 from tools import ProgressBar
 
@@ -96,7 +101,7 @@ def sample_points_reaction_diffusion(
     alpha = 0.5
     n_searches = 10
     for i in range(n_searches):
-        point_poses = []
+        point_poses: np.ndarray = np.empty(shape=(0, 2))
         try:
             delta_t, experiment, N_simulation_steps, size = get_experiments(
                 alpha)
@@ -123,6 +128,7 @@ def sample_points_reaction_diffusion(
         else:
             alpha *= (1 - 0.0003 * (n_searches - i) / n_searches)
         print(f"New alpha: {alpha}")
+    assert len(point_poses) != 0, "No points found."
     return torch.tensor(point_poses, device=torch.device("cpu"),
                         dtype=torch.float, requires_grad=True)
 
