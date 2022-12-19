@@ -13,11 +13,12 @@ from torch_geometric.data import Data
 from tqdm import tqdm
 
 from definitions import (DEFAULT_TIMEOUT_S, IDX_AVERAGE_LENGTH, IDX_SUCCESS,
-                         INVALID, MAP_IMG, POS, C)
+                         INVALID, MAP_IMG, POS, SCENARIO_RESULT, C)
 from multi_optim.state import ScenarioState
 from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy import BFS_TYPE, EdgePolicyModel
 from roadmaps.var_odrm_torch.var_odrm_torch import get_path_len, sample_points
+from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import LearnedPolicy, PolicyType
 from sim.decentralized.runner import run_a_scenario, to_agent_objects
@@ -54,14 +55,14 @@ class Eval(object):
                           random_seed=0)
         self.untrained_policy = EdgePolicyModel()
 
-        self.starts_corrds_s = []  # type: List[List[Tuple[float, float]]]
-        self.goals_corrds_s = []  # type: List[List[Tuple[float, float]]]
-        self.starts_s = []  # type: List[List[C]]
-        self.goals_s = []  # type: List[List[C]]
-        self.res_optimal_policy = []  # type: List[SCENARIO_RESULT]
-        self.agents_s = []  # type: List[List[Agent]]
-        self.states = []  # type: List[ScenarioState]
-        self.first_lengths = []  # type: List[Optional[float]]
+        self.starts_corrds_s: List[List[Tuple[float, float]]] = []
+        self.goals_corrds_s: List[List[Tuple[float, float]]] = []
+        self.starts_s: List[List[C]] = []
+        self.goals_s: List[List[C]] = []
+        self.res_optimal_policy: List[SCENARIO_RESULT] = []
+        self.agents_s: List[List[Agent]] = []
+        self.states: List[ScenarioState] = []
+        self.first_lengths: List[Optional[float]] = []
         # per n_agents ...
         self.eval_set_accuracy: List[
             List[Tuple[Data, BFS_TYPE]]] = [list() for _ in n_agents_s]
@@ -80,7 +81,7 @@ class Eval(object):
             "failed_state_observe": 0,
             "success": 0
         }
-        stats = {}
+        stats: Dict[int, Dict[int, Dict[str, int]]] = {}
 
         for i_na, n_agents in enumerate(self.n_agents_s):
             stats[n_agents] = {}
