@@ -2,23 +2,17 @@
 import pickle as pkl
 from itertools import product
 from random import Random
-from typing import Dict, Tuple
+from typing import Tuple
 
-import networkx as nx
 import numpy as np
-import torch
 from bresenham import bresenham
 from matplotlib import pyplot as plt
 from scipy.ndimage import laplace
 from sklearn.cluster import AgglomerativeClustering  # scikit-learn
 from sklearn.neighbors import NearestCentroid
-from tqdm import tqdm
 
-from definitions import POS
-# from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
-from scenarios.generators import movingai_read_mapfile
-
-# src: https://github.com/benmaier/reaction-diffusion/blob/master/gray_scott.ipynb
+# src:
+# https://github.com/benmaier/reaction-diffusion/blob/master/gray_scott.ipynb
 
 
 def gray_scott_update(A, B, A_bg, B_bg, mask, DA, DB, f, k, delta_t):
@@ -64,7 +58,7 @@ def get_initial_configuration(N, random_influence=0.2, rng: Random = Random()
     # Now let's add four distrubances
     N4 = N//4
     N3 = N//4*3
-    radius = r = int(N/10.0)
+    r = int(N/10.0)
 
     for n1, n2 in product([N4, N3], repeat=2):
         A[n1-r:n1+r, n2-r:n2+r] = 0.50
@@ -128,7 +122,7 @@ def poses_to_reaction_diffusion(
         point_poses: np.ndarray,
         A_min_max: Tuple[float, float], B_min_max: Tuple[float, float],
         width: int, radius: float) -> Tuple[np.ndarray, np.ndarray]:
-    """Regenerate A and B for reaction diffusion by making circles around 
+    """Regenerate A and B for reaction diffusion by making circles around
     the `point_poses`."""
     A_bg = A_min_max[1]
     A_fg = A_min_max[0] + .3
