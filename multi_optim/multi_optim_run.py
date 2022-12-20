@@ -615,7 +615,7 @@ def inflate_map(map_np, SUPER_RES_MULTIPLIER):
 
 
 def gridmap_to_map_img(map_np: np.ndarray) -> MAP_IMG:
-    map_img = tuple(map(tuple, (map_np-1)*-255))
+    map_img = tuple(((map_np-1)*-255).tolist())
     return map_img
 
 

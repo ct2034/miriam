@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
         # start the actual run
         run_optimization(
-            **configs[prefix],
+            **configs[prefix],  # type: ignore
             pool_in=pool)
 
     pool.close()
