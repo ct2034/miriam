@@ -1,6 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
-configs = {
+CONFIGS_TYPE = Dict[str, Dict[str, Union[int, float, str]]]
+configs: CONFIGS_TYPE = {
     "debug": {
         "n_nodes": 16,
         "n_runs_pose": 8,
@@ -159,9 +160,9 @@ configs = {
 
 
 def augment_config_by(
-        configs: Dict[Any, Any],
+        configs: CONFIGS_TYPE,
         key: str,
-        values: List[Any]) -> Dict[Any, Any]:
+        values: List[Any]) -> CONFIGS_TYPE:
     augmented_configs = configs.copy()
     for name, config in configs.items():
         for value in values:

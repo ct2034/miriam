@@ -31,7 +31,7 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (
     draw_graph, make_graph_and_flann, optimize_poses_from_paths, read_map,
     sample_points, sample_points_reaction_diffusion)
 from scenarios.generators import movingai_read_mapfile
-from tools import ProgressBar, StatCollector, set_ulimit
+from tools import ProgressBar, StatCollector
 
 if __name__ == "__main__":
     from configs import configs_all_maps
