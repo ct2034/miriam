@@ -122,7 +122,7 @@ configs: CONFIGS_TYPE = {
         "map_name": "random-32-32-10.map",
         "seed": 0,
         "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10"
+        "prefix": "mapf_benchm_random-32-32-10_200"
     },
     "mapf_benchm_random-32-32-10_300": {
         "n_nodes": 300,
@@ -138,7 +138,7 @@ configs: CONFIGS_TYPE = {
         "map_name": "random-32-32-10.map",
         "seed": 0,
         "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10"
+        "prefix": "mapf_benchm_random-32-32-10_300"
     },
     "mapf_benchm_random-32-32-10_400": {
         "n_nodes": 400,
@@ -154,7 +154,7 @@ configs: CONFIGS_TYPE = {
         "map_name": "random-32-32-10.map",
         "seed": 0,
         "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10"
+        "prefix": "mapf_benchm_random-32-32-10_400"
     }
 }
 
