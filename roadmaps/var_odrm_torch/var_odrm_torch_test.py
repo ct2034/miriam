@@ -3,7 +3,11 @@ from random import Random
 
 import numpy as np
 import torch
-from roadmaps.var_odrm_torch.var_odrm_torch import *
+
+from roadmaps.var_odrm_torch.var_odrm_torch import (get_path_len,
+                                                    get_paths_len,
+                                                    make_graph_and_flann,
+                                                    make_paths, sample_points)
 
 
 class TestVarOdrmTorch(unittest.TestCase):
@@ -48,7 +52,7 @@ class TestVarOdrmTorch(unittest.TestCase):
         self.assertEqual(0, np.count_nonzero(points < 0))
 
     def test_make_graph(self):
-        graph, _ = make_graph_and_flann(self.pos, self.map_img)
+        graph, _ = make_graph_and_flann(self.pos, self.map_img, rng=Random(0))
         # 5 delaunay-edges and 4 self-edges
         self.assertEqual(5 + 4, graph.number_of_edges())
         self.assertEqual(self.pos.shape[0], graph.number_of_nodes())
@@ -60,7 +64,7 @@ class TestVarOdrmTorch(unittest.TestCase):
 
     def test_make_paths(self):
         n = self.pos.shape[0]
-        graph, _ = make_graph_and_flann(self.pos, self.map_img)
+        graph, _ = make_graph_and_flann(self.pos, self.map_img, rng=Random(0))
         paths = make_paths(graph, 10, self.map_img, self.rng)
         for path in paths:
             start, goal, node_path = path

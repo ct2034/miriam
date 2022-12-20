@@ -24,7 +24,7 @@ def demo():
     for _ in range(n_smpls):
         pos = sample_points(n_nodes, map_img, rng)
         g: nx.Graph
-        (g, _) = make_graph_and_flann(pos, map_img, n)
+        (g, _) = make_graph_and_flann(pos, map_img, n, rng)
         starts = rng.sample(range(g.number_of_nodes()), k=n_agents)
         goals = rng.sample(range(g.number_of_nodes()), k=n_agents)
         agents = to_agent_objects(g, starts, goals, radius=.1)

@@ -1,6 +1,7 @@
 
 import pickle as pkl
 from pprint import pprint
+from random import Random
 
 import networkx as nx
 import numpy as np
@@ -63,7 +64,7 @@ if __name__ == '__main__':
         g_rd, flann_rd = make_graph_and_flann(
             pos=torch.Tensor(point_poses),
             map_img=map_img,
-            desired_n_nodes=len(point_poses))
+            desired_n_nodes=len(point_poses), rng=Random(0))
         draw_graph(g_rd, map_img, title=f"RD {name}")
         plt.savefig(f"{eval_results_folder}/{map_name}_rd_{name}.png")
         results[name] = eval.evaluate_roadmap(g_rd, flann_rd)
@@ -74,7 +75,7 @@ if __name__ == '__main__':
     _, flann_mo = make_graph_and_flann(pos=torch.Tensor(
         [g_mo.nodes[n][POS] for n in g_mo.nodes]),
         map_img=map_img,
-        desired_n_nodes=len(g_mo.nodes))
+        desired_n_nodes=len(g_mo.nodes), rng=Random(0))
     draw_graph(g_mo, map_img, title=f"MultiOptim")
     plt.savefig(f"{eval_results_folder}/{map_name}_mo.png")
     results["multi_optim"] = eval.evaluate_roadmap(g_mo, flann_mo)

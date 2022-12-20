@@ -91,7 +91,7 @@ def read_outfile(fname):
     if delete:
         try:
             os.remove(fname)
-        except:
+        except Exception:
             pass
     if data is None:
         return INVALID
@@ -141,6 +141,7 @@ def plan_cbsr(g: nx.Graph, starts: List[int], goals: List[int],
             with open(fname_roadmap, 'r') as f:
                 data = yaml.load(f, Loader=yaml.SafeLoader)
         except (yaml.YAMLError, FileNotFoundError) as e:
+            logging.warning(e)
             pass
     if not data:  # nothing was loaded
         if os.path.exists(fname_roadmap):
@@ -219,7 +220,7 @@ if __name__ == "__main__":
 
     map_img = read_map(map_fname)
     pos = sample_points(n, map_img, rng)
-    g, _ = make_graph_and_flann(pos, map_img, n)
+    g, _ = make_graph_and_flann(pos, map_img, n, rng)
     starts = rng.sample(range(n), n_agents)
     goals = rng.sample(range(n), n_agents)
     starts = [0, 0]

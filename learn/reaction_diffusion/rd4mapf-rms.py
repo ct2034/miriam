@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pickle as pkl
 from itertools import product
+from random import Random
 from typing import Dict, Tuple
 
 import networkx as nx
@@ -9,7 +10,7 @@ import torch
 from bresenham import bresenham
 from matplotlib import pyplot as plt
 from scipy.ndimage import laplace
-from sklearn.cluster import *  # scikit-learn
+from sklearn.cluster import AgglomerativeClustering  # scikit-learn
 from sklearn.neighbors import NearestCentroid
 from tqdm import tqdm
 
@@ -61,7 +62,7 @@ def get_initial_configuration(N, random_influence=0.2) -> Tuple[np.ndarray, np.n
     # Now let's add four distrubances
     N4 = N//4
     N3 = N//4*3
-    radius = r = int(N/10.0)
+    r = int(N/10.0)
 
     for n1, n2 in product([N4, N3], repeat=2):
         A[n1-r:n1+r, n2-r:n2+r] = 0.50
@@ -228,7 +229,8 @@ def processing_back_and_forth(mask, experiments):
         # make a graph from that
         g, _ = make_graph_and_flann(pos=torch.Tensor(point_poses),
                                     map_img=map_img,
-                                    desired_n_nodes=len(point_poses))
+                                    desired_n_nodes=len(point_poses),
+                                    rng=Random(0))
 
         # display graph
         axes[1, i].set_title(f"{len(point_poses)} points ...")
