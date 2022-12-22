@@ -81,82 +81,83 @@ def draw(d: Dict[str, Dict[str, np.ndarray]]):
     fig.tight_layout()
 
 
-# update in time
-delta_t = 1.0
+if __name__ == "__main__":
+    # update in time
+    delta_t = 1.0
 
-# Diffusion coefficients
-DA = 0.14
-DB = 0.06
+    # Diffusion coefficients
+    DA = 0.14
+    DB = 0.06
 
-# define feed/kill rates
-f = 0.035
-k = 0.065
+    # define feed/kill rates
+    f = 0.035
+    k = 0.065
 
-# grid size
-N = 200
+    # grid size
+    N = 200
 
-# simulation steps
-N_simulation_steps = 10000
+    # simulation steps
+    N_simulation_steps = 10000
 
-experiments = {
-    "base": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.035,
-        "k": 0.065,
-    },
-    "faster": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.045,
-        "k": 0.065,
-    },
-    "slower": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.025,
-        "k": 0.065,
-    },
-    "more kill": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.035,
-        "k": 0.075,
-    },
-    "less kill": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.035,
-        "k": 0.055,
-    },
-    "even less kill": {
-        "DA": 0.14,
-        "DB": 0.06,
-        "f": 0.035,
-        "k": 0.045,
-    },
-    "more diffusion": {
-        "DA": 0.16,
-        "DB": 0.08,
-        "f": 0.035,
-        "k": 0.065,
-    },
-    "less diffusion": {
-        "DA": 0.12,
-        "DB": 0.04,
-        "f": 0.035,
-        "k": 0.065,
-    },
-}
+    experiments = {
+        "base": {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.065,
+        },
+        "faster": {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.045,
+            "k": 0.065,
+        },
+        "slower": {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.025,
+            "k": 0.065,
+        },
+        "more kill": {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.075,
+        },
+        "less kill": {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.055,
+        },
+        "even less kill": {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.045,
+        },
+        "more diffusion": {
+            "DA": 0.16,
+            "DB": 0.08,
+            "f": 0.035,
+            "k": 0.065,
+        },
+        "less diffusion": {
+            "DA": 0.12,
+            "DB": 0.04,
+            "f": 0.035,
+            "k": 0.065,
+        },
+    }
 
-results = {}
+    results = {}
 
-for experiment_name, experiment in experiments.items():
-    A, B = get_initial_configuration(N)
-    for i in tqdm(range(N_simulation_steps)):
-        A, B = gray_scott_update(A, B, **experiment, delta_t=delta_t)
-    results[experiment_name] = {"A": A, "B": B}
+    for experiment_name, experiment in experiments.items():
+        A, B = get_initial_configuration(N)
+        for i in tqdm(range(N_simulation_steps)):
+            A, B = gray_scott_update(A, B, **experiment, delta_t=delta_t)
+        results[experiment_name] = {"A": A, "B": B}
 
-draw(results)
-plt.savefig("learn/reaction_diffusion/overview.png")
-plt.show()
+    draw(results)
+    plt.savefig("learn/reaction_diffusion/overview.png")
+    plt.show()
