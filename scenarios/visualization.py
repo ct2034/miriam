@@ -1,13 +1,11 @@
-
-from functools import reduce
-from itertools import product
 from typing import List
+
 import networkx as nx
 import numpy as np
 from matplotlib import cm
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from torch_geometric.data import Data
+
 from definitions import POS
 from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
 
@@ -171,7 +169,7 @@ def plot_schedule(data: dict):
     plot_with_paths(data['gridmap'], paths)
 
 
-def plot_state(data: Data):
+def plot_state(data):  # type: (torch_geometric.data.Data) -> None
     """display state of GCN data with pos, edges and node features"""
     data_x = data.x
     data_edge_index = data.edge_index

@@ -4,12 +4,16 @@ from itertools import product
 from random import Random
 from typing import Tuple
 
+import cv2
 import numpy as np
+import torch
 from bresenham import bresenham
 from matplotlib import pyplot as plt
 from scipy.ndimage import laplace
 from sklearn.cluster import AgglomerativeClustering  # scikit-learn
 from sklearn.neighbors import NearestCentroid
+
+from definitions import MAP_IMG
 
 # src:
 # https://github.com/benmaier/reaction-diffusion/blob/master/gray_scott.ipynb
@@ -177,6 +181,47 @@ def plot_bitmap_and_poses(ax, bitmap, point_poses, title=""):
         c="red",
         marker=".",
         alpha=0.9)
+
+
+def sample_points_reaction_diffusion(
+        n: int,
+        map_img: MAP_IMG,
+        rng: Random) -> torch.Tensor:
+    """Sample roughly `n` random points (0 <= x <= 1) from a map using
+    reaction-diffusion."""
+    alpha = 0.5
+    n_searches = 10
+    for i in range(n_searches):
+        point_poses: np.ndarray = np.empty(shape=(0, 2))
+        try:
+            delta_t, experiment, N_simulation_steps, size = get_experiments(
+                alpha)
+            mask = cv2.resize(np.array(map_img).astype(
+                np.float32), (size, size))
+            mask = mask < 128
+            assert mask.shape[0] == mask.shape[1], "Mask must be square."
+            A, B = get_initial_configuration(mask.shape[0], rng=rng)
+            A_bg = 0.0
+            B_bg = 0.0
+            for i in tqdm(range(N_simulation_steps)):
+                A, B = gray_scott_update(
+                    A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
+            bitmap = reaction_difussion_to_bitmap(B)
+            point_poses = bitmap_to_point_poses(bitmap)
+            print(f"Found {len(point_poses)} points, when {n} were requested.")
+        except Exception as e:
+            print(f"Exception: {e}")
+            assert len(point_poses) != 0, "No points found."
+        if abs(len(point_poses) - n) < 0.2 * n:
+            break
+        elif len(point_poses) > n:
+            alpha *= (1 + 0.0003 * (n_searches - i) / n_searches)
+        else:
+            alpha *= (1 - 0.0003 * (n_searches - i) / n_searches)
+        print(f"New alpha: {alpha}")
+    assert len(point_poses) != 0, "No points found."
+    return torch.tensor(point_poses, device=torch.device("cpu"),
+                        dtype=torch.float, requires_grad=True)
 
 
 def get_experiments(alpha: float = 0.5):

@@ -27,9 +27,11 @@ import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
-from roadmaps.var_odrm_torch.var_odrm_torch import (
-    draw_graph, make_graph_and_flann, optimize_poses_from_paths, read_map,
-    sample_points, sample_points_reaction_diffusion)
+from roadmaps.reaction_diffusion.rd import sample_points_reaction_diffusion
+from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
+                                                    make_graph_and_flann,
+                                                    optimize_poses_from_paths,
+                                                    read_map, sample_points)
 from scenarios.generators import movingai_read_mapfile
 from tools import ProgressBar, StatCollector
 

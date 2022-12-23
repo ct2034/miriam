@@ -1,4 +1,4 @@
-from typing import Any, List, Set, Tuple, TypeVar
+from typing import Any, List, Set, Tuple
 
 import numpy as np
 
