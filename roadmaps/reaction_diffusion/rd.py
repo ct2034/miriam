@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 from scipy.ndimage import laplace
 from sklearn.cluster import AgglomerativeClustering  # scikit-learn
 from sklearn.neighbors import NearestCentroid
+from tqdm import tqdm
 
 from definitions import MAP_IMG
 
@@ -186,7 +187,7 @@ def plot_bitmap_and_poses(ax, bitmap, point_poses, title=""):
 def sample_points_reaction_diffusion(
         n: int,
         map_img: MAP_IMG,
-        rng: Random) -> torch.Tensor:
+        rng: Random) -> Tuple[torch.Tensor, np.ndarray]:
     """Sample roughly `n` random points (0 <= x <= 1) from a map using
     reaction-diffusion."""
     alpha = 0.5
@@ -198,7 +199,7 @@ def sample_points_reaction_diffusion(
                 alpha)
             mask = cv2.resize(np.array(map_img).astype(
                 np.float32), (size, size))
-            mask = mask < 128
+            mask = mask < 255
             assert mask.shape[0] == mask.shape[1], "Mask must be square."
             A, B = get_initial_configuration(mask.shape[0], rng=rng)
             A_bg = 0.0
@@ -221,7 +222,7 @@ def sample_points_reaction_diffusion(
         print(f"New alpha: {alpha}")
     assert len(point_poses) != 0, "No points found."
     return torch.tensor(point_poses, device=torch.device("cpu"),
-                        dtype=torch.float, requires_grad=True)
+                        dtype=torch.float, requires_grad=True), B
 
 
 def get_experiments(alpha: float = 0.5):

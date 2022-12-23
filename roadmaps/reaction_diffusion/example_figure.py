@@ -5,12 +5,31 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from definitions import MAP_IMG
 from roadmaps.reaction_diffusion.rd import (get_experiments,
                                             get_initial_configuration,
-                                            gray_scott_update,
-                                            plot_bitmap_and_poses)
-from roadmaps.var_odrm_torch.var_odrm_torch import read_map
+                                            gray_scott_update)
+
+
+def make_fig(B, resize_factor, map_img, fname):
+    # plot
+    fig, ax = plt.subplots(1, 1, figsize=(4.5, 4.5))
+    ax.imshow(map_img, cmap="gray")
+    B_bigger = cv2.resize(B, (0, 0), fx=resize_factor, fy=resize_factor)
+    masked_bigger = np.ma.masked_where(
+        B_bigger <= (np.min(B_bigger)+.01), B_bigger)
+    img = ax.imshow(masked_bigger, cmap="jet")
+    fig.colorbar(img, ax=ax)
+    ax.set_title("Value of V")
+
+    # beautify
+    ax = plt.gca()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    fig.tight_layout()
+
+    # fin
+    fig.savefig(fname)
+
 
 if __name__ == "__main__":
     # load map
@@ -36,21 +55,5 @@ if __name__ == "__main__":
             A, B, A_bg, B_bg, mask, **experiment, delta_t=delta_t)
 
     # plot
-    fig, ax = plt.subplots(1, 1, figsize=(4.5, 4.5))
-    ax.imshow(map_img, cmap="gray")
-    masked = np.ma.masked_where(B <= 0.001, B)
-    masked_bigger = np.repeat(masked, RESIZE_FACTOR,
-                              axis=0).repeat(RESIZE_FACTOR, axis=1)
-    img = ax.imshow(masked_bigger, cmap="jet")
-    fig.colorbar(img, ax=ax)
-    ax.set_title("Value of V")
-
-    # beautify
-    ax = plt.gca()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    fig.tight_layout()
-
-    # fin
-    fig.savefig(f"roadmaps/reaction_diffusion/example_figure.pdf")
-    # fig.show()
+    make_fig(B, RESIZE_FACTOR, map_img,
+             "roadmaps/reaction_diffusion/example_figure.pdf")
