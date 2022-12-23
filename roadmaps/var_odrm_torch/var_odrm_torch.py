@@ -140,7 +140,7 @@ def draw_graph(
         ax.imshow(
             np.swapaxes(np.array(map_img), 0, 1),
             cmap="gray",
-            alpha=.5,
+            # alpha=.5,
             extent=(0, 1, 0, 1),
             origin="lower"
         )
