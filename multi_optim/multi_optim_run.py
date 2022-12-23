@@ -10,6 +10,7 @@ import time
 from random import Random
 from typing import Dict, List, Optional, Tuple
 
+import cv2
 import git.repo
 import networkx as nx
 import numpy as np
@@ -27,6 +28,7 @@ import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
+from roadmaps.reaction_diffusion.example_figure import make_fig
 from roadmaps.reaction_diffusion.rd import sample_points_reaction_diffusion
 from roadmaps.var_odrm_torch.var_odrm_torch import (draw_graph,
                                                     make_graph_and_flann,
@@ -288,6 +290,7 @@ def run_optimization(
     n_agents: int = n_agents_s[i_n_agents]
 
     # Roadmap
+    SUPER_RES_MULTIPLIER = 3
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}"
     if os.path.splitext(map_fname)[1] == ".png":
         map_img: MAP_IMG = read_map(map_fname)
@@ -296,12 +299,12 @@ def run_optimization(
         map_np = movingai_read_mapfile(map_fname)
         map_img = gridmap_to_map_img(map_np)
         # lets inflate the map a bit
-        SUPER_RES_MULTIPLIER = 3
         map_np_inflated = inflate_map(map_np, SUPER_RES_MULTIPLIER)
         map_img_inflated = gridmap_to_map_img(map_np_inflated)
     else:
         raise ValueError(f"Unknown map file extension {map_fname}")
 
+    B = None
     if load_roadmap is not None:
         # load graph from file
         graph_loaded = nx.read_gpickle(load_roadmap)
@@ -313,7 +316,8 @@ def run_optimization(
                            dtype=torch.float, requires_grad=True)
     else:
         # pos = sample_points(n_nodes, map_img_inflated, rng)
-        pos = sample_points_reaction_diffusion(n_nodes, map_img_inflated, rng)
+        pos, B = sample_points_reaction_diffusion(
+            n_nodes, map_img_inflated, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g: nx.Graph
     flann: FLANN
@@ -321,6 +325,11 @@ def run_optimization(
     if save_images:
         draw_graph(g, map_img, title="Start")
         plt.savefig(f"{save_folder}/{prefix}_start.png")
+    if save_images and B is not None:
+        make_fig(
+            cv2.rotate(B, cv2.ROTATE_90_COUNTERCLOCKWISE),
+            len(map_img) / 256, map_img,
+            fname=f"{save_folder}/{prefix}_start_rd.png")
 
     # GPU or CPU?
     if torch.cuda.is_available():
