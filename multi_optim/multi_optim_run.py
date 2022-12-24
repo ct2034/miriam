@@ -428,16 +428,16 @@ def run_optimization(
             optimize_policy_now = False
 
         # n_agents
-        current_succ_str = f"general_success_{n_agents}"
-        current_succ: float = 0.
+        switching_metric_str = f"policy_accuracy_{n_agents}"
+        switching_metric: float = 0.
         try:
-            current_succ_stats = stats.get_stats(current_succ_str)
-            current_succ = current_succ_stats[
-                current_succ_str][1][-1]  # type: ignore
+            switching_metric_stats = stats.get_stats(switching_metric_str)
+            switching_metric = switching_metric_stats[
+                switching_metric_str][1][-1]  # type: ignore
         except KeyError:
             # in case we don't have any data yet
             pass
-        if current_succ >= .8:
+        if switching_metric >= .7:
             i_n_agents = min(i_n_agents + 1, len(n_agents_s)-1)
         n_agents = n_agents_s[i_n_agents]
 
