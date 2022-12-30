@@ -3,11 +3,13 @@ import logging
 import os
 import subprocess
 import time
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import yaml
 from matplotlib import pyplot as plt
+
+from multi_optim.configs import configs
 from tools import ProgressBar
 
 logger = logging.getLogger(__name__)
@@ -17,21 +19,13 @@ ABLATION_RES_FOLDER = "multi_optim/results/ablation"
 
 
 def params_debug():
-    n_nodes_s = [4]
     parameter_experiments = {
-        "n_nodes": n_nodes_s,
-        "n_runs_pose": [2],
-        "n_runs_policy": [2, 4],
-        "n_epochs_per_run_policy": [2],
-        "batch_size_policy": [2],
-        "stats_and_eval_every": [1],
-        "lr_pos": [1E-4],
-        "lr_policy": [1E-3],
-        "max_n_agents": [2],
-        "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
-        "save_images": [False],
-        "save_folder": [TUNING_RES_FOLDER]
     }  # type: Dict[str, Union[List[int], List[float], List[str]]]
+    for k, v in configs['debug'].items():
+        if k == "seed":
+            continue
+        parameter_experiments[k] = [v]
+    parameter_experiments["save_folder"] = [TUNING_RES_FOLDER]
     n_runs = 2
     return parameter_experiments, n_runs
 
@@ -314,8 +308,8 @@ if __name__ == "__main__":
 
     if tuning:
         folder = TUNING_RES_FOLDER
-        # parameter_experiments, n_runs = params_debug()
-        parameter_experiments, n_runs = params_run()
+        parameter_experiments, n_runs = params_debug()
+        # parameter_experiments, n_runs = params_run()
     elif ablation:
         folder = ABLATION_RES_FOLDER
         parameter_experiments, n_runs = params_ablation()
@@ -331,6 +325,11 @@ if __name__ == "__main__":
         filemode='w',
         level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(name)-12s: %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
     params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
     run(params_to_run)
     plot_data(folder)

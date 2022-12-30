@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Union
 CONFIGS_TYPE = Dict[str, Dict[str, Union[int, float, str]]]
 configs: CONFIGS_TYPE = {
     "debug": {
-        "n_nodes": 16,
+        "n_nodes": 32,
         "n_runs_pose": 8,
         "n_runs_policy": 8,
         "n_episodes_per_run_policy": 2,
