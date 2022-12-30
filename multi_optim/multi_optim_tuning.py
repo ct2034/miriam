@@ -30,22 +30,16 @@ def params_debug():
     return parameter_experiments, n_runs
 
 
-def params_run():
+def params_run_lr_pos():
+    # what do smaller position learning rates do?
     parameter_experiments = {
-        "n_nodes": [64],  # medium
-        "n_runs_pose": [128],
-        "n_runs_policy": [128],
-        "n_epochs_per_run_policy":  [1, 2, 4, 6],
-        "n_episodes_per_run_policy":  [256],
-        "batch_size_policy":  [64],
-        "stats_and_eval_every": [4],
-        "lr_pos": [1E-3],
-        "lr_policy": [1E-4],
-        "max_n_agents": [8],
-        "map_fname": ["roadmaps/odrm/odrm_eval/maps/x.png"],
-        "save_images": [False],
-        "save_folder": [TUNING_RES_FOLDER]
     }  # type: Dict[str, Union[List[int], List[float], List[str]]]
+    for k, v in configs['large'].items():
+        if k == "seed":
+            continue
+        parameter_experiments[k] = [v]
+    parameter_experiments["save_folder"] = [TUNING_RES_FOLDER]
+    parameter_experiments["lr_pos"] = ["1e-3", "1e-4", "1e-5"]
     n_runs = 4
     return parameter_experiments, n_runs
 
@@ -308,8 +302,8 @@ if __name__ == "__main__":
 
     if tuning:
         folder = TUNING_RES_FOLDER
-        parameter_experiments, n_runs = params_debug()
-        # parameter_experiments, n_runs = params_run()
+        # parameter_experiments, n_runs = params_debug()
+        parameter_experiments, n_runs = params_run_lr_pos()
     elif ablation:
         folder = ABLATION_RES_FOLDER
         parameter_experiments, n_runs = params_ablation()
