@@ -93,16 +93,17 @@ def start_process(kwargs):
     kwargs_str = repr(kwargs)
     my_env = os.environ.copy()
     # my_env["CUDA_VISIBLE_DEVICES"] = "-1"
+    cmd = ["/usr/bin/python3",
+           "-c",
+           f"{import_str}; kwargs = {kwargs_str};"
+           + "run_optimization(**kwargs)"]
     process = subprocess.Popen(
-        ["/usr/bin/python3",
-         "-c",
-         f"{import_str}; kwargs = {kwargs_str};"
-         + "run_optimization(**kwargs)"],
+        cmd,
         cwd=str(os.getcwd()),
         env=my_env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-
+    print(f"Started ...... \n{' '.join(cmd)}\n ...... with pid {process.pid}")
     return process
 
 
@@ -302,8 +303,8 @@ if __name__ == "__main__":
 
     if tuning:
         folder = TUNING_RES_FOLDER
-        # parameter_experiments, n_runs = params_debug()
-        parameter_experiments, n_runs = params_run_lr_pos()
+        parameter_experiments, n_runs = params_debug()
+        # parameter_experiments, n_runs = params_run_lr_pos()
     elif ablation:
         folder = ABLATION_RES_FOLDER
         parameter_experiments, n_runs = params_ablation()
