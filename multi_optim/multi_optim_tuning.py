@@ -39,7 +39,7 @@ def params_run_lr_pos():
             continue
         parameter_experiments[k] = [v]
     parameter_experiments["save_folder"] = [TUNING_RES_FOLDER]
-    parameter_experiments["lr_pos"] = ["1e-3", "1e-4", "1e-5"]
+    parameter_experiments["lr_pos"] = [1e-3, 1e-4, 1e-5]
     n_runs = 4
     return parameter_experiments, n_runs
 
