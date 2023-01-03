@@ -154,11 +154,12 @@ def write_stats_png(prefix, save_folder, stats):
         "policy_accuracy",
         "policy_regret",
         "policy_success",
-        "general_accuracy",
+        # "general_accuracy",
+        "general_length",
         "general_regret",
         "general_success",
-        "general_gen"
-        "runtime_",
+        # "general_gen"
+        # "runtime_",
         "data_"
     ]
     _, axs = plt.subplots(len(prefixes), 1, sharex=True,
