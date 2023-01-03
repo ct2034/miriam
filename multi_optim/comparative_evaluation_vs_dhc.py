@@ -424,9 +424,12 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
                     if (total_lenght_our is not None and
                         total_lenght_dhc_by_nodes is not None and
                             total_lenght_dhc_by_edge_len is not None):
-                        f_our, ax_our = plt.subplots()
-                        f_dhc_by_nodes, ax_dhc_by_nodes = plt.subplots()
-                        f_dhc_by_edge_len, ax_dhc_by_edge_len = plt.subplots()
+                        f_our, ax_our = plt.subplots(
+                            figsize=(4.5, 4.5))
+                        f_dhc_by_nodes, ax_dhc_by_nodes = plt.subplots(
+                            figsize=(4.5, 4.5))
+                        f_dhc_by_edge_len, ax_dhc_by_edge_len = plt.subplots(
+                            figsize=(4.5, 4.5))
                         for ax in [ax_our, ax_dhc_by_nodes, ax_dhc_by_edge_len]:
                             ax.imshow(
                                 np.swapaxes(np.array(map_img), 0, 1),
@@ -786,25 +789,44 @@ def plot(figure_folder: str, results_name: str):
     for key in yaml_data.keys():
         if key.startswith('lens_'):
             success[key] = np.logical_not(np.isnan(yaml_data[key]))
-    diffs = {}
-    diffs_list = {}
-    for key in yaml_data.keys():
-        if key.startswith('lens_'):
-            if key != 'lens_our':
-                diffs[key] = yaml_data[key] - yaml_data['lens_our']
-                diffs_list[key] = [list() for _ in range(len(n_agents_s))]
-                for i_na, n_agents in enumerate(n_agents_s):
-                    for i_s in range(n_samples):
-                        if success[key][i_na, i_s] and success['lens_our'][i_na, i_s]:
-                            diffs_list[key][i_na].append(diffs[key][i_na, i_s])
+    # diffs = {}
+    # diffs_list = {}
+    # for key in yaml_data.keys():
+    #     if key.startswith('lens_'):
+    #         if key != 'lens_our':
+    #             diffs[key] = yaml_data[key] - yaml_data['lens_our']
+    #             diffs_list[key] = [list() for _ in range(len(n_agents_s))]
+    #             for i_na, n_agents in enumerate(n_agents_s):
+    #                 for i_s in range(n_samples):
+    #                     if success[key][i_na, i_s] and success['lens_our'][i_na, i_s]:
+    #                         diffs_list[key][i_na].append(diffs[key][i_na, i_s])
 
-    diffs_min_max = [1000, -1000]
-    for diff in diffs_list.values():
-        diffs_min_max = [
-            min(min([min(x) for x in diff if len(x) > 0]),
-                diffs_min_max[0]),
-            max(max([max(x) for x in diff if len(x) > 0]),
-                diffs_min_max[1])
+    # diffs_min_max = [1000, -1000]
+    # for diff in diffs_list.values():
+    #     diffs_min_max = [
+    #         min(min([min(x) for x in diff if len(x) > 0]),
+    #             diffs_min_max[0]),
+    #         max(max([max(x) for x in diff if len(x) > 0]),
+    #             diffs_min_max[1])
+    #     ]
+
+    abs_lengths_our = [list() for _ in range(len(n_agents_s))]
+    abs_lengths_dhc = [list() for _ in range(len(n_agents_s))]
+    abs_lengths_min_max = [1000, -1000]
+    for i_na, n_agents in enumerate(n_agents_s):
+        for i_s in range(n_samples):
+            if success['lens_our'][i_na, i_s]:
+                abs_lengths_our[i_na].append(
+                    yaml_data['lens_our'][i_na, i_s] / n_agents)
+            if success['lens_dhc'][i_na, i_s]:
+                abs_lengths_dhc[i_na].append(
+                    yaml_data['lens_dhc'][i_na, i_s] / n_agents)
+        abs_lengths_min_max = [
+            min(min(abs_lengths_our[i_na]),
+                abs_lengths_min_max[0]),
+            max(max(abs_lengths_our[i_na]),
+                max(abs_lengths_dhc[i_na]),
+                abs_lengths_min_max[1])
         ]
 
     width = .8
@@ -812,9 +834,10 @@ def plot(figure_folder: str, results_name: str):
     ax.boxplot([0, 1],
                positions=[-20],
                widths=width)
-    elemtns = ax.boxplot(diffs_list['lens_dhc'],
+    elemtns = ax.boxplot(abs_lengths_our,
                          positions=np.array(n_agents_s)-width/2,
-                         widths=width)
+                         widths=width,
+                         notch=True)
     for el in elemtns['boxes']:
         el.set_color(colors[1])
     for el in elemtns['medians']:
@@ -826,9 +849,10 @@ def plot(figure_folder: str, results_name: str):
     for el in elemtns['fliers']:
         el.set_markeredgecolor(colors[1])
 
-    elemtns = ax.boxplot(diffs_list['lens_dhc'],
+    elemtns = ax.boxplot(abs_lengths_dhc,
                          positions=np.array(n_agents_s)+width/2,
-                         widths=width)
+                         widths=width,
+                         notch=True)
     for el in elemtns['boxes']:
         el.set_color(colors[2])
     for el in elemtns['medians']:
@@ -842,15 +866,16 @@ def plot(figure_folder: str, results_name: str):
 
     # TODO: naming / why two times?
     ax.plot(0, 99, color=colors[1],
-            label='ORDP vs DHC (gridmap by edge length)')  # for legend
+            label='ORDP')  # for legend
     ax.plot(0, 99, color=colors[2],
-            label='ORDP vs DHC (gridmap by nr of vertices)')  # for legend
+            label='DHC')  # for legend
     ax.set_xlim(1, max(n_agents_s)+1)
-    ax.set_ylim(diffs_min_max[0]-.1, diffs_min_max[1]+.1)
+    ax.set_ylim(abs_lengths_min_max[0]-.1,
+                abs_lengths_min_max[1]+.1)
     ax.set_xticks(n_agents_s)
     ax.set_xticklabels(n_agents_s)
     ax.set_xlabel('Number of Agents')
-    ax.set_ylabel('Average Pathl Length Difference DHC - ORDP')
+    ax.set_ylabel('Average Path Length')
     ax.legend()
 
     f.tight_layout()
@@ -869,9 +894,9 @@ if __name__ == '__main__':
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder)
     n_agents_s: List[int] = [2, 4, 6, 8]
-    n_eval: int = 10
+    n_eval: int = 50
     radius: float = 1. / 32 / 2
 
-    # eval(logger, results_name, base_folder,
-    #      figure_folder, n_agents_s, n_eval, radius)
+    eval(logger, results_name, base_folder,
+         figure_folder, n_agents_s, n_eval, radius)
     plot(figure_folder, results_name)
