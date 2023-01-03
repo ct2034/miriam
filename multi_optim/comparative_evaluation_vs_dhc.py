@@ -895,7 +895,7 @@ if __name__ == '__main__':
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder)
     n_agents_s: List[int] = [4, 8, 12, 16, 20]
-    n_eval: int = 20
+    n_eval: int = 50
     radius: float = 1. / 32 / 2
 
     eval(logger, results_name, base_folder,
