@@ -98,8 +98,8 @@ def plot(figure_folder, results_name):
 
     fig, ax = plt.subplots()
     ax.set_title('Path length comparison')
-    ax.set_xlabel('Path length with RD')
-    ax.set_ylabel('Path length without RD')
+    ax.set_xlabel('Path length with Grey Scott intialization')
+    ax.set_ylabel('Path length with random initialization')
     ax.set_aspect('equal')
     # ax.set_xlim(0, 1)
     # ax.set_ylim(0, 1)
