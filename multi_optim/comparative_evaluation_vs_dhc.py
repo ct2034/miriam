@@ -420,6 +420,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
                         goals_dhc_by_edge_len, paths_dhc_by_edge_len)
 
                 if i_e == 0:
+                    plt.style.use('default')
                     colors = get_colors(n_agents)
                     if (total_lenght_our is not None and
                         total_lenght_dhc_by_nodes is not None and
@@ -535,6 +536,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
                         plt.close(f_our)
                         plt.close(f_dhc_by_nodes)
                         plt.close(f_dhc_by_edge_len)
+                        plt.style.use('bmh')
 
                 # print results
                 logger.info("="*60)
@@ -675,7 +677,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
                             pos=nx.get_node_attributes(g_our, POS),
                             with_labels=False,
                             node_size=5,
-                            edge_color='k',
+                            edge_color='grey',
                             node_color='k',
                             ax=ax_our)
                         nx.draw_networkx(
@@ -683,7 +685,7 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
                             pos=pos_dhc_dict,
                             with_labels=False,
                             node_size=5,
-                            edge_color='k',
+                            edge_color='grey',
                             node_color='k',
                             ax=ax_dhc)
 
@@ -729,10 +731,10 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
 
                         f_our.savefig(
                             f"{figure_folder}/{results_name}"
-                            + f"_paths_our_{n_agents=}.png")
+                            + f"_paths_our_{n_agents=}.pdf")
                         f_dhc.savefig(
                             f"{figure_folder}/{results_name}"
-                            + f"_paths_dhc_{n_agents=}.png")
+                            + f"_paths_dhc_{n_agents=}.pdf")
                         plt.close(f_our)
                         plt.close(f_dhc)
 
@@ -756,9 +758,11 @@ def plot(figure_folder: str, results_name: str):
         open(f"{figure_folder}/{results_name}_lens.yaml"),
         Loader=yaml.SafeLoader)
     n_agents_s = yaml_data['n_agents_s']
+    success = {}
     for key in yaml_data.keys():
         if key.startswith('lens_'):
             yaml_data[key] = np.array(yaml_data[key], dtype=np.float64)
+            success[key] = np.logical_not(np.isnan(yaml_data[key]))
 
     # plot
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']  # type: ignore
@@ -767,17 +771,23 @@ def plot(figure_folder: str, results_name: str):
     n_maps = len(yaml_data)
     width = 1./(n_maps+1)
     for i_na, n_agents in enumerate(n_agents_s):
+        success_rates = {}
         xs = np.arange(float(n_eval))
         for i_map, key in enumerate(yaml_data.keys()):
             if key.startswith('lens_'):
+                approach = key.replace('lens_', '')
+                if approach not in success_rates:
+                    success_rates[approach] = 0
+                if success[key][i_na].sum() > 0:
+                    success_rates[approach] += success[key][i_na].sum()
                 axs[i_na].bar(xs, yaml_data[key][i_na]/n_agents, width,
                               color=colors[i_map], alpha=1,
-                              label=key.replace('lens_', ''))
+                              label=approach)
                 xs += width
         axs[i_na].set_xticks(np.arange(float(n_eval)))
         axs[i_na].set_xlabel('Trials')
         axs[i_na].set_ylabel('Average Path Length')
-        axs[i_na].set_title(f"{n_agents=}")
+        axs[i_na].set_title(f"{n_agents=}, Success Rates: {success_rates}")
         axs[i_na].legend()
     f.savefig(f"{figure_folder}/{results_name}_lens.png")
     plt.close(f)
@@ -785,10 +795,6 @@ def plot(figure_folder: str, results_name: str):
     # plot stats
     n_samples = np.shape(yaml_data["lens_our"])[1]
     f, ax = plt.subplots(1, 1, figsize=(4.5, 4.5))
-    success = {}
-    for key in yaml_data.keys():
-        if key.startswith('lens_'):
-            success[key] = np.logical_not(np.isnan(yaml_data[key]))
     # diffs = {}
     # diffs_list = {}
     # for key in yaml_data.keys():

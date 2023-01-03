@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import networkx as nx
 import numpy as np
-import torch
+
 from definitions import POS, C
 from planner.mapf_implementations.libMultiRobotPlanning.tools.collision import (
     ellipsoid_collision_motion, precheck_bounding_box, precheck_indices)
@@ -172,7 +172,7 @@ def iterate_edge_policy(
     assert all(a.radius == agents[0].radius for a in agents),\
         "all radii must be equal"
 
-    RETRIES = 10
+    RETRIES = 20
     i_try = 0
     space_slice: List[float] = [0.] * len(agents)
     time_slice: List[int] = [1] * len(agents)
@@ -226,10 +226,16 @@ def iterate_edge_policy(
             agents, 0, next_nodes, ignore_finished_agents)
         new_agents_with_colissions = get_agents_in_col([next_collisions])
         new_agents_with_colissions.update(check_motion_col(
-            agents[0].env, agents[0].radius, next_nodes, poses_at_beginning, finished_agents))
+            agents[0].env, agents[0].radius, next_nodes,
+            poses_at_beginning, finished_agents))
         at_least_one_can_move = not any(new_agents_with_colissions)
         logger.debug(
-            f"{i_try=}, {at_least_one_can_move=}, {next_collisions=}, {new_agents_with_colissions=}")
+            f"{i_try=}, {at_least_one_can_move=}, " +
+            f"{next_collisions=}, {new_agents_with_colissions=}")
+        # Who moves?
+        moves = [agents[i_a].what_is_next_step() != agents[i_a].pos
+                 for i_a in range(len(agents))]
+        at_least_one_can_move = any(moves)
         agents_with_colissions.update(new_agents_with_colissions)
         # update agents with new paths in case we ask the policy again
         for i_a, a in enumerate(agents):
