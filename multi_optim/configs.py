@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Union
 
-CONFIGS_TYPE = Dict[str, Dict[str, Union[int, float, str]]]
+CONFIGS_TYPE = Dict[str, Dict[str, Union[int, float, str, bool]]]
 configs: CONFIGS_TYPE = {
     "debug": {
         "n_nodes": 32,
@@ -16,6 +16,22 @@ configs: CONFIGS_TYPE = {
         "map_name": "x.png",
         "seed": 0,
         "prefix": "debug"
+    },
+    "debug_no_rd": {
+        "n_nodes": 32,
+        "n_runs_pose": 8,
+        "n_runs_policy": 8,
+        "n_episodes_per_run_policy": 2,
+        "n_epochs_per_run_policy": 2,
+        "batch_size_policy": 16,
+        "stats_and_eval_every": 4,
+        "lr_pos": 1e-3,
+        "lr_policy": 1e-3,
+        "max_n_agents": 2,
+        "map_name": "x.png",
+        "seed": 0,
+        "use_reaction_diffusion": False,
+        "prefix": "debug_no_rd"
     },
     "tiny": {
         "n_nodes": 16,

@@ -258,6 +258,7 @@ def run_optimization(
         map_name: str,
         seed: int,
         radius: float = 0.001,
+        use_reaction_diffusion: bool = True,
         load_policy_model: Optional[str] = None,
         load_roadmap: Optional[str] = None,
         prefix: str = "noname",
@@ -316,9 +317,11 @@ def run_optimization(
                            device=torch.device("cpu"),
                            dtype=torch.float, requires_grad=True)
     else:
-        # pos = sample_points(n_nodes, map_img_inflated, rng)
-        pos, B = sample_points_reaction_diffusion(
-            n_nodes, map_img_inflated, rng)
+        if not use_reaction_diffusion:
+            pos = sample_points(n_nodes, map_img_inflated, rng)
+        else:  # use reaction diffusion
+            pos, B = sample_points_reaction_diffusion(
+                n_nodes, map_img_inflated, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g: nx.Graph
     flann: FLANN
@@ -385,6 +388,7 @@ def run_optimization(
         "max_n_agents": max_n_agents,
         "map_fname": map_fname,
         "radius": radius,
+        "use_reaction_diffusion": use_reaction_diffusion,
         "load_policy_model": (
             load_policy_model if load_policy_model else "None"),
         "prefix": prefix
@@ -648,6 +652,7 @@ if __name__ == "__main__":
 
     for prefix in [
         "debug",
+        "debug_no_rd",
         "debug_map_name_c.png",
         "debug_map_name_z.png",
         "tiny",
