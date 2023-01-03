@@ -829,7 +829,7 @@ def plot(figure_folder: str, results_name: str):
                 abs_lengths_min_max[1])
         ]
 
-    width = .8
+    width = 1.6
     # lengths
     ax.boxplot([0, 1],
                positions=[-20],
@@ -869,7 +869,8 @@ def plot(figure_folder: str, results_name: str):
             label='ORDP')  # for legend
     ax.plot(0, 99, color=colors[2],
             label='DHC')  # for legend
-    ax.set_xlim(1, max(n_agents_s)+1)
+    ax.set_xlim(min(n_agents_s)-width-.5,
+                max(n_agents_s)+width+.5)
     ax.set_ylim(abs_lengths_min_max[0]-.1,
                 abs_lengths_min_max[1]+.1)
     ax.set_xticks(n_agents_s)
@@ -893,8 +894,8 @@ if __name__ == '__main__':
     figure_folder: str = f'{base_folder}/eval_vs_dhc'
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder)
-    n_agents_s: List[int] = [2, 4, 6, 8]
-    n_eval: int = 50
+    n_agents_s: List[int] = [4, 8, 12, 16, 20]
+    n_eval: int = 20
     radius: float = 1. / 32 / 2
 
     eval(logger, results_name, base_folder,
