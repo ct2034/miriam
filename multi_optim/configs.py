@@ -140,7 +140,7 @@ configs: CONFIGS_TYPE = {
         "radius": 0.25 * (1. / 32),
         "prefix": "mapf_benchm_random-32-32-10_debug"
     },
-    "mapf_benchm_random-32-32-10_200": {
+    "mapf_benchm_random-32-32-10": {
         "n_nodes": 200,
         "n_runs_pose": 64,
         "n_runs_policy": 64,
@@ -154,7 +154,24 @@ configs: CONFIGS_TYPE = {
         "map_name": "random-32-32-10.map",
         "seed": 0,
         "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10_200"
+        "prefix": "mapf_benchm_random-32-32-10"
+    },
+    "mapf_benchm_random-32-32-10_no_rd": {
+        "n_nodes": 200,
+        "n_runs_pose": 64,
+        "n_runs_policy": 64,
+        "n_episodes_per_run_policy": 256,
+        "n_epochs_per_run_policy": 4,
+        "batch_size_policy": 128,
+        "stats_and_eval_every": 2,
+        "lr_pos": 3e-4,
+        "lr_policy": 1e-4,
+        "max_n_agents": 8,
+        "map_name": "random-32-32-10.map",
+        "seed": 0,
+        "use_reaction_diffusion": False,
+        "radius": 0.25 * (1. / 32),
+        "prefix": "mapf_benchm_random-32-32-10_no_rd"
     },
     "mapf_benchm_random-32-32-10_300": {
         "n_nodes": 300,
