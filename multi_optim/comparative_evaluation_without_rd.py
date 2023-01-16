@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     # parameters
     logger.setLevel(logging.INFO)
-    results_name: str = 'debug'
+    results_name: str = 'large'
     suffix_no_rd: str = '_no_rd'
     base_folder: str = 'multi_optim/results'
     figure_folder: str = f'{base_folder}/eval_without_rd'
