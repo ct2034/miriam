@@ -7,6 +7,7 @@ import os
 import pickle
 import socket
 import time
+from math import ceil
 from random import Random
 from typing import Dict, List, Optional, Tuple
 
@@ -296,7 +297,7 @@ def run_optimization(
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}"
     if os.path.splitext(map_fname)[1] == ".png":
         map_img: MAP_IMG = read_map(map_fname)
-        map_img_inflated = map_img  # no difference here TODO: maybe yes?
+        map_img_inflated = inflate_map_img(map_img, radius)
     elif os.path.splitext(map_fname)[1] == ".map":
         map_np = movingai_read_mapfile(map_fname)
         map_img = gridmap_to_map_img(map_np)
@@ -321,7 +322,7 @@ def run_optimization(
             pos = sample_points(n_nodes, map_img_inflated, rng)
         else:  # use reaction diffusion
             pos, B = sample_points_reaction_diffusion(
-                n_nodes, map_img_inflated, rng)
+                n_nodes, map_img, rng)
     optimizer_pos = torch.optim.Adam([pos], lr=lr_pos)
     g: nx.Graph
     flann: FLANN
@@ -628,6 +629,20 @@ def inflate_map(map_np, SUPER_RES_MULTIPLIER):
             map_np_inflated[x, y] = potential
 
     return map_np_inflated
+
+
+def inflate_map_img(map_img: MAP_IMG, radius: float):
+    width = len(map_img[0])
+    radius_px = int(ceil(radius * width))
+    map_img_inflated = np.zeros_like(map_img, dtype=np.uint8)
+    for x in range(map_img_inflated.shape[0]):
+        for y in range(map_img_inflated.shape[1]):
+            potential = map_img[x][y]
+            for x2 in range(max(0, x-radius_px), min(width, x+radius_px)):
+                for y2 in range(max(0, y-radius_px), min(width, y+radius_px)):
+                    potential = min(potential, map_img[x2][y2])
+            map_img_inflated[x, y] = potential
+    return map_img_inflated
 
 
 def gridmap_to_map_img(map_np: np.ndarray) -> MAP_IMG:
