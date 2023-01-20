@@ -13,7 +13,9 @@ from matplotlib import pyplot as plt
 from pyflann import FLANN
 
 from definitions import POS
+from multi_optim.multi_optim_run import gridmap_to_map_img
 from roadmaps.var_odrm_torch.var_odrm_torch import read_map, sample_points
+from scenarios.generators import movingai_read_mapfile
 
 matplotlib.use('cairo')
 plt.style.use('bmh')
@@ -43,6 +45,9 @@ def eval(results_name, base_folder, suffix_no_rd,
     map_img = None
     if map_fname.endswith(".png"):
         map_img = read_map(map_fname)
+    elif map_fname.endswith(".map"):
+        map_grid = movingai_read_mapfile(map_fname)
+        map_img = gridmap_to_map_img(np.array(map_grid))
     assert map_img is not None
 
     lengths = []
@@ -96,21 +101,33 @@ def plot(figure_folder, results_name):
     with open(f'{figure_folder}/{results_name}_lengths.pkl', 'rb') as f:
         lengths = pickle.load(f)
 
-    fig, ax = plt.subplots()
-    ax.set_title('Path length comparison')
-    ax.set_xlabel('Path length with Grey Scott intialization')
+    fig, ax = plt.subplots(
+        figsize=(4.5, 4.5))
+    # ax.set_title('Path length comparison')
+    ax.set_xlabel('Path length with Gray-Scott intialization')
     ax.set_ylabel('Path length with random initialization')
     ax.set_aspect('equal')
-    # ax.set_xlim(0, 1)
-    # ax.set_ylim(0, 1)
-    ax.plot([0, 1], [0, 1], 'k--', linewidth=0.5)
-    ax.scatter([l[0] for l in lengths], [l[1] for l in lengths], s=1)
+    ax.set_xticks([i*.5 for i in range(11)])
+    ax.set_yticks([i*.5 for i in range(11)])
+    # ax.plot([0, 1], [0, 1], 'k--', linewidth=0.5)
+    ax.scatter([l[0] for l in lengths],
+               [l[1] for l in lengths],
+               s=1.2,
+               label='path lengths samples')
     # add trendline
     x = np.array([l[0] for l in lengths])
     y = np.array([l[1] for l in lengths])
     m, b = np.polyfit(x, y, 1)
-    ax.plot(x, m * x + b, 'r--', linewidth=0.5)
+    ax.plot(x, m * x + b, 'r--', linewidth=0.5,
+            label=f'least squares fitted trendline')
+    plt.legend(bbox_to_anchor=(0, 1, 1, 0),
+               loc="lower left")
+    plt.tight_layout()
     fig.savefig(f'{figure_folder}/{results_name}_lengths.pdf')
+    print(f'Percentage of paths where random initialization is longer: '
+          f'{100*sum([l[1] > l[0] for l in lengths])/len(lengths)}%')
+    print(f'On average, random initialization is ' +
+          f'{100*(np.mean([l[1] - l[0] for l in lengths]))/np.mean([l[0] for l in lengths])}% longer')
 
 
 if __name__ == '__main__':
@@ -118,7 +135,7 @@ if __name__ == '__main__':
 
     # parameters
     logger.setLevel(logging.INFO)
-    results_name: str = 'large'
+    results_name: str = 'mapf_benchm_random-32-32-10'
     suffix_no_rd: str = '_no_rd'
     base_folder: str = 'multi_optim/results'
     figure_folder: str = f'{base_folder}/eval_without_rd'
