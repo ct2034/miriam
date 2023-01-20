@@ -107,8 +107,10 @@ def plot(figure_folder, results_name):
     ax.set_xlabel('Path length with Gray-Scott intialization')
     ax.set_ylabel('Path length with random initialization')
     ax.set_aspect('equal')
-    ax.set_xticks([i*.5 for i in range(11)])
-    ax.set_yticks([i*.5 for i in range(11)])
+    ax.set_xticks([i*.5 for i in range(1, 11)])
+    ax.set_yticks([i*.5 for i in range(1, 11)])
+    ax.set_xlim(0, max([l[0] for l in lengths])+.05)
+    ax.set_ylim(0, max([l[1] for l in lengths])+.05)
     # ax.plot([0, 1], [0, 1], 'k--', linewidth=0.5)
     ax.scatter([l[0] for l in lengths],
                [l[1] for l in lengths],
@@ -119,7 +121,7 @@ def plot(figure_folder, results_name):
     y = np.array([l[1] for l in lengths])
     m, b = np.polyfit(x, y, 1)
     ax.plot(x, m * x + b, 'r--', linewidth=0.5,
-            label=f'least squares fitted trendline')
+            label=f'trendline fitted by least squares')
     plt.legend(bbox_to_anchor=(0, 1, 1, 0),
                loc="lower left")
     plt.tight_layout()
