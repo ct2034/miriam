@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
   const size_t dimension = 2;
   desc.add_options()
       ("help", "produce help message")
-      ("environment,e", po::value<std::string>(&environmentFile)->required(), "input file for environment (STL)")
+      ("environment,e", po::value<std::string>(&environmentFile)->required(), "input file for environment (PNG)")
       ("output,o", po::value<std::string>(&outputFile)->required(), "output file for graph (YAML)")
       ("config,c", po::value<std::string>(&configFile)->required(), "config file for advanced parameters (YAML)")
       ("type", po::value<GenerationType::Type>(&genType)->default_value(GenerationType::SPARS)->multitoken(), "Method, one of [SPARS,SPARS2]. Default: SPARS")
@@ -174,7 +174,9 @@ int main(int argc, char** argv) {
       p.setStretchFactor(node["stretchFactor"].as<float>());
       p.setMaxFailures(node["maxFailures"].as<int>());
 
-      p.constructRoadmap(/*base::timedPlannerTerminationCondition(30)*/base::IterationTerminationCondition(node["maxIter"].as<int>()), true);
+      p.constructRoadmap(
+        base::timedPlannerTerminationCondition(node["maxTime"].as<double>()), true);
+        // /*base::timedPlannerTerminationCondition(30)*/base::IterationTerminationCondition(node["maxIter"].as<int>()), true);
 
       p.printDebug();
      

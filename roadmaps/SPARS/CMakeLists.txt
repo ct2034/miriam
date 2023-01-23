@@ -5,14 +5,23 @@ project(generateRoadmap)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_PREFIX_PATH /usr/local/lib)
 
-FIND_PACKAGE(Boost 1.58 COMPONENTS program_options filesystem serialization REQUIRED)
+# Set the python version
+set(PYTHON_VERSION 38)
+set(PYTHON_DOT_VERSION 3.8)
+set(PYTHON_INCLUDE /usr/include/python${PYTHON_DOT_VERSION})
+set(PYTHON_LIBRARY /usr/lib/python${PYTHON_DOT_VERSION}/config-${PYTHON_DOT_VERSION}m-x86_64-linux-gnu/)
+
+FIND_PACKAGE(Boost 1.71.0 REQUIRED COMPONENTS 
+    program_options 
+    filesystem 
+    serialization 
+    python${PYTHON_VERSION}
+)
 FIND_PACKAGE(Eigen3 REQUIRED)
-#FIND_PACKAGE(fcl REQUIRED)
 FIND_PACKAGE(yaml-cpp REQUIRED)
-# FIND_PACKAGE(assimp REQUIRED)
-# FIND_PACKAGE(OMPL REQUIRED)
-# FIND_PACKAGE(octomap REQUIRED)
+FIND_PACKAGE(ompl REQUIRED)
 
 # Additional include folders
 include_directories(
@@ -20,31 +29,30 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
   ${OMPL_INCLUDE_DIRS}
   lodepng
-  # ../libCommon/include
-  # externalDependencies/ompl_bolt/src
+  ${PYTHON_INCLUDE} 
 )
 
+# the executable
 add_executable(generateRoadmap
   src/main.cpp
   lodepng/lodepng.cpp
-  # src/fclHelper.cpp
 )
-
-message(${OMPL_LIBRARIES})
 
 target_link_libraries(generateRoadmap
   ${Boost_LIBRARIES}
-  # ${fcl_LIBRARIES}
-  # ${CCD_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
-  # ${ASSIMP_LIBRARIES}
-  # ${OMPL_LIBRARIES}
-  # ${OCTOMAP_LIBRARIES}
-  # fcl
-  # libCommon
-  # ode
-  # boost_serialization
   ompl
 )
 
-# target_compile_options(generateRoadmap PUBLIC -std=c++11 -Wall)
+# the python module
+SET(SPARSPY sparspy)
+
+add_library(${SPARSPY} SHARED src/${SPARSPY}.cpp)
+
+TARGET_LINK_LIBRARIES(
+  ${SPARSPY} 
+  ${Boost_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
+  ompl
+)
+
