@@ -219,7 +219,7 @@ def plot(figure_folder: str, results_name: str):
     ]
     for i_na in range(len(n_agents_s)):
         for i_a in range(2):
-            if(len(data_lenghts[i_a][i_na]) == 0):
+            if (len(data_lenghts[i_a][i_na]) == 0):
                 data_lenghts[i_a][i_na].append(99)
 
     width = .8
@@ -309,8 +309,10 @@ def plot_multiple_prefixes(figure_folder: str, prefixes: List[str]):
                 lens_bvc[i_na, :] != 0) / n_samples
             for i_e in range(n_samples):
                 if both_successfull[i_na, i_e]:
-                    data_lenghts[0][i_na].append(lens_our[i_na, i_e])
-                    data_lenghts[1][i_na].append(lens_bvc[i_na, i_e])
+                    data_lenghts[0][i_na].append(
+                        lens_our[i_na, i_e] / n_agents)
+                    data_lenghts[1][i_na].append(
+                        lens_bvc[i_na, i_e] / n_agents)
         lenghts_min_max = [
             min(min([min(x) for x in data_lenghts[0] if len(x) > 0]),
                 min([min(x) for x in data_lenghts[1] if len(x) > 0])),
@@ -319,7 +321,7 @@ def plot_multiple_prefixes(figure_folder: str, prefixes: List[str]):
         ]
         for i_na in range(len(n_agents_s)):
             for i_a in range(2):
-                if(len(data_lenghts[i_a][i_na]) == 0):
+                if (len(data_lenghts[i_a][i_na]) == 0):
                     data_lenghts[i_a][i_na].append(99)
 
         width = .8
