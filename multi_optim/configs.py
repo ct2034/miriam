@@ -92,6 +92,21 @@ configs: CONFIGS_TYPE = {
         "map_name": "x.png",
         "seed": 0,
         "prefix": "large"
+    }, ,
+    "large_bigger_lr_pos": {
+        "n_nodes": 128,
+        "n_runs_pose": 128,
+        "n_runs_policy": 64,
+        "n_episodes_per_run_policy": 256,
+        "n_epochs_per_run_policy": 4,
+        "batch_size_policy": 128,
+        "stats_and_eval_every": 2,
+        "lr_pos": 1e-4,  # old value 1e-3
+        "lr_policy": 1e-4,
+        "max_n_agents": 10,
+        "map_name": "x.png",
+        "seed": 0,
+        "prefix": "large_bigger_lr_pos"
     },
     "large_no_rd": {
         "n_nodes": 128,
