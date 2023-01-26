@@ -129,14 +129,14 @@ def run():
 
     trials = [
         (Spars, {
-            "denseDelta":    .7,
-            "sparseDelta":    7.,
+            "denseDelta":    10.,
+            "sparseDelta":    100,
             "stretchFactor": 1.01,
             "maxFailures": 500,
             "maxTime": 1.,
         }), (Spars, {
-            "denseDelta":    1.,
-            "sparseDelta":    10.,
+            "denseDelta":    7.,
+            "sparseDelta":    70.,
             "stretchFactor": 1.01,
             "maxFailures": 500,
             "maxTime": 1.,
