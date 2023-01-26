@@ -5,12 +5,16 @@ from typing import Any, Dict, List, Optional, Tuple
 import networkx as nx
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from definitions import DISTANCE, POS
 from roadmaps.var_odrm_torch.var_odrm_torch import (get_path_len, make_paths,
                                                     read_map)
+
+CSV_PATH = "roadmaps/benchmark.csv"
 
 
 class RoadmapToTest:
@@ -26,7 +30,9 @@ class RoadmapToTest:
         self.rng = Random(0)
         assert self.g is not None, "Roadmap must be built."
         paths = make_paths(self.g, self.n_eval, self.map_img, self.rng)
-        pos_t = torch.tensor([self.g.nodes[n]["pos"] for n in self.g.nodes])
+        pos_t = torch.zeros((max(self.g.nodes) + 1, 2))
+        for n, (x, y) in nx.get_node_attributes(self.g, POS).items():
+            pos_t[n] = torch.tensor([x, y])
         lens = []
         for path in paths:
             try:
@@ -75,9 +81,10 @@ class Spars(RoadmapToTest):
             ay /= len(self.map_img)
             bx /= len(self.map_img)
             by /= len(self.map_img)
-            self.g.add_node(a, pos=(ax, ay))
-            self.g.add_node(b, pos=(bx, by))
-            self.g.add_edge(a, b)
+            self.g.add_node(a, **{POS: (ax, ay)})
+            self.g.add_node(b, **{POS: (bx, by)})
+            self.g.add_edge(
+                a, b, **{DISTANCE: np.sqrt((ax - bx)**2 + (ay - by)**2)})
         print("nodes", self.g.number_of_nodes())
         print("edges", self.g.number_of_edges())
 
@@ -88,7 +95,7 @@ class Spars(RoadmapToTest):
         #     ax=ax,
         #     node_size=4,
         #     width=0.2,
-        #     pos=nx.get_node_attributes(self.g, "pos"),
+        #     pos=nx.get_node_attributes(self.g, POS),
         # )
         # ax.set_aspect("equal")
         # fig.tight_layout()
@@ -117,22 +124,43 @@ class ODRM(RoadmapToTest):
                 self.g, pos, self.map_img, optimizer, n, rng)
 
 
-if __name__ == "__main__":
+def run():
     df = pd.DataFrame()
 
-    spars = (Spars, {
-        "denseDelta":    1.,
-        "sparseDelta":    10.,
-        "stretchFactor": 1.01,
-        "maxFailures": 500,
-        "maxTime": 1.,
-    })
-    odrm = (ODRM, {
-        "n": 100,
-        "lr": 1e-3,
-        "epochs": 50,
-    })
-    for cls, args in [spars, odrm]:
+    trials = [
+        (Spars, {
+            "denseDelta":    .7,
+            "sparseDelta":    7.,
+            "stretchFactor": 1.01,
+            "maxFailures": 500,
+            "maxTime": 1.,
+        }), (Spars, {
+            "denseDelta":    1.,
+            "sparseDelta":    10.,
+            "stretchFactor": 1.01,
+            "maxFailures": 500,
+            "maxTime": 1.,
+        }), (Spars, {
+            "denseDelta":    3.,
+            "sparseDelta":    30.,
+            "stretchFactor": 1.01,
+            "maxFailures": 500,
+            "maxTime": 1.,
+        }), (ODRM, {
+            "n": 100,
+            "lr": 1e-3,
+            "epochs": 50,
+        }), (ODRM, {
+            "n": 300,
+            "lr": 1e-3,
+            "epochs": 50,
+        }), (ODRM, {
+            "n": 500,
+            "lr": 1e-3,
+            "epochs": 50,
+        })
+    ]
+    for cls, args in trials:
         for map_name in ["c", "x", "z"]:
             i = len(df) + 1
             map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
@@ -146,4 +174,17 @@ if __name__ == "__main__":
             df.at[i, "roadmap"] = cls.__name__
 
     df.head()
-    df.to_csv("roadmaps/benchmark.csv")
+    df.to_csv(CSV_PATH)
+
+
+def plot():
+    df = pd.read_csv(CSV_PATH)
+    sns.set_theme(style="whitegrid")
+    sns.pairplot(df, hue="roadmap", vars=[
+                 "path_len", "n_nodes", "success_rate"])
+    plt.savefig(CSV_PATH.replace(".csv", ".png"))
+
+
+if __name__ == "__main__":
+    run()
+    plot()
