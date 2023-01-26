@@ -85,8 +85,13 @@ public:
   {
   }
 
-  int run(std::string mapFile, std::string outputFile, std::string configFile)
+  boost::python::list run(
+    std::string mapFile, int seed,
+    float denseDelta, float sparseDelta, float stretchFactor,
+    int maxFailures, double maxTime)
   {
+    ompl::RNG::setSeed(seed);
+
     GenerationType::Type genType = GenerationType::SPARS;
     const size_t dimension = 2;
 
@@ -99,12 +104,12 @@ public:
     // if there's an error, display it
     if (error) {
       std::cerr << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
-      return 1;
+      return {};
     }
 
     std::cout << "Loaded environment: " << width << "x" << height << std::endl;
 
-    YAML::Node cfg = YAML::LoadFile(configFile);
+    // YAML::Node cfg = YAML::LoadFile(configFile);
 
     if (genType == GenerationType::SPARS || genType == GenerationType::SPARS2) {
       base::StateSpacePtr space(new base::RealVectorStateSpace(dimension));
@@ -128,11 +133,9 @@ public:
       // fill start state
       base::ScopedState<base::RealVectorStateSpace> goal(space);
       // fill goal state
-      pdef->setStartAndGoalStates(start, goal);
+      // pdef->setStartAndGoalStates(start, goal);  // TODO: why this?
 
       if (genType == GenerationType::SPARS) {
-        auto node = cfg["spars"];
-
         geometric::SPARS p(si);
         p.setProblemDefinition(pdef);
         // std::cout << p.getDenseDeltaFraction()
@@ -141,14 +144,13 @@ public:
         // << " " << p.getMaxFailures() << std::endl;
         // p.setSparseDeltaFraction(1.0 / si->getMaximumExtent() );
 
-        p.setDenseDeltaFraction(node["denseDelta"].as<float>() / si->getMaximumExtent());
-        p.setSparseDeltaFraction(node["sparseDelta"].as<float>() / si->getMaximumExtent());
-        p.setStretchFactor(node["stretchFactor"].as<float>());
-        p.setMaxFailures(node["maxFailures"].as<int>());
+        p.setDenseDeltaFraction(denseDelta / si->getMaximumExtent());
+        p.setSparseDeltaFraction(sparseDelta / si->getMaximumExtent());
+        p.setStretchFactor(stretchFactor);
+        p.setMaxFailures(maxFailures);
 
         p.constructRoadmap(
-          base::timedPlannerTerminationCondition(
-            node["maxTime"].as<double>()), true);
+          base::timedPlannerTerminationCondition(maxTime), true);
         // /*base::timedPlannerTerminationCondition(30)*/base::IterationTerminationCondition(node["maxIter"].as<int>()),
         // true);
 
@@ -170,7 +172,7 @@ public:
         // }
 
         // output
-        std::ofstream stream(outputFile.c_str());
+        boost::python::list edges;
 
         BOOST_FOREACH(const geometric::SPARS::SparseEdge e, boost::edges(roadmapOMPL))
         {
@@ -188,9 +190,11 @@ public:
             float x_j = (*typedState_j)[0];
             float y_j = (*typedState_j)[1];
 
-            stream << x_i << "," << y_i << "," << x_j << "," << y_j << std::endl;
+            edges.append(boost::python::make_tuple(i, x_i, y_i, j, x_j, y_j));
           }
         }
+
+        return edges;
       }
 #if 0
       if (genType == GenerationType::SPARS2) {
@@ -250,14 +254,18 @@ public:
 
     saveSearchGraph(roadmap, outputFile);
 #endif
-    return 0;
+    return {};
   }
 };
 
 BOOST_PYTHON_MODULE(libsparspy)
 {
   using namespace boost::python;
+  namespace bp = boost::python;
   class_<Spars>("Spars", init<>())
-  .def("run", &Spars::run)
+  .def(
+    "run", &Spars::run,
+    (bp::arg("mapFile"), bp::arg("seed"), bp::arg("denseDelta"), bp::arg("sparseDelta"),
+    bp::arg("stretchFactor"), bp::arg("maxFailures"), bp::arg("maxTime")))
   ;
 }
