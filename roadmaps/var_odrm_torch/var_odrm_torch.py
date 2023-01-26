@@ -225,7 +225,7 @@ def make_paths(
     pos = nx.get_node_attributes(g, POS)
     pos_np = np.array([pos[n] for n in g.nodes()])
     flann = FLANN(random_seed=0)
-    flann.build_index(np.array(pos_np), random_seed=0)
+    flann.build_index(np.array(pos_np, dtype=np.float32), random_seed=0)
     paths = []
     for i in range(n_paths):
         start = (rng.random(), rng.random())
