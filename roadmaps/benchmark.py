@@ -19,8 +19,8 @@ class Spars:
     def __init__(self, map_fname: str, rng: Random):
         from roadmaps.SPARS.build.libsparspy import Spars
         s = Spars()
-        s.run("", "", "")
-        self.map_img = map_img
+        s.run("x.png", "", "")
+        # self.map_img = map_img
         self.rng = rng
 
     def evaluate(self) -> Dict[str, float]:
@@ -28,4 +28,5 @@ class Spars:
 
 
 if __name__ == "__main__":
-    Spars("", Random(0)).evaluate()
+    rm = Spars("", Random(0))
+    rm.evaluate()

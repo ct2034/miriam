@@ -47,7 +47,10 @@ target_link_libraries(generateRoadmap
 # the python module
 SET(SPARSPY sparspy)
 
-add_library(${SPARSPY} SHARED src/${SPARSPY}.cpp)
+add_library(${SPARSPY} SHARED 
+  src/${SPARSPY}.cpp
+  lodepng/lodepng.cpp
+)
 
 TARGET_LINK_LIBRARIES(
   ${SPARSPY} 
