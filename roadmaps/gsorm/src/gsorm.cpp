@@ -58,7 +58,7 @@ public:
   {
   }
 
-  boost::python::list run(
+  boost::python::tuple run(
     std::string mapFile, float DA, float DB, float f, float k, float delta_t,
     int iterations, int resolution)
   {
@@ -145,8 +145,9 @@ public:
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
+    float duration_ms = static_cast<float>(duration.count()) / 1000.;
     std::cout << "Time taken by function: " <<
-      static_cast<float>(duration.count()) / 1000 << " ms" << std::endl;
+      duration_ms << " ms" << std::endl;
 
     // draw middles
     // cv::Mat middles_layer = cv::Mat::zeros(mask.size(), CV_8U);
@@ -167,7 +168,7 @@ public:
       boost::python::tuple point = boost::python::make_tuple(middle.x, middle.y);
       points.append(point);
     }
-    return points;
+    return boost::python::make_tuple(points, duration_ms);
   }
 };
 

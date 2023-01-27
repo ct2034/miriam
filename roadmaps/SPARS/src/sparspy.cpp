@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
+#include <chrono>
 
 // Boost
 #include <boost/program_options.hpp>
@@ -23,6 +24,7 @@
 
 using namespace std;
 using namespace ompl;
+using namespace std::chrono;
 
 struct GenerationType
 {
@@ -85,7 +87,7 @@ public:
   {
   }
 
-  boost::python::list run(
+  boost::python::tuple run(
     std::string mapFile, int seed,
     float denseDelta, float sparseDelta, float stretchFactor,
     int maxFailures, double maxTime)
@@ -149,10 +151,14 @@ public:
         p.setStretchFactor(stretchFactor);
         p.setMaxFailures(maxFailures);
 
+        auto start = high_resolution_clock::now();
         p.constructRoadmap(
           base::timedPlannerTerminationCondition(maxTime), true);
         // /*base::timedPlannerTerminationCondition(30)*/base::IterationTerminationCondition(node["maxIter"].as<int>()),
         // true);
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        float duration_ms = static_cast<float>(duration.count()) / 1000.;
 
         p.printDebug();
 
@@ -194,7 +200,7 @@ public:
           }
         }
 
-        return edges;
+        return boost::python::make_tuple(edges, duration_ms);
       }
 #if 0
       if (genType == GenerationType::SPARS2) {

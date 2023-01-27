@@ -1,4 +1,5 @@
 import abc
+import timeit
 from random import Random
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -25,6 +26,7 @@ class RoadmapToTest:
         self.rng = rng
         self.roadmap_specific_kwargs = roadmap_specific_kwargs
         self.g: Optional[nx.Graph] = None
+        self.runtime_ms: Optional[float] = None
 
     def _initialize_eval_rng(self):
         self.rng = Random(0)
@@ -50,11 +52,17 @@ class RoadmapToTest:
         assert self.g is not None, "Roadmap must be built."
         return {"n_nodes": self.g.number_of_nodes()}
 
+    def evaluate_runtime(self) -> Dict[str, float]:
+        if self.runtime_ms is None:
+            return {}
+        return {"runtime_ms": self.runtime_ms}
+
     def evaluate(self):
         results = {}
         for fun in [
             self.evaluate_path_length,
             self.evaluate_n_nodes,
+            self.evaluate_runtime,
         ]:
             self._initialize_eval_rng()
             results.update(fun())
@@ -71,13 +79,16 @@ class Gsorm(RoadmapToTest):
         from roadmaps.gsorm.build.libgsorm import Gsorm
         from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
         gs = Gsorm()
-        nodes = gs.run(
+        nodes, runtime_points = gs.run(
             mapFile=map_fname,
             **self.roadmap_specific_kwargs,
         )
         pos = torch.Tensor(nodes) / len(self.map_img)
         n = pos.shape[0]
+        start_t = timeit.default_timer()
         self.g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
+        runtime_delaunay = (timeit.default_timer() - start_t) * 1000
+        self.runtime_ms = runtime_points + runtime_delaunay
 
 
 class Spars(RoadmapToTest):
@@ -89,7 +100,7 @@ class Spars(RoadmapToTest):
 
         from roadmaps.SPARS.build.libsparspy import Spars
         s = Spars()
-        edges = s.run(
+        edges, self.runtime_ms = s.run(
             mapFile=map_fname,
             seed=rng.randint(0, 2**16),
             **self.roadmap_specific_kwargs,
@@ -136,6 +147,7 @@ class ODRM(RoadmapToTest):
         epochs = roadmap_specific_kwargs["epochs"]
         lr = roadmap_specific_kwargs["lr"]
 
+        start_t = timeit.default_timer()
         pos = sample_points(n, self.map_img, self.rng)
         self.g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
 
@@ -144,6 +156,8 @@ class ODRM(RoadmapToTest):
         for i_e in tqdm(range(epochs)):
             self.g, pos, test_length, training_length = optimize_poses(
                 self.g, pos, self.map_img, optimizer, n, rng)
+        end_t = timeit.default_timer()
+        self.runtime_ms = (end_t - start_t) * 1000
 
 
 def run():
@@ -237,7 +251,7 @@ def plot():
     df = pd.read_csv(CSV_PATH)
     sns.set_theme(style="whitegrid")
     sns.pairplot(df, hue="roadmap", vars=[
-                 "path_len", "n_nodes", "success_rate"])
+                 "path_len", "n_nodes", "success_rate", "runtime_ms"])
     plt.savefig(CSV_PATH.replace(".csv", ".png"))
 
 
