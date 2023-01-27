@@ -157,6 +157,25 @@ def run():
             "k": 0.065,
             "delta_t": 1.0,
             "iterations": 10000,
+            "resolution": 300,
+        }),
+        (Gsorm, {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.065,
+            "delta_t": 1.0,
+            "iterations": 10000,
+            "resolution": 400,
+        }),
+        (Gsorm, {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.065,
+            "delta_t": 1.0,
+            "iterations": 10000,
+            "resolution": 500,
         }),
         (Spars, {
             "denseDelta":    10.,
@@ -197,7 +216,7 @@ def run():
     ]
     for cls, args in trials:
         for map_name in ["c", "x", "z"]:
-            for seed in range(10):
+            for seed in range(2):
                 i = len(df) + 1  # new experiment in new row
                 map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
                 df.at[i, "map"] = map_name
