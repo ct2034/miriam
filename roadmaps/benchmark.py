@@ -26,8 +26,10 @@ class RoadmapToTest:
         self.roadmap_specific_kwargs = roadmap_specific_kwargs
         self.g: Optional[nx.Graph] = None
 
-    def evaluate_path_length(self) -> Dict[str, float]:
+    def _initialize_eval_rng(self):
         self.rng = Random(0)
+
+    def evaluate_path_length(self) -> Dict[str, float]:
         assert self.g is not None, "Roadmap must be built."
         paths = make_paths(self.g, self.n_eval, self.map_img, self.rng)
         pos_t = torch.zeros((max(self.g.nodes) + 1, 2))
@@ -54,6 +56,7 @@ class RoadmapToTest:
             self.evaluate_path_length,
             self.evaluate_n_nodes,
         ]:
+            self._initialize_eval_rng()
             results.update(fun())
         return results
 
@@ -162,16 +165,18 @@ def run():
     ]
     for cls, args in trials:
         for map_name in ["c", "x", "z"]:
-            i = len(df) + 1
-            map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
-            t = cls(map_fname, Random(0), args)
-            data = t.evaluate()
-            for k, v in data.items():
-                df.at[i, k] = v
-            for k, v in args.items():
-                df.at[i, cls.__name__ + "_" + k] = v
-            df.at[i, "map"] = map_name
-            df.at[i, "roadmap"] = cls.__name__
+            for seed in range(10):
+                i = len(df) + 1  # new experiment in new row
+                map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
+                df.at[i, "map"] = map_name
+                t = cls(map_fname, Random(seed), args)
+                df.at[i, "roadmap"] = cls.__name__
+                df.at[i, "seed"] = seed
+                data = t.evaluate()
+                for k, v in data.items():
+                    df.at[i, k] = v
+                for k, v in args.items():
+                    df.at[i, cls.__name__ + "_" + k] = v
 
     df.head()
     df.to_csv(CSV_PATH)
