@@ -61,6 +61,25 @@ class RoadmapToTest:
         return results
 
 
+class Gsorm(RoadmapToTest):
+    def __init__(self,
+                 map_fname: str,
+                 rng: Random,
+                 roadmap_specific_kwargs):
+        super().__init__(map_fname, rng, roadmap_specific_kwargs)
+
+        from roadmaps.gsorm.build.libgsorm import Gsorm
+        from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
+        gs = Gsorm()
+        nodes = gs.run(
+            mapFile=map_fname,
+            **self.roadmap_specific_kwargs,
+        )
+        pos = torch.Tensor(nodes) / len(self.map_img)
+        n = pos.shape[0]
+        self.g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
+
+
 class Spars(RoadmapToTest):
     def __init__(self,
                  map_fname: str,
@@ -131,33 +150,46 @@ def run():
     df = pd.DataFrame()
 
     trials = [
+        (Gsorm, {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.065,
+            "delta_t": 1.0,
+            "iterations": 10000,
+        }),
         (Spars, {
             "denseDelta":    10.,
             "sparseDelta":    100,
             "stretchFactor": 1.01,
             "maxFailures": 500,
             "maxTime": 1.,
-        }), (Spars, {
+        }),
+        (Spars, {
             "denseDelta":    7.,
             "sparseDelta":    70.,
             "stretchFactor": 1.01,
             "maxFailures": 500,
             "maxTime": 1.,
-        }), (Spars, {
+        }),
+        (Spars, {
             "denseDelta":    3.,
             "sparseDelta":    30.,
             "stretchFactor": 1.01,
             "maxFailures": 500,
             "maxTime": 1.,
-        }), (ODRM, {
+        }),
+        (ODRM, {
             "n": 100,
             "lr": 1e-3,
             "epochs": 50,
-        }), (ODRM, {
+        }),
+        (ODRM, {
             "n": 300,
             "lr": 1e-3,
             "epochs": 50,
-        }), (ODRM, {
+        }),
+        (ODRM, {
             "n": 500,
             "lr": 1e-3,
             "epochs": 50,
