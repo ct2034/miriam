@@ -1,4 +1,5 @@
 import abc
+import os
 import timeit
 from random import Random
 from typing import Any, Dict, List, Optional, Tuple
@@ -16,12 +17,15 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (get_path_len, make_paths,
                                                     read_map)
 
 CSV_PATH = "roadmaps/benchmark.csv"
+PLOT_FOLDER = "roadmaps/benchmark_plots"
 
 
 class RoadmapToTest:
     def __init__(self, map_fname: str, rng: Random, roadmap_specific_kwargs: Dict[str, Any] = {}):
         self.map_fname = map_fname
         self.map_img = read_map(map_fname)
+        # swap rows and columns
+        # self.map_img = np.swapaxes(np.array(self.map_img), 0, 1)
         self.n_eval = 100
         self.rng = rng
         self.roadmap_specific_kwargs = roadmap_specific_kwargs
@@ -68,6 +72,20 @@ class RoadmapToTest:
             results.update(fun())
         return results
 
+    def plot(self, folder: str, i: int):
+        assert self.g is not None, "Roadmap must be built."
+        fig, ax = plt.subplots(dpi=500)
+        ax.imshow(self.map_img, cmap="gray")
+        pos = nx.get_node_attributes(self.g, POS)
+        pos = {k: (v[0] * len(self.map_img), v[1] * len(self.map_img))
+               for k, v in pos.items()}
+        nx.draw_networkx_nodes(self.g, pos, ax=ax, node_size=1)
+        # exclude self edges
+        edges = [(u, v) for u, v in self.g.edges if u != v]
+        nx.draw_networkx_edges(self.g, pos, ax=ax, edgelist=edges, width=0.5)
+        name = f"{i:03d}_{self.__class__.__name__}_{os.path.basename(self.map_fname)}"
+        fig.savefig(os.path.join(folder, name))
+
 
 class GSRM(RoadmapToTest):
     """Its gsorm without the o.
@@ -86,12 +104,20 @@ class GSRM(RoadmapToTest):
             mapFile=map_fname,
             **self.roadmap_specific_kwargs,
         )
-        pos = torch.Tensor(nodes) / len(self.map_img)
+        pos = torch.Tensor(nodes) / roadmap_specific_kwargs["resolution"]
+        # swap x and y
+        pos = pos[:, [1, 0]]
         n = pos.shape[0]
         start_t = timeit.default_timer()
         self.g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
         runtime_delaunay = (timeit.default_timer() - start_t) * 1000
         self.runtime_ms = runtime_points + runtime_delaunay
+
+        # swap x and y
+        nx.set_node_attributes(self.g,
+                               {i: (p[1],
+                                    p[0]) for i, p in nx.get_node_attributes(
+                                   self.g, POS).items()}, POS)
 
 
 class GSORM(RoadmapToTest):
@@ -115,7 +141,9 @@ class GSORM(RoadmapToTest):
             mapFile=map_fname,
             **gsorm_kwargs,
         )
-        pos = torch.Tensor(nodes) / len(self.map_img)
+        pos = torch.Tensor(nodes) / roadmap_specific_kwargs["resolution"]
+        # swap x and y
+        pos = pos[:, [1, 0]]
         pos.requires_grad = True
         n = pos.shape[0]
 
@@ -128,6 +156,12 @@ class GSORM(RoadmapToTest):
                 self.g, pos, self.map_img, optimizer, n, rng)
         runtime_optim = (timeit.default_timer() - start_t) * 1000
         self.runtime_ms = runtime_points + runtime_optim
+
+        # swap x and y
+        nx.set_node_attributes(self.g,
+                               {i: (p[1],
+                                    p[0]) for i, p in nx.get_node_attributes(
+                                   self.g, POS).items()}, POS)
 
 
 class SPARS(RoadmapToTest):
@@ -197,6 +231,12 @@ class ODRM(RoadmapToTest):
                 self.g, pos, self.map_img, optimizer, n, rng)
         end_t = timeit.default_timer()
         self.runtime_ms = (end_t - start_t) * 1000
+
+        # swap x and y
+        nx.set_node_attributes(self.g,
+                               {i: (p[1],
+                                    p[0]) for i, p in nx.get_node_attributes(
+                                   self.g, POS).items()}, POS)
 
 
 def run():
@@ -300,17 +340,24 @@ def run():
             "epochs": 50,
         })
     ]
+    if not os.path.exists(PLOT_FOLDER):
+        os.makedirs(PLOT_FOLDER)
+    if not len(os.listdir(PLOT_FOLDER)) == 0:
+        # delete all files in folder
+        for f in os.listdir(PLOT_FOLDER):
+            os.remove(os.path.join(PLOT_FOLDER, f))
     for cls, args in trials:
         for map_name in [
+            "b",
             "c",
             "dual_w",
             "dual",
             "dual2",
-            "o",
-            "plain",
-            "simple",
-            "x",
-            "z"
+            # "o",
+            # "plain",
+            # "simple",
+            # "x",
+            # "z"
         ]:
             for seed in range(1):
                 i = len(df) + 1  # new experiment in new row
@@ -324,6 +371,7 @@ def run():
                     df.at[i, k] = v
                 for k, v in args.items():
                     df.at[i, cls.__name__ + "_" + k] = v
+                t.plot(PLOT_FOLDER, i)
 
     df.head()
     df.to_csv(CSV_PATH)
@@ -341,9 +389,9 @@ def plot():
             "success_rate",
             "runtime_ms"
         ],
-        markers=".",
+        # markers=".",
     )
-    plt.saveplto(CSV_PATH.replace(".csv", ".png"))
+    plt.savefig(CSV_PATH.replace(".csv", ".png"))
 
     for roadmap in df.roadmap.unique():
         df_roadmap = df[df.roadmap == roadmap]
@@ -364,5 +412,5 @@ def plot():
 
 
 if __name__ == "__main__":
-    # run()
+    run()
     plot()

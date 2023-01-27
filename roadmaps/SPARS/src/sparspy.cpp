@@ -71,7 +71,7 @@ public:
       return false;
     }
 
-    return image_[y * width_ + x] > 200;
+    return image_[y * width_ + x] > 250;
   }
 
 private:
