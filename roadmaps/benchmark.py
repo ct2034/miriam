@@ -37,7 +37,8 @@ class RoadmapToTest:
 
     def evaluate_path_length(self) -> Dict[str, float]:
         assert self.g is not None, "Roadmap must be built."
-        paths = make_paths(self.g, self.n_eval, self.map_img, self.rng)
+        map_img_inv = np.swapaxes(np.array(self.map_img), 0, 1)
+        paths = make_paths(self.g, self.n_eval, map_img_inv, self.rng)
         pos_t = torch.zeros((max(self.g.nodes) + 1, 2))
         for n, (x, y) in nx.get_node_attributes(self.g, POS).items():
             pos_t[n] = torch.tensor([x, y])
@@ -76,6 +77,8 @@ class RoadmapToTest:
         assert self.g is not None, "Roadmap must be built."
         fig, ax = plt.subplots(dpi=500)
         ax.imshow(self.map_img, cmap="gray")
+
+        # plot graph
         pos = nx.get_node_attributes(self.g, POS)
         pos = {k: (v[0] * len(self.map_img), v[1] * len(self.map_img))
                for k, v in pos.items()}
@@ -84,6 +87,22 @@ class RoadmapToTest:
         edges = [(u, v) for u, v in self.g.edges if u != v]
         nx.draw_networkx_edges(self.g, pos, ax=ax, edgelist=edges, width=0.5)
         name = f"{i:03d}_{self.__class__.__name__}_{os.path.basename(self.map_fname)}"
+
+        # make an example path
+        # invert x and y of map
+        map_img = np.swapaxes(np.array(self.map_img), 0, 1)
+        path = make_paths(self.g, 1, map_img, Random(0))[0]
+        start, end, node_path = path
+        coord_path = [pos[n] for n in node_path]
+        full_path = (
+            [(start[0] * len(self.map_img),
+              start[1] * len(self.map_img))] +
+            coord_path +
+            [(end[0] * len(self.map_img),
+              end[1] * len(self.map_img))])
+        x, y = zip(*full_path)
+        ax.plot(x, y, color="red", linewidth=0.5)
+
         fig.savefig(os.path.join(folder, name))
 
 
