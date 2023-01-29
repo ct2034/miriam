@@ -1,8 +1,7 @@
-import abc
 import os
 import timeit
 from random import Random
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import networkx as nx
 import numpy as np
@@ -21,7 +20,8 @@ PLOT_FOLDER = "roadmaps/benchmark_plots"
 
 
 class RoadmapToTest:
-    def __init__(self, map_fname: str, rng: Random, roadmap_specific_kwargs: Dict[str, Any] = {}):
+    def __init__(self, map_fname: str, rng: Random,
+                 roadmap_specific_kwargs: Dict[str, Any] = {}):
         self.map_fname = map_fname
         self.map_img = read_map(map_fname)
         # swap rows and columns
@@ -38,7 +38,9 @@ class RoadmapToTest:
     def evaluate_path_length(self) -> Dict[str, float]:
         assert self.g is not None, "Roadmap must be built."
         map_img_inv = np.swapaxes(np.array(self.map_img), 0, 1)
-        paths = make_paths(self.g, self.n_eval, map_img_inv, self.rng)
+        paths = make_paths(self.g, self.n_eval,
+                           tuple(map_img_inv.tolist()),
+                           self.rng)
         pos_t = torch.zeros((max(self.g.nodes) + 1, 2))
         for n, (x, y) in nx.get_node_attributes(self.g, POS).items():
             pos_t[n] = torch.tensor([x, y])
@@ -46,11 +48,11 @@ class RoadmapToTest:
         for path in paths:
             try:
                 lens.append(
-                    get_path_len(pos_t, path, False)
+                    get_path_len(pos_t, path, False).item()
                 )
             except IndexError:
                 pass
-        return {"path_len": (sum(lens) / len(lens)).item(),
+        return {"path_len": (sum(lens) / len(lens)),
                 "success_rate": len(lens) / self.n_eval}
 
     def evaluate_n_nodes(self) -> Dict[str, float]:
@@ -86,12 +88,14 @@ class RoadmapToTest:
         # exclude self edges
         edges = [(u, v) for u, v in self.g.edges if u != v]
         nx.draw_networkx_edges(self.g, pos, ax=ax, edgelist=edges, width=0.5)
-        name = f"{i:03d}_{self.__class__.__name__}_{os.path.basename(self.map_fname)}"
+        name = f"{i:03d}_{self.__class__.__name__}_" +\
+            f"{os.path.basename(self.map_fname)}"
 
         # make an example path
         # invert x and y of map
         map_img = np.swapaxes(np.array(self.map_img), 0, 1)
-        path = make_paths(self.g, 1, map_img, Random(0))[0]
+        map_img_t = tuple(map_img.tolist())
+        path = make_paths(self.g, 1, map_img_t, Random(0))[0]
         start, end, node_path = path
         coord_path = [pos[n] for n in node_path]
         full_path = (
@@ -108,7 +112,8 @@ class RoadmapToTest:
 
 class GSRM(RoadmapToTest):
     """Its gsorm without the o.
-    So no optimization, only the generation of the points by the Grey Scott model."""
+    So no optimization, only the generation of the points by the
+    Grey Scott model."""
 
     def __init__(self,
                  map_fname: str,
@@ -147,7 +152,7 @@ class GSORM(RoadmapToTest):
         super().__init__(map_fname, rng, roadmap_specific_kwargs)
         from roadmaps.gsorm.build.libgsorm import Gsorm
         from roadmaps.var_odrm_torch.var_odrm_torch import (
-            make_graph_and_flann, optimize_poses, sample_points)
+            make_graph_and_flann, optimize_poses)
 
         # prepare args
         gsorm_kwargs = self.roadmap_specific_kwargs.copy()

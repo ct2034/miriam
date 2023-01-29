@@ -222,8 +222,9 @@ def make_paths(
         map_img: MAP_IMG,
         rng: Random) -> List[PATH_W_COORDS]:
     """Make `n_paths` path between random coordinates on `g`."""
-    pos = nx.get_node_attributes(g, POS)
-    pos_np = np.array([pos[n] for n in g.nodes()])
+    pos_np = np.zeros((max(g.nodes) + 1, 2))
+    for n, (x, y) in nx.get_node_attributes(g, POS).items():
+        pos_np[n] = torch.tensor([x, y])
     flann = FLANN(random_seed=0)
     flann.build_index(np.array(pos_np, dtype=np.float32), random_seed=0)
     paths = []
