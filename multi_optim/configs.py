@@ -92,7 +92,7 @@ configs: CONFIGS_TYPE = {
         "map_name": "x.png",
         "seed": 0,
         "prefix": "large"
-    }, ,
+    },
     "large_bigger_lr_pos": {
         "n_nodes": 128,
         "n_runs_pose": 128,
