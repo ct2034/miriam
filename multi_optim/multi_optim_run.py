@@ -28,6 +28,7 @@ import tools
 import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
+from multi_optim.configs import configs_more_lr_pos_s
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from roadmaps.reaction_diffusion.example_figure import make_fig
 from roadmaps.reaction_diffusion.rd import sample_points_reaction_diffusion
@@ -665,28 +666,15 @@ if __name__ == "__main__":
     n_processes = min(tmp.cpu_count(), 16)
     pool = tmp.Pool(processes=n_processes)
 
-    for prefix in [
-        "debug",
-        # "debug_no_rd",
-        # "debug_map_name_c.png",
-        # "debug_map_name_z.png",
-        # "tiny",
-        # "tiny_map_name_c.png",
-        # "tiny_map_name_z.png",
-        # "tiny_plain",
-        # "small",
-        # "small_map_name_c.png",
-        # "small_map_name_z.png",
-        # "medium",
-        # "medium_map_name_c.png",
-        # "medium_map_name_z.png",
-        # "large",
-        # "large_no_rd",
-        "large_bigger_lr_pos",
-        # "large_map_name_c.png",
-        # "large_map_name_z.png",
-        # "large_plain",
-    ]:
+    configs_to_run = {
+        k: v for k, v in configs_more_lr_pos_s.items() if k.startswith("debug") or
+        k.startswith("large")
+    }
+
+    prefixes_to_run = sorted(configs_to_run.keys())
+    print(f"Running {len(prefixes_to_run)} configs: {prefixes_to_run}")
+
+    for prefix in prefixes_to_run:
         if prefix.startswith("debug"):
             level = logging.DEBUG
         else:
@@ -704,7 +692,7 @@ if __name__ == "__main__":
 
         # start the actual run
         run_optimization(
-            **configs_all_maps[prefix],
+            **configs_to_run[prefix],
             pool_in=pool)
 
     pool.close()
