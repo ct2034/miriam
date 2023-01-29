@@ -297,7 +297,7 @@ def run_optimization(
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}"
     if os.path.splitext(map_fname)[1] == ".png":
         map_img: MAP_IMG = read_map(map_fname)
-        map_img_inflated = inflate_map_img(map_img, radius*10)
+        map_img_inflated = inflate_map_img(map_img, radius*20)
     elif os.path.splitext(map_fname)[1] == ".map":
         map_np = movingai_read_mapfile(map_fname)
         map_img = gridmap_to_map_img(map_np)
@@ -667,7 +667,7 @@ if __name__ == "__main__":
 
     for prefix in [
         "debug",
-        "debug_no_rd",
+        # "debug_no_rd",
         # "debug_map_name_c.png",
         # "debug_map_name_z.png",
         # "tiny",

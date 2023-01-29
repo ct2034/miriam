@@ -136,8 +136,12 @@ class Eval(object):
                         this_stats["failed_cbsr"] += 1
                         continue
                     # solvable by policy
-                    res = run_a_scenario(self.first_roadmap,
-                                         agents, False, self.iterator_type)
+                    try:
+                        res = run_a_scenario(self.first_roadmap,
+                                             agents, False, self.iterator_type)
+                    except RuntimeError:
+                        this_stats["failed_policy"] += 1
+                        continue
                     if not res[IDX_SUCCESS]:
                         this_stats["failed_policy"] += 1
                         continue
