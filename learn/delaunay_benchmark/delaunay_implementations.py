@@ -7,11 +7,12 @@ import networkx as nx
 import numpy as np
 import png
 from bresenham import bresenham
-from definitions import POS
 from libpysal import weights
 from libpysal.cg import voronoi_frames
 from scipy.spatial import Delaunay as Delaunay
 from tqdm import tqdm
+
+from definitions import POS
 
 
 class Delaunay_impl:

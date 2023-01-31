@@ -1,22 +1,29 @@
+import logging
 import os
 import timeit
+from multiprocessing import Pool
 from random import Random
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
+from bresenham import bresenham
 from matplotlib import pyplot as plt
+from pyflann import FLANN
 from tqdm import tqdm
 
 from definitions import DISTANCE, POS
-from roadmaps.var_odrm_torch.var_odrm_torch import (get_path_len, make_paths,
-                                                    read_map)
+from roadmaps.var_odrm_torch.var_odrm_torch import (
+    get_path_len, is_coord_free, is_pixel_free, make_paths,
+    plan_path_between_coordinates, read_map)
 
 CSV_PATH = "roadmaps/benchmark.csv"
 PLOT_FOLDER = "roadmaps/benchmark_plots"
+
+logger = logging.getLogger(__name__)
 
 
 class RoadmapToTest:
@@ -55,6 +62,54 @@ class RoadmapToTest:
         return {"path_len": (sum(lens) / len(lens)),
                 "success_rate": len(lens) / self.n_eval}
 
+    def _check_line(self, a: Tuple[float, float], b: Tuple[float, float]):
+        line = bresenham(
+            round(a[0] * len(self.map_img)),
+            round(a[1] * len(self.map_img)),
+            round(b[0] * len(self.map_img)),
+            round(b[1] * len(self.map_img)),
+        )
+        # print(list(line))
+        return all([is_pixel_free(
+            self.map_img, (x[0], x[1])) for x in line])
+
+    def evaluate_straight_path_length(self) -> Dict[str, float]:
+        assert self.g is not None, "Roadmap must be built."
+        pos_np = np.zeros((max(self.g.nodes) + 1, 2))
+        for n, (x, y) in nx.get_node_attributes(self.g, POS).items():
+            pos_np[n] = torch.tensor([x, y])
+        pos_t = torch.tensor(pos_np)
+        flann = FLANN(random_seed=0)
+        flann.build_index(np.array(pos_np, dtype=np.float32), random_seed=0)
+        rel_lengths = []
+        for _ in range(self.n_eval):
+            found = False
+            while not found:
+                start = (self.rng.random(), self.rng.random())
+                if not is_coord_free(self.map_img, start):
+                    continue
+                end = (self.rng.random(), self.rng.random())
+                if not is_coord_free(self.map_img, end):
+                    continue
+                if not self._check_line(start, end):
+                    continue
+                length = np.linalg.norm(np.array(start) - np.array(end))
+                if length < 0.5:
+                    continue
+                try:
+                    path = plan_path_between_coordinates(
+                        self.g, flann, start, end)
+                except Exception:
+                    logger.error("Error while planning path.: ", exc_info=True)
+                    continue
+                if path is None:
+                    continue
+                found = True
+            assert path is not None
+            path_len = get_path_len(pos_t, path, False).item()
+            rel_lengths.append(path_len / length)
+        return {"path_len_straight": np.mean(rel_lengths).item()}
+
     def evaluate_n_nodes(self) -> Dict[str, float]:
         assert self.g is not None, "Roadmap must be built."
         return {"n_nodes": self.g.number_of_nodes()}
@@ -68,6 +123,7 @@ class RoadmapToTest:
         results = {}
         for fun in [
             self.evaluate_path_length,
+            self.evaluate_straight_path_length,
             self.evaluate_n_nodes,
             self.evaluate_runtime,
         ]:
@@ -108,6 +164,7 @@ class RoadmapToTest:
         ax.plot(x, y, color="red", linewidth=0.5)
 
         fig.savefig(os.path.join(folder, name))
+        plt.close(fig)
 
 
 class GSRM(RoadmapToTest):
@@ -370,6 +427,7 @@ def run():
         # delete all files in folder
         for f in os.listdir(PLOT_FOLDER):
             os.remove(os.path.join(PLOT_FOLDER, f))
+    params_to_run = []
     for cls, args in trials:
         for map_name in [
             "b",
@@ -383,22 +441,39 @@ def run():
             # "x",
             # "z"
         ]:
-            for seed in range(1):
+            for seed in range(5):
                 i = len(df) + 1  # new experiment in new row
-                map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
                 df.at[i, "map"] = map_name
-                t = cls(map_fname, Random(seed), args)
                 df.at[i, "roadmap"] = cls.__name__
                 df.at[i, "seed"] = seed
-                data = t.evaluate()
-                for k, v in data.items():
-                    df.at[i, k] = v
-                for k, v in args.items():
-                    df.at[i, cls.__name__ + "_" + k] = v
-                t.plot(PLOT_FOLDER, i)
+                params_to_run.append((cls, args, map_name, seed, i))
+    Random(0).shuffle(params_to_run)
+
+    for ptr in tqdm(params_to_run):
+        cls, args, map_name, seed, i = ptr
+        _, data = _run_proxy(ptr)
+        for k, v in data.items():
+            df.at[i, k] = v
+        for k, v in args.items():
+            df.at[i, cls.__name__ + "_" + k] = v
+    # with Pool(2) as p:
+    #     for i, data in p.imap_unordered(_run_proxy, params_to_run):
+    #         for k, v in data.items():
+    #             df.at[i, k] = v
+    #         for k, v in args.items():
+    #             df.at[i, cls.__name__ + "_" + k] = v
 
     df.head()
     df.to_csv(CSV_PATH)
+
+
+def _run_proxy(args):
+    cls, args, map_name, seed, i = args
+    map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
+    t = cls(map_fname, Random(seed), args)
+    data = t.evaluate()
+    t.plot(PLOT_FOLDER, i)
+    return (i, data)
 
 
 def plot():
@@ -409,13 +484,15 @@ def plot():
         hue="roadmap",
         vars=[
             "path_len",
+            "path_len_straight",
             "n_nodes",
             "success_rate",
             "runtime_ms"
         ],
-        # markers=".",
+        markers=".",
     )
     plt.savefig(CSV_PATH.replace(".csv", ".png"))
+    plt.close()
 
     for roadmap in df.roadmap.unique():
         df_roadmap = df[df.roadmap == roadmap]
@@ -433,8 +510,9 @@ def plot():
             ],
         )
         plt.savefig(CSV_PATH.replace(".csv", f"_{roadmap}.png"))
+        plt.close()
 
 
 if __name__ == "__main__":
-    run()
+    # run()
     plot()
