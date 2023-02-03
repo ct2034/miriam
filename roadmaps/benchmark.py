@@ -3,7 +3,7 @@ import os
 import timeit
 from multiprocessing import Pool
 from random import Random
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
@@ -22,6 +22,7 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (
 
 CSV_PATH = "roadmaps/benchmark.csv"
 PLOT_FOLDER = "roadmaps/benchmark_plots"
+DPI = 500
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ class RoadmapToTest:
         pos_t = torch.zeros((max(self.g.nodes) + 1, 2))
         for n, (x, y) in nx.get_node_attributes(self.g, POS).items():
             pos_t[n] = torch.tensor([x, y])
-        lens = []
+        lens: List[float] = []
         for path in paths:
             try:
                 lens.append(
@@ -59,8 +60,11 @@ class RoadmapToTest:
                 )
             except IndexError:
                 pass
-        return {"path_len": (sum(lens) / len(lens)),
-                "success_rate": len(lens) / self.n_eval}
+        data = {"success_rate": len(lens) / self.n_eval}
+        for i, d in enumerate(lens):
+            data[f"path_length_{i:02d}"] = d
+        data["path_length_mean"] = np.mean(lens).item()
+        return data
 
     def _check_line(self, a: Tuple[float, float], b: Tuple[float, float]):
         line = bresenham(
@@ -81,7 +85,7 @@ class RoadmapToTest:
         pos_t = torch.tensor(pos_np)
         flann = FLANN(random_seed=0)
         flann.build_index(np.array(pos_np, dtype=np.float32), random_seed=0)
-        rel_lengths = []
+        rel_lengths: List[float] = []
         for _ in range(self.n_eval):
             found = False
             while not found:
@@ -93,7 +97,7 @@ class RoadmapToTest:
                     continue
                 if not self._check_line(start, end):
                     continue
-                length = np.linalg.norm(np.array(start) - np.array(end))
+                length = np.linalg.norm(np.array(start) - np.array(end)).item()
                 if length < 0.5:
                     continue
                 try:
@@ -108,7 +112,11 @@ class RoadmapToTest:
             assert path is not None
             path_len = get_path_len(pos_t, path, False).item()
             rel_lengths.append(path_len / length)
-        return {"path_len_straight": np.mean(rel_lengths).item()}
+        data = {}
+        for i, d in enumerate(rel_lengths):
+            data[f"rel_length_{i:02d}"] = d
+        data["rel_length_mean"] = np.mean(rel_lengths).item()
+        return data
 
     def evaluate_n_nodes(self) -> Dict[str, float]:
         assert self.g is not None, "Roadmap must be built."
@@ -133,7 +141,7 @@ class RoadmapToTest:
 
     def plot(self, folder: str, i: int):
         assert self.g is not None, "Roadmap must be built."
-        fig, ax = plt.subplots(dpi=500)
+        fig, ax = plt.subplots(dpi=DPI)
         ax.imshow(self.map_img, cmap="gray")
 
         # plot graph
@@ -276,7 +284,7 @@ class SPARS(RoadmapToTest):
         print("edges", self.g.number_of_edges())
 
         # plot
-        # fig, ax = plt.subplots(figsize=(10, 10), dpi=300)
+        # fig, ax = plt.subplots(figsize=(10, 10), dpi=DPI)
         # nx.draw(
         #     self.g,
         #     ax=ax,
@@ -310,6 +318,31 @@ class ODRM(RoadmapToTest):
         for i_e in tqdm(range(epochs)):
             self.g, pos, test_length, training_length = optimize_poses(
                 self.g, pos, self.map_img, optimizer, n, rng)
+        end_t = timeit.default_timer()
+        self.runtime_ms = (end_t - start_t) * 1000
+
+        # swap x and y
+        nx.set_node_attributes(self.g,
+                               {i: (p[1],
+                                    p[0]) for i, p in nx.get_node_attributes(
+                                   self.g, POS).items()}, POS)
+
+
+class PRM(RoadmapToTest):
+    # Hint: PRM is a special case of ODRM without optimization
+    def __init__(self,
+                 map_fname: str,
+                 rng: Random,
+                 roadmap_specific_kwargs):
+        super().__init__(map_fname, rng, roadmap_specific_kwargs)
+        from roadmaps.var_odrm_torch.var_odrm_torch import (
+            make_graph_and_flann, sample_points)
+        n = roadmap_specific_kwargs["n"]
+
+        start_t = timeit.default_timer()
+        pos = sample_points(n, self.map_img, self.rng)
+        self.g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
+
         end_t = timeit.default_timer()
         self.runtime_ms = (end_t - start_t) * 1000
 
@@ -385,25 +418,25 @@ def run():
             "resolution": 500,
         }),
         (SPARS, {
-            "denseDelta":    10.,
-            "sparseDelta":    100,
+            "denseDelta":    50.,
+            "sparseDelta":    500,
             "stretchFactor": 1.01,
             "maxFailures": 500,
-            "maxTime": 5.,
+            "maxTime": 8.,
         }),
         (SPARS, {
-            "denseDelta":    7.,
-            "sparseDelta":    70.,
+            "denseDelta":    35.,
+            "sparseDelta":    350.,
             "stretchFactor": 1.01,
             "maxFailures": 500,
-            "maxTime": 5.,
+            "maxTime": 8.,
         }),
         (SPARS, {
-            "denseDelta":    3.,
-            "sparseDelta":    30.,
+            "denseDelta":    20.,
+            "sparseDelta":    200.,
             "stretchFactor": 1.01,
             "maxFailures": 500,
-            "maxTime": 5.,
+            "maxTime": 8.,
         }),
         (ODRM, {
             "n": 100,
@@ -419,6 +452,15 @@ def run():
             "n": 500,
             "lr": 1e-3,
             "epochs": 50,
+        }),
+        (PRM, {
+            "n": 100,
+        }),
+        (PRM, {
+            "n": 300,
+        }),
+        (PRM, {
+            "n": 500,
         })
     ]
     if not os.path.exists(PLOT_FOLDER):
@@ -428,6 +470,8 @@ def run():
         for f in os.listdir(PLOT_FOLDER):
             os.remove(os.path.join(PLOT_FOLDER, f))
     params_to_run = []
+    df["i"] = np.nan
+    df.set_index("i", inplace=True)
     for cls, args in trials:
         for map_name in [
             "b",
@@ -443,11 +487,13 @@ def run():
         ]:
             for seed in range(5):
                 i = len(df) + 1  # new experiment in new row
+                df.at[i, "i"] = i
                 df.at[i, "map"] = map_name
                 df.at[i, "roadmap"] = cls.__name__
                 df.at[i, "seed"] = seed
                 params_to_run.append((cls, args, map_name, seed, i))
     Random(0).shuffle(params_to_run)
+    df = df.copy()
 
     for ptr in tqdm(params_to_run):
         cls, args, map_name, seed, i = ptr
@@ -477,22 +523,25 @@ def _run_proxy(args):
 
 
 def plot():
+    interesting_vars = [
+        "path_length_mean",
+        "rel_length_mean",
+        "n_nodes",
+        "success_rate",
+        "runtime_ms"
+    ]
+
     df = pd.read_csv(CSV_PATH)
     sns.set_theme(style="whitegrid")
+    sns.set(rc={'figure.dpi': DPI})
     sns.pairplot(
         df,
         hue="roadmap",
-        vars=[
-            "path_len",
-            "path_len_straight",
-            "n_nodes",
-            "success_rate",
-            "runtime_ms"
-        ],
+        vars=interesting_vars,
         markers=".",
     )
     plt.savefig(CSV_PATH.replace(".csv", ".png"))
-    plt.close()
+    plt.close('all')
 
     for roadmap in df.roadmap.unique():
         df_roadmap = df[df.roadmap == roadmap]
@@ -502,15 +551,50 @@ def plot():
             hue="map",
             x_vars=[
                 col for col in df_roadmap.columns if col.startswith(roadmap)],
-            y_vars=[
-                "path_len",
-                "n_nodes",
-                "success_rate",
-                "runtime_ms"
-            ],
+            y_vars=interesting_vars,
         )
         plt.savefig(CSV_PATH.replace(".csv", f"_{roadmap}.png"))
-        plt.close()
+        plt.close('all')
+
+    COMPARE_TO = "GSORM"
+    for roadmap in df.roadmap.unique():
+        if roadmap == COMPARE_TO:
+            continue
+        df_roadmap = df[df.roadmap == roadmap]
+        df_compare = df[df.roadmap == COMPARE_TO]
+        data_len = []
+        assert len(df_roadmap) == len(df_compare)
+        "df_roadmap and df_compare must have same length"
+        for row in range(len(df_roadmap)):
+            for i in range(100):
+                data_len.append((
+                    df_compare.iloc[row][f"path_length_{i:02d}"],
+                    df_roadmap.iloc[row][f"path_length_{i:02d}"],
+                ))
+        data_len = np.array(data_len)
+        data_rel = []
+        for row in range(len(df_roadmap)):
+            for i in range(100):
+                data_rel.append((
+                    df_compare.iloc[row][f"rel_length_{i:02d}"],
+                    df_roadmap.iloc[row][f"rel_length_{i:02d}"],
+                ))
+        data_rel = np.array(data_rel)
+        fig, axs = plt.subplots(1, 2, figsize=(10, 5), dpi=DPI)
+        for i, d in enumerate([data_len, data_rel]):
+            axs[i].scatter(d[:, 0], d[:, 1],
+                           marker='.', alpha=.5,
+                           edgecolors='none', s=3)
+            axs[i].set_xlabel(COMPARE_TO)
+            axs[i].set_ylabel(roadmap)
+            axs[i].plot([0, 1000], [0, 1000], color="red")
+            axs[i].set_xlim(min(d[:, 0]) - .1, max(d[:, 0]) + .1)
+            axs[i].set_ylim(min(d[:, 1]) - .1, max(d[:, 1]) + .1)
+        axs[0].set_title("Path Length")
+        axs[1].set_title("Relative Path Length")
+
+        fig.savefig(CSV_PATH.replace(".csv", f"_{roadmap}_scatter.png"))
+        plt.close('all')
 
 
 if __name__ == "__main__":
