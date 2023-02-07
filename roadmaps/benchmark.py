@@ -1,7 +1,6 @@
 import logging
 import os
 import timeit
-from multiprocessing import Pool
 from random import Random
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -45,6 +44,9 @@ class RoadmapToTest:
 
     def evaluate_path_length(self) -> Dict[str, float]:
         assert self.g is not None, "Roadmap must be built."
+        if self.g.number_of_nodes() == 0:
+            logger.error("Error while making paths, no nodes in graph.")
+            return {"success_rate": 0.0}
         map_img_inv = np.swapaxes(np.array(self.map_img), 0, 1)
         paths = make_paths(self.g, self.n_eval,
                            tuple(map_img_inv.tolist()),
@@ -79,13 +81,16 @@ class RoadmapToTest:
 
     def evaluate_straight_path_length(self) -> Dict[str, float]:
         assert self.g is not None, "Roadmap must be built."
+        if self.g.number_of_nodes() == 0:
+            logger.error("Error while making paths, no nodes in graph.")
+            return {"success_rate": 0.0}
         pos_np = np.zeros((max(self.g.nodes) + 1, 2))
         for n, (x, y) in nx.get_node_attributes(self.g, POS).items():
             pos_np[n] = torch.tensor([x, y])
         pos_t = torch.tensor(pos_np)
         flann = FLANN(random_seed=0)
         flann.build_index(np.array(pos_np, dtype=np.float32), random_seed=0)
-        rel_lengths: List[float] = []
+        rel_straight_lengths: List[float] = []
         for _ in range(self.n_eval):
             found = False
             while not found:
@@ -111,11 +116,11 @@ class RoadmapToTest:
                 found = True
             assert path is not None
             path_len = get_path_len(pos_t, path, False).item()
-            rel_lengths.append(path_len / length)
+            rel_straight_lengths.append(path_len / length)
         data = {}
-        for i, d in enumerate(rel_lengths):
-            data[f"rel_length_{i:02d}"] = d
-        data["rel_length_mean"] = np.mean(rel_lengths).item()
+        for i, d in enumerate(rel_straight_lengths):
+            data[f"rel_straight_length_{i:02d}"] = d
+        data["rel_straight_length_mean"] = np.mean(rel_straight_lengths).item()
         return data
 
     def evaluate_n_nodes(self) -> Dict[str, float]:
@@ -152,14 +157,26 @@ class RoadmapToTest:
         # exclude self edges
         edges = [(u, v) for u, v in self.g.edges if u != v]
         nx.draw_networkx_edges(self.g, pos, ax=ax, edgelist=edges, width=0.5)
+
+        # what will be the file name
+        n_nodes = self.g.number_of_nodes()
+        if n_nodes == 0:
+            return
         name = f"{i:03d}_{self.__class__.__name__}_" +\
+            f"{n_nodes:04d}n_" +\
             f"{os.path.basename(self.map_fname)}"
 
         # make an example path
         # invert x and y of map
         map_img = np.swapaxes(np.array(self.map_img), 0, 1)
         map_img_t = tuple(map_img.tolist())
-        path = make_paths(self.g, 1, map_img_t, Random(0))[0]
+        seed = 0
+        path = None
+        while path is None:
+            try:
+                path = make_paths(self.g, 1, map_img_t, Random(seed))[0]
+            except ValueError:
+                seed += 1        
         start, end, node_path = path
         coord_path = [pos[n] for n in node_path]
         full_path = (
@@ -418,15 +435,15 @@ def run():
             "resolution": 500,
         }),
         (SPARS, {
-            "denseDelta":    50.,
-            "sparseDelta":    500,
+            "denseDelta":    80.,
+            "sparseDelta":    800,
             "stretchFactor": 1.01,
             "maxFailures": 500,
             "maxTime": 8.,
         }),
         (SPARS, {
-            "denseDelta":    35.,
-            "sparseDelta":    350.,
+            "denseDelta":    50.,
+            "sparseDelta":    500.,
             "stretchFactor": 1.01,
             "maxFailures": 500,
             "maxTime": 8.,
@@ -439,28 +456,28 @@ def run():
             "maxTime": 8.,
         }),
         (ODRM, {
-            "n": 100,
+            "n": 400,
             "lr": 1e-3,
             "epochs": 50,
         }),
         (ODRM, {
-            "n": 300,
+            "n": 900,
             "lr": 1e-3,
             "epochs": 50,
         }),
         (ODRM, {
-            "n": 500,
+            "n": 1400,
             "lr": 1e-3,
             "epochs": 50,
         }),
         (PRM, {
-            "n": 100,
-        }),
-        (PRM, {
-            "n": 300,
-        }),
-        (PRM, {
             "n": 500,
+        }),
+        (PRM, {
+            "n": 900,
+        }),
+        (PRM, {
+            "n": 1500,
         })
     ]
     if not os.path.exists(PLOT_FOLDER):
@@ -525,7 +542,7 @@ def _run_proxy(args):
 def plot():
     interesting_vars = [
         "path_length_mean",
-        "rel_length_mean",
+        "rel_straight_length_mean",
         "n_nodes",
         "success_rate",
         "runtime_ms"
@@ -576,8 +593,8 @@ def plot():
         for row in range(len(df_roadmap)):
             for i in range(100):
                 data_rel.append((
-                    df_compare.iloc[row][f"rel_length_{i:02d}"],
-                    df_roadmap.iloc[row][f"rel_length_{i:02d}"],
+                    df_compare.iloc[row][f"rel_straight_length_{i:02d}"],
+                    df_roadmap.iloc[row][f"rel_straight_length_{i:02d}"],
                 ))
         data_rel = np.array(data_rel)
         fig, axs = plt.subplots(1, 2, figsize=(10, 5), dpi=DPI)
@@ -598,5 +615,5 @@ def plot():
 
 
 if __name__ == "__main__":
-    # run()
+    run()
     plot()
