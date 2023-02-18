@@ -130,6 +130,7 @@ public:
     cv::Mat spots_layer = cv::Mat::zeros(mask.size(), CV_8U);
     spots_layer.setTo(255, b > 0.5 * b_max);
 //   cv::imwrite("spots_layer.png", spots_layer);
+    auto before_finding_spots = high_resolution_clock::now();
 
     // find spots
     std::vector<std::vector<cv::Point>> spots;
@@ -145,9 +146,15 @@ public:
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
-    float duration_ms = static_cast<float>(duration.count()) / 1000.;
-    std::cout << "Time taken by function: " <<
-      duration_ms << " ms" << std::endl;
+
+    float duration_find_spots_ms = static_cast<float>(
+      duration_cast<microseconds>(stop - before_finding_spots).count()) / 1000.;
+    std::cout << "Time taken by finding spots: " <<
+      duration_find_spots_ms << " ms" << std::endl;
+
+    float duration_total_ms = static_cast<float>(duration.count()) / 1000.;
+    std::cout << "Total time taken by function: " <<
+      duration_total_ms << " ms" << std::endl;
 
     // draw middles
     // cv::Mat middles_layer = cv::Mat::zeros(mask.size(), CV_8U);
@@ -168,7 +175,7 @@ public:
       boost::python::tuple point = boost::python::make_tuple(middle.x, middle.y);
       points.append(point);
     }
-    return boost::python::make_tuple(points, duration_ms);
+    return boost::python::make_tuple(points, duration_total_ms);
   }
 };
 
