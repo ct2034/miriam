@@ -63,7 +63,7 @@ public:
     int iterations, int resolution, bool plot)
   {
     // seed opencv rng
-    cv::theRNG().state = time(NULL);
+    cv::theRNG().state = 1;
 
     // Load PNG image
     std::vector<unsigned char> image; // the raw pixels
