@@ -1,5 +1,5 @@
-from PyQt5 import QtGui, QtCore
 from numpy import *
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 green = QtGui.QColor(10, 200, 10, 127)
 blue = QtGui.QColor(10, 10, 200, 127)
@@ -13,7 +13,7 @@ def pointFromPose(pose):
     return QtCore.QPoint(poseVis[0], poseVis[1])
 
 
-class Vis(QtGui.QWidget):
+class Vis(QtWidgets.QWidget):
     """Visualisation of the AGVs and environment"""
 
     scale = False
@@ -24,10 +24,11 @@ class Vis(QtGui.QWidget):
     scene = False
 
     def __init__(self, sim_thread, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         print("init vis")
         print("sim_thread: " + str(sim_thread))
         Vis.sim_thread = sim_thread
+        self.open
         self.connect(Vis.sim_thread, QtCore.SIGNAL(
             "open(int, int, PyQt_PyObject)"), self.open)
         self.connect(Vis.sim_thread, QtCore.SIGNAL(

@@ -5,7 +5,7 @@ import threading
 import time
 
 import numpy as np
-from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sim.simple.mod_random import Random
 from sim.simple.simulation import SimpSim
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     # vis
     vis = True
     if vis:
-        app = QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
         window = Vis(sim_thread)
         window.show()
         sys.exit(app.exec_())
