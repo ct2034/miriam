@@ -30,7 +30,6 @@ def read_map(fname: str) -> MAP_IMG:
     return tuple(data)
 
 
-# @lru_cache  # this slowed things down a lot. TODO: investigate
 def is_coord_free(
         map_img: MAP_IMG,
         point: Tuple[float, float]) -> bool:
@@ -43,7 +42,6 @@ def is_coord_free(
     ] >= 255
 
 
-# @lru_cache  # this slowed things down a lot. TODO: investigate
 def is_pixel_free(
         map_img: MAP_IMG,
         point: Tuple[float, float]) -> bool:
@@ -62,6 +60,8 @@ def check_edge(
         b: int) -> bool:
     """Check edge between two nodes."""
     size = len(map_img)
+    if a >= len(pos) or b >= len(pos):
+        return False
     line = bresenham(
         int(pos[a][0]*size),
         int(pos[a][1]*size),
@@ -72,14 +72,20 @@ def check_edge(
 
 
 def sample_points(
-        n: int,
-        map_img: MAP_IMG,
-        rng: Random) -> torch.Tensor:
+    n: int,
+    map_img: MAP_IMG,
+    rng: Random,
+    free_points: bool = True
+) -> torch.Tensor:
     """Sample `n` random points (0 <= x <= 1) from a map."""
+    if free_points:
+        test_fun = is_coord_free
+    else:
+        def test_fun(m, p): return not is_coord_free(m, p)
     points = np.empty(shape=(0, 2))
     while points.shape[0] < n:
         point = (rng.random(), rng.random())
-        if is_coord_free(map_img, point):
+        if test_fun(map_img, point):
             points = np.append(points, [np.array(point)], axis=0)
     return torch.tensor(points, device=torch.device("cpu"),
                         dtype=torch.float, requires_grad=True)
@@ -95,7 +101,11 @@ def make_graph_and_flann(
     # while pos.shape[0] < desired_n_nodes:
     #     pos = torch.cat((pos, sample_points(1, map_img, rng)), dim=0)
     pos_np = pos.detach().numpy()
-    cells, _ = voronoi_frames(pos_np, clip="bbox")
+    # make dummy points in obstacles
+    dummy_points = sample_points(
+        len(pos_np) * .5, map_img, rng, free_points=False)
+    pos_np_w_dummy = np.append(pos_np, dummy_points.detach().numpy(), axis=0)
+    cells, _ = voronoi_frames(pos_np_w_dummy, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells)
     g: nx.Graph = delaunay.to_networkx()  # type: ignore
     nx.set_node_attributes(g, {

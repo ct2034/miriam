@@ -298,15 +298,15 @@ def run_optimization(
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}"
     if os.path.splitext(map_fname)[1] == ".png":
         map_img: MAP_IMG = read_map(map_fname)
-        map_img_inflated = inflate_map_img(map_img, radius*20)
+        map_img_np = np.array(map_img, dtype=np.uint8)
     elif os.path.splitext(map_fname)[1] == ".map":
-        map_np = movingai_read_mapfile(map_fname)
-        map_img = gridmap_to_map_img(map_np)
-        # lets inflate the map a bit
-        map_np_inflated = inflate_map(map_np, SUPER_RES_MULTIPLIER)
-        map_img_inflated = gridmap_to_map_img(map_np_inflated)
+        map_img_np = movingai_read_mapfile(map_fname)
+        map_img = gridmap_to_map_img(map_img_np)
     else:
         raise ValueError(f"Unknown map file extension {map_fname}")
+    map_ocv = cv2.Mat(map_img_np)
+    map_img_inflated = cv2.erode(map_ocv, np.ones(
+        (SUPER_RES_MULTIPLIER, SUPER_RES_MULTIPLIER), np.uint8))
 
     B = None
     if load_roadmap is not None:
@@ -667,8 +667,8 @@ if __name__ == "__main__":
     pool = tmp.Pool(processes=n_processes)
 
     configs_to_run = {
-        k: v for k, v in configs_more_lr_pos_s.items() if k.startswith("debug") or
-        k.startswith("large")
+        k: v for k, v in configs_more_lr_pos_s.items() if k.startswith("debug")
+        # or k.startswith("large")
     }
 
     prefixes_to_run = sorted(configs_to_run.keys())
