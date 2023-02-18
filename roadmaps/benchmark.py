@@ -176,7 +176,7 @@ class RoadmapToTest:
             try:
                 path = make_paths(self.g, 1, map_img_t, Random(seed))[0]
             except ValueError:
-                seed += 1        
+                seed += 1
         start, end, node_path = path
         coord_path = [pos[n] for n in node_path]
         full_path = (
@@ -209,6 +209,7 @@ class GSRM(RoadmapToTest):
         nodes, runtime_points = gs.run(
             mapFile=map_fname,
             **self.roadmap_specific_kwargs,
+            plot=False,
         )
         pos = torch.Tensor(nodes) / roadmap_specific_kwargs["resolution"]
         # swap x and y
@@ -246,6 +247,7 @@ class GSORM(RoadmapToTest):
         nodes, runtime_points = gs.run(
             mapFile=map_fname,
             **gsorm_kwargs,
+            plot=False,
         )
         pos = torch.Tensor(nodes) / roadmap_specific_kwargs["resolution"]
         # swap x and y
@@ -374,6 +376,33 @@ def run():
     df = pd.DataFrame()
 
     trials = [
+        (GSRM, {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.065,
+            "delta_t": 1.0,
+            "iterations": 10000,
+            "resolution": 300,
+        }),
+        (GSRM, {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.065,
+            "delta_t": 1.0,
+            "iterations": 10000,
+            "resolution": 400,
+        }),
+        (GSRM, {
+            "DA": 0.14,
+            "DB": 0.06,
+            "f": 0.035,
+            "k": 0.065,
+            "delta_t": 1.0,
+            "iterations": 10000,
+            "resolution": 500,
+        }),
         (GSORM, {
             "DA": 0.14,
             "DB": 0.06,
@@ -406,33 +435,6 @@ def run():
             "resolution": 500,
             "epochs_optim": 25,  # of optimization
             "lr_optim": 1e-3,
-        }),
-        (GSRM, {
-            "DA": 0.14,
-            "DB": 0.06,
-            "f": 0.035,
-            "k": 0.065,
-            "delta_t": 1.0,
-            "iterations": 10000,
-            "resolution": 300,
-        }),
-        (GSRM, {
-            "DA": 0.14,
-            "DB": 0.06,
-            "f": 0.035,
-            "k": 0.065,
-            "delta_t": 1.0,
-            "iterations": 10000,
-            "resolution": 400,
-        }),
-        (GSRM, {
-            "DA": 0.14,
-            "DB": 0.06,
-            "f": 0.035,
-            "k": 0.065,
-            "delta_t": 1.0,
-            "iterations": 10000,
-            "resolution": 500,
         }),
         (SPARS, {
             "denseDelta":    80.,
@@ -479,6 +481,7 @@ def run():
         (PRM, {
             "n": 1500,
         })
+        # TODO: gridmaps, visibility graphs, voronoi diagrams
     ]
     if not os.path.exists(PLOT_FOLDER):
         os.makedirs(PLOT_FOLDER)

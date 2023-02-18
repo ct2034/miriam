@@ -60,7 +60,7 @@ public:
 
   boost::python::tuple run(
     std::string mapFile, float DA, float DB, float f, float k, float delta_t,
-    int iterations, int resolution)
+    int iterations, int resolution, bool plot)
   {
     // Load PNG image
     std::vector<unsigned char> image; // the raw pixels
@@ -81,7 +81,9 @@ public:
     cv::Mat mask;
     cv::inRange(image_in, cv::Scalar(0), cv::Scalar(254), mask);
     cv::resize(mask, mask, cv::Size(resolution, resolution));
-    // cv::imwrite("mask.png", mask);
+    if (plot) {
+      cv::imwrite("mask.png", mask);
+    }
     std::cout << "Loaded mask: " << mask.size() << std::endl;
 
     // grey scott model
@@ -105,10 +107,13 @@ public:
       b.setTo(0, mask);
 
       // save image for debugging
-      // if (i % 1000 == 0) {
-      //   std::cout << "Iteration: " << i << std::endl;
-      //   cv::imwrite("a_" + std::to_string(i) + ".png", a * 255);
-      // }
+      if (plot) {
+        std::vector<int> save_at = {0, 10, 100, 500, 2000, iterations - 1};
+        if (std::find(save_at.begin(), save_at.end(), i) != save_at.end()) {
+          std::cout << "Iteration: " << i << std::endl;
+          cv::imwrite("a_" + std::to_string(i) + ".png", a * 255);
+        }
+      }
 
       // laplacian
       cv::Laplacian(a, lap_a, CV_32F);
@@ -129,7 +134,6 @@ public:
       b.end<float>());
     cv::Mat spots_layer = cv::Mat::zeros(mask.size(), CV_8U);
     spots_layer.setTo(255, b > 0.5 * b_max);
-//   cv::imwrite("spots_layer.png", spots_layer);
     auto before_finding_spots = high_resolution_clock::now();
 
     // find spots
@@ -156,19 +160,20 @@ public:
     std::cout << "Total time taken by function: " <<
       duration_total_ms << " ms" << std::endl;
 
-    // draw middles
-    // cv::Mat middles_layer = cv::Mat::zeros(mask.size(), CV_8U);
-    // for (auto middle : middles) {
-    //   cv::circle(middles_layer, middle, 1, cv::Scalar(255), -1);
-    // }
-    // cv::imwrite("middles_layer.png", middles_layer);
+    if (plot) {
+      // draw middles
+      cv::Mat middles_layer = cv::Mat::zeros(mask.size(), CV_8U);
+      for (auto middle : middles) {
+        cv::circle(middles_layer, middle, 1, cv::Scalar(255), -1);
+      }
 
-    // overlay middles on spots
-    // cv::Mat spots_middles_layer = cv::Mat::zeros(mask.size(), CV_8UC3);
-    // cv::cvtColor(spots_layer, spots_middles_layer, cv::COLOR_GRAY2BGR);
-    // cv::cvtColor(middles_layer, middles_layer, cv::COLOR_GRAY2BGR);
-    // cv::addWeighted(spots_middles_layer, 0.3, middles_layer, 0.7, 0, spots_middles_layer);
-    // cv::imwrite("spots_middles_layer.png", spots_middles_layer);
+      // overlay middles on spots
+      cv::Mat spots_middles_layer = cv::Mat::zeros(mask.size(), CV_8UC3);
+      cv::cvtColor(spots_layer, spots_middles_layer, cv::COLOR_GRAY2BGR);
+      cv::cvtColor(middles_layer, middles_layer, cv::COLOR_GRAY2BGR);
+      cv::addWeighted(spots_middles_layer, 0.3, middles_layer, 0.7, 0, spots_middles_layer);
+      cv::imwrite("spots_middles_layer.png", spots_middles_layer);
+    }
 
     boost::python::list points;
     for (auto middle : middles) {
@@ -187,6 +192,7 @@ BOOST_PYTHON_MODULE(libgsorm)
   .def(
     "run", &Gsorm::run,
     (bp::arg("mapFile"), bp::arg("DA"), bp::arg("DB"), bp::arg("f"),
-    bp::arg("k"), bp::arg("delta_t"), bp::arg("iterations"), bp::arg("resolution")))
+    bp::arg("k"), bp::arg("delta_t"), bp::arg("iterations"), bp::arg("resolution"),
+    bp::arg("plot")))
   ;
 }
