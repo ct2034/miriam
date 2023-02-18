@@ -62,6 +62,9 @@ public:
     std::string mapFile, float DA, float DB, float f, float k, float delta_t,
     int iterations, int resolution, bool plot)
   {
+    // seed opencv rng
+    cv::theRNG().state = time(NULL);
+
     // Load PNG image
     std::vector<unsigned char> image; // the raw pixels
     unsigned width, height;
@@ -95,7 +98,6 @@ public:
     cv::Mat lap_b = cv::Mat::zeros(mask.size(), CV_32F);
 
     // initialize a and b
-    // TODO: seed
     cv::randu(a, cv::Scalar(0.8), cv::Scalar(1.0));
     cv::randu(b, cv::Scalar(0.0), cv::Scalar(0.2));
 
@@ -111,7 +113,11 @@ public:
         std::vector<int> save_at = {0, 10, 100, 500, 2000, iterations - 1};
         if (std::find(save_at.begin(), save_at.end(), i) != save_at.end()) {
           std::cout << "Iteration: " << i << std::endl;
-          cv::imwrite("a_" + std::to_string(i) + ".png", a * 255);
+          cv::Mat a_8bit = cv::Mat::zeros(a.size(), CV_8U);
+          a.convertTo(a_8bit, CV_8U, 255);
+          cv::Mat a_colormap;
+          cv::applyColorMap(a_8bit, a_colormap, cv::COLORMAP_INFERNO);
+          cv::imwrite("a_" + std::to_string(i) + ".png", a_colormap);
         }
       }
 
