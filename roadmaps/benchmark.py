@@ -1,4 +1,6 @@
+from itertools import product
 import logging
+from math import ceil, sqrt
 import os
 import timeit
 from random import Random
@@ -202,6 +204,8 @@ class GSRM(RoadmapToTest):
                  rng: Random,
                  roadmap_specific_kwargs):
         super().__init__(map_fname, rng, roadmap_specific_kwargs)
+        if "plot" not in roadmap_specific_kwargs:
+            roadmap_specific_kwargs["plot"] = False
 
         from roadmaps.gsorm.build.libgsorm import Gsorm
         from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
@@ -209,7 +213,6 @@ class GSRM(RoadmapToTest):
         nodes, runtime_points = gs.run(
             mapFile=map_fname,
             **self.roadmap_specific_kwargs,
-            plot=False,
         )
         pos = torch.Tensor(nodes) / roadmap_specific_kwargs["resolution"]
         # swap x and y
@@ -372,6 +375,58 @@ class PRM(RoadmapToTest):
                                    self.g, POS).items()}, POS)
 
 
+class GridMap(RoadmapToTest):
+    def __init__(self,
+                 map_fname: str,
+                 rng: Random,
+                 roadmap_specific_kwargs):
+        super().__init__(map_fname, rng, roadmap_specific_kwargs)
+        n_side = ceil(sqrt(roadmap_specific_kwargs["n"]))
+        start_t = timeit.default_timer()
+        g = self._make_gridmap(n_side)
+        while g.number_of_nodes() < roadmap_specific_kwargs["n"]:
+            n_side += 1
+            g = self._make_gridmap(n_side)
+        end_t = timeit.default_timer()
+        self.runtime_ms = (end_t - start_t) * 1000
+        self.g = g
+
+    def _make_gridmap(self, n_side):
+        edge_length = 1 / (n_side + 1)
+        g = nx.Graph()
+        grid = np.full((n_side, n_side), -1)
+        for x, y in product(range(n_side), range(n_side)):
+            i_to_add = len(g)
+            coords = (
+                x * edge_length + edge_length / 2,
+                y * edge_length + edge_length / 2,
+            )
+            if is_coord_free(self.map_img, coords):
+                g.add_node(i_to_add, **{POS: coords})
+                grid[x, y] = i_to_add
+                if x > 0 and grid[x - 1, y] != -1:
+                    if self._check_line(
+                            coords,
+                            g.nodes[grid[x - 1, y]][POS]):
+                        g.add_edge(i_to_add, grid[x - 1, y], **{
+                            DISTANCE: edge_length
+                        })
+                if y > 0 and grid[x, y - 1] != -1:
+                    if self._check_line(
+                            coords,
+                            g.nodes[grid[x, y - 1]][POS]):
+                        g.add_edge(i_to_add, grid[x, y - 1], **{
+                            DISTANCE: edge_length
+                        })
+        # swap x and y
+        nx.set_node_attributes(
+            g,
+            {i: (p[1],
+                 p[0]) for i, p in nx.get_node_attributes(
+                g, POS).items()}, POS)
+        return g
+
+
 def run():
     df = pd.DataFrame()
 
@@ -384,6 +439,7 @@ def run():
             "delta_t": 1.0,
             "iterations": 10000,
             "resolution": 300,
+            "plot": True,
         }),
         (GSRM, {
             "DA": 0.14,
@@ -481,7 +537,16 @@ def run():
         (PRM, {
             "n": 1500,
         })
-        # TODO: gridmaps, visibility graphs, voronoi diagrams
+        (GridMap, {
+            "n": 400,
+        }),
+        (GridMap, {
+            "n": 900,
+        }),
+        (GridMap, {
+            "n": 1400,
+        })
+        # TODO: visibility graphs, voronoi diagrams
     ]
     if not os.path.exists(PLOT_FOLDER):
         os.makedirs(PLOT_FOLDER)
@@ -499,12 +564,18 @@ def run():
             "dual_w",
             "dual",
             "dual2",
-            # "o",
-            # "plain",
-            # "simple",
-            # "x",
-            # "z"
+            "o",
+            "plain",
+            "simple",
+            "x",
+            "z"
         ]:
+            if "plot" in args:
+                if map_name == "c" and args["plot"]:
+                    print(f"Plotting {len(df) + 1}")
+                else:
+                    args["plot"] = False
+
             for seed in range(5):
                 i = len(df) + 1  # new experiment in new row
                 df.at[i, "i"] = i
