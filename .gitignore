@@ -52,3 +52,4 @@ roadmaps/gsorm/build/*
 # but include the binary and images
 !roadmaps/gsorm/build/gsorm
 !roadmaps/gsorm/build/*.png
+roadmaps/benchmark_plots/

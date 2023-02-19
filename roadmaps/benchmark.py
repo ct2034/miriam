@@ -2,6 +2,7 @@ from itertools import product
 import logging
 from math import ceil, sqrt
 import os
+import re
 import timeit
 from random import Random
 from typing import Any, Dict, List, Optional, Tuple
@@ -26,6 +27,20 @@ PLOT_FOLDER = "roadmaps/benchmark_plots"
 DPI = 500
 
 logger = logging.getLogger(__name__)
+
+# this list is roughly sorted by complexity
+MAP_NAMES = [
+    'plain',
+    'c',
+    'x',
+    'b',
+    'o',
+    'dual_w',
+    'dual2',
+    'dual',
+    'simple',
+    'z'
+]
 
 
 class RoadmapToTest:
@@ -558,18 +573,7 @@ def run():
     df["i"] = np.nan
     df.set_index("i", inplace=True)
     for cls, args in trials:
-        for map_name in [
-            "b",
-            "c",
-            "dual_w",
-            "dual",
-            "dual2",
-            "o",
-            "plain",
-            "simple",
-            "x",
-            "z"
-        ]:
+        for map_name in map_names:
             if "plot" in args:
                 if map_name == "c" and args["plot"]:
                     print(f"Plotting {len(df) + 1}")
@@ -613,6 +617,17 @@ def _run_proxy(args):
     return (i, data)
 
 
+def _get_i_from_column_name(col_name):
+    return int(col_name.split("_")[-1])
+
+
+def _get_cols_by_prefix(df, prefix):
+    return filter(
+        # must math {prefix}XX
+        lambda x: re.match(f"^({prefix})[0-9]+$", x),
+        df.columns)
+
+
 def plot():
     interesting_vars = [
         "path_length_mean",
@@ -654,40 +669,77 @@ def plot():
         df_roadmap = df[df.roadmap == roadmap]
         df_compare = df[df.roadmap == COMPARE_TO]
         data_len = []
-        assert len(df_roadmap) == len(df_compare)
-        "df_roadmap and df_compare must have same length"
-        for row in range(len(df_roadmap)):
-            for i in range(100):
-                data_len.append((
-                    df_compare.iloc[row][f"path_length_{i:02d}"],
-                    df_roadmap.iloc[row][f"path_length_{i:02d}"],
-                ))
-        data_len = np.array(data_len)
         data_rel = []
-        for row in range(len(df_roadmap)):
-            for i in range(100):
-                data_rel.append((
-                    df_compare.iloc[row][f"rel_straight_length_{i:02d}"],
-                    df_roadmap.iloc[row][f"rel_straight_length_{i:02d}"],
-                ))
-        data_rel = np.array(data_rel)
+        map_names = []
+        assert len(df_roadmap) == len(df_compare), \
+            "df_roadmap and df_compare must have same length"
+        for data, prefix in [
+            (data_len, "path_length_"),
+            (data_rel, "rel_straight_length_")
+        ]:
+            cols = _get_cols_by_prefix(df_roadmap, prefix)
+            i_s = [_get_i_from_column_name(col) for col in cols]
+            map_names = []
+            for row in range(len(df_roadmap)):
+                map_name = df_roadmap.iloc[row]["map"]
+                for i in i_s:
+                    data.append((
+                        df_compare.iloc[row][f"{prefix}{i:02d}"],
+                        df_roadmap.iloc[row][f"{prefix}{i:02d}"],
+                    ))
+                    map_names.append(map_name)
+        assert len(data_len) == len(data_rel), \
+            "data_len and data_rel must have same length"
+        assert len(data_len) == len(map_names), \
+            "data_len and map_names must have same length"
+        data_len_np = np.array(data_len)
+        data_rel_np = np.array(data_rel)
         fig, axs = plt.subplots(1, 2, figsize=(10, 5), dpi=DPI)
-        for i, d in enumerate([data_len, data_rel]):
-            axs[i].scatter(d[:, 0], d[:, 1],
-                           marker='.', alpha=.5,
-                           edgecolors='none', s=3)
+        # sort by map names list
+        sorted_map_names = []
+        for map_name in MAP_NAMES:
+            if map_name in list(set(map_names)):
+                sorted_map_names.append(map_name)
+        colors_per_data = [
+            plt.cm.get_cmap("hsv")(
+                sorted_map_names.index(map_name) /
+                len(sorted_map_names))
+            for map_name in map_names
+        ]
+        for i, d in enumerate([data_len_np, data_rel_np]):
+            axs[i].scatter(d[:, 0],
+                           d[:, 1],
+                           marker='.',
+                           alpha=.4,
+                           c=colors_per_data,
+                           edgecolors='none',
+                           s=2)
             axs[i].set_xlabel(COMPARE_TO)
             axs[i].set_ylabel(roadmap)
-            axs[i].plot([0, 1000], [0, 1000], color="red")
+            axs[i].plot([0, 1000], [0, 1000], color="black", linewidth=1)
             axs[i].set_xlim(min(d[:, 0]) - .1, max(d[:, 0]) + .1)
             axs[i].set_ylim(min(d[:, 1]) - .1, max(d[:, 1]) + .1)
         axs[0].set_title("Path Length")
         axs[1].set_title("Relative Path Length")
+
+        # make legend
+        legend_elements = [
+            plt.Line2D([-1], [-1],
+                       marker='.',
+                       color='w',
+                       label=map_name,
+                       markerfacecolor=plt.cm.get_cmap("hsv")(
+                       sorted_map_names.index(map_name) /
+                       len(sorted_map_names)),
+                       markersize=10)
+            for map_name in sorted_map_names
+        ]
+        axs[0].legend(handles=legend_elements, loc='upper left')
 
         fig.savefig(CSV_PATH.replace(".csv", f"_{roadmap}_scatter.png"))
         plt.close('all')
 
 
 if __name__ == "__main__":
-    run()
+    # run()
     plot()
