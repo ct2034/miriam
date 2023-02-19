@@ -53,7 +53,9 @@ class ImageStateValidityChecker : public ompl::base::StateValidityChecker
 {
 public:
   ImageStateValidityChecker(
-    ompl::base::SpaceInformationPtr si, const std::vector<unsigned char> & image, unsigned width,
+    ompl::base::SpaceInformationPtr si,
+    const std::vector<unsigned char> & image,
+    unsigned width,
     unsigned height)
   : StateValidityChecker(si), image_(image), width_(width), height_(height)
   {
@@ -80,6 +82,70 @@ private:
   unsigned height_;
 };
 
+class ImageMotionValidator : public ompl::base::MotionValidator
+{
+public:
+  ImageMotionValidator(
+    ompl::base::SpaceInformationPtr si,
+    const std::vector<unsigned char> & image,
+    unsigned width,
+    unsigned height)
+  : MotionValidator(si), image_(image), width_(width), height_(height), stateValidityChecker_(si,
+      image,
+      width,
+      height)
+  {
+  }
+
+  bool checkMotion(const ompl::base::State * s1, const ompl::base::State * s2) const
+  {
+    const ompl::base::RealVectorStateSpace::StateType * ts1 =
+      s1->as<ompl::base::RealVectorStateSpace::StateType>();
+    int x1 = (int)(*ts1)[0];
+    int y1 = (int)(*ts1)[1];
+    const ompl::base::RealVectorStateSpace::StateType * ts2 =
+      s2->as<ompl::base::RealVectorStateSpace::StateType>();
+    int x2 = (int)(*ts2)[0];
+    int y2 = (int)(*ts2)[1];
+
+    if (not (
+        stateValidityChecker_.isValid(s1) &&
+        stateValidityChecker_.isValid(s2) ))
+    {
+      return false;
+    }
+
+    //bresenham's line algorithm
+    int m_new = 2 * (y2 - y1);
+    int slope_error_new = m_new - (x2 - x1);
+    for (int x = x1, y = y1; x <= x2; x++) {
+      if (image_[y * width_ + x] < 255) {
+        return false;
+      }
+      slope_error_new += m_new;
+      if (slope_error_new >= 0) {
+        y++;
+        slope_error_new -= 2 * (x2 - x1);
+      }
+    }
+    return true;
+  }
+
+  bool checkMotion(
+    const ompl::base::State * s1, const ompl::base::State * s2,
+    std::pair<ompl::base::State *, double> & lastValid) const
+  {
+    // maybe we can get away with not implementing this
+    return checkMotion(s1, s2);
+  }
+
+private:
+  ImageStateValidityChecker stateValidityChecker_;
+  const std::vector<unsigned char> & image_;
+  unsigned width_;
+  unsigned height_;
+};
+
 class Spars
 {
 public:
@@ -97,7 +163,7 @@ public:
     GenerationType::Type genType = GenerationType::SPARS;
     const size_t dimension = 2;
 
-    std::vector<unsigned char> image;  // the raw pixels
+    std::vector<unsigned char> image;   // the raw pixels
     unsigned width, height;
 
     // decode
@@ -123,11 +189,17 @@ public:
       space->as<base::RealVectorStateSpace>()->setBounds(bounds);
 
       base::SpaceInformationPtr si(new base::SpaceInformation(space));
-      base::StateValidityCheckerPtr stateValidityChecker(new ImageStateValidityChecker(
+      base::StateValidityCheckerPtr stateValidityChecker(
+        new ImageStateValidityChecker(
           si, image,
           width, height));
       si->setStateValidityChecker(stateValidityChecker);
-      si->setStateValidityCheckingResolution(0.01);  // 1%
+      si->setStateValidityCheckingResolution(0.01);   // 1%
+      base::MotionValidatorPtr motionValidator(
+        new ImageMotionValidator(
+          si, image,
+          width, height));
+      si->setMotionValidator(motionValidator);
       si->setup();
 
       base::ProblemDefinitionPtr pdef(new base::ProblemDefinition(si));
