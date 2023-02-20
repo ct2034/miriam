@@ -302,8 +302,11 @@ class GSRM(RoadmapToTest):
             actual_n = pos.shape[0]
             print(f"Got {actual_n} nodes. Target was {target_n}.")
             factor = 1 + (target_n / actual_n - 1) * 0.7
-            resolution *= sqrt(factor)
-            resolution = int(resolution)
+            new_resolution = resolution * sqrt(factor)
+            if int(new_resolution) == resolution:
+                resolution += 1
+            else:
+                resolution = int(new_resolution)
 
         # swap x and y
         pos = pos[:, [1, 0]]
@@ -390,11 +393,11 @@ class SPARS(RoadmapToTest):
             ay /= len(self.map_img)
             bx /= len(self.map_img)
             by /= len(self.map_img)
-            if self._check_line((ay, ax), (by, bx)):
-                g.add_edge(
-                    a, b, **{DISTANCE: np.sqrt((ax - bx)**2 + (ay - by)**2)})
-                g.add_node(a, **{POS: (ax, ay)})
-                g.add_node(b, **{POS: (bx, by)})
+            # if self._check_line((ay, ax), (by, bx)):
+            g.add_edge(
+                a, b, **{DISTANCE: np.sqrt((ax - bx)**2 + (ay - by)**2)})
+            g.add_node(a, **{POS: (ax, ay)})
+            g.add_node(b, **{POS: (bx, by)})
         print("nodes", g.number_of_nodes())
         print("edges", g.number_of_edges())
 
