@@ -22,6 +22,7 @@ FIND_PACKAGE(Boost 1.71.0 REQUIRED COMPONENTS
 FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(yaml-cpp REQUIRED)
 FIND_PACKAGE(ompl REQUIRED)
+find_package( OpenCV REQUIRED )
 
 # Additional include folders
 include_directories(
@@ -30,6 +31,7 @@ include_directories(
   ${OMPL_INCLUDE_DIRS}
   lodepng
   ${PYTHON_INCLUDE} 
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 # the executable
@@ -56,6 +58,7 @@ TARGET_LINK_LIBRARIES(
   ${SPARSPY} 
   ${Boost_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
+  ${OpenCV_LIBS}
   ompl
 )
 

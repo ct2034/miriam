@@ -35,18 +35,19 @@ logger = logging.getLogger(__name__)
 # this list is roughly sorted by complexity
 MAP_NAMES = [
     'plain',
-    'c',
-    # 'x',
+    # 'c',
+    'x',
     'b',
     # 'o',
     # 'dual_w',
     # 'dual2',
-    'dual',
+    # 'dual',
     'z',
-    'dense',
+    'dense34',
+    # 'dense',
     # 'simple'
 ]
-N_SEEDS = 10
+N_SEEDS = 5
 
 
 class RoadmapToTest:
@@ -63,6 +64,8 @@ class RoadmapToTest:
         self.runtime_ms: Optional[float] = None
         self.astar_solver: Optional[AstarSolver] = None
         self.flann: Optional[FLANN] = None
+
+        print(f'{roadmap_specific_kwargs=}')
 
     def _initialize_eval_rng(self):
         self.rng = Random(0)
@@ -160,7 +163,6 @@ class RoadmapToTest:
         assert self.g is not None, 'Roadmap must be built.'
         if self.g.number_of_nodes() == 0:
             logger.error('Error while making paths, no nodes in graph.')
-            return {'success_rate': 0.0}
         pos_np = np.zeros((max(self.g.nodes) + 1, 2))
         for n, (x, y) in nx.get_node_attributes(self.g, POS).items():
             pos_np[n] = torch.tensor([x, y])
@@ -202,7 +204,9 @@ class RoadmapToTest:
 
     def evaluate_n_nodes(self) -> Dict[str, float]:
         assert self.g is not None, "Roadmap must be built."
-        return {"n_nodes": self.g.number_of_nodes()}
+        return {
+            'n_nodes': self.g.number_of_nodes(),
+            'n_edges': self.g.number_of_edges()}
 
     def evaluate_runtime(self) -> Dict[str, float]:
         if self.runtime_ms is None:
@@ -287,6 +291,7 @@ class GSRM(RoadmapToTest):
         target_n = kwargs.pop('target_n')
         actual_n = 200
         resolution = 300
+        pos = None
         from roadmaps.gsorm.build.libgsorm import Gsorm
         from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
 
@@ -307,6 +312,7 @@ class GSRM(RoadmapToTest):
                 resolution += 1
             else:
                 resolution = int(new_resolution)
+        assert pos is not None
 
         # swap x and y
         pos = pos[:, [1, 0]]
@@ -378,28 +384,46 @@ class SPARS(RoadmapToTest):
         super().__init__(map_fname, rng, roadmap_specific_kwargs)
 
         from roadmaps.SPARS.build.libsparspy import Spars
-        s = Spars()
-        edges, self.runtime_ms = s.run(
-            mapFile=map_fname,
-            seed=rng.randint(0, 2**16),
-            **self.roadmap_specific_kwargs,
-        )
+        target_n = self.roadmap_specific_kwargs['target_n']
+        spars_kwargs = self.roadmap_specific_kwargs.copy()
+        if 'target_n' in spars_kwargs:
+            spars_kwargs.pop('target_n')
+        dense_delta = 2.5
+        sparse_delta = dense_delta * 40
+        n_nodes = 0
+        while n_nodes < target_n:
+            print(f"Got {n_nodes} nodes, target was {target_n}.")
+            print(f"Trying denseDelta={dense_delta}, "
+                  f"sparseDelta={sparse_delta}...")
 
-        # to networkx
-        g = nx.Graph()
-        for (a, ax, ay, b, bx, by) in edges:
-            # positions to unit square
-            ax /= len(self.map_img)
-            ay /= len(self.map_img)
-            bx /= len(self.map_img)
-            by /= len(self.map_img)
-            # if self._check_line((ay, ax), (by, bx)):
-            g.add_edge(
-                a, b, **{DISTANCE: np.sqrt((ax - bx)**2 + (ay - by)**2)})
-            g.add_node(a, **{POS: (ax, ay)})
-            g.add_node(b, **{POS: (bx, by)})
-        print("nodes", g.number_of_nodes())
-        print("edges", g.number_of_edges())
+            spars_kwargs['denseDelta'] = dense_delta
+            spars_kwargs['sparseDelta'] = sparse_delta
+            s = Spars()
+            edges, self.runtime_ms = s.run(
+                mapFile=map_fname,
+                seed=rng.randint(0, 2**16),
+                **spars_kwargs,
+            )
+
+            # to networkx
+            g = nx.Graph()
+            for (a, ax, ay, b, bx, by) in edges:
+                # positions to unit square
+                ax /= len(self.map_img)
+                ay /= len(self.map_img)
+                bx /= len(self.map_img)
+                by /= len(self.map_img)
+                # if self._check_line((ay, ax), (by, bx)):
+                g.add_edge(
+                    a, b, **{DISTANCE: np.sqrt((ax - bx)**2 + (ay - by)**2)})
+                g.add_node(a, **{POS: (ax, ay)})
+                g.add_node(b, **{POS: (bx, by)})
+            print("nodes", g.number_of_nodes())
+            print("edges", g.number_of_edges())
+            n_nodes = g.number_of_nodes()
+
+            dense_delta *= .85
+            sparse_delta *= .85
 
         # plot
         # fig, ax = plt.subplots(figsize=(10, 10), dpi=DPI)
@@ -566,7 +590,7 @@ def run():
             'k': 0.065,
             'delta_t': 1.0,
             'iterations': 10000,
-            'target_n': 500,
+            'target_n': 300,
             'plot': True,
         }),
         (GSRM, {
@@ -576,7 +600,7 @@ def run():
             'k': 0.065,
             'delta_t': 1.0,
             'iterations': 10000,
-            'target_n': 900,
+            'target_n': 600,
         }),
         (GSRM, {
             'DA': 0.14,
@@ -585,7 +609,7 @@ def run():
             'k': 0.065,
             'delta_t': 1.0,
             'iterations': 10000,
-            'target_n': 1500,
+            'target_n': 900,
         }),
         # (GSORM, {
         #     'DA': 0.14,
@@ -621,25 +645,25 @@ def run():
         #     'lr_optim': 1e-3,
         # }),
         (SPARS, {
-            'denseDelta':    80.,
-            'sparseDelta':    800,
-            'stretchFactor': 1.01,
+            'target_n': 300,
+            'stretchFactor': 3,
             'maxFailures': 500,
-            'maxTime': 8.,
+            'maxTime': 8.,  # ignored
+            'maxIter': 50000,
         }),
         (SPARS, {
-            'denseDelta':    50.,
-            'sparseDelta':    500.,
-            'stretchFactor': 1.01,
+            'target_n': 600,
+            'stretchFactor': 3,
             'maxFailures': 500,
-            'maxTime': 8.,
+            'maxTime': 8.,  # ignored
+            'maxIter': 50000,
         }),
         (SPARS, {
-            'denseDelta':    20.,
-            'sparseDelta':    200.,
-            'stretchFactor': 1.01,
+            'target_n': 900,
+            'stretchFactor': 3,
             'maxFailures': 500,
-            'maxTime': 8.,
+            'maxTime': 8.,  # ignored
+            'maxIter': 50000,
         }),
         (ORM, {
             'n': 400,
@@ -749,6 +773,7 @@ def plot():
         'path_length_mean',
         'rel_straight_length_mean',
         'n_nodes',
+        'n_edges',
         'visited_nodes_mean',
         'success_rate',
         'runtime_ms'
