@@ -242,28 +242,28 @@ public:
     auto stateProperty = boost::get(geometric::SPARStwo::vertex_state_t(), roadmapOMPL);
 
     // save to image
-    cv::Mat img(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
-    BOOST_FOREACH(auto e, boost::edges(roadmapOMPL))
-    {
-      size_t i = boost::source(e, roadmapOMPL);
-      size_t j = boost::target(e, roadmapOMPL);
+    // cv::Mat img(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
+    // BOOST_FOREACH(auto e, boost::edges(roadmapOMPL))
+    // {
+    //   size_t i = boost::source(e, roadmapOMPL);
+    //   size_t j = boost::target(e, roadmapOMPL);
 
-      base::State * state_i = stateProperty[i];
-      base::State * state_j = stateProperty[j];
+    //   base::State * state_i = stateProperty[i];
+    //   base::State * state_j = stateProperty[j];
 
-      const base::RealVectorStateSpace::StateType * typedState_i =
-        state_i->as<base::RealVectorStateSpace::StateType>();
-      const base::RealVectorStateSpace::StateType * typedState_j =
-        state_j->as<base::RealVectorStateSpace::StateType>();
+    //   const base::RealVectorStateSpace::StateType * typedState_i =
+    //     state_i->as<base::RealVectorStateSpace::StateType>();
+    //   const base::RealVectorStateSpace::StateType * typedState_j =
+    //     state_j->as<base::RealVectorStateSpace::StateType>();
 
-      int x1 = (*typedState_i)[0];
-      int y1 = (*typedState_i)[1];
-      int x2 = (*typedState_j)[0];
-      int y2 = (*typedState_j)[1];
+    //   int x1 = (*typedState_i)[0];
+    //   int y1 = (*typedState_i)[1];
+    //   int x2 = (*typedState_j)[0];
+    //   int y2 = (*typedState_j)[1];
 
-      cv::line(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(255, 255, 255), 1);
-    }
-    cv::imwrite("spars.png", img);
+    //   cv::line(img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(255, 255, 255), 1);
+    // }
+    // cv::imwrite("spars.png", img);
 
     // for (size_t i = 0; i < boost::num_vertices(roadmapOMPL); ++i) {
     //   base::State* state = stateProperty[i];

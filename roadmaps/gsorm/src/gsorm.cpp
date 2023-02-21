@@ -62,6 +62,8 @@ public:
     std::string mapFile, float DA, float DB, float f, float k, float delta_t,
     int iterations, int resolution, bool plot)
   {
+    std::string example_folder = "roadmaps/gsorm/examples/";
+
     // seed opencv rng
     cv::theRNG().state = 1;
 
@@ -85,7 +87,7 @@ public:
     cv::inRange(image_in, cv::Scalar(0), cv::Scalar(254), mask);
     cv::resize(mask, mask, cv::Size(resolution, resolution));
     if (plot) {
-      cv::imwrite("mask.png", mask);
+      cv::imwrite(example_folder + "mask.png", mask);
     }
     std::cout << "Loaded mask: " << mask.size() << std::endl;
 
@@ -117,7 +119,7 @@ public:
           a.convertTo(a_8bit, CV_8U, 255);
           cv::Mat a_colormap;
           cv::applyColorMap(a_8bit, a_colormap, cv::COLORMAP_INFERNO);
-          cv::imwrite("a_" + std::to_string(i) + ".png", a_colormap);
+          cv::imwrite(example_folder + "a_" + std::to_string(i) + ".png", a_colormap);
         }
       }
 
@@ -178,7 +180,7 @@ public:
       cv::cvtColor(spots_layer, spots_middles_layer, cv::COLOR_GRAY2BGR);
       cv::cvtColor(middles_layer, middles_layer, cv::COLOR_GRAY2BGR);
       cv::addWeighted(spots_middles_layer, 0.3, middles_layer, 0.7, 0, spots_middles_layer);
-      cv::imwrite("spots_middles_layer.png", spots_middles_layer);
+      cv::imwrite(example_folder + "spots_middles_layer.png", spots_middles_layer);
     }
 
     boost::python::list points;

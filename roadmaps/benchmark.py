@@ -25,14 +25,15 @@ from roadmaps.var_odrm_torch.var_odrm_torch import (
 
 from planner.astar_boost.build.libastar_graph import AstarSolver
 
-
-CSV_PATH = "roadmaps/benchmark.csv"
-PLOT_FOLDER = "roadmaps/benchmark_plots"
-DPI = 500
-
 logger = logging.getLogger(__name__)
 
-# this list is roughly sorted by complexity
+
+CSV_PATH = 'roadmaps/benchmark.csv'
+PLOT_FOLDER = 'roadmaps/benchmark_plots'
+EXAMPLE_FOLDER = 'roadmaps/benchmark_examples'
+DPI = 500
+
+# this list is sorted roughly by complexity
 MAP_NAMES = [
     'plain',
     # 'c',
@@ -47,6 +48,7 @@ MAP_NAMES = [
     # 'dense',
     # 'simple'
 ]
+PLOT_GSRM_ON_MAP = 'z'
 N_SEEDS = 5
 
 
@@ -178,6 +180,9 @@ class RoadmapToTest:
                     continue
                 end = (self.rng.random(), self.rng.random())
                 if not is_coord_free(self.map_img, end):
+                    continue
+                if not np.linalg.norm(np.array(start) - np.array(end)) > 0.5:
+                    # should have some length
                     continue
                 if not self._check_line(start, end):
                     continue
@@ -703,20 +708,21 @@ def run():
         })
         # TODO: visibility graphs, voronoi diagrams
     ]
-    if not os.path.exists(PLOT_FOLDER):
-        os.makedirs(PLOT_FOLDER)
-    if not len(os.listdir(PLOT_FOLDER)) == 0:
+    if not os.path.exists(EXAMPLE_FOLDER):
+        os.makedirs(EXAMPLE_FOLDER)
+    if not len(os.listdir(EXAMPLE_FOLDER)) == 0:
         # delete all files in folder
-        for f in os.listdir(PLOT_FOLDER):
-            os.remove(os.path.join(PLOT_FOLDER, f))
+        for f in os.listdir(EXAMPLE_FOLDER):
+            os.remove(os.path.join(EXAMPLE_FOLDER, f))
     params_to_run = []
     df['i'] = np.nan
     df.set_index('i', inplace=True)
-    for cls, args in trials:
+    for _cls, _args in trials:
         for map_name in MAP_NAMES:
+            args = _args.copy()
             if 'plot' in args:
-                if map_name == 'c' and args['plot']:
-                    print(f'Plotting {len(df) + 1}')
+                if map_name == PLOT_GSRM_ON_MAP and args['plot']:
+                    print(f'Plotting Trial {len(df) + 1} on {map_name}')
                 else:
                     args['plot'] = False
 
@@ -724,19 +730,19 @@ def run():
                 i = len(df) + 1  # new experiment in new row
                 df.at[i, 'i'] = i
                 df.at[i, 'map'] = map_name
-                df.at[i, 'roadmap'] = cls.__name__
+                df.at[i, 'roadmap'] = _cls.__name__
                 df.at[i, 'seed'] = seed
-                params_to_run.append((cls, args, map_name, seed, i))
+                params_to_run.append((_cls, args, map_name, seed, i))
     Random(0).shuffle(params_to_run)
     df = df.copy()
 
     for ptr in tqdm(params_to_run):
-        cls, args, map_name, seed, i = ptr
+        _cls, args, map_name, seed, i = ptr
         _, data = _run_proxy(ptr)
         for k, v in data.items():
             df.at[i, k] = v
         for k, v in args.items():
-            df.at[i, cls.__name__ + "_" + k] = v
+            df.at[i, _cls.__name__ + "_" + k] = v
     # with Pool(2) as p:
     #     for i, data in p.imap_unordered(_run_proxy, params_to_run):
     #         for k, v in data.items():
@@ -752,7 +758,7 @@ def _run_proxy(args):
     cls, args, map_name, seed, i = args
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
     t = cls(map_fname, Random(seed), args)
-    t.plot_example(PLOT_FOLDER, i)
+    t.plot_example(EXAMPLE_FOLDER, i)
     data = t.evaluate()
     return (i, data)
 
@@ -782,15 +788,41 @@ def plot():
     df = pd.read_csv(CSV_PATH)
     sns.set_theme(style='whitegrid')
     sns.set(rc={'figure.dpi': DPI})
+
+    print("Plotting results for all maps")
     sns.pairplot(
         df,
         hue='roadmap',
         vars=interesting_vars,
         markers='.',
+        plot_kws={
+            'alpha': 0.7,
+            'edgecolor': 'none'},
     )
-    plt.savefig(CSV_PATH.replace('.csv', '.png'))
+    plt.savefig(os.path.join(
+        PLOT_FOLDER,
+        os.path.basename(CSV_PATH).replace('.csv', '.png')))
     plt.close('all')
 
+    print("Plotting results per map")
+    for map_name in df.map.unique():
+        df_map = df[df.map == map_name]
+        sns.set_theme(style='whitegrid')
+        sns.pairplot(
+            df_map,
+            hue='roadmap',
+            vars=interesting_vars,
+            markers='.',
+            plot_kws={
+                'alpha': 0.7,
+                'edgecolor': 'none'},
+        )
+        plt.savefig(os.path.join(
+            PLOT_FOLDER,
+            os.path.basename(CSV_PATH).replace('.csv', f'_map-{map_name}.png')))
+        plt.close('all')
+
+    print("Plotting results per roadmap")
     for roadmap in df.roadmap.unique():
         df_roadmap = df[df.roadmap == roadmap]
         sns.set_theme(style='whitegrid')
@@ -801,9 +833,12 @@ def plot():
                 col for col in df_roadmap.columns if col.startswith(roadmap)],
             y_vars=interesting_vars,
         )
-        plt.savefig(CSV_PATH.replace('.csv', f'_{roadmap}.png'))
+        plt.savefig(os.path.join(
+            PLOT_FOLDER,
+            os.path.basename(CSV_PATH).replace('.csv', f'_rm-{roadmap}.png')))
         plt.close('all')
 
+    print("Making scatter plots")
     COMPARE_TO = 'GSRM'
     assert COMPARE_TO in df.roadmap.unique(), \
         f'{COMPARE_TO=} must be in {df.roadmap.unique()=}'
@@ -885,41 +920,45 @@ def plot():
         ]
         axs[0].legend(handles=legend_elements, loc='upper left')
 
-        fig.savefig(CSV_PATH.replace('.csv', f'_{roadmap}_scatter.png'))
+        plt.savefig(os.path.join(
+            PLOT_FOLDER,
+            os.path.basename(CSV_PATH).replace('.csv', f'_{roadmap}_scatter.png')))
         plt.close('all')
 
         # KDE Plot similar to scatter plot
-        fig, axs = plt.subplots(1, 2, figsize=(10, 5), dpi=DPI)
-        for i, (d, mns) in enumerate([
-            (data_len_np, map_names_len),
-            (data_rel_np, map_names_rel),
-        ]):
-            colors_per_data = []
-            for map_name in mns:
-                colors_per_data.append(
-                    plt.cm.get_cmap('hsv')(sorted_map_names.index(map_name) /
-                                           len(sorted_map_names)))
-            sns.kdeplot(
-                x=d[:, 0],
-                y=d[:, 1],
-                ax=axs[i],
-                shade=True,
-                shade_lowest=False,
-                cmap='hsv',
-                alpha=.4,
-                levels=100,
-                cbar=True,
-                cbar_ax=axs[i].cax,
-                cbar_kws={
-                    'ticks': [0, .5, 1],
-                    'label': 'Density'
-                },
-            )
-            axs[i].set_xlabel(COMPARE_TO)
-            axs[i].set_ylabel(roadmap)
-            axs[i].plot([0, 1000], [0, 1000], color='black', linewidth=1)
-            axs[i].set_xlim(min(d[:, 0]) - .1, max(d[:, 0]) + .1)
-            axs[i].set_ylim(min(d[:, 1]) - .1, max(d[:, 1]) + .1)
+        # fig, axs = plt.subplots(1, 2, figsize=(10, 5), dpi=DPI)
+        # for i, (d, mns) in enumerate([
+        #     (data_len_np, map_names_len),
+        #     (data_rel_np, map_names_rel),
+        # ]):
+        #     colors_per_data = []
+        #     for map_name in mns:
+        #         colors_per_data.append(
+        #             plt.cm.get_cmap('hsv')(sorted_map_names.index(map_name) /
+        #                                    len(sorted_map_names)))
+        #     sns.kdeplot(
+        #         x=d[:, 0],
+        #         y=d[:, 1],
+        #         ax=axs[i],
+        #         shade=True,
+        #         shade_lowest=False,
+        #         cmap='hsv',
+        #         alpha=.4,
+        #         levels=100,
+        #         cbar=True,
+        #         cbar_ax=axs[i].cax,
+        #         cbar_kws={
+        #             'ticks': [0, .5, 1],
+        #             'label': 'Density'
+        #         },
+        #     )
+        #     axs[i].set_xlabel(COMPARE_TO)
+        #     axs[i].set_ylabel(roadmap)
+        #     axs[i].plot([0, 1000], [0, 1000], color='black', linewidth=1)
+        #     axs[i].set_xlim(min(d[:, 0]) - .1, max(d[:, 0]) + .1)
+        #     axs[i].set_ylim(min(d[:, 1]) - .1, max(d[:, 1]) + .1)
+
+    print('Done')
 
 
 if __name__ == '__main__':
