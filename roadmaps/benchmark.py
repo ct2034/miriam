@@ -1,9 +1,9 @@
-from itertools import product
 import logging
-from math import ceil, sqrt
 import os
 import re
 import timeit
+from itertools import product
+from math import ceil, sqrt
 from random import Random
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -18,12 +18,11 @@ from pyflann import FLANN
 from tqdm import tqdm
 
 from definitions import DISTANCE, POS
+from planner.astar_boost.build.libastar_graph import AstarSolver
 from planner.astar_boost.converter import initialize_from_graph
 from roadmaps.var_odrm_torch.var_odrm_torch import (
-    get_path_len, is_coord_free, is_pixel_free, make_paths,
-    plan_path_between_coordinates, read_map, PATH_W_COORDS)
-
-from planner.astar_boost.build.libastar_graph import AstarSolver
+    PATH_W_COORDS, get_path_len, is_coord_free, is_pixel_free, make_paths,
+    plan_path_between_coordinates, read_map)
 
 logger = logging.getLogger(__name__)
 
@@ -486,7 +485,7 @@ class PRM(RoadmapToTest):
                  rng: Random,
                  roadmap_specific_kwargs):
         super().__init__(map_fname, rng, roadmap_specific_kwargs)
-        from roadmaps.var_odrm_torch.var_odrm_torch import (sample_points)
+        from roadmaps.var_odrm_torch.var_odrm_torch import sample_points
         n = roadmap_specific_kwargs['n']
 
         g = nx.Graph()
@@ -586,7 +585,7 @@ class GridMap(RoadmapToTest):
 
 def run():
     df = pd.DataFrame()
-
+    ns = [500, 1000, 1500]
     trials = [
         (GSRM, {
             'DA': 0.14,
@@ -595,7 +594,7 @@ def run():
             'k': 0.065,
             'delta_t': 1.0,
             'iterations': 10000,
-            'target_n': 300,
+            'target_n': ns[0],
             'plot': True,
         }),
         (GSRM, {
@@ -605,7 +604,7 @@ def run():
             'k': 0.065,
             'delta_t': 1.0,
             'iterations': 10000,
-            'target_n': 600,
+            'target_n': ns[1],
         }),
         (GSRM, {
             'DA': 0.14,
@@ -614,7 +613,7 @@ def run():
             'k': 0.065,
             'delta_t': 1.0,
             'iterations': 10000,
-            'target_n': 900,
+            'target_n': ns[2],
         }),
         # (GSORM, {
         #     'DA': 0.14,
@@ -650,61 +649,61 @@ def run():
         #     'lr_optim': 1e-3,
         # }),
         (SPARS, {
-            'target_n': 300,
+            'target_n': ns[0],
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
             'maxIter': 50000,
         }),
         (SPARS, {
-            'target_n': 600,
+            'target_n': ns[1],
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
             'maxIter': 50000,
         }),
         (SPARS, {
-            'target_n': 900,
+            'target_n': ns[2],
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
             'maxIter': 50000,
         }),
         (ORM, {
-            'n': 400,
+            'n': ns[0],
             'lr': 1e-3,
             'epochs': 50,
         }),
         (ORM, {
-            'n': 900,
+            'n': ns[1],
             'lr': 1e-3,
             'epochs': 50,
         }),
         (ORM, {
-            'n': 1400,
+            'n': ns[2],
             'lr': 1e-3,
             'epochs': 50,
         }),
         (PRM, {
-            'n': 500,
-            'radius': 0.08,
+            'n': ns[0],
+            'radius': 0.085,
         }),
         (PRM, {
-            'n': 900,
-            'radius': 0.05,
+            'n': ns[1],
+            'radius': 0.045,
         }),
         (PRM, {
-            'n': 1500,
-            'radius': 0.04,
+            'n': ns[2],
+            'radius': 0.035,
         }),
         (GridMap, {
-            'n': 400,
+            'n': ns[0],
         }),
         (GridMap, {
-            'n': 900,
+            'n': ns[1],
         }),
         (GridMap, {
-            'n': 1400,
+            'n': ns[2],
         })
         # TODO: visibility graphs, voronoi diagrams
     ]
@@ -736,13 +735,16 @@ def run():
     Random(0).shuffle(params_to_run)
     df = df.copy()
 
-    for ptr in tqdm(params_to_run):
+    for i_p, ptr in enumerate(tqdm(params_to_run)):
         _cls, args, map_name, seed, i = ptr
         _, data = _run_proxy(ptr)
         for k, v in data.items():
             df.at[i, k] = v
         for k, v in args.items():
             df.at[i, _cls.__name__ + "_" + k] = v
+        if i_p % 100 == 0:
+            print("cleaning ...")
+            df = df.copy()
     # with Pool(2) as p:
     #     for i, data in p.imap_unordered(_run_proxy, params_to_run):
     #         for k, v in data.items():
