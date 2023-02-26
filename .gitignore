@@ -53,3 +53,5 @@ roadmaps/gsorm/build/*
 !roadmaps/gsorm/build/gsorm
 !roadmaps/gsorm/build/*.png
 roadmaps/benchmark_examples/
+roadmaps/benchmark_plots/benchmark.png
+roadmaps/benchmark_plots/benchmark_*.png
