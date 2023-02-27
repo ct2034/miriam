@@ -393,8 +393,10 @@ class SPARS(RoadmapToTest):
         spars_kwargs = self.roadmap_specific_kwargs.copy()
         if 'target_n' in spars_kwargs:
             spars_kwargs.pop('target_n')
+        dense_to_sparse_multiplier = spars_kwargs.pop(
+            'dense_to_sparse_multiplier')
         dense_delta = 2.5
-        sparse_delta = dense_delta * 40
+        sparse_delta = dense_delta * dense_to_sparse_multiplier
         n_nodes = 0
         while n_nodes < target_n:
             print(f"Got {n_nodes} nodes, target was {target_n}.")
@@ -651,6 +653,7 @@ def run():
         # }),
         (SPARS, {
             'target_n': ns[0],
+            'dense_to_sparse_multiplier': 40,
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
@@ -658,6 +661,7 @@ def run():
         }),
         (SPARS, {
             'target_n': ns[1],
+            'dense_to_sparse_multiplier': 30,
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
@@ -665,6 +669,7 @@ def run():
         }),
         (SPARS, {
             'target_n': ns[2],
+            'dense_to_sparse_multiplier': 20,
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
