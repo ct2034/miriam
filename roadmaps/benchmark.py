@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 CSV_PATH = 'roadmaps/benchmark.csv'
 PLOT_FOLDER = 'roadmaps/benchmark_plots'
+PLOT_FOLDER_PAPER = 'roadmaps/benchmark_plots_paper'
 EXAMPLE_FOLDER = 'roadmaps/benchmark_examples'
 DPI = 500
 
@@ -782,6 +783,14 @@ def _get_cols_by_prefix(df, prefix):
         df.columns)
 
 
+def _make_sure_folder_exists_and_is_empty(folder):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    else:
+        for f in os.listdir(folder):
+            os.remove(os.path.join(folder, f))
+
+
 def plot():
     interesting_vars = [
         'path_length_mean',
@@ -796,12 +805,7 @@ def plot():
     df = pd.read_csv(CSV_PATH)
     sns.set_theme(style='whitegrid')
     sns.set(rc={'figure.dpi': DPI})
-
-    if not os.path.exists(PLOT_FOLDER):
-        os.makedirs(PLOT_FOLDER)
-    else:
-        for f in os.listdir(PLOT_FOLDER):
-            os.remove(os.path.join(PLOT_FOLDER, f))
+    _make_sure_folder_exists_and_is_empty(PLOT_FOLDER)
 
     print("Plotting results for all maps")
     sns.pairplot(
@@ -939,42 +943,76 @@ def plot():
             os.path.basename(CSV_PATH).replace('.csv', f'_scatter_{roadmap}.png')))
         plt.close('all')
 
-        # KDE Plot similar to scatter plot
-        # fig, axs = plt.subplots(1, 2, figsize=(10, 5), dpi=DPI)
-        # for i, (d, mns) in enumerate([
-        #     (data_len_np, map_names_len),
-        #     (data_rel_np, map_names_rel),
-        # ]):
-        #     colors_per_data = []
-        #     for map_name in mns:
-        #         colors_per_data.append(
-        #             plt.cm.get_cmap('hsv')(sorted_map_names.index(map_name) /
-        #                                    len(sorted_map_names)))
-        #     sns.kdeplot(
-        #         x=d[:, 0],
-        #         y=d[:, 1],
-        #         ax=axs[i],
-        #         shade=True,
-        #         shade_lowest=False,
-        #         cmap='hsv',
-        #         alpha=.4,
-        #         levels=100,
-        #         cbar=True,
-        #         cbar_ax=axs[i].cax,
-        #         cbar_kws={
-        #             'ticks': [0, .5, 1],
-        #             'label': 'Density'
-        #         },
-        #     )
-        #     axs[i].set_xlabel(COMPARE_TO)
-        #     axs[i].set_ylabel(roadmap)
-        #     axs[i].plot([0, 1000], [0, 1000], color='black', linewidth=1)
-        #     axs[i].set_xlim(min(d[:, 0]) - .1, max(d[:, 0]) + .1)
-        #     axs[i].set_ylim(min(d[:, 1]) - .1, max(d[:, 1]) + .1)
-
     print('Done')
+
+
+def _group_n_nodes(df, n_n_nodes):
+    dfc = df.copy()
+    for roadmap in df.roadmap.unique():
+        df_roadmap = df[df.roadmap == roadmap]
+        n_nodes_s_goal = []
+        n_nodes = df_roadmap.n_nodes.unique()
+        n_nodes_per_goal = len(n_nodes) // n_n_nodes
+        for i in range(n_n_nodes):
+            n_nodes_s_goal.append(
+                np.mean(n_nodes[
+                    i*n_nodes_per_goal:(i+1)*n_nodes_per_goal]))
+        for x in n_nodes:
+            dfc.loc[dfc.n_nodes == x, 'n_nodes'] = \
+                n_nodes_s_goal[np.argmin(np.abs(n_nodes_s_goal - x))]
+    return dfc
+
+
+def plots_for_paper():
+    df = pd.read_csv(CSV_PATH)
+    sns.set_theme(style='whitegrid')
+    # sns.set(rc={'figure.dpi': DPI})
+    _make_sure_folder_exists_and_is_empty(PLOT_FOLDER_PAPER)
+
+    # Plots for the paper
+    # -------------------
+    # 1) Path length
+
+    interesting_maps = [
+        'plain',
+        'b',
+        'z',
+        'dense34'
+    ]
+    n_plots = len(interesting_maps)
+    n_n_nodes = len(df[df.roadmap == 'PRM'].n_nodes.unique())
+    print(f'{n_plots=}, {n_n_nodes=}')
+    df = _group_n_nodes(df, n_n_nodes)
+
+    fig, axs = plt.subplots(
+        1,
+        n_plots,
+        figsize=(5*n_plots, 5))
+    for i, map_name in enumerate(interesting_maps):
+        ax = axs[i]
+        df_map = df[df.map == map_name]
+        sns.lineplot(
+            data=df_map,
+            x='n_nodes',
+            y='path_length_mean',
+            hue='roadmap',
+            marker='.',
+            ax=ax,
+        )
+        ax.set_xlabel('Number of Nodes')
+        ax.set_ylabel('Path Length')
+        map_name_title = map_name.replace('34', '').capitalize()
+        ax.set_title(f'Map {map_name_title}')
+    fig.tight_layout()
+    plt.savefig(os.path.join(
+        PLOT_FOLDER_PAPER,
+        os.path.basename(CSV_PATH).replace(
+            '.csv',
+            '_paper_path_length.pdf'))
+    )
 
 
 if __name__ == '__main__':
     # run()
-    plot()
+    # plot()
+    plots_for_paper()
