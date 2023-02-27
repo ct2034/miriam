@@ -430,8 +430,8 @@ class SPARS(RoadmapToTest):
             print("edges", g.number_of_edges())
             n_nodes = g.number_of_nodes()
 
-            dense_delta *= .85
-            sparse_delta *= .85
+            dense_delta *= .93
+            sparse_delta *= .93
 
         # plot
         # fig, ax = plt.subplots(figsize=(10, 10), dpi=DPI)
@@ -589,7 +589,7 @@ class GridMap(RoadmapToTest):
 
 def run():
     df = pd.DataFrame()
-    ns = [500, 1000, 1500]
+    ns = [700, 1200, 1500]
     trials = [
         (GSRM, {
             'DA': 0.14,
@@ -1013,6 +1013,6 @@ def plots_for_paper():
 
 
 if __name__ == '__main__':
-    # run()
-    # plot()
+    run()
+    plot()
     plots_for_paper()
