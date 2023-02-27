@@ -129,9 +129,10 @@ class RoadmapToTest:
         for _ in range(self.n_eval):
             a = self.rng.random(), self.rng.random()
             b = self.rng.random(), self.rng.random()
-            if not is_coord_free(map_img_inv, a) or \
+            while not is_coord_free(map_img_inv, a) or \
                     not is_coord_free(map_img_inv, b):
-                continue
+                a = self.rng.random(), self.rng.random()
+                b = self.rng.random(), self.rng.random()
             path_w_coords, visited_nodes = self._plan_path_coords(a, b)
             visited_nodes_s.append(visited_nodes)
             if path_w_coords[-1] is None:
@@ -924,7 +925,7 @@ def plot():
 
         plt.savefig(os.path.join(
             PLOT_FOLDER,
-            os.path.basename(CSV_PATH).replace('.csv', f'_{roadmap}_scatter.png')))
+            os.path.basename(CSV_PATH).replace('.csv', f'_scatter_{roadmap}.png')))
         plt.close('all')
 
         # KDE Plot similar to scatter plot
