@@ -797,6 +797,12 @@ def plot():
     sns.set_theme(style='whitegrid')
     sns.set(rc={'figure.dpi': DPI})
 
+    if not os.path.exists(PLOT_FOLDER):
+        os.makedirs(PLOT_FOLDER)
+    else:
+        for f in os.listdir(PLOT_FOLDER):
+            os.remove(os.path.join(PLOT_FOLDER, f))
+
     print("Plotting results for all maps")
     sns.pairplot(
         df,
@@ -970,5 +976,5 @@ def plot():
 
 
 if __name__ == '__main__':
-    run()
+    # run()
     plot()
