@@ -947,7 +947,8 @@ def plot():
 
 
 def _group_n_nodes(df, n_n_nodes):
-    dfc = df.copy()
+    df_new = pd.DataFrame()
+    n_nodes_per_rm = {}
     for roadmap in df.roadmap.unique():
         df_roadmap = df[df.roadmap == roadmap]
         n_nodes_s_goal = []
@@ -957,10 +958,14 @@ def _group_n_nodes(df, n_n_nodes):
             n_nodes_s_goal.append(
                 np.mean(n_nodes[
                     i*n_nodes_per_goal:(i+1)*n_nodes_per_goal]))
-        for x in n_nodes:
-            dfc.loc[dfc.n_nodes == x, 'n_nodes'] = \
-                n_nodes_s_goal[np.argmin(np.abs(n_nodes_s_goal - x))]
-    return dfc
+        n_nodes_per_rm[roadmap] = n_nodes_s_goal
+    for i_row in range(len(df)):
+        row = df.iloc[i_row].copy()
+        n_nodes = n_nodes_per_rm[row.roadmap][
+            np.argmin(np.abs(row.n_nodes - n_nodes_per_rm[row.roadmap]))]
+        row['n_nodes'] = n_nodes
+        df_new = pd.concat([df_new, row.to_frame().T])
+    return df_new
 
 
 def plots_for_paper():
@@ -1013,6 +1018,6 @@ def plots_for_paper():
 
 
 if __name__ == '__main__':
-    run()
-    plot()
+    # run()
+    # plot()
     plots_for_paper()
