@@ -37,7 +37,7 @@ DPI = 500
 MAP_NAMES = [
     'plain',
     # 'c',
-    'x',
+    # 'x',
     'b',
     # 'o',
     # 'dual_w',
@@ -49,7 +49,7 @@ MAP_NAMES = [
     # 'simple'
 ]
 PLOT_GSRM_ON_MAP = 'z'
-N_SEEDS = 5
+N_SEEDS = 10
 
 
 class RoadmapToTest:
@@ -589,7 +589,7 @@ class GridMap(RoadmapToTest):
 
 def run():
     df = pd.DataFrame()
-    ns = [700, 1200, 1500]
+    ns = [500, 1200, 2000]
     trials = [
         (GSRM, {
             'DA': 0.14,
@@ -693,7 +693,7 @@ def run():
         }),
         (PRM, {
             'n': ns[0],
-            'radius': 0.085,
+            'radius': 0.08,
         }),
         (PRM, {
             'n': ns[1],
