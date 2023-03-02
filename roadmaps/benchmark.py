@@ -1018,6 +1018,6 @@ def plots_for_paper():
 
 
 if __name__ == '__main__':
-    run()
+    # run()
     # plot()
-    # plots_for_paper()
+    plots_for_paper()
