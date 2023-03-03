@@ -974,10 +974,6 @@ def plots_for_paper():
     # sns.set(rc={'figure.dpi': DPI})
     _make_sure_folder_exists_and_is_empty(PLOT_FOLDER_PAPER)
 
-    # Plots for the paper
-    # -------------------
-    # 1) Path length
-
     interesting_maps = [
         'plain',
         'b',
@@ -989,32 +985,39 @@ def plots_for_paper():
     print(f'{n_plots=}, {n_n_nodes=}')
     df = _group_n_nodes(df, n_n_nodes)
 
-    fig, axs = plt.subplots(
-        1,
-        n_plots,
-        figsize=(5*n_plots, 5))
-    for i, map_name in enumerate(interesting_maps):
-        ax = axs[i]
-        df_map = df[df.map == map_name]
-        sns.lineplot(
-            data=df_map,
-            x='n_nodes',
-            y='path_length_mean',
-            hue='roadmap',
-            marker='.',
-            ax=ax,
+    for key, title in [
+        ('path_length_mean', 'Path Length'),
+        ('visited_nodes_mean', 'Visited Nodes'),
+        ('runtime_ms', 'Runtime Generation (ms)')
+    ]:
+        fig, axs = plt.subplots(
+            1,
+            n_plots,
+            figsize=(5*n_plots, 5))
+        for i, map_name in enumerate(interesting_maps):
+            ax = axs[i]
+            df_map = df[df.map == map_name]
+            sns.lineplot(
+                data=df_map,
+                x='n_nodes',
+                y=key,
+                hue='roadmap',
+                marker='.',
+                ax=ax,
+            )
+            ax.set_xlabel('Number of Nodes')
+            ax.set_ylabel(title)
+            if key == 'runtime_ms':
+                ax.set_yscale('log')
+            map_name_title = map_name.replace('34', '').capitalize()
+            ax.set_title(f'Map {map_name_title}')
+        fig.tight_layout()
+        plt.savefig(os.path.join(
+            PLOT_FOLDER_PAPER,
+            os.path.basename(CSV_PATH).replace(
+                '.csv',
+                f'_paper_{key}.pdf'))
         )
-        ax.set_xlabel('Number of Nodes')
-        ax.set_ylabel('Path Length')
-        map_name_title = map_name.replace('34', '').capitalize()
-        ax.set_title(f'Map {map_name_title}')
-    fig.tight_layout()
-    plt.savefig(os.path.join(
-        PLOT_FOLDER_PAPER,
-        os.path.basename(CSV_PATH).replace(
-            '.csv',
-            '_paper_path_length.pdf'))
-    )
 
 
 if __name__ == '__main__':
