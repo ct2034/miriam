@@ -987,7 +987,7 @@ def plots_for_paper():
 
     for key, title in [
         ('path_length_mean', 'Path Length'),
-        ('visited_nodes_mean', 'Visited Nodes'),
+        ('visited_nodes_mean', 'Visited Vertices'),
         ('runtime_ms', 'Runtime Generation (ms)')
     ]:
         fig, axs = plt.subplots(
@@ -1005,7 +1005,7 @@ def plots_for_paper():
                 marker='.',
                 ax=ax,
             )
-            ax.set_xlabel('Number of Nodes')
+            ax.set_xlabel('Number of Vertices')
             ax.set_ylabel(title)
             if key == 'runtime_ms':
                 ax.set_yscale('log')
