@@ -976,8 +976,8 @@ def plots_for_paper():
 
     interesting_maps = [
         'plain',
-        'b',
         'z',
+        'b',
         'dense34'
     ]
     n_plots = len(interesting_maps)
