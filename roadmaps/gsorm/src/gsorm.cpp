@@ -152,8 +152,14 @@ public:
     // find middles of spots
     std::vector<cv::Point> middles;
     for (auto spot : spots) {
-      cv::Moments m = cv::moments(spot);
-      middles.push_back(cv::Point(m.m10 / m.m00, m.m01 / m.m00));
+      // printf("Spot size: %d", spot.size());
+      // std::cout << "Spot: " << spot << std::endl;
+      float x = 0, y = 0;
+      for (auto point : spot) {
+        x += point.x;
+        y += point.y;
+      }
+      middles.push_back(cv::Point(x / spot.size(), y / spot.size()));
     }
 
     auto stop = high_resolution_clock::now();
