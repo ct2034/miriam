@@ -238,6 +238,7 @@ class RoadmapToTest:
 
         # plot graph
         pos = nx.get_node_attributes(self.g, POS)
+        pos_torch = torch.tensor(list(pos.values()))
         pos = {k: (v[0] * len(self.map_img), v[1] * len(self.map_img))
                for k, v in pos.items()}
         nx.draw_networkx_nodes(self.g, pos, ax=ax, node_size=1)
@@ -245,13 +246,9 @@ class RoadmapToTest:
         edges = [(u, v) for u, v in self.g.edges if u != v]
         nx.draw_networkx_edges(self.g, pos, ax=ax, edgelist=edges, width=0.5)
 
-        # what will be the file name
         n_nodes = self.g.number_of_nodes()
         if n_nodes == 0:
             return
-        name = f"{i:03d}_{self.__class__.__name__}_" +\
-            f"{n_nodes:04d}n_" +\
-            f"{os.path.basename(self.map_fname)}"
 
         # make an example path
         # invert x and y of map
@@ -262,6 +259,8 @@ class RoadmapToTest:
         while path is None:
             try:
                 path = make_paths(self.g, 1, map_img_t, Random(seed))[0]
+                path_len = get_path_len(
+                    pos_torch, path, False).item()
             except (ValueError, IndexError):
                 seed += 1
         start, end, node_path = path
@@ -275,6 +274,13 @@ class RoadmapToTest:
         x, y = zip(*full_path)
         ax.plot(x, y, color="red", linewidth=0.8, alpha=0.7)
 
+        # what will be the file name
+        name = f"{i:03d}_{self.__class__.__name__}_" +\
+            f"n_nodes{n_nodes:04d}_" +\
+            f"path_len{path_len:.3f}_" +\
+            f"{os.path.basename(self.map_fname)}"
+
+        # save
         fig.savefig(os.path.join(folder, name))
         plt.close(fig)
 
@@ -1021,6 +1027,6 @@ def plots_for_paper():
 
 
 if __name__ == '__main__':
-    # run()
-    # plot()
+    run()
+    plot()
     plots_for_paper()
