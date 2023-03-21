@@ -497,23 +497,31 @@ class PRM(RoadmapToTest):
         super().__init__(map_fname, rng, roadmap_specific_kwargs)
         from roadmaps.var_odrm_torch.var_odrm_torch import sample_points
         n = roadmap_specific_kwargs['n']
+        n_edges = roadmap_specific_kwargs['n_edges']
+        radius = roadmap_specific_kwargs['start_radius']
 
-        g = nx.Graph()
-        start_t = timeit.default_timer()
-        pos = sample_points(n, self.map_img, self.rng)
-        pos_np = pos.detach().numpy()
-        for i in range(n):
-            g.add_node(i, **{POS: (pos_np[i, 0], pos_np[i, 1])})
-            for j in range(i):
-                length = np.linalg.norm(pos_np[i] - pos_np[j])
-                if length > roadmap_specific_kwargs['radius']:
-                    continue
-                if self._check_line(
-                    (pos_np[i, 0].item(), pos_np[i, 1].item()),
-                        (pos_np[j, 0].item(), pos_np[j, 1].item())):
-                    g.add_edge(i, j, **{DISTANCE: length})
+        actual_n_edges = 0
+        while actual_n_edges < n_edges:
+            print(f"Trying radius={radius}...")
+            g = nx.Graph()
+            start_t = timeit.default_timer()
+            pos = sample_points(n, self.map_img, self.rng)
+            pos_np = pos.detach().numpy()
+            for i in range(n):
+                g.add_node(i, **{POS: (pos_np[i, 0], pos_np[i, 1])})
+                for j in range(i):
+                    length = np.linalg.norm(pos_np[i] - pos_np[j])
+                    if length > radius:
+                        continue
+                    if self._check_line(
+                        (pos_np[i, 0].item(), pos_np[i, 1].item()),
+                            (pos_np[j, 0].item(), pos_np[j, 1].item())):
+                        g.add_edge(i, j, **{DISTANCE: length})
 
-        end_t = timeit.default_timer()
+            end_t = timeit.default_timer()
+            actual_n_edges = g.number_of_edges()
+            print(f"Got {actual_n_edges} edges, target was {n_edges}.")
+            radius *= 1.1
         self.runtime_ms = (end_t - start_t) * 1000
 
         # swap x and y
@@ -699,15 +707,15 @@ def run():
         }),
         (PRM, {
             'n': ns[0],
-            'radius': 0.08,
+            'start_radius': 0.06,
         }),
         (PRM, {
             'n': ns[1],
-            'radius': 0.045,
+            'start_radius': 0.035,
         }),
         (PRM, {
             'n': ns[2],
-            'radius': 0.035,
+            'start_radius': 0.025,
         }),
         (GridMap, {
             'n': ns[0],
@@ -718,7 +726,6 @@ def run():
         (GridMap, {
             'n': ns[2],
         })
-        # TODO: visibility graphs, voronoi diagrams
     ]
     if not os.path.exists(EXAMPLE_FOLDER):
         os.makedirs(EXAMPLE_FOLDER)
@@ -745,11 +752,17 @@ def run():
                 df.at[i, 'roadmap'] = _cls.__name__
                 df.at[i, 'seed'] = seed
                 params_to_run.append((_cls, args, map_name, seed, i))
-    Random(0).shuffle(params_to_run)
     df = df.copy()
 
     for i_p, ptr in enumerate(tqdm(params_to_run)):
         _cls, args, map_name, seed, i = ptr
+        # for prm, we want to have the same n_edges as gsrm
+        if _cls == PRM:
+            ptr[1]['n_edges'] = df[
+                df['roadmap'] == GSRM.__name__][
+                df['map'] == map_name][
+                df['GSRM_target_n'] == args['n']
+            ]['n_edges'].values[0]
         _, data = _run_proxy(ptr)
         for k, v in data.items():
             df.at[i, k] = v
@@ -843,7 +856,8 @@ def plot():
         )
         plt.savefig(os.path.join(
             PLOT_FOLDER,
-            os.path.basename(CSV_PATH).replace('.csv', f'_map-{map_name}.png')))
+            os.path.basename(CSV_PATH).replace(
+                '.csv', f'_map-{map_name}.png')))
         plt.close('all')
 
     print("Plotting results per roadmap")
@@ -859,7 +873,8 @@ def plot():
         )
         plt.savefig(os.path.join(
             PLOT_FOLDER,
-            os.path.basename(CSV_PATH).replace('.csv', f'_rm-{roadmap}.png')))
+            os.path.basename(CSV_PATH).replace(
+                '.csv', f'_rm-{roadmap}.png')))
         plt.close('all')
 
     print("Making scatter plots")
