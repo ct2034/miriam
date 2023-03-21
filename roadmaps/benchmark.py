@@ -314,6 +314,7 @@ class GSRM(RoadmapToTest):
             nodes, runtime_points = gs.run(
                 mapFile=map_fname,
                 **kwargs,
+                seed=rng.randint(0, 2**8),
             )
             pos = torch.Tensor(nodes) / resolution
             actual_n = pos.shape[0]

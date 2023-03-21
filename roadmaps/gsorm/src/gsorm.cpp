@@ -60,12 +60,12 @@ public:
 
   boost::python::tuple run(
     std::string mapFile, float DA, float DB, float f, float k, float delta_t,
-    int iterations, int resolution, bool plot)
+    int iterations, int resolution, bool plot, int seed)
   {
     std::string example_folder = "roadmaps/gsorm/examples/";
 
     // seed opencv rng
-    cv::theRNG().state = 1;
+    cv::theRNG().state = seed;
 
     // Load PNG image
     std::vector<unsigned char> image; // the raw pixels
@@ -207,6 +207,6 @@ BOOST_PYTHON_MODULE(libgsorm)
     "run", &Gsorm::run,
     (bp::arg("mapFile"), bp::arg("DA"), bp::arg("DB"), bp::arg("f"),
     bp::arg("k"), bp::arg("delta_t"), bp::arg("iterations"), bp::arg("resolution"),
-    bp::arg("plot")))
+    bp::arg("plot"), bp::arg("seed")))
   ;
 }
