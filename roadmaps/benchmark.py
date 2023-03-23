@@ -1006,6 +1006,7 @@ def plots_for_paper():
     n_n_nodes = len(df[df.roadmap == 'PRM'].n_nodes.unique())
     print(f'{n_plots=}, {n_n_nodes=}')
     df = _group_n_nodes(df, n_n_nodes)
+    legend_i = 1
 
     for key, title in [
         ('path_length_mean', 'Path Length'),
@@ -1013,9 +1014,10 @@ def plots_for_paper():
         ('runtime_ms', 'Runtime Generation (ms)')
     ]:
         fig, axs = plt.subplots(
-            1,
-            n_plots,
-            figsize=(5*n_plots, 5))
+            2,
+            n_plots // 2,
+            figsize=(4.5*(n_plots // 2), 7))
+        axs = axs.flatten()
         for i, map_name in enumerate(interesting_maps):
             ax = axs[i]
             df_map = df[df.map == map_name]
@@ -1026,6 +1028,7 @@ def plots_for_paper():
                 hue='roadmap',
                 marker='.',
                 ax=ax,
+                legend=True if i == legend_i else False,
             )
             ax.set_xlabel('Number of Vertices')
             ax.set_ylabel(title)
@@ -1033,6 +1036,7 @@ def plots_for_paper():
                 ax.set_yscale('log')
             map_name_title = map_name.replace('34', '').capitalize()
             ax.set_title(f'Map {map_name_title}')
+        axs[legend_i].legend(bbox_to_anchor=(1.1, 1.05))
         fig.tight_layout()
         plt.savefig(os.path.join(
             PLOT_FOLDER_PAPER,
@@ -1043,6 +1047,6 @@ def plots_for_paper():
 
 
 if __name__ == '__main__':
-    run()
-    plot()
+    # run()
+    # plot()
     plots_for_paper()
