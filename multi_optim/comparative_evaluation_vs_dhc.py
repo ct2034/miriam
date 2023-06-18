@@ -552,7 +552,10 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
             'n_agents_s': n_agents_s,
             'lens_our': lens_our.tolist(),
             'lens_dhc_by_edge_len': lens_dhc_by_edge_len.tolist(),
-            'lens_dhc_by_nodes': lens_dhc_by_nodes.tolist()
+            'lens_dhc_by_nodes': lens_dhc_by_nodes.tolist(),
+            'n_nodes_our': g_our.number_of_nodes(),
+            'n_nodes_dhc_by_edge_len': g_dhc_by_edge_len.number_of_nodes(),
+            'n_nodes_dhc_by_nodes': g_dhc_by_nodes.number_of_nodes(),
         }, open(f"{figure_folder}/{results_name}_lens.yaml", 'w'))
 
     elif map_fname.endswith(".map"):
@@ -731,10 +734,12 @@ def eval(logger, results_name, base_folder, figure_folder, n_agents_s, n_eval, r
 
                         f_our.savefig(
                             f"{figure_folder}/{results_name}"
-                            + f"_paths_our_{n_agents=}.pdf")
+                            + f"_paths_our_{n_agents=}"
+                            + f"_n_nodes={n_nodes}.pdf")
                         f_dhc.savefig(
                             f"{figure_folder}/{results_name}"
-                            + f"_paths_dhc_{n_agents=}.pdf")
+                            + f"_paths_dhc_{n_agents=}"
+                            + f"_n_nodes={g_dhc.number_of_nodes()}.pdf")
                         plt.close(f_our)
                         plt.close(f_dhc)
 
@@ -891,6 +896,7 @@ def plot(figure_folder: str, results_name: str):
 
 
 if __name__ == '__main__':
+    print("Running evaluation vs dhc")
     logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
 
     # parameters
