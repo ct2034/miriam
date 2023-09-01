@@ -31,6 +31,7 @@ CSV_PATH = 'roadmaps/benchmark.csv'
 PLOT_FOLDER = 'roadmaps/benchmark_plots'
 PLOT_FOLDER_PAPER = 'roadmaps/benchmark_plots_paper'
 EXAMPLE_FOLDER = 'roadmaps/benchmark_examples'
+GSRM_EXAMPLE_FOLDER = 'roadmaps/gsorm/examples'
 DPI = 500
 
 # this list is sorted roughly by complexity
@@ -275,10 +276,13 @@ class RoadmapToTest:
         ax.plot(x, y, color="red", linewidth=0.8, alpha=0.7)
 
         # what will be the file name
+        map_no_ext = os.path.splitext(
+            os.path.basename(self.map_fname))[0]
         name = f"{i:03d}_{self.__class__.__name__}_" +\
             f"n_nodes{n_nodes:04d}_" +\
             f"path_len{path_len:.3f}_" +\
-            f"{os.path.basename(self.map_fname)}"
+            f"{map_no_ext}" +\
+            ".pdf"
 
         # save
         fig.savefig(os.path.join(folder, name))
@@ -389,7 +393,7 @@ class GSRM(RoadmapToTest):
 #         self._set_graph(g)
 
 
-class SPARS(RoadmapToTest):
+class SPARS2(RoadmapToTest):
     def __init__(self,
                  map_fname: str,
                  rng: Random,
@@ -474,7 +478,7 @@ class ORM(RoadmapToTest):
 
         optimizer = torch.optim.Adam([pos], lr=lr)
 
-        for i_e in tqdm(range(epochs)):
+        for _ in tqdm(range(epochs)):
             g, pos, test_length, training_length = optimize_poses(
                 g, pos, self.map_img, optimizer, n, rng)
         end_t = timeit.default_timer()
@@ -563,20 +567,18 @@ class GridMap(RoadmapToTest):
             if is_coord_free(self.map_img, coords):
                 g.add_node(i_to_add, **{POS: coords})
                 grid[x, y] = i_to_add
-                if x > 0 and grid[x - 1, y] != -1:
-                    if self._check_line(
-                            coords,
-                            g.nodes[grid[x - 1, y]][POS]):
-                        g.add_edge(i_to_add, grid[x - 1, y], **{
-                            DISTANCE: edge_length
-                        })
-                if y > 0 and grid[x, y - 1] != -1:
-                    if self._check_line(
-                            coords,
-                            g.nodes[grid[x, y - 1]][POS]):
-                        g.add_edge(i_to_add, grid[x, y - 1], **{
-                            DISTANCE: edge_length
-                        })
+                if x > 0 and grid[x - 1, y] != -1 and self._check_line(
+                        coords,
+                        g.nodes[grid[x - 1, y]][POS]):
+                    g.add_edge(i_to_add, grid[x - 1, y], **{
+                        DISTANCE: edge_length
+                    })
+                if y > 0 and grid[x, y - 1] != -1 and self._check_line(
+                        coords,
+                        g.nodes[grid[x, y - 1]][POS]):
+                    g.add_edge(i_to_add, grid[x, y - 1], **{
+                        DISTANCE: edge_length
+                    })
         # swap x and y
         nx.set_node_attributes(
             g,
@@ -667,7 +669,7 @@ def run():
         #     'epochs_optim': 25,  # of optimization
         #     'lr_optim': 1e-3,
         # }),
-        (SPARS, {
+        (SPARS2, {
             'target_n': ns[0],
             'dense_to_sparse_multiplier': 40,
             'stretchFactor': 3,
@@ -675,7 +677,7 @@ def run():
             'maxTime': 8.,  # ignored
             'maxIter': 50000,
         }),
-        (SPARS, {
+        (SPARS2, {
             'target_n': ns[1],
             'dense_to_sparse_multiplier': 30,
             'stretchFactor': 3,
@@ -683,7 +685,7 @@ def run():
             'maxTime': 8.,  # ignored
             'maxIter': 50000,
         }),
-        (SPARS, {
+        (SPARS2, {
             'target_n': ns[2],
             'dense_to_sparse_multiplier': 20,
             'stretchFactor': 3,
@@ -730,7 +732,7 @@ def run():
     ]
     if not os.path.exists(EXAMPLE_FOLDER):
         os.makedirs(EXAMPLE_FOLDER)
-    if not len(os.listdir(EXAMPLE_FOLDER)) == 0:
+    if len(os.listdir(EXAMPLE_FOLDER)) != 0:
         # delete all files in folder
         for f in os.listdir(EXAMPLE_FOLDER):
             os.remove(os.path.join(EXAMPLE_FOLDER, f))
@@ -788,6 +790,11 @@ def _run_proxy(args):
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}.png"
     t = cls(map_fname, Random(seed), args)
     t.plot_example(EXAMPLE_FOLDER, i)
+    if ('plot' in args and
+        args['plot'] and
+        seed == 0 and
+            map_name == PLOT_GSRM_ON_MAP):
+        t.plot_example(GSRM_EXAMPLE_FOLDER, i)
     data = t.evaluate()
     return (i, data)
 
@@ -913,24 +920,23 @@ def plot():
             f'{len(data_rel)=} != {len(map_names_rel)=}'
         data_len_np = np.array(data_len)
         data_rel_np = np.array(data_rel)
-        fig, axs = plt.subplots(1, 2, figsize=(10, 5), dpi=DPI)
-        # sort by map names list
-        sorted_map_names = []
+        _, axs = plt.subplots(1, 2, figsize=(10, 5), dpi=DPI)
         all_map_names = set()
         all_map_names.update(map_names_len)
         all_map_names.update(map_names_rel)
-        for map_name in MAP_NAMES:
-            if map_name in all_map_names:
-                sorted_map_names.append(map_name)
+        sorted_map_names = [
+            map_name for map_name in MAP_NAMES if map_name in all_map_names
+        ]
         for i, (d, mns) in enumerate([
             (data_len_np, map_names_len),
             (data_rel_np, map_names_rel),
         ]):
-            colors_per_data = []
-            for map_name in mns:
-                colors_per_data.append(
-                    plt.cm.get_cmap('hsv')(sorted_map_names.index(map_name) /
-                                           len(sorted_map_names)))
+            colors_per_data = [
+                plt.cm.get_cmap('hsv')(
+                    sorted_map_names.index(map_name) / len(sorted_map_names)
+                )
+                for map_name in mns
+            ]
             axs[i].scatter(d[:, 0],
                            d[:, 1],
                            marker='.',
@@ -973,13 +979,12 @@ def _group_n_nodes(df, n_n_nodes):
     n_nodes_per_rm = {}
     for roadmap in df.roadmap.unique():
         df_roadmap = df[df.roadmap == roadmap]
-        n_nodes_s_goal = []
         n_nodes = df_roadmap.n_nodes.unique()
         n_nodes_per_goal = len(n_nodes) // n_n_nodes
-        for i in range(n_n_nodes):
-            n_nodes_s_goal.append(
-                np.mean(n_nodes[
-                    i*n_nodes_per_goal:(i+1)*n_nodes_per_goal]))
+        n_nodes_s_goal = [
+            np.mean(n_nodes[i * n_nodes_per_goal: (i + 1) * n_nodes_per_goal])
+            for i in range(n_n_nodes)
+        ]
         n_nodes_per_rm[roadmap] = n_nodes_s_goal
     for i_row in range(len(df)):
         row = df.iloc[i_row].copy()
@@ -1028,7 +1033,7 @@ def plots_for_paper():
                 hue='roadmap',
                 marker='.',
                 ax=ax,
-                legend=True if i == legend_i else False,
+                legend=(i == legend_i),
             )
             ax.set_xlabel('Number of Vertices')
             ax.set_ylabel(title)
@@ -1047,6 +1052,6 @@ def plots_for_paper():
 
 
 if __name__ == '__main__':
-    # run()
-    # plot()
+    run()
+    plot()
     plots_for_paper()
