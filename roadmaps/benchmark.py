@@ -1050,8 +1050,68 @@ def plots_for_paper():
                 f'_paper_{key}.pdf'))
         )
 
+def table_for_paper():
+    """Make a latex formatted table that contains how much shorter
+    the paths from the different roadmaps are compared to the GSRM
+    on different maps.
+    """
+    import latextable
+    from collections import OrderedDict 
+    from texttable import Texttable
+    df = pd.read_csv(CSV_PATH)
+
+    interesting_maps = [
+        'plain',
+        'z',
+        'b',
+        'dense34'
+    ]
+    data = OrderedDict()
+    for i_m, map_name in enumerate(interesting_maps):
+        df_map = df[df.map == map_name].copy()
+        data[map_name] = OrderedDict()
+        for i_r, roadmap in enumerate(df_map.roadmap.unique()):
+            if roadmap == 'GSRM':
+                continue
+            data[map_name][roadmap] = []
+            df_own = df_map[df_map.roadmap == 'GSRM'].copy()
+            df_cmp = df_map[df_map.roadmap == roadmap].copy()
+            for col in df_cmp.columns:
+                if not col.startswith('path_length_'):
+                    continue
+                assert col in df_own.columns, \
+                    f'{col=} not in {df_own.columns=}'
+                # filter out nan
+                df_cmp_mean = df_cmp[~df_cmp[col].isna()][col].mean()
+                df_own_mean = df_own[~df_own[col].isna()][col].mean()
+                if np.isnan(df_cmp_mean):
+                    continue  # not added to table
+                x = (df_cmp_mean - df_own_mean) / df_cmp_mean
+                data[map_name][roadmap].append(x)
+            data[map_name][roadmap] = float(
+                np.mean(data[map_name][roadmap])) * 100 # in percent
+    print(data)
+
+    roadmap_names = sorted(df.roadmap.unique())
+    roadmap_names.remove('GSRM')
+
+    table = Texttable()
+    table.set_deco(Texttable.HEADER)
+    table.set_cols_dtype(['t'] + ['f'] * len(roadmap_names))
+    table.set_cols_align(['l'] + ['r'] * len(roadmap_names))
+                          
+    table.add_row(["Map"] + roadmap_names)
+    for map_name, roadmap_data in data.items():
+        map_name_title = map_name.replace('34', '').capitalize()
+        table.add_row([map_name_title] + [
+            f'{roadmap_data[roadmap]:.2f}\%' for roadmap in roadmap_names
+        ])
+    print(table.draw())
+    print(latextable.draw_latex(table))
+
 
 if __name__ == '__main__':
-    run()
-    plot()
-    plots_for_paper()
+    # run()
+    # plot()
+    # plots_for_paper()
+    table_for_paper()
