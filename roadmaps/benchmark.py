@@ -280,6 +280,7 @@ class RoadmapToTest:
             os.path.basename(self.map_fname))[0]
         name = f"{i:03d}_{self.__class__.__name__}_" +\
             f"n_nodes{n_nodes:04d}_" +\
+            f"n_edges{self.g.number_of_edges():04d}_" +\
             f"path_len{path_len:.3f}_" +\
             f"{map_no_ext}" +\
             ".pdf"
@@ -1089,7 +1090,7 @@ def table_for_paper():
                 x = (df_cmp_mean - df_own_mean) / df_cmp_mean
                 data[map_name][roadmap].append(x)
             data[map_name][roadmap] = float(
-                np.mean(data[map_name][roadmap])) * 100 # in percent
+                np.mean(data[map_name][roadmap])) * 100  # in percent
     print(data)
 
     roadmap_names = sorted(df.roadmap.unique())
@@ -1104,14 +1105,14 @@ def table_for_paper():
     for map_name, roadmap_data in data.items():
         map_name_title = map_name.replace('34', '').capitalize()
         table.add_row([map_name_title] + [
-            f'{roadmap_data[roadmap]:.2f}\%' for roadmap in roadmap_names
+            f'\SI{{{roadmap_data[roadmap]:.1f}}}{{\percent}}' for roadmap in roadmap_names
         ])
     print(table.draw())
     print(latextable.draw_latex(table))
 
 
 if __name__ == '__main__':
-    # run()
-    # plot()
-    # plots_for_paper()
+    run()
+    plot()
+    plots_for_paper()
     table_for_paper()
