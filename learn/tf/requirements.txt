@@ -1,5 +1,5 @@
 numpy
 matplotlib
-tensorflow==1.15  # final ? tf1
+tensorflow==2.11.1  # final ? tf1
 cachier
 networkx
