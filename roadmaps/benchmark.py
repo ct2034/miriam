@@ -13,6 +13,7 @@ import pandas as pd
 import seaborn as sns
 import torch
 from bresenham import bresenham
+import matplotlib
 from matplotlib import pyplot as plt
 from pyflann import FLANN
 from tqdm import tqdm
@@ -23,6 +24,11 @@ from planner.astar_boost.converter import initialize_from_graph
 from roadmaps.var_odrm_torch.var_odrm_torch import (
     PATH_W_COORDS, get_path_len, is_coord_free, is_pixel_free, make_paths,
     plan_path_between_coordinates, read_map)
+
+# fix for papercept --This document has a Type 3 font (on page 6)
+# https://tex.stackexchange.com/questions/77968/how-do-i-avoid-type3-fonts-when-submitting-to-manuscriptcentral
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +56,7 @@ MAP_NAMES = [
     # 'simple'
 ]
 PLOT_GSRM_ON_MAP = 'z'
-N_SEEDS = 6
+N_SEEDS = 1 # 6
 
 
 class RoadmapToTest:
@@ -278,15 +284,16 @@ class RoadmapToTest:
         # what will be the file name
         map_no_ext = os.path.splitext(
             os.path.basename(self.map_fname))[0]
-        name = f"{i:03d}_{self.__class__.__name__}_" +\
-            f"n_nodes{n_nodes:04d}_" +\
-            f"n_edges{self.g.number_of_edges():04d}_" +\
-            f"path_len{path_len:.3f}_" +\
-            f"{map_no_ext}" +\
-            ".pdf"
 
         # save
-        fig.savefig(os.path.join(folder, name))
+        for extenstion in ['pdf', 'png']:
+            name = f"{i:03d}_{self.__class__.__name__}_" +\
+                f"n_nodes{n_nodes:04d}_" +\
+                f"n_edges{self.g.number_of_edges():04d}_" +\
+                f"path_len{path_len:.3f}_" +\
+                f"{map_no_ext}" +\
+                f".{extenstion}"
+            fig.savefig(os.path.join(folder, name))
         plt.close(fig)
 
 
@@ -1044,12 +1051,14 @@ def plots_for_paper():
             ax.set_title(f'Map {map_name_title}')
         axs[legend_i].legend(bbox_to_anchor=(1.1, 1.05))
         fig.tight_layout()
-        plt.savefig(os.path.join(
-            PLOT_FOLDER_PAPER,
-            os.path.basename(CSV_PATH).replace(
-                '.csv',
-                f'_paper_{key}.pdf'))
-        )
+        for extension in ['png', 'pdf']:
+            plt.savefig(os.path.join(
+                PLOT_FOLDER_PAPER,
+                os.path.basename(CSV_PATH).replace(
+                    '.csv',
+                    f'_paper_{key}.{extension}'))
+            )
+
 
 def table_for_paper():
     """Make a latex formatted table that contains how much shorter
@@ -1112,7 +1121,7 @@ def table_for_paper():
 
 
 if __name__ == '__main__':
-    run()
-    plot()
+    # run()
+    # plot()
     plots_for_paper()
     table_for_paper()
