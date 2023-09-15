@@ -19,6 +19,6 @@
 [submodule "planner/dhc/DHC"]
 	path = planner/dhc/DHC
 	url = https://github.com/ct2034/DHC.git
-[submodule "planner/bvc/mr-nav-stack"]
-	path = planner/bvc/mr-nav-stack
-	url = git@github.com:ct2034/mr-nav-stack.git
+# [submodule "planner/bvc/mr-nav-stack"]
+# 	path = planner/bvc/mr-nav-stack
+# 	url = git@github.com:ct2034/mr-nav-stack.git
