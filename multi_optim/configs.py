@@ -17,22 +17,22 @@ configs: CONFIGS_TYPE = {
         "seed": 0,
         "prefix": "debug"
     },
-    "debug_no_rd": {
-        "n_nodes": 32,
-        "n_runs_pose": 8,
-        "n_runs_policy": 8,
-        "n_episodes_per_run_policy": 2,
-        "n_epochs_per_run_policy": 2,
-        "batch_size_policy": 16,
-        "stats_and_eval_every": 4,
-        "lr_pos": 1e-3,
-        "lr_policy": 1e-3,
-        "max_n_agents": 2,
-        "map_name": "x.png",
-        "seed": 0,
-        "use_reaction_diffusion": False,
-        "prefix": "debug_no_rd"
-    },
+    # "debug_no_rd": {
+    #     "n_nodes": 32,
+    #     "n_runs_pose": 8,
+    #     "n_runs_policy": 8,
+    #     "n_episodes_per_run_policy": 2,
+    #     "n_epochs_per_run_policy": 2,
+    #     "batch_size_policy": 16,
+    #     "stats_and_eval_every": 4,
+    #     "lr_pos": 1e-3,
+    #     "lr_policy": 1e-3,
+    #     "max_n_agents": 2,
+    #     "map_name": "x.png",
+    #     "seed": 0,
+    #     "use_reaction_diffusion": False,
+    #     "prefix": "debug_no_rd"
+    # },
     "tiny": {
         "n_nodes": 16,
         "n_runs_pose": 64,
@@ -93,37 +93,37 @@ configs: CONFIGS_TYPE = {
         "seed": 0,
         "prefix": "large"
     },
-    "large_no_rd": {
-        "n_nodes": 128,
-        "n_runs_pose": 128,
-        "n_runs_policy": 64,
-        "n_episodes_per_run_policy": 256,
-        "n_epochs_per_run_policy": 4,
-        "batch_size_policy": 128,
-        "stats_and_eval_every": 2,
-        "lr_pos": 1e-3,  # old value when not using RD
-        "lr_policy": 1e-4,
-        "max_n_agents": 10,
-        "map_name": "x.png",
-        "seed": 0,
-        "use_reaction_diffusion": False,
-        "prefix": "large_no_rd"
-    },
-    "large_plain": {
-        "n_nodes": 128,
-        "n_runs_pose": 64,
-        "n_runs_policy": 64,
-        "n_episodes_per_run_policy": 256,
-        "n_epochs_per_run_policy": 4,
-        "batch_size_policy": 128,
-        "stats_and_eval_every": 2,
-        "lr_pos": 1e-3,
-        "lr_policy": 1e-4,
-        "max_n_agents": 10,
-        "map_name": "plain.png",
-        "seed": 0,
-        "prefix": "large_plain"
-    },
+    # "large_no_rd": {
+    #     "n_nodes": 128,
+    #     "n_runs_pose": 128,
+    #     "n_runs_policy": 64,
+    #     "n_episodes_per_run_policy": 256,
+    #     "n_epochs_per_run_policy": 4,
+    #     "batch_size_policy": 128,
+    #     "stats_and_eval_every": 2,
+    #     "lr_pos": 1e-3,  # old value when not using RD
+    #     "lr_policy": 1e-4,
+    #     "max_n_agents": 10,
+    #     "map_name": "x.png",
+    #     "seed": 0,
+    #     "use_reaction_diffusion": False,
+    #     "prefix": "large_no_rd"
+    # },
+    # "large_plain": {
+    #     "n_nodes": 128,
+    #     "n_runs_pose": 64,
+    #     "n_runs_policy": 64,
+    #     "n_episodes_per_run_policy": 256,
+    #     "n_epochs_per_run_policy": 4,
+    #     "batch_size_policy": 128,
+    #     "stats_and_eval_every": 2,
+    #     "lr_pos": 1e-3,
+    #     "lr_policy": 1e-4,
+    #     "max_n_agents": 10,
+    #     "map_name": "plain.png",
+    #     "seed": 0,
+    #     "prefix": "large_plain"
+    # },
     "mapf_benchm_random-32-32-10_debug": {
         "n_nodes": 50,
         "n_runs_pose": 4,
@@ -225,4 +225,8 @@ def augment_config_by(
 
 configs_all_maps = augment_config_by(configs, "map_name", [
     "c.png", "z.png"
+])
+
+configs_more_lr_pos_s = augment_config_by(configs, "lr_pos", [
+    1e-3, 3e-4, 1e-4, 3e-5, 1e-5
 ])

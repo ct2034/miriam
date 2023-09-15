@@ -28,6 +28,7 @@ import tools
 import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
+from multi_optim.configs import configs_more_lr_pos_s
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from roadmaps.reaction_diffusion.example_figure import make_fig
 from roadmaps.reaction_diffusion.rd import sample_points_reaction_diffusion
@@ -297,15 +298,15 @@ def run_optimization(
     map_fname = f"roadmaps/odrm/odrm_eval/maps/{map_name}"
     if os.path.splitext(map_fname)[1] == ".png":
         map_img: MAP_IMG = read_map(map_fname)
-        map_img_inflated = inflate_map_img(map_img, radius)
+        map_img_np = np.array(map_img, dtype=np.uint8)
     elif os.path.splitext(map_fname)[1] == ".map":
-        map_np = movingai_read_mapfile(map_fname)
-        map_img = gridmap_to_map_img(map_np)
-        # lets inflate the map a bit
-        map_np_inflated = inflate_map(map_np, SUPER_RES_MULTIPLIER)
-        map_img_inflated = gridmap_to_map_img(map_np_inflated)
+        map_img_np = movingai_read_mapfile(map_fname)
+        map_img = gridmap_to_map_img(map_img_np)
     else:
         raise ValueError(f"Unknown map file extension {map_fname}")
+    map_ocv = cv2.Mat(map_img_np)
+    map_img_inflated = cv2.erode(map_ocv, np.ones(
+        (SUPER_RES_MULTIPLIER, SUPER_RES_MULTIPLIER), np.uint8))
 
     B = None
     if load_roadmap is not None:
@@ -665,27 +666,15 @@ if __name__ == "__main__":
     n_processes = min(tmp.cpu_count(), 16)
     pool = tmp.Pool(processes=n_processes)
 
-    for prefix in [
-        "debug",
-        "debug_no_rd",
-        # "debug_map_name_c.png",
-        # "debug_map_name_z.png",
-        # "tiny",
-        # "tiny_map_name_c.png",
-        # "tiny_map_name_z.png",
-        # "tiny_plain",
-        # "small",
-        # "small_map_name_c.png",
-        # "small_map_name_z.png",
-        # "medium",
-        # "medium_map_name_c.png",
-        # "medium_map_name_z.png",
-        "large",
-        "large_no_rd",
-        # "large_map_name_c.png",
-        # "large_map_name_z.png",
-        # "large_plain",
-    ]:
+    configs_to_run = {
+        k: v for k, v in configs_more_lr_pos_s.items() if k.startswith("debug")
+        # or k.startswith("large")
+    }
+
+    prefixes_to_run = sorted(configs_to_run.keys())
+    print(f"Running {len(prefixes_to_run)} configs: {prefixes_to_run}")
+
+    for prefix in prefixes_to_run:
         if prefix.startswith("debug"):
             level = logging.DEBUG
         else:
@@ -703,7 +692,7 @@ if __name__ == "__main__":
 
         # start the actual run
         run_optimization(
-            **configs_all_maps[prefix],
+            **configs_to_run[prefix],
             pool_in=pool)
 
     pool.close()
