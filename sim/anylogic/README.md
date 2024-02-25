@@ -2,16 +2,16 @@
 
 ### Cloudsim
 What can a Simulation do in the cloud?
-![General](../doc/cloud_sim_general.jpg?raw=true)
+![General](doc/cloud_sim_general.jpg?raw=true)
 
 ### Architecture
-<!-- ![Concept](../doc/anylogic.jpg?raw=true) -->
+![Concept](doc/anylogic.jpg?raw=true)
 
 The following image illustrates the general concept of simulation in Anylogic and AGV sim:
-![Concept](../doc/160818_architecture_01.png?raw=true)
+![Concept](doc/160818_architecture_01.png?raw=true)
 
 This shows the interconnection between both simulations
-![Concept](../doc/160818_architecture_02.png?raw=true)
+![Concept](doc/160818_architecture_02.png?raw=true)
 
 ## Anylogic
 
