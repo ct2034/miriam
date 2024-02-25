@@ -1,5 +1,0 @@
-<launch>
-  <node name="robot_controller" pkg="logistics_controller" type="robot_controller.py" output="screen">
-    <param name="n_robots" value="2" type="int" />
- </node>
-</launch>

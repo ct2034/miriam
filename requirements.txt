@@ -34,7 +34,6 @@ scipy
 seaborn
 sortedcontainers
 # stable-baselines3[extra]
-# tensorflow==2.4.0  # https://stackoverflow.com/questions/61137954/attributeerror-module-tensorflow-python-keras-utils-generic-utils-has-no-attr
 timeout-decorator
 types-PyYAML
 unittest2
