@@ -56,7 +56,7 @@ MAP_NAMES = [
     # 'simple'
 ]
 PLOT_GSRM_ON_MAP = 'z'
-N_SEEDS = 1 # 6
+N_SEEDS = 5
 
 
 class RoadmapToTest:
@@ -562,6 +562,10 @@ class GridMap(RoadmapToTest):
         self.runtime_ms = (end_t - start_t) * 1000
         self._set_graph(g)
 
+    def _make_gridmap(self, _):
+        raise NotImplementedError("Implement in subclass.")
+
+class GridMap4(GridMap):
     def _make_gridmap(self, n_side):
         edge_length = 1 / (n_side + 1)
         g = nx.Graph()
@@ -594,6 +598,51 @@ class GridMap(RoadmapToTest):
                  p[0]) for i, p in nx.get_node_attributes(
                 g, POS).items()}, POS)
         return g
+    
+
+class GridMap8(GridMap):
+    def _make_gridmap(self, n_side):
+        edge_length = 1 / (n_side + 1)
+        g = nx.Graph()
+        grid = np.full((n_side, n_side), -1)
+        for x, y in product(range(n_side), range(n_side)):
+            i_to_add = len(g)
+            coords = (
+                x * edge_length + edge_length / 2,
+                y * edge_length + edge_length / 2,
+            )
+            if is_coord_free(self.map_img, coords):
+                g.add_node(i_to_add, **{POS: coords})
+                grid[x, y] = i_to_add
+                deltas = [
+                    [0, -1],  # left
+                    [-1, -1],  # up left
+                    [-1, 0],  # up
+                    [-1, 1],  # up right
+                ]
+                for dx, dy in deltas:
+                    other_x, other_y = x + dx, y + dy
+                    if (
+                            other_x < 0 or
+                            other_x >= n_side or
+                            other_y < 0 or
+                            other_y >= n_side):
+                        continue
+                    if grid[other_x, other_y] != -1 and self._check_line(
+                            coords,
+                            g.nodes[grid[other_x, other_y]][POS]):
+                        g.add_edge(i_to_add, grid[other_x, other_y], **{
+                            DISTANCE: np.linalg.norm(
+                                np.array([dx, dy])) * edge_length
+                        })
+        # swap x and y
+        nx.set_node_attributes(
+            g,
+            {i: (p[1],
+                 p[0]) for i, p in nx.get_node_attributes(
+                g, POS).items()}, POS)
+        return g
+
 
 
 # class VisibilityGraph(RoadmapToTest):
@@ -677,64 +726,73 @@ def run():
         #     'epochs_optim': 25,  # of optimization
         #     'lr_optim': 1e-3,
         # }),
-        (SPARS2, {
-            'target_n': ns[0],
-            'dense_to_sparse_multiplier': 40,
-            'stretchFactor': 3,
-            'maxFailures': 500,
-            'maxTime': 8.,  # ignored
-            'maxIter': 50000,
-        }),
-        (SPARS2, {
-            'target_n': ns[1],
-            'dense_to_sparse_multiplier': 30,
-            'stretchFactor': 3,
-            'maxFailures': 500,
-            'maxTime': 8.,  # ignored
-            'maxIter': 50000,
-        }),
-        (SPARS2, {
-            'target_n': ns[2],
-            'dense_to_sparse_multiplier': 20,
-            'stretchFactor': 3,
-            'maxFailures': 500,
-            'maxTime': 8.,  # ignored
-            'maxIter': 50000,
-        }),
-        (ORM, {
+        # (SPARS2, {
+        #     'target_n': ns[0],
+        #     'dense_to_sparse_multiplier': 40,
+        #     'stretchFactor': 3,
+        #     'maxFailures': 500,
+        #     'maxTime': 8.,  # ignored
+        #     'maxIter': 50000,
+        # }),
+        # (SPARS2, {
+        #     'target_n': ns[1],
+        #     'dense_to_sparse_multiplier': 30,
+        #     'stretchFactor': 3,
+        #     'maxFailures': 500,
+        #     'maxTime': 8.,  # ignored
+        #     'maxIter': 50000,
+        # }),
+        # (SPARS2, {
+        #     'target_n': ns[2],
+        #     'dense_to_sparse_multiplier': 20,
+        #     'stretchFactor': 3,
+        #     'maxFailures': 500,
+        #     'maxTime': 8.,  # ignored
+        #     'maxIter': 50000,
+        # }),
+        # (ORM, {
+        #     'n': ns[0],
+        #     'lr': 1e-3,
+        #     'epochs': 50,
+        # }),
+        # (ORM, {
+        #     'n': ns[1],
+        #     'lr': 1e-3,
+        #     'epochs': 50,
+        # }),
+        # (ORM, {
+        #     'n': ns[2],
+        #     'lr': 1e-3,
+        #     'epochs': 50,
+        # }),
+        # (PRM, {
+        #     'n': ns[0],
+        #     'start_radius': 0.06,
+        # }),
+        # (PRM, {
+        #     'n': ns[1],
+        #     'start_radius': 0.035,
+        # }),
+        # (PRM, {
+        #     'n': ns[2],
+        #     'start_radius': 0.025,
+        # }),
+        (GridMap4, {
             'n': ns[0],
-            'lr': 1e-3,
-            'epochs': 50,
         }),
-        (ORM, {
+        (GridMap4, {
             'n': ns[1],
-            'lr': 1e-3,
-            'epochs': 50,
         }),
-        (ORM, {
+        (GridMap4, {
             'n': ns[2],
-            'lr': 1e-3,
-            'epochs': 50,
         }),
-        (PRM, {
-            'n': ns[0],
-            'start_radius': 0.06,
-        }),
-        (PRM, {
-            'n': ns[1],
-            'start_radius': 0.035,
-        }),
-        (PRM, {
-            'n': ns[2],
-            'start_radius': 0.025,
-        }),
-        (GridMap, {
+        (GridMap8, {
             'n': ns[0],
         }),
-        (GridMap, {
+        (GridMap8, {
             'n': ns[1],
         }),
-        (GridMap, {
+        (GridMap8, {
             'n': ns[2],
         })
     ]
@@ -1016,7 +1074,8 @@ def plots_for_paper():
         'dense34'
     ]
     n_plots = len(interesting_maps)
-    n_n_nodes = len(df[df.roadmap == 'PRM'].n_nodes.unique())
+    a_roadmap = df['roadmap'][0]
+    n_n_nodes = len(df[df.roadmap == a_roadmap].n_nodes.unique())
     print(f'{n_plots=}, {n_n_nodes=}')
     df = _group_n_nodes(df, n_n_nodes)
     legend_i = 1
@@ -1066,7 +1125,7 @@ def table_for_paper():
     on different maps.
     """
     import latextable
-    from collections import OrderedDict 
+    from collections import OrderedDict
     from texttable import Texttable
     df = pd.read_csv(CSV_PATH)
 
