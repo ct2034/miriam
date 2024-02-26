@@ -7,9 +7,6 @@
 [submodule "planner/cobra/external"]
 	path = planner/cobra/external
 	url = https://github.com/ct2034/cobra.git
-[submodule "roadmaps/SPARS/lodepng"]
-	path = roadmaps/SPARS/lodepng
-	url = https://github.com/lvandeve/lodepng.git
 [submodule "planner/mapf_implementations/libMultiRobotPlanning"]
 	path = planner/mapf_implementations/libMultiRobotPlanning
 	url = https://github.com/ct2034/libMultiRobotPlanning.git

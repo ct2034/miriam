@@ -13,11 +13,11 @@ iso8601
 keras
 latextable
 libpysal
-matplotlib==3.4.2
+matplotlib==3.8.3
 munkres
 mypy
-networkx==2.5.1
-numpy==1.20.3
+networkx==3.2.1
+numpy==1.22.0
 opencv-python
 psutil
 pycairo==1.14.0
