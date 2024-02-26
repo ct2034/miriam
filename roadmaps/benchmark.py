@@ -401,6 +401,41 @@ class GSRM(RoadmapToTest):
 #         self._set_graph(g)
 
 
+class CVD(RoadmapToTest):
+    def __init__(self,
+                 map_fname: str,
+                 rng: Random,
+                 roadmap_specific_kwargs):
+        super().__init__(map_fname, rng, roadmap_specific_kwargs)
+        from roadmaps.cvd.build.libcvd import CVD
+        from roadmaps.var_odrm_torch.var_odrm_torch import (
+            make_graph_and_flann, optimize_poses)
+
+        # prepare args
+        cvd_kwargs = self.roadmap_specific_kwargs.copy()
+
+        # run cvd
+        cvd = CVD()
+        nodes, runtime_points = cvd.run(
+            mapFile=map_fname,
+            **cvd_kwargs,
+            plot=False,
+        )
+        pos = torch.Tensor(nodes) / roadmap_specific_kwargs["resolution"]
+        # swap x and y
+        pos = pos[:, [1, 0]]
+        pos.requires_grad = True
+        n = pos.shape[0]
+        g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
+
+        # swap x and y
+        nx.set_node_attributes(g,
+                               {i: (p[1],
+                                    p[0]) for i, p in nx.get_node_attributes(
+                                   g, POS).items()}, POS)
+        self._set_graph(g)
+
+
 class SPARS2(RoadmapToTest):
     def __init__(self,
                  map_fname: str,
@@ -665,6 +700,34 @@ def run():
     df = pd.DataFrame()
     ns = [500, 1200, 2000]
     trials = [
+        (CVD, {
+            'DA': 0.14,
+            'DB': 0.06,
+            'f': 0.035,
+            'k': 0.065,
+            'delta_t': 1.0,
+            'iterations': 10000,
+            'target_n': ns[0],
+            'plot': True,
+        }),
+        (CVD, {
+            'DA': 0.14,
+            'DB': 0.06,
+            'f': 0.035,
+            'k': 0.065,
+            'delta_t': 1.0,
+            'iterations': 10000,
+            'target_n': ns[1],
+        }),
+        (CVD, {
+            'DA': 0.14,
+            'DB': 0.06,
+            'f': 0.035,
+            'k': 0.065,
+            'delta_t': 1.0,
+            'iterations': 10000,
+            'target_n': ns[2],
+        }),
         (GSRM, {
             'DA': 0.14,
             'DB': 0.06,
