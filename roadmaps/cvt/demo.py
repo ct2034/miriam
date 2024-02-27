@@ -12,10 +12,10 @@ if __name__ == '__main__':
     img = mpimg.imread(img_path)
     nodes = np.array(nodes)
 
-    fig = plt.figure()
-    plt.imshow(img)
-    plt.plot(nodes[:, 1], nodes[:, 0], 'r.')
+    # fig = plt.figure()
+    # plt.imshow(img)
+    # plt.plot(nodes[:, 1], nodes[:, 0], 'r.')
 
-    plt.axis('scaled')  # Ensure aspect ratio is maintained
-    plt.show()
+    # plt.axis('scaled')  # Ensure aspect ratio is maintained
+    # plt.show()
 

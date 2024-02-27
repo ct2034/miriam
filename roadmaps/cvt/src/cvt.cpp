@@ -9,11 +9,34 @@
 #include <chrono>
 using namespace std::chrono;
 
+// includes for defining the Voronoi diagram adaptor
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_2.h>
+#include <CGAL/Voronoi_diagram_2.h>
+#include <CGAL/Delaunay_triangulation_adaptation_traits_2.h>
+#include <CGAL/Delaunay_triangulation_adaptation_policies_2.h>
+// typedefs for defining the adaptor
+typedef CGAL::Exact_predicates_inexact_constructions_kernel                  K;
+typedef CGAL::Delaunay_triangulation_2<K>                                    DT;
+typedef CGAL::Delaunay_triangulation_adaptation_traits_2<DT>                 AT;
+typedef CGAL::Delaunay_triangulation_caching_degeneracy_removal_policy_2<DT> AP;
+typedef CGAL::Voronoi_diagram_2<DT,AT,AP>                                    VD;
+// typedef for the result type of the point location
+typedef AT::Site_2                    Site_2;
+typedef AT::Point_2                   Point_2;
+typedef VD::Locate_result             Locate_result;
+typedef VD::Vertex_handle             Vertex_handle;
+typedef VD::Face_handle               Face_handle;
+typedef VD::Halfedge_handle           Halfedge_handle;
+typedef VD::Ccb_halfedge_circulator   Ccb_halfedge_circulator;
+
+
 class CVT
 {
 public:
   CVT()
   {
+    std::cout << "init" << std::endl;
   }
 
   boost::python::tuple run(
@@ -46,30 +69,63 @@ public:
     }
 
     // Make Voronoi diagram
-    cv::Mat mask = cv::Mat::zeros(height, width, CV_8U);
-    for (int i = 0; i < mask.rows; i++) {
-      for (int j = 0; j < mask.cols; j++) {
-        if (image[i * width + j] == 255) {
-          mask.at<uchar>(i, j) = 255;
+    VD vd;
+    for(auto node : nodes) {
+      Site_2  site = Point_2(node.x, node.y);
+      vd.insert(site);
+    }
+    bool valid = vd.is_valid();
+    if (!valid) {
+      std::cerr << "Voronoi diagram is not valid" << std::endl;
+      return {};
+    } else {
+      std::cout << "Voronoi diagram is valid" << std::endl;
+    }
+
+    std::cout << "Number of faces: " << vd.number_of_faces() << std::endl;
+
+    // Draw Voronoi tessellation
+    cv::Mat img_voronoi = cv::Mat::zeros(height, width, CV_8UC3);
+    for (auto face = vd.faces_begin(); face != vd.faces_end(); ++face) {
+      Ccb_halfedge_circulator ec_start = face->ccb();
+      Ccb_halfedge_circulator ec = ec_start;
+      std::vector<cv::Point> face_points;
+      do {
+        if (!ec->has_source() or !ec->has_target()) {
+          continue;
+        }
+        face_points.push_back(cv::Point(ec->source()->point().x(), ec->source()->point().y()));
+        face_points.push_back(cv::Point(ec->target()->point().x(), ec->target()->point().y()));
+      } while (++ec != ec_start);
+      bool is_finite = true;
+      for (auto point : face_points) {
+        if (point.x < 0 or point.x >= width or point.y < 0 or point.y >= height) {
+          is_finite = false;
+          break;
+        }
+      }
+      // if (is_finite) {
+        // random color
+        cv::Scalar color(
+          rng.uniform(200, 255), 
+          rng.uniform(200, 255), 
+          rng.uniform(200, 255));
+        cv::fillConvexPoly(img_voronoi, face_points, color);
+      // }
+    }
+
+    // Mask freespace
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        if (image[y * width + x] != 255) {
+          img_voronoi.at<cv::Vec3b>(y, x) = cv::Vec3b(0, 0, 0);
         }
       }
     }
-    cv::Subdiv2D subdiv(cv::Rect(50, 50, 910, 910));
-    for (auto node : nodes) {
-      subdiv.insert(node);
-    }
 
-    // Draw Voronoi diagram
-    cv::Mat img_voronoi = cv::Mat::zeros(mask.size(), CV_8UC3);
-    std::vector<std::vector<cv::Point2f>> facets;
-    std::vector<cv::Point2f> centers;
-    subdiv.getVoronoiFacetList(std::vector<int>(), facets, centers);
-    for (size_t i = 0; i < facets.size(); i++) {
-      std::vector<cv::Point> facet;
-      for (size_t j = 0; j < facets[i].size(); j++) {
-        facet.push_back(facets[i][j]);
-      }
-      cv::fillConvexPoly(img_voronoi, facet, cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255)), 8, 0);
+    // Also draw points
+    for (auto node : nodes) {
+      cv::circle(img_voronoi, node, 3, cv::Scalar(0, 0, 255), -1);
     }
     cv::imwrite(example_folder + "voronoi.png", img_voronoi);
 
