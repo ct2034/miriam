@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "lodepng.h"
-// #include <torch/torch.h>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <chrono>
@@ -39,8 +38,8 @@ public:
     auto start = high_resolution_clock::now();
     std::vector<cv::Point> nodes;
     while (nodes.size() < n_nodes) {
-      float x = rng.uniform(0., (float) width);
-      float y = rng.uniform(0., (float) height);
+      float x = rng.uniform((float) 0, (float) width);
+      float y = rng.uniform((float) 0, (float) height);
       if (image[(int) y * width + (int) x] == 255) {
         nodes.push_back(cv::Point(x, y));
       }
