@@ -56,5 +56,5 @@ roadmaps/benchmark_examples/
 roadmaps/benchmark_plots/benchmark.png
 roadmaps/benchmark_plots/benchmark_*.png
 
-# build folder for cvd
-roadmaps/cvd/build/*
+# build folder for cvt
+roadmaps/cvt/build/*

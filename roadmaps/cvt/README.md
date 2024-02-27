@@ -1,4 +1,4 @@
-# Centroidal Voronoi tessellation (CVD)
+# Centroidal Voronoi Tessellation (CVT)
 
 ## Requirements
 

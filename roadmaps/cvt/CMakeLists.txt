@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(cvd)
+project(cvt)
 
 set(CMAKE_CXX_STANDARD 14)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,15 +29,15 @@ include_directories(
 )
 
 # the python module
-SET(cvd cvd)
+SET(cvt cvt)
 
-add_library(${cvd} SHARED 
-  src/${cvd}.cpp
+add_library(${cvt} SHARED 
+  src/${cvt}.cpp
   lodepng/lodepng.cpp
 )
 
 TARGET_LINK_LIBRARIES(
-  ${cvd} 
+  ${cvt} 
   ${Boost_LIBRARIES}
   ${OpenCV_LIBS}
 )

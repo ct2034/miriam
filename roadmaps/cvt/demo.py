@@ -2,13 +2,13 @@ from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 
-from roadmaps.cvd.build.libcvd import CVD
+from roadmaps.cvt.build.libcvt import CVT
 
 if __name__ == '__main__':
     img_path = "roadmaps/odrm/odrm_eval/maps/plain.png"
 
-    cvd = CVD()
-    (nodes, t) = cvd.run(img_path, 100)
+    cvt = CVT()
+    (nodes, t) = cvt.run(img_path, 100)
     img = mpimg.imread(img_path)
     nodes = np.array(nodes)
 

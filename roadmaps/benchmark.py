@@ -401,24 +401,24 @@ class GSRM(RoadmapToTest):
 #         self._set_graph(g)
 
 
-class CVD(RoadmapToTest):
+class CVT(RoadmapToTest):
     def __init__(self,
                  map_fname: str,
                  rng: Random,
                  roadmap_specific_kwargs):
         super().__init__(map_fname, rng, roadmap_specific_kwargs)
-        from roadmaps.cvd.build.libcvd import CVD
+        from roadmaps.cvt.build.libcvt import CVT
         from roadmaps.var_odrm_torch.var_odrm_torch import (
             make_graph_and_flann, optimize_poses)
 
         # prepare args
-        cvd_kwargs = self.roadmap_specific_kwargs.copy()
+        cvt_kwargs = self.roadmap_specific_kwargs.copy()
 
-        # run cvd
-        cvd = CVD()
-        nodes, runtime_points = cvd.run(
+        # run cvt
+        cvt = CVT()
+        nodes, runtime_points = cvt.run(
             mapFile=map_fname,
-            **cvd_kwargs,
+            **cvt_kwargs,
             plot=False,
         )
         pos = torch.Tensor(nodes) / roadmap_specific_kwargs["resolution"]
@@ -700,7 +700,7 @@ def run():
     df = pd.DataFrame()
     ns = [500, 1200, 2000]
     trials = [
-        (CVD, {
+        (CVT, {
             'DA': 0.14,
             'DB': 0.06,
             'f': 0.035,
@@ -710,7 +710,7 @@ def run():
             'target_n': ns[0],
             'plot': True,
         }),
-        (CVD, {
+        (CVT, {
             'DA': 0.14,
             'DB': 0.06,
             'f': 0.035,
@@ -719,7 +719,7 @@ def run():
             'iterations': 10000,
             'target_n': ns[1],
         }),
-        (CVD, {
+        (CVT, {
             'DA': 0.14,
             'DB': 0.06,
             'f': 0.035,

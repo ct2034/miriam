@@ -10,17 +10,17 @@
 #include <chrono>
 using namespace std::chrono;
 
-class CVD
+class CVT
 {
 public:
-  CVD()
+  CVT()
   {
   }
 
   boost::python::tuple run(
     std::string mapFile, int n_nodes, int seed = 1)
   {
-    std::string example_folder = "roadmaps/cvd/examples/";
+    std::string example_folder = "roadmaps/cvt/examples/";
 
     // seed opencv rng
     cv::RNG rng(seed);
@@ -104,13 +104,13 @@ public:
   }
 };
 
-BOOST_PYTHON_MODULE(libcvd)
+BOOST_PYTHON_MODULE(libcvt)
 {
   using namespace boost::python;
   namespace bp = boost::python;
-  class_<CVD>("CVD", init<>())
+  class_<CVT>("CVT", init<>())
   .def(
-    "run", &CVD::run,
+    "run", &CVT::run,
     (bp::arg("mapFile"), bp::arg("n_nodes"), bp::arg("seed") = 0)
   )
   ;
