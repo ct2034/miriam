@@ -26,7 +26,8 @@ def read_map(fname: str) -> MAP_IMG:
     assert width == height
     data = []
     for i, row in enumerate(rows):
-        data.append(tuple(row[::4]))
+        skip = len(row) // width
+        data.append(tuple(row[::skip]))
     return tuple(data)
 
 
@@ -35,11 +36,14 @@ def is_coord_free(
         point: Tuple[float, float]) -> bool:
     """Check if a coordinate is free."""
     size = len(map_img)
-    return map_img[
-        int(point[0] * size)
-    ][
-        int(point[1] * size)
-    ] >= 255
+    try:
+        return map_img[
+            int(point[0] * size)
+        ][
+            int(point[1] * size)
+        ] >= 255
+    except IndexError:
+        print(f"IndexError: {point}")
 
 
 def is_pixel_free(

@@ -7,6 +7,7 @@ from math import ceil, sqrt
 from random import Random
 from typing import Any, Dict, List, Optional, Tuple
 
+import cv2 as cv
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -42,7 +43,8 @@ DPI = 500
 
 # this list is sorted roughly by complexity
 MAP_NAMES = [
-    'plain',
+    'Berlin_1_256',
+    # 'plain',
     # 'c',
     # 'x',
     'b',
@@ -56,14 +58,28 @@ MAP_NAMES = [
     # 'simple'
 ]
 PLOT_GSRM_ON_MAP = 'z'
-N_SEEDS = 5
+N_SEEDS = 10
+
+edge_radius_stats = {}
 
 
 class RoadmapToTest:
     def __init__(self, map_fname: str, rng: Random,
                  roadmap_specific_kwargs: Dict[str, Any] = {}):
-        self.map_fname = map_fname
-        self.map_img = read_map(map_fname)
+        if self.__class__ == GSRM:
+            self.map_fname = map_fname
+        else:
+            map_name = os.path.splitext(os.path.basename(map_fname))[0]
+            n: Optional[int] = None
+            if 'n' in roadmap_specific_kwargs:
+                n = roadmap_specific_kwargs['n']
+            elif 'target_n' in roadmap_specific_kwargs:
+                n = roadmap_specific_kwargs['target_n']
+            else:
+                raise NotImplementedError("what is n?")
+            self.map_fname = os.path.join(
+                EXAMPLE_FOLDER, f"{map_name}_inflated_{n}.png")
+        self.map_img = read_map(self.map_fname)
         # swap rows and columns
         # self.map_img = np.swapaxes(np.array(self.map_img), 0, 1)
         self.n_eval = 100
@@ -230,7 +246,7 @@ class RoadmapToTest:
         results = {}
         for fun in [
             self.evaluate_path_length,
-            self.evaluate_straight_path_length,
+            # self.evaluate_straight_path_length,
             self.evaluate_n_nodes,
             self.evaluate_runtime,
         ]:
@@ -346,6 +362,41 @@ class GSRM(RoadmapToTest):
         g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
         runtime_delaunay = (timeit.default_timer() - start_t) * 1000
         self.runtime_ms = runtime_points + runtime_delaunay
+
+        # statistics on edge lengths
+        edge_lengths = []
+        for (a, b) in g.edges:
+            if a == b:
+                continue
+            edge_lengths.append(
+                np.linalg.norm(
+                    np.array(nx.get_node_attributes(g, POS)[a]) -
+                    np.array(nx.get_node_attributes(g, POS)[b])))
+        edge_lengths = np.array(edge_lengths)
+        edge_len_median = np.median(edge_lengths)
+        edge_len_std = np.std(edge_lengths)
+        agent_radius = edge_len_median
+        print(f"Agent radius: {agent_radius}")       
+        if map_fname not in edge_radius_stats:
+            edge_radius_stats[map_fname] = {}
+        edge_radius_stats[map_fname][target_n] = agent_radius
+
+        # inflate map
+        agent_radius_map = int(agent_radius * len(self.map_img))
+        map_img_np = np.array([list(row) for row in self.map_img])
+        elm = cv.getStructuringElement(
+            cv.MORPH_ELLIPSE, 
+            (agent_radius_map, agent_radius_map))
+        inflated_map = cv.erode(
+            map_img_np.astype(np.uint8),
+            elm
+        )
+        map_name = os.path.splitext(os.path.basename(map_fname))[0]
+        cv.imwrite(
+            f"{EXAMPLE_FOLDER}/{map_name}_inflated_{target_n}.png",
+            inflated_map)
+        self.map_img = tuple([tuple(row) for row in inflated_map])
+        g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
 
         # swap x and y
         nx.set_node_attributes(g,
@@ -700,34 +751,34 @@ def run():
     df = pd.DataFrame()
     ns = [500, 1200, 2000]
     trials = [
-        (CVT, {
-            'DA': 0.14,
-            'DB': 0.06,
-            'f': 0.035,
-            'k': 0.065,
-            'delta_t': 1.0,
-            'iterations': 10000,
-            'target_n': ns[0],
-            'plot': True,
-        }),
-        (CVT, {
-            'DA': 0.14,
-            'DB': 0.06,
-            'f': 0.035,
-            'k': 0.065,
-            'delta_t': 1.0,
-            'iterations': 10000,
-            'target_n': ns[1],
-        }),
-        (CVT, {
-            'DA': 0.14,
-            'DB': 0.06,
-            'f': 0.035,
-            'k': 0.065,
-            'delta_t': 1.0,
-            'iterations': 10000,
-            'target_n': ns[2],
-        }),
+        # (CVT, {
+        #     'DA': 0.14,
+        #     'DB': 0.06,
+        #     'f': 0.035,
+        #     'k': 0.065,
+        #     'delta_t': 1.0,
+        #     'iterations': 10000,
+        #     'target_n': ns[0],
+        #     'plot': True,
+        # }),
+        # (CVT, {
+        #     'DA': 0.14,
+        #     'DB': 0.06,
+        #     'f': 0.035,
+        #     'k': 0.065,
+        #     'delta_t': 1.0,
+        #     'iterations': 10000,
+        #     'target_n': ns[1],
+        # }),
+        # (CVT, {
+        #     'DA': 0.14,
+        #     'DB': 0.06,
+        #     'f': 0.035,
+        #     'k': 0.065,
+        #     'delta_t': 1.0,
+        #     'iterations': 10000,
+        #     'target_n': ns[2],
+        # }),
         (GSRM, {
             'DA': 0.14,
             'DB': 0.06,
@@ -756,39 +807,6 @@ def run():
             'iterations': 10000,
             'target_n': ns[2],
         }),
-        # (GSORM, {
-        #     'DA': 0.14,
-        #     'DB': 0.06,
-        #     'f': 0.035,
-        #     'k': 0.065,
-        #     'delta_t': 1.0,
-        #     'iterations': 5000,  # of grey scott model
-        #     'resolution': 300,
-        #     'epochs_optim': 25,  # of optimization
-        #     'lr_optim': 1e-3,
-        # }),
-        # (GSORM, {
-        #     'DA': 0.14,
-        #     'DB': 0.06,
-        #     'f': 0.035,
-        #     'k': 0.065,
-        #     'delta_t': 1.0,
-        #     'iterations': 5000,
-        #     'resolution': 400,
-        #     'epochs_optim': 25,  # of optimization
-        #     'lr_optim': 1e-3,
-        # }),
-        # (GSORM, {
-        #     'DA': 0.14,
-        #     'DB': 0.06,
-        #     'f': 0.035,
-        #     'k': 0.065,
-        #     'delta_t': 1.0,
-        #     'iterations': 5000,
-        #     'resolution': 500,
-        #     'epochs_optim': 25,  # of optimization
-        #     'lr_optim': 1e-3,
-        # }),
         # (SPARS2, {
         #     'target_n': ns[0],
         #     'dense_to_sparse_multiplier': 40,
@@ -950,7 +968,7 @@ def _make_sure_folder_exists_and_is_empty(folder):
 def plot():
     interesting_vars = [
         'path_length_mean',
-        'rel_straight_length_mean',
+        # 'rel_straight_length_mean',
         'n_nodes',
         'n_edges',
         'visited_nodes_mean',
@@ -1243,7 +1261,7 @@ def table_for_paper():
 
 
 if __name__ == '__main__':
-    # run()
-    # plot()
+    run()
+    plot()
     plots_for_paper()
     table_for_paper()
