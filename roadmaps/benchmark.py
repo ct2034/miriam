@@ -90,6 +90,9 @@ class RoadmapToTest:
         self.astar_solver: Optional[AstarSolver] = None
         self.flann: Optional[FLANN] = None
 
+        print('\n' + '+' * 80)
+        print(f'{self.__class__.__name__=}')
+        print(f'{map_fname=}')
         print(f'{roadmap_specific_kwargs=}')
 
     def _initialize_eval_rng(self):
@@ -335,7 +338,7 @@ class GSRM(RoadmapToTest):
         from roadmaps.gsorm.build.libgsorm import Gsorm
         from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
 
-        while target_n > actual_n:
+        while target_n * .95 > actual_n:
             print(f"Trying resolution {resolution}...")
             kwargs['resolution'] = resolution
             gs = Gsorm()
@@ -376,26 +379,27 @@ class GSRM(RoadmapToTest):
         edge_len_median = np.median(edge_lengths)
         edge_len_std = np.std(edge_lengths)
         agent_radius = edge_len_median
-        print(f"Agent radius: {agent_radius}")       
+        print(f"Agent radius: {agent_radius}")
         if map_fname not in edge_radius_stats:
             edge_radius_stats[map_fname] = {}
         edge_radius_stats[map_fname][target_n] = agent_radius
 
-        # inflate map
-        agent_radius_map = int(agent_radius * len(self.map_img))
-        map_img_np = np.array([list(row) for row in self.map_img])
-        elm = cv.getStructuringElement(
-            cv.MORPH_ELLIPSE, 
-            (agent_radius_map, agent_radius_map))
-        inflated_map = cv.erode(
-            map_img_np.astype(np.uint8),
-            elm
-        )
+        # if the right map is already saved, load it
         map_name = os.path.splitext(os.path.basename(map_fname))[0]
-        cv.imwrite(
-            f"{EXAMPLE_FOLDER}/{map_name}_inflated_{target_n}.png",
-            inflated_map)
-        self.map_img = tuple([tuple(row) for row in inflated_map])
+        inflated_map_fname = os.path.join(
+            EXAMPLE_FOLDER, f"{map_name}_inflated_{target_n}.png")
+        if os.path.exists(inflated_map_fname):
+            self.map_img = read_map(inflated_map_fname)
+        else:
+            # inflate map
+            agent_radius_map = int(agent_radius * len(self.map_img))
+            map_img_np = np.array([list(row) for row in self.map_img])
+            elm = cv.getStructuringElement(
+                cv.MORPH_ELLIPSE,
+                (agent_radius_map, agent_radius_map))
+            inflated_map = cv.erode(map_img_np.astype(np.uint8), elm)
+            cv.imwrite(inflated_map_fname, inflated_map)
+            self.map_img = tuple([tuple(row) for row in inflated_map])
         g, _ = make_graph_and_flann(pos, self.map_img, n, rng)
 
         # swap x and y
@@ -651,6 +655,7 @@ class GridMap(RoadmapToTest):
     def _make_gridmap(self, _):
         raise NotImplementedError("Implement in subclass.")
 
+
 class GridMap4(GridMap):
     def _make_gridmap(self, n_side):
         edge_length = 1 / (n_side + 1)
@@ -684,7 +689,7 @@ class GridMap4(GridMap):
                  p[0]) for i, p in nx.get_node_attributes(
                 g, POS).items()}, POS)
         return g
-    
+
 
 class GridMap8(GridMap):
     def _make_gridmap(self, n_side):
@@ -728,7 +733,6 @@ class GridMap8(GridMap):
                  p[0]) for i, p in nx.get_node_attributes(
                 g, POS).items()}, POS)
         return g
-
 
 
 # class VisibilityGraph(RoadmapToTest):
@@ -1249,7 +1253,7 @@ def table_for_paper():
     table.set_deco(Texttable.HEADER)
     table.set_cols_dtype(['t'] + ['f'] * len(roadmap_names))
     table.set_cols_align(['l'] + ['r'] * len(roadmap_names))
-                          
+
     table.add_row(["Map"] + roadmap_names)
     for map_name, roadmap_data in data.items():
         map_name_title = map_name.replace('34', '').capitalize()
