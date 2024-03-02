@@ -1080,7 +1080,7 @@ def plot():
         ]
         for i, (d, mns) in enumerate([
             (data_len_np, map_names_len),
-            (data_rel_np, map_names_rel),
+            # (data_rel_np, map_names_rel),
         ]):
             colors_per_data = [
                 plt.cm.get_cmap('hsv')(
@@ -1154,13 +1154,12 @@ def plots_for_paper():
 
     interesting_maps = [
         'plain',
-        'z',
+        'Berlin_1_256',  # 'z',
         'b',
         'dense34'
     ]
     n_plots = len(interesting_maps)
-    a_roadmap = df['roadmap'][0]
-    n_n_nodes = len(df[df.roadmap == a_roadmap].n_nodes.unique())
+    n_n_nodes = len(df[df.roadmap == 'GSRM'].GSRM_target_n.unique())
     print(f'{n_plots=}, {n_n_nodes=}')
     df = _group_n_nodes(df, n_n_nodes)
     legend_i = 1
