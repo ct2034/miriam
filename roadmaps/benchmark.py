@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 CSV_PATH = 'roadmaps/benchmark.csv'
+CSV_MEAN_PATH = 'roadmaps/benchmark_w_mean.csv'
 PLOT_FOLDER = 'roadmaps/benchmark_plots'
 PLOT_FOLDER_PAPER = 'roadmaps/benchmark_plots_paper'
 EXAMPLE_FOLDER = 'roadmaps/benchmark_examples'
@@ -46,18 +47,20 @@ MAP_NAMES = [
     'Berlin_1_256',
     # 'plain',
     # 'c',
-    # 'x',
+    'x',
     'b',
     # 'o',
     # 'dual_w',
     # 'dual2',
     # 'dual',
-    'z',
+    # 'z',
     'dense34',
     # 'dense',
-    # 'simple'
+    # 'simple',
+    'slam'
 ]
-PLOT_GSRM_ON_MAP = 'z'
+PLOT_GSRM_ON_MAP = 'slam'
+assert PLOT_GSRM_ON_MAP in MAP_NAMES
 N_SEEDS = 10
 
 edge_radius_stats = {}
@@ -71,14 +74,9 @@ class RoadmapToTest:
         else:
             map_name = os.path.splitext(os.path.basename(map_fname))[0]
             n: Optional[int] = None
-            if 'n' in roadmap_specific_kwargs:
-                n = roadmap_specific_kwargs['n']
-            elif 'target_n' in roadmap_specific_kwargs:
-                n = roadmap_specific_kwargs['target_n']
-            else:
-                raise NotImplementedError("what is n?")
+            target_n = roadmap_specific_kwargs['target_n']
             self.map_fname = os.path.join(
-                EXAMPLE_FOLDER, f"{map_name}_inflated_{n}.png")
+                EXAMPLE_FOLDER, f"{map_name}_inflated_{target_n}.png")
         self.map_img = read_map(self.map_fname)
         # swap rows and columns
         # self.map_img = np.swapaxes(np.array(self.map_img), 0, 1)
@@ -153,7 +151,8 @@ class RoadmapToTest:
         map_img_inv = np.swapaxes(np.array(self.map_img), 0, 1)
         lens = []
         visited_nodes_s = []
-        for _ in range(self.n_eval):
+        data = {}
+        for i in range(self.n_eval):
             a = self.rng.random(), self.rng.random()
             b = self.rng.random(), self.rng.random()
             while not is_coord_free(map_img_inv, a) or \
@@ -162,19 +161,20 @@ class RoadmapToTest:
                 b = self.rng.random(), self.rng.random()
             path_w_coords, visited_nodes = self._plan_path_coords(a, b)
             visited_nodes_s.append(visited_nodes)
+            success = True
             if path_w_coords[-1] is None:
-                continue
+                success = False
             if len(path_w_coords[-1]) == 0:
-                continue
+                success = False
             pos_t = torch.tensor(self.pos_np)
-            lens.append(
-                get_path_len(pos_t, path_w_coords, False).item()
-            )
-        data = {'success_rate': len(lens) / self.n_eval}
-        for i, d in enumerate(lens):
-            data[f'path_length_{i:02d}'] = d
-        data['path_length_mean'] = np.mean(lens).item()
-        data['visited_nodes_mean'] = np.mean(visited_nodes_s).item()
+            data[f'success_{i:03d}'] = success
+            if success:
+                data[f'path_length_{i:03d}'] = get_path_len(
+                    pos_t, path_w_coords, False).item()
+                data[f'visited_nodes_{i:03d}'] = visited_nodes
+            else:
+                data[f'path_length_{i:03d}'] = np.nan
+                data[f'visited_nodes_{i:03d}'] = np.nan
         return data
 
     def _check_line(self, a: Tuple[float, float], b: Tuple[float, float]):
@@ -198,8 +198,8 @@ class RoadmapToTest:
         pos_t = torch.tensor(pos_np)
         flann = FLANN(random_seed=0)
         flann.build_index(np.array(pos_np, dtype=np.float32), random_seed=0)
-        rel_straight_lengths: List[float] = []
-        for _ in range(self.n_eval):
+        data = {}
+        for i in range(self.n_eval):
             found = False
             while not found:
                 start = (self.rng.random(), self.rng.random())
@@ -213,8 +213,8 @@ class RoadmapToTest:
                     continue
                 if not self._check_line(start, end):
                     continue
-                length = np.linalg.norm(np.array(start) - np.array(end)).item()
-                if length < 0.5:
+                straight_len = np.linalg.norm(np.array(start) - np.array(end)).item()
+                if straight_len < 0.5:
                     continue
                 try:
                     path = plan_path_between_coordinates(
@@ -227,11 +227,7 @@ class RoadmapToTest:
                 found = True
             assert path is not None
             path_len = get_path_len(pos_t, path, False).item()
-            rel_straight_lengths.append(path_len / length)
-        data = {}
-        for i, d in enumerate(rel_straight_lengths):
-            data[f"rel_straight_length_{i:02d}"] = d
-        data["rel_straight_length_mean"] = np.mean(rel_straight_lengths).item()
+            data[f"rel_straight_length_{i:03d}"] = path_len / straight_len
         return data
 
     def evaluate_n_nodes(self) -> Dict[str, float]:
@@ -332,13 +328,23 @@ class GSRM(RoadmapToTest):
         if 'target_n' not in kwargs:
             print(kwargs)
         target_n = kwargs.pop('target_n')
-        actual_n = 200
-        resolution = 300
+
+        # initialize this with the number of nodes we expect to get at the
+        # (initial) resolution set below
+        actual_n = 100  # 100 works right now
+        assert target_n >= actual_n, f'{target_n=} must be >= {actual_n=}'
+        
+        def _goal_check(target_n, actual_n):
+            return target_n * .95 < actual_n
+        
+        resolution = 150
         pos = None
         from roadmaps.gsorm.build.libgsorm import Gsorm
         from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
 
-        while target_n * .95 > actual_n:
+        first_run = True
+        while not _goal_check(target_n, actual_n) or first_run:
+            first_run = False
             print(f"Trying resolution {resolution}...")
             kwargs['resolution'] = resolution
             gs = Gsorm()
@@ -350,12 +356,18 @@ class GSRM(RoadmapToTest):
             pos = torch.Tensor(nodes) / resolution
             actual_n = pos.shape[0]
             print(f"Got {actual_n} nodes. Target was {target_n}.")
-            factor = 1 + (target_n / actual_n - 1) * 0.7
-            new_resolution = resolution * sqrt(factor)
-            if int(new_resolution) == resolution:
-                resolution += 1
+            if _goal_check(target_n, actual_n):
+                print("✅")
             else:
-                resolution = int(new_resolution)
+                FACTOR_DAMPING = 0.8
+                factor = 1 + (target_n / actual_n - 1) * FACTOR_DAMPING
+                new_resolution = resolution * sqrt(factor)
+                MAX_INCREASE_FACTOR = 2
+                new_resolution = int(min(
+                    new_resolution,
+                    resolution * MAX_INCREASE_FACTOR))
+                # increase by at least 1
+                resolution = max(new_resolution, resolution + 1)
         assert pos is not None
 
         # swap x and y
@@ -642,10 +654,11 @@ class GridMap(RoadmapToTest):
                  rng: Random,
                  roadmap_specific_kwargs):
         super().__init__(map_fname, rng, roadmap_specific_kwargs)
-        n_side = ceil(sqrt(roadmap_specific_kwargs["n"]))
+        target_n = roadmap_specific_kwargs["target_n"]
+        n_side = ceil(sqrt(target_n))
         start_t = timeit.default_timer()
         g = self._make_gridmap(n_side)
-        while g.number_of_nodes() < roadmap_specific_kwargs["n"]:
+        while g.number_of_nodes() < target_n:
             n_side += 1
             g = self._make_gridmap(n_side)
         end_t = timeit.default_timer()
@@ -661,11 +674,14 @@ class GridMap4(GridMap):
         edge_length = 1 / (n_side + 1)
         g = nx.Graph()
         grid = np.full((n_side, n_side), -1)
+        dx, dy = (
+            self.rng.gauss(0, edge_length / 5.),
+            self.rng.gauss(0, edge_length / 5.))
         for x, y in product(range(n_side), range(n_side)):
             i_to_add = len(g)
             coords = (
-                x * edge_length + edge_length / 2,
-                y * edge_length + edge_length / 2,
+                x * edge_length + edge_length / 2 + dx,
+                y * edge_length + edge_length / 2 + dy
             )
             if is_coord_free(self.map_img, coords):
                 g.add_node(i_to_add, **{POS: coords})
@@ -753,7 +769,7 @@ class GridMap8(GridMap):
 
 def run():
     df = pd.DataFrame()
-    ns = [500, 1200, 2000]
+    ns = [500, 200, 100]
     trials = [
         # (CVT, {
         #     'DA': 0.14,
@@ -836,49 +852,49 @@ def run():
         #     'maxIter': 50000,
         # }),
         # (ORM, {
-        #     'n': ns[0],
+        #     'target_n': ns[0],
         #     'lr': 1e-3,
         #     'epochs': 50,
         # }),
         # (ORM, {
-        #     'n': ns[1],
+        #     'target_n': ns[1],
         #     'lr': 1e-3,
         #     'epochs': 50,
         # }),
         # (ORM, {
-        #     'n': ns[2],
+        #     'target_n': ns[2],
         #     'lr': 1e-3,
         #     'epochs': 50,
         # }),
         # (PRM, {
-        #     'n': ns[0],
+        #     'target_n': ns[0],
         #     'start_radius': 0.06,
         # }),
         # (PRM, {
-        #     'n': ns[1],
+        #     'target_n': ns[1],
         #     'start_radius': 0.035,
         # }),
         # (PRM, {
-        #     'n': ns[2],
+        #     'target_n': ns[2],
         #     'start_radius': 0.025,
         # }),
         (GridMap4, {
-            'n': ns[0],
+            'target_n': ns[0],
         }),
         (GridMap4, {
-            'n': ns[1],
+            'target_n': ns[1],
         }),
         (GridMap4, {
-            'n': ns[2],
+            'target_n': ns[2],
         }),
         (GridMap8, {
-            'n': ns[0],
+            'target_n': ns[0],
         }),
         (GridMap8, {
-            'n': ns[1],
+            'target_n': ns[1],
         }),
         (GridMap8, {
-            'n': ns[2],
+            'target_n': ns[2],
         })
     ]
     if not os.path.exists(EXAMPLE_FOLDER):
@@ -905,6 +921,7 @@ def run():
                 df.at[i, 'map'] = map_name
                 df.at[i, 'roadmap'] = _cls.__name__
                 df.at[i, 'seed'] = seed
+                df.at[i, 'target_n'] = args['target_n']
                 params_to_run.append((_cls, args, map_name, seed, i))
     df = df.copy()
 
@@ -915,7 +932,7 @@ def run():
             ptr[1]['n_edges'] = df[
                 df['roadmap'] == GSRM.__name__][
                 df['map'] == map_name][
-                df['GSRM_target_n'] == args['n']
+                df['GSRM_target_n'] == args['target_n']
             ]['n_edges'].values[0]
         _, data = _run_proxy(ptr)
         for k, v in data.items():
@@ -968,6 +985,42 @@ def _make_sure_folder_exists_and_is_empty(folder):
         for f in os.listdir(folder):
             os.remove(os.path.join(folder, f))
 
+def prepare_mean():
+    """Read the csv and prepare a new csv with additional columns
+    that contain the mean of path_length and the success rate."""
+    df = pd.read_csv(CSV_PATH)
+    # mean only over successful runs
+    maps_in_data = df.map.unique()
+    roadmaps_in_data = df.roadmap.unique()
+    target_ns_in_data = df.target_n.unique()
+    target_ns_in_data = target_ns_in_data[
+        np.logical_not(np.isnan(target_ns_in_data))]
+    for map_, roadmap, target_n in product(
+        maps_in_data, roadmaps_in_data, target_ns_in_data
+    ):
+        mask_this_data = np.logical_and(
+            np.logical_and(df.map == map_, df.roadmap == roadmap),
+            df.target_n == target_n)
+        mask_success_all_roadmaps = np.logical_and(
+            df.map == map_, df.target_n == target_n)
+        mask_this_data_where_all_roadmaps_success = np.logical_and(
+            mask_this_data, mask_success_all_roadmaps)
+
+        # calculate the means where all rms were successful
+        df.loc[mask_this_data, 'path_length_mean'] = df[
+            mask_this_data_where_all_roadmaps_success][
+            _get_cols_by_prefix(df, 'path_length_')].mean(axis=1)
+        df.loc[mask_this_data, 'rel_straight_length_mean'] = df[
+            mask_this_data_where_all_roadmaps_success][
+            _get_cols_by_prefix(df, 'rel_straight_length_')].mean(axis=1)
+        df.loc[mask_this_data, 'visited_nodes_mean'] = df[
+            mask_this_data_where_all_roadmaps_success][
+            _get_cols_by_prefix(df, 'visited_nodes_')].mean(axis=1)
+
+        df.loc[mask_this_data, 'success_rate'] = df[mask_this_data][
+            _get_cols_by_prefix(df, 'success_')].mean(axis=1)
+
+    df.to_csv(CSV_MEAN_PATH)
 
 def plot():
     interesting_vars = [
@@ -980,7 +1033,7 @@ def plot():
         'runtime_ms'
     ]
 
-    df = pd.read_csv(CSV_PATH)
+    df = pd.read_csv(CSV_MEAN_PATH)
     sns.set_theme(style='whitegrid')
     sns.set(rc={'figure.dpi': DPI})
     _make_sure_folder_exists_and_is_empty(PLOT_FOLDER)
@@ -1060,10 +1113,13 @@ def plot():
             for row in range(n_rows):
                 map_name = df_roadmap.iloc[row]['map']
                 for i in i_s:
-                    data.append((
-                        df_compare.iloc[row][f'{prefix}{i:02d}'],
-                        df_roadmap.iloc[row][f'{prefix}{i:02d}'],
-                    ))
+                    other, our = (
+                        df_compare.iloc[row][f'{prefix}{i:03d}'],
+                        df_roadmap.iloc[row][f'{prefix}{i:03d}'],
+                    )
+                    if np.isnan(other) or np.isnan(our):
+                        continue
+                    data.append([other, our])
                     map_names.append(map_name)
         assert len(data_len) == len(map_names_len), \
             f'{len(data_len)=} != {len(map_names_len)=}'
@@ -1147,7 +1203,7 @@ def _group_n_nodes(df, n_n_nodes):
 
 
 def plots_for_paper():
-    df = pd.read_csv(CSV_PATH)
+    df = pd.read_csv(CSV_MEAN_PATH)
     sns.set_theme(style='whitegrid')
     # sns.set(rc={'figure.dpi': DPI})
     _make_sure_folder_exists_and_is_empty(PLOT_FOLDER_PAPER)
@@ -1213,12 +1269,13 @@ def table_for_paper():
     from texttable import Texttable
     df = pd.read_csv(CSV_PATH)
 
-    interesting_maps = [
-        'plain',
-        'z',
-        'b',
-        'dense34'
-    ]
+    # interesting_maps = [
+    #     'plain',
+    #     'z',
+    #     'b',
+    #     'dense34'
+    # ]
+    interesting_maps = list(df.map.unique())
     data = OrderedDict()
     for i_m, map_name in enumerate(interesting_maps):
         df_map = df[df.map == map_name].copy()
@@ -1257,7 +1314,8 @@ def table_for_paper():
     for map_name, roadmap_data in data.items():
         map_name_title = map_name.replace('34', '').capitalize()
         table.add_row([map_name_title] + [
-            f'\SI{{{roadmap_data[roadmap]:.1f}}}{{\percent}}' for roadmap in roadmap_names
+            f'\SI{{{roadmap_data[roadmap]:.1f}}}{{\percent}}'
+            for roadmap in roadmap_names
         ])
     print(table.draw())
     print(latextable.draw_latex(table))
@@ -1265,6 +1323,8 @@ def table_for_paper():
 
 if __name__ == '__main__':
     run()
+    prepare_mean()
     plot()
     plots_for_paper()
     table_for_paper()
+    plt.close('all')
