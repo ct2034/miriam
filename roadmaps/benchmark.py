@@ -674,14 +674,11 @@ class GridMap4(GridMap):
         edge_length = 1 / (n_side + 1)
         g = nx.Graph()
         grid = np.full((n_side, n_side), -1)
-        dx, dy = (
-            self.rng.gauss(0, edge_length / 5.),
-            self.rng.gauss(0, edge_length / 5.))
         for x, y in product(range(n_side), range(n_side)):
             i_to_add = len(g)
             coords = (
-                x * edge_length + edge_length / 2 + dx,
-                y * edge_length + edge_length / 2 + dy
+                x * edge_length + edge_length / 2,
+                y * edge_length + edge_length / 2
             )
             if is_coord_free(self.map_img, coords):
                 g.add_node(i_to_add, **{POS: coords})
