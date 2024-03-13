@@ -63,7 +63,7 @@ MAP_NAMES = [
     # 'simple',
     'slam'
 ]
-PLOT_GSRM_ON_MAP = 'rooms_30'
+PLOT_GSRM_ON_MAP = 'slam'
 assert PLOT_GSRM_ON_MAP in MAP_NAMES
 N_SEEDS = 10
 
