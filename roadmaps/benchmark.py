@@ -888,17 +888,17 @@ def run():
         }),
         (ORM, {
             'target_n': ns[0],
-            'lr': 1e-3,
+            'lr': 1e-4,
             'epochs': 50,
         }),
         (ORM, {
             'target_n': ns[1],
-            'lr': 1e-3,
+            'lr': 1e-4,
             'epochs': 50,
         }),
         (ORM, {
             'target_n': ns[2],
-            'lr': 1e-3,
+            'lr': 1e-4,
             'epochs': 50,
         }),
         (PRM, {
