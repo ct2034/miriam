@@ -567,7 +567,7 @@ class SPARS2(RoadmapToTest):
             spars_kwargs['sparseDelta'] = sparse_delta
             s = Spars()
             edges, self.runtime_ms = s.run(
-                mapFile=map_fname,
+                mapFile=self.map_fname,
                 seed=rng.randint(0, 2**16),
                 **spars_kwargs,
             )
@@ -868,7 +868,7 @@ def run():
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
-            'maxIter': 50000,
+            'maxIter': 40000,
         }),
         (SPARS2, {
             'target_n': ns[1],
@@ -876,7 +876,7 @@ def run():
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
-            'maxIter': 50000,
+            'maxIter': 25000,
         }),
         (SPARS2, {
             'target_n': ns[2],
@@ -884,7 +884,7 @@ def run():
             'stretchFactor': 3,
             'maxFailures': 500,
             'maxTime': 8.,  # ignored
-            'maxIter': 50000,
+            'maxIter': 15000,
         }),
         (ORM, {
             'target_n': ns[0],
@@ -1062,6 +1062,8 @@ def prepare_mean():
                 np.logical_and(
                     df.target_n == target_n,
                     df.roadmap == roadmap)))
+        if not mask_this_data.any():
+            continue
         this_i = int(df[mask_this_data].index[0])
         mask_all_roadmaps = np.logical_and(
             df.map == map_,
