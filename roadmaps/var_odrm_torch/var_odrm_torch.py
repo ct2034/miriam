@@ -110,7 +110,7 @@ def make_graph_and_flann(
         len(pos_np) * .5, map_img, rng, free_points=False)
     pos_np_w_dummy = np.append(pos_np, dummy_points.detach().numpy(), axis=0)
     cells, _ = voronoi_frames(pos_np_w_dummy, clip="bbox")
-    delaunay = weights.Rook.from_dataframe(cells)
+    delaunay = weights.Rook.from_dataframe(cells, use_index=False)
     g: nx.Graph = delaunay.to_networkx()  # type: ignore
     nx.set_node_attributes(g, {
         i: pos_np[i] for i in range(len(pos_np))}, POS)
