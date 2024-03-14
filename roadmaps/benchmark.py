@@ -44,7 +44,6 @@ DPI = 500
 
 # this list is sorted roughly by complexity
 MAP_NAMES = [
-    'Berlin_1_256',
     'plain',
     # 'c',
     # 'x',
@@ -57,11 +56,12 @@ MAP_NAMES = [
     # 'dense34',
     # 'dense',
     # 'rooms_20',
-    'rooms2_30',
+    # 'rooms2_30',
     'rooms_30',
-    'rooms_40',
+    # 'rooms_40',
     # 'simple',
-    'slam'
+    'slam',
+    'brc201',
 ]
 PLOT_GSRM_ON_MAP = 'slam'
 assert PLOT_GSRM_ON_MAP in MAP_NAMES
@@ -149,11 +149,11 @@ class RoadmapToTest:
             np.array(self.pos_np, dtype=np.float32), random_seed=0)
 
     def _check_line(
-            self, 
-            a: Tuple[float, float], 
+            self,
+            a: Tuple[float, float],
             b: Tuple[float, float],
             map_img: Optional[MAP_IMG] = None
-            ) -> bool:
+    ) -> bool:
         if map_img is None:
             map_img = self.map_img
         line = bresenham(
@@ -232,7 +232,8 @@ class RoadmapToTest:
                     continue
                 if not self._check_line(start, end):
                     continue
-                straight_len = np.linalg.norm(np.array(start) - np.array(end)).item()
+                straight_len = np.linalg.norm(
+                    np.array(start) - np.array(end)).item()
                 if straight_len < 0.5:
                     continue
                 try:
@@ -354,10 +355,10 @@ class GSRM(RoadmapToTest):
         # (initial) resolution set below
         actual_n = 100  # 100 works right now
         assert target_n >= actual_n, f'{target_n=} must be >= {actual_n=}'
-        
+
         def _goal_check(target_n, actual_n):
             return abs(target_n - actual_n) < 0.1 * target_n
-        
+
         pos = None
         from roadmaps.gsorm.build.libgsorm import Gsorm
         from roadmaps.var_odrm_torch.var_odrm_torch import make_graph_and_flann
@@ -367,6 +368,8 @@ class GSRM(RoadmapToTest):
         if map_fname not in GSRM.resolution_stats:
             GSRM.resolution_stats[map_fname] = ([], [])
         resolutions, ns = GSRM.resolution_stats[map_fname]
+        
+        resolution = 250
 
         while not _goal_check(target_n, actual_n) or first_run:
             first_run = False
@@ -382,7 +385,7 @@ class GSRM(RoadmapToTest):
                 if resolution == resolutions[-1]:
                     if target_n > actual_n:
                         resolution += 1
-                    else: # target_n < actual_n
+                    else:  # target_n < actual_n
                         resolution -= 1
             kwargs['resolution'] = resolution
             gs = Gsorm()
@@ -540,6 +543,9 @@ class CVT(RoadmapToTest):
 
 
 class SPARS2(RoadmapToTest):
+
+    size_stats = {}
+
     def __init__(self,
                  map_fname: str,
                  rng: Random,
@@ -555,16 +561,30 @@ class SPARS2(RoadmapToTest):
             spars_kwargs.pop('ideal_n')
         dense_to_sparse_multiplier = spars_kwargs.pop(
             'dense_to_sparse_multiplier')
+        stretch_factor = spars_kwargs.pop('stretchFactor')
         dense_delta = 2.5
         sparse_delta = dense_delta * dense_to_sparse_multiplier
         n_nodes = 0
-        while n_nodes < target_n:
+
+        def _goal_check(target_n, actual_n):
+            return abs(target_n - actual_n) < 0.1 * target_n
+
+        if map_fname not in SPARS2.size_stats:
+            SPARS2.size_stats[map_fname] = {}
+        if target_n not in SPARS2.size_stats[map_fname]:
+            SPARS2.size_stats[map_fname][target_n] = ([], [], [], [])
+        dense_deltas, sparse_deltas, stretch_factors, ns = SPARS2.size_stats[map_fname][target_n]
+        dense_delta = 1.5
+        sparse_delta = dense_delta * dense_to_sparse_multiplier
+
+        while not _goal_check(target_n, n_nodes):
             print(f"Got {n_nodes} nodes, target was {target_n}.")
             print(f"Trying denseDelta={dense_delta}, "
                   f"sparseDelta={sparse_delta}...")
 
             spars_kwargs['denseDelta'] = dense_delta
             spars_kwargs['sparseDelta'] = sparse_delta
+            spars_kwargs['stretchFactor'] = stretch_factor
             s = Spars()
             edges, self.runtime_ms = s.run(
                 mapFile=self.map_fname,
@@ -589,8 +609,33 @@ class SPARS2(RoadmapToTest):
             print("edges", g.number_of_edges())
             n_nodes = g.number_of_nodes()
 
-            dense_delta *= .93
-            sparse_delta *= .93
+            if _goal_check(target_n, n_nodes):
+                break
+
+            if len(ns) == 0:
+                dense_deltas.append(dense_delta)
+                sparse_deltas.append(sparse_delta)
+                stretch_factors.append(stretch_factor)
+                ns.append(n_nodes)
+            else:
+                # if we improved, keep the values
+                if abs(target_n - n_nodes) < abs(target_n - ns[-1]):
+                    dense_deltas.append(dense_delta)
+                    sparse_deltas.append(sparse_delta)
+                    stretch_factors.append(stretch_factor)
+                    ns.append(n_nodes)
+                # if we didn't improve, try again with the last value
+                else: 
+                    dense_delta = dense_deltas[-1]
+                    sparse_delta = sparse_deltas[-1]
+                    stretch_factor = stretch_factors[-1]
+
+            # adjust deltas
+            dense_delta *= rng.gauss(1, 0.1)
+            sparse_delta *= rng.gauss(1, 0.1)
+            stretch_factor *= rng.gauss(1, 0.1)
+            
+            print(f"{len(dense_deltas)=})")
 
         # plot
         # fig, ax = plt.subplots(figsize=(10, 10), dpi=DPI)
@@ -804,7 +849,7 @@ class GridMap8(GridMap):
 
 def run():
     df = pd.DataFrame()
-    ns = [300, 200, 100]
+    ns = [250, 500, 1000]
     trials = [
         # (CVT, {
         #     'DA': 0.14,
@@ -864,41 +909,41 @@ def run():
         }),
         (SPARS2, {
             'target_n': ns[0],
-            'dense_to_sparse_multiplier': 40,
-            'stretchFactor': 3,
-            'maxFailures': 500,
-            'maxTime': 8.,  # ignored
+            'dense_to_sparse_multiplier': 50,
+            'stretchFactor': 5,
+            'maxFailures': 1000,
+            'maxTime': 4.,  # ignored
             'maxIter': 40000,
         }),
         (SPARS2, {
             'target_n': ns[1],
-            'dense_to_sparse_multiplier': 30,
-            'stretchFactor': 3,
-            'maxFailures': 500,
-            'maxTime': 8.,  # ignored
+            'dense_to_sparse_multiplier': 50,
+            'stretchFactor': 5,
+            'maxFailures': 1000,
+            'maxTime': 4.,  # ignored
             'maxIter': 25000,
         }),
         (SPARS2, {
             'target_n': ns[2],
-            'dense_to_sparse_multiplier': 20,
-            'stretchFactor': 3,
-            'maxFailures': 500,
-            'maxTime': 8.,  # ignored
-            'maxIter': 15000,
+            'dense_to_sparse_multiplier': 50,
+            'stretchFactor': 5,
+            'maxFailures': 1000,
+            'maxTime': 4.,  # ignored
+            'maxIter': 20000,
         }),
         (ORM, {
             'target_n': ns[0],
-            'lr': 1e-4,
+            'lr': 5e-5,
             'epochs': 50,
         }),
         (ORM, {
             'target_n': ns[1],
-            'lr': 1e-4,
+            'lr': 5e-5,
             'epochs': 50,
         }),
         (ORM, {
             'target_n': ns[2],
-            'lr': 1e-4,
+            'lr': 5e-5,
             'epochs': 50,
         }),
         (PRM, {
@@ -944,6 +989,8 @@ def run():
     for _cls, _args in trials:
         for map_name in MAP_NAMES:
             args = _args.copy()
+            if args['target_n'] < 250 and _cls == SPARS2:
+                continue # skip spars2 for small target_n
             if 'plot' in args:
                 if map_name == PLOT_GSRM_ON_MAP and args['plot']:
                     print(f'Plotting Trial {len(df) + 1} on {map_name}')
@@ -962,29 +1009,26 @@ def run():
 
     for i_p, ptr in enumerate(tqdm(params_to_run)):
         _cls, args, map_name, seed, i = ptr
+        if 'ideal_n' in args:
+            target_n = args['ideal_n']
+        else:
+            target_n = args['target_n']
         # for prm, we want to have the same n_edges as gsrm
         if _cls == PRM:
-            if 'ideal_n' in args:
-                target_n = args['ideal_n']
-            else:
-                target_n = args['target_n']
             ptr[1]['n_edges'] = df[
                 df['roadmap'] == GSRM.__name__][
                 df['map'] == map_name][
                 df['GSRM_target_n'] == target_n
             ]['n_edges'].values[0]
         if _cls != GSRM:
-            if 'ideal_n' in args:
-                target_n = args['ideal_n']
-            else:
-                target_n = args['target_n']
             data_target_ns = df[
                 df['roadmap'] == GSRM.__name__][
                 df['map'] == map_name][
                 df['target_n'] == target_n
             ]
             # assume that gsrm was already run
-            assert len(data_target_ns) == N_SEEDS, f"Run gsrm first for {map_name=}, {args['target_n']=}"
+            assert len(
+                data_target_ns) == N_SEEDS, f"Run gsrm first for {map_name=}, {args['target_n']=}"
             # get target_n from gsrm
             new_target_n = data_target_ns['n_nodes'].mean()
             if 'ideal_n' not in args:
@@ -1041,6 +1085,7 @@ def _make_sure_folder_exists_and_is_empty(folder):
         for f in os.listdir(folder):
             os.remove(os.path.join(folder, f))
 
+
 def prepare_mean():
     """Read the csv and prepare a new csv with additional columns
     that contain the mean of path_length and the success rate."""
@@ -1079,17 +1124,18 @@ def prepare_mean():
         success_idx = [int(col.split("_")[-1]) for col in success_cols]
         df.at[this_i, 'path_length_mean'] = df[mask_this_data][
             [f'path_length_{i:03d}' for i in success_idx]
-            ].mean(axis=1).values[0]
+        ].mean(axis=1).values[0]
         # df.at[this_i, 'rel_straight_length_mean'] = df[mask_this_data][
         #     [f'rel_straight_length_{i:03d}' for i in success_idx
         #     ]].mean(axis=1)
         df.at[this_i, 'visited_nodes_mean'] = df[mask_this_data][
             [f'visited_nodes_{i:03d}' for i in success_idx]
-            ].mean(axis=1).values[0]
+        ].mean(axis=1).values[0]
         df.at[this_i, 'success_rate'] = df[mask_this_data][
             _get_cols_by_prefix(df, 'success_')
         ].mean(axis=1).values[0]
     df.to_csv(CSV_MEAN_PATH)
+
 
 def plot():
     interesting_vars = [
@@ -1286,18 +1332,23 @@ def plots_for_paper():
 
     interesting_maps = [
         'plain',
-        'Berlin_1_256',  # 'z',
+        'brc201',
         'rooms_30',
         'slam'
     ]
     n_plots = len(interesting_maps)
     n_n_nodes = len(df[df.roadmap == 'GSRM'].GSRM_target_n.unique())
+    min_n = min(df.target_n.unique())
     print(f'{n_plots=}, {n_n_nodes=}')
     df = _group_n_nodes(df, n_n_nodes)
     legend_i = 1
 
+    # SPARS2 does not perform well on small maps
+    df = df[np.logical_or(
+        df.roadmap != 'SPARS2',
+        df.target_n != min_n)]
+
     for key, title in [
-        ('path_length_mean', 'Path Length'),
         ('visited_nodes_mean', 'Visited Vertices'),
         ('runtime_ms', 'Runtime Generation (ms)'),
         ('success_rate', 'Success Rate')
@@ -1336,6 +1387,103 @@ def plots_for_paper():
             )
 
 
+def plot_regret():
+    interesting_maps = [
+        'plain',
+        'brc201',
+        'rooms_30',
+        'slam'
+    ]
+    n_plots = len(interesting_maps)
+
+    df = pd.read_csv(CSV_PATH)
+    # regret only over successful runs
+    maps_in_data = df.map.unique()
+    roadmaps_in_data = df.roadmap.unique()
+    target_ns_in_data = df.target_n.unique()
+    min_n = min(target_ns_in_data)
+    target_ns_in_data = target_ns_in_data[
+        np.logical_not(np.isnan(target_ns_in_data))]
+    seeds_in_data = df.seed.unique()
+    plot_df = pd.DataFrame()
+    for map_, roadmap, target_n, seed in product(
+        maps_in_data, roadmaps_in_data, target_ns_in_data, seeds_in_data
+    ):
+        if roadmap == 'SPARS2' and target_n == min_n:
+            # SPARS2 does not perform well on small maps
+            continue
+        mask_this_data = np.logical_and(
+            df.map == map_,
+            np.logical_and(
+                df.seed == seed,
+                np.logical_and(
+                    df.target_n == target_n,
+                    df.roadmap == roadmap)))
+        if not mask_this_data.any():
+            continue
+        mask_gsrm = np.logical_and(
+            df.map == map_,
+            np.logical_and(
+                df.seed == seed,
+                np.logical_and(
+                    df.target_n == target_n,
+                    df.roadmap == 'GSRM')))
+        if not mask_gsrm.any():
+            continue
+
+        this_i = int(df[mask_this_data].index[0])
+        mask_both = np.logical_or(mask_gsrm, mask_this_data)
+        success_cols = _get_cols_by_prefix(df, 'success_')
+        # Filter out colums where all roadmaps where successful:
+        success_cols = [
+            col for col in success_cols if df[mask_both][col].all()]
+        if len(success_cols) == 0:
+            continue
+        success_idx = [int(col.split("_")[-1]) for col in success_cols]
+        # calculate regret
+        plot_df.at[this_i, 'regret'] = (df[mask_this_data][
+            [f'path_length_{i:03d}' for i in success_idx]
+        ].mean(axis=1).values[0] - df[mask_gsrm][
+            [f'path_length_{i:03d}' for i in success_idx]
+        ].mean(axis=1).values[0])/df[mask_this_data][
+            [f'path_length_{i:03d}' for i in success_idx]
+        ].mean(axis=1).values[0]
+        plot_df.at[this_i, 'map'] = map_
+        plot_df.at[this_i, 'roadmap'] = roadmap
+        plot_df.at[this_i, 'n_nodes'] = target_n
+
+    legend_i = 1
+    fig, axs = plt.subplots(
+        2,
+        n_plots // 2,
+        figsize=(4.5*(n_plots // 2), 7))
+    axs = axs.flatten()
+    for i, map_name in enumerate(interesting_maps):
+        ax = axs[i]
+        df_map = plot_df[plot_df.map == map_name]
+        sns.lineplot(
+            data=df_map,
+            x='n_nodes',
+            y='regret',
+            hue='roadmap',
+            marker='.',
+            ax=ax,
+            legend=(i == legend_i),
+        )
+        ax.set_xlabel('Number of Vertices')
+        ax.set_ylabel('Regret')
+        map_name_title = _remove_numbers_after_mapnames_and_cap(map_name)
+        ax.set_title(f'Map {map_name_title}')
+    axs[legend_i].legend(bbox_to_anchor=(1.1, 1.05))
+    fig.tight_layout()
+    for extension in ['png', 'pdf']:
+        plt.savefig(os.path.join(
+            PLOT_FOLDER_PAPER,
+            os.path.basename(CSV_PATH).replace(
+                '.csv',
+                f'_paper_regret.{extension}'))
+        )
+
 def table_for_paper():
     """Make a latex formatted table that contains how much shorter
     the paths from the different roadmaps are compared to the GSRM
@@ -1348,7 +1496,7 @@ def table_for_paper():
 
     interesting_maps = [
         'plain',
-        'Berlin_1_256',  # 'z',
+        'brc201',
         'rooms_30',
         'slam'
     ]
@@ -1367,7 +1515,7 @@ def table_for_paper():
                 df.roadmap == roadmap
             )
             data[map_name][roadmap] = 100 * (
-                df[mask_rm].path_length_mean.mean() - 
+                df[mask_rm].path_length_mean.mean() -
                 df[mask_gsrm].path_length_mean.mean()
             ) / df[mask_gsrm].path_length_mean.mean()
     print(data)
@@ -1392,9 +1540,10 @@ def table_for_paper():
 
 
 if __name__ == '__main__':
-    run()
-    prepare_mean()
-    plot()
+    # run()
+    # prepare_mean()
+    # plot()
     plots_for_paper()
+    plot_regret()
     table_for_paper()
     plt.close('all')
