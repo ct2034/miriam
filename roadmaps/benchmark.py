@@ -44,6 +44,7 @@ DPI = 500
 
 # this list is sorted roughly by complexity
 MAP_NAMES = [
+    'den520',
     'plain',
     # 'c',
     # 'x',
@@ -61,7 +62,7 @@ MAP_NAMES = [
     # 'rooms_40',
     # 'simple',
     'slam',
-    'brc201',
+    # 'brc201',
 ]
 PLOT_GSRM_ON_MAP = 'slam'
 assert PLOT_GSRM_ON_MAP in MAP_NAMES
@@ -849,7 +850,7 @@ class GridMap8(GridMap):
 
 def run():
     df = pd.DataFrame()
-    ns = [250, 500, 1000]
+    ns = [270, 530, 1000]
     trials = [
         # (CVT, {
         #     'DA': 0.14,
@@ -1332,7 +1333,7 @@ def plots_for_paper():
 
     interesting_maps = [
         'plain',
-        'brc201',
+        'den520',
         'rooms_30',
         'slam'
     ]
@@ -1390,7 +1391,7 @@ def plots_for_paper():
 def plot_regret():
     interesting_maps = [
         'plain',
-        'brc201',
+        'den520',
         'rooms_30',
         'slam'
     ]
@@ -1496,7 +1497,7 @@ def table_for_paper():
 
     interesting_maps = [
         'plain',
-        'brc201',
+        'den520',
         'rooms_30',
         'slam'
     ]
@@ -1539,11 +1540,61 @@ def table_for_paper():
     print(latextable.draw_latex(table))
 
 
+def table_number_edges():
+    """Make a latex formatted table that contains the number of edges
+    for different roadmaps on different maps.
+    """
+    import latextable
+    from collections import OrderedDict
+    from texttable import Texttable
+    df = pd.read_csv(CSV_MEAN_PATH)
+
+    interesting_maps = [
+        'plain',
+        'den520',
+        'rooms_30',
+        'slam'
+    ]
+    data = OrderedDict()
+    for i_m, map_name in enumerate(interesting_maps):
+        data[map_name] = OrderedDict()
+        for i_r, roadmap in enumerate(df.roadmap.unique()):
+            mask_rm = np.logical_and(
+                df.map == map_name,
+                df.roadmap == roadmap
+            )
+            data[map_name][roadmap] = (
+                df[mask_rm].n_edges.mean(),
+                df[mask_rm].n_nodes.mean()
+            )
+
+    roadmap_names = sorted(df.roadmap.unique())
+
+    table = Texttable()
+    table.set_deco(Texttable.HEADER)
+    table.set_cols_dtype(['t'] + ['i'] * len(roadmap_names))
+    table.set_cols_align(['l'] + ['r'] * len(roadmap_names))
+
+    table.add_row(["Map"] + roadmap_names)
+    for map_name, roadmap_data in data.items():
+        map_name_title = _remove_numbers_after_mapnames_and_cap(map_name)
+        row_nodes = ['Nodes ' + map_name_title] + [
+            int(roadmap_data[roadmap][1]) for roadmap in roadmap_names
+        ]
+        row_edges = ['Edges ' + map_name_title] + [
+            int(roadmap_data[roadmap][0]) for roadmap in roadmap_names
+        ]
+        table.add_row(row_nodes)
+        table.add_row(row_edges)
+    print(latextable.draw_latex(table))
+
+
 if __name__ == '__main__':
     # run()
-    # prepare_mean()
-    # plot()
+    prepare_mean()
+    plot()
     plots_for_paper()
     plot_regret()
     table_for_paper()
+    table_number_edges()
     plt.close('all')
