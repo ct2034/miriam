@@ -1406,84 +1406,88 @@ def plot_regret():
     target_ns_in_data = target_ns_in_data[
         np.logical_not(np.isnan(target_ns_in_data))]
     seeds_in_data = df.seed.unique()
-    plot_df = pd.DataFrame()
-    for map_, roadmap, target_n, seed in product(
-        maps_in_data, roadmaps_in_data, target_ns_in_data, seeds_in_data
-    ):
-        if roadmap == 'SPARS2' and target_n == min_n:
-            # SPARS2 does not perform well on small maps
-            continue
-        mask_this_data = np.logical_and(
-            df.map == map_,
-            np.logical_and(
-                df.seed == seed,
+    for key, title in [
+        ('path_length', 'Path Length Regret'),
+        ('visited_nodes', 'Visited Vertices Regret'),
+    ]:
+        plot_df = pd.DataFrame()
+        for map_, roadmap, target_n, seed in product(
+            maps_in_data, roadmaps_in_data, target_ns_in_data, seeds_in_data
+        ):
+            if roadmap == 'SPARS2' and target_n == min_n:
+                # SPARS2 does not perform well on small maps
+                continue
+            mask_this_data = np.logical_and(
+                df.map == map_,
                 np.logical_and(
-                    df.target_n == target_n,
-                    df.roadmap == roadmap)))
-        if not mask_this_data.any():
-            continue
-        mask_gsrm = np.logical_and(
-            df.map == map_,
-            np.logical_and(
-                df.seed == seed,
+                    df.seed == seed,
+                    np.logical_and(
+                        df.target_n == target_n,
+                        df.roadmap == roadmap)))
+            if not mask_this_data.any():
+                continue
+            mask_gsrm = np.logical_and(
+                df.map == map_,
                 np.logical_and(
-                    df.target_n == target_n,
-                    df.roadmap == 'GSRM')))
-        if not mask_gsrm.any():
-            continue
+                    df.seed == seed,
+                    np.logical_and(
+                        df.target_n == target_n,
+                        df.roadmap == 'GSRM')))
+            if not mask_gsrm.any():
+                continue
 
-        this_i = int(df[mask_this_data].index[0])
-        mask_both = np.logical_or(mask_gsrm, mask_this_data)
-        success_cols = _get_cols_by_prefix(df, 'success_')
-        # Filter out colums where all roadmaps where successful:
-        success_cols = [
-            col for col in success_cols if df[mask_both][col].all()]
-        if len(success_cols) == 0:
-            continue
-        success_idx = [int(col.split("_")[-1]) for col in success_cols]
-        # calculate regret
-        plot_df.at[this_i, 'regret'] = (df[mask_this_data][
-            [f'path_length_{i:03d}' for i in success_idx]
-        ].mean(axis=1).values[0] - df[mask_gsrm][
-            [f'path_length_{i:03d}' for i in success_idx]
-        ].mean(axis=1).values[0])/df[mask_this_data][
-            [f'path_length_{i:03d}' for i in success_idx]
-        ].mean(axis=1).values[0]
-        plot_df.at[this_i, 'map'] = map_
-        plot_df.at[this_i, 'roadmap'] = roadmap
-        plot_df.at[this_i, 'n_nodes'] = target_n
+            this_i = int(df[mask_this_data].index[0])
+            mask_both = np.logical_or(mask_gsrm, mask_this_data)
+            success_cols = _get_cols_by_prefix(df, 'success_')
+            # Filter out colums where all roadmaps where successful:
+            success_cols = [
+                col for col in success_cols if df[mask_both][col].all()]
+            if len(success_cols) == 0:
+                continue
+            success_idx = [int(col.split("_")[-1]) for col in success_cols]
+            # calculate regret
+            plot_df.at[this_i, f'{key}_regret'] = (df[mask_this_data][
+                [f'{key}_{i:03d}' for i in success_idx]
+            ].mean(axis=1).values[0] - df[mask_gsrm][
+                [f'{key}_{i:03d}' for i in success_idx]
+            ].mean(axis=1).values[0])/df[mask_this_data][
+                [f'{key}_{i:03d}' for i in success_idx]
+            ].mean(axis=1).values[0]
+            plot_df.at[this_i, 'map'] = map_
+            plot_df.at[this_i, 'roadmap'] = roadmap
+            plot_df.at[this_i, 'n_nodes'] = target_n
 
-    legend_i = 1
-    fig, axs = plt.subplots(
-        2,
-        n_plots // 2,
-        figsize=(4.5*(n_plots // 2), 7))
-    axs = axs.flatten()
-    for i, map_name in enumerate(interesting_maps):
-        ax = axs[i]
-        df_map = plot_df[plot_df.map == map_name]
-        sns.lineplot(
-            data=df_map,
-            x='n_nodes',
-            y='regret',
-            hue='roadmap',
-            marker='.',
-            ax=ax,
-            legend=(i == legend_i),
-        )
-        ax.set_xlabel('Number of Vertices')
-        ax.set_ylabel('Regret')
-        map_name_title = _remove_numbers_after_mapnames_and_cap(map_name)
-        ax.set_title(f'Map {map_name_title}')
-    axs[legend_i].legend(bbox_to_anchor=(1.1, 1.05))
-    fig.tight_layout()
-    for extension in ['png', 'pdf']:
-        plt.savefig(os.path.join(
-            PLOT_FOLDER_PAPER,
-            os.path.basename(CSV_PATH).replace(
-                '.csv',
-                f'_paper_regret.{extension}'))
-        )
+        legend_i = 1
+        fig, axs = plt.subplots(
+            2,
+            n_plots // 2,
+            figsize=(4.5*(n_plots // 2), 7))
+        axs = axs.flatten()
+        for i, map_name in enumerate(interesting_maps):
+            ax = axs[i]
+            df_map = plot_df[plot_df.map == map_name]
+            sns.lineplot(
+                data=df_map,
+                x='n_nodes',
+                y=f'{key}_regret',
+                hue='roadmap',
+                marker='.',
+                ax=ax,
+                legend=(i == legend_i),
+            )
+            ax.set_xlabel('Number of Vertices')
+            ax.set_ylabel(title)
+            map_name_title = _remove_numbers_after_mapnames_and_cap(map_name)
+            ax.set_title(f'Map {map_name_title}')
+        axs[legend_i].legend(bbox_to_anchor=(1.1, 1.05))
+        fig.tight_layout()
+        for extension in ['png', 'pdf']:
+            plt.savefig(os.path.join(
+                PLOT_FOLDER_PAPER,
+                os.path.basename(CSV_PATH).replace(
+                    '.csv',
+                    f'_paper_{key}_regret.{extension}'))
+            )
 
 def table_for_paper():
     """Make a latex formatted table that contains how much shorter
@@ -1578,7 +1582,7 @@ def table_number_edges():
     table.add_row(["Map"] + roadmap_names)
     for map_name, roadmap_data in data.items():
         map_name_title = _remove_numbers_after_mapnames_and_cap(map_name)
-        row_nodes = ['Nodes ' + map_name_title] + [
+        row_nodes = ['Vertices ' + map_name_title] + [
             int(roadmap_data[roadmap][1]) for roadmap in roadmap_names
         ]
         row_edges = ['Edges ' + map_name_title] + [
@@ -1591,8 +1595,8 @@ def table_number_edges():
 
 if __name__ == '__main__':
     # run()
-    prepare_mean()
-    plot()
+    # prepare_mean()
+    # plot()
     plots_for_paper()
     plot_regret()
     table_for_paper()
