@@ -304,6 +304,14 @@ class RoadmapToTest:
                 path = make_paths(self.g, 1, map_img_t, Random(seed))[0]
                 path_len = get_path_len(
                     pos_torch, path, False).item()
+                a, b, _ = path
+                straight_len = np.linalg.norm(
+                    np.array(a) - np.array(b)).item()
+                if straight_len < 0.3:
+                    # longer paths look more interesting
+                    seed += 1
+                    path = None
+                    continue
             except (ValueError, IndexError):
                 seed += 1
         start, end, node_path = path
@@ -741,20 +749,20 @@ class GridMap(RoadmapToTest):
         target_n = roadmap_specific_kwargs["target_n"]
         n_side = ceil(sqrt(target_n))
         start_t = timeit.default_timer()
-        g = self._make_gridmap(n_side)
+        g = self._make_gridmap(n_side, rng)
         while g.number_of_nodes() < target_n:
             n_side += 1
-            g = self._make_gridmap(n_side)
+            g = self._make_gridmap(n_side, rng)
         end_t = timeit.default_timer()
         self.runtime_ms = (end_t - start_t) * 1000
         self._set_graph(g)
 
-    def _make_gridmap(self, _):
+    def _make_gridmap(self, _, __):
         raise NotImplementedError("Implement in subclass.")
 
 
 class GridMap4(GridMap):
-    def _make_gridmap(self, n_side):
+    def _make_gridmap(self, n_side, _):
         edge_length = 1 / (n_side + 1)
         g = nx.Graph()
         grid = np.full((n_side, n_side), -1)
@@ -789,15 +797,17 @@ class GridMap4(GridMap):
 
 
 class GridMap8(GridMap):
-    def _make_gridmap(self, n_side):
+    def _make_gridmap(self, n_side, rng):
         edge_length = 1 / (n_side + 1)
         g = nx.Graph()
         grid = np.full((n_side, n_side), -1)
+        rx = rng.uniform(0, edge_length)
+        ry = rng.uniform(0, edge_length)
         for x, y in product(range(n_side), range(n_side)):
             i_to_add = len(g)
             coords = (
-                x * edge_length + edge_length / 2,
-                y * edge_length + edge_length / 2,
+                x * edge_length + rx,
+                y * edge_length + ry,
             )
             if is_coord_free(self.map_img, coords):
                 g.add_node(i_to_add, **{POS: coords})
@@ -1342,7 +1352,7 @@ def plots_for_paper():
     min_n = min(df.target_n.unique())
     print(f'{n_plots=}, {n_n_nodes=}')
     df = _group_n_nodes(df, n_n_nodes)
-    legend_i = 1
+    legend_i = 0
 
     # SPARS2 does not perform well on small maps
     df = df[np.logical_or(
@@ -1364,7 +1374,7 @@ def plots_for_paper():
             df_map = df[df.map == map_name]
             sns.lineplot(
                 data=df_map,
-                x='n_nodes',
+                x='target_n',
                 y=key,
                 hue='roadmap',
                 marker='.',
@@ -1377,14 +1387,24 @@ def plots_for_paper():
                 ax.set_yscale('log')
             map_name_title = _remove_numbers_after_mapnames_and_cap(map_name)
             ax.set_title(f'Map {map_name_title}')
-        axs[legend_i].legend(bbox_to_anchor=(1.1, 1.05))
+        axs[legend_i].get_legend().remove()
+        for ax in axs:
+            bbox = ax.get_position()
+            bbox.y0 -= 0.02
+            bbox.y1 -= 0.02
+            ax.set_position(bbox)
+        fig.legend(
+            loc='lower center',
+            bbox_to_anchor=(.5, -.01),
+            ncol=len(df.roadmap.unique()))
         fig.tight_layout()
         for extension in ['png', 'pdf']:
             plt.savefig(os.path.join(
                 PLOT_FOLDER_PAPER,
                 os.path.basename(CSV_PATH).replace(
                     '.csv',
-                    f'_paper_{key}.{extension}'))
+                    f'_paper_{key}.{extension}')),
+                dpi=DPI
             )
 
 
@@ -1450,7 +1470,7 @@ def plot_regret():
                 [f'{key}_{i:03d}' for i in success_idx]
             ].mean(axis=1).values[0] - df[mask_gsrm][
                 [f'{key}_{i:03d}' for i in success_idx]
-            ].mean(axis=1).values[0])/df[mask_this_data][
+            ].mean(axis=1).values[0])/df[mask_gsrm][
                 [f'{key}_{i:03d}' for i in success_idx]
             ].mean(axis=1).values[0]
             plot_df.at[this_i, 'map'] = map_
@@ -1479,14 +1499,24 @@ def plot_regret():
             ax.set_ylabel(title)
             map_name_title = _remove_numbers_after_mapnames_and_cap(map_name)
             ax.set_title(f'Map {map_name_title}')
-        axs[legend_i].legend(bbox_to_anchor=(1.1, 1.05))
+        axs[legend_i].get_legend().remove()
+        for ax in axs:
+            bbox = ax.get_position()
+            bbox.y0 -= 0.02
+            bbox.y1 -= 0.02
+            ax.set_position(bbox)
+        fig.legend(
+            loc='lower center',
+            bbox_to_anchor=(.5, -.01),
+            ncol=len(df.roadmap.unique()))
         fig.tight_layout()
         for extension in ['png', 'pdf']:
             plt.savefig(os.path.join(
                 PLOT_FOLDER_PAPER,
                 os.path.basename(CSV_PATH).replace(
                     '.csv',
-                    f'_paper_{key}_regret.{extension}'))
+                    f'_paper_{key}_regret.{extension}')),
+                dpi=DPI
             )
 
 def table_for_paper():
@@ -1590,6 +1620,7 @@ def table_number_edges():
         ]
         table.add_row(row_nodes)
         table.add_row(row_edges)
+    print(table.draw())
     print(latextable.draw_latex(table))
 
 
@@ -1599,6 +1630,6 @@ if __name__ == '__main__':
     # plot()
     plots_for_paper()
     plot_regret()
-    table_for_paper()
-    table_number_edges()
+    # table_for_paper()
+    # table_number_edges()
     plt.close('all')
