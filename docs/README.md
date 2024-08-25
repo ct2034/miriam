@@ -12,3 +12,5 @@ The platform will be developed open source and integrated with ROS.
 * Christian Henkel, Jannik Abbenseth and Marc Toussaint **An Optimal Algorithm to Solve the Combined Task Allocation and Path Finding Problem** @ IROS2019 ([more](iros2019))
 
 * Christian Henkel and Marc Toussaint **Optimized Directed Roadmap Graph for Multi-Agent Path Finding Using Stochastic Gradient Descent** @ SAC2020 ([more](sac2020))
+
+* Christian Henkel, Marc Toussaint and Wolfgang Hönig **GSRM: Building Roadmaps for Query-Efficient and Near-Optimal Path Planning Using a Reaction Diffusion System** @ IROS2024 ([more](iros2024))
