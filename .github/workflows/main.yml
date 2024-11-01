@@ -3,6 +3,7 @@ name: Python package
 on:
   schedule:
     - cron:  '0 0 * * 0'  # 0:00 on sundays
+  push:
 
 jobs:
   test:
