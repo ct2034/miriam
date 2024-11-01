@@ -30,7 +30,7 @@ jobs:
     #     ./make_cobra.sh
     - name: Build ecbs and cbs_roadmap
       run: |
-        sudo apt install -y cmake libboost1.71-dev libboost-program-options1.71-dev libboost-regex1.71-dev libyaml-cpp-dev
+        sudo apt install -y cmake libboost1.74-dev libboost-program-options1.74-dev libboost-regex1.74-dev libyaml-cpp-dev
         rm -rf planner/mapf_implementations/libMultiRobotPlanning/build
         mkdir planner/mapf_implementations/libMultiRobotPlanning/build
         cd planner/mapf_implementations/libMultiRobotPlanning/build
@@ -41,7 +41,7 @@ jobs:
         sudo apt install libyaml-cpp0.6
     - name: Build astar_boost
       run: |
-        sudo apt install -y cmake libboost-python1.71-dev libboost-graph1.71-dev libboost-random1.71-dev
+        sudo apt install -y cmake libboost-python1.74-dev libboost-graph1.74-dev libboost-random1.74-dev
         cd planner/astar_boost
         mkdir -p build
         cd build
