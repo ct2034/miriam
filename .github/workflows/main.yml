@@ -35,7 +35,7 @@ jobs:
         mkdir planner/mapf_implementations/libMultiRobotPlanning/build
         cd planner/mapf_implementations/libMultiRobotPlanning/build
         cmake ..
-        make ecbs cbs_roadmap
+        make ecbs cbs_roadmap cbs_ta
     - name: Ecbs deps
       run: |
         sudo apt install libyaml-cpp0.6
