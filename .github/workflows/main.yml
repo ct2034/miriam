@@ -38,7 +38,7 @@ jobs:
         make ecbs cbs_roadmap cbs_ta
     - name: Ecbs deps
       run: |
-        sudo apt install libyaml-cpp0.6
+        sudo apt install libyaml-cpp0.7
     - name: Build astar_boost
       run: |
         sudo apt install -y cmake libboost-python1.74-dev libboost-graph1.74-dev libboost-random1.74-dev
