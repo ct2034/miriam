@@ -23,7 +23,7 @@ jobs:
         pip install -r requirements.txt
         pip install -r planner/mapf_implementations/requirements.txt
         pip install -r sim/decentralized/requirements.txt
-        pip install -r requirements-torch_cpu.txt -f https://download.pytorch.org/whl/cpu/torch_stable.html -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+        pip install -r requirements-torch_cpu.txt -f https://download.pytorch.org/whl/cpu/torch_stable.html -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
     # - name: Build cobra
     #   run: |
     #     cd planner/cobra/external
@@ -67,7 +67,7 @@ jobs:
         pip install -r requirements.txt
         pip install -r planner/mapf_implementations/requirements.txt
         pip install -r sim/decentralized/requirements.txt
-        pip install -r requirements-torch_cpu.txt -f https://download.pytorch.org/whl/cpu/torch_stable.html -f https://data.pyg.org/whl/torch-1.10.0+cpu.html
+        pip install -r requirements-torch_cpu.txt -f https://download.pytorch.org/whl/cpu/torch_stable.html -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
     - name: Type checking with mypy
       run: |
         mypy
