@@ -19,3 +19,9 @@
 # [submodule "planner/bvc/mr-nav-stack"]
 # 	path = planner/bvc/mr-nav-stack
 # 	url = git@github.com:ct2034/mr-nav-stack.git
+[submodule "roadmaps/cvt/lodepng"]
+	path = roadmaps/cvt/lodepng
+	url = https://github.com/lvandeve/lodepng.git
+[submodule "roadmaps/gsorm/lodepng"]
+	path = roadmaps/gsorm/lodepng
+	url = https://github.com/lvandeve/lodepng.git
