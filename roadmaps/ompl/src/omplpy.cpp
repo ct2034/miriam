@@ -8,12 +8,6 @@
 #include <boost/program_options.hpp>
 #include <boost/foreach.hpp>
 
-// Eigen
-// #include <Eigen/Core>
-
-// Yaml
-#include <yaml-cpp/yaml.h>
-
 // OMPL
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/geometric/planners/prm/SPARS.h>
@@ -160,6 +154,12 @@ public:
     }
 
     std::cout << "Loaded environment: " << width << "x" << height << std::endl;
+    // for (
+    //   std::vector<unsigned char>::const_iterator i = image.begin();
+    //   i != image.end(); ++i)
+    // {
+    //   std::cout << *i << ' ';
+    // }
 
     base::StateSpacePtr space(new base::RealVectorStateSpace(dimension));
     base::RealVectorBounds bounds(dimension);
@@ -184,7 +184,7 @@ public:
     base::ScopedState<base::RealVectorStateSpace> start(space);
     base::ScopedState<base::RealVectorStateSpace> goal(space);
 
-    geometric::SPARStwo p(si);
+    geometric::SPARS p(si);
     p.setProblemDefinition(pdef);
 
     p.setDenseDeltaFraction(denseDelta / si->getMaximumExtent());
@@ -212,7 +212,7 @@ public:
     std::cout << "#edges " << boost::num_edges(roadmapOMPL) << std::endl;
     // // const auto& roadmapOMPL = p.getDenseGraph();
     auto stateProperty = boost::get(
-      geometric::SPARStwo::vertex_state_t(), roadmapOMPL);
+      geometric::SPARS::vertex_state_t(), roadmapOMPL);
 
     // output
     boost::python::list edges;
@@ -244,6 +244,138 @@ public:
     return boost::python::make_tuple(edges, duration_ms);
 
   }
+
+  boost::python::tuple runPRMStar(
+    std::string mapFile, int seed,
+    float denseDelta, float sparseDelta, float stretchFactor,
+    int maxFailures, double maxTime, int maxIter)
+  {
+    ompl::RNG::setSeed(seed);
+
+    const size_t dimension = 2;
+
+    std::vector<unsigned char> image;   // the raw pixels
+    unsigned width, height;
+
+    // decode
+    unsigned error =
+      lodepng::decode(image, width, height, mapFile, LCT_GREY, 8);
+
+    // if there's an error, display it
+    if (error) {
+      std::cerr << "decoder error " << error << ": " <<
+        lodepng_error_text(error) << std::endl;
+      return {};
+    }
+
+    std::cout << "Loaded environment: " << width << "x" << height << std::endl;
+    // for (
+    //   std::vector<unsigned char>::const_iterator i = image.begin();
+    //   i != image.end(); ++i)
+    // {
+    //   std::cout << *i << ' ';
+    // }
+
+    base::StateSpacePtr space(new base::RealVectorStateSpace(dimension));
+    base::RealVectorBounds bounds(dimension);
+    bounds.setLow(0, 0);
+    bounds.setHigh(0, width);
+    bounds.setLow(1, 0);
+    bounds.setHigh(1, height);
+    space->as<base::RealVectorStateSpace>()->setBounds(bounds);
+    base::SpaceInformationPtr si(new base::SpaceInformation(space));
+    base::StateValidityCheckerPtr stateValidityChecker(
+      new ImageStateValidityChecker(
+        si, image,
+        width, height));
+    si->setStateValidityChecker(stateValidityChecker);
+    si->setStateValidityCheckingResolution(
+      1. / (float)std::max(
+        width,
+        height) / 5.);
+    si->setup();
+
+    base::ProblemDefinitionPtr pdef(new base::ProblemDefinition(si));
+    base::ScopedState<base::RealVectorStateSpace> start(space);
+    base::ScopedState<base::RealVectorStateSpace> goal(space);
+
+    geometric::PRMstar p(si);
+    p.setProblemDefinition(pdef);
+
+    // p.setDenseDeltaFraction(denseDelta / si->getMaximumExtent());
+    // p.setSparseDeltaFraction(sparseDelta / si->getMaximumExtent());
+    // p.setStretchFactor(stretchFactor);
+    // p.setMaxFailures(maxFailures);
+
+    std::cout << "a" << std::endl;
+    auto t_start = high_resolution_clock::now();
+    std::cout << "b" << std::endl;
+    p.constructRoadmap(
+      base::IterationTerminationCondition(maxIter));
+    std::cout << "c" << std::endl;
+    auto t_stop = high_resolution_clock::now();
+    std::cout << "d" << std::endl;
+    auto duration = duration_cast<microseconds>(t_stop - t_start);
+    std::cout << "e" << std::endl;
+    float duration_ms = static_cast<float>(duration.count()) / 1000.;
+    std::cout << "f" << std::endl;
+
+    // p.printDebug();
+
+    const auto & roadmapOMPL = p.getRoadmap();
+    int n_vertices = boost::num_vertices(roadmapOMPL);
+    std::cout << "n_vertices " << n_vertices << std::endl;
+    int n_edges = boost::num_edges(roadmapOMPL);
+    std::cout << "n_edges " << n_edges << std::endl;
+    // // const auto& roadmapOMPL = p.getDenseGraph();
+    auto stateProperty = boost::get(
+      geometric::PRMstar::vertex_state_t(), roadmapOMPL);
+
+    // output
+    boost::python::list edges;
+
+    // read the edges
+    BOOST_FOREACH(
+      const geometric::PRMstar::Edge e, boost::edges(
+        roadmapOMPL))
+    {
+      int i = e.m_source;
+      int j = e.m_target;
+
+      if(i >= n_vertices || j >= n_vertices) {
+        continue;
+      }
+      if(boost::python::len(edges) >= 100) {
+        break;
+      }
+
+      std::cout << "i: " << i << " j: " << j << std::endl;
+      
+      base::State * state_i = stateProperty[i];
+      base::State * state_j = stateProperty[j];
+      if (state_i && state_j) {
+        const auto typedState_i =
+          state_i->as<base::RealVectorStateSpace::StateType>();
+        float x_i = (*typedState_i)[0];
+        float y_i = (*typedState_i)[1];
+
+        const auto typedState_j =
+          state_j->as<base::RealVectorStateSpace::StateType>();
+        float x_j = (*typedState_j)[0];
+        float y_j = (*typedState_j)[1];
+
+        std::cout << "x_i: " << x_i << " y_i: " << y_i << " x_j: " << x_j << " y_j: " << y_j << std::endl;
+
+        edges.append(boost::python::make_tuple(i, x_i, y_i, j, x_j, y_j));
+      } else {
+        std::cout << state_i << " " << state_j << std::endl;
+      }
+    }
+    
+
+    return boost::python::make_tuple(edges, duration_ms);
+
+  }
 };
 
 BOOST_PYTHON_MODULE(libomplpy)
@@ -253,6 +385,17 @@ BOOST_PYTHON_MODULE(libomplpy)
   class_<Ompl>("Ompl", init<>())
   .def(
     "runSparsTwo", &Ompl::runSparsTwo,
+    (
+      bp::arg("mapFile"),
+      bp::arg("seed"),
+      bp::arg("denseDelta"),
+      bp::arg("sparseDelta"),
+      bp::arg("stretchFactor"),
+      bp::arg("maxFailures"),
+      bp::arg("maxTime"),
+      bp::arg("maxIter"))
+  ).def(
+    "runPRMStar", &Ompl::runPRMStar,
     (
       bp::arg("mapFile"),
       bp::arg("seed"),

@@ -23,7 +23,7 @@ MAP_PATH = './roadmaps/odrm/odrm_eval/maps/Berlin_1_256.png'
 MAP_INFLATED_PATH = './roadmaps/benchmark_examples/Berlin_1_256_inflated_1000.png'
 OUTPUT_PATH = 'roadmaps/plots/'
 
-N_SAMPLES = 1000
+N_SAMPLES = 100
 
 
 def make_plot(graph, map_fname, path, _):
@@ -72,19 +72,33 @@ if __name__ == "__main__":
     # )
     # make_plot(prm.g, MAP_PATH, os.path.join(OUTPUT_PATH, 'PRM.png'), 'PRM')
 
-    # SPARS2
+    # PRM Star
     ompl = Ompl()
-    edges, duration_ms = ompl.runSparsTwo(
+    edges, duration_ms = ompl.runPRMStar(
         MAP_INFLATED_PATH, #mapFile
-        1, #seed
-        2.5, #denseDelta
+        2034, #seed
+        3., #denseDelta
         10., #sparseDelta
-        5., #stretchFactor
+        3., #stretchFactor
         1000, #maxFailures
-        4., #maxTime
-        40000, #maxIter
+        2., #maxTime
+        400, #maxIter
     )
     print(edges)
+
+    # SPARS2
+    # ompl = Ompl()
+    # edges, duration_ms = ompl.runSparsTwo(
+    #     MAP_INFLATED_PATH, #mapFile
+    #     2034, #seed
+    #     3., #denseDelta
+    #     10., #sparseDelta
+    #     3., #stretchFactor
+    #     1000, #maxFailures
+    #     2., #maxTime
+    #     400, #maxIter
+    # )
+    # print(edges)
 
     # cleanup
     os.remove(MAP_INFLATED_PATH)

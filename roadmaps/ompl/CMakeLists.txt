@@ -19,8 +19,6 @@ FIND_PACKAGE(Boost 1.71.0 REQUIRED COMPONENTS
     serialization 
     python${PYTHON_VERSION}
 )
-FIND_PACKAGE(Eigen3 REQUIRED)
-FIND_PACKAGE(yaml-cpp REQUIRED)
 FIND_PACKAGE(ompl REQUIRED)
 find_package( OpenCV REQUIRED )
 
@@ -45,7 +43,6 @@ add_library(${OMPLPY} SHARED
 TARGET_LINK_LIBRARIES(
   ${OMPLPY} 
   ${Boost_LIBRARIES}
-  ${YAML_CPP_LIBRARIES}
   ${OpenCV_LIBS}
   ompl
 )
