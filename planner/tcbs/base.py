@@ -9,6 +9,7 @@ logging.setLoggerClass(ColoredLogger)
 
 MAX_COST = 99999
 
+
 def astar_base(start, condition, heuristic, get_children, cost, goal_test):
     _, start = cost(condition, start)  # it may have collisions
 
@@ -50,7 +51,7 @@ def astar_base(start, condition, heuristic, get_children, cost, goal_test):
                     "closed.__len__()": closed.__len__(),
                     "open.__len__()": open.__len__(),
                     "neighbor[2].__len__() (blocks)": neighbor[2].__len__(),
-                    "c": c if c < MAX_COST else 0
+                    "c": c if c < MAX_COST else 0,
                 }
                 if stats.__len__() == 300000:
                     display_stats(stats)

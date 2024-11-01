@@ -14,20 +14,32 @@ from sim.decentralized.runner import run_a_scenario
 
 
 class TestLearnedPolicy(unittest.TestCase):
-
     @pytest.mark.skip  # TODO we should rewrite these for edge policies
     def test_learned_path_until_coll_long(self):
-        lp = LearnedPolicy(Agent(np.array([[0, ]]), np.array([0, 0])))
+        lp = LearnedPolicy(
+            Agent(
+                np.array(
+                    [
+                        [
+                            0,
+                        ]
+                    ]
+                ),
+                np.array([0, 0]),
+            )
+        )
 
-        path = np.array([
-            [0, 0],
-            [0, 0],
-            [1, 1],
-            [2, 2],  # <- path_i
-            [3, 3],  # coll
-            [0, 0],
-            [0, 0]
-        ])
+        path = np.array(
+            [
+                [0, 0],
+                [0, 0],
+                [1, 1],
+                [2, 2],  # <- path_i
+                [3, 3],  # coll
+                [0, 0],
+                [0, 0],
+            ]
+        )
 
         path_until_coll = lp._path_until_coll(path, 3, 3)
         self.assertEqual(len(path_until_coll), 3)
@@ -37,14 +49,20 @@ class TestLearnedPolicy(unittest.TestCase):
 
     @pytest.mark.skip  # TODO we should rewrite these for edge policies
     def test_learned_path_until_coll_short(self):
-        lp = LearnedPolicy(Agent(np.array([[0, ]]), np.array([0, 0])))
+        lp = LearnedPolicy(
+            Agent(
+                np.array(
+                    [
+                        [
+                            0,
+                        ]
+                    ]
+                ),
+                np.array([0, 0]),
+            )
+        )
 
-        path = np.array([
-            [2, 2],  # <- path_i
-            [3, 3],  # coll
-            [0, 0],
-            [0, 0]
-        ])
+        path = np.array([[2, 2], [3, 3], [0, 0], [0, 0]])  # <- path_i  # coll
 
         path_until_coll = lp._path_until_coll(path, 0, 3)
         self.assertEqual(len(path_until_coll), 3)
@@ -54,11 +72,20 @@ class TestLearnedPolicy(unittest.TestCase):
 
     @pytest.mark.skip  # TODO we should rewrite these for edge policies
     def test_learned_path_until_coll_shortest(self):
-        lp = LearnedPolicy(Agent(np.array([[0, ]]), np.array([0, 0])))
+        lp = LearnedPolicy(
+            Agent(
+                np.array(
+                    [
+                        [
+                            0,
+                        ]
+                    ]
+                ),
+                np.array([0, 0]),
+            )
+        )
 
-        path = np.array([
-            [2, 2]  # <- path_i
-        ])
+        path = np.array([[2, 2]])  # <- path_i
 
         path_until_coll = lp._path_until_coll(path, 0, 3)
         self.assertEqual(len(path_until_coll), 3)
@@ -68,7 +95,13 @@ class TestLearnedPolicy(unittest.TestCase):
 
     @pytest.mark.skip  # TODO we should rewrite these for edge policies
     def test_learned_get_priority_calling_model(self):
-        predictMock = MagicMock(return_value=[[.5, ], ])
+        predictMock = MagicMock(
+            return_value=[
+                [
+                    0.5,
+                ],
+            ]
+        )
         env = np.zeros((3, 3))
         env[1, [0, 2]] = 1
         a1 = Agent(env, np.array([0, 0]), PolicyType.LEARNED)
@@ -77,15 +110,18 @@ class TestLearnedPolicy(unittest.TestCase):
         a2 = Agent(env, np.array([0, 2]), PolicyType.LEARNED)
         a2.give_a_goal(np.array([2, 0]))
         a2.policy.model.predict = predictMock
-        _, _, _, _, success = run_a_scenario(
-            env, [a1, a2], False, IteratorType.WAITING)
+        _, _, _, _, success = run_a_scenario(env, [a1, a2], False, IteratorType.WAITING)
         self.assertEqual(success, 1)
 
-        def hist(x): return np.histogram(x, bins=100, range=(0, 1))[0]
+        def hist(x):
+            return np.histogram(x, bins=100, range=(0, 1))[0]
+
         predictMock.assert_called()
         for call in predictMock.call_args_list:
             model_data = call.args[0].numpy()
-            assert a1.policy.__class__ == a2.policy.__class__, "both agents should have same policy"
+            assert (
+                a1.policy.__class__ == a2.policy.__class__
+            ), "both agents should have same policy"
             if a1.policy.model_type == CONVRNN_STR:
                 self.assertEqual(model_data.shape, (1, 3, 7, 7, 5))
                 for t in range(3):

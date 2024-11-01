@@ -11,5 +11,5 @@ def mytest():
         print("{} seconds have passed".format(i))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mytest()

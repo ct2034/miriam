@@ -21,8 +21,7 @@ def pos_to_node(data_pos, pos):
     return None
 
 
-def gridmap_to_graph(gridmap: np.ndarray, hop_dist: int,
-                     own_pos: C):
+def gridmap_to_graph(gridmap: np.ndarray, hop_dist: int, own_pos: C):
     width, height = gridmap.shape
     g = nx.grid_2d_graph(width, height)
     g = g.to_undirected(as_view=True)
@@ -33,6 +32,7 @@ def gridmap_to_graph(gridmap: np.ndarray, hop_dist: int,
 
     def filter_node(n):
         return gridmap[n] == FREE
+
     g = nx.subgraph_view(g, filter_node=filter_node)
     nodes = list(g.nodes)
     edges = []
@@ -40,10 +40,10 @@ def gridmap_to_graph(gridmap: np.ndarray, hop_dist: int,
         edges.append((nodes.index(a), nodes.index(b)))
     data_edge_index = torch.tensor(edges).T
     data_pos = torch.tensor(nodes)
-    assert(data_edge_index.shape[0] == 2)
-    assert(data_edge_index.shape[1] == len(edges))
-    assert(data_pos.shape[0] == len(nodes))
-    assert(data_pos.shape[1] == 2)
+    assert data_edge_index.shape[0] == 2
+    assert data_edge_index.shape[1] == len(edges)
+    assert data_pos.shape[0] == len(nodes)
+    assert data_pos.shape[1] == 2
     return data_edge_index, data_pos
 
 
@@ -67,15 +67,10 @@ def get_agent_path_layer(data_pos, paths, i_as):
         for i_t, pos in enumerate(path):
             node = pos_to_node(data_pos, pos)
             if node is not None and node != previous:
-                data_x_slice[node, 0] += (float(i_t)+1) / len(path)
+                data_x_slice[node, 0] += (float(i_t) + 1) / len(path)
             previous = node
     return data_x_slice
 
 
 def to_data_obj(data_x, data_edge_index, data_pos, y):
-    return Data(
-        x=data_x,
-        edge_index=data_edge_index,
-        pos=data_pos,
-        y=y
-    )
+    return Data(x=data_x, edge_index=data_edge_index, pos=data_pos, y=y)

@@ -18,29 +18,17 @@ if __name__ == "__main__":
         Point(3, 3, 0),
         Point(2, 2, 0),  # 2
         Point(1, 1, 0),
-        Point(3, 1, 0)   # 4
+        Point(3, 1, 0),  # 4
     ]
-    node_ids = [
-        [1],
-        [4],
-        [0, 1],
-        [0, 2],
-        [3, 2]
-    ]
-    weights = [
-        [2],
-        [2],
-        [1.414, 1.414],
-        [2, 1.414],
-        [2, 1.414]
-    ]
+    node_ids = [[1], [4], [0, 1], [0, 2], [3, 2]]
+    weights = [[2], [2], [1.414, 1.414], [2, 1.414], [2, 1.414]]
     for i in range(len(exmaple_gg.nodes)):
         e = Edges()
         e.node_ids = node_ids[i]
         e.weights = weights[i]
         exmaple_gg.edges.append(e)
 
-    r = rospy.Rate(.1)
+    r = rospy.Rate(0.1)
     while not rospy.is_shutdown():
         pub.publish(exmaple_gg)
         r.sleep()

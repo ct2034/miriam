@@ -5,8 +5,8 @@ import rospy
 from geometry_msgs.msg import Polygon, Point32
 
 
-if __name__ == '__main__':
-    rospy.init_node('pub_footprint')
+if __name__ == "__main__":
+    rospy.init_node("pub_footprint")
     rospy.logdebug("init")
     pub = rospy.Publisher("/costmap_2d_node/costmap/footprint", Polygon, queue_size=10)
     radius = rospy.get_param("~radius")
@@ -14,11 +14,13 @@ if __name__ == '__main__':
     corner = radius / sqrt(2)
 
     while not rospy.is_shutdown():  # waiting for first map msg
-        rospy.sleep(.1)
-        p = Polygon([
-            Point32(-corner, -corner, 0),
-            Point32(-corner, corner, 0),
-            Point32(corner, corner, 0),
-            Point32(corner, -corner, 0)
-        ])
+        rospy.sleep(0.1)
+        p = Polygon(
+            [
+                Point32(-corner, -corner, 0),
+                Point32(-corner, corner, 0),
+                Point32(corner, corner, 0),
+                Point32(corner, -corner, 0),
+            ]
+        )
         pub.publish(p)

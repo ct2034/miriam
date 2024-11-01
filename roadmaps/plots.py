@@ -5,6 +5,7 @@ Script for making example plots of roadmaps
 - RRT
 - Sparse2
 """
+
 import os
 import shutil
 from random import Random
@@ -19,35 +20,35 @@ from roadmaps.ompl.build.libomplpy import Ompl
 
 DPI = 500
 
-MAP_PATH = './roadmaps/odrm/odrm_eval/maps/Berlin_1_256.png'
-MAP_INFLATED_PATH = './roadmaps/benchmark_examples/Berlin_1_256_inflated_1000.png'
-OUTPUT_PATH = 'roadmaps/plots/'
+MAP_PATH = "./roadmaps/odrm/odrm_eval/maps/Berlin_1_256.png"
+MAP_INFLATED_PATH = "./roadmaps/benchmark_examples/Berlin_1_256_inflated_1000.png"
+OUTPUT_PATH = "roadmaps/plots/"
 
 N_SAMPLES = 100
 
 
 def make_plot(graph, map_fname, path, _):
-    assert graph is not None, 'Roadmap must be built.'
+    assert graph is not None, "Roadmap must be built."
 
     fig = plt.figure(frameon=False, figsize=(4, 4), dpi=DPI)
-    ax = fig.add_axes([-.05, -.05, 1.1, 1.1])
-    ax.axis('off')
-    ax.set_aspect('equal')
+    ax = fig.add_axes([-0.05, -0.05, 1.1, 1.1])
+    ax.axis("off")
+    ax.set_aspect("equal")
 
     map_img = read_map(map_fname)
-    ax.imshow(map_img, cmap='gray')
+    ax.imshow(map_img, cmap="gray")
 
     # plot graph
     pos = nx.get_node_attributes(graph, POS)
-    pos = {k: (v[0] * len(map_img), v[1] * len(map_img))
-           for k, v in pos.items()}
+    pos = {k: (v[0] * len(map_img), v[1] * len(map_img)) for k, v in pos.items()}
     nx.draw_networkx_nodes(graph, pos, ax=ax, node_size=1)
     # exclude self edges
     edges = [(u, v) for u, v in graph.edges if u != v]
-    nx.draw_networkx_edges(graph, pos, ax=ax, edgelist=edges,
-                           width=0.5, edge_color='dimgrey')
+    nx.draw_networkx_edges(
+        graph, pos, ax=ax, edgelist=edges, width=0.5, edge_color="dimgrey"
+    )
 
-    with open(path, 'wb') as outfile:
+    with open(path, "wb") as outfile:
         fig.canvas.print_png(outfile)
 
 
@@ -75,14 +76,14 @@ if __name__ == "__main__":
     # PRM Star
     ompl = Ompl()
     edges, duration_ms = ompl.runPRMStar(
-        MAP_INFLATED_PATH, #mapFile
-        2034, #seed
-        3., #denseDelta
-        10., #sparseDelta
-        3., #stretchFactor
-        1000, #maxFailures
-        2., #maxTime
-        400, #maxIter
+        MAP_INFLATED_PATH,  # mapFile
+        2034,  # seed
+        3.0,  # denseDelta
+        10.0,  # sparseDelta
+        3.0,  # stretchFactor
+        1000,  # maxFailures
+        2.0,  # maxTime
+        400,  # maxIter
     )
     print(edges)
 

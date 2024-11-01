@@ -6,22 +6,24 @@ import pickle
 import sys
 from odrm_eval.filename_verification import (
     resolve_number_of_iterations,
-is_result_file,
-resolve_number_of_nodes,
-resolve)
+    is_result_file,
+    resolve_number_of_nodes,
+    resolve,
+)
 
 
-
-plt.style.use('bmh')
+plt.style.use("bmh")
 # plt.rcParams["font.family"] = "serif"
 plt.rcParams["savefig.dpi"] = 500
 
-def moving_average(a, n=5) :
+
+def moving_average(a, n=5):
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
-    return ret[n - 1:] / n
+    return ret[n - 1 :] / n
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     folder = sys.argv[1]  # type: str
     assert folder.endswith("/"), "Please call with folder"
 
@@ -37,14 +39,11 @@ if __name__ == '__main__':
             N = resolve_number_of_nodes(fname)
             if nit == 4096 and scen != "C" and N != 1000:
                 print("reading " + fname)
-                legends.append("{} Nodes, Scenario {}".format(
-                    N,
-                    scen
-                ))
+                legends.append("{} Nodes, Scenario {}".format(N, scen))
                 with open(fname, "r") as f:
                     this_dat = pickle.load(f)
                     print(this_dat.keys())
-                    d = moving_average(this_dat['batchcost'])
+                    d = moving_average(this_dat["batchcost"])
                     dat.append(d)
 
     lines_n = len(legends)
@@ -53,11 +52,11 @@ if __name__ == '__main__':
     for i in range(lines_n):
         dummy_lines.append(ax.plot([], [], color=colors[i]))
     for i in range(lines_n):
-        ax.plot(dat[i], linewidth=.3, color=colors[i])
+        ax.plot(dat[i], linewidth=0.3, color=colors[i])
     ax.set_xlabel("Batch Number")
     ax.set_ylabel("Batch Cost")
     legend = plt.legend(legends)
     # ax.add_artist(legend)
     plt.tight_layout()
 
-    plt.savefig('res/convergence.png')
+    plt.savefig("res/convergence.png")

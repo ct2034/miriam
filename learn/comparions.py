@@ -15,6 +15,6 @@ params1 = [0.1, 0.2, 0.3]
 params2 = [5, 10, 50]
 params3 = range(8)
 
-for (p1, p2, p3) in itertools.product(params1, params2, params3):
+for p1, p2, p3 in itertools.product(params1, params2, params3):
     res = evaluate(p1, p2, p3)
     print(res)

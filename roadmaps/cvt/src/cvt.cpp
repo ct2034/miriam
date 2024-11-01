@@ -107,8 +107,8 @@ public:
       // if (is_finite) {
         // random color
         cv::Scalar color(
-          rng.uniform(200, 255), 
-          rng.uniform(200, 255), 
+          rng.uniform(200, 255),
+          rng.uniform(200, 255),
           rng.uniform(200, 255));
         cv::fillConvexPoly(img_voronoi, face_points, color);
       // }

@@ -5,9 +5,7 @@ based on: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode"""
 
 
 def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost):
-    start_int = (int(start[0]),
-                 int(start[1]),
-                 int(start[2]))
+    start_int = (int(start[0]), int(start[1]), int(start[2]))
 
     start = start_int
 
@@ -36,7 +34,9 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
     f_score_open = np.append(f_score_open, f_score[start])
 
     while len(open) > 0:
-        current = argmin_f_open(open, f_score_open)  # the node in openSet having the lowest fScore[] value
+        current = argmin_f_open(
+            open, f_score_open
+        )  # the node in openSet having the lowest fScore[] value
 
         if current[0:2] == goal[0:2]:  # waiting at the goal for free
             return reconstruct_path(came_from, current)
@@ -51,7 +51,9 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
             if neighbor in closed:
                 continue  # Ignore the neighbor which is already evaluated.
             # The distance from start to a neighbor
-            tentative_g_score = g_score[current] + cost(current, neighbor, map if have_map else False)
+            tentative_g_score = g_score[current] + cost(
+                current, neighbor, map if have_map else False
+            )
 
             append = True
             if neighbor not in open:  # Discover a new node
@@ -64,7 +66,9 @@ def astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost
             # This path is the best until now. Record it!
             came_from[neighbor] = current
             g_score[neighbor] = tentative_g_score
-            f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, goal, map if have_map else False)
+            f_score[neighbor] = g_score[neighbor] + heuristic(
+                neighbor, goal, map if have_map else False
+            )
 
             if append:
                 f_score_open = np.append(f_score_open, f_score[neighbor])

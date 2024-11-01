@@ -48,21 +48,23 @@ def learning(
         num_conv_layers=conv_layers,
         num_readout_layers=readout_layers,
         cheb_filter_size=cheb_filter_size,
-        dropout_p=dropout_p)
+        dropout_p=dropout_p,
+    )
     model.to(gpu)
     # model.load_state_dict(torch.load(
     #     f"multi_optim/results/{run_prefix_data}_policy_model.pt"))
 
     # load dataset from previous multi_optim_run
-    dataset = EdgePolicyDataset(
-        f"multi_optim/results/tuning/{run_prefix_data}_data")
+    dataset = EdgePolicyDataset(f"multi_optim/results/tuning/{run_prefix_data}_data")
     test_set_i_s = range(len(dataset) - n_test, len(dataset))
     test_set = dataset[test_set_i_s]
-    test_set = [(d, {n: n for n in range(d.num_nodes)})
-                for d in test_set]  # type: ignore
+    test_set = [
+        (d, {n: n for n in range(d.num_nodes)}) for d in test_set
+    ]  # type: ignore
     exclude_keys = list(map(str, test_set_i_s))
-    loader = DataLoader(dataset, batch_size=batch_size,
-                        shuffle=True, exclude_keys=exclude_keys)
+    loader = DataLoader(
+        dataset, batch_size=batch_size, shuffle=True, exclude_keys=exclude_keys
+    )
 
     # stat collection
     stats = {
@@ -80,7 +82,7 @@ def learning(
         for i_b, batch in enumerate(loader):
             loss = model.learn(batch, optimizer)
             if loss is None:
-                loss = 0.  # TODO: fix this
+                loss = 0.0  # TODO: fix this
             pb.progress()
             if i_b % stats_every_x_batch == 0:
                 accuracy = model.accuracy(test_set)
@@ -91,8 +93,7 @@ def learning(
     pb.end()
 
     # save model
-    torch.save(model.state_dict(),
-               f"{base_folder}/edge_policy_{name}.pt")
+    torch.save(model.state_dict(), f"{base_folder}/edge_policy_{name}.pt")
 
     # save stats
     with open(f"{base_folder}/edge_policy_{name}.json", "w") as f:
@@ -109,7 +110,7 @@ def learning_proxy(kwargs):
 
 
 def tuning(base_folder):
-    lr_s = [3E-4, 1E-4]
+    lr_s = [3e-4, 1e-4]
     batch_size_s = [64]
     conv_channels_s = [128]
     conv_layers_s = [4, 5]
@@ -123,7 +124,7 @@ def tuning(base_folder):
         "conv_layers": conv_layers_s,
         "readout_layers": readout_layers_s,
         "cheb_filter_size": cheb_filter_size_s,
-        "dropout_p": dropout_p_s
+        "dropout_p": dropout_p_s,
     }  # type: Dict[str, Union[str, List[float], List[int]]]
 
     seed_s = range(8)
@@ -158,7 +159,7 @@ def tuning(base_folder):
 
 
 def rolling_average(data: List[float], n: int = 10) -> List[float]:
-    return [sum(data[i:i + n]) / n for i in range(len(data) - n)]
+    return [sum(data[i : i + n]) / n for i in range(len(data) - n)]
 
 
 def plot_results(base_folder):
@@ -176,8 +177,7 @@ def plot_results(base_folder):
         with open(f"{base_folder}/{fname}", "r") as f:
             stats = json.load(f)
         label = fname.split("edge_policy_")[1].split("_seed")[0]
-        seed = int(fname.split("edge_policy_")[
-                   1].split("seed_")[1].split(".")[0])
+        seed = int(fname.split("edge_policy_")[1].split("seed_")[1].split(".")[0])
         max_seed = max(max_seed, seed)
         if label not in data:
             data[label] = {}
@@ -188,14 +188,12 @@ def plot_results(base_folder):
     n_labels = len(data)
     experiments = sorted(data.keys())
     fig, (axs) = plt.subplots(
-        3, n_labels,
-        figsize=(5*n_labels, 10),
-        dpi=500,
-        sharex=True)
+        3, n_labels, figsize=(5 * n_labels, 10), dpi=500, sharex=True
+    )
     # sharey=True)
     assert isinstance(axs, np.ndarray)
 
-    maxloss = 0.  # type: float
+    maxloss = 0.0  # type: float
 
     for i_l, label in enumerate(experiments):
         # collect data over seeds
@@ -219,20 +217,21 @@ def plot_results(base_folder):
 
         # barplots
         n_epochs = len(acc_mean)
-        axs[0, i_l].bar(0, existing_seeds / n_seeds,
-                        width=n_epochs/8., label="existing seeds")
+        axs[0, i_l].bar(
+            0, existing_seeds / n_seeds, width=n_epochs / 8.0, label="existing seeds"
+        )
         axs[0, i_l].set_yticks([0, 1])
         axs[0, i_l].set_yticklabels(["0%", "100%"])
 
         # plotting statistics
         axs[1, i_l].plot(acc_mean, label=label)
         axs[1, i_l].fill_between(
-            range(len(acc_mean)), acc_mean - acc_std, acc_mean + acc_std,
-            alpha=0.3)
+            range(len(acc_mean)), acc_mean - acc_std, acc_mean + acc_std, alpha=0.3
+        )
         axs[2, i_l].plot(loss_mean, label=label)
         axs[2, i_l].fill_between(
-            range(len(loss_mean)), loss_mean - loss_std, loss_mean + loss_std,
-            alpha=0.3)
+            range(len(loss_mean)), loss_mean - loss_std, loss_mean + loss_std, alpha=0.3
+        )
 
         # labels with means
         axs[1, i_l].text(len(acc_mean), acc_mean[-1], f"{acc_mean[-1]:.3f}")

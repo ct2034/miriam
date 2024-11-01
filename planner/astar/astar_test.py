@@ -23,23 +23,22 @@ def test_get_children_middle():
 
 
 def rand_coords(x, y):
-    return (np.random.randint(0, x),
-            np.random.randint(0, y))
+    return (np.random.randint(0, x), np.random.randint(0, y))
 
 
 def astar_wait():
     size = 10
     _grid = np.zeros([size, size, size * 2])
-    for i in range(int(np.round(pow(size, 2) * .3))):
+    for i in range(int(np.round(pow(size, 2) * 0.3))):
         _grid[rand_coords(size, size)] = -1
 
-    start = (rand_coords(size, size) + (0,))
+    start = rand_coords(size, size) + (0,)
     while _grid[start] == -1:
-        start = (rand_coords(size, size) + (0,))
+        start = rand_coords(size, size) + (0,)
 
-    goal = (rand_coords(size, size) + (size * 2 - 1,))
+    goal = rand_coords(size, size) + (size * 2 - 1,)
     while _grid[goal] == -1:
-        goal = (rand_coords(size, size) + (size * 2 - 1,))
+        goal = rand_coords(size, size) + (size * 2 - 1,)
 
     startt = datetime.datetime.now()
 

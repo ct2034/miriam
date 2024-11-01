@@ -5,7 +5,7 @@ import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.style.use('bmh')
+plt.style.use("bmh")
 
 import pymc3 as pm
 
@@ -28,7 +28,14 @@ class state:
     trace = False
 
 
-def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, std_delta: float = 1):
+def update(
+    _s: state,
+    t: float,
+    start: int,
+    goal: int,
+    std_spread: float = 4,
+    std_delta: float = 1,
+):
     """
     Update for new job
     :param _s: the state
@@ -45,18 +52,19 @@ def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, st
     _s.last_timestamp[index] = t
 
     # Save job in list
-    for index_i in itertools.product(tuple(range(_s.nr_landmarks)),
-                                     repeat=2):  # for all last starts and goals
+    for index_i in itertools.product(
+        tuple(range(_s.nr_landmarks)), repeat=2
+    ):  # for all last starts and goals
         current_duration = t - _s.last_timestamp[index_i]
-        if ((current_duration > 0) &
-                (_s.last_timestamp[index_i] != -1)):
+        if (current_duration > 0) & (_s.last_timestamp[index_i] != -1):
             index_save = (index_i[1], index[0])  # last goal + this start
             _s.durations_values[index_save] += 1
-            _s.durations[:, index_save[0], index_save[1]] = np.roll(_s.durations[:, index_save[0], index_save[1]], 1)
+            _s.durations[:, index_save[0], index_save[1]] = np.roll(
+                _s.durations[:, index_save[0], index_save[1]], 1
+            )
             _s.durations[0, index_save[0], index_save[1]] = current_duration
 
-    if ((_s.iterations > _s.durations.shape[0]) &
-            (np.max(_s.durations_values) > 0)):
+    if (_s.iterations > _s.durations.shape[0]) & (np.max(_s.durations_values) > 0):
         if np.min(_s.durations_values[_s.durations_values > 0]) > _s.durations.shape[0]:
             n = _s.nr_landmarks
 
@@ -67,20 +75,20 @@ def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, st
             _s.zeros = 0 == np.min(_s.durations, axis=0)
             for zero in itertools.product(tuple(range(_s.nr_landmarks)), repeat=2):
                 if _s.zeros[zero]:
-                    _s.durations[:,
-                                 zero[0],
-                                 zero[1]] = np.random.normal(loc=durations_mean,
-                                                             scale=durations_std,
-                                                             size=_s.durations.shape[0])
+                    _s.durations[:, zero[0], zero[1]] = np.random.normal(
+                        loc=durations_mean,
+                        scale=durations_std,
+                        size=_s.durations.shape[0],
+                    )
 
             # Build model
             with pm.Model() as model:
                 timing(True)
-                mean = pm.Normal('mean', mu=_s.mean_mu, sd=_s.mean_sd, shape=(n, n))
+                mean = pm.Normal("mean", mu=_s.mean_mu, sd=_s.mean_sd, shape=(n, n))
 
-                std = pm.Normal('std', mu=_s.std_mu, sd=_s.std_sd, shape=(n, n))
+                std = pm.Normal("std", mu=_s.std_mu, sd=_s.std_sd, shape=(n, n))
 
-                Y = pm.Normal('Y', mu=mean, sd=std, observed=_s.durations)
+                Y = pm.Normal("Y", mu=mean, sd=std, observed=_s.durations)
 
                 start = pm.find_MAP()
                 print("found start")
@@ -95,19 +103,22 @@ def update(_s: state, t: float, start: int, goal: int, std_spread: float = 4, st
                 info(_s, True)
                 # Evaluate results
                 # TODO: before saving results, check for correct correlation
-                mean_trace = _s.trace.get_values('mean')
-                std_trace = _s.trace.get_values('std')
+                mean_trace = _s.trace.get_values("mean")
+                std_trace = _s.trace.get_values("std")
 
-                burnin = int(.3 * len(mean_trace))
+                burnin = int(0.3 * len(mean_trace))
 
                 _s.mean_mu = fix_neg_values(np.mean(mean_trace[burnin:, :, :], axis=0))
-                _s.mean_sd = (fix_neg_values(np.std(mean_trace[burnin:, :, :], axis=0))
-                              + std_delta ) * std_spread
+                _s.mean_sd = (
+                    fix_neg_values(np.std(mean_trace[burnin:, :, :], axis=0))
+                    + std_delta
+                ) * std_spread
                 assert np.shape(_s.mean_mu) == (n, n), "Wrong Dimensions"
 
                 _s.std_mu = fix_neg_values(np.mean(std_trace[burnin:, :, :], axis=0))
-                _s.std_sd = (fix_neg_values(np.std(std_trace[burnin:, :, :], axis=0))
-                             + std_delta ) * std_spread
+                _s.std_sd = (
+                    fix_neg_values(np.std(std_trace[burnin:, :, :], axis=0)) + std_delta
+                ) * std_spread
     return _s
 
 
@@ -146,8 +157,7 @@ def info(_s: state, plot: bool = False):
     print("max durations_values", np.max(_s.durations_values))
     print("-----")
 
-    pm_params = {'trace':_s.trace,
-                 'varnames':['mean', 'std']}
+    pm_params = {"trace": _s.trace, "varnames": ["mean", "std"]}
 
     pm.summary(**pm_params)
 
@@ -181,7 +191,7 @@ def init(n):
 
 def estimation(s, start, goal):
     """
-    retrieve one estimation 
+    retrieve one estimation
     :param s: the state
     :param start: the start landmark to check
     :param goal: the goal
@@ -194,6 +204,7 @@ last = False
 
 def timing(reset=False):
     from datetime import datetime
+
     global last
     global start
     if reset or not last:
@@ -201,8 +212,8 @@ def timing(reset=False):
         start = datetime.now()
     else:
         duration = datetime.now() - last
-        print('last:', duration.total_seconds(), 's')
-        print('total:', (datetime.now() - start).total_seconds(), 's')
+        print("last:", duration.total_seconds(), "s")
+        print("total:", (datetime.now() - start).total_seconds(), "s")
         last = datetime.now()
 
 

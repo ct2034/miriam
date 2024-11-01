@@ -17,18 +17,9 @@ def test_munkres_benchmark():
         vals = [10, 30, 70, 100, 300]
     else:
         vals = [10, 30]
-    ts, res = benchmark(
-        munkres_call,
-        [vals],
-        samples=5
-    )
+    ts, res = benchmark(munkres_call, [vals], samples=5)
     print(ts)
-    mongodb_save(
-        'test_munkres_benchmark', {
-            'values': vals,
-            'durations': ts.tolist()
-        }
-    )
+    mongodb_save("test_munkres_benchmark", {"values": vals, "durations": ts.tolist()})
 
 
 if __name__ == "__main__":

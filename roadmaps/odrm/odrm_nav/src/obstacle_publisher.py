@@ -14,9 +14,15 @@ class ObstaclePublisher:
         self.pubs = []
         for i_a in range(n_agents):
             self.pubs.append(
-                rospy.Publisher("/robot_{}/move_base/TebLocalPlannerROS/obstacles".format(i_a), ObstacleArrayMsg, queue_size=1)
+                rospy.Publisher(
+                    "/robot_{}/move_base/TebLocalPlannerROS/obstacles".format(i_a),
+                    ObstacleArrayMsg,
+                    queue_size=1,
+                )
             )
-            rospy.Subscriber("/robot_{}/odom".format(i_a), Odometry, self.odom_callback, i_a)
+            rospy.Subscriber(
+                "/robot_{}/odom".format(i_a), Odometry, self.odom_callback, i_a
+            )
 
     def odom_callback(self, msg, i_a):
         p = Point32()
@@ -30,7 +36,7 @@ class ObstaclePublisher:
         if len(self.obstacles[i_a].polygon.points):
             yaw = math.atan2(
                 p.y - self.obstacles[i_a].polygon.points[0].y,
-                p.x - self.obstacles[i_a].polygon.points[0].x
+                p.x - self.obstacles[i_a].polygon.points[0].x,
             )
         else:
             yaw = 0
@@ -57,12 +63,12 @@ class ObstaclePublisher:
     def cycle(self):
         while not rospy.is_shutdown():
             while not all(self.received) and not rospy.is_shutdown():
-                rospy.sleep(.1)
+                rospy.sleep(0.1)
             self.publish_obstacles()
 
 
-if __name__ == '__main__':
-    rospy.init_node('obstacle_publisher')
+if __name__ == "__main__":
+    rospy.init_node("obstacle_publisher")
     rospy.logdebug("init")
 
     n_agents = rospy.get_param("~n_agents")

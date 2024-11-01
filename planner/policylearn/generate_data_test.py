@@ -6,7 +6,6 @@ from planner.policylearn import generate_data
 
 
 class GenerateDataTest(unittest.TestCase):
-
     def test_get_random_free_pos(self):
         env = np.array([[0, 1], [1, 1]])
         a_free_pose = generate_data.get_random_free_pos(env)
@@ -20,6 +19,7 @@ class GenerateDataTest(unittest.TestCase):
 
     def test_calling_plan_ecbs(self):
         from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
+
         timeout = 30
         suboptimality = 1.5
 
@@ -36,8 +36,7 @@ class GenerateDataTest(unittest.TestCase):
         radius = 2  # testing
         my_gridmap = np.zeros([2, 3])
         my_gridmap[1, 2] = 1  # a pixel
-        out_gridmap = generate_data.add_padding_to_gridmap(
-            my_gridmap, radius)
+        out_gridmap = generate_data.add_padding_to_gridmap(my_gridmap, radius)
         assert out_gridmap[0, 0] == 1  # padding
         assert out_gridmap[1, 1] == 1  # padding
         assert out_gridmap[2, 2] == 0  # free map space
@@ -51,16 +50,9 @@ class GenerateDataTest(unittest.TestCase):
         radius = 2  # testing
         my_gridmap = np.zeros([2, 3])
         my_gridmap[1, 2] = 1  # a pixel
-        padded_gridmap = generate_data.add_padding_to_gridmap(
-            my_gridmap, radius)
-        path = np.array(
-            [(0, 0, 0), (0, 1, 1), (1, 1, 2), (1, 2, 3), (99, 99, 99)])
-        out_fovs = generate_data.make_obstacle_fovs(
-            padded_gridmap,
-            path,
-            3,
-            radius
-        )
+        padded_gridmap = generate_data.add_padding_to_gridmap(my_gridmap, radius)
+        path = np.array([(0, 0, 0), (0, 1, 1), (1, 1, 2), (1, 2, 3), (99, 99, 99)])
+        out_fovs = generate_data.make_obstacle_fovs(padded_gridmap, path, 3, radius)
         assert out_fovs.shape[2] == 3 + 1
         # t = 0
         assert out_fovs[0, 0, 0] == 1
@@ -76,8 +68,7 @@ class GenerateDataTest(unittest.TestCase):
         assert out_fovs[4, 4, 3] == 1
 
     def test_make_target_deltas(self):
-        testing_path = np.array(
-            [(0, 0), (0, 1), (1, 1), (1, 2), (99, 99)])
+        testing_path = np.array([(0, 0), (0, 1), (1, 1), (1, 2), (99, 99)])
         out_deltas = generate_data.make_target_deltas(testing_path, 3)
         # t = 0
         assert out_deltas[0][0] == 99
@@ -91,7 +82,8 @@ class GenerateDataTest(unittest.TestCase):
 
     def test_get_path(self):
         testing_path = np.array(
-            [(0, 0, 0), (0, 1, 1), (1, 1, 2), (1, 2, 3), (99, 99, 4)])
+            [(0, 0, 0), (0, 1, 1), (1, 1, 2), (1, 2, 3), (99, 99, 4)]
+        )
         # fixed_length_shorter
         fixed_len_path = generate_data.get_path(testing_path, 2)
         assert len(fixed_len_path) == 3

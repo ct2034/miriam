@@ -7,7 +7,7 @@ set(PYTHON_INCLUDE /usr/include/python${PYTHON_DOT_VERSION})
 set(PYTHON_LIBRARY /usr/lib/python${PYTHON_DOT_VERSION}/config-${PYTHON_DOT_VERSION}m-x86_64-linux-gnu/)
 
 # Find Boost
-find_package(Boost REQUIRED COMPONENTS 
+find_package(Boost REQUIRED COMPONENTS
     # python-py${PYTHON_VERSION}
     python${PYTHON_VERSION}
     graph

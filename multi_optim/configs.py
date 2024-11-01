@@ -15,7 +15,7 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 2,
         "map_name": "x.png",
         "seed": 0,
-        "prefix": "debug"
+        "prefix": "debug",
     },
     # "debug_no_rd": {
     #     "n_nodes": 32,
@@ -46,7 +46,7 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 4,
         "map_name": "x.png",
         "seed": 0,
-        "prefix": "tiny"
+        "prefix": "tiny",
     },
     "small": {
         "n_nodes": 32,
@@ -61,7 +61,7 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 6,
         "map_name": "x.png",
         "seed": 0,
-        "prefix": "small"
+        "prefix": "small",
     },
     "medium": {
         "n_nodes": 64,
@@ -76,7 +76,7 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 8,
         "map_name": "x.png",
         "seed": 0,
-        "prefix": "medium"
+        "prefix": "medium",
     },
     "large": {
         "n_nodes": 128,
@@ -91,7 +91,7 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 10,
         "map_name": "x.png",
         "seed": 0,
-        "prefix": "large"
+        "prefix": "large",
     },
     # "large_no_rd": {
     #     "n_nodes": 128,
@@ -137,8 +137,8 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 4,
         "map_name": "random-32-32-10.map",
         "seed": 0,
-        "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10_debug"
+        "radius": 0.25 * (1.0 / 32),
+        "prefix": "mapf_benchm_random-32-32-10_debug",
     },
     "mapf_benchm_random-32-32-10": {
         "n_nodes": 200,
@@ -153,8 +153,8 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 8,
         "map_name": "random-32-32-10.map",
         "seed": 0,
-        "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10"
+        "radius": 0.25 * (1.0 / 32),
+        "prefix": "mapf_benchm_random-32-32-10",
     },
     "mapf_benchm_random-32-32-10_no_rd": {
         "n_nodes": 200,
@@ -170,8 +170,8 @@ configs: CONFIGS_TYPE = {
         "map_name": "random-32-32-10.map",
         "seed": 0,
         "use_reaction_diffusion": False,
-        "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10_no_rd"
+        "radius": 0.25 * (1.0 / 32),
+        "prefix": "mapf_benchm_random-32-32-10_no_rd",
     },
     "mapf_benchm_random-32-32-10_300": {
         "n_nodes": 300,
@@ -186,8 +186,8 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 8,
         "map_name": "random-32-32-10.map",
         "seed": 0,
-        "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10_300"
+        "radius": 0.25 * (1.0 / 32),
+        "prefix": "mapf_benchm_random-32-32-10_300",
     },
     "mapf_benchm_random-32-32-10_400": {
         "n_nodes": 400,
@@ -202,31 +202,25 @@ configs: CONFIGS_TYPE = {
         "max_n_agents": 8,
         "map_name": "random-32-32-10.map",
         "seed": 0,
-        "radius": 0.25 * (1. / 32),
-        "prefix": "mapf_benchm_random-32-32-10_400"
-    }
+        "radius": 0.25 * (1.0 / 32),
+        "prefix": "mapf_benchm_random-32-32-10_400",
+    },
 }
 
 
 def augment_config_by(
-        configs: CONFIGS_TYPE,
-        key: str,
-        values: List[Any]) -> CONFIGS_TYPE:
+    configs: CONFIGS_TYPE, key: str, values: List[Any]
+) -> CONFIGS_TYPE:
     augmented_configs = configs.copy()
     for name, config in configs.items():
         for value in values:
             prefix: str = f"{name}_{key}_{value}"
-            augmented_configs[prefix] = {
-                **config,
-                key: value,
-                "prefix": prefix}
+            augmented_configs[prefix] = {**config, key: value, "prefix": prefix}
     return augmented_configs
 
 
-configs_all_maps = augment_config_by(configs, "map_name", [
-    "c.png", "z.png"
-])
+configs_all_maps = augment_config_by(configs, "map_name", ["c.png", "z.png"])
 
-configs_more_lr_pos_s = augment_config_by(configs, "lr_pos", [
-    1e-3, 3e-4, 1e-4, 3e-5, 1e-5
-])
+configs_more_lr_pos_s = augment_config_by(
+    configs, "lr_pos", [1e-3, 3e-4, 1e-4, 3e-5, 1e-5]
+)

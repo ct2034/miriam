@@ -9,7 +9,7 @@ from planner.tcbs.plan import plan_cbsext
 from planner.tcbs_test import get_data_random
 
 if __name__ == "__main__":
-    plt.style.use('bmh')
+    plt.style.use("bmh")
     fname = "/tmp/test.pkl"
 
     n_tests = 10
@@ -26,7 +26,9 @@ if __name__ == "__main__":
                 os.remove(fname)
             assert not os.path.exists(fname), "File exists already"
 
-            agent_pos, grid, idle_goals, jobs = get_data_random(10, 5, n_agent[i_agents], n_agent[i_agents], 5)
+            agent_pos, grid, idle_goals, jobs = get_data_random(
+                10, 5, n_agent[i_agents], n_agent[i_agents], 5
+            )
 
             start_time = datetime.datetime.now()
             try:
@@ -50,21 +52,21 @@ if __name__ == "__main__":
             res2[i_agents, i_test] = time2
 
     try:
-        with open('figure_cache.pkl', 'wb') as f:
+        with open("figure_cache.pkl", "wb") as f:
             pickle.dump((res, res2), f, pickle.HIGHEST_PROTOCOL)
     except Exception as e:
         print(e)
 
     plt.figure()
     plt.boxplot(res.T)
-    plt.xlabel('Agents')
-    plt.ylabel('Planning Time Saving [%]')
+    plt.xlabel("Agents")
+    plt.ylabel("Planning Time Saving [%]")
 
-    plt.savefig('figure_cache.png', bbox_inches='tight')
+    plt.savefig("figure_cache.png", bbox_inches="tight")
 
     plt.figure()
     plt.boxplot(res2.T)
-    plt.xlabel('Agents')
-    plt.ylabel('Planning Time [s]')
+    plt.xlabel("Agents")
+    plt.ylabel("Planning Time [s]")
 
-    plt.savefig('figure_planningtime.png', bbox_inches='tight')
+    plt.savefig("figure_planningtime.png", bbox_inches="tight")

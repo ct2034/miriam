@@ -51,12 +51,12 @@ def plot_maze_with_path(maze, path, start, goal):
     """
     Plot a maze with a path.
     """
-    plt.imshow(maze, cmap='binary', interpolation='nearest')
-    plt.plot(start[1], start[0], 'ro')
-    plt.plot(goal[1], goal[0], 'go')
+    plt.imshow(maze, cmap="binary", interpolation="nearest")
+    plt.plot(start[1], start[0], "ro")
+    plt.plot(goal[1], goal[0], "go")
     path_x = [p[1] for p in path]
     path_y = [p[0] for p in path]
-    plt.plot(path_x, path_y, 'b-')
+    plt.plot(path_x, path_y, "b-")
     plt.xticks(np.arange(0, maze.shape[1], 1.0))
     plt.yticks(np.arange(0, maze.shape[0], 1.0))
     plt.grid(False)
@@ -76,8 +76,7 @@ def find_path(maze, start, goal):
     for i in range(maze.shape[0]):
         for j in range(maze.shape[1]):
             if maze[i, j] == 0:
-                neighbors = get_neighbors(
-                    [i, j], maze)
+                neighbors = get_neighbors([i, j], maze)
                 for neighbor in neighbors:
                     graph.add_edge((i, j), neighbor)
     # find path
@@ -85,7 +84,7 @@ def find_path(maze, start, goal):
     return path
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     np.random.seed(0)
     maze = make_random_maze(100, 100, 0.3)
     start = find_random_free_pose(maze)

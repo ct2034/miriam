@@ -9,7 +9,7 @@
 define p2dxsonar sensor
 (
   # define the size of each transducer [xsize ysize zsize] in meters
-  size [0.01 0.05 0.01 ] 
+  size [0.01 0.05 0.01 ]
   # define the range bounds [min max]
   range [0 5.0]
   # define the angular field of view in degrees
@@ -103,27 +103,27 @@ define p3at_sonar ranger
   p3dxsonar ( pose [-0.144 0.136 0 90] )
 )
 
-define pioneer_base position 
+define pioneer_base position
 (
   color "red"			# Default color.
   drive "diff"		 	# Differential steering model.
   gui_nose 1                  	# Draw a nose on the robot so we can see which way it points
   obstacle_return 1           	# Can hit things.
   ranger_return 0.5            	# reflects sonar beams
-  blob_return 1               	# Seen by blobfinders  
+  blob_return 1               	# Seen by blobfinders
   fiducial_return 1           	# Seen as "1" fiducial finders
 
-  localization "gps"         	  
+  localization "gps"
   localization_origin [0 0 0 0] 	# Start odometry at (0, 0, 0).
 
   # alternative odometric localization with simple error model
   # localization "odom"         		# Change to "gps" to have impossibly perfect, global odometry
   #  odom_error [ 0.05 0.05 0.1 ]   	# Odometry error or slip in X, Y and Theta
-                                   	# (Uniform random distribution)   
+                                   	# (Uniform random distribution)
 
   # four DOF kinematics limits
-  # [ xmin xmax ymin ymax zmin zmax amin amax ]				
-  velocity_bounds [-0.5 0.5 0 0 0 0 -90.0 90.0 ]					
+  # [ xmin xmax ymin ymax zmin zmax amin amax ]
+  velocity_bounds [-0.5 0.5 0 0 0 0 -90.0 90.0 ]
   acceleration_bounds [-0.5 0.5 0 0 0 0 -90 90.0 ]
 )
 
@@ -141,7 +141,7 @@ define pioneer2dx_base_no_sonar pioneer_base
   gui_nose 1
 
   # estimated mass in KG
-  mass 23.0 
+  mass 23.0
   # differential steering model
   drive "diff"
  )
@@ -151,21 +151,21 @@ define pioneer2dx_base pioneer2dx_base_no_sonar
 (
   # use the sonar array defined above with a small vertical offset to
   # drop the sensors into the robot body
-  p2dx_sonar( pose [0 0 -0.03 0] ) 
+  p2dx_sonar( pose [0 0 -0.03 0] )
 )
 
 define pioneer2dx_base_front_sonar pioneer2dx_base_no_sonar
 (
   # use the sonar array defined above with a small vertical offset to
   # drop the sensors into the robot body
-  p2dx_sonar_front( pose [0 0 -0.03 0] ) 
+  p2dx_sonar_front( pose [0 0 -0.03 0] )
 )
 
 
 define pioneer2dx pioneer2dx_base
-(  
+(
   # simplified Body shape:
-  block( 
+  block(
     points 8
     point[0] [-0.2 0.12]
     point[1] [-0.2 -0.12]
@@ -182,9 +182,9 @@ define pioneer2dx pioneer2dx_base
 
 # as above, but with front sonar only
 define pioneer2dx_front_sonar pioneer2dx_base_front_sonar
-(  
+(
   # simplified Body shape:
-  block( 
+  block(
     points 8
     point[0] [-0.2 0.12]
     point[1] [-0.2 -0.12]
@@ -207,19 +207,19 @@ define fancypioneer2dx pioneer2dx_base
   #  The geometry is from the Webots v5.3.0 manual. Thanks to Webots
   #  and Olivier Michel. If Stage or Gazebo do not do what you want,
   #  take a look at Webots. It's a very nice commercial simulator.
- 
+
   # main body
-  block 
+  block
   (
     points 8
-    point[0] [ -0.185 -0.135 ] 
-    point[1] [  0.095 -0.135 ] 
-    point[2] [  0.11  -0.08  ] 
-    point[3] [  0.11   0.08  ] 
-    point[4] [  0.095  0.135 ] 
+    point[0] [ -0.185 -0.135 ]
+    point[1] [  0.095 -0.135 ]
+    point[2] [  0.11  -0.08  ]
+    point[3] [  0.11   0.08  ]
+    point[4] [  0.095  0.135 ]
     point[5] [ -0.185  0.135 ]
     point[6] [ -0.215  0.1   ]
-    point[7] [ -0.215 -0.1   ] 
+    point[7] [ -0.215 -0.1   ]
     z [ 0.059 0.234 ]
   )
 
@@ -254,7 +254,7 @@ define fancypioneer2dx pioneer2dx_base
     point[8]  [ 0.046  0.136 ]
     z [ 0.184 0.234 ]
   )
-  
+
   # left wheel
   block
   (
@@ -287,7 +287,7 @@ define fancypioneer2dx pioneer2dx_base
     point[0] [ -0.2475 -0.012 ]
     z [ 0 0.065 ]
   )
- 
+
   # lid
   block
   (
@@ -325,7 +325,7 @@ define fancypioneer2dx pioneer2dx_base
 # format: bumper[x] [x y th length radius] (zero radius gives a straight line)
 # WARNING: bumpers are not currently supported by Stage>=1.5
 # define pioneer2dxbumper bumper
-# ( 
+# (
 #   bumpers10
 #   bumper[0] [  0.17 -0.22  -52  0.105 0.0 ]
 #   bumper[1] [  0.24 -0.12  -19  0.105 0.0 ]
@@ -350,10 +350,10 @@ define pioneer3dx pioneer_base
   origin [-0.04465 0.0 0.0]
 
   # Estimated mass in KG
-  mass 23.0 
+  mass 23.0
 
   # Body shape:
-  block( 
+  block(
     points 8
     point[0] [-0.2 0.12]
     point[1] [-0.2 -0.12]
@@ -367,8 +367,8 @@ define pioneer3dx pioneer_base
   )
 
   # Use the sonar array defined above
-  p3dx_sonar( pose [ 0 0 -0.03 0 ] )  
-) 
+  p3dx_sonar( pose [ 0 0 -0.03 0 ] )
+)
 
 # The Pioneer3AT standard configuration
 define pioneer3at pioneer_base
@@ -380,10 +380,10 @@ define pioneer3at pioneer_base
   origin [-0.04465 0.0 0.0]
 
   # Estimated mass in KG
-  mass 40.0 
+  mass 40.0
 
   # Body shape:
-  block( 
+  block(
     points 8
     point[0] [-0.18 0.313]
     point[1] [0.18 0.313]
@@ -396,7 +396,7 @@ define pioneer3at pioneer_base
   )
 
   # Use the sonar array defined above
-  p3at_sonar( pose [ 0 0 -0.03 0 ] )  
+  p3at_sonar( pose [ 0 0 -0.03 0 ] )
 )
 
 

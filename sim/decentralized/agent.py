@@ -6,12 +6,26 @@ from typing import Dict, Optional, Tuple, Union
 import networkx as nx
 import numpy as np
 import torch
-from definitions import (BLOCKED_EDGES_TYPE, BLOCKED_NODES_TYPE, EDGE_TYPE,
-                         FREE, INVALID, PATH, POS, C, C_grid, N)
+from definitions import (
+    BLOCKED_EDGES_TYPE,
+    BLOCKED_NODES_TYPE,
+    EDGE_TYPE,
+    FREE,
+    INVALID,
+    PATH,
+    POS,
+    C,
+    C_grid,
+    N,
+)
 from planner.astar_boost.build.libastar_graph import AstarSolver
 from planner.astar_boost.converter import initialize_from_graph
-from scenarios.types import (COORD_TO_NODE_TYPE, POTENTIAL_ENV_TYPE,
-                             is_gridmap, is_roadmap)
+from scenarios.types import (
+    COORD_TO_NODE_TYPE,
+    POTENTIAL_ENV_TYPE,
+    is_gridmap,
+    is_roadmap,
+)
 from sim.decentralized.policy import Policy, PolicyType
 from tools import hasher
 
@@ -20,8 +34,7 @@ logger = logging.getLogger(__name__)
 COST = "cost"
 
 
-def gridmap_to_graph(gridmap: np.ndarray) -> Tuple[
-        nx.Graph, COORD_TO_NODE_TYPE]:
+def gridmap_to_graph(gridmap: np.ndarray) -> Tuple[nx.Graph, COORD_TO_NODE_TYPE]:
     w, h = gridmap.shape
 
     # transformation between coordinates and node numbers
@@ -48,11 +61,12 @@ def gridmap_to_graph(gridmap: np.ndarray) -> Tuple[
 
 class Agent(object):
     def __init__(
-        self, env: POTENTIAL_ENV_TYPE,
+        self,
+        env: POTENTIAL_ENV_TYPE,
         pos: Union[C, C_grid, np.ndarray],
         policy: PolicyType = PolicyType.LEARNED,
         radius: Optional[float] = None,
-        rng: random.Random = random.Random(0)
+        rng: random.Random = random.Random(0),
     ):
         """Initialize a new agent at a given postion `pos` using a given
         `policy` for resolution of errors."""
@@ -62,13 +76,12 @@ class Agent(object):
             self.has_roadmap: bool = False
             self.has_gridmap: bool = True
             assert isinstance(env, np.ndarray), "Env must be numpy array"
-            (self.env, self.coord_to_node
-             ) = gridmap_to_graph(env)
+            (self.env, self.coord_to_node) = gridmap_to_graph(env)
             assert isinstance(pos, tuple)
             self.pos = self.coord_to_node[pos]  # type: ignore
             assert len(pos) == 2  # (x, y)self.pos: C = pos
             if radius is None:
-                self.radius = .4  # good for gridmaps
+                self.radius = 0.4  # good for gridmaps
             else:
                 self.radius = radius
         elif is_roadmap(env):
@@ -89,37 +102,37 @@ class Agent(object):
         self.path_i: Union[int, None] = None
         self.policy: Policy = Policy.construct_by_type(policy, self)
         self.rng = rng
-        self.id: int = self.rng.randint(0, int(2E14))
+        self.id: int = self.rng.randint(0, int(2e14))
         self.blocked_edges: BLOCKED_EDGES_TYPE = set()
         self.blocked_nodes: BLOCKED_NODES_TYPE = set()
 
     def __hash__(self):
-        return hash(hasher([
-            f"start: {self.start}\n",
-            f"goal: {self.goal}\n",
-            f"policy: {self.policy}\n",
-            f"hash(env): {hasher(self.env)}"
-        ]))  # should not change over time
+        return hash(
+            hasher(
+                [
+                    f"start: {self.start}\n",
+                    f"goal: {self.goal}\n",
+                    f"policy: {self.policy}\n",
+                    f"hash(env): {hasher(self.env)}",
+                ]
+            )
+        )  # should not change over time
 
     def __eq__(self, other):
         return hash(self) == hash(other)
 
     def __str__(self):
         return (
-            f"id: {self.id}\n" +
-            f"start: {self.start}\n" +
-            f"goal: {self.goal}\n" +
-            f"pos: {self.pos}\n" +
-            f"policy: {self.policy}\n" +
-            f"hash(env): {hasher(self.env)}"
+            f"id: {self.id}\n"
+            + f"start: {self.start}\n"
+            + f"goal: {self.goal}\n"
+            + f"pos: {self.pos}\n"
+            + f"policy: {self.policy}\n"
+            + f"hash(env): {hasher(self.env)}"
         )
 
     def copy(self):
-        a = Agent(
-            env=self.env,
-            pos=self.start,
-            radius=self.radius,
-            rng=self.rng)
+        a = Agent(env=self.env, pos=self.start, radius=self.radius, rng=self.rng)
         a.policy = self.policy
         a.pos = self.pos
         a.goal = self.goal
@@ -139,10 +152,7 @@ class Agent(object):
         elif self.has_roadmap:
             assert isinstance(goal, int)  # (node)
         assert isinstance(goal, int)
-        path = self.plan_path(
-            start=self.pos,
-            goal=goal
-        )
+        path = self.plan_path(start=self.pos, goal=goal)
         if path is not None:
             self.goal = goal
             self.path = path
@@ -184,20 +194,14 @@ class Agent(object):
     def replan(self):
         """Replan the path to the current goal."""
         assert self.goal is not None, "Should have a goal to replan"
-        self.path = self.plan_path(
-            start=self.pos,
-            goal=self.goal
-        )
+        self.path = self.plan_path(start=self.pos, goal=self.goal)
         self.path_i = 0
         assert self.path is not None, "We must be successful with no blocks"
 
     def replan_with_first_step(self, step: C):
         self.check_step(step)
         assert self.goal is not None, "Should have a goal to plan"
-        path_from_step = self.plan_path(
-            start=step,
-            goal=self.goal
-        )
+        path_from_step = self.plan_path(start=step, goal=self.goal)
         assert path_from_step is not None
         self.path = [self.pos] + path_from_step
         self.path_i = 0
@@ -212,8 +216,9 @@ class Agent(object):
         """Move agent to its next step, pass that pose for clarification."""
         potential_next_pos = self.what_is_next_step()
         if self.has_gridmap:
-            assert (potential_next_pos == next_pos_to_check
-                    ), "Our next position has to be correct."
+            assert (
+                potential_next_pos == next_pos_to_check
+            ), "Our next position has to be correct."
         if self.is_at_goal():
             pass
         else:  # not at goal yet
@@ -232,11 +237,11 @@ class Agent(object):
 
     def check_step(self, pos_to_go_to):
         if self.pos != pos_to_go_to:
-            if not self.env.has_edge(
-                    self.pos, pos_to_go_to):
+            if not self.env.has_edge(self.pos, pos_to_go_to):
                 raise RuntimeError(
-                    f"Should have edge from current pos ({self.pos})" +
-                    f" to pos_to_go_to ({pos_to_go_to}).")
+                    f"Should have edge from current pos ({self.pos})"
+                    + f" to pos_to_go_to ({pos_to_go_to})."
+                )
 
     def get_path_i_not_none(self) -> int:
         assert self.path_i is not None

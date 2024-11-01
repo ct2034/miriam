@@ -15,19 +15,17 @@ import torch.optim as optim
 import torchvision.transforms as T
 from PIL import Image
 
-env = gym.make('CartPole-v0').unwrapped
+env = gym.make("CartPole-v0").unwrapped
 
 # if gpu is to be used
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = "cpu"
 
 # --------------------------------------------------------------------------
-Transition = namedtuple('Transition',
-                        ('state', 'action', 'next_state', 'reward'))
+Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 
 
 class ReplayMemory(object):
-
     def __init__(self, capacity):
         self.capacity = capacity
         self.memory = []
@@ -46,11 +44,11 @@ class ReplayMemory(object):
     def __len__(self):
         return len(self.memory)
 
+
 # --------------------------------------------------------------------------
 
 
 class DQN(nn.Module):
-
     def __init__(self, h, w, outputs):
         super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
@@ -64,6 +62,7 @@ class DQN(nn.Module):
         # and therefore the input image size, so compute it.
         def conv2d_size_out(size, kernel_size=5, stride=2):
             return (size - (kernel_size - 1) - 1) // stride + 1
+
         convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
         convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h)))
         linear_input_size = convw * convh * 32
@@ -79,9 +78,9 @@ class DQN(nn.Module):
 
 
 # --------------------------------------------------------------------------
-resize = T.Compose([T.ToPILImage(),
-                    T.Resize(40, interpolation=Image.CUBIC),
-                    T.ToTensor()])
+resize = T.Compose(
+    [T.ToPILImage(), T.Resize(40, interpolation=Image.CUBIC), T.ToTensor()]
+)
 
 
 def get_cart_location(screen_width):
@@ -93,10 +92,10 @@ def get_cart_location(screen_width):
 def get_screen():
     # Returned screen requested by gym is 400x600x3, but is sometimes larger
     # such as 800x1200x3. Transpose it into torch order (CHW).
-    screen = env.render(mode='rgb_array').transpose((2, 0, 1))
+    screen = env.render(mode="rgb_array").transpose((2, 0, 1))
     # Cart is in the lower half, so strip off the top and bottom of the screen
     _, screen_height, screen_width = screen.shape
-    screen = screen[:, int(screen_height*0.4):int(screen_height * 0.8)]
+    screen = screen[:, int(screen_height * 0.4) : int(screen_height * 0.8)]
     view_width = int(screen_width * 0.6)
     cart_location = get_cart_location(screen_width)
     if cart_location < view_width // 2:
@@ -104,8 +103,9 @@ def get_screen():
     elif cart_location > (screen_width - view_width // 2):
         slice_range = slice(-view_width, None)
     else:
-        slice_range = slice(cart_location - view_width // 2,
-                            cart_location + view_width // 2)
+        slice_range = slice(
+            cart_location - view_width // 2, cart_location + view_width // 2
+        )
     # Strip off the edges, so that we have a square image centered on a cart
     screen = screen[:, :, slice_range]
     # Convert to float, rescale, convert to torch tensor
@@ -156,8 +156,9 @@ steps_done = 0
 def select_action(state):
     global steps_done
     sample = random.random()
-    eps_threshold = EPS_END + (EPS_START - EPS_END) * \
-        math.exp(-1. * steps_done / EPS_DECAY)
+    eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(
+        -1.0 * steps_done / EPS_DECAY
+    )
     steps_done += 1
     if sample > eps_threshold:
         with torch.no_grad():
@@ -166,8 +167,9 @@ def select_action(state):
             # found, so we pick action with the larger expected reward.
             return policy_net(state).max(1)[1].view(1, 1)
     else:
-        return torch.tensor([[random.randrange(n_actions)]],
-                            device=device, dtype=torch.long)
+        return torch.tensor(
+            [[random.randrange(n_actions)]], device=device, dtype=torch.long
+        )
 
 
 episode_durations = []
@@ -177,9 +179,9 @@ def plot_durations():
     plt.figure(2)
     plt.clf()
     durations_t = torch.tensor(episode_durations, dtype=torch.float)
-    plt.title('Training...')
-    plt.xlabel('Episode')
-    plt.ylabel('Duration')
+    plt.title("Training...")
+    plt.xlabel("Episode")
+    plt.ylabel("Duration")
     plt.plot(durations_t.numpy())
     # Take 100 episode averages and plot them too
     if len(durations_t) >= 100:
@@ -188,6 +190,7 @@ def plot_durations():
         plt.plot(means.numpy())
 
     plt.pause(0.001)  # pause a bit so that plots are updated
+
 
 # --------------------------------------------------------------------------
 
@@ -203,11 +206,12 @@ def optimize_model():
 
     # Compute a mask of non-final states and concatenate the batch elements
     # (a final state would've been the one after which simulation ended)
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                            batch.next_state)), device=device,
-                                  dtype=torch.bool)
-    non_final_next_states = torch.cat([s for s in batch.next_state
-                                       if s is not None])
+    non_final_mask = torch.tensor(
+        tuple(map(lambda s: s is not None, batch.next_state)),
+        device=device,
+        dtype=torch.bool,
+    )
+    non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
     state_batch = torch.cat(batch.state)
     action_batch = torch.cat(batch.action)
     reward_batch = torch.cat(batch.reward)
@@ -223,14 +227,16 @@ def optimize_model():
     # This is merged based on the mask, such that we'll have either the
     # expected state value or 0 in case the state was final.
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
-    next_state_values[non_final_mask] = target_net(
-        non_final_next_states).max(1)[0].detach()
+    next_state_values[non_final_mask] = (
+        target_net(non_final_next_states).max(1)[0].detach()
+    )
     # Compute the expected Q values
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # Compute Huber loss
-    loss = F.smooth_l1_loss(state_action_values,
-                            expected_state_action_values.unsqueeze(1))
+    loss = F.smooth_l1_loss(
+        state_action_values, expected_state_action_values.unsqueeze(1)
+    )
 
     # Optimize the model
     optimizer.zero_grad()
@@ -278,7 +284,7 @@ for i_episode in range(num_episodes):
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
 
-print('Complete')
+print("Complete")
 env.render()
 env.close()
 plt.show()

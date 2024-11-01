@@ -4,8 +4,9 @@ from ortools.linear_solver import pywraplp
 
 def main(x1, x2, t):
     # Create the linear solver with the GLOP backend.
-    solver = pywraplp.Solver('simple_lp_program',
-                             pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
+    solver = pywraplp.Solver(
+        "simple_lp_program", pywraplp.Solver.GLOP_LINEAR_PROGRAMMING
+    )
 
     # polynome
     #   x(t) = a_x x^3 + b_x x^2 + c_x x + d_x
@@ -18,5 +19,5 @@ def main(x1, x2, t):
     # ....
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(1, 2, 5)

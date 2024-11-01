@@ -6,22 +6,29 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from tensorflow.keras import initializers, regularizers
-from tensorflow.keras.layers import (Dense, DepthwiseConv2D, Dropout, Flatten,
-                                     Input, MaxPooling2D, Reshape)
+from tensorflow.keras.layers import (
+    Dense,
+    DepthwiseConv2D,
+    Dropout,
+    Flatten,
+    Input,
+    MaxPooling2D,
+    Reshape,
+)
 from tensorflow.keras.models import Model
 
-if int(tf.__version__.split('.')[0]) > 1:
-    accuracy = 'accuracy'
+if int(tf.__version__.split(".")[0]) > 1:
+    accuracy = "accuracy"
 else:
-    accuracy = 'acc'
+    accuracy = "acc"
 
 size_polynome = 4  # how many parameters has the polynome
-learn_res = 100     # with of input samples (x) == neurons of input and output
-n_encoding = 5     # neurons in encoding layer
+learn_res = 100  # with of input samples (x) == neurons of input and output
+n_encoding = 5  # neurons in encoding layer
 
 
 def make_random_poly():
-    return np.polynomial.Polynomial(np.random.random(size_polynome)-.5)
+    return np.polynomial.Polynomial(np.random.random(size_polynome) - 0.5)
 
 
 def get_sample(poly, t, t_pred):
@@ -48,39 +55,41 @@ def train_autoenc(n, learn_res, sample_end, t_pred):
         y.append(Y)
 
     # helpers
-    init = initializers.RandomNormal(mean=0.0,
-                                     stddev=0.1, seed=None)
-    reg_sparse = regularizers.l2(.01)
+    init = initializers.RandomNormal(mean=0.0, stddev=0.1, seed=None)
+    reg_sparse = regularizers.l2(0.01)
 
     # layers
     input_data = Input(shape=x[0].shape)
-    e1 = Dense(learn_res, kernel_initializer=init,
-               activation='relu')(input_data)
-    encoded_input = Dense(n_encoding, kernel_initializer=init,
-                          kernel_regularizer=reg_sparse, activation='relu')(e1)
-    decoded = Dense(learn_res, kernel_initializer=init,
-                    activation='linear')(encoded_input)
+    e1 = Dense(learn_res, kernel_initializer=init, activation="relu")(input_data)
+    encoded_input = Dense(
+        n_encoding,
+        kernel_initializer=init,
+        kernel_regularizer=reg_sparse,
+        activation="relu",
+    )(e1)
+    decoded = Dense(learn_res, kernel_initializer=init, activation="linear")(
+        encoded_input
+    )
 
     autoencoder_model = Model(input_data, decoded)
-    autoencoder_model.compile(optimizer='adam',
-                              loss='mean_squared_error',
-                              metrics=['accuracy'])
+    autoencoder_model.compile(
+        optimizer="adam", loss="mean_squared_error", metrics=["accuracy"]
+    )
     autoencoder_model.summary()
 
     # train
-    history = autoencoder_model.fit([x], [x],
-                                    validation_split=0.3, epochs=32,
-                                    batch_size=256)
+    history = autoencoder_model.fit(
+        [x], [x], validation_split=0.3, epochs=32, batch_size=256
+    )
     return autoencoder_model, history
 
 
 def run_an_example_and_plot_info():
-    n = 2 ** 17  # samples
+    n = 2**17  # samples
     sample_end = 1  # where does X data stop
     t_pred = 1  # where to measure y
 
-    autoencoder_model, history = train_autoenc(
-        n, learn_res, sample_end, t_pred)
+    autoencoder_model, history = train_autoenc(n, learn_res, sample_end, t_pred)
 
     encoded_input = Input(shape=(n_encoding,))
     decoder_layer = autoencoder_model.layers[-1]
@@ -90,20 +99,20 @@ def run_an_example_and_plot_info():
     plt.subplot(211)
     # Plot training & validation accuracy values
     plt.plot(history.history[accuracy])
-    plt.plot(history.history['val_' + accuracy])
-    plt.title('Model accuracy')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.plot(history.history["val_" + accuracy])
+    plt.title("Model accuracy")
+    plt.ylabel("Accuracy")
+    plt.xlabel("Epoch")
+    plt.legend(["Train", "Test"], loc="upper left")
 
     plt.subplot(212)
     # Plot training & validation loss values
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('Model loss')
-    plt.ylabel('Loss')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.plot(history.history["loss"])
+    plt.plot(history.history["val_loss"])
+    plt.title("Model loss")
+    plt.ylabel("Loss")
+    plt.xlabel("Epoch")
+    plt.legend(["Train", "Test"], loc="upper left")
 
     # original data and its reconstruction
     plt.figure()
@@ -116,8 +125,8 @@ def run_an_example_and_plot_info():
         X, Y = get_sample(poly, t_sample, t_pred)
         pred = autoencoder_model.predict(np.array([X]))[0]
         plt.subplot(int(100 * n / 2 + 21 + i))
-        plt.plot(t_plot, poly(t_plot), 'k--')
-        plt.plot(t_sample, pred, 'r')
+        plt.plot(t_plot, poly(t_plot), "k--")
+        plt.plot(t_sample, pred, "r")
         plt.title(str(poly.coef))
         plt.grid(True)
 
@@ -131,7 +140,7 @@ def run_an_example_and_plot_info():
             code[i_e] += pm
             decoded = decoder_model.predict(np.array([code]))[0]
             plt.title(str(code))
-            plt.plot(t_sample, decoded, 'r')
+            plt.plot(t_sample, decoded, "r")
 
     # The End
     plt.show()

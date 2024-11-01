@@ -22,20 +22,19 @@ def plan_cobra(agent_pos, jobs, grid, config) -> ([], []):
         cobra_bin = "cobra"
 
     job_endpoints_i, agent_points_i = write_map_file(
-        agent_pos, jobs, grid, cobra_filename_base)
+        agent_pos, jobs, grid, cobra_filename_base
+    )
     write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base)
 
-    time.sleep(.2)
+    time.sleep(0.2)
 
     pwd = os.getcwd()
-    cmd = " ".join([
-        cobra_bin,
-        cobra_filename_base + MAP_EXT,
-        cobra_filename_base + TASK_EXT
-    ])
+    cmd = " ".join(
+        [cobra_bin, cobra_filename_base + MAP_EXT, cobra_filename_base + TASK_EXT]
+    )
     _stdout, _stderr, retcode = tools.run_command(cmd)
 
-    time.sleep(.2)
+    time.sleep(0.2)
 
     try:
         if retcode != 0:
@@ -72,7 +71,7 @@ def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
     for a in agent_pos:
         agent_points_i.append(agent_points.index(a))
 
-    with open(fname, 'w') as f:
+    with open(fname, "w") as f:
         f.write(",".join(map(str, grid.shape[0:2])) + "\n")
         f.write(str(len(job_endpoints)) + "\n")
         f.write(str(len(agent_points)) + "\n")
@@ -94,8 +93,7 @@ def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
     job_endpoints_i = []
     for j in jobs:
         job_endpoints_i.append(
-            (job_endpoints_sorted.index(j[0]),
-             job_endpoints_sorted.index(j[1]))
+            (job_endpoints_sorted.index(j[0]), job_endpoints_sorted.index(j[1]))
         )
 
     return job_endpoints_i, agent_points_i
@@ -103,26 +101,20 @@ def write_map_file(agent_pos, jobs, grid, cobra_filename_base):
 
 def write_task_file(job_endpoints_i, agent_points_i, cobra_filename_base):
     fname = cobra_filename_base + TASK_EXT
-    with open(fname, 'w') as f:
+    with open(fname, "w") as f:
         f.write(str(len(job_endpoints_i)) + "\n")
         for jei in job_endpoints_i:
-            f.write("\t".join([
-                "0",
-                str(jei[0]),
-                str(jei[1]),
-                "0",
-                "10\n"
-            ]))
+            f.write("\t".join(["0", str(jei[0]), str(jei[1]), "0", "10\n"]))
 
 
 def read_path_file(fname, grid):
     paths = []
     agent_path = []
     t = 0
-    time.sleep(.5)
+    time.sleep(0.5)
     while not os.path.exists(fname):
-        time.sleep(.5)
-    with open(fname, 'r') as f:
+        time.sleep(0.5)
+    with open(fname, "r") as f:
         for line in f:
             nums = line.strip().split("\t")
             if len(nums) == 1:  # a new agent
@@ -132,11 +124,7 @@ def read_path_file(fname, grid):
                     agent_path = []
                     t = 0
             else:  # a new point
-                agent_path.append(
-                    (int(nums[0]),
-                     int(nums[1]),
-                     t)
-                )
+                agent_path.append((int(nums[0]), int(nums[1]), t))
                 t += 1
         paths.append((agent_path,))
     new_paths = []
@@ -216,7 +204,7 @@ def make_paths_comparable(paths, agent_job, agent_pos, jobs):
                 i_p += 1
             paths_agent_out.append(path[0:i_p])
             path_out = []
-            for p in path[i_p - 1:]:
+            for p in path[i_p - 1 :]:
                 path_out.append(tuple([p[0], p[1], p[2] + 1]))
             paths_agent_out.append(path_out)
             paths_out.append(tuple(paths_agent_out))

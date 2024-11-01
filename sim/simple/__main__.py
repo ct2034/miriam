@@ -20,25 +20,25 @@ def testing(thread: SimpSim):
     width = 20
     height = 20
 
-    time.sleep(.5)
+    time.sleep(0.5)
     gridmap = np.zeros([width, width])
     thread.start_sim(gridmap, 3)
 
-    time.sleep(.5)
+    time.sleep(0.5)
 
     for i in range(4):
         thread.new_job(
             np.array([random.randint(0, width), random.randint(0, height)]),
             np.array([random.randint(0, width), random.randint(0, height)]),
-            random.randint(0, 1000)
+            random.randint(0, 1000),
         )
-        time.sleep(.1)
+        time.sleep(0.1)
 
     time.sleep(20)
     thread.stop_sim()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.info("__main__.py ...")
 
     # init switches

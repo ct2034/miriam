@@ -1,5 +1,4 @@
-
-class A():
+class A:
     def __init__(self):
         self.foo = 0
 

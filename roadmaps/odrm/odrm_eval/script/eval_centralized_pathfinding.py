@@ -22,19 +22,14 @@ import coloredlogs
 import imageio
 import networkx as nx
 from odrm.odrm import is_pixel_free
-from odrm.eval_disc import (
-    get_unique_batch,
-    eval_graph,
-    graphs_from_posar,
-    make_edges
-)
+from odrm.eval_disc import get_unique_batch, eval_graph, graphs_from_posar, make_edges
 from odrm_eval.filename_verification import (
     get_graph_csvs,
     get_graph_undir_csv,
     is_result_file,
     is_eval_cen_file,
     resolve_mapname,
-    get_basename_wo_extension
+    get_basename_wo_extension,
 )
 from bresenham import bresenham
 
@@ -79,23 +74,29 @@ def evaluate(fname):
     assert is_result_file(fname), "Please call with result file (*.pkl)"
     fname_graph_adjlist, fname_graph_pos = get_graph_csvs(fname)
     assert os.path.exists(fname_graph_adjlist) and os.path.exists(
-        fname_graph_pos), "Please make csv files first `script/write_graph.py csv res/...pkl`"
+        fname_graph_pos
+    ), "Please make csv files first `script/write_graph.py csv res/...pkl`"
     fname_graph_undir_adjlist = get_graph_undir_csv(fname)
     assert os.path.exists(
-        fname_graph_undir_adjlist), "Please make csv files first `script/write_graph.py csv res/...pkl`"
+        fname_graph_undir_adjlist
+    ), "Please make csv files first `script/write_graph.py csv res/...pkl`"
     fname_map = resolve_mapname(fname)
-    fname_eval_results = "res/" + \
-        get_basename_wo_extension(fname) + ".eval_cen." + \
-        str(uuid.uuid1()) + ".pkl"
+    fname_eval_results = (
+        "res/"
+        + get_basename_wo_extension(fname)
+        + ".eval_cen."
+        + str(uuid.uuid1())
+        + ".pkl"
+    )
     assert is_eval_cen_file(fname_eval_results)
 
     # read file
     with open(fname, "rb") as f:
         assert is_result_file(fname), "Please call with result file"
         store = pickle.load(f)
-    posar = store['posar']
+    posar = store["posar"]
     N = posar.shape[0]
-    edgew = store['edgew']
+    edgew = store["edgew"]
     im = imageio.imread(fname_map)
     _, graph, pos = graphs_from_posar(N, posar)
     make_edges(N, _, graph, posar, edgew, im)
@@ -103,7 +104,8 @@ def evaluate(fname):
 
     # grid map
     g_grid, posar_grid, fname_grid_adjlist, fname_grid_posar = make_gridmap(
-        N, im, fname)
+        N, im, fname
+    )
     logging.info("fname_grid_adjlist: " + fname_grid_adjlist)
     logging.info("fname_grid_posar: " + fname_grid_posar)
     logging.info("fname_graph_adjlist: " + fname_graph_adjlist)
@@ -122,24 +124,31 @@ def evaluate(fname):
     graph_iter = Graph
     # graph_iter = [Graph.GRID]
 
-    time_estimate = len(planner_iter) * len(graph_iter) * \
-        len(n_agentss) * TRIALS * TIMEOUT_S
-    logging.info("(worst case) runtime estimate: {} (h:m:s)".format(
-        str(datetime.timedelta(seconds=time_estimate))
-    ))
+    time_estimate = (
+        len(planner_iter) * len(graph_iter) * len(n_agentss) * TRIALS * TIMEOUT_S
+    )
+    logging.info(
+        "(worst case) runtime estimate: {} (h:m:s)".format(
+            str(datetime.timedelta(seconds=time_estimate))
+        )
+    )
 
-    for i_c, (planner_type, graph_type) in enumerate(itertools.product(planner_iter, graph_iter)):
+    for i_c, (planner_type, graph_type) in enumerate(
+        itertools.product(planner_iter, graph_iter)
+    ):
         combination_name = "{}-{}".format(planner_type.name, graph_type.name)
-        logging.info("- Combination {}/{}: {}".format(i_c + 1, len(Planner) * len(Graph),
-                                                      combination_name))
+        logging.info(
+            "- Combination {}/{}: {}".format(
+                i_c + 1, len(Planner) * len(Graph), combination_name
+            )
+        )
         eval_results[SUCCESSFUL][combination_name] = {}
         eval_results[COMPUTATION_TIME][combination_name] = {}
         eval_results[COST][combination_name] = {}
         for n_agents in n_agentss:
             logging.info("-- n_agents: " + str(n_agents))
             eval_results[SUCCESSFUL][combination_name][str(n_agents)] = []
-            eval_results[COMPUTATION_TIME][combination_name][str(n_agents)] = [
-            ]
+            eval_results[COMPUTATION_TIME][combination_name][str(n_agents)] = []
             eval_results[COST][combination_name][str(n_agents)] = []
             for i_trial in range(TRIALS):
                 logging.info("--= trial {}/{}".format(i_trial + 1, TRIALS))
@@ -166,30 +175,43 @@ def evaluate(fname):
                 run_it = True
                 try:
                     # if the run with the last number of agents on this trial failed ...
-                    if eval_results[SUCCESSFUL][combination_name][str(n_agents - STEP_AGENTS)][i_trial] is False:
+                    if (
+                        eval_results[SUCCESSFUL][combination_name][
+                            str(n_agents - STEP_AGENTS)
+                        ][i_trial]
+                        is False
+                    ):
                         run_it = False
                 except Exception as e:
                     logging.debug("e {}".format(e))
                     logging.debug("e.message {}".format(e.message))
                     pass
                 if run_it:
-                    succesful, comp_time, cost = plan(n, planner_type, graph_type, n_agents, g, p, fname_adjlist,
-                                                      fname_posar)
+                    succesful, comp_time, cost = plan(
+                        n,
+                        planner_type,
+                        graph_type,
+                        n_agents,
+                        g,
+                        p,
+                        fname_adjlist,
+                        fname_posar,
+                    )
                 else:
-                    logging.warn(
-                        "skipping because last agent number timed out, too")
+                    logging.warn("skipping because last agent number timed out, too")
                     succesful, comp_time, cost = False, TIMEOUT_S, 0
-                eval_results[SUCCESSFUL][combination_name][str(
-                    n_agents)].append(succesful)
-                eval_results[COMPUTATION_TIME][combination_name][str(
-                    n_agents)].append(comp_time)
-                eval_results[COST][combination_name][str(
-                    n_agents)].append(cost)
+                eval_results[SUCCESSFUL][combination_name][str(n_agents)].append(
+                    succesful
+                )
+                eval_results[COMPUTATION_TIME][combination_name][str(n_agents)].append(
+                    comp_time
+                )
+                eval_results[COST][combination_name][str(n_agents)].append(cost)
 
                 # saving / presenting results
                 logging.info("Saving ..")
                 logging.info(pretty(eval_results))
-                with open(fname_eval_results, 'wb') as f_res:
+                with open(fname_eval_results, "wb") as f_res:
                     pickle.dump(eval_results, f_res)
                     logging.info("Saved results to: " + fname_eval_results)
 
@@ -213,7 +235,7 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
                 graph_adjlist_fname=fname_adjlist,
                 graph_pos_fname=fname_posar,
                 timeout=TIMEOUT_S,
-                cwd=os.path.dirname(__file__) + "/../"
+                cwd=os.path.dirname(__file__) + "/../",
             )
         except TimeoutException:
             return False, float(TIMEOUT_S), 0
@@ -226,9 +248,10 @@ def plan(n, planner_type, graph_type, n_agents, g, posar, fname_adjlist, fname_p
                 starts=batch[:, 0],
                 goals=batch[:, 1],
                 N=n,
-                graph_fname=os.path.abspath(os.path.dirname(
-                    __file__)) + "/../" + fname_adjlist,
-                timeout=TIMEOUT_S
+                graph_fname=os.path.abspath(os.path.dirname(__file__))
+                + "/../"
+                + fname_adjlist,
+                timeout=TIMEOUT_S,
             )
         except TimeoutException:
             return False, float(TIMEOUT_S), 0
@@ -267,14 +290,13 @@ def make_gridmap(N, im, fname):
         for i_n, i_b in itertools.product(range(len(posar_grid)), repeat=2):
             a = posar_grid[i_n]
             b = posar_grid[i_b]
-            if (a[0] == b[0] and isclose(a[1] - b[1], edge_len) or  # up
-                    isclose(a[0] - b[0], edge_len) and a[1] == b[1]):  # right
-                line = bresenham(
-                    int(a[0]),
-                    int(a[1]),
-                    int(b[0]),
-                    int(b[1])
-                )
+            if (
+                a[0] == b[0]
+                and isclose(a[1] - b[1], edge_len)  # up
+                or isclose(a[0] - b[0], edge_len)
+                and a[1] == b[1]
+            ):  # right
+                line = bresenham(int(a[0]), int(a[1]), int(b[0]), int(b[1]))
                 if all([is_pixel_free(im, x) for x in line]):
                     g_grid.add_edge(i_n, i_b)
         for n in g_grid.nodes:
@@ -284,18 +306,18 @@ def make_gridmap(N, im, fname):
         logging.debug("edge_len {}".format(edge_len))
         logging.debug("N_grid {}".format(N_grid))
 
-        grid_adjlist_fname = "res/" + \
-            get_basename_wo_extension(fname) + ".grid_adjlist.csv"
-        grid_posar_fname = "res/" + \
-            get_basename_wo_extension(fname) + ".grid_pos.csv"
+        grid_adjlist_fname = (
+            "res/" + get_basename_wo_extension(fname) + ".grid_adjlist.csv"
+        )
+        grid_posar_fname = "res/" + get_basename_wo_extension(fname) + ".grid_pos.csv"
         g_undir = nx.DiGraph()
         for e in g_grid.edges:
             g_undir.add_edge(e[0], e[1])
             g_undir.add_edge(e[1], e[0])
         nx.write_adjlist(g_undir, grid_adjlist_fname)
         remove_comment_lines(grid_adjlist_fname)
-        with open(grid_posar_fname, 'w') as f_csv:
-            writer = csv.writer(f_csv, delimiter=' ')
+        with open(grid_posar_fname, "w") as f_csv:
+            writer = csv.writer(f_csv, delimiter=" ")
             for pos in posar_grid:
                 writer.writerow(pos)
 
@@ -303,10 +325,7 @@ def make_gridmap(N, im, fname):
 
 
 def n_to_xy(n):
-    return (
-        n % WIDTH,
-        (n - n % WIDTH) / WIDTH
-    )
+    return (n % WIDTH, (n - n % WIDTH) / WIDTH)
 
 
 def xy_to_n(x, y):
@@ -314,25 +333,25 @@ def xy_to_n(x, y):
 
 
 def isclose(a, b):
-    return abs(a - b) < 1E-9
+    return abs(a - b) < 1e-9
 
 
 def pretty(d, indent=0):
-    str_out = ''
+    str_out = ""
     for key, value in d.items():
-        str_out += ('\t' * indent + str(key)) + '\n'
+        str_out += ("\t" * indent + str(key)) + "\n"
         if isinstance(value, dict):
-            str_out += pretty(value, indent + 1) + '\n'
+            str_out += pretty(value, indent + 1) + "\n"
         else:
-            str_out += ('\t' * (indent + 1) + str(value) + '\n')
+            str_out += "\t" * (indent + 1) + str(value) + "\n"
     return str_out
 
 
 def remove_comment_lines(fname):
     tmp_fname = fname + "TMP"
     os.rename(fname, tmp_fname)
-    with open(tmp_fname, 'r') as f_tmp:
-        with open(fname, 'w') as f:
+    with open(tmp_fname, "r") as f_tmp:
+        with open(fname, "w") as f:
             for line in f_tmp.readlines():
                 if not line.startswith("#"):
                     f.write(line)
@@ -340,10 +359,7 @@ def remove_comment_lines(fname):
 
 
 def dist(a, b):
-    return sqrt(
-        pow(a[0] - b[0], 2)
-        + pow(a[1] - b[1], 2)
-    )
+    return sqrt(pow(a[0] - b[0], 2) + pow(a[1] - b[1], 2))
 
 
 def count_processes_with_name(process_name):
@@ -357,6 +373,6 @@ def count_processes_with_name(process_name):
     return count
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fname = sys.argv[1]
     evaluate(fname)

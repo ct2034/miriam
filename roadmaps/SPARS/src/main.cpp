@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
         // /*base::timedPlannerTerminationCondition(30)*/base::IterationTerminationCondition(node["maxIter"].as<int>()), true);
 
       p.printDebug();
-     
+
       const auto& roadmapOMPL = p.getRoadmap();
       std::cout << "#vertices " << boost::num_vertices(roadmapOMPL) << std::endl;
       std::cout << "#edges " << boost::num_edges(roadmapOMPL) << std::endl;
@@ -275,4 +275,3 @@ int main(int argc, char** argv) {
 #endif
   return 0;
 }
-

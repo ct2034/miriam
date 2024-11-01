@@ -19,9 +19,10 @@ ABLATION_RES_FOLDER = "multi_optim/results/ablation"
 
 
 def params_debug():
-    parameter_experiments = {
-    }  # type: Dict[str, Union[List[int], List[float], List[str]]]
-    for k, v in configs['debug'].items():
+    parameter_experiments = (
+        {}
+    )  # type: Dict[str, Union[List[int], List[float], List[str]]]
+    for k, v in configs["debug"].items():
         if k == "seed":
             continue
         parameter_experiments[k] = [v]
@@ -32,9 +33,10 @@ def params_debug():
 
 def params_run_lr_pos():
     # what do smaller position learning rates do?
-    parameter_experiments = {
-    }  # type: Dict[str, Union[List[int], List[float], List[str]]]
-    for k, v in configs['large'].items():
+    parameter_experiments = (
+        {}
+    )  # type: Dict[str, Union[List[int], List[float], List[str]]]
+    for k, v in configs["large"].items():
         if k == "seed":
             continue
         parameter_experiments[k] = [v]
@@ -52,12 +54,12 @@ def params_ablation():
         "n_epochs_per_run_policy": [128],
         "batch_size_policy": [128],
         "stats_and_eval_every": [8],
-        "lr_pos": [1E-2],
-        "lr_policy": [1E-3],
+        "lr_pos": [1e-2],
+        "lr_policy": [1e-3],
         "max_n_agents": [4, 3, 5, 6],
         "map_fname": ["roadmaps/odrm/odrm_eval/maps/c.png"],
         "save_images": [True],
-        "save_folder": [ABLATION_RES_FOLDER]
+        "save_folder": [ABLATION_RES_FOLDER],
     }  # type: Dict[str, Union[List[int], List[float], List[str]]]
     n_runs = 4
     return parameter_experiments, n_runs
@@ -93,16 +95,18 @@ def start_process(kwargs):
     kwargs_str = repr(kwargs)
     my_env = os.environ.copy()
     # my_env["CUDA_VISIBLE_DEVICES"] = "-1"
-    cmd = ["/usr/bin/python3",
-           "-c",
-           f"{import_str}; kwargs = {kwargs_str};"
-           + "run_optimization(**kwargs)"]
+    cmd = [
+        "/usr/bin/python3",
+        "-c",
+        f"{import_str}; kwargs = {kwargs_str};" + "run_optimization(**kwargs)",
+    ]
     process = subprocess.Popen(
         cmd,
         cwd=str(os.getcwd()),
         env=my_env,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+        stderr=subprocess.PIPE,
+    )
     print(f"Started ...... \n{' '.join(cmd)}\n ...... with pid {process.pid}")
     return process
 
@@ -132,23 +136,20 @@ def run(params_to_run):
     # not running them again
     logger.info(f"(all) {len(params_to_run)=}")
     logger.info(f"{len(ran_prefixes)=}")
-    params_to_run = [
-        p for p in params_to_run if p["prefix"] not in ran_prefixes]
+    params_to_run = [p for p in params_to_run if p["prefix"] not in ran_prefixes]
     logger.info(f"(remaining) {len(params_to_run)=}")
 
     n_initial = len(params_to_run)
     pb = ProgressBar("Running", n_initial, 5, logger.info)
 
     while len(params_to_run) > 0 or len(active_processes) > 0:
-        if (len(active_processes) < max_active_processes
-                and len(params_to_run) > 0):
+        if len(active_processes) < max_active_processes and len(params_to_run) > 0:
             if len(params_to_run) > 0:
                 kwargs = params_to_run.pop()
                 prefix = kwargs["prefix"]
                 process = start_process(kwargs)
                 active_processes.add(process)
-                logger.info("Started process "
-                            + f"\"{prefix}\" @ [{process.pid}]")
+                logger.info("Started process " + f'"{prefix}" @ [{process.pid}]')
             logger.debug(f"{len(active_processes)=}")
             logger.debug(f"{len(params_to_run)=}")
         else:
@@ -156,14 +157,17 @@ def run(params_to_run):
             for process in active_processes:
                 if process.poll() is not None:
                     outs, errs = process.communicate()
-                    logger.info("Finished process "
-                                + f"[{process.pid}]")
-                    logger.info(f"outs: [{process.pid}] >>>>>"
-                                + f"{clean_str(outs.decode('utf-8'))}"
-                                + f"<<<<< [{process.pid}]")
-                    logger.error(f"errs: [{process.pid}] >>>>>"
-                                 + f"{clean_str(errs.decode('utf-8'))}"
-                                 + f"<<<<< [{process.pid}]")
+                    logger.info("Finished process " + f"[{process.pid}]")
+                    logger.info(
+                        f"outs: [{process.pid}] >>>>>"
+                        + f"{clean_str(outs.decode('utf-8'))}"
+                        + f"<<<<< [{process.pid}]"
+                    )
+                    logger.error(
+                        f"errs: [{process.pid}] >>>>>"
+                        + f"{clean_str(errs.decode('utf-8'))}"
+                        + f"<<<<< [{process.pid}]"
+                    )
                     to_remove.add(process)
             pb.progress(n_initial - len(params_to_run) - len(active_processes))
             active_processes -= to_remove
@@ -206,10 +210,8 @@ def plot_data(path: str):
     params.sort()
     n_params = len(params)
     fig, (axs) = plt.subplots(
-        n_params + 1,
-        n_exps,
-        figsize=(4*n_exps, 4*n_params),
-        dpi=200)
+        n_params + 1, n_exps, figsize=(4 * n_exps, 4 * n_params), dpi=200
+    )
     axs = axs.reshape(n_params + 1, n_exps)
 
     lims_per_param = {}  # type: Dict[str, List[float]]
@@ -220,16 +222,15 @@ def plot_data(path: str):
 
             # consolidate data
             n_seeds = len(data[exp])
-            t_min_l = 10E10
+            t_min_l = 10e10
             for i_seed, seed in enumerate(data[exp].keys()):
-                t_raw = data[exp][seed][param]['t']
+                t_raw = data[exp][seed][param]["t"]
                 if len(t_raw) < t_min_l:
                     t_min_l = len(t_raw)
                     t_min_raw = t_raw
             this_data_raw = np.zeros((n_seeds, t_min_l))
             for i_seed, seed in enumerate(data[exp].keys()):
-                this_data_raw[i_seed, :] = data[exp][seed][param]['x'][
-                    :t_min_l]
+                this_data_raw[i_seed, :] = data[exp][seed][param]["x"][:t_min_l]
 
             means = np.empty((0,))
             stds = np.empty((0,))
@@ -239,11 +240,9 @@ def plot_data(path: str):
             for i_t, t in enumerate(t_min_raw):
                 t_slice = this_data_raw[:, i_t]
                 if not np.isnan(t_slice).all():
-                    mean = np.mean(
-                        t_slice[np.logical_not(np.isnan(t_slice))])
+                    mean = np.mean(t_slice[np.logical_not(np.isnan(t_slice))])
                     means = np.append(means, mean)
-                    std = np.std(
-                        t_slice[np.logical_not(np.isnan(t_slice))])
+                    std = np.std(t_slice[np.logical_not(np.isnan(t_slice))])
                     stds = np.append(stds, std)
                     min_ = np.min(t_slice[np.logical_not(np.isnan(t_slice))])
                     mins = np.append(mins, min_)
@@ -252,11 +251,10 @@ def plot_data(path: str):
                     ts = np.append(ts, t)
 
             # plot
-            ax.plot(ts, means, label=exp, color='black')
-            ax.fill_between(ts, means - stds, means +
-                            stds, alpha=0.2, color='grey')
-            ax.plot(ts, mins, label=exp, color='green')
-            ax.plot(ts, maxs, label=exp, color='red')
+            ax.plot(ts, means, label=exp, color="black")
+            ax.fill_between(ts, means - stds, means + stds, alpha=0.2, color="grey")
+            ax.plot(ts, mins, label=exp, color="green")
+            ax.plot(ts, maxs, label=exp, color="red")
 
             # labels
             if i_exp == 0:
@@ -274,15 +272,13 @@ def plot_data(path: str):
             if param not in lims_per_param:
                 lims_per_param[param] = [bottom_lim, top_lim]
             else:
-                lims_per_param[param][0] = min(lims_per_param[param][0],
-                                               bottom_lim)
-                lims_per_param[param][1] = max(lims_per_param[param][1],
-                                               top_lim)
+                lims_per_param[param][0] = min(lims_per_param[param][0], bottom_lim)
+                lims_per_param[param][1] = max(lims_per_param[param][1], top_lim)
 
     # barplots
     for i_exp, exp in enumerate(exps):
         ax = axs[0, i_exp]  # type: ignore
-        ax.bar(0, n_existing_seeds[exp], label=exp, color='black')
+        ax.bar(0, n_existing_seeds[exp], label=exp, color="black")
         ax.set_ylim(0, n_seeds)
 
     # cosmetics
@@ -291,8 +287,8 @@ def plot_data(path: str):
     for i_exp, exp in enumerate(exps):
         for i_param, param in enumerate(params):
             ax = axs[i_param + 1, i_exp]  # type: ignore
-            d = (lims_per_param[param][1] - lims_per_param[param][0])*.05
-            ax.set_ylim(lims_per_param[param][0]-d, lims_per_param[param][1]+d)
+            d = (lims_per_param[param][1] - lims_per_param[param][0]) * 0.05
+            ax.set_ylim(lims_per_param[param][0] - d, lims_per_param[param][1] + d)
 
     plt.savefig(os.path.join(path, "_tuning_stats.png"))
 
@@ -315,16 +311,14 @@ if __name__ == "__main__":
         os.makedirs(folder)
 
     logging.basicConfig(
-        filename=os.path.join(
-            folder, "_tuning.log"),
-        filemode='w',
-        level=logging.DEBUG)
-    logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+        filename=os.path.join(folder, "_tuning.log"), filemode="w", level=logging.DEBUG
+    )
+    logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(name)-12s: %(message)s')
+    formatter = logging.Formatter("%(name)-12s: %(message)s")
     console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
+    logging.getLogger("").addHandler(console)
     params_to_run = make_kwargs_for_tuning(parameter_experiments, n_runs)
     run(params_to_run)
     plot_data(folder)

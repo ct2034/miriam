@@ -10,15 +10,13 @@ from sim.decentralized.runner import run_a_scenario
 
 
 def make_scenario():
-    """this makes a scenario as in generate_data.py 
+    """this makes a scenario as in generate_data.py
     (what the policy was trained on)"""
     width = 35
     n_agents = 100
-    fill = .4
+    fill = 0.4
     seed = 2034
-    gridmap, starts, goals = tracing_pathes_in_the_dark(
-        width, fill, n_agents, seed
-    )
+    gridmap, starts, goals = tracing_pathes_in_the_dark(width, fill, n_agents, seed)
     return (gridmap, starts, goals)
 
 
@@ -33,9 +31,14 @@ if __name__ == "__main__":
             a = Agent(gridmap, starts[i_a], p)
             a.give_a_goal(goals[i_a])
             agents.append(a)
-        (average_time, max_time, average_length,
-         max_length, successful) = run_a_scenario(
-             gridmap, agents, False)  # type: ignore
+        (
+            average_time,
+            max_time,
+            average_length,
+            max_length,
+            successful,
+        ) = run_a_scenario(
+            gridmap, agents, False
+        )  # type: ignore
         print(p.name)
-        print((average_time, max_time, average_length,
-               max_length, successful))
+        print((average_time, max_time, average_length, max_length, successful))

@@ -5,15 +5,15 @@ from typing import Optional, Set
 import torch
 
 from planner.policylearn.edge_policy import EdgePolicyModel
-from planner.policylearn.edge_policy_graph_utils import (agents_to_data,
-                                                         get_optimal_edge)
+from planner.policylearn.edge_policy_graph_utils import agents_to_data, get_optimal_edge
 
 logger = logging.getLogger(__name__)
 
 
 class PolicyCalledException(Exception):
-    def __init__(self, policy, id_coll: int,
-                 agents_with_colissions: Optional[Set[int]] = None) -> None:
+    def __init__(
+        self, policy, id_coll: int, agents_with_colissions: Optional[Set[int]] = None
+    ) -> None:
         super().__init__()
         self.policy: RaisingPolicy = policy
         self.agents_with_colissions = agents_with_colissions
@@ -35,8 +35,9 @@ class Policy(object):
             return RandomPolicy(agent)
         elif type == PolicyType.LEARNED:
             nn = EdgePolicyModel(gpu=torch.device("cpu"))
-            nn.load_state_dict(torch.load(
-                "sim/decentralized/policy_model.pt", map_location="cpu"))
+            nn.load_state_dict(
+                torch.load("sim/decentralized/policy_model.pt", map_location="cpu")
+            )
             return LearnedPolicy(agent, nn, **kwargs)
         elif type == PolicyType.OPTIMAL:
             return OptimalPolicy(agent, 0, **kwargs)
@@ -79,13 +80,10 @@ class LearnedPolicy(Policy):
 
     def get_edge(self, agents, _):
         i_a_self = agents.index(self.a)
-        data, big_from_small = agents_to_data(
-            agents, i_a_self, with_optimal=False)
+        data, big_from_small = agents_to_data(agents, i_a_self, with_optimal=False)
         node_to_go = self.nn.predict_probablilistic(
-            data.x,
-            data.edge_index,
-            big_from_small,
-            rng=self.a.rng)
+            data.x, data.edge_index, big_from_small, rng=self.a.rng
+        )
         return node_to_go
 
 

@@ -13,7 +13,7 @@ while len(free_tasks > 0):
 	closest_pose, closest_task = nearest_neighbor(poses, free_tasks) // as of path (only eval 2 best candidates or something)
 	free_tasks -= closest_task
 	if type(closest_pose) == task
-		consec[task] = closest_pose // (task) 
+		consec[task] = closest_pose // (task)
 	else: // is an agent
 		agent_task[task] = closest_pose
 		free_agents -= closest_pose // as agent

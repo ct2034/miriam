@@ -32,9 +32,7 @@ class Robi(pyafai.Agent):
         self.prio = prio
 
         obj = objects.SimplePhysicsObject(
-            random.random()*size,
-            random.random()*size,
-            random.random()*1000 % 360
+            random.random() * size, random.random() * size, random.random() * 1000 % 360
         )
         shape = shapes.Circle(10)
         obj.add_shape(shape)
@@ -46,26 +44,30 @@ class Robi(pyafai.Agent):
 
     def stop_me(self):
         self.body.velocity = 0
-        self.body._shapes[0].color = ('c3B', (255, 0, 0))
+        self.body._shapes[0].color = ("c3B", (255, 0, 0))
 
     def move_me(self):
         self.body.velocity = self.would_be_velocity
-        self.body._shapes[0].color = ('c3B', (255, 255, 255))
+        self.body._shapes[0].color = ("c3B", (255, 255, 255))
 
     def pos(self):
         return (self.body.x, self.body.y)
 
     def update(self, delta):
-        self.body.x = self.body.x + \
-            math.cos(self.body.angle) * self.body.velocity * delta
-        self.body.y = self.body.y + \
-            math.sin(self.body.angle) * self.body.velocity * delta
-        if (self.body.x >= self.world.size or
-            self.body.x <= 0 or
-            self.body.y >= self.world.size or
-                self.body.y <= 0):
+        self.body.x = (
+            self.body.x + math.cos(self.body.angle) * self.body.velocity * delta
+        )
+        self.body.y = (
+            self.body.y + math.sin(self.body.angle) * self.body.velocity * delta
+        )
+        if (
+            self.body.x >= self.world.size
+            or self.body.x <= 0
+            or self.body.y >= self.world.size
+            or self.body.y <= 0
+        ):
             self.collisions += 1
-            self.body.angle = random.random()*1000 % 360
+            self.body.angle = random.random() * 1000 % 360
         a = self.in_front_of_me()
         if a:
             if a.prio > self.prio:
@@ -74,20 +76,18 @@ class Robi(pyafai.Agent):
             self.move_me()
 
     def in_front_of_me(self):
-        agents, dists = self.world.get_nearest_agents(
-            4, [self.body.x, self.body.y])
+        agents, dists = self.world.get_nearest_agents(4, [self.body.x, self.body.y])
         for i_a, a in enumerate(agents):
             if a != self and self.would_be_velocity * 5 >= dists[i_a] > 0:
                 p_self = Point(self.pos())
                 p_other = Point(a.pos())
-                angle_other = math.atan2(
-                    p_other[1] - p_self[1], p_other[0] - p_self[0])
-                if(abs(self.body.angle - angle_other)) < pi / 2:
+                angle_other = math.atan2(p_other[1] - p_self[1], p_other[0] - p_self[0])
+                if (abs(self.body.angle - angle_other)) < pi / 2:
                     return a
         return False
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     size = 1000
     world = NnWorld(size)
     display = pyafai.Display(world)

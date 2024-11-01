@@ -10,18 +10,8 @@ class ScenarioStateTest(unittest.TestCase):
         super().__init__(methodName)
 
     def test_init(self):
-        posl = [
-            [0.1, 0.1],
-            [0.9, 0.1],
-            [0.1, 0.9],
-            [0.9, 0.9]
-        ]
-        edges = [
-            [0, 1],
-            [0, 2],
-            [1, 3],
-            [2, 3]
-        ]
+        posl = [[0.1, 0.1], [0.9, 0.1], [0.1, 0.9], [0.9, 0.9]]
+        edges = [[0, 1], [0, 2], [1, 3], [2, 3]]
         a = AstarSolver(posl, edges)
         self.assertAlmostEqual(a.retreive(0).x, 0.1)
         self.assertAlmostEqual(a.retreive(0).y, 0.1)
@@ -37,14 +27,9 @@ class ScenarioStateTest(unittest.TestCase):
             [0.1, 0.1],
             [0.9, 0.1],
             [0.2, 0.8],  # preferred, because closer in
-            [0.8, 0.8]   # preferred, because closer in
+            [0.8, 0.8],  # preferred, because closer in
         ]
-        edges = [
-            [0, 1],
-            [1, 2],
-            [2, 3],
-            [0, 3]
-        ]
+        edges = [[0, 1], [1, 2], [2, 3], [0, 3]]
         a = AstarSolver(posl, edges)
 
         # one path

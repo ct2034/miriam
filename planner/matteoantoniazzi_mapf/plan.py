@@ -4,17 +4,19 @@ import numpy as np
 from definitions import DEFAULT_TIMEOUT_S, OBSTACLE
 
 from .external.MAPFSolver.SearchBasedAlgorithms import ICTSSolver
-from .external.MAPFSolver.Utilities import (Agent, Map, ProblemInstance,
-                                            SolverSettings)
+from .external.MAPFSolver.Utilities import Agent, Map, ProblemInstance, SolverSettings
 
-EXPANDED_NODES = 'expanded_nodes'
-SUM_OF_COSTS = 'sum_of_costs'
-INFO_TYPE = Tuple[List[List[Tuple[int, int]]],
-                  Dict[str, Union[int, float]]]
+EXPANDED_NODES = "expanded_nodes"
+SUM_OF_COSTS = "sum_of_costs"
+INFO_TYPE = Tuple[List[List[Tuple[int, int]]], Dict[str, Union[int, float]]]
 
 
-def icts_plan(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
-              timeout: int = DEFAULT_TIMEOUT_S) -> INFO_TYPE:
+def icts_plan(
+    grid: np.ndarray,
+    starts: np.ndarray,
+    goals: np.ndarray,
+    timeout: int = DEFAULT_TIMEOUT_S,
+) -> INFO_TYPE:
     sse = SolverSettings()
     sse.set_time_out(timeout)
     solver = ICTSSolver(sse)
@@ -22,7 +24,8 @@ def icts_plan(grid: np.ndarray, starts: np.ndarray, goals: np.ndarray,
     n_agents = starts.shape[0]
     obs_idx = np.where(grid == OBSTACLE)
     obstacles = list(
-        map(lambda x: (obs_idx[0][x], obs_idx[1][x]), range(len(obs_idx[0]))))
+        map(lambda x: (obs_idx[0][x], obs_idx[1][x]), range(len(obs_idx[0])))
+    )
     problem_map = Map(grid.shape[0], grid.shape[1], obstacles)
     agents = []
     for i in range(n_agents):
@@ -55,7 +58,5 @@ def paths_from_info(info: INFO_TYPE) -> List[np.ndarray]:
         p = np.array(pt)
         le = p.shape[0]
         ts = np.arange(le)
-        paths.append(
-            np.append(p, ts.reshape((le, 1)), axis=1)
-        )
+        paths.append(np.append(p, ts.reshape((le, 1)), axis=1))
     return paths

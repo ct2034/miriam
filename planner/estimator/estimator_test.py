@@ -4,10 +4,10 @@ from planner import estimator as e
 
 
 def generate_data(
-        trips_todo: int = 10000,
-        timestep: float = .1,
-        nr_agents: int = 5,
-        nr_landmarks: int = 8
+    trips_todo: int = 10000,
+    timestep: float = 0.1,
+    nr_agents: int = 5,
+    nr_landmarks: int = 8,
 ) -> list:
     """
     generating example data that simulates a number of
@@ -35,8 +35,7 @@ def generate_data(
 
             location[agent] = current_landmark + 0.5
             timeout[agent] = np.random.normal(
-                loc=duration_travel_mean,
-                scale=duration_travel_std
+                loc=duration_travel_mean, scale=duration_travel_std
             )
 
             _history.append([t, current_landmark, next_landmark])
@@ -48,7 +47,7 @@ def generate_data(
             location[agent] = arriving_landmark
             timeout[agent] = np.random.normal(
                 loc=duration_landmarks_mean[arriving_landmark],
-                scale=duration_landmarks_std
+                scale=duration_landmarks_std,
             )
 
         t += timestep
@@ -62,7 +61,9 @@ def base_test():
     s = e.init(8)
     e.update(s, 0, 4, 5)
     assert e.estimation(s, 4, 5) == (
-        1, 0), "with only one update we expect a clear result"
+        1,
+        0,
+    ), "with only one update we expect a clear result"
 
 
 @pytest.mark.skip  # TODO: Finish Tests!
@@ -76,7 +77,7 @@ def list_test():
     np.random.seed(42)
     n = 3  # number of landmarks
     s = e.init(n)
-    l = generate_data(92, .1, nr_agents=4, nr_landmarks=n)
+    l = generate_data(92, 0.1, nr_agents=4, nr_landmarks=n)
     #  with this setup window is full at iteration 88
     s = e.update_list(s, l)
     e.info(s, plot=True)

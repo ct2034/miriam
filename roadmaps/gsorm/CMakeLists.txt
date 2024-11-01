@@ -12,8 +12,8 @@ set(PYTHON_DOT_VERSION 3.10)
 set(PYTHON_INCLUDE /usr/include/python${PYTHON_DOT_VERSION})
 set(PYTHON_LIBRARY /usr/lib/python${PYTHON_DOT_VERSION}/config-${PYTHON_DOT_VERSION}m-x86_64-linux-gnu/)
 
-FIND_PACKAGE(Boost 1.71.0 REQUIRED COMPONENTS 
-    program_options 
+FIND_PACKAGE(Boost 1.71.0 REQUIRED COMPONENTS
+    program_options
     python${PYTHON_VERSION}
 )
 
@@ -42,13 +42,13 @@ include_directories(
 # the python module
 SET(GSORM gsorm)
 
-add_library(${GSORM} SHARED 
+add_library(${GSORM} SHARED
   src/${GSORM}.cpp
   lodepng/lodepng.cpp
 )
 
 TARGET_LINK_LIBRARIES(
-  ${GSORM} 
+  ${GSORM}
   ${Boost_LIBRARIES}
   ${OpenCV_LIBS}
 )

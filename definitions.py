@@ -33,7 +33,7 @@ PATH = List[C]
 PATH_W_COORDS = Tuple[Tuple[float, float], Tuple[float, float], PATH]
 
 # strings for graph attributes
-POS = 'pos'
-DISTANCE = 'distance'
+POS = "pos"
+DISTANCE = "distance"
 
 MAP_IMG = Tuple[Tuple[int, ...], ...]

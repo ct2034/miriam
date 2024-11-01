@@ -56,4 +56,3 @@
 
 	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find odrm_nav)/config/nav.rviz" unless="$(arg headless)" />
 </launch>
-

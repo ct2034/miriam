@@ -20,7 +20,7 @@ from odrm.odrm import (
     make_edges,
     eval,
     grad_func,
-    fix
+    fix,
 )
 
 
@@ -28,9 +28,15 @@ class RoadmapServer:
     info = None
 
     def __init__(self):
-        self.pub_rm = rospy.Publisher("roadmap", GeometryGraph, latch=True, queue_size=1)
-        self.pub_rmv = rospy.Publisher("roadmap_viz", MarkerArray, latch=True, queue_size=1)
-        self.sub_cm = rospy.Subscriber("/costmap_2d_node/costmap/costmap", OccupancyGrid, self.map_cb)
+        self.pub_rm = rospy.Publisher(
+            "roadmap", GeometryGraph, latch=True, queue_size=1
+        )
+        self.pub_rmv = rospy.Publisher(
+            "roadmap_viz", MarkerArray, latch=True, queue_size=1
+        )
+        self.sub_cm = rospy.Subscriber(
+            "/costmap_2d_node/costmap/costmap", OccupancyGrid, self.map_cb
+        )
         self.cache_dir = rospy.get_param("~cache_dir")
         self.graph_pkl = rospy.get_param("~graph_pkl", default=None)
         rospy.logdebug("cache_dir: " + self.cache_dir)
@@ -108,10 +114,9 @@ class RoadmapServer:
         processes = 2  # Number of processes
         # pool = Pool(processes)
 
-        evalset = np.array([
-            [get_random_pos(im),
-             get_random_pos(im)]
-            for _ in range(ne)])
+        evalset = np.array(
+            [[get_random_pos(im), get_random_pos(im)] for _ in range(ne)]
+        )
         evalcosts = []
         evalunsucc = []
         evalbc = []
@@ -119,7 +124,7 @@ class RoadmapServer:
         alpha = 0.01
         beta_1 = 0.9
         beta_2 = 0.999
-        epsilon = 10E-8
+        epsilon = 10e-8
 
         m_t_p = np.zeros([n, 2])
         v_t_p = np.zeros([n, 2])
@@ -133,26 +138,34 @@ class RoadmapServer:
 
             g, ge, pos = graphs_from_posar(n, posar)
             make_edges(n, g, ge, posar, edgew, im)
-            e_cost, unsuccesful = eval(t, evalset, nn, g, ge,
-                                       pos, posar, edgew, im, plot=False)
+            e_cost, unsuccesful = eval(
+                t, evalset, nn, g, ge, pos, posar, edgew, im, plot=False
+            )
             if t == 0:
                 e_cost_initial = e_cost
             print("---")
             ratio = float(t) / nts
-            print("%d/%d (%.1f%%)" % (t, nts, 100. * ratio))
-            print("Eval cost: %.1f (%-.1f%%)" %
-                  (e_cost, 100. * (e_cost - e_cost_initial) / e_cost_initial))
+            print("%d/%d (%.1f%%)" % (t, nts, 100.0 * ratio))
+            print(
+                "Eval cost: %.1f (%-.1f%%)"
+                % (e_cost, 100.0 * (e_cost - e_cost_initial) / e_cost_initial)
+            )
             print("N unsuccesful: %d / %d" % (unsuccesful, ne))
             elapsed = time.time() - start
-            print("T elapsed: %.1fs / remaining: %.1fs" %
-                  (elapsed, elapsed / ratio - elapsed if ratio > 0 else np.inf))
-            print("edgew min: %.3f / max: %.3f / std: %.3f" %
-                  (np.min(edgew), np.max(edgew), np.std(edgew)))
+            print(
+                "T elapsed: %.1fs / remaining: %.1fs"
+                % (elapsed, elapsed / ratio - elapsed if ratio > 0 else np.inf)
+            )
+            print(
+                "edgew min: %.3f / max: %.3f / std: %.3f"
+                % (np.min(edgew), np.max(edgew), np.std(edgew))
+            )
             evalcosts.append(e_cost)
             evalunsucc.append(unsuccesful)
 
-            batch = np.array([
-                [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
+            batch = np.array(
+                [[get_random_pos(im), get_random_pos(im)] for _ in range(ntb)]
+            )
 
             # Adam
             g_t_p, g_t_e, bc_tot = grad_func(batch, nn, g, ge, posar, edgew)
@@ -160,8 +173,10 @@ class RoadmapServer:
             bc = bc_tot / batch.shape[0]
             if t == 0:
                 b_cost_initial = bc
-            print("Batch cost: %.2f (%-.1f%%)" %
-                  (bc, 100. * (bc - b_cost_initial) / b_cost_initial))
+            print(
+                "Batch cost: %.2f (%-.1f%%)"
+                % (bc, 100.0 * (bc - b_cost_initial) / b_cost_initial)
+            )
             evalbc.append(bc)
 
             m_t_p = beta_1 * m_t_p + (1 - beta_1) * g_t_p
@@ -169,16 +184,14 @@ class RoadmapServer:
             m_cap_p = m_t_p / (1 - (beta_1 ** (t + 1)))
             v_cap_p = v_t_p / (1 - (beta_2 ** (t + 1)))
             posar_prev = np.copy(posar)
-            posar = posar - np.divide(
-                (alpha * m_cap_p), (np.sqrt(v_cap_p) + epsilon))
+            posar = posar - np.divide((alpha * m_cap_p), (np.sqrt(v_cap_p) + epsilon))
             fix(posar_prev, posar, im)
 
             m_t_e = beta_1 * m_t_e + (1 - beta_1) * g_t_e
             v_t_e = beta_2 * v_t_e + (1 - beta_2) * (g_t_e * g_t_e)
             m_cap_e = m_t_e / (1 - (beta_1 ** (t + 1)))
             v_cap_e = v_t_e / (1 - (beta_2 ** (t + 1)))
-            edgew = edgew - np.divide(
-                (alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
+            edgew = edgew - np.divide((alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
 
             self.store_graph_and_pub(n, ge, posar, edgew)
 
@@ -187,7 +200,7 @@ class RoadmapServer:
             "batchcost": evalbc,
             "unsuccesful": evalunsucc,
             "posar": posar,
-            "edgew": edgew
+            "edgew": edgew,
         }
 
         with open(self.fname(hash, n, nts), "wb") as f:
@@ -196,13 +209,13 @@ class RoadmapServer:
     def store_graph_and_pub(self, n, ge, posar, edgew):
         self.ps = []
         for i_p in range(posar.shape[0]):
-            self.ps.append(Point(posar[i_p, 0] * .01 - 4.8,
-                                 -1 * (posar[i_p, 1] * .01 - 4.8),
-                                 0))
+            self.ps.append(
+                Point(posar[i_p, 0] * 0.01 - 4.8, -1 * (posar[i_p, 1] * 0.01 - 4.8), 0)
+            )
 
         self.edges = []
         for _ in range(n):
-            self.edges.append(Edges() )
+            self.edges.append(Edges())
         for e in ge.edges:
             self.edges[e[0]].node_ids.append(e[1])
             self.edges[e[0]].weights.append(edgew[e[0], e[1]])
@@ -210,12 +223,7 @@ class RoadmapServer:
         self.publish_graph()
 
     def fname(self, hash, n, nts):
-        return (self.cache_dir +
-        "/%s_%d_%d.pkl" % (
-            hash,
-            n,
-            nts
-        ))
+        return self.cache_dir + "/%s_%d_%d.pkl" % (hash, n, nts)
 
     def publish_viz(self):
         ma = MarkerArray()
@@ -227,15 +235,12 @@ class RoadmapServer:
                 id += 1
                 arrow.header.frame_id = "map"
                 arrow.pose.orientation.w = 1
-                arrow.scale.x = .03
-                arrow.scale.y = .10
-                arrow.color.a = .4
+                arrow.scale.x = 0.03
+                arrow.scale.y = 0.10
+                arrow.color.a = 0.4
                 arrow.color.b = 1
                 arrow.type = Marker.ARROW
-                arrow.points = [
-                    self.ps[v],
-                    self.ps[to]
-                ]
+                arrow.points = [self.ps[v], self.ps[to]]
                 ma.markers.append(arrow)
         for p in self.ps:
             point = Marker()
@@ -243,10 +248,10 @@ class RoadmapServer:
             id += 1
             point.header.frame_id = "map"
             point.pose.orientation.w = 1
-            point.scale.x = .2
-            point.scale.y = .2
-            point.scale.z = .2
-            point.color.a = .4
+            point.scale.x = 0.2
+            point.scale.y = 0.2
+            point.scale.z = 0.2
+            point.color.a = 0.4
             point.color.r = 1
             point.type = Marker.SPHERE
             point.pose.position.x = p.x
@@ -262,14 +267,14 @@ class RoadmapServer:
         self.pub_rm.publish(gg)
 
 
-if __name__ == '__main__':
-    rospy.init_node('roadmap_server')
+if __name__ == "__main__":
+    rospy.init_node("roadmap_server")
     rospy.logdebug("init")
 
     rs = RoadmapServer()
 
     while rs.info is None and not rospy.is_shutdown():  # waiting for first map msg
-        rospy.sleep(.1)
+        rospy.sleep(0.1)
     rospy.logdebug("got the first map")
 
     while not rospy.is_shutdown():

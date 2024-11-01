@@ -5,7 +5,6 @@ from planner.policylearn.generate_graph import gridmap_to_graph
 
 
 class GenerateGraphTest(unittest.TestCase):
-
     def test_gridmap_to_graph(self):
         map_1x2 = np.zeros((1, 2))
         edges_1x2, pos_1x2 = gridmap_to_graph(map_1x2, np.inf, (0, 0))

@@ -9,11 +9,12 @@ from tools import load_map, get_map_str
 
 def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
     from planner.milp.milp import plan_milp
+
     grid = np.repeat(_map[:, ::2, np.newaxis], 100, axis=2)
 
     config = generate_config()
-    config['filename_pathsave'] = fname
-    config['finished_agents_block'] = finished_blocking
+    config["filename_pathsave"] = fname
+    config["finished_agents_block"] = finished_blocking
 
     print("Problem:")
     print(str(jobs))
@@ -22,13 +23,17 @@ def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
     print(mapstr)
 
     print("TCBS")
-    res_agent_job, res_agent_idle, res_paths = plan(agent_pos, jobs, [], [], grid, config, plot=False)
+    res_agent_job, res_agent_idle, res_paths = plan(
+        agent_pos, jobs, [], [], grid, config, plot=False
+    )
     print("agent_job: " + str(res_agent_job))
     print("paths: " + str(res_paths))
     costs_opt = get_costs(res_paths, jobs, res_agent_job, display)
 
     print("MINLP")
-    minlp_res_agent_job, minlp_res_paths = plan_milp(agent_pos, jobs, grid, config, plot=False)
+    minlp_res_agent_job, minlp_res_paths = plan_milp(
+        agent_pos, jobs, grid, config, plot=False
+    )
     print("agent_job: " + str(minlp_res_agent_job))
     print("paths: " + str(minlp_res_paths))
     costs_minlp = get_costs(minlp_res_paths, jobs, minlp_res_agent_job, display)
@@ -36,11 +41,23 @@ def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):
     # MINLP VS PLAN
     if display:
         fig = plt.figure()
-        ax1 = fig.add_subplot(121, projection='3d')
+        ax1 = fig.add_subplot(121, projection="3d")
         ax1.set_title("Solution Optimal")
-        ax2 = fig.add_subplot(122, projection='3d')
-        plot_results(ax1, [], res_paths, res_agent_job, agent_pos, grid, [], jobs, "Optimal")
-        plot_results(ax2, [], minlp_res_paths, minlp_res_agent_job, agent_pos, grid, [], jobs, "Separate")
+        ax2 = fig.add_subplot(122, projection="3d")
+        plot_results(
+            ax1, [], res_paths, res_agent_job, agent_pos, grid, [], jobs, "Optimal"
+        )
+        plot_results(
+            ax2,
+            [],
+            minlp_res_paths,
+            minlp_res_agent_job,
+            agent_pos,
+            grid,
+            [],
+            jobs,
+            "Separate",
+        )
         plt.show()
 
     print("TCBS (results again for comparison)")
@@ -76,7 +93,7 @@ def get_costs(paths, jobs, agent_job, display=True):
 def random_landmark(landmarks, taken):
     assert len(taken) < len(landmarks), "All are taken"
     i_lm = np.random.choice(range(len(landmarks)))
-    while (i_lm in taken):
+    while i_lm in taken:
         i_lm = np.random.choice(range(len(landmarks)))
     taken.add(i_lm)
     return landmarks[i_lm]
@@ -87,31 +104,31 @@ def random_jobs(n, landmarks):
     jobs = []
     for i in range(n):
         jobs.append(
-            (random_landmark(landmarks, taken),
-             random_landmark(landmarks, taken),
-             0)
+            (random_landmark(landmarks, taken), random_landmark(landmarks, taken), 0)
         )
     return jobs
 
+
 # -------
 def corridor():
-    _map = load_map('corridor.png')
-    agent_pos = [(0, 0),
-              (0, 1)]
-    jobs = [((5, 0), (5, 2), 0),
-            ((4, 2), (4, 0), 0),
-            ((3, 0), (3, 2), 0),
-            ]
-    eval(_map, agent_pos, jobs, 'corridor.pkl')
+    _map = load_map("corridor.png")
+    agent_pos = [(0, 0), (0, 1)]
+    jobs = [
+        ((5, 0), (5, 2), 0),
+        ((4, 2), (4, 0), 0),
+        ((3, 0), (3, 2), 0),
+    ]
+    eval(_map, agent_pos, jobs, "corridor.pkl")
+
 
 # -------
 def mr_t():
-    _map = load_map('mr_t.png')
-    agent_pos = [(5, 3),
-              (2, 1)]
-    jobs = [((4, 3), (4, 1), 0),
-            ((3, 1), (3, 3), 0)]
-    eval(_map, agent_pos, jobs, 'mr_t.pkl', finished_blocking=True)
+    _map = load_map("mr_t.png")
+    agent_pos = [(5, 3), (2, 1)]
+    jobs = [((4, 3), (4, 1), 0), ((3, 1), (3, 3), 0)]
+    eval(_map, agent_pos, jobs, "mr_t.pkl", finished_blocking=True)
+
+
 # Results with finished agent_pos as obstacle:
 # CBS EXT
 # agent_job: ((0, 1), ())
@@ -130,73 +147,71 @@ def mr_t():
 # (total:)
 # 26.0
 
+
 # -------
 def c():
-    _map = load_map('c.png')
-    agent_pos = [(3, 3),
-              (6, 5)]
-    jobs = [((4, 3), (4, 5), 0),
-            ((5, 5), (5, 3), 0)]
-    eval(_map, agent_pos, jobs, 'c.pkl')
+    _map = load_map("c.png")
+    agent_pos = [(3, 3), (6, 5)]
+    jobs = [((4, 3), (4, 5), 0), ((5, 5), (5, 3), 0)]
+    eval(_map, agent_pos, jobs, "c.pkl")
 
 
 # -------
 def line():
-    _map = load_map('line.png')
-    agent_pos = [(0, 0),
-              (6, 0)]
-    jobs = [((1, 0), (6, 0), 0),
-            ((5, 0), (1, 0), 0),
-            ]
-    eval(_map, agent_pos, jobs, 'line.pkl')
+    _map = load_map("line.png")
+    agent_pos = [(0, 0), (6, 0)]
+    jobs = [
+        ((1, 0), (6, 0), 0),
+        ((5, 0), (1, 0), 0),
+    ]
+    eval(_map, agent_pos, jobs, "line.pkl")
 
 
 # -------
 def h():
-    _map = load_map('h.png')
-    agent_pos = [(0, 0),
-              (2, 2)]
-    jobs = [((0, 1), (2, 0), 0),
-            ((2, 1), (0, 2), 0),
-            ]
-    eval(_map, agent_pos, jobs, 'h.pkl')
+    _map = load_map("h.png")
+    agent_pos = [(0, 0), (2, 2)]
+    jobs = [
+        ((0, 1), (2, 0), 0),
+        ((2, 1), (0, 2), 0),
+    ]
+    eval(_map, agent_pos, jobs, "h.pkl")
 
 
 # -------
 def i():
-    _map = load_map('I.png')
-    agent_pos = [(0, 2),
-              (4, 1)]
-    jobs = [((0, 0), (0, 3), 0),
-            ((1, 3), (1, 0), 0),
-            ((3, 0), (3, 3), 0),
-            ((4, 3), (4, 0), 0),
-            ]
-    eval(_map, agent_pos, jobs, 'I.pkl')
+    _map = load_map("I.png")
+    agent_pos = [(0, 2), (4, 1)]
+    jobs = [
+        ((0, 0), (0, 3), 0),
+        ((1, 3), (1, 0), 0),
+        ((3, 0), (3, 3), 0),
+        ((4, 3), (4, 0), 0),
+    ]
+    eval(_map, agent_pos, jobs, "I.pkl")
 
 
 # -------
 def s():
-    _map = load_map('S.png')
-    agent_pos = [(3, 4),
-              (6, 0),
-              (2, 0)]
-    jobs = [((0, 4), (0, 0), 0),
-            ((2, 4), (8, 0), 0),
-            ((7, 0), (3, 4), 0),
-            ]
-    eval(_map, agent_pos, jobs, 'S.pkl')
+    _map = load_map("S.png")
+    agent_pos = [(3, 4), (6, 0), (2, 0)]
+    jobs = [
+        ((0, 4), (0, 0), 0),
+        ((2, 4), (8, 0), 0),
+        ((7, 0), (3, 4), 0),
+    ]
+    eval(_map, agent_pos, jobs, "S.pkl")
+
 
 # -------
 def u():
-    _map = load_map('u.png')
-    agent_pos = [(2, 1),
-                 (3, 1),
-                 (4, 1)]
-    jobs = [((1, 4), (3, 1), 0),
-            ((2, 4), (4, 1), 0),
-            ((3, 4), (5, 1), 0),
-            ]
+    _map = load_map("u.png")
+    agent_pos = [(2, 1), (3, 1), (4, 1)]
+    jobs = [
+        ((1, 4), (3, 1), 0),
+        ((2, 4), (4, 1), 0),
+        ((3, 4), (5, 1), 0),
+    ]
 
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
@@ -204,15 +219,14 @@ def u():
     # plot_inputs(ax, agent_pos, [], jobs, grid)
     # fig.show()
 
-    eval(_map, agent_pos, jobs, 'u.pkl', finished_blocking=False, display=True)
+    eval(_map, agent_pos, jobs, "u.pkl", finished_blocking=False, display=True)
+
 
 # -------
 def ff():
     jobs = random_jobs(3, [(0, 0), (2, 0), (2, 6), (4, 6), (6, 2), (7, 7)])
-    _map = load_map('ff.png')
-    agent_pos = [(0, 1),
-                 (2, 7),
-                 (7, 4)]
+    _map = load_map("ff.png")
+    agent_pos = [(0, 1), (2, 7), (7, 4)]
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -220,12 +234,12 @@ def ff():
     plot_inputs(ax, agent_pos, [], jobs, grid)
     plt.show()
 
-    return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=True)
+    return eval(_map, agent_pos, jobs, "ff.pkl", finished_blocking=False, display=True)
 
 
 # -------
 def iros18_workshop():
-    _map = load_map('ff.png')
+    _map = load_map("ff.png")
     jobs = [((2, 0), (6, 2), 0), ((0, 0), (2, 6), 0), ((7, 7), (4, 6), 0)]
     agent_pos = [(0, 1), (2, 7), (7, 4)]
 
@@ -235,22 +249,20 @@ def iros18_workshop():
     # plot_inputs(ax, agent_pos, [], jobs, grid)
     # plt.show()
 
-    return eval(_map, agent_pos, jobs, 'ff.pkl', finished_blocking=False, display=True)
+    return eval(_map, agent_pos, jobs, "ff.pkl", finished_blocking=False, display=True)
 
 
 # -------
 def o():
-    _map = load_map('o.png')
-    agent_pos = [(1, 3),
-                 (6, 1),
-                 (2, 2),
-                 (1, 1)]
-    jobs = [((7, 4), (0, 4), 4),
-            ((2, 0), (3, 7), 3),
-            ((4, 5), (7, 5), 0),
-            ((4, 4), (6, 5), 1)]
-    eval(_map, agent_pos, jobs, 'o.pkl', finished_blocking=False, display=True)
-
+    _map = load_map("o.png")
+    agent_pos = [(1, 3), (6, 1), (2, 2), (1, 1)]
+    jobs = [
+        ((7, 4), (0, 4), 4),
+        ((2, 0), (3, 7), 3),
+        ((4, 5), (7, 5), 0),
+        ((4, 4), (6, 5), 1),
+    ]
+    eval(_map, agent_pos, jobs, "o.pkl", finished_blocking=False, display=True)
 
 
 if __name__ == "__main__":

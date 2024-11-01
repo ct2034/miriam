@@ -5,6 +5,7 @@
 
 A simple example of an animated plot... In 3D!
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
@@ -25,7 +26,7 @@ def Gen_RandLine(length, dims=2):
         # movement is small compared to position.
         # subtraction by 0.5 is to change the range to [-0.5, 0.5]
         # to allow a line to move backwards.
-        step = ((np.random.rand(dims) - 0.5) * 0.1)
+        step = (np.random.rand(dims) - 0.5) * 0.1
         lineData[:, index] = lineData[:, index - 1] + step
 
     return lineData
@@ -52,27 +53,27 @@ lines = [ax.plot(dat[0, 0:1], dat[1, 0:1], dat[2, 0:1])[0] for dat in data]
 
 # Setting the axes properties
 ax.set_xlim3d([0.0, 1.0])
-ax.set_xlabel('X')
+ax.set_xlabel("X")
 
 ax.set_ylim3d([0.0, 1.0])
-ax.set_ylabel('Y')
+ax.set_ylabel("Y")
 
 ax.set_zlim3d([0.0, 1.0])
-ax.set_zlabel('Z')
+ax.set_zlabel("Z")
 
-ax.set_title('3D Test')
+ax.set_title("3D Test")
 
 N = 100
-X = np.random.uniform(-.1, .1, N)
-Y = np.random.uniform(-.1, .1, N)
-Z = np.random.uniform(0, .2, N)
+X = np.random.uniform(-0.1, 0.1, N)
+Y = np.random.uniform(-0.1, 0.1, N)
+Z = np.random.uniform(0, 0.2, N)
 ax.scatter(X, Y, Z)
 
 # Cylinder
-x = np.linspace(-.1, .1, 100)
-z = np.linspace(0, .2, 100)
+x = np.linspace(-0.1, 0.1, 100)
+z = np.linspace(0, 0.2, 100)
 Xc, Zc = np.meshgrid(x, z)
-Yc = np.sqrt(.01-Xc**2)
+Yc = np.sqrt(0.01 - Xc**2)
 
 # Draw parameters
 rstride = 20
@@ -81,7 +82,8 @@ ax.plot_surface(Xc, Yc, Zc, alpha=0.2, rstride=rstride, cstride=cstride)
 ax.plot_surface(Xc, -Yc, Zc, alpha=0.2, rstride=rstride, cstride=cstride)
 
 # Creating the Animation object
-line_ani = animation.FuncAnimation(fig, update_lines, 25, fargs=(data, lines),
-                                   interval=50, blit=False)
+line_ani = animation.FuncAnimation(
+    fig, update_lines, 25, fargs=(data, lines), interval=50, blit=False
+)
 # line_ani.save("demo.mp4")
 plt.show()

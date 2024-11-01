@@ -9,7 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 
 def tick():
-    print('Tick! The time is: %s' % datetime.now())
+    print("Tick! The time is: %s" % datetime.now())
     print(Test.i)
     Test.i += 1
 
@@ -17,9 +17,10 @@ def tick():
 class Test:
     i = 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     scheduler = BackgroundScheduler()
-    scheduler.add_job(tick, 'interval', seconds=1)
+    scheduler.add_job(tick, "interval", seconds=1)
 
     Test.i += 1
 

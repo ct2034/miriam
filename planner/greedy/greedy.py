@@ -7,16 +7,17 @@ from pyflann import FLANN
 from planner.tcbs.plan import plan as plan_cbsext, load_paths, save_paths, make_unique
 from planner.common import path
 
-logging.getLogger('pyutilib.component.core.pca').setLevel(logging.INFO)
+logging.getLogger("pyutilib.component.core.pca").setLevel(logging.INFO)
 
 t = tuple
+
 
 def manhattan_dist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 def plan_greedy(agent_pos, jobs, grid, config):
-    filename = config['filename_pathsave']
+    filename = config["filename_pathsave"]
     load_paths(filename)
     res_agent_job = strictly_consec(agent_pos, jobs, grid)
     assertjobs = reduce(lambda a, b: a + b, res_agent_job, tuple())
@@ -24,10 +25,16 @@ def plan_greedy(agent_pos, jobs, grid, config):
         assert ij in assertjobs
     save_paths(filename)
     print(res_agent_job)
-    _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
-                                  plot=False,
-                                  config=config,
-                                  pathplanning_only_assignment=res_agent_job)
+    _, _, res_paths = plan_cbsext(
+        agent_pos,
+        jobs,
+        [],
+        [],
+        grid,
+        plot=False,
+        config=config,
+        pathplanning_only_assignment=res_agent_job,
+    )
     return res_agent_job, res_paths
 
 
@@ -40,7 +47,8 @@ def get_closest(possible_starts, free_tasks_starts, grid, n):
         algorithm="kmeans",
         branching=32,
         iterations=7,
-        checks=16)
+        checks=16,
+    )
     lengths = []
     nearestss = []
     paths = []
@@ -52,10 +60,12 @@ def get_closest(possible_starts, free_tasks_starts, grid, n):
 
         temp_i_possible_starts = result[temp_nearest]
         temp_i_free_tasks_start = temp_nearest[0]
-        p, _ = path(tuple(possible_starts[temp_i_possible_starts]),
-                    tuple(free_tasks_starts[temp_i_free_tasks_start]),
-                    grid,
-                    [])
+        p, _ = path(
+            tuple(possible_starts[temp_i_possible_starts]),
+            tuple(free_tasks_starts[temp_i_free_tasks_start]),
+            grid,
+            [],
+        )
         if p:
             lengths.append(len(p))
         paths.append(p)
@@ -87,13 +97,16 @@ def strictly_consec(agents_list, tasks, grid):
             possible_starts = free_agents
         if len(possible_starts) > 1:
             i_free_tasks_start, i_possible_starts, p = get_closest(
-                possible_starts, free_tasks_starts, grid, N_CLOSEST)
+                possible_starts, free_tasks_starts, grid, N_CLOSEST
+            )
         else:  # only one start left
             i_free_tasks_start = 0
             i_possible_starts = 0
         if i_possible_starts >= len(free_agents):  # is a task end
             i_task_end = i_possible_starts - len(free_agents)
-            consec[i_task_end] = tasks.index(free_tasks[i_free_tasks_start])  # after this task comes that
+            consec[i_task_end] = tasks.index(
+                free_tasks[i_free_tasks_start]
+            )  # after this task comes that
         else:  # an agent
             i_agent = agents_list.index(t(free_agents[i_possible_starts]))
             agent_task_d[i_agent] = tasks.index(t(free_tasks[i_free_tasks_start]))

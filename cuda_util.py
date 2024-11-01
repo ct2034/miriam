@@ -15,8 +15,7 @@ import sys
 def run_command(cmd):
     """Run command, return output as string."""
 
-    output = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+    output = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
     return output.decode("ascii")
 
 
@@ -29,7 +28,7 @@ def list_available_gpus():
     result = []
     for line in output.strip().split("\n"):
         m = gpu_regex.match(line)
-        assert m, "Couldnt parse "+line
+        assert m, "Couldnt parse " + line
         result.append(int(m.group("gpu_id")))
     return result
 
@@ -38,11 +37,12 @@ def gpu_memory_map():
     """Returns map of GPU id to memory allocated on that GPU."""
 
     output = run_command("nvidia-smi")
-    gpu_output = output[output.find("GPU Memory"):]
+    gpu_output = output[output.find("GPU Memory") :]
     # lines of the form
     # |    0      8734    C   python    11705MiB |
     memory_regex = re.compile(
-        r"[|]\s+?(?P<gpu_id>\d+)\D+?(?P<pid>\d+).+[ ](?P<gpu_memory>\d+)MiB")
+        r"[|]\s+?(?P<gpu_id>\d+)\D+?(?P<pid>\d+).+[ ](?P<gpu_memory>\d+)MiB"
+    )
     rows = gpu_output.split("\n")
     result = {gpu_id: 0 for gpu_id in list_available_gpus()}
     for row in gpu_output.split("\n"):
@@ -58,12 +58,11 @@ def gpu_memory_map():
 def pick_gpu_lowest_memory():
     """Returns GPU with the least allocated memory"""
 
-    memory_gpu_map = [(memory, gpu_id)
-                      for (gpu_id, memory) in gpu_memory_map().items()]
+    memory_gpu_map = [(memory, gpu_id) for (gpu_id, memory) in gpu_memory_map().items()]
     best_memory, best_gpu = sorted(memory_gpu_map)[0]
     best_gpus = []
     for mem, gpu in memory_gpu_map:
-        if mem <= best_memory+2048:  # allow 10% difference
+        if mem <= best_memory + 2048:  # allow 10% difference
             best_gpus.append(gpu)
     return random.choice(best_gpus)
 
@@ -71,23 +70,23 @@ def pick_gpu_lowest_memory():
 def pick_gpu_low_memory():
     """Returns GPU with little allocated memory"""
     N = 4  # select randomly between N lowest gpus
-    memory_gpu_map = [(memory, gpu_id)
-                      for (gpu_id, memory) in gpu_memory_map().items()]
-    n_best_gpus = sorted(memory_gpu_map)[0:N+1]
+    memory_gpu_map = [(memory, gpu_id) for (gpu_id, memory) in gpu_memory_map().items()]
+    n_best_gpus = sorted(memory_gpu_map)[0 : N + 1]
     _, good_gpu = random.choice(n_best_gpus)
     return good_gpu
 
 
 def setup_one_gpu():
-    assert 'tensorflow' not in sys.modules, \
-        "GPU setup must happen before importing TensorFlow"
+    assert (
+        "tensorflow" not in sys.modules
+    ), "GPU setup must happen before importing TensorFlow"
     gpu_id = pick_gpu_lowest_memory()
-    print("Picking GPU "+str(gpu_id))
+    print("Picking GPU " + str(gpu_id))
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
 
 
 def setup_no_gpu():
-    if 'tensorflow' in sys.modules:
+    if "tensorflow" in sys.modules:
         print("Warning, GPU setup must happen before importing TensorFlow")
-    os.environ["CUDA_VISIBLE_DEVICES"] = ''
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""

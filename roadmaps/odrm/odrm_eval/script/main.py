@@ -16,8 +16,9 @@ from odrm.odrm import (
     make_edges,
     eval,
     grad_func,
-    fix
-    )
+    fix,
+)
+
 # import odrm
 
 
@@ -31,10 +32,7 @@ def optimize(n, ntb, nts, image_fname):
     # The map
     im = imageio.imread(image_fname)
 
-    evalset = np.array([
-        [get_random_pos(im),
-         get_random_pos(im)]
-        for _ in range(ne)])
+    evalset = np.array([[get_random_pos(im), get_random_pos(im)] for _ in range(ne)])
     evalcosts = []
     evalunsucc = []
     evalbc = []
@@ -42,7 +40,7 @@ def optimize(n, ntb, nts, image_fname):
     alpha = 0.01
     beta_1 = 0.9
     beta_2 = 0.999
-    epsilon = 10E-8
+    epsilon = 10e-8
 
     m_t_p = np.zeros([n, 2])
     v_t_p = np.zeros([n, 2])
@@ -56,53 +54,55 @@ def optimize(n, ntb, nts, image_fname):
 
         g, ge, pos = graphs_from_posar(n, posar)
         make_edges(n, g, ge, posar, edgew, im)
-        e_cost, unsuccesful = eval(t, evalset, nn, g, ge,
-                                   pos, posar, edgew, im)
+        e_cost, unsuccesful = eval(t, evalset, nn, g, ge, pos, posar, edgew, im)
         if t == 0:
             e_cost_initial = e_cost
         print("---")
         ratio = float(t) / nts
-        print("%d/%d (%.1f%%)" % (t, nts, 100. * ratio))
-        print("Eval cost: %.1f (%-.1f%%)" %
-              (e_cost, 100. * (e_cost - e_cost_initial) / e_cost_initial))
+        print("%d/%d (%.1f%%)" % (t, nts, 100.0 * ratio))
+        print(
+            "Eval cost: %.1f (%-.1f%%)"
+            % (e_cost, 100.0 * (e_cost - e_cost_initial) / e_cost_initial)
+        )
         print("N unsuccesful: %d / %d" % (unsuccesful, ne))
         elapsed = time.time() - start
-        print("T elapsed: %.1fs / remaining: %.1fs" %
-              (elapsed, elapsed/ratio-elapsed if ratio > 0 else np.inf))
-        print("edgew min: %.3f / max: %.3f / std: %.3f" %
-              (np.min(edgew), np.max(edgew), np.std(edgew)))
+        print(
+            "T elapsed: %.1fs / remaining: %.1fs"
+            % (elapsed, elapsed / ratio - elapsed if ratio > 0 else np.inf)
+        )
+        print(
+            "edgew min: %.3f / max: %.3f / std: %.3f"
+            % (np.min(edgew), np.max(edgew), np.std(edgew))
+        )
         evalcosts.append(e_cost)
         evalunsucc.append(unsuccesful)
 
-        batch = np.array([
-            [get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
+        batch = np.array([[get_random_pos(im), get_random_pos(im)] for _ in range(ntb)])
 
         # Adam
-        g_t_p, g_t_e, bc_tot = grad_func(
-            batch, nn, g, ge, posar, edgew
-        )
+        g_t_p, g_t_e, bc_tot = grad_func(batch, nn, g, ge, posar, edgew)
         bc = float(bc_tot) / batch.shape[0]
         if t == 0:
             b_cost_initial = bc
-        print("Batch cost: %.2f (%-.1f%%)" %
-              (bc, 100. * (bc - b_cost_initial) / b_cost_initial))
+        print(
+            "Batch cost: %.2f (%-.1f%%)"
+            % (bc, 100.0 * (bc - b_cost_initial) / b_cost_initial)
+        )
         evalbc.append(bc)
 
-        m_t_p = beta_1*m_t_p + (1-beta_1)*g_t_p
-        v_t_p = beta_2*v_t_p + (1-beta_2)*(g_t_p*g_t_p)
-        m_cap_p = m_t_p / (1-(beta_1**(t+1)))
-        v_cap_p = v_t_p / (1-(beta_2**(t+1)))
+        m_t_p = beta_1 * m_t_p + (1 - beta_1) * g_t_p
+        v_t_p = beta_2 * v_t_p + (1 - beta_2) * (g_t_p * g_t_p)
+        m_cap_p = m_t_p / (1 - (beta_1 ** (t + 1)))
+        v_cap_p = v_t_p / (1 - (beta_2 ** (t + 1)))
         posar_prev = np.copy(posar)
-        posar = posar - np.divide(
-            (alpha * m_cap_p), (np.sqrt(v_cap_p) + epsilon))
+        posar = posar - np.divide((alpha * m_cap_p), (np.sqrt(v_cap_p) + epsilon))
         fix(posar_prev, posar, im)
 
-        m_t_e = beta_1*m_t_e + (1-beta_1)*g_t_e
-        v_t_e = beta_2*v_t_e + (1-beta_2)*(g_t_e*g_t_e)
-        m_cap_e = m_t_e / (1-(beta_1**(t+1)))
-        v_cap_e = v_t_e / (1-(beta_2**(t+1)))
-        edgew = edgew - np.divide(
-            (alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
+        m_t_e = beta_1 * m_t_e + (1 - beta_1) * g_t_e
+        v_t_e = beta_2 * v_t_e + (1 - beta_2) * (g_t_e * g_t_e)
+        m_cap_e = m_t_e / (1 - (beta_1 ** (t + 1)))
+        v_cap_e = v_t_e / (1 - (beta_2 ** (t + 1)))
+        edgew = edgew - np.divide((alpha * m_cap_e), (np.sqrt(v_cap_e) + epsilon))
 
     fig = plt.figure()
     plt.plot(evalcosts)
@@ -121,27 +121,23 @@ def optimize(n, ntb, nts, image_fname):
         "batchcost": evalbc,
         "unsuccesful": evalunsucc,
         "posar": posar,
-        "edgew": edgew
-        }
+        "edgew": edgew,
+    }
 
     with open(fname(image_fname, n, nts), "wb") as f:
         pickle.dump(store, f)
 
+
 def fname(image_fname, n, nts):
-    return "res/%s_%d_%d.pkl" % (
-        image_fname.split(".")[0].split("/")[-1],
-        n,
-        nts
-    )
+    return "res/%s_%d_%d.pkl" % (image_fname.split(".")[0].split("/")[-1], n, nts)
+
 
 if __name__ == "__main__":
     # Training
     ntb = 256  # batch size
 
-    for (image_fname, N, nts) in product(
-        ['maps/o.png', 'maps/x.png', 'maps/z.png'],
-        [100, 200, 500],
-        [4096]
+    for image_fname, N, nts in product(
+        ["maps/o.png", "maps/x.png", "maps/z.png"], [100, 200, 500], [4096]
     ):
         if os.path.exists(fname(image_fname, N, nts)):
             print("exists")

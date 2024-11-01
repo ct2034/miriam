@@ -10,8 +10,7 @@ from scenarios.generators import tracing_pathes_in_the_dark
 from tools import hasher
 
 
-def convert_scenario_to_primal(
-        scen: SCENARIO_TYPE, path: str):
+def convert_scenario_to_primal(scen: SCENARIO_TYPE, path: str):
     """
     Converts a scenario to primal format.
     :param scen: scenario
@@ -62,7 +61,8 @@ def eval_primal2(workdir):
             cwd=workdir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            shell=True)
+            shell=True,
+        )
         output, error = process.communicate()
         print(f"error: {error.decode('utf-8')}")
         print(f"output: {output.decode('utf-8')}")
@@ -70,19 +70,14 @@ def eval_primal2(workdir):
         print(f"error: {e}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     workdir = os.path.dirname(__file__)
     n_eval = 10
     # generate files
     rng = Random(0)
     scens = []
     for _ in range(n_eval):
-        scen = tracing_pathes_in_the_dark(
-            size=8,
-            fill=.5,
-            n_agents=4,
-            rng=rng
-        )
+        scen = tracing_pathes_in_the_dark(size=8, fill=0.5, n_agents=4, rng=rng)
         scens.append(scen)
         convert_scenario_to_primal(scen, get_fnames(workdir, scen)[0])
 

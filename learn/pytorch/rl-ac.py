@@ -13,13 +13,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-train_env = gym.make('CartPole-v1')
-test_env = gym.make('CartPole-v1')
+train_env = gym.make("CartPole-v1")
+test_env = gym.make("CartPole-v1")
 
 SEED = 0
 
 train_env.seed(SEED)
-test_env.seed(SEED+1)
+test_env.seed(SEED + 1)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
 
@@ -94,7 +94,8 @@ def train(env, policy, optimizer, discount_factor):
     values = torch.cat(values).squeeze(-1)
     returns = calculate_returns(rewards, discount_factor)
     policy_loss, value_loss = update_policy(
-        returns, log_prob_actions, values, optimizer)
+        returns, log_prob_actions, values, optimizer
+    )
     return policy_loss, value_loss, episode_reward
 
 
@@ -112,7 +113,7 @@ def calculate_returns(rewards, discount_factor, normalize=True):
 
 def update_policy(returns, log_prob_actions, values, optimizer):
     returns = returns.detach()
-    policy_loss = - (returns * log_prob_actions).sum()
+    policy_loss = -(returns * log_prob_actions).sum()
     value_loss = F.smooth_l1_loss(returns, values).sum()
     optimizer.zero_grad()
     policy_loss.backward()
@@ -138,7 +139,7 @@ def evaluate(env, policy):
 
 
 def demo(policy):
-    demo_env = gym.make('CartPole-v1')
+    demo_env = gym.make("CartPole-v1")
     state = demo_env.reset()
     done = False
     while not done:
@@ -161,9 +162,10 @@ PRINT_EVERY = 10
 train_rewards = []
 test_rewards = []
 
-for episode in range(1, MAX_EPISODES+1):
+for episode in range(1, MAX_EPISODES + 1):
     policy_loss, critic_loss, train_reward = train(
-        train_env, policy, optimizer, DISCOUNT_FACTOR)
+        train_env, policy, optimizer, DISCOUNT_FACTOR
+    )
     test_reward = evaluate(test_env, policy)
     train_rewards.append(train_reward)
     test_rewards.append(test_reward)
@@ -171,21 +173,22 @@ for episode in range(1, MAX_EPISODES+1):
     mean_test_rewards = np.mean(test_rewards[-N_TRIALS:])
     if episode % PRINT_EVERY == 0:
         print(
-            f'| Episode: {episode:3} | Mean Train Rewards: '
-            f'{mean_train_rewards:5.1f} | Mean Test Rewards: '
-            f'{mean_test_rewards:5.1f} |')
+            f"| Episode: {episode:3} | Mean Train Rewards: "
+            f"{mean_train_rewards:5.1f} | Mean Test Rewards: "
+            f"{mean_test_rewards:5.1f} |"
+        )
         # demo(policy)
     if mean_test_rewards >= REWARD_THRESHOLD:
-        print(f'Reached reward threshold in {episode} episodes')
+        print(f"Reached reward threshold in {episode} episodes")
         demo(policy)
         break
 
 plt.figure(figsize=(12, 8))
-plt.plot(test_rewards, label='Test Reward')
-plt.plot(train_rewards, label='Train Reward')
-plt.xlabel('Episode', fontsize=20)
-plt.ylabel('Reward', fontsize=20)
-plt.hlines(REWARD_THRESHOLD, 0, len(test_rewards), color='r')
-plt.legend(loc='lower right')
+plt.plot(test_rewards, label="Test Reward")
+plt.plot(train_rewards, label="Train Reward")
+plt.xlabel("Episode", fontsize=20)
+plt.ylabel("Reward", fontsize=20)
+plt.hlines(REWARD_THRESHOLD, 0, len(test_rewards), color="r")
+plt.legend(loc="lower right")
 plt.grid()
 plt.show()

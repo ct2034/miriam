@@ -8,8 +8,7 @@ import networkx as nx
 
 def euclidian(G, i, j):
     return math.sqrt(
-        (G.node[i]['x'] - G.node[j]['x']) ** 2 +
-        (G.node[i]['y'] - G.node[j]['y']) ** 2
+        (G.node[i]["x"] - G.node[j]["x"]) ** 2 + (G.node[i]["y"] - G.node[j]["y"]) ** 2
     )
 
 
@@ -34,8 +33,8 @@ def main():
         T = list(G.nodes())
         random.shuffle(T)
         for i in xrange(1, len(T)):
-            G.edge[T[i - 1]][T[i]]['weight'] = ans
-        G.edge[T[-1]][T[0]]['weight'] = ans
+            G.edge[T[i - 1]][T[i]]["weight"] = ans
+        G.edge[T[-1]][T[0]]["weight"] = ans
         print
         T
 

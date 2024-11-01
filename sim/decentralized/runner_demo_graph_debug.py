@@ -13,17 +13,14 @@ from sim.decentralized.policy import LearnedPolicy, PolicyType
 from sim.decentralized.runner import SCENARIO_RESULT, run_a_scenario
 from tools import ProgressBar
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     n_agents = 8
     n_nodes = 64
 
     n_runs = 1
 
     # policies
-    policies = [
-        PolicyType.LEARNED,
-        PolicyType.RANDOM,
-        PolicyType.OPTIMAL]
+    policies = [PolicyType.LEARNED, PolicyType.RANDOM, PolicyType.OPTIMAL]
 
     results = {}  # type: Dict[int, Dict[PolicyType, SCENARIO_RESULT]]
     paths = {}  # type: Dict[int, Dict[PolicyType, List[PATH]]]
@@ -45,8 +42,9 @@ if __name__ == '__main__':
         # plot_env_with_arrows(g, starts, goals)  # type: ignore
 
         # initialize agents
-        agents = tuple([Agent(g, start, radius=RADIUS, policy=policy)
-                       for start in starts])
+        agents = tuple(
+            [Agent(g, start, radius=RADIUS, policy=policy) for start in starts]
+        )
         for i, agent in enumerate(agents):
             agent.give_a_goal(goals[i])
             if policy == PolicyType.LEARNED:
@@ -60,19 +58,20 @@ if __name__ == '__main__':
 
         # run the scenario
         paths_run: List[Any] = []
-        res = run_a_scenario(env=g,
-                             agents=agents,
-                             plot=False,
-                             paths_out=paths_run)
+        res = run_a_scenario(env=g, agents=agents, plot=False, paths_out=paths_run)
         paths[i_r][policy] = paths_run
         results[i_r][policy] = res
 
-        if (PolicyType.LEARNED in results[i_r].keys() and
-                PolicyType.OPTIMAL in results[i_r].keys()):
-            if (results[i_r][PolicyType.LEARNED][IDX_AVERAGE_LENGTH] <
-                    results[i_r][PolicyType.OPTIMAL][IDX_AVERAGE_LENGTH] and
-                    results[i_r][PolicyType.LEARNED][IDX_SUCCESS] and
-                    results[i_r][PolicyType.OPTIMAL][IDX_SUCCESS]):
+        if (
+            PolicyType.LEARNED in results[i_r].keys()
+            and PolicyType.OPTIMAL in results[i_r].keys()
+        ):
+            if (
+                results[i_r][PolicyType.LEARNED][IDX_AVERAGE_LENGTH]
+                < results[i_r][PolicyType.OPTIMAL][IDX_AVERAGE_LENGTH]
+                and results[i_r][PolicyType.LEARNED][IDX_SUCCESS]
+                and results[i_r][PolicyType.OPTIMAL][IDX_SUCCESS]
+            ):
                 print(f"Policy {policy} is better than optimal")
                 # filename of roadmap is 'planner/mapf_implementations/cache/187280093900cae76fffd919cbea9110bf8042fab2df6aa35bbd415480b785ce_roadmap.yaml'
                 # paths_learned = [[2, **1**, 2, 4], [4, 2, 6, 0], [0, 5, 3, 3]]

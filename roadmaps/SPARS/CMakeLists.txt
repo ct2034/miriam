@@ -13,10 +13,10 @@ set(PYTHON_DOT_VERSION 3.10)
 set(PYTHON_INCLUDE /usr/include/python${PYTHON_DOT_VERSION})
 set(PYTHON_LIBRARY /usr/lib/python${PYTHON_DOT_VERSION}/config-${PYTHON_DOT_VERSION}m-x86_64-linux-gnu/)
 
-FIND_PACKAGE(Boost 1.71.0 REQUIRED COMPONENTS 
-    program_options 
-    filesystem 
-    serialization 
+FIND_PACKAGE(Boost 1.71.0 REQUIRED COMPONENTS
+    program_options
+    filesystem
+    serialization
     python${PYTHON_VERSION}
 )
 FIND_PACKAGE(Eigen3 REQUIRED)
@@ -30,7 +30,7 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
   ${OMPL_INCLUDE_DIRS}
   lodepng
-  ${PYTHON_INCLUDE} 
+  ${PYTHON_INCLUDE}
   ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -49,16 +49,15 @@ target_link_libraries(generateRoadmap
 # the python module
 SET(SPARSPY sparspy)
 
-add_library(${SPARSPY} SHARED 
+add_library(${SPARSPY} SHARED
   src/${SPARSPY}.cpp
   lodepng/lodepng.cpp
 )
 
 TARGET_LINK_LIBRARIES(
-  ${SPARSPY} 
+  ${SPARSPY}
   ${Boost_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
   ${OpenCV_LIBS}
   ompl
 )
-

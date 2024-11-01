@@ -9,23 +9,21 @@ import numpy as np
 import logging
 
 
-logging.getLogger('pyomo.core').setLevel(logging.ERROR)
-logging.getLogger('pyomo.util').setLevel(logging.ERROR)
-logging.getLogger('pyomo.util.timing.construction').setLevel(logging.ERROR)
-logging.getLogger('git.cmd').setLevel(logging.ERROR)
-logging.getLogger(
-    'pyutilib.component.core.pyutilib.autotest').setLevel(logging.ERROR)
-logging.getLogger(
-    'pyutilib.component.core.pyutilib.workflow').setLevel(logging.ERROR)
-logging.getLogger('pyutilib.component.core.pyutilib').setLevel(logging.ERROR)
-logging.getLogger('pyutilib.component.core').setLevel(logging.ERROR)
-logging.getLogger('pyutilib.component.core.pyomo').setLevel(logging.ERROR)
-logging.getLogger('pyutilib.component.core.pca').setLevel(logging.ERROR)
-logging.getLogger('Pyro4.core').setLevel(logging.ERROR)
+logging.getLogger("pyomo.core").setLevel(logging.ERROR)
+logging.getLogger("pyomo.util").setLevel(logging.ERROR)
+logging.getLogger("pyomo.util.timing.construction").setLevel(logging.ERROR)
+logging.getLogger("git.cmd").setLevel(logging.ERROR)
+logging.getLogger("pyutilib.component.core.pyutilib.autotest").setLevel(logging.ERROR)
+logging.getLogger("pyutilib.component.core.pyutilib.workflow").setLevel(logging.ERROR)
+logging.getLogger("pyutilib.component.core.pyutilib").setLevel(logging.ERROR)
+logging.getLogger("pyutilib.component.core").setLevel(logging.ERROR)
+logging.getLogger("pyutilib.component.core.pyomo").setLevel(logging.ERROR)
+logging.getLogger("pyutilib.component.core.pca").setLevel(logging.ERROR)
+logging.getLogger("Pyro4.core").setLevel(logging.ERROR)
 
 
 def manhattan_dist(a, b):
-    """Get the manhattan distance beteween two points 
+    """Get the manhattan distance beteween two points
 
     :param a: One point
     :type a: list
@@ -51,9 +49,16 @@ def plan_milp(agent_pos, jobs, grid, config, plot=False):
     res_agent_job = optimize(agent_pos, jobs)
 
     # using our planner with prededined assignemt as MAPF planner
-    _, _, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid, config,
-                                  plot=plot,
-                                  pathplanning_only_assignment=res_agent_job)
+    _, _, res_paths = plan_cbsext(
+        agent_pos,
+        jobs,
+        [],
+        [],
+        grid,
+        config,
+        plot=plot,
+        pathplanning_only_assignment=res_agent_job,
+    )
     return res_agent_job, res_paths
 
 
@@ -94,9 +99,12 @@ def optimize(agents, tasks):
         :param _: We will not need data from the model here
         :return: The set
         """
-        return ((a, c, t) for a in range(len(agents))
-                for c in range(len(tasks))
-                for t in range(len(tasks)))
+        return (
+            (a, c, t)
+            for a in range(len(agents))
+            for c in range(len(tasks))
+            for t in range(len(tasks))
+        )
 
     m.all = Set(dimen=3, initialize=init_all)
 
@@ -116,8 +124,7 @@ def optimize(agents, tasks):
     m.cons_a_first = Set(dimen=1, initialize=init_cons_a_first)
 
     # Variables
-    m.assignments = Var(m.all,
-                        within=NonNegativeIntegers)
+    m.assignments = Var(m.all, within=NonNegativeIntegers)
 
     # Objective
     def total_duration(m):
@@ -137,14 +144,15 @@ def optimize(agents, tasks):
                 # we care for this path
                 obj_task += path * m.assignments[ia, 0, it]
                 for ic in range(1, len(tasks)):  # for all consecutive assignments
-                    path += m.assignments[ia, ic, it] * \
-                        path  # how did we get here?
+                    path += m.assignments[ia, ic, it] * path  # how did we get here?
                     for it2 in m.tasks:
                         for it2_prev in m.tasks:  # for all possible previous tasks
                             # from previous task end to this start
-                            path += m.assignments[ia, ic, it2] * \
-                                m.assignments[ia, ic - 1, it2_prev] * \
-                                dist_tt[it2_prev][it2]
+                            path += (
+                                m.assignments[ia, ic, it2]
+                                * m.assignments[ia, ic - 1, it2_prev]
+                                * dist_tt[it2_prev][it2]
+                            )
                         path += m.assignments[ia, ic, it] * dist_t[it]
                         # we care for this path
                         obj_task += path * m.assignments[ia, ic, it]
@@ -178,7 +186,7 @@ def optimize(agents, tasks):
     m.consec = Constraint(m.agents, m.cons_a_first, rule=consecutive)
 
     # Solve
-    optim = SolverFactory('bonmin')
+    optim = SolverFactory("bonmin")
     result = optim.solve(m)
 
     # Solution
@@ -197,13 +205,15 @@ def optimize(agents, tasks):
 
 if __name__ == "__main__":
     config = generate_config()
-    config['filename_pathsave'] = ''
+    config["filename_pathsave"] = ""
     agent_pos = [(1, 1), (9, 1), (3, 1)]  # three agents
-    jobs = [((1, 6), (9, 6), 0),
-            ((1, 3), (7, 3), 0),
-            # ((6, 6), (3, 8), 10),
-            # ((4, 8), (7, 1), 10),
-            ((3, 4), (1, 5), 10)]
+    jobs = [
+        ((1, 6), (9, 6), 0),
+        ((1, 3), (7, 3), 0),
+        # ((6, 6), (3, 8), 10),
+        # ((4, 8), (7, 1), 10),
+        ((3, 4), (1, 5), 10),
+    ]
     grid = np.zeros([10, 10, 51])
     res = plan_milp(agent_pos, jobs, grid, config)
     print(res)

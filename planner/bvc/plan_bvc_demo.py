@@ -22,7 +22,9 @@ if __name__ == "__main__":
     n_trials = 10
 
     path_lengths = [list() for _ in range(len(n_agents_s))]
-    success = [0, ] * len(n_agents_s)
+    success = [
+        0,
+    ] * len(n_agents_s)
     valid_paths_for_plotting = None
 
     pb = ProgressBar("eval", len(n_agents_s) * n_trials, 1)
@@ -38,7 +40,9 @@ if __name__ == "__main__":
                 valid_paths_for_plotting = paths
             pb.progress()
         if len(path_lengths[i_na]) == 0:
-            path_lengths[i_na] = [0.0, ]
+            path_lengths[i_na] = [
+                0.0,
+            ]
     pb.end()
 
     # plot results
@@ -54,16 +58,25 @@ if __name__ == "__main__":
 
     # figure for paths
     fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
+    ax = fig.add_subplot(projection="3d")
 
     # show map
     try:
-        xx, yy = np.meshgrid(np.linspace(0, 1, len(map_img)),
-                             np.linspace(0, 1, len(map_img)))
+        xx, yy = np.meshgrid(
+            np.linspace(0, 1, len(map_img)), np.linspace(0, 1, len(map_img))
+        )
         z = np.zeros_like(xx)
-        img_data = np.array(map_img) / -255. + 1
-        ax.contourf(xx, yy, img_data, len(map_img),
-                    zdir='z', offset=0.5, cmap=plt.cm.Greys, zorder=200)
+        img_data = np.array(map_img) / -255.0 + 1
+        ax.contourf(
+            xx,
+            yy,
+            img_data,
+            len(map_img),
+            zdir="z",
+            offset=0.5,
+            cmap=plt.cm.Greys,
+            zorder=200,
+        )
     except Exception as e:
         pass
 
@@ -74,8 +87,9 @@ if __name__ == "__main__":
             valid_paths_for_plotting[i_a, :, 1],
             range(valid_paths_for_plotting.shape[1]),
             label=f"robot_{i_a}",
-            zorder=100+i_a)
-    ax.set_zlim((0., valid_paths_for_plotting.shape[1]))
+            zorder=100 + i_a,
+        )
+    ax.set_zlim((0.0, valid_paths_for_plotting.shape[1]))
     ax.legend()
 
     plt.savefig("planner/bvc/bvc_eval_paths.png")

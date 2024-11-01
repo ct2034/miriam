@@ -16,36 +16,34 @@ from planner.mapf_implementations.plan_ecbs import BLOCKS_STR
 from planner.policylearn.generate_fovs import *
 from planner.policylearn.generate_graph import *
 from scenarios.evaluators import cached_ecbs
-from scenarios.generators import (building_walls, random_fill,
-                                  tracing_pathes_in_the_dark)
+from scenarios.generators import building_walls, random_fill, tracing_pathes_in_the_dark
 from scenarios.main_eval import GENERATOR
 from sim.decentralized.runner import will_scenario_collide_and_get_paths
 from tools import ProgressBar
 
-VERTEX_CONSTRAINTS_STR = 'vertexConstraints'
-EDGE_CONSTRAINTS_STR = 'edgeConstraints'
-SCHEDULE_STR = 'schedule'
-INDEP_AGENT_PATHS_STR = 'indepAgentPaths'
-COLLISIONS_STR = 'collisions'
-GRIDMAP_STR = 'gridmap'
-OWN_STR = 'own'
-OTHERS_STR = 'others'
+VERTEX_CONSTRAINTS_STR = "vertexConstraints"
+EDGE_CONSTRAINTS_STR = "edgeConstraints"
+SCHEDULE_STR = "schedule"
+INDEP_AGENT_PATHS_STR = "indepAgentPaths"
+COLLISIONS_STR = "collisions"
+GRIDMAP_STR = "gridmap"
+OWN_STR = "own"
+OTHERS_STR = "others"
 
 # input options ---------------------------
-TRANSFER_LSTM_STR = 'transfer_lstm'
-TRANSFER_CLASSIFICATION_STR = 'transfer_classification'
-TRANSFER_GCN_STR = 'transfer_gcn'
-GENERATE_SIM_STR = 'generate_simulation'
-NO_SOLUTION_STR = 'no_solution'
-MERGE_FILES = 'merge_files'
+TRANSFER_LSTM_STR = "transfer_lstm"
+TRANSFER_CLASSIFICATION_STR = "transfer_classification"
+TRANSFER_GCN_STR = "transfer_gcn"
+GENERATE_SIM_STR = "generate_simulation"
+NO_SOLUTION_STR = "no_solution"
+MERGE_FILES = "merge_files"
 
 LSTM_FOV_RADIUS = 2  # self plus x in all 4 directions
 CLASSIFICATION_POS_TIMESTEPS = 3
 CLASSIFICATION_FOV_RADIUS = 3  # self plus x in all 4 directions
 DTYPE_SAMPLES = np.int8
 
-GENERATORS = [building_walls, random_fill,
-              tracing_pathes_in_the_dark]
+GENERATORS = [building_walls, random_fill, tracing_pathes_in_the_dark]
 
 
 def show_map(x):
@@ -53,15 +51,16 @@ def show_map(x):
     yourself."""
     plt.imshow(
         np.swapaxes(x, 0, 1),
-        aspect='equal',
+        aspect="equal",
         cmap=plt.get_cmap("binary"),
-        origin='lower')
+        origin="lower",
+    )
 
 
 def get_random_free_pos(gridmap):
     """return a random pose from that map, that is free."""
     free = np.where(gridmap == FREE)
-    choice = random.randint(0, len(free[0])-1)
+    choice = random.randint(0, len(free[0]) - 1)
     pos = tuple(np.array(free)[:, choice])
     return pos
 
@@ -75,7 +74,7 @@ def get_vertex_block_coords(blocks):  # TODO: edge constraints
             blocks_pa = blocks[agent]
             if VERTEX_CONSTRAINTS_STR in blocks_pa.keys():
                 for vc in blocks_pa[VERTEX_CONSTRAINTS_STR]:
-                    coords_pa.append([vc['v.x'], vc['v.y']])
+                    coords_pa.append([vc["v.x"], vc["v.y"]])
         coords.append(np.array(coords_pa))
     return coords
 
@@ -87,12 +86,16 @@ def count_blocks(blocks):
     for agent in blocks.keys():
         if blocks[agent] != 0 and blocks[agent] is not None:
             blocks_pa = blocks[agent]
-            if (VERTEX_CONSTRAINTS_STR in blocks_pa.keys() and
-                    blocks_pa[VERTEX_CONSTRAINTS_STR] is not None):
+            if (
+                VERTEX_CONSTRAINTS_STR in blocks_pa.keys()
+                and blocks_pa[VERTEX_CONSTRAINTS_STR] is not None
+            ):
                 for _ in blocks_pa[VERTEX_CONSTRAINTS_STR]:
                     n_vc += 1
-            if (EDGE_CONSTRAINTS_STR in blocks_pa.keys() and
-                    blocks_pa[EDGE_CONSTRAINTS_STR] is not None):
+            if (
+                EDGE_CONSTRAINTS_STR in blocks_pa.keys()
+                and blocks_pa[EDGE_CONSTRAINTS_STR] is not None
+            ):
                 for _ in blocks_pa[EDGE_CONSTRAINTS_STR]:
                     n_ec += 1
     return n_vc, n_ec
@@ -126,22 +129,15 @@ def get_agent_paths_from_data(data, timed=False):
             schedule_pa = schedule[agent_str]
             for pose in schedule_pa:
                 if timed:
-                    path_pa.append([
-                        pose['x'],
-                        pose['y'],
-                        pose['t']
-                    ])
+                    path_pa.append([pose["x"], pose["y"], pose["t"]])
                 else:
-                    path_pa.append([
-                        pose['x'],
-                        pose['y']
-                    ])
+                    path_pa.append([pose["x"], pose["y"]])
             agent_paths.append(np.array(path_pa, dtype=DTYPE_SAMPLES))
     return agent_paths
 
 
 def where_will_they_collide(agent_paths, starts):
-    """checks if for a given set of starts and paths the agents 
+    """checks if for a given set of starts and paths the agents
     may collide and where."""
     collisions = {}
     seen_pos = set()
@@ -195,28 +191,22 @@ def blocks_from_data_to_lists(data):
             blocks_pa = []
             if VERTEX_CONSTRAINTS_STR in data_blocks_pa.keys():
                 for db in data_blocks_pa[VERTEX_CONSTRAINTS_STR]:
-                    if ('v.x' in db.keys() and 'v.y' in db.keys()
-                            and 't' in db.keys()):
-                        block = (
-                            db['v.x'],
-                            db['v.y'],
-                            db['t']
-                        )
+                    if "v.x" in db.keys() and "v.y" in db.keys() and "t" in db.keys():
+                        block = (db["v.x"], db["v.y"], db["t"])
                         blocks_pa.append(block)
             if EDGE_CONSTRAINTS_STR in data_blocks_pa.keys():
                 for db in data_blocks_pa[EDGE_CONSTRAINTS_STR]:
-                    if ('v1.x' in db.keys() and 'v1.y' in db.keys()
-                        and 'v2.x' in db.keys() and 'v2.y' in db.keys()
-                            and 't' in db.keys()):
-                        block = ((
-                            db['v1.x'],
-                            db['v1.y'],
-                            db['t']
-                        ), (
-                            db['v2.x'],
-                            db['v2.y'],
-                            db['t']+1
-                        ))
+                    if (
+                        "v1.x" in db.keys()
+                        and "v1.y" in db.keys()
+                        and "v2.x" in db.keys()
+                        and "v2.y" in db.keys()
+                        and "t" in db.keys()
+                    ):
+                        block = (
+                            (db["v1.x"], db["v1.y"], db["t"]),
+                            (db["v2.x"], db["v2.y"], db["t"] + 1),
+                        )
                         blocks_pa.append(block)
             blocks[i_a] = blocks_pa
     return blocks
@@ -262,14 +252,21 @@ def training_samples_from_data(data, mode):
             if unblocked_agent is not None:  # if we were able to find it
                 if mode == TRANSFER_LSTM_STR:
                     data_pa = []
-                    training_samples.extend(lstm_samples(
-                        n_agents, data, t, data_pa, col_agents, unblocked_agent))
+                    training_samples.extend(
+                        lstm_samples(
+                            n_agents, data, t, data_pa, col_agents, unblocked_agent
+                        )
+                    )
                 elif mode == TRANSFER_CLASSIFICATION_STR:
-                    training_samples.extend(classification_samples(
-                        n_agents, data, t, col_agents, unblocked_agent))
+                    training_samples.extend(
+                        classification_samples(
+                            n_agents, data, t, col_agents, unblocked_agent
+                        )
+                    )
                 elif mode == TRANSFER_GCN_STR:
-                    training_samples.extend(gcn_samples(
-                        n_agents, data, t, col_agents, unblocked_agent))
+                    training_samples.extend(
+                        gcn_samples(n_agents, data, t, col_agents, unblocked_agent)
+                    )
             # else:
             #     print("unblocked_agent is None")
     except Exception as e:
@@ -285,72 +282,61 @@ def lstm_samples(n_agents, data, t, data_pa, col_agents, unblocked_agent):
     for i_a in range(n_agents):
         # training features
         path = get_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
-        fovs = make_obstacle_fovs(padded_gridmap,
-                                  path,
-                                  t,
-                                  LSTM_FOV_RADIUS)
-        deltas = make_target_deltas(path,
-                                    t)
+        fovs = make_obstacle_fovs(padded_gridmap, path, t, LSTM_FOV_RADIUS)
+        deltas = make_target_deltas(path, t)
         data_this_agent = []
-        for i_t in range(t+1):
+        for i_t in range(t + 1):
             data_this_agent.append(
-                np.append(
-                    np.concatenate(fovs[i_t]),
-                    [
-                        deltas[i_t],
-                        path[i_t][:2]
-                    ]
-                )
+                np.append(np.concatenate(fovs[i_t]), [deltas[i_t], path[i_t][:2]])
             )
         data_pa.append(data_this_agent)
     for i_a in col_agents:
         x = {
             OWN_STR: data_pa[i_a],
-            OTHERS_STR: [data_pa[i_ao]
-                         for i_ao in range(n_agents) if i_a != i_ao]
+            OTHERS_STR: [data_pa[i_ao] for i_ao in range(n_agents) if i_a != i_ao],
         }
-        training_samples.append((
-            x,
-            1 if i_a == unblocked_agent else 0))
+        training_samples.append((x, 1 if i_a == unblocked_agent else 0))
     return training_samples
 
 
-def classification_samples(n_agents, data, t, col_agents,
-                           unblocked_agent):
+def classification_samples(n_agents, data, t, col_agents, unblocked_agent):
     """specifically construct training data for the classification model."""
     training_samples = []
     paths_until_col = []
     paths_full = []
-    padded_gridmap = add_padding_to_gridmap(data[GRIDMAP_STR],
-                                            CLASSIFICATION_FOV_RADIUS)
+    padded_gridmap = add_padding_to_gridmap(
+        data[GRIDMAP_STR], CLASSIFICATION_FOV_RADIUS
+    )
     for i_a in range(n_agents):
         path_until_col = get_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
         if len(path_until_col) < CLASSIFICATION_POS_TIMESTEPS:
             padded_path = np.zeros([CLASSIFICATION_POS_TIMESTEPS, 2])
-            for i in range(
-                0, CLASSIFICATION_POS_TIMESTEPS - len(path_until_col)
-            ):
+            for i in range(0, CLASSIFICATION_POS_TIMESTEPS - len(path_until_col)):
                 padded_path[i] = path_until_col[0]
-            padded_path[i+1:] = path_until_col
+            padded_path[i + 1 :] = path_until_col
             path_until_col = padded_path
         paths_until_col.append(path_until_col[-CLASSIFICATION_POS_TIMESTEPS:])
         # full path:
         path_full = get_path(data[INDEP_AGENT_PATHS_STR][i_a], -1)
         paths_full.append(path_full)
-    t = CLASSIFICATION_POS_TIMESTEPS-1
+    t = CLASSIFICATION_POS_TIMESTEPS - 1
     assert len(col_agents) == 2, "assuming two agent in colission here"
     for i_ca, i_a in enumerate(col_agents):
-        i_oa = col_agents[(i_ca+1) % 2]
-        x = extract_all_fovs(t, paths_until_col, paths_full,
-                             padded_gridmap, i_a, i_oa, CLASSIFICATION_FOV_RADIUS)
-        training_samples.append((
-            x,
-            1 if i_a == unblocked_agent else 0))
+        i_oa = col_agents[(i_ca + 1) % 2]
+        x = extract_all_fovs(
+            t,
+            paths_until_col,
+            paths_full,
+            padded_gridmap,
+            i_a,
+            i_oa,
+            CLASSIFICATION_FOV_RADIUS,
+        )
+        training_samples.append((x, 1 if i_a == unblocked_agent else 0))
     return training_samples
 
 
-def gcn_samples(n_agents, data, t, col_agents,
-                unblocked_agent):
+def gcn_samples(n_agents, data, t, col_agents, unblocked_agent):
     """specifically construct training data for the gcn model."""
     training_samples = []
     paths_until_col = []
@@ -362,34 +348,38 @@ def gcn_samples(n_agents, data, t, col_agents,
         path_until_col = get_path(data[INDEP_AGENT_PATHS_STR][i_a], t)
         if len(path_until_col) < CLASSIFICATION_POS_TIMESTEPS:
             padded_path = np.zeros([CLASSIFICATION_POS_TIMESTEPS, 2])
-            for i in range(
-                0, CLASSIFICATION_POS_TIMESTEPS - len(path_until_col)
-            ):
+            for i in range(0, CLASSIFICATION_POS_TIMESTEPS - len(path_until_col)):
                 padded_path[i] = path_until_col[0]
-            padded_path[i+1:] = path_until_col
+            padded_path[i + 1 :] = path_until_col
             path_until_col = padded_path
         paths_until_col.append(path_until_col[-CLASSIFICATION_POS_TIMESTEPS:])
         # full path:
         path_full = get_path(data[INDEP_AGENT_PATHS_STR][i_a], -1)
         paths_full.append(path_full)
-    t = CLASSIFICATION_POS_TIMESTEPS-1
+    t = CLASSIFICATION_POS_TIMESTEPS - 1
     assert len(col_agents) == 2, "assuming two agent in colission here"
     for i_ca, i_a in enumerate(col_agents):
-        i_oa = col_agents[(i_ca+1) % 2]
-        data_x = torch.cat((
-            get_agent_pos_layer(data_pos, paths_until_col, i_a),
-            get_agent_path_layer(data_pos, paths_until_col, i_a),
-            get_agent_path_layer(data_pos, paths_full, i_a),
-            get_agent_pos_layer(data_pos, paths_until_col, i_oa),
-            get_agent_path_layer(data_pos, paths_until_col, i_oa),
-            get_agent_path_layer(data_pos, paths_full, i_oa),
-        ), 1)
+        i_oa = col_agents[(i_ca + 1) % 2]
+        data_x = torch.cat(
+            (
+                get_agent_pos_layer(data_pos, paths_until_col, i_a),
+                get_agent_path_layer(data_pos, paths_until_col, i_a),
+                get_agent_path_layer(data_pos, paths_full, i_a),
+                get_agent_pos_layer(data_pos, paths_until_col, i_oa),
+                get_agent_path_layer(data_pos, paths_until_col, i_oa),
+                get_agent_path_layer(data_pos, paths_full, i_oa),
+            ),
+            1,
+        )
 
-        training_samples.append(to_data_obj(
-            data_x,
-            data_edge_index,
-            data_pos,
-            1. if i_a == unblocked_agent else 0.))
+        training_samples.append(
+            to_data_obj(
+                data_x,
+                data_edge_index,
+                data_pos,
+                1.0 if i_a == unblocked_agent else 0.0,
+            )
+        )
     return training_samples
 
 
@@ -398,7 +388,7 @@ def make_target_deltas(path, t):
     the end of the path until (including) time t."""
     deltas = []
     goal = path[-1][:2]
-    for i_t in range(t+1):
+    for i_t in range(t + 1):
         pos = path[i_t]
         deltas.append(goal - pos)
     return deltas
@@ -410,7 +400,7 @@ def get_path(path_data, t):
     path = []
     if t < 0:
         t = path_data.shape[0] - 1
-    for i_t in range(t+1):
+    for i_t in range(t + 1):
         if i_t < path_data.shape[0]:
             pos = path_data[i_t][:2]
         else:
@@ -422,20 +412,16 @@ def get_path(path_data, t):
 def plot_map_and_paths(gridmap, blocks, data, n_agents):
     """plot the map, agent paths and their blocks.
     You may call `plt.show()` afterwards."""
-    colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+    colors = ["r", "g", "b", "c", "m", "y", "k"]
     show_map(gridmap)
     block_coords = get_vertex_block_coords(blocks)
     agent_paths = get_agent_paths_from_data(data)
     for ia in range(n_agents):
-        plt.plot(agent_paths[ia][:, 0],
-                 agent_paths[ia][:, 1],
-                 '-',
-                 color=colors[ia])
+        plt.plot(agent_paths[ia][:, 0], agent_paths[ia][:, 1], "-", color=colors[ia])
         if block_coords[ia].shape[0]:
-            plt.plot(block_coords[ia][:, 0],
-                     block_coords[ia][:, 1],
-                     'x',
-                     color=colors[ia])
+            plt.plot(
+                block_coords[ia][:, 0], block_coords[ia][:, 1], "x", color=colors[ia]
+            )
 
 
 def insert_str_before_extension(fname: str, to_insert: str):
@@ -448,7 +434,7 @@ def insert_str_before_extension(fname: str, to_insert: str):
 def save_data(data_dict, fname_pkl):
     """save the current data dict in the given pickle file."""
     print(f"Saving data under {fname_pkl}")
-    with open(fname_pkl, 'wb') as f:
+    with open(fname_pkl, "wb") as f:
         pickle.dump(data_dict, f)
 
 
@@ -460,31 +446,31 @@ def simulate_one_data(width, fill, n_agents, base_seed, pb, i):
         do_collide = False
         while not do_collide:
             gen = random.choice(GENERATORS)
-            gridmap, starts, goals = gen(
-                width, fill, n_agents, float(seed / 10000)
-            )
-            seed += random.randint(0, 10E6)
-            seed = seed % (2E32-1)
+            gridmap, starts, goals = gen(width, fill, n_agents, float(seed / 10000))
+            seed += random.randint(0, 10e6)
+            seed = seed % (2e32 - 1)
             do_collide, indep_agent_paths = will_scenario_collide_and_get_paths(
-                gridmap, starts, goals)
+                gridmap, starts, goals
+            )
 
-        data = cached_ecbs(
-            gridmap, starts, goals, timeout=10)
+        data = cached_ecbs(gridmap, starts, goals, timeout=10)
         collisions = where_will_they_collide(indep_agent_paths, starts)
 
         data_ok = (
-            data != INVALID and
-            BLOCKS_STR in data.keys() and
-            has_one_or_more_vertex_blocks(data[BLOCKS_STR])
+            data != INVALID
+            and BLOCKS_STR in data.keys()
+            and has_one_or_more_vertex_blocks(data[BLOCKS_STR])
         )
         if data_ok:
             # we take only these for learning
-            data.update({
-                INDEP_AGENT_PATHS_STR: indep_agent_paths,
-                COLLISIONS_STR: collisions,
-                GRIDMAP_STR: gridmap,
-                BLOCKS_STR: data[BLOCKS_STR]
-            })
+            data.update(
+                {
+                    INDEP_AGENT_PATHS_STR: indep_agent_paths,
+                    COLLISIONS_STR: collisions,
+                    GRIDMAP_STR: gridmap,
+                    BLOCKS_STR: data[BLOCKS_STR],
+                }
+            )
     pb.progress(i)
     return data
 
@@ -495,29 +481,33 @@ if __name__ == "__main__":
     logger.setLevel(logging.INFO)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', help='mode', choices=(
-        TRANSFER_LSTM_STR,
-        TRANSFER_CLASSIFICATION_STR,
-        TRANSFER_GCN_STR,
-        GENERATE_SIM_STR,
-        NO_SOLUTION_STR,
-        MERGE_FILES))
-    parser.add_argument('fname_write_pkl',
-                        type=str, nargs='?')
     parser.add_argument(
-        'fname_read_pkl', type=str, nargs='?')
-    parser.add_argument(
-        '-m', type=str, nargs='*')
+        "mode",
+        help="mode",
+        choices=(
+            TRANSFER_LSTM_STR,
+            TRANSFER_CLASSIFICATION_STR,
+            TRANSFER_GCN_STR,
+            GENERATE_SIM_STR,
+            NO_SOLUTION_STR,
+            MERGE_FILES,
+        ),
+    )
+    parser.add_argument("fname_write_pkl", type=str, nargs="?")
+    parser.add_argument("fname_read_pkl", type=str, nargs="?")
+    parser.add_argument("-m", type=str, nargs="*")
     args = parser.parse_args()
 
     start_time = datetime.datetime.now()
 
-    if (args.mode == TRANSFER_LSTM_STR or
-            args.mode == TRANSFER_CLASSIFICATION_STR or
-            args.mode == TRANSFER_GCN_STR):
+    if (
+        args.mode == TRANSFER_LSTM_STR
+        or args.mode == TRANSFER_CLASSIFICATION_STR
+        or args.mode == TRANSFER_GCN_STR
+    ):
         # transfer modes
         training_data_we_want = []
-        with open(args.fname_read_pkl, 'rb') as f:
+        with open(args.fname_read_pkl, "rb") as f:
             all_data = pickle.load(f)
         data_len = len(all_data)
         print(f"data_len {data_len}")
@@ -525,40 +515,47 @@ if __name__ == "__main__":
         pb = ProgressBar("Transfer", data_len, 5)
         for d in all_data:
             i += 1
-            training_data_we_want.extend(
-                training_samples_from_data(d, args.mode))
+            training_data_we_want.extend(training_samples_from_data(d, args.mode))
             pb.progress()
         save_data(training_data_we_want, args.fname_write_pkl)
-        print(f'got {len(training_data_we_want)} samples '
-              + f'from {len(all_data)} simulations')
+        print(
+            f"got {len(training_data_we_want)} samples "
+            + f"from {len(all_data)} simulations"
+        )
         pb.end()
     elif args.mode == GENERATE_SIM_STR:
         # scenario paramters
         width = 8
         height = width
         n_agents = 8
-        fill = .4
+        fill = 0.4
         # generation parameters
         plot = False
         n_data_to_gen = int(os.getenv("N_DATA_TO_GEN", 5000))
         batch_size = int(n_data_to_gen / 10)
         n_batches = math.ceil(n_data_to_gen / batch_size)
-        logger.info(f'Generating {n_data_to_gen} data points ' +
-                    f'in {n_batches} batches of {batch_size}.')
+        logger.info(
+            f"Generating {n_data_to_gen} data points "
+            + f"in {n_batches} batches of {batch_size}."
+        )
         seed = os.getenv("SEED", 0)
         random.seed(seed)
         logger.info(f"Using initial seed: {seed}")
         # start
         with Pool(4) as p:
-            pb_main = ProgressBar(f'Generation', batch_size * n_batches, 1)
+            pb_main = ProgressBar(f"Generation", batch_size * n_batches, 1)
             for i_batch in range(n_batches):
                 start = batch_size * i_batch
                 stop = min(start + batch_size, n_data_to_gen)
-                arguments = [(width, fill, n_agents, seed, pb_main, seed)
-                             for seed in range(start, stop)]
+                arguments = [
+                    (width, fill, n_agents, seed, pb_main, seed)
+                    for seed in range(start, stop)
+                ]
                 batch_data = p.starmap(simulate_one_data, arguments)
-                save_data(batch_data, insert_str_before_extension(
-                    args.fname_write_pkl, f'{i_batch:02}'))
+                save_data(
+                    batch_data,
+                    insert_str_before_extension(args.fname_write_pkl, f"{i_batch:02}"),
+                )
             # save in the end for sure
             pb_main.end()
     elif args.mode == NO_SOLUTION_STR:
@@ -568,11 +565,11 @@ if __name__ == "__main__":
         width = 8
         height = width
         n_agents = 8
-        fill = .4
+        fill = 0.4
         # generation parameters
         plot = False
         all_data = []
-        n_data_to_gen = int(os.getenv("N_DATA_TO_GEN", 2 ** 10))
+        n_data_to_gen = int(os.getenv("N_DATA_TO_GEN", 2**10))
         logger.info("Generating {} data points.".format(n_data_to_gen))
         # seed = int(os.getenv("SEED", 0))
         my_uuid = uuid.uuid4()
@@ -595,12 +592,10 @@ if __name__ == "__main__":
                 )
                 seed += 1
                 do_collide, indep_agent_paths = will_scenario_collide_and_get_paths(
-                    gridmap, starts, goals, ignore_finished_agents=False)
+                    gridmap, starts, goals, ignore_finished_agents=False
+                )
 
-            data = {
-                INDEP_AGENT_PATHS_STR: indep_agent_paths,
-                GRIDMAP_STR: gridmap
-            }
+            data = {INDEP_AGENT_PATHS_STR: indep_agent_paths, GRIDMAP_STR: gridmap}
             all_data.append(data)
             if len(all_data) % 100 == 0:
                 save_data(all_data, fname)
@@ -614,12 +609,11 @@ if __name__ == "__main__":
         print(f"fname_out: {fname_out}")
         all_data = []
         for fname in args.m:
-            with open(fname, 'rb') as f:
+            with open(fname, "rb") as f:
                 this_data = pickle.load(f)
             all_data.extend(this_data)
-        with open(fname_out, 'wb') as f:
+        with open(fname_out, "wb") as f:
             pickle.dump(all_data, f)
 
     else:
-        raise NotImplementedError(
-            "mode >{}< is not implemented yet".format(args.mode))
+        raise NotImplementedError("mode >{}< is not implemented yet".format(args.mode))

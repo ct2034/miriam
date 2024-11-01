@@ -11,17 +11,16 @@ class DhcTest(unittest.TestCase):
     def test_eval(self):
         rng = Random(0)
         size = 10
-        fill = .5
+        fill = 0.5
         n_agents = 5
-        env, starts, goals = tracing_pathes_in_the_dark(
-            size, fill, n_agents, rng)
+        env, starts, goals = tracing_pathes_in_the_dark(size, fill, n_agents, rng)
         res = eval(env, starts, goals)
         success, steps, paths = res
         self.assertTrue(success)
         self.assertGreater(steps, 0)
         self.assertEqual(len(paths), n_agents)
         for i_a in range(n_agents):
-            self.assertEqual(len(paths[i_a]), steps+1)
+            self.assertEqual(len(paths[i_a]), steps + 1)
             self.assertEqual(tuple(paths[i_a][0]), tuple(starts[i_a]))
             self.assertEqual(tuple(paths[i_a][-1]), tuple(goals[i_a]))
 

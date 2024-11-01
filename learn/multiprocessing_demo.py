@@ -6,7 +6,7 @@ import numpy as np
 
 
 def wait(t, x):
-    print(f'x:{x}')
+    print(f"x:{x}")
     print("Waiting for %.1fs" % t)
     time.sleep(t)
     print("Waited for %.1fs" % t)
@@ -15,7 +15,7 @@ def wait(t, x):
 
 def test_parallelization(par):
     time.sleep(1)
-    t = .1
+    t = 0.1
     pool = Pool(5)
     start = datetime.now()
     returns = pool.starmap(wait, np.full((par, 2), (t, 99)))

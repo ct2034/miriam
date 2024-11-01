@@ -25,14 +25,11 @@ pos3 = pos.copy()
 plt.figure(figsize=(8, 8))
 plt.title("r-disc")
 nx.draw_networkx_edges(G, pos, alpha=0.4)
-nx.draw_networkx_nodes(G, pos,
-                       node_size=50,
-                       node_color='#0F1C95',
-                       cmap=plt.cm.Reds_r)
+nx.draw_networkx_nodes(G, pos, node_size=50, node_color="#0F1C95", cmap=plt.cm.Reds_r)
 
 plt.xlim(-0.05, 1.05)
 plt.ylim(-0.05, 1.05)
-plt.axis('off')
+plt.axis("off")
 
 # vgl nearest neighbor graph
 
@@ -43,8 +40,8 @@ G2.add_nodes_from(range(N))
 nn = 4
 flann = FLANN()
 result, dists = flann.nn(
-    points, points, nn,
-    algorithm="kmeans", branching=32, iterations=7, checks=16)
+    points, points, nn, algorithm="kmeans", branching=32, iterations=7, checks=16
+)
 
 for i in range(N):
     for inn in range(nn):
@@ -53,14 +50,11 @@ for i in range(N):
 plt.figure(figsize=(8, 8))
 plt.title("K-Nearest-Neighbour")
 nx.draw_networkx_edges(G2, pos2, alpha=0.4)
-nx.draw_networkx_nodes(G2, pos2,
-                       node_size=50,
-                       node_color='#0F1C95',
-                       cmap=plt.cm.Reds_r)
+nx.draw_networkx_nodes(G2, pos2, node_size=50, node_color="#0F1C95", cmap=plt.cm.Reds_r)
 
 plt.xlim(-0.05, 1.05)
 plt.ylim(-0.05, 1.05)
-plt.axis('off')
+plt.axis("off")
 
 
 # vgl online nearest neighbor graph
@@ -73,7 +67,7 @@ G3.add_nodes_from(range(N))
 for i in range(N):
     for j in range(N):
         d_ij = dist(points[i], points[j])
-        d_min = 10.
+        d_min = 10.0
         min_k = 0
         for k in range(j):
             d = dist(points[k], points[j])
@@ -86,14 +80,11 @@ for i in range(N):
 plt.figure(figsize=(8, 8))
 plt.title("Online Nearest-Neighbour")
 nx.draw_networkx_edges(G3, pos3, alpha=0.4)
-nx.draw_networkx_nodes(G3, pos3,
-                       node_size=50,
-                       node_color='#0F1C95',
-                       cmap=plt.cm.Reds_r)
+nx.draw_networkx_nodes(G3, pos3, node_size=50, node_color="#0F1C95", cmap=plt.cm.Reds_r)
 
 plt.xlim(-0.05, 1.05)
 plt.ylim(-0.05, 1.05)
-plt.axis('off')
+plt.axis("off")
 
 
 # vgl delaunay ---
@@ -103,10 +94,10 @@ tri = Delaunay(points)
 
 plt.figure(figsize=(8, 8))
 plt.title("Delaunay")
-plt.triplot(points[:, 0], points[:, 1], tri.simplices.copy(), '-k', alpha=0.4)
-plt.plot(points[:, 0], points[:, 1], 'ob')
+plt.triplot(points[:, 0], points[:, 1], tri.simplices.copy(), "-k", alpha=0.4)
+plt.plot(points[:, 0], points[:, 1], "ob")
 
-plt.axis('off')
+plt.axis("off")
 plt.xlim(-0.05, 1.05)
 plt.ylim(-0.05, 1.05)
 plt.show()

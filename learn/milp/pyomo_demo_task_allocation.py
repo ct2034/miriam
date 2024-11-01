@@ -40,17 +40,23 @@ def optimize(agents, tasks):
         :param _: We will not need data from the model here
         :return: The set
         """
-        return ((a, c, t) for a in range(len(agents))
-                for c in range(len(tasks))
-                for t in range(len(tasks)))
+        return (
+            (a, c, t)
+            for a in range(len(agents))
+            for c in range(len(tasks))
+            for t in range(len(tasks))
+        )
+
     m.all = Set(dimen=3, initialize=init_all)
 
     def init_agents(_):
         return [a for a in range(len(agents))]
+
     m.agents = Set(dimen=1, initialize=init_agents)
 
     def init_tasks(_):
         return [t for t in range(len(tasks))]
+
     m.tasks = Set(dimen=1, initialize=init_tasks)
 
     def init_cons_a_first(_):
@@ -59,8 +65,7 @@ def optimize(agents, tasks):
     m.cons_a_first = Set(dimen=1, initialize=init_cons_a_first)
 
     # Variables
-    m.assignments = Var(m.all,
-                        within=NonNegativeIntegers)
+    m.assignments = Var(m.all, within=NonNegativeIntegers)
 
     # Objective
     def total_duration(m):
@@ -82,21 +87,24 @@ def optimize(agents, tasks):
                 for it in m.tasks:
                     for it_prev in m.tasks:  # for all possible previous tasks
                         # from previous task end to this start
-                        obj_agent += m.assignments[ia, ic, it] * \
-                            m.assignments[ia, ic - 1, it_prev] * \
-                            dist_tt[it_prev][it]
+                        obj_agent += (
+                            m.assignments[ia, ic, it]
+                            * m.assignments[ia, ic - 1, it_prev]
+                            * dist_tt[it_prev][it]
+                        )
                     obj_agent += m.assignments[ia, ic, it] * dist_t[it]
         for it in m.tasks:
             # all tasks arrival time, TODO: whats the difference then?
             obj += tasks[it][2]
         return obj
+
     m.duration = Objective(rule=total_duration)
 
     # Constraints
     # every task has exactly one agent
     def one_agent_per_task(m, i_t):
-        return sum(m.assignments[a, c, i_t]
-                   for a in m.agents for c in m.tasks) == 1
+        return sum(m.assignments[a, c, i_t] for a in m.agents for c in m.tasks) == 1
+
     m.one_agent = Constraint(m.tasks, rule=one_agent_per_task)
 
     # one agent can only have one task per time
@@ -116,7 +124,7 @@ def optimize(agents, tasks):
 
     # Solve
     prob = m.create_instance()
-    optim = SolverFactory('cplex')
+    optim = SolverFactory("cplex")
     result = optim.solve(prob, tee=True)
 
     # Solution
@@ -126,9 +134,11 @@ def optimize(agents, tasks):
 
 if __name__ == "__main__":
     agent_pos = [(1, 1), (9, 1), (3, 1)]  # three agents
-    jobs = [((1, 6), (9, 6), 0),
-            ((1, 3), (7, 3), 0),
-            ((6, 6), (3, 8), 10),
-            ((4, 8), (7, 1), 10),
-            ((3, 4), (1, 5), 10)]
+    jobs = [
+        ((1, 6), (9, 6), 0),
+        ((1, 3), (7, 3), 0),
+        ((6, 6), (3, 8), 10),
+        ((4, 8), (7, 1), 10),
+        ((3, 4), (1, 5), 10),
+    ]
     optimize(agent_pos, jobs)

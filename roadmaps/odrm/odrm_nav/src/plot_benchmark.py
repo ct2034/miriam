@@ -7,7 +7,7 @@ import sys
 ODRM_STR = "ODRM-based"
 
 if __name__ == "__main__":
-    plt.style.use('bmh')
+    plt.style.use("bmh")
     # plt.rcParams["font.family"] = "serif"
     plt.rcParams["savefig.dpi"] = 500
 
@@ -21,7 +21,9 @@ if __name__ == "__main__":
         maps = []
         for fname in sorted(os.listdir(folder)):
 
-            if fname.endswith(".pkl") and (("random" in fname) if rand else (not "random" in fname)):
+            if fname.endswith(".pkl") and (
+                ("random" in fname) if rand else (not "random" in fname)
+            ):
                 # exmpl:
                 #   odrm_global_planner-OdrmGlobalPlanner_x_100_4096.pkl_n_agents-8.pkl
                 #   navfn-NavfnROS_x_100_4096.pkl_n_agents-8.pkl
@@ -29,7 +31,9 @@ if __name__ == "__main__":
                     d = pickle.load(pkl_file)
                     data.append(d)
                     if rand:
-                        ns_agents.append(fname.split(".")[1].split("-")[-1].split("_")[0])
+                        ns_agents.append(
+                            fname.split(".")[1].split("-")[-1].split("_")[0]
+                        )
                     else:
                         ns_agents.append(fname.split(".")[1].split("-")[-1])
                     planner = fname.split("-")[0]
@@ -55,12 +59,11 @@ if __name__ == "__main__":
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 4))
         violin_parts = ax.violinplot(data, showmeans=True, showextrema=False)
         idx = range(len(data))
-        violin_parts['cmeans'].set_color("C1")
+        violin_parts["cmeans"].set_color("C1")
         for i in idx:
-            violin_parts['bodies'][i].set_facecolor(colors[i])
-        print(violin_parts['cmeans'])
+            violin_parts["bodies"][i].set_facecolor(colors[i])
+        print(violin_parts["cmeans"])
         ax.set_xticks([x + 1 for x in idx])
-
 
         def get_label(x):
             if rand:
@@ -74,14 +77,11 @@ if __name__ == "__main__":
                 else:
                     return "\n" + ns_agents[x] + " Agents"
 
-
-        ax.set_xticklabels(
-            map(get_label, idx)
-        )
+        ax.set_xticklabels(map(get_label, idx))
         ax.set_ylabel("Max Travel Duration [s]")
         # plt.title("Decentralized Planner Travel Duration")
         plt.tight_layout()
         if rand:
-            fig.savefig(folder + 'decentralized_travel_times_random.png')
+            fig.savefig(folder + "decentralized_travel_times_random.png")
         else:
-            fig.savefig(folder + 'decentralized_travel_times.png')
+            fig.savefig(folder + "decentralized_travel_times.png")

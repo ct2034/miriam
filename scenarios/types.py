@@ -16,18 +16,12 @@ class EnvType(Enum):
 
 
 def _get_type(env: POTENTIAL_ENV_TYPE) -> EnvType:
-    if(
-        isinstance(env, np.ndarray) and
-        env.shape[0] == env.shape[1]
-    ):
+    if isinstance(env, np.ndarray) and env.shape[0] == env.shape[1]:
         return EnvType.GRIDMAP
-    elif(
-        isinstance(env, nx.Graph)
-    ):
+    elif isinstance(env, nx.Graph):
         return EnvType.ROADMAP
     else:
-        raise RuntimeError(
-            f"Could not determine environment type of {env} correctly.")
+        raise RuntimeError(f"Could not determine environment type of {env} correctly.")
 
 
 def is_gridmap(env: POTENTIAL_ENV_TYPE) -> bool:

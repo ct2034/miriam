@@ -17,21 +17,21 @@ from multi_optim.multi_optim_run import gridmap_to_map_img
 from roadmaps.var_odrm_torch.var_odrm_torch import read_map, sample_points
 from scenarios.generators import movingai_read_mapfile
 
-matplotlib.use('cairo')
-plt.style.use('bmh')
+matplotlib.use("cairo")
+plt.style.use("bmh")
 
 logger = logging.getLogger(__name__)
 
 
-def eval(results_name, base_folder, suffix_no_rd,
-         figure_folder, n_eval):
+def eval(results_name, base_folder, suffix_no_rd, figure_folder, n_eval):
     rng = Random(0)
     flann = FLANN(random_seed=0)
 
     # load roadmaps
-    g_w_rd = nx.read_gpickle(f'{base_folder}/{results_name}_graph.gpickle')
+    g_w_rd = nx.read_gpickle(f"{base_folder}/{results_name}_graph.gpickle")
     g_wo_rd = nx.read_gpickle(
-        f'{base_folder}/{results_name}{suffix_no_rd}_graph.gpickle')
+        f"{base_folder}/{results_name}{suffix_no_rd}_graph.gpickle"
+    )
     pos_w_rd = nx.get_node_attributes(g_w_rd, POS)
     pos_wo_rd = nx.get_node_attributes(g_wo_rd, POS)
     pos_w_rd_np = np.array(list(pos_w_rd.values()))
@@ -39,9 +39,9 @@ def eval(results_name, base_folder, suffix_no_rd,
 
     # get map image
     yaml_fname = f"{base_folder}/{results_name}_stats.yaml"
-    with open(yaml_fname, 'r') as f:
+    with open(yaml_fname, "r") as f:
         stats = yaml.load(f, Loader=yaml.SafeLoader)
-    map_fname = stats['static']['map_fname']
+    map_fname = stats["static"]["map_fname"]
     map_img = None
     if map_fname.endswith(".png"):
         map_img = read_map(map_fname)
@@ -69,82 +69,89 @@ def eval(results_name, base_folder, suffix_no_rd,
             goal_w_rd = nn_w_rd[1]
             start_wo_rd = nn_wo_rd[0]
             goal_wo_rd = nn_wo_rd[1]
-            unique_starts_and_goals = start_w_rd != goal_w_rd and \
-                start_wo_rd != goal_wo_rd
+            unique_starts_and_goals = (
+                start_w_rd != goal_w_rd and start_wo_rd != goal_wo_rd
+            )
 
         # plan paths
         path_w_rd = nx.shortest_path(g_w_rd, start_w_rd, goal_w_rd)
         path_wo_rd = nx.shortest_path(g_wo_rd, start_wo_rd, goal_wo_rd)
 
-        len_w_rd = (
-            np.linalg.norm(points[0] - pos_w_rd[path_w_rd[0]]) +
-            np.linalg.norm(points[1] - pos_w_rd[path_w_rd[-1]])
+        len_w_rd = np.linalg.norm(points[0] - pos_w_rd[path_w_rd[0]]) + np.linalg.norm(
+            points[1] - pos_w_rd[path_w_rd[-1]]
         )  # bits to and from graph
         for i in range(len(path_w_rd) - 1):
-            len_w_rd += np.linalg.norm(pos_w_rd[path_w_rd[i]] -
-                                       pos_w_rd[path_w_rd[i + 1]])
-        len_wo_rd = (
-            np.linalg.norm(points[0] - pos_wo_rd[path_wo_rd[0]]) +
-            np.linalg.norm(points[1] - pos_wo_rd[path_wo_rd[-1]])
+            len_w_rd += np.linalg.norm(
+                pos_w_rd[path_w_rd[i]] - pos_w_rd[path_w_rd[i + 1]]
+            )
+        len_wo_rd = np.linalg.norm(
+            points[0] - pos_wo_rd[path_wo_rd[0]]
+        ) + np.linalg.norm(
+            points[1] - pos_wo_rd[path_wo_rd[-1]]
         )  # bits to and from graph
         for i in range(len(path_wo_rd) - 1):
-            len_wo_rd += np.linalg.norm(pos_wo_rd[path_wo_rd[i]] -
-                                        pos_wo_rd[path_wo_rd[i + 1]])
+            len_wo_rd += np.linalg.norm(
+                pos_wo_rd[path_wo_rd[i]] - pos_wo_rd[path_wo_rd[i + 1]]
+            )
         lengths.append((len_w_rd, len_wo_rd))
 
         # store results
-        with open(f'{figure_folder}/{results_name}_lengths.pkl', 'wb') as f:
+        with open(f"{figure_folder}/{results_name}_lengths.pkl", "wb") as f:
             pickle.dump(lengths, f)
 
 
 def plot(figure_folder, results_name):
-    with open(f'{figure_folder}/{results_name}_lengths.pkl', 'rb') as f:
+    with open(f"{figure_folder}/{results_name}_lengths.pkl", "rb") as f:
         lengths = pickle.load(f)
 
-    fig, ax = plt.subplots(
-        figsize=(4.5, 4.5))
+    fig, ax = plt.subplots(figsize=(4.5, 4.5))
     # ax.set_title('Path length comparison')
-    ax.set_xlabel('Path length with Gray-Scott intialization')
-    ax.set_ylabel('Path length with random initialization')
-    ax.set_aspect('equal')
-    ax.set_xticks([i*.5 for i in range(1, 11)])
-    ax.set_yticks([i*.5 for i in range(1, 11)])
-    ax.set_xlim(0, max([l[0] for l in lengths])+.05)
-    ax.set_ylim(0, max([l[1] for l in lengths])+.05)
+    ax.set_xlabel("Path length with Gray-Scott intialization")
+    ax.set_ylabel("Path length with random initialization")
+    ax.set_aspect("equal")
+    ax.set_xticks([i * 0.5 for i in range(1, 11)])
+    ax.set_yticks([i * 0.5 for i in range(1, 11)])
+    ax.set_xlim(0, max([l[0] for l in lengths]) + 0.05)
+    ax.set_ylim(0, max([l[1] for l in lengths]) + 0.05)
     # ax.plot([0, 1], [0, 1], 'k--', linewidth=0.5)
-    ax.scatter([l[0] for l in lengths],
-               [l[1] for l in lengths],
-               s=1.2,
-               label='path lengths samples')
+    ax.scatter(
+        [l[0] for l in lengths],
+        [l[1] for l in lengths],
+        s=1.2,
+        label="path lengths samples",
+    )
     # add trendline
     x = np.array([l[0] for l in lengths])
     y = np.array([l[1] for l in lengths])
     m, b = np.polyfit(x, y, 1)
-    ax.plot(x, m * x + b, 'r--', linewidth=0.5,
-            label=f'trendline fitted by least squares')
-    plt.legend(bbox_to_anchor=(0, 1, 1, 0),
-               loc="lower left")
+    ax.plot(
+        x, m * x + b, "r--", linewidth=0.5, label=f"trendline fitted by least squares"
+    )
+    plt.legend(bbox_to_anchor=(0, 1, 1, 0), loc="lower left")
     plt.tight_layout()
-    fig.savefig(f'{figure_folder}/{results_name}_lengths.pdf')
-    print(f'Percentage of paths where random initialization is longer: '
-          f'{100*sum([l[1] > l[0] for l in lengths])/len(lengths)}%')
-    print(f'On average, random initialization is ' +
-          f'{100*(np.mean([l[1] - l[0] for l in lengths]))/np.mean([l[0] for l in lengths])}% longer')
+    fig.savefig(f"{figure_folder}/{results_name}_lengths.pdf")
+    print(
+        f"Percentage of paths where random initialization is longer: "
+        f"{100*sum([l[1] > l[0] for l in lengths])/len(lengths)}%"
+    )
+    print(
+        f"On average, random initialization is "
+        + f"{100*(np.mean([l[1] - l[0] for l in lengths]))/np.mean([l[0] for l in lengths])}% longer"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
 
     # parameters
     logger.setLevel(logging.INFO)
-    results_name: str = 'mapf_benchm_random-32-32-10'
-    suffix_no_rd: str = '_no_rd'
-    base_folder: str = 'multi_optim/results'
-    figure_folder: str = f'{base_folder}/eval_without_rd'
+    results_name: str = "mapf_benchm_random-32-32-10"
+    suffix_no_rd: str = "_no_rd"
+    base_folder: str = "multi_optim/results"
+    figure_folder: str = f"{base_folder}/eval_without_rd"
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder)
     n_eval: int = 1000
 
-    eval(results_name, base_folder, suffix_no_rd,
-         figure_folder, n_eval)
+    eval(results_name, base_folder, suffix_no_rd, figure_folder, n_eval)
     plot(figure_folder, results_name)

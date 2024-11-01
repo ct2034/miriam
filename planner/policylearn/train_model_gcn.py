@@ -13,8 +13,13 @@ from tools import ProgressBar
 from torch.nn import Linear, MSELoss
 from torch.special import expit
 from torch_geometric.loader import DataLoader
-from torch_geometric.nn import (ChebConv, GCNConv, global_add_pool,
-                                global_max_pool, global_mean_pool)
+from torch_geometric.nn import (
+    ChebConv,
+    GCNConv,
+    global_add_pool,
+    global_max_pool,
+    global_mean_pool,
+)
 
 LOSSFN = MSELoss()
 
@@ -26,7 +31,7 @@ class GCN(torch.nn.Module):
         torch.manual_seed(0)
         self.conv1 = GCNConv(num_node_features, conv_channels)
         self.conv2 = GCNConv(conv_channels, conv_channels)
-        self.lin = Linear(conv_channels*3, class_channels)
+        self.lin = Linear(conv_channels * 3, class_channels)
         self.lin2 = Linear(class_channels, 1)
 
     def forward(self, x, edge_index, pos, batch):
@@ -37,11 +42,14 @@ class GCN(torch.nn.Module):
         x = x.relu()
 
         # 2. Readout layer
-        x = torch.cat((
-            global_mean_pool(x, batch),
-            global_max_pool(x, batch),
-            global_add_pool(x, batch)
-        ), 1)
+        x = torch.cat(
+            (
+                global_mean_pool(x, batch),
+                global_max_pool(x, batch),
+                global_add_pool(x, batch),
+            ),
+            1,
+        )
 
         # 3. Apply a final classifier
         x = F.dropout(x, p=0.6, training=self.training)
@@ -89,29 +97,32 @@ if __name__ == "__main__":
     # arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-m', '--model_fname', type=str, default="my_model.torch", )
+        "-m",
+        "--model_fname",
+        type=str,
+        default="my_model.torch",
+    )
     # parser.add_argument(
     #     '-t', '--model_type', choices=[
     #         CLASSIFICATION_STR,
     #         CONVRNN_STR
     #     ])
-    parser.add_argument(
-        'fnames_read_pkl', type=str, nargs='+')
+    parser.add_argument("fnames_read_pkl", type=str, nargs="+")
     args = parser.parse_args()
     fnames_read_pkl: List[str] = args.fnames_read_pkl
-    print(f'fnames_read_pkl: {fnames_read_pkl}')
+    print(f"fnames_read_pkl: {fnames_read_pkl}")
     model_fname: str = args.model_fname
-    print(f'model_fname: {model_fname}')
+    print(f"model_fname: {model_fname}")
     # model_type: str = args.model_type
     # print(f'model_type: {model_type}')
 
     # meta params
-    validation_split: float = .1  # of first file
-    test_split: float = .1
+    validation_split: float = 0.1  # of first file
+    test_split: float = 0.1
     epochs = 100
 
     # data
-    pb = ProgressBar("epochs * files", len(fnames_read_pkl)*epochs, 1)
+    pb = ProgressBar("epochs * files", len(fnames_read_pkl) * epochs, 1)
     for i_e in range(epochs):
         for fname_read_pkl in fnames_read_pkl:
             # print("~"*60)
@@ -120,24 +131,23 @@ if __name__ == "__main__":
             #     f"reading file {fnames_read_pkl.index(fname_read_pkl) + 1} of " +
             #     f"{len(fnames_read_pkl)} : " +
             #     f"{fname_read_pkl}")
-            with open(fname_read_pkl, 'rb') as f:
+            with open(fname_read_pkl, "rb") as f:
                 d = pickle.load(f)
             n = len(d)
             n_val = int(n * validation_split)
             # on first file only
             if fname_read_pkl == fnames_read_pkl[0] and i_e == 0:
-                print(f'n: {n}')
-                print(f'n_val: {n_val}')
-                n_test = int(n*test_split)
-                print(f'n_test: {n_test}')
+                print(f"n: {n}")
+                print(f"n_val: {n_val}")
+                n_test = int(n * test_split)
+                print(f"n_test: {n_test}")
                 n_train = n - n_val - n_test
-                print(f'n_train: {n_train}')
+                print(f"n_train: {n_train}")
                 train_graphs = [d[i] for i in range(n_train)]
                 assert len(train_graphs) == n_train, "We must have all data."
-                test_graphs = [d[i] for i in range(n_train, n_train+n_test)]
-                val_graphs = [d[i] for i in range(n_train+n_test, n)]
-                assert len(d) == len(train_graphs) + \
-                    len(test_graphs) + len(val_graphs)
+                test_graphs = [d[i] for i in range(n_train, n_train + n_test)]
+                val_graphs = [d[i] for i in range(n_train + n_test, n)]
+                assert len(d) == len(train_graphs) + len(test_graphs) + len(val_graphs)
             else:
                 n_train = n - n_val
                 # print(f'n_train: {n_train}')
@@ -161,7 +171,7 @@ if __name__ == "__main__":
                 model = GCN(
                     conv_channels=50,
                     class_channels=100,
-                    num_node_features=num_node_features
+                    num_node_features=num_node_features,
                 )
                 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
@@ -175,8 +185,7 @@ if __name__ == "__main__":
                 test_x: List[float] = []
 
                 # evaluating untrained model
-                pretrain_test_accuracy, pretrain_test_loss = test(
-                    model, test_graphs)
+                pretrain_test_accuracy, pretrain_test_loss = test(model, test_graphs)
                 print(f"pretrain_test_loss: {pretrain_test_loss}")
                 print(f"pretrain_test_accuracy: {pretrain_test_accuracy}")
                 test_x.append(0)
@@ -185,22 +194,21 @@ if __name__ == "__main__":
             # (if) on first file only
             random.shuffle(train_graphs)
             one_training_accuracy, one_training_loss = train(
-                model, train_graphs, optimizer)
+                model, train_graphs, optimizer
+            )
             training_accuracy.append(one_training_accuracy)
             loss.append(one_training_loss)
             pb.progress()
 
         # test after each epoch
-        one_test_accuracy, one_test_loss = test(
-            model, test_graphs)
+        one_test_accuracy, one_test_loss = test(model, test_graphs)
         print(f"one_test_loss: {one_test_loss}")
         print(f"one_test_accuracy: {one_test_accuracy}")
-        test_x.append(len(training_accuracy)-1)
+        test_x.append(len(training_accuracy) - 1)
         test_accuracy.append(one_test_accuracy)
         test_loss.append(one_test_loss)
 
-    val_accuracy, val_loss = test(
-        model, val_graphs)
+    val_accuracy, val_loss = test(model, val_graphs)
     print(f"val_loss: {val_loss}")
     print(f"val_accuracy: {val_accuracy}")
     torch.save(model.state_dict(), model_fname)
@@ -212,21 +220,15 @@ if __name__ == "__main__":
     axs[1].plot(loss, label="training_loss")
     if val_accuracy is not None:
         axs[0].plot(
-            [min(test_x), max(test_x)],
-            [val_accuracy]*2,
-            "--",
-            label="val_accuracy")
+            [min(test_x), max(test_x)], [val_accuracy] * 2, "--", label="val_accuracy"
+        )
     if val_loss is not None:
-        axs[1].plot(
-            [min(test_x), max(test_x)],
-            [val_loss]*2,
-            "--",
-            label="val_loss")
+        axs[1].plot([min(test_x), max(test_x)], [val_loss] * 2, "--", label="val_loss")
     axs[0].plot(test_x, test_accuracy, label="test_accuracy")
     axs[1].plot(test_x, test_loss, label="test_loss")
-    axs[0].legend(loc='upper right')
-    axs[0].set_xlabel('Batch')
-    axs[1].legend(loc='upper right')
-    axs[1].set_xlabel('Batch')
+    axs[0].legend(loc="upper right")
+    axs[0].set_xlabel("Batch")
+    axs[1].legend(loc="upper right")
+    axs[1].set_xlabel("Batch")
     fig.savefig("training_history.png")
     plt.show()

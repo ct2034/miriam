@@ -25,8 +25,8 @@ class TestEdgePolicyGraphUtils(unittest.TestCase):
             if y > 0:
                 self.env.add_edge(x + y * 7, x + (y - 1) * 7)
         self.agents = [
-            Agent(self.env, pos=24, radius=.3),
-            Agent(self.env, pos=25, radius=.3)
+            Agent(self.env, pos=24, radius=0.3),
+            Agent(self.env, pos=25, radius=0.3),
         ]
         self.agents[0].give_a_goal(27)
         self.agents[1].give_a_goal(21)
@@ -45,12 +45,31 @@ class TestEdgePolicyGraphUtils(unittest.TestCase):
         # make sure big_from_small is correct
         expected_nodes_big = [
             45,
-            37, 38, 39,
-            29, 30, 31, 32, 33,
-            21, 22, 23, 24, 25, 26, 27,
-            15, 16, 17, 18, 19,
-            9, 10, 11,
-            3]
+            37,
+            38,
+            39,
+            29,
+            30,
+            31,
+            32,
+            33,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            15,
+            16,
+            17,
+            18,
+            19,
+            9,
+            10,
+            11,
+            3,
+        ]
         self.assertEqual(len(big_from_small), len(expected_nodes_big))
         for n in expected_nodes_big:
             self.assertIn(n, list(big_from_small.values()))

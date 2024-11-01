@@ -18,12 +18,9 @@ c50 = LpVariable("c50", 0, cat=LpInteger)
 prob += c1 + c2 + c5 + c10 + c20 + c50  # Amount of coins
 
 # Constraints
-prob += ((c1 * 1 +  # Values of coins
-          c2 * 2 +
-          c5 * 5 +
-          c10 * 10 +
-          c20 * 20 +
-          c50 * 50) == 87)  # Target value
+prob += (
+    c1 * 1 + c2 * 2 + c5 * 5 + c10 * 10 + c20 * 20 + c50 * 50  # Values of coins
+) == 87  # Target value
 
 GLPK().solve(prob)
 

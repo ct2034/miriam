@@ -4,7 +4,7 @@ define roomba position
   size [0.33 0.33 0.1]
 
   # this block approximates the circular shape of a Roomba
-  block( 
+  block(
     points 16
     point[0] [ 0.225 0.000 ]
     point[1] [ 0.208 0.086 ]
@@ -27,15 +27,13 @@ define roomba position
 
   # this bumper array VERY crudely approximates the Roomba's bumpers
   bumper( size [.01 .01 .01 0]
-          bcount 2  
+          bcount 2
           blength .33
           bpose[0] [0.12  0.12 .02  45]
-          bpose[1] [0.12 -0.12 .02 -45] 
+          bpose[1] [0.12 -0.12 .02 -45]
         )
 
   color "gray50"
 )
 
 define create roomba( color "gray90" )
-
-

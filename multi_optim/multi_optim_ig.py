@@ -14,9 +14,9 @@ from planner.policylearn.generate_data_demo import plot_graph_wo_pos_data
 
 def print_matrix_with_row_numbers(X, prec=2):
     for i, row in enumerate(X):
-        print(f'{i}:', end='\t')
+        print(f"{i}:", end="\t")
         for j, col in enumerate(row):
-            print(f'{col:.2E}', end='\t')
+            print(f"{col:.2E}", end="\t")
         print()
 
 
@@ -27,9 +27,11 @@ if __name__ == "__main__":
 
     # Load the model
     model = EdgePolicyModel()
-    model.load_state_dict(torch.load(
-        f"{save_folder}/{prefix}_policy_model.pt",
-        map_location=torch.device('cpu')))
+    model.load_state_dict(
+        torch.load(
+            f"{save_folder}/{prefix}_policy_model.pt", map_location=torch.device("cpu")
+        )
+    )
     model.eval()
 
     ex_good = None  # example of data which is correctly classified
@@ -45,7 +47,16 @@ if __name__ == "__main__":
 
         # Find good and bad examples
         for d in data:
-            out = model(d.x, d.edge_index, torch.tensor([0, ]*d.num_nodes))
+            out = model(
+                d.x,
+                d.edge_index,
+                torch.tensor(
+                    [
+                        0,
+                    ]
+                    * d.num_nodes
+                ),
+            )
             y_out = out.argmax()
             y_target = d.y.argmax()
             if y_out == y_target:
@@ -86,17 +97,29 @@ if __name__ == "__main__":
         baselines=torch.ones_like(ex_good.x) * -1,
         additional_forward_args=(
             ex_good.edge_index,
-            torch.tensor([0, ]*ex_good.num_nodes)
+            torch.tensor(
+                [
+                    0,
+                ]
+                * ex_good.num_nodes
+            ),
         ),
-        internal_batch_size=1)
+        internal_batch_size=1,
+    )
     ig_bad = ig.attribute(
         ex_bad.x,
         baselines=torch.ones_like(ex_bad.x) * -1,
         additional_forward_args=(
             ex_bad.edge_index,
-            torch.tensor([0, ]*ex_bad.num_nodes)
+            torch.tensor(
+                [
+                    0,
+                ]
+                * ex_bad.num_nodes
+            ),
         ),
-        internal_batch_size=1)
+        internal_batch_size=1,
+    )
 
     print(f"IG good:")
     print_matrix_with_row_numbers(ig_good)
@@ -105,19 +128,18 @@ if __name__ == "__main__":
 
     highlight_nodes_s = [
         {
-            (d.x[:, 0] == 1.).nonzero(): "yellow",  # pose self
-            (d.x[:, 1] == 1.).nonzero(): "cyan",  # pose others
-            d.y.argmax(): "lime"  # correct next node
-        } for d in [ex_good, ex_bad]
+            (d.x[:, 0] == 1.0).nonzero(): "yellow",  # pose self
+            (d.x[:, 1] == 1.0).nonzero(): "cyan",  # pose others
+            d.y.argmax(): "lime",  # correct next node
+        }
+        for d in [ex_good, ex_bad]
     ]
     highlight_nodes_s[1][y_out_bad] = "red"  # wrong next node
     print(f"Highlight nodes good:\n{highlight_nodes_s[0]}")
     print(f"Highlight nodes bad:\n{highlight_nodes_s[1]}")
 
     f, axs = plt.subplots(2, 2, figsize=(9, 9))
-    for i_smpl, d in enumerate([
-        (ex_good, ig_good),
-            (ex_bad, ig_bad)]):
+    for i_smpl, d in enumerate([(ex_good, ig_good), (ex_bad, ig_bad)]):
         ax = axs[0, i_smpl]
         data, ig = d
         plot_graph_wo_pos_data(
@@ -125,19 +147,17 @@ if __name__ == "__main__":
             data.edge_index,
             data.pos,
             data.x,
-            highlight_nodes=highlight_nodes_s[i_smpl])
+            highlight_nodes=highlight_nodes_s[i_smpl],
+        )
         ax = axs[1, i_smpl]
         plot_graph_wo_pos_data(
-            ax,
-            data.edge_index,
-            data.pos,
-            ig,
-            highlight_nodes=highlight_nodes_s[i_smpl])
+            ax, data.edge_index, data.pos, ig, highlight_nodes=highlight_nodes_s[i_smpl]
+        )
     axs[1, 0].set_title("IG good")
     axs[1, 1].set_title("IG bad")
     axs[0, 0].set_title("Sample good")
     axs[0, 1].set_title("Sample bad")
 
     for x, y in product(range(2), repeat=2):
-        axs[x, y].set_aspect('equal')
+        axs[x, y].set_aspect("equal")
     plt.show()

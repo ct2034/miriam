@@ -2,8 +2,13 @@ from __future__ import division
 
 import numpy as np
 from pyomo.core.base import Var
-from pyomo.environ import (ConcreteModel, Constraint, Expression,
-                           NonNegativeIntegers, Objective)
+from pyomo.environ import (
+    ConcreteModel,
+    Constraint,
+    Expression,
+    NonNegativeIntegers,
+    Objective,
+)
 from pyomo.opt import SolverFactory
 
 model = ConcreteModel()
@@ -40,7 +45,7 @@ def ObjRule(model):
 model.g = Objective(rule=ObjRule)
 
 prob = model.create()
-optim = SolverFactory('glpk')
+optim = SolverFactory("glpk")
 result = optim.solve(prob, tee=True)
 prob.load(result)
 

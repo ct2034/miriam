@@ -33,8 +33,9 @@ class TestGraphConverter(unittest.TestCase):
         rng = random.Random(0)
         for _ in range(10):
             node = rng.randint(0, 63)
-            self.assertEqual(coordinate_to_node(
-                self.env, node_to_coordinate(self.env, node)), node)
+            self.assertEqual(
+                coordinate_to_node(self.env, node_to_coordinate(self.env, node)), node
+            )
 
     def test_gridmap_to_nx(self):
         small_env = np.zeros((3, 3))

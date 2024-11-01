@@ -3,6 +3,7 @@
 import sys, time
 from PyQt5 import QtGui, QtCore
 
+
 class MyView(QtGui.QGraphicsView):
     def __init__(self):
         QtGui.QV.__init__(self)
@@ -40,7 +41,8 @@ class MyView(QtGui.QGraphicsView):
 
         print(str(self.item.pos().x()))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     view = MyView()
     view.show()

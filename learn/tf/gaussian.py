@@ -8,15 +8,18 @@ from itertools import product
 
 
 def getGaussValue(kerStd, posX, posY):
-    return (1./(2. *
-                math.pi*(np.power(kerStd, 2))) *
-            math.exp(-(np.power(posX, 2)+np.power(posY, 2)) /
-                     (2.*(np.power(kerStd, 2)))))
+    return (
+        1.0
+        / (2.0 * math.pi * (np.power(kerStd, 2)))
+        * math.exp(
+            -(np.power(posX, 2) + np.power(posY, 2)) / (2.0 * (np.power(kerStd, 2)))
+        )
+    )
 
 
 def getGaussKernel(kerStd, datSize):
-    d = int(6*kerStd)
-    d_idxs = range(int(-d), int(d+1), 1)
+    d = int(6 * kerStd)
+    d_idxs = range(int(-d), int(d + 1), 1)
     kerSize = 2 * d + 1
     kernel = np.zeros([kerSize, kerSize, datSize, datSize])
 
@@ -39,8 +42,10 @@ def getImageData(fileNameList):
 def blur(g, imageData, kernel):
     if imageData.dtype is not tf.float32:
         imageData = tf.cast(imageData, dtype=tf.float32)
-    y = tf.cast(tf.nn.conv2d(imageData, kernel, strides=[
-                1, 1, 1, 1], padding="SAME"), dtype=tf.int32)
+    y = tf.cast(
+        tf.nn.conv2d(imageData, kernel, strides=[1, 1, 1, 1], padding="SAME"),
+        dtype=tf.int32,
+    )
     init_op = tf.global_variables_initializer()
     with tf.Session(graph=g) as sess:
         return sess.run(y)

@@ -14,7 +14,7 @@ paused 0
 # spatial resolution of the underlying occupancy grid. Default is 0.02m.
 resolution 0.02
 
-# set the multiple of real time that Stage should try to achieve. Default is 1. 
+# set the multiple of real time that Stage should try to achieve. Default is 1.
 # set to 0 to go as fast as possible.
 speedup 1.000
 
@@ -25,13 +25,13 @@ window
   scale 28.967 	# pixels per meter
   center [ 5.404  -22.321 ]
   rotate [ 0  0 ]
-  			
+
   show_data 1              # 1=on 0=off
 )
 
 # load an environment bitmap
 floorplan
-( 
+(
   name "cave"
   size [100 100 0.800]
   pose [0 0 0 0]
@@ -40,14 +40,14 @@ floorplan
 
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r0"
-  pose [ 4 -24 0 -121 ] 
+  pose [ 4 -24 0 -121 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -57,18 +57,18 @@ pioneer2dx
   localization_origin [ 0 0 0 0 ]
 
   trail_length 400
-    
+
 )
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r1"
-  pose [ 10 -18 0 175 ] 
+  pose [ 10 -18 0 175 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -79,14 +79,14 @@ pioneer2dx
 )
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r2"
-  pose [ 15 -20 0 175 ] 
+  pose [ 15 -20 0 175 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -97,14 +97,14 @@ pioneer2dx
 )
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r3"
-  pose [ -4 -16 0 -90 ] 
+  pose [ -4 -16 0 -90 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -116,14 +116,14 @@ pioneer2dx
 
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r4"
-  pose [ 0 -25 0 175 ] 
+  pose [ 0 -25 0 175 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -136,14 +136,14 @@ pioneer2dx
 
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r5"
-  pose [ 2 -25 0 0.0 ] 
+  pose [ 2 -25 0 0.0 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -154,14 +154,14 @@ pioneer2dx
 )
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r6"
-  pose [ -4 -25 0 0.0 ] 
+  pose [ -4 -25 0 0.0 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -172,14 +172,14 @@ pioneer2dx
 )
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r7"
-  pose [ -3 -19 0 0.0 ] 
+  pose [ -3 -19 0 0.0 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -190,14 +190,14 @@ pioneer2dx
 )
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r8"
-  pose [ 2 -20 0 0.0 ] 
+  pose [ 2 -20 0 0.0 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"
@@ -208,14 +208,14 @@ pioneer2dx
 )
 
 pioneer2dx
-(		  
+(
   # can refer to the robot by this name
   name "r9"
-  pose [ -4 -18 0 0.0 ] 
+  pose [ -4 -18 0 0.0 ]
 
   # pioneer2dx's sonars	will be ranger:0 and the laser will be ranger:1
-  sicklaser( pose [ 0 0 0 0 ] ) 
- 
+  sicklaser( pose [ 0 0 0 0 ] )
+
   # demonstrate a plugin controller, implemented in examples/ctrl/wander.cc
   # you probably should comment this out when using simple.cfg with Player
   ctrl "wander"

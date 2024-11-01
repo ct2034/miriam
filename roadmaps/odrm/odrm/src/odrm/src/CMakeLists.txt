@@ -1,6 +1,6 @@
 # If the pyx file is a C++ file, we should specify that here.
 #set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/odrm.pyx PROPERTIES CYTHON_IS_CXX FALSE )
-  
+
 if(APPLE)
 	include_directories(/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/numpy/core/include/)
 endif(APPLE)

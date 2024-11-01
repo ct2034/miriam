@@ -19,7 +19,8 @@ sys.path.append(cwd + "/..")
 
 # %%
 env, starts, goals = scenarios.generators.tracing_pathes_in_the_dark(
-    50, .6, 8, random.Random(0))
+    50, 0.6, 8, random.Random(0)
+)
 
 
 # %%
@@ -33,7 +34,7 @@ paths = solvers.indep(env, starts, goals)
 
 # %%
 
-get_ipython().run_line_magic('matplotlib', 'inline')
+get_ipython().run_line_magic("matplotlib", "inline")
 visualization.plot_with_paths(env, paths)
 plt.show()
 

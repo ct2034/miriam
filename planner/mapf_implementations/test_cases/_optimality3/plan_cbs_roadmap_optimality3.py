@@ -17,61 +17,83 @@ if __name__ == "__main__":
     rng = Random(0)
     data_no = "optimality3"
     graph = nx.read_gpickle(
-        f"planner/mapf_implementations/test_cases/optimality2/{data_no}.gpickle")
+        f"planner/mapf_implementations/test_cases/optimality2/{data_no}.gpickle"
+    )
     model = EdgePolicyModel()
     model.load_state_dict(
-        torch.load(f"planner/mapf_implementations/test_cases/optimality2/{data_no}.pt"))
+        torch.load(f"planner/mapf_implementations/test_cases/optimality2/{data_no}.pt")
+    )
     starts = np.array([4, 6])
     goals = np.array([5, 3])
     radius = 0.001
 
     # run
     paths_cbsr_raw = plan_cbsr(
-        graph, starts, goals, radius, 60, skip_cache=True, ignore_finished_agents=True)
-    assert(isinstance(paths_cbsr_raw, list))
+        graph, starts, goals, radius, 60, skip_cache=True, ignore_finished_agents=True
+    )
+    assert isinstance(paths_cbsr_raw, list)
     max_len = max(map(len, paths_cbsr_raw))
     paths_cbsr = []
     for p in paths_cbsr_raw:
         p_out = []
         for x in p:
             p_out.append(x[0])
-        p_out.extend([p_out[-1], ] * (max_len - len(p_out)))
+        p_out.extend(
+            [
+                p_out[-1],
+            ]
+            * (max_len - len(p_out))
+        )
         paths_cbsr.append(p_out)
     print(f"{paths_cbsr=}")
-    print("-"*80)
+    print("-" * 80)
 
     paths_sim_learned = []
     agents_sim_learned = to_agent_objects(
-        graph, starts.tolist(), goals.tolist(),
-        radius=radius, rng=rng)
+        graph, starts.tolist(), goals.tolist(), radius=radius, rng=rng
+    )
     assert isinstance(agents_sim_learned, list)
     for a in agents_sim_learned:
         a.policy = LearnedPolicy(a, model)
     res_sim_learned = run_a_scenario(
-        graph, agents_sim_learned, False, iterator=IteratorType.LOOKAHEAD2, paths_out=paths_sim_learned)
+        graph,
+        agents_sim_learned,
+        False,
+        iterator=IteratorType.LOOKAHEAD2,
+        paths_out=paths_sim_learned,
+    )
     print(f"{res_sim_learned=}")
     print(f"{paths_sim_learned=}")
-    print("-"*80)
+    print("-" * 80)
 
     paths_sim_optimal = []
     agents_sim_optimal = to_agent_objects(
-        graph, starts.tolist(), goals.tolist(),
+        graph,
+        starts.tolist(),
+        goals.tolist(),
         policy=PolicyType.OPTIMAL,
-        radius=radius, rng=rng)
+        radius=radius,
+        rng=rng,
+    )
     assert isinstance(agents_sim_optimal, list)
     res_sim_optimal = run_a_scenario(
-        graph, agents_sim_optimal, False, iterator=IteratorType.LOOKAHEAD2, paths_out=paths_sim_optimal)
+        graph,
+        agents_sim_optimal,
+        False,
+        iterator=IteratorType.LOOKAHEAD2,
+        paths_out=paths_sim_optimal,
+    )
     print(f"{res_sim_optimal=}")
     print(f"{paths_sim_optimal=}")
-    print("-"*80)
+    print("-" * 80)
 
     # plot
     fig_cbsr = plt.figure()
-    fig_cbsr.suptitle('Paths CBSR')
+    fig_cbsr.suptitle("Paths CBSR")
     plot_with_paths(graph, paths_cbsr, fig=fig_cbsr)
 
     fig_learned = plt.figure()
-    fig_learned.suptitle('Paths Learned Policy')
+    fig_learned.suptitle("Paths Learned Policy")
     plot_with_paths(graph, paths_sim_learned, fig=fig_learned)
 
     plt.show()

@@ -8,7 +8,7 @@ def dist(a, b):
 
 N = 1000
 
-G = nx.random_geometric_graph(N, .1)
+G = nx.random_geometric_graph(N, 0.1)
 
 n = 100
 for i in range(n):

@@ -94,8 +94,7 @@ class TestAgent(unittest.TestCase):
         self.assertTrue(next_step == 0)
 
         # can we move to the wrong next step
-        self.assertRaises(
-            AssertionError, lambda: a.make_next_step(99))
+        self.assertRaises(AssertionError, lambda: a.make_next_step(99))
         self.assertTrue(a.pos == 1)
 
         # move to correct next step
@@ -127,12 +126,7 @@ class TestAgent(unittest.TestCase):
 
     def test_agent_with_graph(self):
         """Basic operation of agents on graphs"""
-        pos_s = {
-            0: (0., 0.),
-            1: (0., 0.99),
-            2: (1., 0.),
-            3: (1., 1.)
-        }
+        pos_s = {0: (0.0, 0.0), 1: (0.0, 0.99), 2: (1.0, 0.0), 3: (1.0, 1.0)}
         g = nx.Graph()
         g.add_edge(0, 1)
         g.add_edge(0, 2)
@@ -150,6 +144,7 @@ class TestAgent(unittest.TestCase):
             self.assertIsInstance(a.path[2], int)
             self.assertEqual(a.path[0], 0)
             self.assertEqual(a.path[2], 3)
+
         general_path_assertions(self)
         self.assertEqual(a.path[1], 1)  # along 1 is quicker
 

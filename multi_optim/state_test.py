@@ -17,20 +17,20 @@ class ScenarioStateTest(unittest.TestCase):
         # square graph
         self.sq_graph = nx.Graph()
         for x, y in product(range(5), range(5)):
-            self.sq_graph.add_node(x + 5*y, pos=(float(x), float(y)))
+            self.sq_graph.add_node(x + 5 * y, pos=(float(x), float(y)))
             if x > 0:
-                self.sq_graph.add_edge(x + 5*y, x - 1 + 5*y)
+                self.sq_graph.add_edge(x + 5 * y, x - 1 + 5 * y)
             if y > 0:
-                self.sq_graph.add_edge(x + 5*y, x + 5*(y - 1))
+                self.sq_graph.add_edge(x + 5 * y, x + 5 * (y - 1))
         self.radius = 0.2
 
         # graph with passing point
         self.pass_graph = nx.Graph()
-        self.pass_graph.add_node(0, pos=(0., 0.))
-        self.pass_graph.add_node(1, pos=(1., 0.))
-        self.pass_graph.add_node(2, pos=(1., 1.))
-        self.pass_graph.add_node(3, pos=(2., 0.))
-        self.pass_graph.add_node(4, pos=(3., 0.))
+        self.pass_graph.add_node(0, pos=(0.0, 0.0))
+        self.pass_graph.add_node(1, pos=(1.0, 0.0))
+        self.pass_graph.add_node(2, pos=(1.0, 1.0))
+        self.pass_graph.add_node(3, pos=(2.0, 0.0))
+        self.pass_graph.add_node(4, pos=(3.0, 0.0))
         self.pass_graph.add_edge(0, 1)
         self.pass_graph.add_edge(0, 2)
         self.pass_graph.add_edge(1, 3)
@@ -44,8 +44,7 @@ class ScenarioStateTest(unittest.TestCase):
         """Test running the scenario with parallel paths."""
         starts = [0, 1, 2, 3, 4]
         goals = [20, 21, 22, 23, 24]
-        state = ScenarioState(self.sq_graph, starts,
-                              goals, self.model, self.radius)
+        state = ScenarioState(self.sq_graph, starts, goals, self.model, self.radius)
         # not finished before running
         self.assertFalse(state.finished)
 
@@ -63,8 +62,7 @@ class ScenarioStateTest(unittest.TestCase):
         """Test running the scenario with a collision."""
         starts = [0, 3]
         goals = [3, 0]
-        state = ScenarioState(self.pass_graph, starts,
-                              goals, self.model, self.radius)
+        state = ScenarioState(self.pass_graph, starts, goals, self.model, self.radius)
         # not finished before running
         self.assertFalse(state.finished)
 
@@ -84,8 +82,7 @@ class ScenarioStateTest(unittest.TestCase):
         # preparation
         starts = [0, 3]
         goals = [3, 0]
-        state = ScenarioState(self.pass_graph, starts,
-                              goals, self.model, self.radius)
+        state = ScenarioState(self.pass_graph, starts, goals, self.model, self.radius)
         state.run()
 
         # check state after running
@@ -110,13 +107,13 @@ class ScenarioStateTest(unittest.TestCase):
         for d in [data_0, data_1]:
             self.assertEqual(d.num_nodes, self.pass_graph.number_of_nodes())
             # made it undirected
-            self.assertEqual(d.num_edges, 2*self.pass_graph.number_of_edges())
+            self.assertEqual(d.num_edges, 2 * self.pass_graph.number_of_edges())
             self.assertEqual(d.x.shape[0], self.pass_graph.number_of_nodes())
             self.assertEqual(d.x.shape[1], self.model.num_node_features)
         # 1. path layer ...
         #    current poses for each agent
-        self.assertEqual(data_0.x[0, 0], 1.)
-        self.assertEqual(data_1.x[3, 0], 1.)
+        self.assertEqual(data_0.x[0, 0], 1.0)
+        self.assertEqual(data_1.x[3, 0], 1.0)
         #    intermediate poses for each agent
         self.assertEqual(data_0.x[1, 0], 1.1)
         self.assertEqual(data_1.x[1, 0], 1.1)
@@ -135,17 +132,17 @@ class ScenarioStateTest(unittest.TestCase):
         self.assertEqual(data_1.x[3, 1], 1.2)
         # 3. relative distance layer ...
         #    for own pose
-        self.assertEqual(data_0.x[0, 2], 0.)
-        self.assertEqual(data_1.x[3, 2], 0.)
+        self.assertEqual(data_0.x[0, 2], 0.0)
+        self.assertEqual(data_1.x[3, 2], 0.0)
         #    for node 4
-        self.assertEqual(data_0.x[4, 2], 3.)
-        self.assertEqual(data_1.x[4, 2], 1.)
+        self.assertEqual(data_0.x[4, 2], 3.0)
+        self.assertEqual(data_1.x[4, 2], 1.0)
         # 4. relative angle layer ...
         #    for own pose
-        self.assertEqual(data_0.x[0, 3], 0.)   # own pose always 0
-        self.assertEqual(data_1.x[3, 3], 0.)   # own pose always 0
+        self.assertEqual(data_0.x[0, 3], 0.0)  # own pose always 0
+        self.assertEqual(data_1.x[3, 3], 0.0)  # own pose always 0
         #    for node 4
-        self.assertEqual(data_0.x[4, 3], 0.)   # in front of me
+        self.assertEqual(data_0.x[4, 3], 0.0)  # in front of me
         self.assertEqual(data_1.x[4, 3], -pi)  # behind me
         #    for node 2
         self.assertAlmostEqual(data_0.x[2, 3].item(), pi / 4, places=3)

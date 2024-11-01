@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 *************************************************
-	         AnyLogic Project File 
-*************************************************	         
+	         AnyLogic Project File
+*************************************************
 -->
 <AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="7.3.4.201605201443" AlpVersion="7.3.3">
 <Model>
@@ -47,33 +47,33 @@ Thread thread = new Thread(new Runnable() {
 		try{
 			//handler = factory.getClientHandler("ws://localhost:8085",9999);
 			handler = factory.getClientHandler("ws://atm.virtualfortknox.de/msb",9999);
-			Application smartObject = new Application();		
+			Application smartObject = new Application();
 			smartObject.setUuid("AL_TC2");
 			smartObject.setName("AnyLogic-TestClient");
 			smartObject.setDescription("Test client");
-			smartObject.setToken("altc2");	
+			smartObject.setToken("altc2");
 
 			Map<String, ParameterValue> parameters = new HashMap<>();
 			parameters.put("test", new ParameterValue("testValue"));
 			Configuration configuration = new Configuration();
 			configuration.setParameters(parameters);
 			smartObject.setConfiguration(configuration);
-			
+
 			Class<?> dataType = QueueConf.class;
-			
+
 			handler.addEvent(smartObject, "NUMBER", "number", "A number", dataType);
 			handler.addEvent(smartObject, "CONFIG", "config", "A Configuration", dataType);
 
 			FunctionContainer fc = new FunctionContainer(getEmbeddedObjects());
 			handler.addFunction(smartObject, "/FunctionContainer/logThis", "to_log", "Log This", new String[0], fc, FunctionContainer.class.getMethod("logThis", String.class));
 			handler.addFunction(smartObject, "/FunctionContainer/configThis", "to_config", "Config This", new String[0], fc, FunctionContainer.class.getMethod("configThis", dataType));
-			
+
 			handler.register(smartObject);
 		  //handler.register(smartObject, "javatest");
-			
+
 			connected = true;
 			System.out.println("CONNECTED TO MSB ...");
-			
+
 			synchronized (waitLock) {
 				try {
 					waitLock.wait();
@@ -82,8 +82,8 @@ Thread thread = new Thread(new Runnable() {
 		}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-		}		
-	}	
+		}
+	}
 
 });
 thread.start();
@@ -99,20 +99,20 @@ thread.start();
 //				try{
 //					handler = factory.getClientHandler("ws://localhost:8085");
 					//Random rand = new Random();
-					
+
 //					while (true) {
-					
+
 //						Thread.sleep(3000);
-//						try {		
-										
+//						try {
+
 //							List<Object> list = getEmbeddedObjects();
 //							QueueConf qc = new QueueConf(queue.getName(),21,true,true);
-							
+
 //							if(connected) handler.publish("CONFIG", qc);
-							
+
 						//	for(int i =0; i< list.size();i++){
 						//		System.out.println("Obj. "+list.get(i).toString());
-						//	}					
+						//	}
 
 //						} catch (Exception e) {
 //							System.out.println("Exception: "+ e.toString());
@@ -125,7 +125,7 @@ thread.start();
 //			}
 //		});
 
-//		thread2.start();	
+//		thread2.start();
 	]]></StartupCode>
 			<Generic>false</Generic>
 			<GenericParameter>
@@ -144,7 +144,7 @@ thread.start();
 			<SceneGridColor/>
 			<SceneBackgroundColor/>
 			<AgentProperties>
-	 			<SpaceType>CONTINUOUS</SpaceType>			
+	 			<SpaceType>CONTINUOUS</SpaceType>
 				<EnvironmentDefinesInitialLocation>true</EnvironmentDefinesInitialLocation>
 				<RotateAnimationTowardsMovement>true</RotateAnimationTowardsMovement>
 				<RotateAnimationVertically>false</RotateAnimationVertically>
@@ -632,7 +632,7 @@ thread.start();
 						<Parameter>
 							<Name><![CDATA[onEnter]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[try {					
+								<Code><![CDATA[try {
 	Random rand = new Random();
 
 	int x = rand.nextInt() ;
@@ -908,7 +908,7 @@ thread.start();
 			<SceneGridColor/>
 			<SceneBackgroundColor/>
 			<AgentProperties>
-	 			<SpaceType>CONTINUOUS</SpaceType>			
+	 			<SpaceType>CONTINUOUS</SpaceType>
 				<EnvironmentDefinesInitialLocation>true</EnvironmentDefinesInitialLocation>
 				<RotateAnimationTowardsMovement>true</RotateAnimationTowardsMovement>
 				<RotateAnimationVertically>false</RotateAnimationVertically>
@@ -990,7 +990,7 @@ thread.start();
 							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
 							<DelimeterType>NO_DELIMETER</DelimeterType>
 						</ParameterEditor>
-					</Properties>                 
+					</Properties>
 				</Variable>
 			</Variables>
 			<AgentLinks>
@@ -1158,7 +1158,7 @@ thread.start();
 			</Shapes>
 
 		</ActiveObjectClass>
-	</ActiveObjectClasses>	
+	</ActiveObjectClasses>
 	<DifferentialEquationsMethod>EULER</DifferentialEquationsMethod>
 	<MixedEquationsMethod>RK45_NEWTON</MixedEquationsMethod>
 	<AlgebraicEquationsMethod>MODIFIED_NEWTON</AlgebraicEquationsMethod>
@@ -1174,8 +1174,8 @@ thread.start();
 		<ExportSettings>
 			<ExportExcelFilePath><![CDATA[]]></ExportExcelFilePath>
 		</ExportSettings>
-	</Database>	
-	<Experiments>	
+	</Database>
+	<Experiments>
 		<!--   =========   Simulation Experiment   ========  -->
 		<SimulationExperiment ActiveObjectClassId="1468521131733">
 			<Id>1468521131736</Id>
@@ -1228,7 +1228,7 @@ thread.start();
 			</Shapes>
 			<Controls>
 				<Control Type="Button">
-				 	<EmbeddedIcon>false</EmbeddedIcon>				
+				 	<EmbeddedIcon>false</EmbeddedIcon>
 					<Id>1468521131738</Id>
 					<Name><![CDATA[button]]></Name>
 					<X>40</X><Y>80</Y>
@@ -1236,9 +1236,9 @@ thread.start();
 					<PublicFlag>true</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>false</ShowLabel>
-					<BasicProperties Width="100" Height="30" 
+					<BasicProperties Width="100" Height="30"
 				AsObject="true">
-                        <EmbeddedIcon>false</EmbeddedIcon>				
+                        <EmbeddedIcon>false</EmbeddedIcon>
 						<FillColor/>
 						<TextColor/>
 						<Enabled>true</Enabled>
@@ -1256,18 +1256,18 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 				</Control>
 			</Controls>
 
-			<Parameters>			
-			</Parameters>			
-			<PresentationProperties 
-				EnableAdaptiveFrameManagement="true" 
+			<Parameters>
+			</Parameters>
+			<PresentationProperties
+				EnableAdaptiveFrameManagement="true"
 				EnableAntiAliasing="true"
 				EnableEnhancedModelElementsAnimation="true"
 				EnablePanning="true"
 				ToolbarCustomizableAtRuntime="true"
 				EnableZoom="true">
 				<ExecutionMode><![CDATA[realTimeScaled]]></ExecutionMode>
-				<CpuRatio><![CDATA[ratio_1_2]]></CpuRatio>	        
-				<Title><![CDATA[JavaTest : Simulation]]></Title>	
+				<CpuRatio><![CDATA[ratio_1_2]]></CpuRatio>
+				<Title><![CDATA[JavaTest : Simulation]]></Title>
 				<FramesPerSecond><![CDATA[20.0]]></FramesPerSecond>
 				<RealTimeScale>1.0</RealTimeScale>
 				<UIProperty Name="Experiment Progress" Value="false"/>
@@ -1289,12 +1289,12 @@ getPresentation().setPresentable( getEngine().getRoot() );]]></ActionCode>
 			</PresentationProperties>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Never]]></StopOption>
-				<InitialDate><![CDATA[1468454400000]]></InitialDate>	
-				<InitialTime><![CDATA[0.0]]></InitialTime>	
-				<FinalDate><![CDATA[1471132800000]]></FinalDate>	
-				<FinalTime><![CDATA[100.0]]></FinalTime>	
+				<InitialDate><![CDATA[1468454400000]]></InitialDate>
+				<InitialTime><![CDATA[0.0]]></InitialTime>
+				<FinalDate><![CDATA[1471132800000]]></FinalDate>
+				<FinalTime><![CDATA[100.0]]></FinalTime>
 			</ModelTimeProperties>
-		</SimulationExperiment>	
+		</SimulationExperiment>
 	</Experiments>
 	<JavaClasses>
 		<!--   =========   Java Class   ========  -->
@@ -1320,7 +1320,7 @@ public class FunctionContainer implements Serializable {
 		fc = this;
 		list = l;
     }
-    
+
 	private static final long serialVersionUID = 1L;
 
 	public void logThis(@FunctionParam(name = "to_log")String in) {
@@ -1331,14 +1331,14 @@ public class FunctionContainer implements Serializable {
 			System.out.println("FunctionContainer.logThis: " + e.getMessage() + " fc == null " + (fc==null) + " in == null " + (in==null));
 		}
 	}
-	
+
 	/*public void configThis(@FunctionParam(name = "to_config")QueueConf in) {
 		try {
 			System.out.println("Queue Name: " + in.name);
 			System.out.println("Queue capacity: " + in.capacity);
 			System.out.println("Queue preemption: " + in.preemption);
 			System.out.println("Queue timeout: " + in.timeout);
-				
+
 				for(int i =0; i< list.size();i++){
 					try{
 						Queue q = (Queue)list.get(i);
@@ -1351,7 +1351,7 @@ public class FunctionContainer implements Serializable {
 							}
 						//	q.set_enablePreemption(in.preemption);
 						//	q.set_enableTimeout(in.timeout);
-							
+
 							System.out.println("Nacher:\n"+q.toString());
 						}
 					}catch(ClassCastException e){
@@ -1371,7 +1371,7 @@ public class FunctionContainer implements Serializable {
 			<Name><![CDATA[QueueConf]]></Name>
 			<Text><![CDATA[/**
  * QueueConf
- */	
+ */
 public class QueueConf implements Serializable {
 
 	String 	name="noName";
@@ -1384,25 +1384,25 @@ public class QueueConf implements Serializable {
     public QueueConf() {
     	System.out.println("new QueueConf (Default)");
     }
-    
+
     public QueueConf(String name, int capacity, boolean timeout, boolean preemption) {
     	System.out.println("new QueueConf");
     	this.name = name;
     	this.capacity = capacity;
-    	this.timeout = timeout;   
+    	this.timeout = timeout;
     	this.preemption = preemption;
     	maximum = false;
     }
-    
+
     public QueueConf(String name, boolean maximum, boolean timeout, boolean preemption) {
     	System.out.println("new QueueConf2");
     	this.name = name;
     	this.maximum = maximum;
-    	this.timeout = timeout;   
+    	this.timeout = timeout;
     	this.preemption = preemption;
     }
- 
-    
+
+
 	@Override
 	public String toString() {
 		return super.toString();
@@ -1411,9 +1411,9 @@ public class QueueConf implements Serializable {
 	/**
 	 * This number is here for model snapshot storing purpose<br>
 	 * It needs to be changed when this class gets changed
-	 */ 
+	 */
 	private static final long serialVersionUID = 1L;
-	
+
 
 	public String getName(){
 		return name;
@@ -1430,7 +1430,7 @@ public class QueueConf implements Serializable {
 	public boolean getMaximum(){
 		return maximum;
 	}
-	
+
 	public void setMaximum(boolean maximum){
 		this.maximum=maximum;
 	}
@@ -1446,7 +1446,7 @@ public class QueueConf implements Serializable {
 	public void setPreemption(boolean preemption){
 		this.preemption=preemption;
 	}
-	
+
 }]]></Text>
 		</JavaClass>
 	</JavaClasses>
@@ -1458,7 +1458,7 @@ public class QueueConf implements Serializable {
 			<VersionMajor>1</VersionMajor>
 			<VersionMinor>0</VersionMinor>
 			<VersionBuild>0</VersionBuild>
-			<Provider><![CDATA[]]></Provider>    
+			<Provider><![CDATA[]]></Provider>
 		</Library>
 	</Libraries>
     <RequiredLibraryReference>

@@ -350,7 +350,7 @@ public:
       }
 
       std::cout << "i: " << i << " j: " << j << std::endl;
-      
+
       base::State * state_i = stateProperty[i];
       base::State * state_j = stateProperty[j];
       if (state_i && state_j) {
@@ -371,7 +371,7 @@ public:
         std::cout << state_i << " " << state_j << std::endl;
       }
     }
-    
+
 
     return boost::python::make_tuple(edges, duration_ms);
 

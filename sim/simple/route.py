@@ -10,6 +10,7 @@ from numpy import linalg
 
 class Route(object):
     """a route to be simulated"""
+
     lock = Lock()
 
     def __init__(self, start, goal, _id, s, idle_goal_stats=False):
@@ -23,11 +24,11 @@ class Route(object):
         else:
             self.state = RouteState.QUEUED
 
-            assert start.__class__ is np.tuple, 'Start needs to be a numpy.tuple'
-            assert len(start) == 2, 'Start should have 2 coords'
+            assert start.__class__ is np.tuple, "Start needs to be a numpy.tuple"
+            assert len(start) == 2, "Start should have 2 coords"
             self.start = start
-            assert goal.__class__ is np.tuple, 'Goal needs to be a numpy.tuple'
-            assert len(goal) == 2, 'Goal should have 2 coords'
+            assert goal.__class__ is np.tuple, "Goal needs to be a numpy.tuple"
+            assert len(goal) == 2, "Goal should have 2 coords"
             self.goal = goal
 
             self.vector = np.tuple(np.array(goal) - np.array(start))
@@ -52,8 +53,12 @@ class Route(object):
                 self.state = RouteState.TO_START
                 logging.debug(str(self))
             elif self.state == RouteState.TO_START:  # had another car already
-                assert self.car, "Should have had a car, had: " + \
-                    str(self.car) + ", should get: " + str(_car)
+                assert self.car, (
+                    "Should have had a car, had: "
+                    + str(self.car)
+                    + ", should get: "
+                    + str(_car)
+                )
                 self.car = _car
             elif self.is_idle_goal():  # is an idle goal
                 self.car = _car
@@ -86,15 +91,17 @@ class Route(object):
         i_next_round = min(i_next_round, len(self.car.paths) - 1)  # e.g. 3
         assert not self.is_finished(), "Should not be finished"
         while self.car is None:
-            time.sleep(.1)
+            time.sleep(0.1)
             logging.warning("Waiting for car to be assigned")
         for _i in range(i_prev_round, i_next_round + 1):  # e.g. [3]
-            if not self.is_idle_goal() and \
-                    ((self.car.paths[_i][0:2] == tuple(self.start)) or
-                     (tuple(self.car.pose) == tuple(self.start))):
+            if not self.is_idle_goal() and (
+                (self.car.paths[_i][0:2] == tuple(self.start))
+                or (tuple(self.car.pose) == tuple(self.start))
+            ):
                 self.at_start()
             elif (self.car.paths[_i][0:2] == tuple(self.goal)) and (
-                    self.is_on_route() or self.is_idle_goal()):  # @ goal
+                self.is_on_route() or self.is_idle_goal()
+            ):  # @ goal
                 self.at_goal()
                 break
             # somewhere else
@@ -123,9 +130,11 @@ class Route(object):
         logging.info(str(self) + " reached Start")
 
     def is_running(self):
-        return (self.state == RouteState.TO_START or
-                self.state == RouteState.ON_ROUTE or
-                self.state == RouteState.IDLE_GOAL_RUNNING)
+        return (
+            self.state == RouteState.TO_START
+            or self.state == RouteState.ON_ROUTE
+            or self.state == RouteState.IDLE_GOAL_RUNNING
+        )
 
     def is_on_route(self):
         return self.state == RouteState.ON_ROUTE
@@ -134,28 +143,43 @@ class Route(object):
         return self.state == RouteState.FINISHED
 
     def is_idle_goal(self):
-        return self.state == RouteState.IDLE_GOAL_RUNNING or self.state == RouteState.IDLE_GOAL_QUEUED
+        return (
+            self.state == RouteState.IDLE_GOAL_RUNNING
+            or self.state == RouteState.IDLE_GOAL_QUEUED
+        )
 
     def is_re_assignable(self):
         return self.state == RouteState.TO_START or self.is_idle_goal()
 
     def to_tuple(self):
         if self.is_idle_goal():
-            return tuple([(self.goal[0], self.goal[1]),
-                          self.idle_goal_stats])
+            return tuple([(self.goal[0], self.goal[1]), self.idle_goal_stats])
 
         else:
-            return tuple([(self.start[0], self.start[1]),
-                          (self.goal[0], self.goal[1]),
-                          (datetime.datetime.now() - self.creation_time).total_seconds()])
+            return tuple(
+                [
+                    (self.start[0], self.start[1]),
+                    (self.goal[0], self.goal[1]),
+                    (datetime.datetime.now() - self.creation_time).total_seconds(),
+                ]
+            )
 
     def __str__(self):
         if self.is_idle_goal():
             return "R%d: %s (%s) = %s" % (
-                self.id, str(self.goal), str(self.state).split('.')[1], str(self.car))
+                self.id,
+                str(self.goal),
+                str(self.state).split(".")[1],
+                str(self.car),
+            )
         else:
             return "R%d: %s -> %s (%s) = %s" % (
-                self.id, str(self.start), str(self.goal), str(self.state).split('.')[1], str(self.car))
+                self.id,
+                str(self.start),
+                str(self.goal),
+                str(self.state).split(".")[1],
+                str(self.car),
+            )
 
     def __hash__(self):
         return hash(self.id * 1000)
@@ -193,8 +217,7 @@ class Car(object):
 
     def to_tuple(self):
         assert len(self.pose) == 2, "A cars pose must have 2 coordinates"
-        return (int(self.pose[0]),
-                int(self.pose[1]))
+        return (int(self.pose[0]), int(self.pose[1]))
 
     def get_route(self):
         """On which route is this car (if any)"""
@@ -208,17 +231,20 @@ class Car(object):
         return "C%d: [%.2f %.2f]" % (self.id, self.pose[0], self.pose[1])
 
     def __hash__(self):
-        return hash(100*self.id)
+        return hash(100 * self.id)
 
 
 def free_car(_car: Car):
     if _car.get_route():
-        assert _car.get_route().is_re_assignable(
+        assert (
+            _car.get_route().is_re_assignable()
         ), "This can only have been on the way or on a idle goal"
         if _car.get_route().is_idle_goal():
             _car.get_route().state = RouteState.IDLE_GOAL_QUEUED  # back to queue
         else:  # normal route
-            _car.get_route().state = RouteState.QUEUED  # Other route is now queued again
+            _car.get_route().state = (
+                RouteState.QUEUED
+            )  # Other route is now queued again
 
         if _car.get_route().car:  # also routes loose their car
             _car.get_route().car = None

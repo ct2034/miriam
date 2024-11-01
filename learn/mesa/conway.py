@@ -32,34 +32,33 @@ class ConveyModel(Model):
             # Add the agent to a random grid cell
             x = random.randrange(self.grid.width)
             y = random.randrange(self.grid.height)
-            while(len(self.grid.get_cell_list_contents((x, y)))):
+            while len(self.grid.get_cell_list_contents((x, y))):
                 x = random.randrange(self.grid.width)
                 y = random.randrange(self.grid.height)
             self.grid.place_agent(a, (x, y))
             self.schedule.add(a)
         self.i = i
 
-        self.datacollector = DataCollector(
-            agent_reporters={"State": lambda a: a.die})
+        self.datacollector = DataCollector(agent_reporters={"State": lambda a: a.die})
 
     def step(self):
         self.datacollector.collect(self)
         new_agents = []
-        for (x, y) in product(range(self.grid.width), range(self.grid.height)):
+        for x, y in product(range(self.grid.width), range(self.grid.height)):
             ns = self.grid.iter_neighbors((x, y), True)
             neighbors = 0
             for n in ns:
-                if(n):
+                if n:
                     neighbors += 1
-            if(self.grid[x][y]):  # live cell
-                if(neighbors < 2):  # underpopulation
+            if self.grid[x][y]:  # live cell
+                if neighbors < 2:  # underpopulation
                     list(self.grid[x][y])[0].die = 1
-                elif(neighbors > 3):  # overpopulation
+                elif neighbors > 3:  # overpopulation
                     list(self.grid[x][y])[0].die = 1
             else:  # dead cell
-                if(neighbors == 3):
+                if neighbors == 3:
                     new_agents.append((x, y))
-        for (x, y) in product(range(self.grid.width), range(self.grid.height)):
+        for x, y in product(range(self.grid.width), range(self.grid.height)):
             if self.grid[x][y]:
                 a = list(self.grid[x][y])[0]
                 if a.die:
@@ -73,19 +72,20 @@ class ConveyModel(Model):
 
 
 def agent_portrayal(agent):
-    portrayal = {"Shape": "circle",
-                 "Filled": "true",
-                 "Layer": 0,
-                 "Color": "red",
-                 "r": 0.5}
+    portrayal = {
+        "Shape": "circle",
+        "Filled": "true",
+        "Layer": 0,
+        "Color": "red",
+        "r": 0.5,
+    }
     return portrayal
 
 
 grid = CanvasGrid(agent_portrayal, 100, 100, 500, 500)
-server = ModularServer(ConveyModel,
-                       [grid],
-                       "Convey Model",
-                       {"N": 2000, "width": 100, "height": 100})
+server = ModularServer(
+    ConveyModel, [grid], "Convey Model", {"N": 2000, "width": 100, "height": 100}
+)
 
 server.port = 8521  # The default
 server.launch()

@@ -28,7 +28,11 @@ class Random(Module):
         pass
 
     def plan(self, car, route):
-        return (astar_grid4con((car.pose[0], car.pose[1], 0),
-                               tuple(route.start), self.grid),
-                astar_grid4con((route.start[0], route.start[1], 0),
-                               tuple(route.goal), self.grid))
+        return (
+            astar_grid4con(
+                (car.pose[0], car.pose[1], 0), tuple(route.start), self.grid
+            ),
+            astar_grid4con(
+                (route.start[0], route.start[1], 0), tuple(route.goal), self.grid
+            ),
+        )

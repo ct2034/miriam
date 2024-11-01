@@ -4,41 +4,42 @@ from random import Random
 import numpy as np
 import torch
 
-from roadmaps.var_odrm_torch.var_odrm_torch import (get_path_len,
-                                                    get_paths_len,
-                                                    make_graph_and_flann,
-                                                    make_paths, sample_points)
+from roadmaps.var_odrm_torch.var_odrm_torch import (
+    get_path_len,
+    get_paths_len,
+    make_graph_and_flann,
+    make_paths,
+    sample_points,
+)
 
 
 class TestVarOdrmTorch(unittest.TestCase):
     def __init__(self, methodName: str) -> None:
         super().__init__(methodName=methodName)
         self.rng = Random(0)
-        self.pos = torch.tensor([
-            [.2, .2],
-            [.2, .8],
-            [.8, .8],
-            [.7, .3],
-        ])
-        self.path_nodes = (
-            tuple(self.pos[1]),
-            tuple(self.pos[0]),
-            [1, 0]
+        self.pos = torch.tensor(
+            [
+                [0.2, 0.2],
+                [0.2, 0.8],
+                [0.8, 0.8],
+                [0.7, 0.3],
+            ]
         )
+        self.path_nodes = (tuple(self.pos[1]), tuple(self.pos[0]), [1, 0])
         self.path_nodes_plus_one_start = (
             (self.pos[1][0], self.pos[1][1] + 1),
             tuple(self.pos[0]),
-            [1, 0]
+            [1, 0],
         )
         self.path_nodes_plus_one_goal = (
             tuple(self.pos[0]),
             (self.pos[1][0], self.pos[1][1] + 1),
-            [0, 1]
+            [0, 1],
         )
         self.path_nodes_plus_one_start_goal = (
             (self.pos[1][0], self.pos[1][1] + 1),
             (self.pos[2][0], self.pos[2][1] - 1),
-            [1, 2]
+            [1, 2],
         )
         map_img_np = np.full((10, 10), 255)
         self.map_img = tuple(map(tuple, map_img_np))
@@ -81,55 +82,58 @@ class TestVarOdrmTorch(unittest.TestCase):
 
     def test_get_path_len_training(self):
         self.assertAlmostEqual(
-            .6,
-            float(get_path_len(self.pos, self.path_nodes, True)))
+            0.6, float(get_path_len(self.pos, self.path_nodes, True))
+        )
         self.assertAlmostEqual(
             6.6,
-            float(get_path_len(self.pos,
-                               self.path_nodes_plus_one_start, True)),
-            places=5)
+            float(get_path_len(self.pos, self.path_nodes_plus_one_start, True)),
+            places=5,
+        )
         self.assertAlmostEqual(
             6.6,
             float(get_path_len(self.pos, self.path_nodes_plus_one_goal, True)),
-            places=5)
+            places=5,
+        )
         self.assertAlmostEqual(
             12.6,
-            float(get_path_len(self.pos,
-                               self.path_nodes_plus_one_start_goal, True)),
-            places=5)
+            float(get_path_len(self.pos, self.path_nodes_plus_one_start_goal, True)),
+            places=5,
+        )
 
     def test_get_path_len_testing(self):
         self.assertAlmostEqual(
-            .6,
-            float(get_path_len(self.pos, self.path_nodes, False)))
+            0.6, float(get_path_len(self.pos, self.path_nodes, False))
+        )
         self.assertAlmostEqual(
             1.6,
-            float(get_path_len(self.pos,
-                               self.path_nodes_plus_one_start, False)),
-            places=5)
+            float(get_path_len(self.pos, self.path_nodes_plus_one_start, False)),
+            places=5,
+        )
         self.assertAlmostEqual(
             1.6,
-            float(get_path_len(self.pos,
-                               self.path_nodes_plus_one_goal, False)),
-            places=5)
+            float(get_path_len(self.pos, self.path_nodes_plus_one_goal, False)),
+            places=5,
+        )
         self.assertAlmostEqual(
             2.6,
-            float(get_path_len(self.pos,
-                               self.path_nodes_plus_one_start_goal, False)),
-            places=5)
+            float(get_path_len(self.pos, self.path_nodes_plus_one_start_goal, False)),
+            places=5,
+        )
 
     def test_get_paths_len(self):
         paths = [
             self.path_nodes,
             self.path_nodes_plus_one_start,
             self.path_nodes_plus_one_goal,
-            self.path_nodes_plus_one_start_goal
+            self.path_nodes_plus_one_start_goal,
         ]
         self.assertAlmostEqual(
-            .6 + 6.6 + 6.6 + 12.6,
+            0.6 + 6.6 + 6.6 + 12.6,
             float(get_paths_len(self.pos, paths, True)),
-            places=5)
+            places=5,
+        )
         self.assertAlmostEqual(
-            .6 + 1.6 + 1.6 + 2.6,
+            0.6 + 1.6 + 1.6 + 2.6,
             float(get_paths_len(self.pos, paths, False)),
-            places=5)
+            places=5,
+        )

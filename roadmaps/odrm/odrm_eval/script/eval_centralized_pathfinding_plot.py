@@ -7,8 +7,7 @@ from itertools import product
 from matplotlib import pyplot as plt
 import numpy as np
 import pickle
-from odrm_eval.filename_verification import (
-    is_eval_cen_file)
+from odrm_eval.filename_verification import is_eval_cen_file
 
 
 @unique
@@ -67,13 +66,12 @@ def how_may_datas(eval_results):
     return lengths
 
 
-
 if __name__ == "__main__":
-    plt.style.use('bmh')
+    plt.style.use("bmh")
     plt.rcParams["savefig.dpi"] = 500
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-    markers = ['s', 'X', 'o']
-    linestyles = ['solid', 'dashed', 'dotted']
+    colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+    markers = ["s", "X", "o"]
+    linestyles = ["solid", "dashed", "dotted"]
 
     folder = sys.argv[1]  # type: str
     assert folder.endswith("/"), "Please call with folder"
@@ -95,20 +93,41 @@ if __name__ == "__main__":
                         else:
                             for combination in additional_results[type].keys():
                                 if combination not in eval_results[type].keys():
-                                    eval_results[type][combination] = additional_results[type][combination]
+                                    eval_results[type][combination] = (
+                                        additional_results[type][combination]
+                                    )
                                 else:
-                                    for agents_n in additional_results[type][combination].keys():
-                                        if agents_n not in eval_results[type][combination].keys():
-                                            eval_results[type][combination][agents_n] = additional_results[type][combination][agents_n]
+                                    for agents_n in additional_results[type][
+                                        combination
+                                    ].keys():
+                                        if (
+                                            agents_n
+                                            not in eval_results[type][
+                                                combination
+                                            ].keys()
+                                        ):
+                                            eval_results[type][combination][
+                                                agents_n
+                                            ] = additional_results[type][combination][
+                                                agents_n
+                                            ]
                                         else:
-                                            eval_results[type][combination][agents_n] += additional_results[type][combination][agents_n]
+                                            eval_results[type][combination][
+                                                agents_n
+                                            ] += additional_results[type][combination][
+                                                agents_n
+                                            ]
             print("read ... {}".format(fname))
             lengths = how_may_datas(eval_results)
-            print("sum: {}, min_len: {}, max_len: {}".format(lengths.sum(), lengths.min(), lengths.max()))
+            print(
+                "sum: {}, min_len: {}, max_len: {}".format(
+                    lengths.sum(), lengths.min(), lengths.max()
+                )
+            )
 
     assert eval_results is not None
 
-    successful_fig_data = eval_results['successful']
+    successful_fig_data = eval_results["successful"]
     for fig_title in eval_results.keys():
         fig, ax = plt.subplots()
         fig_data = eval_results[fig_title]
@@ -121,11 +140,12 @@ if __name__ == "__main__":
             agents_ns_strs = combination_data.keys()
             agents_ns_strs = sorted(agents_ns_strs, key=int)[:-1]
             x = []
-            if fig_title == 'successful':
+            if fig_title == "successful":
                 to_plot = map(
-                    lambda k: 100. * np.count_nonzero(np.array(combination_data[k]))
-                              / len(combination_data[k]),
-                    agents_ns_strs
+                    lambda k: 100.0
+                    * np.count_nonzero(np.array(combination_data[k]))
+                    / len(combination_data[k]),
+                    agents_ns_strs,
                 )
                 x = np.arange(len(agents_ns_strs))
             else:
@@ -133,19 +153,22 @@ if __name__ == "__main__":
                 for i_a, agents_ns_str in enumerate(agents_ns_strs):
                     tmp_plot = []
                     for i_trial, dat_p in enumerate(combination_data[agents_ns_str]):
-                        if successful_fig_data[combination_name][agents_ns_str][i_trial]:
+                        if successful_fig_data[combination_name][agents_ns_str][
+                            i_trial
+                        ]:
                             tmp_plot.append(combination_data[agents_ns_str][i_trial])
                     if len(tmp_plot):
                         to_plot.append(np.mean(np.array(tmp_plot)))
                         x.append(i_a)
-            line, = plt.plot(
+            (line,) = plt.plot(
                 x,
                 to_plot,
                 label=combination_name,
                 color=colors[i_p],
                 marker=markers[i_g],
                 linestyle=linestyles[i_g],
-                linewidth=1)
+                linewidth=1,
+            )
             lines.append(line)
 
         # the text around the fig ...
@@ -155,7 +178,7 @@ if __name__ == "__main__":
         #
         # # Put a legend to the right of the current axis
         # # ax.legend()
-        fig.legend(handles=lines, loc='center right')
+        fig.legend(handles=lines, loc="center right")
         ax.set_title(make_nice_title(fig_title))
         x = np.arange(len(agents_ns_strs))  # the label locations
         ax.set_xlabel("Number of Agents")
@@ -165,10 +188,10 @@ if __name__ == "__main__":
             ax.set_ylabel("Planning Success Rate within Time Limit [%]")
         elif fig_title == "computation_time":
             ax.set_ylabel("Computation Time [s]")
-            ax.set_yscale('log')
+            ax.set_yscale("log")
         elif fig_title == "cost":
             ax.set_ylabel("Average Agent Path Duration [steps]")
-            ax.set_yscale('log')
+            ax.set_yscale("log")
         plt.tight_layout()
         fig.savefig(fname=folder + fname_base + "." + fig_title + ".png")
 

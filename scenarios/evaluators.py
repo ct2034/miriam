@@ -5,23 +5,29 @@ import networkx as nx
 import numpy as np
 from definitions import DEFAULT_TIMEOUT_S, FREE, INVALID
 from networkx.algorithms import approximation
-from planner.matteoantoniazzi_mapf.plan import (expanded_nodes_from_info,
-                                                is_info_valid,
-                                                sum_of_costs_from_info)
+from planner.matteoantoniazzi_mapf.plan import (
+    expanded_nodes_from_info,
+    is_info_valid,
+    sum_of_costs_from_info,
+)
 from sim.decentralized.runner import to_agent_objects
 from sim.decentralized.agent import gridmap_to_graph
 
-from scenarios.solvers import (SCHEDULE, cached_decentralized, cached_ecbs,
-                               cached_icts, indep)
+from scenarios.solvers import (
+    SCHEDULE,
+    cached_decentralized,
+    cached_ecbs,
+    cached_icts,
+    indep,
+)
 
-logging.getLogger('sim.decentralized.agent').setLevel(logging.ERROR)
-logging.getLogger('sim.decentralized.runner').setLevel(logging.ERROR)
-logging.getLogger(
-    'planner.mapf_implementations').setLevel(logging.ERROR)
+logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)
+logging.getLogger("sim.decentralized.runner").setLevel(logging.ERROR)
+logging.getLogger("planner.mapf_implementations").setLevel(logging.ERROR)
 
-HIGHLEVELEXPANDED = 'highLevelExpanded'
-LOWLEVELEXPANDED = 'lowLevelExpanded'
-STATISTICS = 'statistics'
+HIGHLEVELEXPANDED = "highLevelExpanded"
+LOWLEVELEXPANDED = "lowLevelExpanded"
+STATISTICS = "statistics"
 
 
 # static problem analysis ####################################################
@@ -34,7 +40,7 @@ def cost_independent(env, starts, goals):
     paths = indep(env, starts, goals)
     if paths is INVALID:
         return INVALID
-    return float(sum(map(lambda p: len(p)-1, paths))) / n_agents
+    return float(sum(map(lambda p: len(p) - 1, paths))) / n_agents
 
 
 def connectivity(env, starts, goals) -> float:
@@ -48,7 +54,8 @@ def connectivity(env, starts, goals) -> float:
             cons.append(0)
         else:
             con = approximation.node_connectivity(
-                g, tuple(starts[i_a]), tuple(goals[i_a]))
+                g, tuple(starts[i_a]), tuple(goals[i_a])
+            )
             cons.append(1 / con)
     return sum(cons)
 
@@ -63,7 +70,7 @@ def uncentrality(env, starts, goals) -> float:
     """Hand crafted score that sums up eigenvector uncentralities for start and
     goal positions. Uncentrality is `1-centrality`"""
     # how much more to value uncentrality over number of agents
-    SCALE_UNCENTRALITY: float = 3.
+    SCALE_UNCENTRALITY: float = 3.0
     ec = _eigenvector_centrality_dict(env)
     score = 0
     for i_a in range(len(starts)):
@@ -76,8 +83,7 @@ def uncentrality(env, starts, goals) -> float:
 def cost_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
     """get the average agent cost of this from ecbs
     returns: `float` and `-1` if planning was unsuccessful."""
-    data = cached_ecbs(env, starts, goals, timeout=timeout,
-                       skip_cache=skip_cache)
+    data = cached_ecbs(env, starts, goals, timeout=timeout, skip_cache=skip_cache)
     if data == INVALID:
         return data
     try:
@@ -85,10 +91,10 @@ def cost_ecbs(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
         schedule = data[SCHEDULE]
         cost_per_agent = []
         for i_a in range(n_agents):
-            agent_key = 'agent'+str(i_a)
+            agent_key = "agent" + str(i_a)
             assert agent_key in schedule.keys(), "Path for this agent"
             path = schedule[agent_key]
-            cost_per_agent.append(path[-1]['t'])
+            cost_per_agent.append(path[-1]["t"])
         return float(sum(cost_per_agent)) / n_agents
     except Exception as e:
         return INVALID
@@ -107,18 +113,18 @@ def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
     data = cached_ecbs(env, starts, goals)
     if data == INVALID:
         return data
-    blocks = data['blocks']
+    blocks = data["blocks"]
     n_agents = starts.shape[0]
     (n_vertex_blocks, n_edge_blocks) = (0, 0)
     for i_a in range(n_agents):
-        agent_key = 'agent'+str(i_a)
+        agent_key = "agent" + str(i_a)
         assert agent_key in blocks.keys(), "Blocks for this agent"
         blocks_pa = blocks[agent_key]
         if blocks_pa != 0:
             for contraint_type in blocks_pa.keys():
-                if contraint_type == 'vertexConstraints':
+                if contraint_type == "vertexConstraints":
                     n_vertex_blocks += len(blocks_pa[contraint_type])
-                elif contraint_type == 'edgeConstraints':
+                elif contraint_type == "edgeConstraints":
                     n_edge_blocks += len(blocks_pa[contraint_type])
     return (n_vertex_blocks, n_edge_blocks)
 
@@ -126,12 +132,11 @@ def blocks_ecbs(env, starts, goals) -> Tuple[int, int]:
 # decen #######################################################################
 def cost_sim_decentralized_random(env, starts, goals, skip_cache=False):
     metrics = cached_decentralized(
-        env, starts, goals,
-        sim.decentralized.policy.PolicyType.RANDOM, skip_cache)
+        env, starts, goals, sim.decentralized.policy.PolicyType.RANDOM, skip_cache
+    )
     if metrics is INVALID:
         return INVALID
-    (average_time, _, _, _, successful
-     ) = metrics
+    (average_time, _, _, _, successful) = metrics
     if successful:
         return average_time
     else:
@@ -140,12 +145,11 @@ def cost_sim_decentralized_random(env, starts, goals, skip_cache=False):
 
 def cost_sim_decentralized_learned(env, starts, goals, skip_cache=False):
     metrics = cached_decentralized(
-        env, starts, goals,
-        sim.decentralized.policy.PolicyType.LEARNED, skip_cache)
+        env, starts, goals, sim.decentralized.policy.PolicyType.LEARNED, skip_cache
+    )
     if metrics is INVALID:
         return INVALID
-    (average_time, _, _, _, successful
-     ) = metrics
+    (average_time, _, _, _, successful) = metrics
     if successful:
         return average_time
     else:
@@ -163,8 +167,7 @@ def expanded_nodes_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S):
 
 def cost_icts(env, starts, goals, timeout=DEFAULT_TIMEOUT_S, skip_cache=False):
     n_agents = starts.shape[0]
-    info = cached_icts(env, starts, goals, timeout=timeout,
-                       skip_cache=skip_cache)
+    info = cached_icts(env, starts, goals, timeout=timeout, skip_cache=skip_cache)
     if is_info_valid(info):
         return float(sum_of_costs_from_info(info)) / n_agents
     else:

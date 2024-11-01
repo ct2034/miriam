@@ -6,13 +6,13 @@ bibtex:
 
 ```bibtex
 @misc{henkel2024gsrmbuildingroadmapsqueryefficient,
-      title={GSRM: Building Roadmaps for Query-Efficient and Near-Optimal Path Planning Using a Reaction Diffusion System}, 
+      title={GSRM: Building Roadmaps for Query-Efficient and Near-Optimal Path Planning Using a Reaction Diffusion System},
       author={Christian Henkel and Marc Toussaint and Wolfgang Hönig},
       year={2024},
       eprint={2410.11024},
       archivePrefix={arXiv},
       primaryClass={cs.RO},
-      url={https://arxiv.org/abs/2410.11024}, 
+      url={https://arxiv.org/abs/2410.11024},
 }
 ```
 

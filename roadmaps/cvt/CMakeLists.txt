@@ -12,8 +12,8 @@ set(PYTHON_DOT_VERSION 3.10)
 set(PYTHON_INCLUDE /usr/include/python${PYTHON_DOT_VERSION})
 set(PYTHON_LIBRARY /usr/lib/python${PYTHON_DOT_VERSION}/config-${PYTHON_DOT_VERSION}-x86_64-linux-gnu/libpython${PYTHON_DOT_VERSION}.so)
 
-find_package(Boost 1.74.0 REQUIRED COMPONENTS 
-    program_options 
+find_package(Boost 1.74.0 REQUIRED COMPONENTS
+    program_options
     python${PYTHON_VERSION}
 )
 
@@ -43,13 +43,13 @@ include_directories(
 # the python module
 SET(cvt cvt)
 
-add_library(${cvt} SHARED 
+add_library(${cvt} SHARED
   src/${cvt}.cpp
   lodepng/lodepng.cpp
 )
 
 TARGET_LINK_LIBRARIES(
-  ${cvt} 
+  ${cvt}
   Boost::program_options
   Boost::python${PYTHON_VERSION}
   ${OpenCV_LIBS}

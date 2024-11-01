@@ -13,14 +13,13 @@ t = torch.linspace(-math.pi, math.pi, 2000, device=device, dtype=dtype)
 y = torch.sin(t)
 
 # Randomly initialize weights
-x = torch.tensor([0, -.3, 0, 0, 0], device=device,
-                 dtype=dtype, requires_grad=True)
+x = torch.tensor([0, -0.3, 0, 0, 0], device=device, dtype=dtype, requires_grad=True)
 
 learning_rate = 1e-7
 y_preds = []
 for i in range(int(1e4)):
     # Forward pass: compute predicted y
-    y_pred = x[0] + x[1] * t + x[2] * t ** 2 + x[3] * t ** 3 + x[4] * t ** 4
+    y_pred = x[0] + x[1] * t + x[2] * t**2 + x[3] * t**3 + x[4] * t**4
 
     # Compute and print loss
     loss = (y_pred - y).pow(2).sum()
@@ -39,14 +38,15 @@ for i in range(int(1e4)):
 
 
 print(
-    f'Result: y={x[0].item()} + {x[1].item()} x +' +
-    f'{x[2].item()} x ^ 2 + {x[3].item()} x ^ 3 + {x[4].item()} x ^ 4')
+    f"Result: y={x[0].item()} + {x[1].item()} x +"
+    + f"{x[2].item()} x ^ 2 + {x[3].item()} x ^ 3 + {x[4].item()} x ^ 4"
+)
 
-plt.plot(t, y, 'r', linewidth=1)
+plt.plot(t, y, "r", linewidth=1)
 n = len(y_preds)
-d_col = .4
-col = .4
+d_col = 0.4
+col = 0.4
 for y_pred in y_preds:
     col += d_col / n
-    plt.plot(t, y_pred.detach().numpy(), color=(0, col, .4), linewidth=.5)
+    plt.plot(t, y_pred.detach().numpy(), color=(0, col, 0.4), linewidth=0.5)
 plt.show()

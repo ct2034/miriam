@@ -11,7 +11,7 @@ from tools import hasher
 This can store and recall saved scenario solutions for different planners.
 Basic requirement is the SCENARIO_STORAGE_PATH environment variable to be set.
 """
-SCENARIO_STORAGE_PATH_ENVVAR_STR = 'SCENARIO_STORAGE_PATH'
+SCENARIO_STORAGE_PATH_ENVVAR_STR = "SCENARIO_STORAGE_PATH"
 
 
 class ResultType(Enum):
@@ -40,8 +40,7 @@ def has_file(scenario: SCENARIO_TYPE) -> bool:
     return os.path.isfile(get_filepath(scenario))
 
 
-def to_key_string(
-        result_type: ResultType, solver_params: Dict[str, Any]) -> str:
+def to_key_string(result_type: ResultType, solver_params: Dict[str, Any]) -> str:
     key_str: str = str(result_type.name).upper()
     solver_param_keys = sorted(solver_params.keys())
     for k in solver_param_keys:
@@ -52,12 +51,13 @@ def to_key_string(
     return key_str
 
 
-def has_result(scenario: SCENARIO_TYPE, result_type: ResultType,
-               solver_params: Dict[str, Any]) -> bool:
+def has_result(
+    scenario: SCENARIO_TYPE, result_type: ResultType, solver_params: Dict[str, Any]
+) -> bool:
     # For this `scenario` is there a `result` in storage?
     key_str = to_key_string(result_type, solver_params)
     if has_file(scenario):
-        with open(get_filepath(scenario), 'rb') as f:
+        with open(get_filepath(scenario), "rb") as f:
             try:
                 data = pkl.load(f)
             except EOFError:
@@ -68,31 +68,36 @@ def has_result(scenario: SCENARIO_TYPE, result_type: ResultType,
         return False
 
 
-def get_result(scenario: SCENARIO_TYPE, result_type: ResultType,
-               solver_params: Dict[str, Any]) -> Any:
+def get_result(
+    scenario: SCENARIO_TYPE, result_type: ResultType, solver_params: Dict[str, Any]
+) -> Any:
     # Retrieve `result` for `scenario`.
     key_str = to_key_string(result_type, solver_params)
     assert has_result(scenario, result_type, solver_params)
-    with open(get_filepath(scenario), 'rb') as f:
+    with open(get_filepath(scenario), "rb") as f:
         data = pkl.load(f)
         return data[key_str]
 
 
-def save_result(scenario: SCENARIO_TYPE, result_type: ResultType,
-                solver_params: Dict[str, Any], result: Any):
+def save_result(
+    scenario: SCENARIO_TYPE,
+    result_type: ResultType,
+    solver_params: Dict[str, Any],
+    result: Any,
+):
     # Save a `result` for `scenario`.
     key_str = to_key_string(result_type, solver_params)
     if has_file(scenario):
-        with open(get_filepath(scenario), 'rb') as f:
+        with open(get_filepath(scenario), "rb") as f:
             try:
                 data: dict = pkl.load(f)
             except EOFError:
                 # new file
                 data = {}
         data[key_str] = result
-        with open(get_filepath(scenario), 'wb') as f:
+        with open(get_filepath(scenario), "wb") as f:
             pkl.dump(data, f)
     else:
-        with open(get_filepath(scenario), 'wb') as f:
+        with open(get_filepath(scenario), "wb") as f:
             data = {key_str: result}
             pkl.dump(data, f)

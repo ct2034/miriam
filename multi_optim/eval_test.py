@@ -24,11 +24,11 @@ class EvalTest(unittest.TestCase):
         res = 5
 
         for x, y in product(range(res), range(res)):
-            self.sq_graph.add_node(x + res*y, pos=(float(x)/res, float(y)/res))
+            self.sq_graph.add_node(x + res * y, pos=(float(x) / res, float(y) / res))
             if x > 0:
-                self.sq_graph.add_edge(x + res*y, x - 1 + res*y)
+                self.sq_graph.add_edge(x + res * y, x - 1 + res * y)
             if y > 0:
-                self.sq_graph.add_edge(x + res*y, x + res*(y - 1))
+                self.sq_graph.add_edge(x + res * y, x + res * (y - 1))
         self.radius = 0.08
 
     @pytest.mark.skip(reason="hard to make deterministic")
@@ -41,7 +41,8 @@ class EvalTest(unittest.TestCase):
             n_eval=10,
             iterator_type=IteratorType.LOOKAHEAD2,
             radius=self.radius,
-            rng=self.rng)
+            rng=self.rng,
+        )
 
         model_a = EdgePolicyModel(gpu=torch.device("cpu"))
         model_b = EdgePolicyModel(gpu=torch.device("cpu"))

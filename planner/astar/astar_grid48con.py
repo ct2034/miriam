@@ -20,7 +20,13 @@ def get_children(current, grid):
         ds = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
         raise NotImplementedError("8-connected not in spacetime")
     else:
-        ds = [(-1, 0, 1), (0, -1, 1), (0, 1, 1), (1, 0, 1), (0, 0, 1)]  # ugly but faster
+        ds = [
+            (-1, 0, 1),
+            (0, -1, 1),
+            (0, 1, 1),
+            (1, 0, 1),
+            (0, 0, 1),
+        ]  # ugly but faster
 
     _children = []
     for d in ds:
@@ -77,29 +83,25 @@ def path_length(path: list) -> int:
 
 
 def astar_grid4con(start, goal, map):
-    return base.astar_base(start, goal, map, heuristic, reconstruct_path, get_children, cost)
+    return base.astar_base(
+        start, goal, map, heuristic, reconstruct_path, get_children, cost
+    )
 
 
 def plot(path, map):
     import matplotlib.pyplot as plt
 
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
 
     zz = map[:, :, 0].T
-    xx, yy = np.meshgrid(np.arange(len(zz)),
-                         np.arange(len(zz)))
-    ax.contourf(xx, yy, zz, cmap='Greys', zdir='z', alpha=.2)
+    xx, yy = np.meshgrid(np.arange(len(zz)), np.arange(len(zz)))
+    ax.contourf(xx, yy, zz, cmap="Greys", zdir="z", alpha=0.2)
 
     patharray = np.array(path)
-    ax.plot(
-        xs=patharray[:, 0],
-        ys=patharray[:, 1],
-        zs=patharray[:, 2],
-        c='b'
-    )
+    ax.plot(xs=patharray[:, 0], ys=patharray[:, 1], zs=patharray[:, 2], c="b")
 
-    plt.title('Astar path')
+    plt.title("Astar path")
     ax.axis([0, map.shape[0], 0, map.shape[1]])
 
     plt.show()

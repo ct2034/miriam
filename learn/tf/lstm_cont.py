@@ -22,16 +22,16 @@ from tensorflow.contrib import rnn
 from tensorflow.examples.tutorials.mnist import input_data
 
 # Logging
-logdir = "learn/tf/logs/"+datetime.now().strftime("%Y%m%d-%H%M%S")
+logdir = "learn/tf/logs/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 
 # Import MNIST data
 mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
 
-'''
+"""
 To classify images using a recurrent neural network, we consider every image
 row as a sequence of pixels. Because MNIST image shape is 28*28px, we will then
 handle 28 sequences of 28 steps for every sample.
-'''
+"""
 
 # Training Parameters
 learning_rate = 0.01
@@ -51,12 +51,9 @@ Y = tf.placeholder("float", [None, num_classes], name="Y")
 
 # Define weights
 weights = {
-    'out': tf.Variable(tf.random_normal([num_hidden, num_classes]),
-                       name="weights")
+    "out": tf.Variable(tf.random_normal([num_hidden, num_classes]), name="weights")
 }
-biases = {
-    'out': tf.Variable(tf.random_normal([num_classes]), name="biases")
-}
+biases = {"out": tf.Variable(tf.random_normal([num_classes]), name="biases")}
 
 
 def LSTM(x, weights, biases):
@@ -78,7 +75,7 @@ def LSTM(x, weights, biases):
     outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
 
     # Linear activation, using rnn inner loop last output
-    return tf.matmul(outputs[-1], weights['out']) + biases['out']
+    return tf.matmul(outputs[-1], weights["out"]) + biases["out"]
 
 
 pred_cont = LSTM(X, weights, biases)
@@ -109,7 +106,7 @@ with tf.Session() as sess:
     # defining "at runtime"
     timesteps = 28
 
-    for step in range(1, training_steps+1):
+    for step in range(1, training_steps + 1):
         batch_x, batch_y = mnist.train.next_batch(batch_size)
         batch_y = argmax_label(batch_y)
         # Reshape data to get 28 seq of 28 elements
@@ -118,28 +115,35 @@ with tf.Session() as sess:
         sess.run(train_op, feed_dict={X: batch_x, Y: batch_y})
         if step % display_step == 0 or step == 1:
             # Calculate batch loss and accuracy
-            loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
-                                                                 Y: batch_y})
-            print("Step " + str(step) + ", Minibatch Loss= " +
-                  "{:.4f}".format(loss) + ", Training Accuracy= " +
-                  "{:.3f}".format(acc))
+            loss, acc = sess.run(
+                [loss_op, accuracy], feed_dict={X: batch_x, Y: batch_y}
+            )
+            print(
+                "Step "
+                + str(step)
+                + ", Minibatch Loss= "
+                + "{:.4f}".format(loss)
+                + ", Training Accuracy= "
+                + "{:.3f}".format(acc)
+            )
 
     print("Optimization Finished!")
     file_writer = tf.compat.v1.summary.FileWriter(logdir, sess.graph)
 
     # Calculate accuracy for 128 mnist test images
     test_len = 128
-    test_data = mnist.test.images[:test_len].reshape(
-        (-1, timesteps, num_input))
+    test_data = mnist.test.images[:test_len].reshape((-1, timesteps, num_input))
     test_label = mnist.test.labels[:test_len]
     test_label = argmax_label(test_label)
-    print("Testing Accuracy:",
-          sess.run(accuracy, feed_dict={X: test_data, Y: test_label}))
+    print(
+        "Testing Accuracy:", sess.run(accuracy, feed_dict={X: test_data, Y: test_label})
+    )
 
     # trying
     for dat in mnist.test.images[:2]:
-        pred = sess.run(prediction, feed_dict={
-                        X: dat.reshape((-1, timesteps, num_input))})[0][0]
+        pred = sess.run(
+            prediction, feed_dict={X: dat.reshape((-1, timesteps, num_input))}
+        )[0][0]
         plt.imshow(dat.reshape([28, 28]))
         plt.title("pred: " + str(pred))
         plt.show()

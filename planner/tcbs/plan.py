@@ -17,7 +17,7 @@ from tools import ColoredLogger
 
 logging.setLoggerClass(ColoredLogger)
 
-plt.style.use('bmh')
+plt.style.use("bmh")
 
 _config = {}
 _distances = None
@@ -25,8 +25,16 @@ _distances = None
 EXPECTED_MAX_N_BLOCKS = 1000
 
 
-def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array,
-         config: dict = {}, plot: bool = False, pathplanning_only_assignment=False):
+def plan(
+    agent_pos: list,
+    jobs: list,
+    alloc_jobs: list,
+    idle_goals: list,
+    grid: np.array,
+    config: dict = {},
+    plot: bool = False,
+    pathplanning_only_assignment=False,
+):
     """
     Main entry point for planner
 
@@ -39,11 +47,11 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
       grid: the map (2D-space + time)
       plot: whether to plot conditions and results or not
       filename: filename to save / read path_save (set to False to not do this)
-      agent_pos: list: 
-      jobs: list: 
-      alloc_jobs: list: 
-      idle_goals: list: 
-      grid: np.array: 
+      agent_pos: list:
+      jobs: list:
+      alloc_jobs: list:
+      idle_goals: list:
+      grid: np.array:
       plot: bool:  (Default value = False)
       filename: str:  (Default value = 'path_save.pkl')
       pathplanning_only_assignment: bool: do the pathplanning only (this assumes each job to the same index agent)
@@ -55,7 +63,7 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
 
     if not config:
         config = generate_config()  # default config
-    filename = config['filename_pathsave']
+    filename = config["filename_pathsave"]
     global _config
     _config = config
 
@@ -68,11 +76,10 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     agent_job = []
     _agent_idle = []
 
-    if _config['number_nearest'] != 0:
+    if _config["number_nearest"] != 0:
         global _distances
         filename = pre_calc_paths(jobs, idle_goals, grid, filename)
-        _distances = pre_calc_distances(
-            agent_pos, jobs, idle_goals, grid, filename)
+        _distances = pre_calc_distances(agent_pos, jobs, idle_goals, grid, filename)
 
     agent_pos_test = set()
     for a in agent_pos:
@@ -109,13 +116,14 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
     condition = comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid)
 
     # planning!
-    (agent_job, _agent_idle, blocked
-     ) = astar_base(start=comp2state(agent_job, _agent_idle, blocked),
-                    condition=condition,
-                    goal_test=goal_test,
-                    get_children=get_children,
-                    heuristic=heuristic,
-                    cost=cost)
+    (agent_job, _agent_idle, blocked) = astar_base(
+        start=comp2state(agent_job, _agent_idle, blocked),
+        condition=condition,
+        goal_test=goal_test,
+        get_children=get_children,
+        heuristic=heuristic,
+        cost=cost,
+    )
 
     _paths = get_paths(condition, comp2state(agent_job, _agent_idle, blocked))
 
@@ -127,9 +135,10 @@ def plan(agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: 
         fig = plt.figure()
         ax1 = fig.add_subplot(121)
         plot_inputs(ax1, agent_pos, idle_goals, jobs, grid)
-        ax2 = fig.add_subplot(122, projection='3d')
-        plot_results(ax2, _agent_idle, _paths, agent_job,
-                     agent_pos, grid, idle_goals, jobs)
+        ax2 = fig.add_subplot(122, projection="3d")
+        plot_results(
+            ax2, _agent_idle, _paths, agent_job, agent_pos, grid, idle_goals, jobs
+        )
         plt.show()
 
     pool.close()
@@ -148,6 +157,7 @@ def alloc_threads():
 
 # Main methods
 
+
 def get_children(_condition: dict, _state: tuple) -> list:
     """
     Get all following states
@@ -163,8 +173,9 @@ def get_children(_condition: dict, _state: tuple) -> list:
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
-    (left_agent_pos, left_idle_goals, left_jobs
-     ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
+    (left_agent_pos, left_idle_goals, left_jobs) = clear_set(
+        agent_idle, agent_job, agent_pos, idle_goals, jobs
+    )
 
     eval_confilct_to_block = False
     if blocked:
@@ -181,28 +192,49 @@ def get_children(_condition: dict, _state: tuple) -> list:
             else:
                 blocked1.append(blocked[i])
                 blocked2.append(blocked[i])
-        return [comp2state(agent_job, agent_idle, tuple(blocked1)),
-                comp2state(agent_job, agent_idle, tuple(blocked2))]
+        return [
+            comp2state(agent_job, agent_idle, tuple(blocked1)),
+            comp2state(agent_job, agent_idle, tuple(blocked2)),
+        ]
     else:
         agent_pos = list(agent_pos)
         agent_job = list(agent_job)
         jobs = list(jobs)
         idle_goals = list(idle_goals)
         if len(left_jobs) > 0:  # still jobs to assign - try with all left agents
-            if _config['number_nearest'] != 0:
-                n = _config['number_nearest']
-                return assign_nearest_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs, n)
+            if _config["number_nearest"] != 0:
+                n = _config["number_nearest"]
+                return assign_nearest_jobs(
+                    agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs, n
+                )
             else:
-                return assign_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs)
+                return assign_jobs(
+                    agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs
+                )
         # only idle goals if more agents than jobs
         elif (len(left_idle_goals) > 0) & (len(left_jobs) == 0):
-            return assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, idle_goals, left_agent_pos,
-                                     left_idle_goals)
+            return assign_idle_goals(
+                agent_idle,
+                agent_job,
+                agent_pos,
+                blocked,
+                idle_goals,
+                left_agent_pos,
+                left_idle_goals,
+            )
         else:  # all assigned
             return []
 
 
-def assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, idle_goals, left_agent_pos, left_idle_goals):
+def assign_idle_goals(
+    agent_idle,
+    agent_job,
+    agent_pos,
+    blocked,
+    idle_goals,
+    left_agent_pos,
+    left_idle_goals,
+):
     children = []
     agent_idle = list(agent_idle)
     for i_la in range(len(left_agent_pos)):
@@ -211,11 +243,10 @@ def assign_idle_goals(agent_idle, agent_job, agent_pos, blocked, idle_goals, lef
         if not len(agent_idle[i_a]):  # no idle goal yet
             for i_ig in range(len(left_idle_goals)):
                 agent_idle_new = agent_idle.copy()
-                agent_idle_new[i_a] = (
-                    idle_goals.index(left_idle_goals[i_ig]),)
-                children.append(comp2state(tuple(agent_job),
-                                           tuple(agent_idle_new),
-                                           blocked))
+                agent_idle_new[i_a] = (idle_goals.index(left_idle_goals[i_ig]),)
+                children.append(
+                    comp2state(tuple(agent_job), tuple(agent_idle_new), blocked)
+                )
     return children
 
 
@@ -226,14 +257,13 @@ def assign_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs):
         for i_a in range(len(agent_pos)):
             agent_job_new = agent_job.copy()
             agent_job_new[i_a] += (job_to_assign,)
-            children.append(comp2state(tuple(agent_job_new),
-                                       agent_idle,
-                                       blocked))
+            children.append(comp2state(tuple(agent_job_new), agent_idle, blocked))
     return children
 
 
 def assign_nearest_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs, n):
     from pyflann import FLANN
+
     children = []
     starts = []
     ends = []
@@ -255,17 +285,25 @@ def assign_nearest_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jo
         algorithm="kmeans",
         branching=32,
         iterations=7,
-        checks=16)
+        checks=16,
+    )
     assert len(agent_pos) == len(result), "Not the right amount of results"
     for i_a in range(len(agent_pos)):
         if len(result.shape) == 1:
-            result = np.array(list(map(lambda x: [x, ], result)))
+            result = np.array(
+                list(
+                    map(
+                        lambda x: [
+                            x,
+                        ],
+                        result,
+                    )
+                )
+            )
         for res in result[i_a]:
             agent_job_new = agent_job.copy()
             agent_job_new[i_a] += (ends_job[res],)
-            children.append(comp2state(tuple(agent_job_new),
-                                       agent_idle,
-                                       blocked))
+            children.append(comp2state(tuple(agent_job_new), agent_idle, blocked))
     return children
 
 
@@ -282,7 +320,7 @@ def cost(_condition: dict, _state: tuple):
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, block_state) = state2comp(_state)
-    _cost = 0.
+    _cost = 0.0
 
     _paths = get_paths(_condition, _state)
     if _paths == False:  # one path was not viable
@@ -310,12 +348,11 @@ def cost(_condition: dict, _state: tuple):
             idle_goal_stat = idle_goals[i_idle_goal][1]
             # this agent will have only one path in its set, or has it?
             path_len = pathset[0][-1][2]
-            prob = norm.cdf(
-                path_len, loc=idle_goal_stat[0], scale=idle_goal_stat[1])
+            prob = norm.cdf(path_len, loc=idle_goal_stat[0], scale=idle_goal_stat[1])
             _cost += prob * path_len
 
     # finding collisions in paths
-    collisions = find_collision(_paths, _config['all_collisions'])
+    collisions = find_collision(_paths, _config["all_collisions"])
     for collision in collisions:
         if collision != ():
             block_state += (collision,)
@@ -346,10 +383,11 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, _agent_idle, block_state) = state2comp(_state)
-    _cost = 0.
+    _cost = 0.0
 
-    (left_agent_pos, left_idle_goals, left_jobs
-     ) = clear_set(_agent_idle, agent_job, agent_pos, idle_goals, jobs)
+    (left_agent_pos, left_idle_goals, left_jobs) = clear_set(
+        _agent_idle, agent_job, agent_pos, idle_goals, jobs
+    )
 
     paths = get_paths(_condition, _state)
     if paths is False:
@@ -368,13 +406,11 @@ def heuristic(_condition: dict, _state: tuple) -> float:
         agentposes.append(left_jobs[i_lj][1])
     valss = []
     for i_lj in range(len(left_jobs)):
-        valss.append({'agentposes': agentposes,
-                      'job': left_jobs[i_lj]})
+        valss.append({"agentposes": agentposes, "job": left_jobs[i_lj]})
 
     if left_agent_pos:
         for ig in left_idle_goals:
-            valss.append({'agentposes': left_agent_pos,
-                          'idle_goal': ig})
+            valss.append({"agentposes": left_agent_pos, "idle_goal": ig})
 
     job_costs = list(map(heuristic_per_job, valss))
     _cost += reduce(lambda a, b: a + b, job_costs, 0)
@@ -386,9 +422,9 @@ def heuristic(_condition: dict, _state: tuple) -> float:
 
 
 def heuristic_per_job(vals):
-    agentposes = vals['agentposes']
-    if 'job' in vals.keys():
-        job = vals['job']
+    agentposes = vals["agentposes"]
+    if "job" in vals.keys():
+        job = vals["job"]
         _cost = 0
         agentposes_no_self = agentposes.copy()
         agentposes_no_self.remove(job[1])
@@ -396,8 +432,8 @@ def heuristic_per_job(vals):
         nearest_agent = get_nearest(agentposes_no_self, job[0])
         _cost += distance_no_calc(nearest_agent, job[0])
         _cost += distance_no_calc(job[0], job[1])
-    elif 'idle_goal' in vals.keys():
-        idle_goal = vals['idle_goal']
+    elif "idle_goal" in vals.keys():
+        idle_goal = vals["idle_goal"]
         _cost = 0
         nearest_agent = get_nearest(agentposes, idle_goal[0])
         path_len = distance_no_calc(nearest_agent, idle_goal[0])
@@ -426,8 +462,9 @@ def goal_test(_condition: dict, _state: tuple) -> bool:
         if is_conflict_not_block(b):  # two agents blocked
             return False
 
-    (left_agent_pos, left_idle_goals, left_jobs
-     ) = clear_set(agent_idle, agent_job, agent_pos, idle_goals, jobs)
+    (left_agent_pos, left_idle_goals, left_jobs) = clear_set(
+        agent_idle, agent_job, agent_pos, idle_goals, jobs
+    )
 
     if len(left_jobs) > 0:
         return False
@@ -498,9 +535,7 @@ def concat_paths(path1: list, path2: list) -> list:
         path2.remove(path2[0])
     d = path1[-1][2]
     for i in range(len(path2)):
-        path1.append((path2[i][0],
-                      path2[i][1],
-                      path2[i][2] + d))
+        path1.append((path2[i][0], path2[i][1], path2[i][2] + d))
     return path1
 
 
@@ -542,7 +577,7 @@ def pre_calc_paths(jobs, idle_goals, grid, fname=None):
 
     # SAVE
     if not fname:
-        fname = '/tmp/paths_' + str(uuid.uuid4()) + '.pkl'
+        fname = "/tmp/paths_" + str(uuid.uuid4()) + ".pkl"
     save_paths(fname)
     return fname
 
@@ -560,11 +595,7 @@ def pre_calc_distances(agents, tasks, idle_goals, grid, fname=None):
     for it1, it2 in product(range(len(tasks)), range(len(tasks))):
         dist_tt[it1, it2] = distance_no_calc(tasks[it1][1], tasks[it2][0])
 
-    return {
-        'at': dist_at,
-        't': dist_t,
-        'tt': dist_tt
-    }
+    return {"at": dist_at, "t": dist_t, "tt": dist_tt}
 
 
 # Collision Helpers
@@ -572,15 +603,15 @@ def pre_calc_distances(agents, tasks, idle_goals, grid, fname=None):
 
 def get_paths_for_agent(vals):
     path_save_process = {}
-    _agent_idle = vals['_agent_idle']
-    _map = vals['_map']
-    agent_job = vals['agent_job']
-    agent_pos = vals['agent_pos']
-    alloc_jobs = vals['alloc_jobs']
-    blocks = vals['blocks']
-    i_a = vals['i_a']
-    idle_goals = vals['idle_goals']
-    jobs = vals['jobs']
+    _agent_idle = vals["_agent_idle"]
+    _map = vals["_map"]
+    agent_job = vals["agent_job"]
+    agent_pos = vals["agent_pos"]
+    alloc_jobs = vals["alloc_jobs"]
+    blocks = vals["blocks"]
+    i_a = vals["i_a"]
+    idle_goals = vals["idle_goals"]
+    jobs = vals["jobs"]
     # -------
     paths_for_agent = tuple()
     if i_a in blocks.keys():
@@ -593,7 +624,8 @@ def get_paths_for_agent(vals):
     for ij in assigned_jobs:
         if (i_a, ij) in alloc_jobs:  # can be first only; need to go to goal only
             p, path_save_process = path(
-                pose, jobs[ij][1], _map, block, path_save_process, calc=True)
+                pose, jobs[ij][1], _map, block, path_save_process, calc=True
+            )
             if not p:
                 return False
         else:
@@ -602,7 +634,8 @@ def get_paths_for_agent(vals):
                 pose, t_shift = get_last_pose_and_t(paths_for_agent)
             block1 = time_shift_blocks(block, t_shift)
             p1, path_save_process = path(
-                pose, jobs[ij][0], _map, block1, path_save_process, calc=True)
+                pose, jobs[ij][0], _map, block1, path_save_process, calc=True
+            )
             if not p1:
                 return False
             paths_for_agent += (time_shift_path(p1, t_shift),)
@@ -611,13 +644,20 @@ def get_paths_for_agent(vals):
             assert pose == jobs[ij][0], "Last pose should be the start"
             block2 = time_shift_blocks(block, t_shift)
             p, path_save_process = path(
-                jobs[ij][0], jobs[ij][1], _map, block2, path_save_process, calc=True)
+                jobs[ij][0], jobs[ij][1], _map, block2, path_save_process, calc=True
+            )
             if not p:
                 return False
         paths_for_agent += (time_shift_path(p, t_shift),)
     if len(_agent_idle[i_a]):
-        p, path_save_process = (
-            path(agent_pos[i_a], idle_goals[_agent_idle[i_a][0]][0], _map, block, path_save_process, calc=True))
+        p, path_save_process = path(
+            agent_pos[i_a],
+            idle_goals[_agent_idle[i_a][0]][0],
+            _map,
+            block,
+            path_save_process,
+            calc=True,
+        )
         if not p:
             return False
         paths_for_agent += (p,)
@@ -643,15 +683,19 @@ def get_paths(_condition: dict, _state: tuple):
     blocks = get_blocks_dict(blocked)
     valss = []
     for i_a in range(len(agent_pos)):
-        valss.append({'_agent_idle': _agent_idle,
-                      '_map': _map,
-                      'agent_job': agent_job,
-                      'agent_pos': agent_pos,
-                      'alloc_jobs': alloc_jobs,
-                      'blocks': blocks,
-                      'i_a': i_a,
-                      'idle_goals': idle_goals,
-                      'jobs': jobs})
+        valss.append(
+            {
+                "_agent_idle": _agent_idle,
+                "_map": _map,
+                "agent_job": agent_job,
+                "agent_pos": agent_pos,
+                "alloc_jobs": alloc_jobs,
+                "blocks": blocks,
+                "i_a": i_a,
+                "idle_goals": idle_goals,
+                "jobs": jobs,
+            }
+        )
     global pool
     res = list(pool.map(get_paths_for_agent, valss))
     for r in res:
@@ -663,11 +707,11 @@ def get_paths(_condition: dict, _state: tuple):
 
         _paths.append(r[0])
         path_save.update(r[1])
-    longest = max(
-        map(lambda p: len(reduce(lambda a, b: a + b, p, [])), _paths))
-    if _config['finished_agents_block']:
-        (left_agent_pos, left_idle_goals, left_jobs
-         ) = clear_set(_agent_idle, agent_job, agent_pos, idle_goals, jobs)
+    longest = max(map(lambda p: len(reduce(lambda a, b: a + b, p, [])), _paths))
+    if _config["finished_agents_block"]:
+        (left_agent_pos, left_idle_goals, left_jobs) = clear_set(
+            _agent_idle, agent_job, agent_pos, idle_goals, jobs
+        )
         if left_jobs.__len__() == 0:  # Only fill up if all jobs are assigned.
             _paths = fill_up_paths(longest, _paths, agent_pos, blocks)
 
@@ -681,11 +725,11 @@ def fill_up_paths(longest: int, _paths: list, agent_pos: list, blocks: list) -> 
     if longest > 0:
         res_paths = []
         for ia, paths_for_agent in enumerate(_paths):
-            blocks_for_agent = map(
-                lambda x: x[1], filter(
-                    lambda x: x[0] == VERTEX, blocks[ia]
-                )
-            ) if ia in blocks else []
+            blocks_for_agent = (
+                map(lambda x: x[1], filter(lambda x: x[0] == VERTEX, blocks[ia]))
+                if ia in blocks
+                else []
+            )
             if paths_for_agent:
                 last = paths_for_agent[-1][-1]
             else:
@@ -725,8 +769,10 @@ def get_nearest(points, coord):
     Return closest point to coord from points
     source: https://stackoverflow.com/a/37376187/1493204
     """
-    dists = [(pow(point[0] - coord[0], 2) + pow(point[1] - coord[1], 2), point)
-             for point in points]  # list of (dist, point) tuples
+    dists = [
+        (pow(point[0] - coord[0], 2) + pow(point[1] - coord[1], 2), point)
+        for point in points
+    ]  # list of (dist, point) tuples
     nearest = min(dists)
     return nearest[1]
 
@@ -766,7 +812,9 @@ def find_collision(_paths: list, all_collisions=False) -> tuple:
                 if vortex in vortexes[t].keys():  # it is already someone there
                     col = VERTEX, vortex + (t,), (agent, vortexes[t][vortex])
                     if not all_collisions:
-                        return [col, ]
+                        return [
+                            col,
+                        ]
                     else:
                         collisions.append(col)
                 else:
@@ -779,7 +827,9 @@ def find_collision(_paths: list, all_collisions=False) -> tuple:
                     if edge in edges[t].keys():
                         col = EDGE, edge + (t,), (agent, edges[t][edge])
                         if not all_collisions:
-                            return [col, ]
+                            return [
+                                col,
+                            ]
                         else:
                             collisions.append(col)
                     else:
@@ -804,15 +854,22 @@ def get_blocks_dict(blocked):
         if not is_conflict_not_block(b):  # a block, not a conflict
             agent = b[-1]
             if agent in block_dict.keys():  # agent_nr
-                block_dict[agent] += list(b[:1], )
+                block_dict[agent] += list(
+                    b[:1],
+                )
             else:
-                block_dict[agent] = list(b[:1], )
+                block_dict[agent] = list(
+                    b[:1],
+                )
     return block_dict
 
 
 # Data Helpers
 
-def clear_set(_agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals: list, jobs: list) -> tuple:
+
+def clear_set(
+    _agent_idle: tuple, agent_job: tuple, agent_pos: list, idle_goals: list, jobs: list
+) -> tuple:
     """
     Clear condition sets of agents, jobs and idle goals already assigned with each other
 
@@ -847,7 +904,7 @@ def make_unique(jobs):
     jobs_set = set()
     for j in jobs_copy:
         while j in jobs_set:
-            j = (j[0], j[1], j[2] + .0001)
+            j = (j[0], j[1], j[2] + 0.0001)
         jobs.append(j)
         jobs_set.add(j)
     return jobs
@@ -863,18 +920,18 @@ def condition2comp(_condition: dict):
     Returns:
 
     """
-    return (_condition["agent_pos"],
-            _condition["jobs"],
-            _condition["alloc_jobs"],
-            _condition["idle_goals"],
-            _condition["grid"])
+    return (
+        _condition["agent_pos"],
+        _condition["jobs"],
+        _condition["alloc_jobs"],
+        _condition["idle_goals"],
+        _condition["grid"],
+    )
 
 
-def comp2condition(agent_pos: list,
-                   jobs: list,
-                   alloc_jobs: list,
-                   idle_goals: list,
-                   grid: np.array):
+def comp2condition(
+    agent_pos: list, jobs: list, alloc_jobs: list, idle_goals: list, grid: np.array
+):
     """
     Transform condition sections into dict to use
 
@@ -893,7 +950,7 @@ def comp2condition(agent_pos: list,
         "jobs": jobs,
         "alloc_jobs": alloc_jobs,
         "idle_goals": idle_goals,
-        "grid": grid
+        "grid": grid,
     }
 
 
@@ -907,21 +964,17 @@ def state2comp(_state: tuple) -> tuple:
     Returns:
 
     """
-    return (_state[0],
-            _state[1],
-            _state[2])
+    return (_state[0], _state[1], _state[2])
 
 
-def comp2state(agent_job: tuple,
-               _agent_idle: tuple,
-               blocked: tuple) -> tuple:
+def comp2state(agent_job: tuple, _agent_idle: tuple, blocked: tuple) -> tuple:
     """
     Transform state sections into tuple to use
 
     Args:
-      agent_job: tuple: 
+      agent_job: tuple:
       _agent_idle: tuple:
-      blocked: tuple: 
+      blocked: tuple:
 
     Returns:
       the state tuple
@@ -931,20 +984,20 @@ def comp2state(agent_job: tuple,
 
 def generate_config():
     return {
-        'filename_pathsave': 'path_save.pkl',  # filename to save path cache
+        "filename_pathsave": "path_save.pkl",  # filename to save path cache
         # weather finished agents stand around and block others
-        'finished_agents_block': False,
-        'number_nearest': 0,  # 0 means all, otherwise only n nearest possible agents are checked
+        "finished_agents_block": False,
+        "number_nearest": 0,  # 0 means all, otherwise only n nearest possible agents are checked
         # whether to insert all collisions as block (suboptimal)
-        'all_collisions': False,
+        "all_collisions": False,
         # whether to use heuristic collisions resolution (suboptimal)
-        'heuristic_colission': False,
+        "heuristic_colission": False,
     }
 
 
 def save_paths(filename):
     try:
-        with open(filename, 'wb') as f:
+        with open(filename, "wb") as f:
             pickle.dump(path_save, f, pickle.HIGHEST_PROTOCOL)
     except Exception as e:
         logging.error("Error saving paths: " + str(e))
@@ -953,7 +1006,7 @@ def save_paths(filename):
 def load_paths(filename):
     global path_save
     try:
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             path_save = pickle.load(f)
     except FileNotFoundError:
         logging.warning("File %s does not exist", filename)

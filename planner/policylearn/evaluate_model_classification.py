@@ -10,8 +10,7 @@ from tensorflow.python.ops.gen_math_ops import mod
 if __name__ == "__main__":
     # arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'model_read_h5', type=argparse.FileType('rb'))
+    parser.add_argument("model_read_h5", type=argparse.FileType("rb"))
     args = parser.parse_args()
 
     model: keras.Model = keras.models.load_model(args.model_read_h5.name)

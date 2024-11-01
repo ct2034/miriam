@@ -8,11 +8,11 @@ import matplotlib.image as mpimg
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("input",  help="input file (yaml)")
-    parser.add_argument("environment",  help="environment file (png)")
+    parser.add_argument("input", help="input file (yaml)")
+    parser.add_argument("environment", help="environment file (png)")
     args = parser.parse_args()
 
-    data = np.loadtxt(args.input, delimiter=',')
+    data = np.loadtxt(args.input, delimiter=",")
     data = np.reshape(data, (data.shape[0], 2, 2))
 
     lc = mc.LineCollection(data)

@@ -4,18 +4,21 @@ import glob
 import os
 import sys
 
-if os.path.exists('readme.rst'):
-    print("""The setup.py script should be executed from the build directory. Please see the file 'readme.rst' for further instructions.""")
+if os.path.exists("readme.rst"):
+    print(
+        """The setup.py script should be executed from the build directory. Please see the file 'readme.rst' for further instructions."""
+    )
     sys.exit(1)
 
 
 setup(
-    name = "odrm",
-    package_dir = {'': 'src'},
-    data_files = [(get_python_lib(), glob.glob('src/*.so'))
-                  #,('bin', ['bin/odrm'])
-                  ],
-    author = 'Christian Henkel',
-    keywords = 'cmake cython build',
-    zip_safe = False,
-    )
+    name="odrm",
+    package_dir={"": "src"},
+    data_files=[
+        (get_python_lib(), glob.glob("src/*.so"))
+        # ,('bin', ['bin/odrm'])
+    ],
+    author="Christian Henkel",
+    keywords="cmake cython build",
+    zip_safe=False,
+)

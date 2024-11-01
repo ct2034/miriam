@@ -13,19 +13,26 @@ grid[4, 1:9, :] = -1
 def pathplan(agent_pos, jobs):
     start_time = datetime.datetime.now()
     # This misuses the cbsext planner as cbs only planner by fixing the assignment
-    res_agent_job, res_agent_idle, res_paths = plan_cbsext(agent_pos, jobs, [], [], grid,
-                                                           plot=False, filename='pathplanning_only.pkl',
-                                                           pathplanning_only_assignment=[(0,), (1,), (2,)])
-    print("computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s")
+    res_agent_job, res_agent_idle, res_paths = plan_cbsext(
+        agent_pos,
+        jobs,
+        [],
+        [],
+        grid,
+        plot=False,
+        filename="pathplanning_only.pkl",
+        pathplanning_only_assignment=[(0,), (1,), (2,)],
+    )
+    print(
+        "computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s"
+    )
     return res_paths
 
 
 if __name__ == "__main__":
     # input 1
     agent_pos = [(1, 1), (2, 1), (3, 1)]  # three agents
-    jobs = [((1, 7), (9, 1), 0),
-            ((1, 8), (8, 1), 0),
-            ((9, 8), (4, 2), 0)]  # three jobs
+    jobs = [((1, 7), (9, 1), 0), ((1, 8), (8, 1), 0), ((9, 8), (4, 2), 0)]  # three jobs
 
     paths = pathplan(agent_pos, jobs)
     for p in paths:

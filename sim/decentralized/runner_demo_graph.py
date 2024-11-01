@@ -14,7 +14,7 @@ from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import OptimalPolicy
 from sim.decentralized.runner import run_a_scenario, will_agents_collide
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.getLogger("sim.decentralized.runner").setLevel(logging.DEBUG)
     logging.getLogger("sim.decentralized.iterators").setLevel(logging.DEBUG)
 
@@ -42,24 +42,25 @@ if __name__ == '__main__':
     plot_env_with_arrows(g, starts, goals)
 
     # initialize agents
-    agents = tuple([Agent(g, start, radius=.01) for start in starts])
+    agents = tuple([Agent(g, start, radius=0.01) for start in starts])
     for i, agent in enumerate(agents):
         agent.give_a_goal(goals[i])
         agent.policy = OptimalPolicy(agent, None)
 
     # independent paths
-    do_collide, paths = will_agents_collide(
-        agents, ignore_finished_agents=True)
+    do_collide, paths = will_agents_collide(agents, ignore_finished_agents=True)
     print(f"Will agents collide? {do_collide}")
     plot_with_paths(g, paths)
 
     # run the scenario
     paths_run: List[Any] = []
-    res = run_a_scenario(env=g,
-                         agents=agents,
-                         plot=False,
-                         iterator=IteratorType.LOOKAHEAD2,
-                         paths_out=paths_run)
+    res = run_a_scenario(
+        env=g,
+        agents=agents,
+        plot=False,
+        iterator=IteratorType.LOOKAHEAD2,
+        paths_out=paths_run,
+    )
     print(f"{res=}")
 
     plot_with_paths(g, paths_run)

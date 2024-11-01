@@ -4,7 +4,7 @@ import numpy as np
 
 from roadmaps.cvt.build.libcvt import CVT
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     img_path = "roadmaps/odrm/odrm_eval/maps/plain.png"
 
     cvt = CVT()
@@ -18,4 +18,3 @@ if __name__ == '__main__':
 
     # plt.axis('scaled')  # Ensure aspect ratio is maintained
     # plt.show()
-

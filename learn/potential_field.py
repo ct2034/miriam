@@ -15,7 +15,7 @@ def calculate_attractive_potential(x, y, gx, gy):
 def calculate_repulsive_potential(x, y, ox, oy, robot_rad):
     # find a better/concise way to find this index
     minind = -1
-    dmin = float('inf')
+    dmin = float("inf")
     for i in range(len(ox)):
         d = np.hypot(x - ox[i], y - oy[i])
         if d <= dmin:
@@ -56,14 +56,7 @@ def calculate_potential_field(gx, gy, ox, oy, res, robot_rad):
 
 def get_motion_model():
     # dx, dy
-    motion = [[1, 0],
-              [0, 1],
-              [-1, 0],
-              [0, -1],
-              [-1, -1],
-              [-1, 1],
-              [1, -1],
-              [1, 1]]
+    motion = [[1, 0], [0, 1], [-1, 0], [0, -1], [-1, -1], [-1, 1], [1, -1], [1, 1]]
 
     return motion
 
@@ -71,7 +64,8 @@ def get_motion_model():
 def potential_field_planner(sx, sy, gx, gy, ox, oy, robot_rad, res):
 
     potential_map, minx, miny = calculate_potential_field(
-        gx, gy, ox, oy, res, robot_rad)
+        gx, gy, ox, oy, res, robot_rad
+    )
     # search path
 
     d = np.hypot(sx - gx, sy - gy)
@@ -90,13 +84,13 @@ def potential_field_planner(sx, sy, gx, gy, ox, oy, robot_rad, res):
     motion = get_motion_model()
 
     while d >= res:
-        min_potential = float('inf')
+        min_potential = float("inf")
         minix, miniy = -1, -1
         for i in range(len(motion)):
             inx = int(ix + motion[i][0])
             iny = int(iy + motion[i][1])
             if inx >= len(potential_map) or iny >= len(potential_map[0]):
-                p = float('inf')  # outside area
+                p = float("inf")  # outside area
             else:
                 p = potential_map[inx][iny]
             if p < min_potential:
@@ -129,10 +123,10 @@ def draw_heatmap(data):
 def main():
     print("potential_field_planning start")
 
-    sx = 10.  # start x position [m]
-    sy = 5.  # start y positon [m]
-    gx = 40.  # goal x position [m]
-    gy = 45.  # goal y position [m]
+    sx = 10.0  # start x position [m]
+    sy = 5.0  # start y positon [m]
+    gx = 40.0  # goal x position [m]
+    gy = 45.0  # goal y position [m]
 
     grid_size = 0.5  # potential grid size [m]
     robot_radius = 5.0  # robot radius [m]
@@ -145,14 +139,13 @@ def main():
         plt.axis("equal")
 
     # path generation
-    rx, ry = potential_field_planner(
-        sx, sy, gx, gy, ox, oy, robot_radius, grid_size)
+    rx, ry = potential_field_planner(sx, sy, gx, gy, ox, oy, robot_radius, grid_size)
 
     if show_animation:
         plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(__file__ + " start!!")
     main()
     print(__file__ + " Done!!")

@@ -18,18 +18,10 @@ def test_eval_disc_basic():
     g.add_edge(2, 4)
     g.add_edge(3, 0)
     g.add_edge(4, 3)
-    posar = [
-        [1, 3],
-        [3, 3],
-        [2, 2],
-        [1, 1],
-        [3, 1]
-    ]
-    batch = np.array(
-        [[0, 1], [3, 4]]
-    )
+    posar = [[1, 3], [3, 3], [2, 2], [1, 1], [3, 1]]
+    batch = np.array([[0, 1], [3, 4]])
     agent_diameter = 1
-    v = .1
+    v = 0.1
     eval_disc(batch, g, posar, agent_diameter, v)
 
 
@@ -44,11 +36,9 @@ def test_eval_disc_no_path():
         [3, 3],
         [2, 2],
     ]
-    batch = np.array(
-        [[0, 1], [1, 2]]
-    )
+    batch = np.array([[0, 1], [1, 2]])
     agent_diameter = 1
-    v = .1
+    v = 0.1
     t, paths = eval_disc(batch, g, posar, agent_diameter, v)
     print(t)
     print(paths)
@@ -57,8 +47,8 @@ def test_eval_disc_no_path():
 def test_synchronize_paths_basic():
     # basic example
     in_paths = [[1, 2, 3], [3, 2, 1]]
-    expected1 = [[1, 1, 2, 3], [3, 2, 1]] # agent 1 has prio over 0
-    expected2 = [[1, 2, 3], [3, 3, 2, 1]] # agent 0 has prio over 1
+    expected1 = [[1, 1, 2, 3], [3, 2, 1]]  # agent 1 has prio over 0
+    expected2 = [[1, 2, 3], [3, 3, 2, 1]]  # agent 0 has prio over 1
     out_paths = synchronize_paths(in_paths)
     assert expected1 == out_paths or expected2 == out_paths
 
@@ -93,7 +83,7 @@ def test_synchronize_paths_independent():
         rotate(range(length), 3),
         rotate(range(length), -3),
         rotate(range(length), -2),
-        rotate(range(length), -1)
+        rotate(range(length), -1),
     ]
     expected = list(in_paths)
     out_paths = synchronize_paths(in_paths)

@@ -8,7 +8,15 @@ EDGE = 1
 
 path_save = {}
 
-def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_process: dict = {}, calc: bool = True):
+
+def path(
+    start: tuple,
+    goal: tuple,
+    _map: np.array,
+    blocked: list,
+    path_save_process: dict = {},
+    calc: bool = True,
+):
     """
     Calculate or return pre-calculated path from start to goal
 
@@ -29,16 +37,12 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
     for b in blocked:
         if b[0] == VERTEX:
             v = b[1]
-            _map[(v[1],
-                  v[0],
-                  v[2])] = -1
+            _map[(v[1], v[0], v[2])] = -1
             if v[:2] == start or v[:2] == goal:
                 return False, {}
         elif b[0] == EDGE:
             for v in b[1][0:2]:
-                _map[(v[1],
-                      v[0],
-                      b[1][2])] = -1
+                _map[(v[1], v[0], b[1][2])] = -1
                 if v[:2] == start or v[:2] == goal:
                     return False, {}
                 # TODO: actually block edge!
@@ -51,9 +55,9 @@ def path(start: tuple, goal: tuple, _map: np.array, blocked: list, path_save_pro
         if calc:  # if we want to calc (i.e. find the cost)
             assert len(start) == 2, "Should be called with only spatial coords"
             try:
-                _path = astar_grid4con(start + (0,),
-                                       goal + (_map.shape[2] - 1,),
-                                       _map.swapaxes(0, 1))
+                _path = astar_grid4con(
+                    start + (0,), goal + (_map.shape[2] - 1,), _map.swapaxes(0, 1)
+                )
             except NoPathException:
                 _path = []
 

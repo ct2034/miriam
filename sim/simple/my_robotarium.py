@@ -31,10 +31,9 @@ class MyRob:
 
         self.r.initialize(cars)
 
-        Vis.scale = float(min(
-            desktop.geometry().width() / x,
-            desktop.geometry().height() / y
-        )/1.5)
+        Vis.scale = float(
+            min(desktop.geometry().width() / x, desktop.geometry().height() / y) / 1.5
+        )
         if Vis.scale < 1:
             Vis.scale = 1
         print("Vis.scale " + str(Vis.scale))
@@ -54,19 +53,21 @@ class MyRob:
 
         for car in cars:
             Vis.carCircles[car.id] = QtGui.QGraphicsEllipseItem(
-                0, 0, Vis.scale, Vis.scale)
+                0, 0, Vis.scale, Vis.scale
+            )
             Vis.scene.addItem(Vis.carCircles[car.id])
             self.update_car(car)
 
         view.setScene(Vis.scene)
-        view.resize(width+margin, height+margin)
-        self.resize(width+margin, height+margin)
+        view.resize(width + margin, height + margin)
+        self.resize(width + margin, height + margin)
         view.show()
 
     def update_car(self, car):
         if car:
-            Vis.carCircles[car.id].setPos(pointFromPose(
-                car.pose)-QtCore.QPointF(Vis.scale/2, Vis.scale/2))
+            Vis.carCircles[car.id].setPos(
+                pointFromPose(car.pose) - QtCore.QPointF(Vis.scale / 2, Vis.scale / 2)
+            )
             # print(Vis.carCircles[car.id].pos().x())
             brush = self.brush_for_car(car)
             Vis.carCircles[car.id].setBrush(brush)
@@ -75,11 +76,12 @@ class MyRob:
         if route:
             if route.id not in Vis.routeLines.keys():
                 Vis.routeLines[route.id] = QtGui.QGraphicsLineItem()
-                Vis.routeLines[route.id].setLine(QtCore.QLineF(
-                    pointFromPose(route.start), pointFromPose(route.goal)))
+                Vis.routeLines[route.id].setLine(
+                    QtCore.QLineF(pointFromPose(route.start), pointFromPose(route.goal))
+                )
                 Vis.scene.addItem(Vis.routeLines[route.id])
                 Vis.routeLines[route.id].setPen(QtGui.QPen(blue))
-        #         Vis.routeLines[route.id].setArrow('last')
+            #         Vis.routeLines[route.id].setArrow('last')
             elif route.onRoute:
                 Vis.routeLines[route.id].setPen(QtGui.QPen(red))
             elif route.is_finished:

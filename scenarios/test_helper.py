@@ -5,7 +5,8 @@ import uuid
 import networkx as nx
 import numpy as np
 from sim.decentralized.agent import gridmap_to_graph
-ENVVAR_STORAGE_PATH_STR = 'SCENARIO_STORAGE_PATH'
+
+ENVVAR_STORAGE_PATH_STR = "SCENARIO_STORAGE_PATH"
 STORAGE_PATH_TESTING = "/tmp/testing/"
 
 
@@ -27,8 +28,7 @@ def make_cache_folder_and_set_envvar(set_envvar=True):
 
 
 def remove_cache_folder_and_unset_envvar(unset_envvar=True):
-    assert (ENVVAR_STORAGE_PATH_STR in os.environ
-            ), "environment variable must be set"
+    assert ENVVAR_STORAGE_PATH_STR in os.environ, "environment variable must be set"
     data_path = os.environ[ENVVAR_STORAGE_PATH_STR]
     shutil.rmtree(data_path)
     if unset_envvar:
@@ -52,101 +52,34 @@ def is_connected(env):
     return nx.is_connected(env)
 
 
-env = np.array([
-    [0, 0, 0],
-    [1, 0, 1],
-    [0, 0, 0]
-])
+env = np.array([[0, 0, 0], [1, 0, 1], [0, 0, 0]])
 
 # starts and goals with no collision on env
-starts_no_collision = np.array([
-    [0, 0],
-    [2, 0]
-])
-goals_no_collision = np.array([
-    [0, 2],
-    [2, 2]
-])
+starts_no_collision = np.array([[0, 0], [2, 0]])
+goals_no_collision = np.array([[0, 2], [2, 2]])
 paths_no_collision = [
-    np.array([
-        [0, 0, 0],
-        [0, 1, 1],
-        [0, 2, 2]
-    ]),
-    np.array([
-        [2, 0, 0],
-        [2, 1, 1],
-        [2, 2, 2]
-    ])
-
-
+    np.array([[0, 0, 0], [0, 1, 1], [0, 2, 2]]),
+    np.array([[2, 0, 0], [2, 1, 1], [2, 2, 2]]),
 ]
 
 # starts and goals with a collision in middle of env
-starts_collision = np.array([
-    [0, 0],
-    [0, 2]
-])
-goals_collision = np.array([
-    [2, 0],
-    [2, 2]
-])
+starts_collision = np.array([[0, 0], [0, 2]])
+goals_collision = np.array([[2, 0], [2, 2]])
 paths_collision_indep = [
-    np.array([
-        [0, 0, 0],
-        [0, 1, 1],
-        [1, 1, 2],
-        [2, 1, 3],
-        [2, 0, 4]
-    ]),
-    np.array([
-        [0, 2, 0],
-        [0, 1, 1],
-        [1, 1, 2],
-        [2, 1, 3],
-        [2, 2, 4]
-    ])
+    np.array([[0, 0, 0], [0, 1, 1], [1, 1, 2], [2, 1, 3], [2, 0, 4]]),
+    np.array([[0, 2, 0], [0, 1, 1], [1, 1, 2], [2, 1, 3], [2, 2, 4]]),
 ]
 
 # narrow hallway with two agents that can not pass each other
-env_deadlock = np.array([
-    [1, 1, 1],
-    [0, 0, 0],
-    [1, 1, 1]
-])
-starts_deadlock = np.array([
-    [1, 0],
-    [1, 2]
-])
-goals_deadlock = np.array([
-    [1, 2],
-    [1, 0]
-])
+env_deadlock = np.array([[1, 1, 1], [0, 0, 0], [1, 1, 1]])
+starts_deadlock = np.array([[1, 0], [1, 2]])
+goals_deadlock = np.array([[1, 2], [1, 0]])
 
 # complicated example
-env_complicated = np.array([
-    [0, 0, 0, 0],
-    [1, 1, 0, 0],
-    [0, 1, 0, 1],
-    [0, 0, 0, 0]
-])
-starts_complicated = np.array([
-    [0, 0],
-    [0, 3],
-    [3, 0]
-])
-goals_complicated = np.array([
-    [3, 0],
-    [3, 3],
-    [0, 0]
-])
+env_complicated = np.array([[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 0, 1], [0, 0, 0, 0]])
+starts_complicated = np.array([[0, 0], [0, 3], [3, 0]])
+goals_complicated = np.array([[3, 0], [3, 3], [0, 0]])
 
 # two agents to cross over each other in open 3x3 space
-starts_cross = np.array([
-    [0, 0],
-    [2, 0]
-])
-goals_cross = np.array([
-    [2, 2],
-    [0, 2]
-])
+starts_cross = np.array([[0, 0], [2, 0]])
+goals_cross = np.array([[2, 2], [0, 2]])

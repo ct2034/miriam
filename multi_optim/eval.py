@@ -12,8 +12,16 @@ from pyflann import FLANN
 from torch_geometric.data import Data
 from tqdm import tqdm
 
-from definitions import (DEFAULT_TIMEOUT_S, IDX_AVERAGE_LENGTH, IDX_SUCCESS,
-                         INVALID, MAP_IMG, POS, SCENARIO_RESULT, C)
+from definitions import (
+    DEFAULT_TIMEOUT_S,
+    IDX_AVERAGE_LENGTH,
+    IDX_SUCCESS,
+    INVALID,
+    MAP_IMG,
+    POS,
+    SCENARIO_RESULT,
+    C,
+)
 from multi_optim.state import ScenarioState
 from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy import BFS_TYPE, EdgePolicyModel
@@ -35,10 +43,16 @@ class Eval(object):
     """This class hold the information to evaluate the roadmap and policy
     during its run."""
 
-    def __init__(self, roadmap: nx.Graph, map_img: MAP_IMG,
-                 n_agents_s: List[int], n_eval_per_n_agents: int,
-                 iterator_type: IteratorType, radius: float,
-                 seed: int = 0) -> None:
+    def __init__(
+        self,
+        roadmap: nx.Graph,
+        map_img: MAP_IMG,
+        n_agents_s: List[int],
+        n_eval_per_n_agents: int,
+        iterator_type: IteratorType,
+        radius: float,
+        seed: int = 0,
+    ) -> None:
         torch.manual_seed(seed)
         np.random.seed(seed)
         self.rng = Random(seed)
@@ -51,8 +65,7 @@ class Eval(object):
         pos = nx.get_node_attributes(self.first_roadmap, POS)
         pos_np = np.array([pos[n] for n in self.first_roadmap.nodes])
         flann = FLANN(random_seed=0)
-        flann.build_index(np.array(pos_np, dtype=np.float32),
-                          random_seed=0)
+        flann.build_index(np.array(pos_np, dtype=np.float32), random_seed=0)
         self.untrained_policy = EdgePolicyModel()
 
         self.starts_corrds_s: List[List[Tuple[float, float]]] = []
@@ -64,8 +77,9 @@ class Eval(object):
         self.states: List[ScenarioState] = []
         self.first_lengths: List[Optional[float]] = []
         # per n_agents ...
-        self.eval_set_accuracy: List[
-            List[Tuple[Data, BFS_TYPE]]] = [list() for _ in n_agents_s]
+        self.eval_set_accuracy: List[List[Tuple[Data, BFS_TYPE]]] = [
+            list() for _ in n_agents_s
+        ]
 
         N_TRIES = 100
 
@@ -79,7 +93,7 @@ class Eval(object):
             "failed_policy": 0,
             "failed_state_construction": 0,
             "failed_state_observe": 0,
-            "success": 0
+            "success": 0,
         }
         stats: Dict[int, Dict[int, Dict[str, int]]] = {}
 
@@ -94,51 +108,65 @@ class Eval(object):
                 while not solvable_and_interesting:
                     remaining_tries -= 1
                     if remaining_tries == 0:
-                        logger.error(f"Failed to generate a scenario for "
-                                     f"{n_agents} agents after "
-                                     f"{N_TRIES} tries."
-                                     f"stats: {stats}")
+                        logger.error(
+                            f"Failed to generate a scenario for "
+                            f"{n_agents} agents after "
+                            f"{N_TRIES} tries."
+                            f"stats: {stats}"
+                        )
                         raise RuntimeError("Failed to generate a scenario")
                     unique = False
                     starts: Optional[List[C]] = None
                     goals: Optional[List[C]] = None
                     starts_goals_coord: Optional[np.ndarray] = None
                     while not unique:
-                        starts_goals_coord = sample_points(
-                            n_agents * 2, map_img, self.rng
-                        ).detach().numpy()
+                        starts_goals_coord = (
+                            sample_points(n_agents * 2, map_img, self.rng)
+                            .detach()
+                            .numpy()
+                        )
                         nearest, _ = flann.nn_index(
-                            starts_goals_coord,
-                            1,
-                            random_seed=0)
+                            starts_goals_coord, 1, random_seed=0
+                        )
                         starts = nearest[:n_agents].tolist()
                         goals = nearest[n_agents:].tolist()
                         assert starts is not None
                         assert goals is not None
-                        unique = len(set(starts)) == len(starts) and \
-                            len(set(goals)) == len(goals)
+                        unique = len(set(starts)) == len(starts) and len(
+                            set(goals)
+                        ) == len(goals)
                     assert starts is not None
                     assert goals is not None
                     # make agents (only possible if single-agent sovable)
                     agents = to_agent_objects(
-                        self.first_roadmap, starts, goals,
-                        policy=PolicyType.OPTIMAL, radius=self.radius,
-                        rng=self.rng)
+                        self.first_roadmap,
+                        starts,
+                        goals,
+                        policy=PolicyType.OPTIMAL,
+                        radius=self.radius,
+                        rng=self.rng,
+                    )
                     if agents is None:
                         this_stats["failed_generating_agents"] += 1
                         continue
                     # genereally solvable?
-                    res_cbsr = plan_cbsr(self.first_roadmap, starts, goals,
-                                         self.radius, DEFAULT_TIMEOUT_S,
-                                         skip_cache=False,
-                                         ignore_finished_agents=True)
+                    res_cbsr = plan_cbsr(
+                        self.first_roadmap,
+                        starts,
+                        goals,
+                        self.radius,
+                        DEFAULT_TIMEOUT_S,
+                        skip_cache=False,
+                        ignore_finished_agents=True,
+                    )
                     if res_cbsr == INVALID:
                         this_stats["failed_cbsr"] += 1
                         continue
                     # solvable by policy
                     try:
-                        res = run_a_scenario(self.first_roadmap,
-                                             agents, False, self.iterator_type)
+                        res = run_a_scenario(
+                            self.first_roadmap, agents, False, self.iterator_type
+                        )
                     except RuntimeError:
                         this_stats["failed_policy"] += 1
                         continue
@@ -147,8 +175,12 @@ class Eval(object):
                         continue
                     # maybe we can also make a state:
                     state = ScenarioState(
-                        self.first_roadmap, starts, goals,
-                        self.untrained_policy, self.radius)
+                        self.first_roadmap,
+                        starts,
+                        goals,
+                        self.untrained_policy,
+                        self.radius,
+                    )
                     state.run()
                     if state.finished:
                         this_stats["failed_state_construction"] += 1
@@ -162,17 +194,13 @@ class Eval(object):
                         continue
                     assert observation is not None
                     self.states.append(state)
-                    i_a = self.rng.sample(
-                        list(observation.keys()), 1)[0]
+                    i_a = self.rng.sample(list(observation.keys()), 1)[0]
                     data, big_from_small = observation[i_a]
-                    self.eval_set_accuracy[i_na].append(
-                        (data, big_from_small))
+                    self.eval_set_accuracy[i_na].append((data, big_from_small))
                     # save meta data:
                     assert starts_goals_coord is not None
-                    self.starts_corrds_s.append(
-                        starts_goals_coord[:n_agents].tolist())
-                    self.goals_corrds_s.append(
-                        starts_goals_coord[n_agents:].tolist())
+                    self.starts_corrds_s.append(starts_goals_coord[:n_agents].tolist())
+                    self.goals_corrds_s.append(starts_goals_coord[n_agents:].tolist())
                     self.starts_s.append(starts)
                     self.goals_s.append(goals)
                     self.res_optimal_policy.append(res)
@@ -183,8 +211,7 @@ class Eval(object):
         pb_t.close()
         pprint(stats)
 
-    def evaluate_policy(self, model: EdgePolicyModel
-                        ) -> Dict[str, float]:
+    def evaluate_policy(self, model: EdgePolicyModel) -> Dict[str, float]:
         """
         Evaluate the policy on the first roadmap.
 
@@ -197,8 +224,9 @@ class Eval(object):
             results[n_agents] = {}
             results[n_agents][SUCCESS_STR] = []
             results[n_agents][REGRET_STR] = []
-            results[n_agents][ACCURACY_STR] = [model.accuracy(
-                self.eval_set_accuracy[i_na])]
+            results[n_agents][ACCURACY_STR] = [
+                model.accuracy(self.eval_set_accuracy[i_na])
+            ]
         for i_e in range(self.n_eval):
             # prepare agents
             n_agents = len(self.agents_s[i_e])
@@ -206,25 +234,23 @@ class Eval(object):
                 a.policy = LearnedPolicy(a, model)
                 a.back_to_the_start()
             this_res = run_a_scenario(
-                self.first_roadmap,
-                self.agents_s[i_e],
-                False,
-                self.iterator_type)
+                self.first_roadmap, self.agents_s[i_e], False, self.iterator_type
+            )
             assert n_agents in results.keys()
-            results[n_agents][SUCCESS_STR].append(
-                this_res[IDX_SUCCESS])
+            results[n_agents][SUCCESS_STR].append(this_res[IDX_SUCCESS])
             assert self.res_optimal_policy[i_e][IDX_SUCCESS]
             if this_res[IDX_SUCCESS]:
                 results[n_agents][REGRET_STR].append(
-                    this_res[IDX_AVERAGE_LENGTH] -
-                    self.res_optimal_policy[i_e][IDX_AVERAGE_LENGTH])
+                    this_res[IDX_AVERAGE_LENGTH]
+                    - self.res_optimal_policy[i_e][IDX_AVERAGE_LENGTH]
+                )
         return_results: Dict[str, float] = {}
         for n_agents, measures in results.items():
             for measure_name, measure_values in measures.items():
                 if len(measure_values) > 0:
-                    return_results[
-                        f"{measure_name}_{n_agents}"
-                    ] = float(np.mean(measure_values))
+                    return_results[f"{measure_name}_{n_agents}"] = float(
+                        np.mean(measure_values)
+                    )
         return return_results
 
     def evaluate_roadmap(self, graph: nx.Graph, flann: FLANN) -> float:
@@ -241,14 +267,20 @@ class Eval(object):
             n_agents = len(self.starts_s[i_e])
             this_e_lens = []
             starts, _ = flann.nn_index(
-                np.array(self.starts_corrds_s[i_e], dtype=np.float32),
-                1, random_seed=0)
+                np.array(self.starts_corrds_s[i_e], dtype=np.float32), 1, random_seed=0
+            )
             goals, _ = flann.nn_index(
-                np.array(self.goals_corrds_s[i_e], dtype=np.float32),
-                1, random_seed=0)
-            paths = plan_cbsr(graph, list(starts), list(goals), self.radius,
-                              DEFAULT_TIMEOUT_S, skip_cache=False,
-                              ignore_finished_agents=True)
+                np.array(self.goals_corrds_s[i_e], dtype=np.float32), 1, random_seed=0
+            )
+            paths = plan_cbsr(
+                graph,
+                list(starts),
+                list(goals),
+                self.radius,
+                DEFAULT_TIMEOUT_S,
+                skip_cache=False,
+                ignore_finished_agents=True,
+            )
             if paths == INVALID:
                 logger.warning("No paths")
                 continue
@@ -257,22 +289,22 @@ class Eval(object):
                 path = (
                     self.starts_corrds_s[i_e][i_a],
                     self.goals_corrds_s[i_e][i_a],
-                    [n for n, _ in paths[i_a]])
-                this_e_lens.append(get_path_len(
-                    pos_t, path, training=False).item())
+                    [n for n, _ in paths[i_a]],
+                )
+                this_e_lens.append(get_path_len(pos_t, path, training=False).item())
             this_e_len = float(np.mean(this_e_lens))
             if self.first_lengths[i_e] is None:
                 self.first_lengths[i_e] = this_e_len
-                all_e_lengths.append(1.)
+                all_e_lengths.append(1.0)
             else:
                 first_len = self.first_lengths[i_e]
                 assert first_len is not None
                 all_e_lengths.append(this_e_len / first_len)
         return float(np.mean(all_e_lengths))
 
-    def evaluate_both(self, model: EdgePolicyModel,
-                      graph: nx.Graph, flann: FLANN
-                      ) -> Dict[str, float]:
+    def evaluate_both(
+        self, model: EdgePolicyModel, graph: nx.Graph, flann: FLANN
+    ) -> Dict[str, float]:
         """
         Evaluate both the policy and the roadmap.
 
@@ -290,57 +322,60 @@ class Eval(object):
         for i_e in range(self.n_eval):
             n_agents = len(self.starts_s[i_e])
             starts, _ = flann.nn_index(
-                np.array(self.starts_corrds_s[i_e], dtype=np.float32),
-                1, random_seed=0)
+                np.array(self.starts_corrds_s[i_e], dtype=np.float32), 1, random_seed=0
+            )
             goals, _ = flann.nn_index(
-                np.array(self.goals_corrds_s[i_e], dtype=np.float32),
-                1, random_seed=0)
+                np.array(self.goals_corrds_s[i_e], dtype=np.float32), 1, random_seed=0
+            )
             # run sim with optimal policy
             agents = to_agent_objects(
-                graph, starts.tolist(), goals.tolist(),
-                policy=PolicyType.OPTIMAL, radius=self.radius,
-                rng=self.rng)
+                graph,
+                starts.tolist(),
+                goals.tolist(),
+                policy=PolicyType.OPTIMAL,
+                radius=self.radius,
+                rng=self.rng,
+            )
             if agents is None:
                 continue
             try:
-                res_optimal = run_a_scenario(
-                    graph, agents, False, self.iterator_type)
+                res_optimal = run_a_scenario(graph, agents, False, self.iterator_type)
             except RuntimeError:
                 res_optimal = (0, 0, 0, 0, 0)
             # run sim with learned policy
             for i_a, a in enumerate(agents):
                 a.policy = LearnedPolicy(a, model)
                 a.back_to_the_start()
-            res_policy = run_a_scenario(
-                graph, agents, False, self.iterator_type)
+            res_policy = run_a_scenario(graph, agents, False, self.iterator_type)
 
             # success
             if res_policy[IDX_SUCCESS]:
-                results[n_agents][SUCCESS_STR].append(1.)
+                results[n_agents][SUCCESS_STR].append(1.0)
             else:
-                results[n_agents][SUCCESS_STR].append(0.)
+                results[n_agents][SUCCESS_STR].append(0.0)
 
             if res_policy[IDX_SUCCESS] and res_optimal[IDX_SUCCESS]:
                 # regret
-                this_regret = (res_policy[IDX_AVERAGE_LENGTH] -
-                               res_optimal[IDX_AVERAGE_LENGTH])
+                this_regret = (
+                    res_policy[IDX_AVERAGE_LENGTH] - res_optimal[IDX_AVERAGE_LENGTH]
+                )
                 results[n_agents][REGRET_STR].append(this_regret)
 
                 # length
                 if self.first_lengths[i_e] is None:
                     self.first_lengths[i_e] = res_policy[IDX_AVERAGE_LENGTH]
-                    results[n_agents][LENGTH_STR].append(1.)
+                    results[n_agents][LENGTH_STR].append(1.0)
                 else:
                     first_len = self.first_lengths[i_e]
                     assert first_len is not None
-                    this_len = (res_policy[IDX_AVERAGE_LENGTH] /
-                                first_len)
+                    this_len = res_policy[IDX_AVERAGE_LENGTH] / first_len
                     results[n_agents][LENGTH_STR].append(this_len)
 
         return_results: Dict[str, float] = {}
         for n_agents, measures in results.items():
             for measure_name, measure_values in measures.items():
                 if len(measure_values) > 0:
-                    return_results[f"{measure_name}_{n_agents}"
-                                   ] = float(np.mean(measure_values))
+                    return_results[f"{measure_name}_{n_agents}"] = float(
+                        np.mean(measure_values)
+                    )
         return return_results

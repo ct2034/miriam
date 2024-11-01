@@ -16,48 +16,54 @@ from definitions import FREE, INVALID
 
 logger = logging.getLogger(__name__)
 
-BLOCKS_STR = 'blocks'
+BLOCKS_STR = "blocks"
 
 
 def to_inputfile(gridmap, starts, goals, fname):
     starts = np.array(starts)
     goals = np.array(goals)
     obstacles = []
-    for (x, y) in list(zip(*(np.where(gridmap > FREE)))):
+    for x, y in list(zip(*(np.where(gridmap > FREE)))):
         obstacles.append([x.item(), y.item()])
     data = {
-        "map": {
-            "dimensions": list(gridmap.shape),
-            "obstacles": obstacles},
+        "map": {"dimensions": list(gridmap.shape), "obstacles": obstacles},
         "agents": list(
-            map(lambda i_a: {
-                "name": f"agent{i_a}",
-                "start": [starts[i_a, 0].item(), starts[i_a, 1].item()],
-                "goal": [goals[i_a, 0].item(), goals[i_a, 1].item()],
-            }, range(len(starts)))
-        )
+            map(
+                lambda i_a: {
+                    "name": f"agent{i_a}",
+                    "start": [starts[i_a, 0].item(), starts[i_a, 1].item()],
+                    "goal": [goals[i_a, 0].item(), goals[i_a, 1].item()],
+                },
+                range(len(starts)),
+            )
+        ),
     }
-    with open(fname, 'w') as f:
+    with open(fname, "w") as f:
         yaml.dump(data, f, default_flow_style=True)
 
 
 def read_outfile(fname):
-    with open(fname, 'r') as f:
+    with open(fname, "r") as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
     return data
 
 
-def call_subprocess(fname_infile, fname_outfile,
-                    suboptimality, timeout, disappear_at_goal):
+def call_subprocess(
+    fname_infile, fname_outfile, suboptimality, timeout, disappear_at_goal
+):
     start_time = time.time()
     out_data = INVALID
     process = None
     t = 0
     cmd = [
         os.path.dirname(__file__) + "/libMultiRobotPlanning/build/ecbs",
-        "-i", fname_infile,
-        "-o", fname_outfile,
-        "-w", str(suboptimality)]
+        "-i",
+        fname_infile,
+        "-o",
+        fname_outfile,
+        "-w",
+        str(suboptimality),
+    ]
     if disappear_at_goal:
         cmd.append("--disappear-at-goal")
     logger.info(" ".join(cmd))
@@ -66,7 +72,7 @@ def call_subprocess(fname_infile, fname_outfile,
             cmd,
             cwd=os.path.dirname(__file__) + "/libMultiRobotPlanning",
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
         while t < timeout:
             t = time.time() - start_time
@@ -78,7 +84,7 @@ def call_subprocess(fname_infile, fname_outfile,
                     logger.error("stderrdata: " + str(stderrdata))
                 outstr = stdoutdata
                 break
-            time.sleep(.1)
+            time.sleep(0.1)
     except subprocess.CalledProcessError as e:
         logger.warning("CalledProcessError")
         logger.warning(e.output)
@@ -104,16 +110,18 @@ def call_subprocess(fname_infile, fname_outfile,
     return out_data
 
 
-def plan_in_gridmap(gridmap: np.ndarray, starts, goals,
-                    suboptimality, timeout, disappear_at_goal=False):
+def plan_in_gridmap(
+    gridmap: np.ndarray, starts, goals, suboptimality, timeout, disappear_at_goal=False
+):
     # solving memoryview: underlying buffer is not C-contiguous
-    gridmap = np.asarray(gridmap, order='C')
+    gridmap = np.asarray(gridmap, order="C")
     uuid_str = str(uuid.uuid1())
     fname_infile = "/tmp/" + uuid_str + "_in.yaml"
     fname_outfile = "/tmp/" + uuid_str + "_out.yaml"
     to_inputfile(gridmap, starts, goals, fname_infile)
-    out_data = call_subprocess(fname_infile, fname_outfile,
-                               suboptimality, timeout, disappear_at_goal)
+    out_data = call_subprocess(
+        fname_infile, fname_outfile, suboptimality, timeout, disappear_at_goal
+    )
     return out_data
 
 
@@ -136,17 +144,8 @@ if __name__ == "__main__":
     # res = plan_in_gridmap(gridmap, starts, goals, 1.5, 10, True)
     # print(res)
 
-    gridmap = np.array([
-        [0, 0, 1, 1],
-        [0, 0, 0, 1],
-        [0, 0, 0, 0],
-        [0, 0, 0, 1]
-    ])
-    starts = [[1, 2],
-              [3, 2],
-              [2, 1]]
-    goals = [[3, 0],
-             [2, 2],
-             [0, 0]]
+    gridmap = np.array([[0, 0, 1, 1], [0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 1]])
+    starts = [[1, 2], [3, 2], [2, 1]]
+    goals = [[3, 0], [2, 2], [0, 0]]
     res = plan_in_gridmap(gridmap, starts, goals, 1.5, 10, True)
     print(res)

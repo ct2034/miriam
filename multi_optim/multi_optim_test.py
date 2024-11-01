@@ -8,8 +8,7 @@ import torch
 
 import multi_optim.state
 from definitions import POS
-from multi_optim.multi_optim_run import (inflate_map, optimize_policy,
-                                         sample_trajectory)
+from multi_optim.multi_optim_run import inflate_map, optimize_policy, sample_trajectory
 from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.edge_policy_test import make_data
 from scenarios.test_helper import make_cache_folder_and_set_envvar
@@ -23,19 +22,13 @@ class MultiOptimTest(unittest.TestCase):
         super().__init__(methodName)
         make_cache_folder_and_set_envvar()
         self.g = nx.Graph()
-        self.g.add_edges_from([
-            (0, 1),
-            (1, 2),
-            (1, 3),
-            (1, 4),
-            (3, 4)])
-        nx.set_node_attributes(self.g, {
-            0: (0., 0.),
-            1: (1., 1.),
-            2: (0., 2.),
-            3: (2., 2.),
-            4: (2., 0.)}, POS)
-        self.radius = .3
+        self.g.add_edges_from([(0, 1), (1, 2), (1, 3), (1, 4), (3, 4)])
+        nx.set_node_attributes(
+            self.g,
+            {0: (0.0, 0.0), 1: (1.0, 1.0), 2: (0.0, 2.0), 3: (2.0, 2.0), 4: (2.0, 0.0)},
+            POS,
+        )
+        self.radius = 0.3
 
         #   2   3
         #    \ /|
@@ -52,15 +45,15 @@ class MultiOptimTest(unittest.TestCase):
         n_nodes = 2
         n_epochs = 20
         n_data = 10
-        policy = EdgePolicyModel(
-            num_node_features, conv_channels)
-        optimizer = torch.optim.Adam(policy.parameters(), lr=.01)
+        policy = EdgePolicyModel(num_node_features, conv_channels)
+        optimizer = torch.optim.Adam(policy.parameters(), lr=0.01)
         datas = []
 
         # test data
-        test_data = [(
-            make_data(rng, num_node_features, n_nodes),
-            {x: x for x in range(n_nodes)}) for _ in range(10)]
+        test_data = [
+            (make_data(rng, num_node_features, n_nodes), {x: x for x in range(n_nodes)})
+            for _ in range(10)
+        ]
         test_acc = policy.accuracy(test_data)
         self.assertLess(test_acc, 0.6)
 
@@ -69,7 +62,8 @@ class MultiOptimTest(unittest.TestCase):
             for _ in range(n_data):
                 datas.append(make_data(rng, num_node_features, n_nodes))
             policy, loss = optimize_policy(
-                policy, batch_size=5, optimizer=optimizer, epds=datas, n_epochs=1)
+                policy, batch_size=5, optimizer=optimizer, epds=datas, n_epochs=1
+            )
             test_acc = policy.accuracy(test_data)
             print(test_acc)
 
@@ -91,7 +85,8 @@ class MultiOptimTest(unittest.TestCase):
             self.is_agents_to_consider = None
             self.finished = False
             self.agents = to_agent_objects(
-                graph, self.starts, self.goals, radius=radius, rng=rng)
+                graph, self.starts, self.goals, radius=radius, rng=rng
+            )
             self.model = model
             if self.agents is None:
                 raise RuntimeError("Error in agent generation")
@@ -111,10 +106,8 @@ class MultiOptimTest(unittest.TestCase):
                 a.back_to_the_start()
             self.run()
 
-        with patch.object(multi_optim.state.ScenarioState, '__init__',
-                          new=patch_init):
-            with patch.object(multi_optim.state.ScenarioState, 'step',
-                              new=patch_step):
+        with patch.object(multi_optim.state.ScenarioState, "__init__", new=patch_init):
+            with patch.object(multi_optim.state.ScenarioState, "step", new=patch_step):
                 ds, paths, t = sample_trajectory(
                     seed=0,
                     graph=self.g,
@@ -122,7 +115,8 @@ class MultiOptimTest(unittest.TestCase):
                     model=model,
                     map_img=((255,),),
                     max_steps=10,
-                    radius=.1)
+                    radius=0.1,
+                )
                 print(f"{ds=}")
                 print(f"{paths=}")
                 print(f"{t=}")
@@ -142,13 +136,16 @@ class MultiOptimTest(unittest.TestCase):
 
     def test_inflate_map(self):
         img = np.array(
-            [[255, 0, 0, 0, 0],
-             [255, 0, 0, 0, 0],
-             [255, 0, 0, 255, 0],
-             [0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0]])
+            [
+                [255, 0, 0, 0, 0],
+                [255, 0, 0, 0, 0],
+                [255, 0, 0, 255, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        )
         inflated = inflate_map(img, 3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

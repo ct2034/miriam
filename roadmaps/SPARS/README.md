@@ -18,4 +18,3 @@ cd build
 ./generateRoadmap -c ../examples/config.yaml -e ../../odrm_eval/maps/o.png -o test.csv
 python3 ../examples/visualizeRoadmap.py test.csv ../../odrm_eval/maps/o.png
 ```
-

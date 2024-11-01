@@ -11,7 +11,7 @@ model.OBJ = Objective(expr=2 * model.x[1] + 3 * model.x[2])
 
 model.Constraint1 = Constraint(expr=3 * model.x[1] + 4 * model.x[2] >= 1)
 prob = model.create_instance()
-optim = SolverFactory('glpk')
+optim = SolverFactory("glpk")
 SolverFactory
 result = optim.solve(prob, tee=True)
 prob.load(result)

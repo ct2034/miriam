@@ -2,12 +2,21 @@
 
 import rospy, math, tf
 from costmap_converter.msg import ObstacleArrayMsg, ObstacleMsg
-from geometry_msgs.msg import Point32, QuaternionStamped, Quaternion, TwistWithCovariance
+from geometry_msgs.msg import (
+    Point32,
+    QuaternionStamped,
+    Quaternion,
+    TwistWithCovariance,
+)
 from tf.transformations import quaternion_from_euler
 
 
 def publish_obstacle_msg():
-    pub = rospy.Publisher('/robot_4/move_base/TebLocalPlannerROS/obstacles', ObstacleArrayMsg, queue_size=1)
+    pub = rospy.Publisher(
+        "/robot_4/move_base/TebLocalPlannerROS/obstacles",
+        ObstacleArrayMsg,
+        queue_size=1,
+    )
     rospy.init_node("test_obstacle_msg")
 
     y_0 = -3.0
@@ -43,10 +52,12 @@ def publish_obstacle_msg():
     while not rospy.is_shutdown():
 
         # Vary y component of the point obstacle
-        if (vel_y >= 0):
+        if vel_y >= 0:
             obstacle_msg.obstacles[0].polygon.points[0].y = y_0 + (vel_y * t) % range_y
         else:
-            obstacle_msg.obstacles[0].polygon.points[0].y = y_0 + (vel_y * t) % range_y - range_y
+            obstacle_msg.obstacles[0].polygon.points[0].y = (
+                y_0 + (vel_y * t) % range_y - range_y
+            )
 
         t = t + 0.1
 
@@ -55,7 +66,7 @@ def publish_obstacle_msg():
         r.sleep()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         publish_obstacle_msg()
     except rospy.ROSInterruptException:

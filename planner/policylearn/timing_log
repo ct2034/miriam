@@ -1,6 +1,6 @@
 cmd:
-  N_DATA_TO_GEN=1000 ./generate_data.py generate_simulation data/data.pk 
-took: 
+  N_DATA_TO_GEN=1000 ./generate_data.py generate_simulation data/data.pk
+took:
   2:25:46.798217
 filesize data00.pkl:
   289K

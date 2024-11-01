@@ -7,7 +7,13 @@ from threading import Lock
 
 import numpy as np
 
-from planner.tcbs.plan import plan, get_paths, comp2condition, comp2state, generate_config
+from planner.tcbs.plan import (
+    plan,
+    get_paths,
+    comp2condition,
+    comp2state,
+    generate_config,
+)
 from sim.simple.mod import Module
 from sim.simple.route import Route, Car
 from sim.simple.simulation import list_hash
@@ -25,16 +31,11 @@ def get_car_i(cars: list, car: Car):
 
 def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
     config = generate_config()
-    config['filename_pathsave'] = fname
+    config["filename_pathsave"] = fname
     try:
-        (agent_job,
-         agent_idle,
-         paths) = plan(agent_pos,
-                       jobs,
-                       alloc_jobs,
-                       idle_goals,
-                       grid,
-                       config)
+        (agent_job, agent_idle, paths) = plan(
+            agent_pos, jobs, alloc_jobs, idle_goals, grid, config
+        )
     except Exception as e:
         # Could not find a solution, returning just anything .. TODO: something better?
         logging.warning("Could not find a solution, returning just anything \n", str(e))
@@ -43,12 +44,12 @@ def plan_process(pipe, agent_pos, jobs, alloc_jobs, idle_goals, grid, fname):
             agent_job.append(tuple(a))
         agent_job[0] = (0,)
         agent_idle = ()
-        paths = get_paths(comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid),
-                          comp2state(tuple(agent_job), agent_idle, ()))
+        paths = get_paths(
+            comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid),
+            comp2state(tuple(agent_job), agent_idle, ()),
+        )
 
-    pipe.send((agent_job,
-               agent_idle,
-               paths))
+    pipe.send((agent_job, agent_idle, paths))
 
 
 def get_routes_to_plan(routes):
@@ -122,7 +123,7 @@ class Cbsext(Module):
         if self.process:
             while self.process.is_alive():
                 logging.warning("waiting (is already planning)")
-                time.sleep(.4)
+                time.sleep(0.4)
 
         job_goals_and_agents = []
 
@@ -146,37 +147,45 @@ class Cbsext(Module):
                     alloc_jobs.append((get_car_i(cars, r.car), i_route))
         for i_idle_goals in range(len(idle_goal_routes)):
             ig = idle_goal_routes[i_idle_goals]
-            if ig.goal not in job_goals_and_agents:  # we only consider idle goals where no car goes or is anyway :)
+            if (
+                ig.goal not in job_goals_and_agents
+            ):  # we only consider idle goals where no car goes or is anyway :)
                 idle_goals.append(ig.to_tuple())
 
         planning_start = datetime.datetime.now()
         parent_conn, child_conn = Pipe()
-        self.process = Process(target=plan_process,
-                               args=(child_conn,
-                                     agent_pos,
-                                     jobs,
-                                     alloc_jobs,
-                                     idle_goals,
-                                     self.grid,
-                                     self.fname)
-                               )
+        self.process = Process(
+            target=plan_process,
+            args=(
+                child_conn,
+                agent_pos,
+                jobs,
+                alloc_jobs,
+                idle_goals,
+                self.grid,
+                self.fname,
+            ),
+        )
         self.process.name = "cbs_ext planner"
         self.process.start()
         # logging.debug("process started")
-        (self.agent_job,
-         self.agent_idle,
-         self.paths) = parent_conn.recv()
+        (self.agent_job, self.agent_idle, self.paths) = parent_conn.recv()
         # logging.debug("process received")
         self.process.join(timeout=1)
         # logging.debug("process joined")
         self.process.terminate()
         # logging.debug("process terminated")
 
-        logging.info("Planning took %.4fs" % (datetime.datetime.now() - planning_start).total_seconds())
+        logging.info(
+            "Planning took %.4fs"
+            % (datetime.datetime.now() - planning_start).total_seconds()
+        )
 
         # save the paths in cars
         for i_car in range(len(cars)):
             cars[i_car].set_paths(self.paths[i_car])
 
-        self.plan_params_hash = list_hash(cars + routes)  # how we have planned last time TODO: idle_goals
+        self.plan_params_hash = list_hash(
+            cars + routes
+        )  # how we have planned last time TODO: idle_goals
         self.lock.release()

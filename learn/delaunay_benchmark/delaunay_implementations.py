@@ -34,18 +34,17 @@ class Delaunay_scipy(Delaunay_impl):
         (indptr, indices) = tri.vertex_neighbor_vertices
         g = nx.Graph()
         for i in range(n_nodes):
-            neighbors = indices[indptr[i]:indptr[i+1]]
+            neighbors = indices[indptr[i] : indptr[i + 1]]
             for n in neighbors:
                 if n >= n_nodes:
                     continue  # ignoring fake nodes from above
                 if check_edge(self.points, map_img, i, n):
-                    g.add_edge(i, n,
-                               distance=np.linalg.norm(
-                                   self.points[i] - self.points[n]))
-        nx.set_node_attributes(g,
-                               {i: tuple(self.points[i])
-                                for i in range(n_nodes)},
-                               POS)
+                    g.add_edge(
+                        i, n, distance=np.linalg.norm(self.points[i] - self.points[n])
+                    )
+        nx.set_node_attributes(
+            g, {i: tuple(self.points[i]) for i in range(n_nodes)}, POS
+        )
         return g
 
 
@@ -65,13 +64,12 @@ class Delaunay_libpysal(Delaunay_impl):
             if a >= n_nodes or b >= n_nodes:
                 continue  # ignoring fake nodes from above
             if check_edge(self.points, map_img, a, b):
-                g.add_edge(a, b,
-                           distance=np.linalg.norm(
-                               self.points[a] - self.points[b]))
-        nx.set_node_attributes(g,
-                               {i: tuple(self.points[i])
-                                for i in range(n_nodes)},
-                               POS)
+                g.add_edge(
+                    a, b, distance=np.linalg.norm(self.points[a] - self.points[b])
+                )
+        nx.set_node_attributes(
+            g, {i: tuple(self.points[i]) for i in range(n_nodes)}, POS
+        )
         return g
 
 
@@ -86,20 +84,11 @@ def read_map(fname: str):
 
 
 def is_pixel_free(map_img, point):
-    return map_img[
-        int(point[0])
-    ][
-        int(point[1])
-    ] >= 255
+    return map_img[int(point[0])][int(point[1])] >= 255
 
 
 def check_edge(pos, map_img, a, b):
-    line = bresenham(
-        pos[a][0],
-        pos[a][1],
-        pos[b][0],
-        pos[b][1]
-    )
+    line = bresenham(pos[a][0], pos[a][1], pos[b][0], pos[b][1])
     # print(list(line))
     return all([is_pixel_free(map_img, tuple(x)) for x in line])
 
@@ -111,10 +100,10 @@ def prepare_fake_nodes(pos: np.ndarray) -> int:
     # edge below.
     n_fn = 5
     fake_nodes = np.array(
-        [(0, 1/n_fn*i) for i in range(n_fn+1)] +
-        [(1, 1/n_fn*i) for i in range(n_fn+1)] +
-        [(1/n_fn*i, 0) for i in range(n_fn+1)] +
-        [(1/n_fn*i, 1) for i in range(n_fn+1)]
+        [(0, 1 / n_fn * i) for i in range(n_fn + 1)]
+        + [(1, 1 / n_fn * i) for i in range(n_fn + 1)]
+        + [(1 / n_fn * i, 0) for i in range(n_fn + 1)]
+        + [(1 / n_fn * i, 1) for i in range(n_fn + 1)]
     )
     pos = np.append(pos, fake_nodes, axis=0)
     return fake_nodes.shape[0]  # number of fake nodes
@@ -134,7 +123,7 @@ def run_delaunay_libpysal(pos_np, map_img):
     return g
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     n_nodes = 1000
     map_fname: str = "roadmaps/odrm/odrm_eval/maps/z.png"
     map_img = read_map(map_fname)
@@ -149,13 +138,19 @@ if __name__ == '__main__':
 
     for _ in tqdm(range(n_runs)):
         pos = np.array(
-            [(rng.randint(0, map_img.shape[0]-1),
-              rng.randint(0, map_img.shape[1]-1)) for _ in range(n_nodes)],
-            dtype=np.int32)
+            [
+                (
+                    rng.randint(0, map_img.shape[0] - 1),
+                    rng.randint(0, map_img.shape[1] - 1),
+                )
+                for _ in range(n_nodes)
+            ],
+            dtype=np.int32,
+        )
 
         # randomly change order
         p = rng.random()
-        HALF = .5
+        HALF = 0.5
 
         def eval_scipy():
             try:
@@ -187,13 +182,11 @@ if __name__ == '__main__':
 
     # show last results
     plt.figure()
-    plt.imshow(np.swapaxes(map_img, 0, 1), cmap='gray')
-    nx.draw_networkx(g_sp, pos=pos, node_size=10,
-                     node_color='r', with_labels=False)
+    plt.imshow(np.swapaxes(map_img, 0, 1), cmap="gray")
+    nx.draw_networkx(g_sp, pos=pos, node_size=10, node_color="r", with_labels=False)
     plt.figure()
-    plt.imshow(np.swapaxes(map_img, 0, 1), cmap='gray')
-    nx.draw_networkx(g_lp, pos=pos, node_size=10,
-                     node_color='r', with_labels=False)
+    plt.imshow(np.swapaxes(map_img, 0, 1), cmap="gray")
+    nx.draw_networkx(g_lp, pos=pos, node_size=10, node_color="r", with_labels=False)
 
     # print success rate
     print("success rate scipy:", success_s_scipy / n_runs)
@@ -205,6 +198,6 @@ if __name__ == '__main__':
     plt.figure()
     plt.violinplot([times_scipy, times_libpysal])
     plt.ylabel("runtime [s]")
-    plt.xticks([1, 2], ['scipy', 'libpysal'])
+    plt.xticks([1, 2], ["scipy", "libpysal"])
     plt.savefig("learn/delaunay_benchmark/benchmark.png")
     # plt.show()

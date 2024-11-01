@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 def discrete_laplacian(M):
     """Get the discrete Laplacian of matrix M"""
-    L = -4*M
+    L = -4 * M
     L += np.roll(M, (0, -1), (0, 1))  # right neighbor
     L += np.roll(M, (0, +1), (0, 1))  # left neighbor
     L += np.roll(M, (-1, 0), (0, 1))  # top neighbor
@@ -32,8 +32,8 @@ def gray_scott_update(A, B, DA, DB, f, k, delta_t):
     LB = discrete_laplacian(B)
 
     # Now apply the update formula
-    diff_A = (DA*LA - A*B**2 + f*(1-A)) * delta_t
-    diff_B = (DB*LB + A*B**2 - (k+f)*B) * delta_t
+    diff_A = (DA * LA - A * B**2 + f * (1 - A)) * delta_t
+    diff_B = (DB * LB + A * B**2 - (k + f) * B) * delta_t
 
     A += diff_A
     B += diff_B
@@ -50,20 +50,21 @@ def get_initial_configuration(N, random_influence=0.2):
 
     # We start with a configuration where on every grid cell
     # there's a lot of chemical A, so the concentration is high
-    A = (1-random_influence) * np.ones((N, N)) + \
-        random_influence * np.random.random((N, N))
+    A = (1 - random_influence) * np.ones((N, N)) + random_influence * np.random.random(
+        (N, N)
+    )
 
     # Let's assume there's only a bit of B everywhere
     B = random_influence * np.random.random((N, N))
 
     # Now let's add four distrubances
-    N4 = N//4
-    N3 = N//4*3
-    radius = r = int(N/10.0)
+    N4 = N // 4
+    N3 = N // 4 * 3
+    radius = r = int(N / 10.0)
 
     for n1, n2 in product([N4, N3], repeat=2):
-        A[n1-r:n1+r, n2-r:n2+r] = 0.50
-        B[n1-r:n1+r, n2-r:n2+r] = 0.25
+        A[n1 - r : n1 + r, n2 - r : n2 + r] = 0.50
+        B[n1 - r : n1 + r, n2 - r : n2 + r] = 0.25
 
     return A, B
 
@@ -71,8 +72,7 @@ def get_initial_configuration(N, random_influence=0.2):
 def draw(d: Dict[str, Dict[str, np.ndarray]]):
     ncols = len(d)
     nrows = len(d[list(d.keys())[0]])
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,
-                             figsize=(ncols*3, nrows*3))
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols * 3, nrows * 3))
     for i, (key, value) in enumerate(d.items()):
         for j, (key2, value2) in enumerate(value.items()):
             axes[j, i].imshow(value2, cmap="gray")
