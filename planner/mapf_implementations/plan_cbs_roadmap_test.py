@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 import unittest
 from random import Random
 
@@ -7,6 +8,7 @@ import networkx as nx
 import numpy as np
 import pytest
 import torch
+
 from definitions import INVALID, POS
 from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy import EdgePolicyModel
@@ -121,7 +123,9 @@ class PlanCbsrTest(unittest.TestCase):
                 print("Testing optimality of", file_or_dir)
 
                 rng = Random(0)
-                graph = nx.read_gpickle(os.path.join(dir, f"{file_or_dir}.gpickle"))
+                # graph = nx.read_gpickle(os.path.join(dir, f"{file_or_dir}.gpickle"))
+                with open(os.path.join(dir, f"{file_or_dir}.gpickle"), "rb") as f:
+                    graph = pickle.load(f)
                 assert isinstance(graph, nx.Graph)
                 model = EdgePolicyModel()
                 model.load_state_dict(
