@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repo and submodules
       uses: actions/checkout@v2
@@ -51,7 +51,7 @@ jobs:
       run: |
         pytest -rP
   mypy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repo and submodules
       uses: actions/checkout@v2
@@ -72,7 +72,7 @@ jobs:
       run: |
         mypy
   pre-commit:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repo and submodules
       uses: actions/checkout@v2
