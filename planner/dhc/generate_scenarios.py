@@ -1,10 +1,11 @@
 import pickle
 from random import Random
 
+from tqdm import tqdm
+
 from definitions import SCENARIO_TYPE
 from scenarios.generators import tracing_pathes_in_the_dark
 from tools import hasher
-from tqdm import tqdm
 
 
 def generate_file(scen: SCENARIO_TYPE):

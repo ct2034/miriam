@@ -5,9 +5,10 @@ from random import Random
 from timeit import repeat
 
 import torch
-from planner.policylearn.edge_policy import EdgePolicyModel
 from torch_geometric.data import Data
 from torch_geometric.data.batch import Batch
+
+from planner.policylearn.edge_policy import EdgePolicyModel
 
 
 def make_data(rng, num_node_features, n_nodes):

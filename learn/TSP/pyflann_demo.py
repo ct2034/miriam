@@ -1,5 +1,5 @@
-from pyflann import FLANN
 import numpy as np
+from pyflann import FLANN
 
 # the base points
 dataset = np.array([[1.0, 1, 1, 2, 3], [10, 10, 10, 3, 2], [100, 100, 2, 30, 1]])

@@ -7,6 +7,7 @@ from typing import List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
+
 from definitions import INVALID, MAP_IMG
 from tools import hasher, run_command
 

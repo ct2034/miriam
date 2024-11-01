@@ -1,10 +1,11 @@
 import math
+import random
+
 import numpy as np
 import pyafai
-from pyafai import shapes, objects
+from pyafai import objects, shapes
 from pyflann import FLANN
-import random
-from sympy.geometry.polygon import Point, Ray, Line, pi
+from sympy.geometry.polygon import Line, Point, Ray, pi
 
 
 class NnWorld(pyafai.World2D):

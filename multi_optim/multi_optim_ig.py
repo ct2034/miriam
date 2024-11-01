@@ -6,8 +6,9 @@ import networkx as nx
 import torch
 import torch_geometric
 from captum.attr import IntegratedGradients
-from definitions import POS
 from matplotlib import pyplot as plt
+
+from definitions import POS
 from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.generate_data_demo import plot_graph_wo_pos_data
 

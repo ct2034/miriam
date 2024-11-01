@@ -1,11 +1,13 @@
 import logging
-import numpy as np
 from functools import reduce
 
+import numpy as np
 from pyflann import FLANN
 
-from planner.tcbs.plan import plan as plan_cbsext, load_paths, save_paths, make_unique
 from planner.common import path
+from planner.tcbs.plan import load_paths, make_unique
+from planner.tcbs.plan import plan as plan_cbsext
+from planner.tcbs.plan import save_paths
 
 logging.getLogger("pyutilib.component.core.pca").setLevel(logging.INFO)
 

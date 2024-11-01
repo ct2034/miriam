@@ -5,6 +5,7 @@ import unittest
 
 import networkx as nx
 import numpy as np
+
 from definitions import POS
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import Policy, PolicyType, RandomPolicy

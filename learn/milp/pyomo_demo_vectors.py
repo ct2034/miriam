@@ -1,7 +1,8 @@
 from __future__ import division
+
+import numpy as np
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
-import numpy as np
 
 model = ConcreteModel()
 

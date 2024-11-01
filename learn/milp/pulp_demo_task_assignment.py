@@ -1,6 +1,5 @@
-from pulp import *
 import numpy as np
-
+from pulp import *
 
 # Author: Christian Henkel
 

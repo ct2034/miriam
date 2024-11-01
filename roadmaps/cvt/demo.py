@@ -1,6 +1,6 @@
-from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
+from matplotlib import pyplot as plt
 
 from roadmaps.cvt.build.libcvt import CVT
 

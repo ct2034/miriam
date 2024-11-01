@@ -8,10 +8,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch_geometric
-from planner.policylearn.edge_policy_graph_utils import BFS_TYPE
 from torch.nn.modules.module import T
 from torch_geometric.data import Data, Dataset
 from torch_geometric.data.batch import Batch
+
+from planner.policylearn.edge_policy_graph_utils import BFS_TYPE
 
 MODEL_INPUT = Tuple[torch.Tensor, torch.Tensor]
 EVAL_LIST = List[Tuple[Data, BFS_TYPE]]

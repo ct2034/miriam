@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import networkx as nx
 import numpy as np
 import pytest
+
 import sim.decentralized.runner as runner
 from definitions import POS
 from scenarios.generators import corridor_with_passing

@@ -2,9 +2,9 @@
 import os
 import sys
 
-from tools import StatCollector
-
 from multi_optim_run import write_stats_png
+
+from tools import StatCollector
 
 if __name__ == "__main__":
     explanation = "Pass yaml path as argument"

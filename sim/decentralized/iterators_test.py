@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import MagicMock
 
 import pytest
+
 from definitions import PATH
 from sim.decentralized.iterators import *
 from sim.decentralized.policy import PolicyType

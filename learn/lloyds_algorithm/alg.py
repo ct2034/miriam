@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 
-from typing import Dict, Tuple, List
-import numpy as np
-import matplotlib.pyplot as plt
+from typing import Dict, List, Tuple
+
 import cv2
+import matplotlib.pyplot as plt
+import numpy as np
 from scipy.spatial import Voronoi
 
 

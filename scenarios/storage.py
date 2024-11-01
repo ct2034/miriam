@@ -3,8 +3,9 @@ import pickle as pkl
 from enum import Enum, auto
 from typing import Any, Dict, OrderedDict
 
-from definitions import SCENARIO_TYPE
 from numpy.core.numerictypes import ScalarType
+
+from definitions import SCENARIO_TYPE
 from tools import hasher
 
 """

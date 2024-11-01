@@ -3,8 +3,9 @@ import logging
 import random
 
 import numpy as np
-from definitions import INVALID
 from matplotlib import pyplot as plt
+
+from definitions import INVALID
 from scenarios.evaluators import (
     cost_ecbs,
     cost_independent,

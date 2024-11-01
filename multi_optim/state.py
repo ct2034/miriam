@@ -1,6 +1,8 @@
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from torch_geometric.data import Data
+
 from definitions import SCENARIO_RESULT
 from planner.policylearn.edge_policy_graph_utils import agents_to_data, get_optimal_edge
 from sim.decentralized.iterators import IteratorType
@@ -10,7 +12,6 @@ from sim.decentralized.policy import (
     ValueThenRaisingPolicy,
 )
 from sim.decentralized.runner import has_exception, run_a_scenario, to_agent_objects
-from torch_geometric.data import Data
 
 logger = logging.getLogger(__name__)
 

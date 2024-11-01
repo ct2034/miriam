@@ -10,8 +10,9 @@ from itertools import product
 from typing import Any, List
 
 import numpy as np
-import tools
 import yaml
+
+import tools
 from definitions import FREE, INVALID
 
 logger = logging.getLogger(__name__)

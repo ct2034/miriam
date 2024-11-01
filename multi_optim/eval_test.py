@@ -5,11 +5,11 @@ from random import Random
 import networkx as nx
 import pytest
 import torch
+
+from multi_optim.eval import Eval
 from planner.policylearn.edge_policy import EdgePolicyModel
 from scenarios.test_helper import make_cache_folder_and_set_envvar
 from sim.decentralized.iterators import IteratorType
-
-from multi_optim.eval import Eval
 
 
 class EvalTest(unittest.TestCase):

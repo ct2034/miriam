@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from matplotlib import pyplot as plt
+from visualization import plot_env_with_arrows
 
 from scenarios.generators import building_walls, movingai, tracing_pathes_in_the_dark
-from visualization import plot_env_with_arrows
 
 
 def demo_movingai():

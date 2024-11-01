@@ -1,8 +1,9 @@
-from setuptools import setup
-from distutils.sysconfig import get_python_lib
 import glob
 import os
 import sys
+from distutils.sysconfig import get_python_lib
+
+from setuptools import setup
 
 if os.path.exists("readme.rst"):
     print(

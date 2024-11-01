@@ -1,13 +1,15 @@
 from __future__ import division
 
-from planner.tcbs.plan import plan as plan_cbsext, generate_config
-from pyomo.opt import SolverFactory
+import logging
+from itertools import *
+
+import numpy as np
 from pyomo.core import *
 from pyomo.environ import *
-from itertools import *
-import numpy as np
-import logging
+from pyomo.opt import SolverFactory
 
+from planner.tcbs.plan import generate_config
+from planner.tcbs.plan import plan as plan_cbsext
 
 logging.getLogger("pyomo.core").setLevel(logging.ERROR)
 logging.getLogger("pyomo.util").setLevel(logging.ERROR)

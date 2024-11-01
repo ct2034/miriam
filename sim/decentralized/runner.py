@@ -5,6 +5,7 @@ from random import Random
 from typing import Iterable, List, Optional, Tuple, Type, Union
 
 import numpy as np
+
 from definitions import BLOCKED_NODES_TYPE, INVALID, POS, SCENARIO_RESULT
 from scenarios.types import POTENTIAL_ENV_TYPE, is_gridmap, is_roadmap
 from scenarios.visualization import plot_with_paths

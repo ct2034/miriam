@@ -3,10 +3,10 @@ from itertools import product
 from math import pi
 
 import networkx as nx
-from planner.policylearn.edge_policy import EdgePolicyModel
-from scenarios.test_helper import make_cache_folder_and_set_envvar
 
 from multi_optim.state import ScenarioState
+from planner.policylearn.edge_policy import EdgePolicyModel
+from scenarios.test_helper import make_cache_folder_and_set_envvar
 
 
 class ScenarioStateTest(unittest.TestCase):

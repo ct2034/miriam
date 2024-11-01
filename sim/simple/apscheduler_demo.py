@@ -2,8 +2,8 @@
 Demonstrates how to schedule a job to be run in a process pool on 3 second intervals.
 """
 
-from datetime import datetime
 import time
+from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 

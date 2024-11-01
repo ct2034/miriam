@@ -6,6 +6,7 @@ from datetime import datetime
 
 import numpy as np
 import pytest
+
 from sim.simple.mod_cbsextension import Cbsext
 from sim.simple.mod_nearest import Nearest
 from sim.simple.mod_random import Random

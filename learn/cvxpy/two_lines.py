@@ -1,8 +1,7 @@
+import cvxpy as cp
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.lib.shape_base import _apply_along_axis_dispatcher
-
-import cvxpy as cp
 
 
 def min_dist(l1, l2):

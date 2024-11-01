@@ -1,9 +1,9 @@
 # methods to check type of environment
 from enum import Enum, auto
-from typing import Union, Dict, Tuple
+from typing import Dict, Tuple, Union
 
-import numpy as np
 import networkx as nx
+import numpy as np
 
 POTENTIAL_ENV_TYPE = Union[np.ndarray, nx.Graph]
 

@@ -4,11 +4,13 @@ from random import Random
 from typing import Any, List
 
 import networkx as nx
+import torch
+from matplotlib import pyplot as plt
+from torch_geometric.data import Data
+
 import scenarios
 import sim
-import torch
 from definitions import INVALID, POS
-from matplotlib import pyplot as plt
 from planner.policylearn.edge_policy import EdgePolicyModel
 from planner.policylearn.edge_policy_graph_utils import agents_to_data
 from planner.policylearn.generate_data_demo import plot_graph_wo_pos_data
@@ -19,7 +21,6 @@ from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario
-from torch_geometric.data import Data
 
 
 def make_random_data_self(rng, n_nodes, num_node_features):

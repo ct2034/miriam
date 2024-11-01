@@ -8,18 +8,18 @@ from random import Random
 from typing import Any, Dict, List, Optional, Tuple
 
 import cv2 as cv
+import matplotlib
 import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
 from bresenham import bresenham
-import matplotlib
 from matplotlib import pyplot as plt
 from pyflann import FLANN
 from tqdm import tqdm
 
-from definitions import DISTANCE, POS, MAP_IMG
+from definitions import DISTANCE, MAP_IMG, POS
 from planner.astar_boost.build.libastar_graph import AstarSolver
 from planner.astar_boost.converter import initialize_from_graph
 from roadmaps.var_odrm_torch.var_odrm_torch import (
@@ -1566,8 +1566,9 @@ def table_for_paper():
     the paths from the different roadmaps are compared to the GSRM
     on different maps.
     """
-    import latextable
     from collections import OrderedDict
+
+    import latextable
     from texttable import Texttable
 
     df = pd.read_csv(CSV_MEAN_PATH)
@@ -1617,8 +1618,9 @@ def table_number_edges():
     """Make a latex formatted table that contains the number of edges
     for different roadmaps on different maps.
     """
-    import latextable
     from collections import OrderedDict
+
+    import latextable
     from texttable import Texttable
 
     df = pd.read_csv(CSV_MEAN_PATH)

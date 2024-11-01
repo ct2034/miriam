@@ -3,8 +3,9 @@ from random import Random
 import networkx as nx
 import numpy as np
 import torch
-from definitions import IDX_SUCCESS
 from matplotlib import pyplot as plt
+
+from definitions import IDX_SUCCESS
 from planner.mapf_implementations.plan_cbs_roadmap import plan_cbsr
 from planner.policylearn.edge_policy import EdgePolicyModel
 from scenarios.visualization import plot_with_paths

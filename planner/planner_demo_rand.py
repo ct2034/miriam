@@ -5,7 +5,7 @@ from itertools import *
 
 import numpy as np
 
-from planner.tcbs.plan import pre_calc_paths, plan
+from planner.tcbs.plan import plan, pre_calc_paths
 from planner.tcbs_test import get_data_random
 
 if __name__ == "__main__":

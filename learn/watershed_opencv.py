@@ -1,11 +1,12 @@
 # source: https://www.pyimagesearch.com/2015/11/02/watershed-opencv/
 # import the necessary packages
+import argparse
+
+import cv2
+import numpy as np
+from scipy import ndimage
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed
-from scipy import ndimage
-import numpy as np
-import argparse
-import cv2
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()

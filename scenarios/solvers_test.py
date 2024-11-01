@@ -1,9 +1,9 @@
 import unittest
-import pytest
 
 import numpy as np
-from definitions import INVALID
+import pytest
 
+from definitions import INVALID
 from scenarios import test_helper
 from scenarios.solvers import *
 

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import numpy as np
-from matplotlib import pyplot as plt
-import libastar
 import sys
 from itertools import product
+
+import libastar
+import numpy as np
+from matplotlib import pyplot as plt
 
 width = 100
 height = 50

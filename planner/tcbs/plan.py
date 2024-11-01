@@ -4,15 +4,15 @@ import pickle
 import uuid
 from functools import reduce
 from itertools import product
-from typing import List, Any, Union, Iterator
+from typing import Any, Iterator, List, Union
 
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 from planner.astar.astar_grid48con import distance_manhattan
-from planner.tcbs.base import astar_base, MAX_COST
 from planner.common import *
 from planner.eval.display import plot_inputs, plot_results
+from planner.tcbs.base import MAX_COST, astar_base
 from tools import ColoredLogger
 
 logging.setLoggerClass(ColoredLogger)

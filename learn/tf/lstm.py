@@ -12,10 +12,11 @@ Project: https://github.com/aymericdamien/TensorFlow-Examples/
 
 from __future__ import print_function
 
+import random
+
+import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import rnn
-import numpy as np
-import random
 
 # Training Parameters
 learning_rate = 0.001

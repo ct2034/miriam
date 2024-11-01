@@ -1,9 +1,9 @@
+import pickle
 import re
 from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pickle
 
 if __name__ == "__main__":
     plt.style.use("bmh")
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     #     i_s = 0
     # data = ress[int(i_s)]
     data = False
-    from planner.eval.comparison_data_raw import all_times, all_results
+    from planner.eval.comparison_data_raw import all_results, all_times
 
     n_planners = 5
     n_sizes = 3

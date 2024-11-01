@@ -1,12 +1,13 @@
 import hashlib
 
-from planner.tcbs.plan import plan, generate_config
-from planner.tcbs_test import get_data_random
+from mpl_toolkits.mplot3d import Axes3D
+
+from planner.eval.display import *
 from planner.eval.eval_scenarios import get_costs
 from planner.milp.milp import plan_milp
-from tools import load_map, get_map_str
-from planner.eval.display import *
-from mpl_toolkits.mplot3d import Axes3D
+from planner.tcbs.plan import generate_config, plan
+from planner.tcbs_test import get_data_random
+from tools import get_map_str, load_map
 
 if __name__ == "__main__":
     params = get_data_random(

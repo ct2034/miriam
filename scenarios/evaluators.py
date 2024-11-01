@@ -1,18 +1,17 @@
 import logging
 from typing import Tuple
-import sim
+
 import networkx as nx
 import numpy as np
-from definitions import DEFAULT_TIMEOUT_S, FREE, INVALID
 from networkx.algorithms import approximation
+
+import sim
+from definitions import DEFAULT_TIMEOUT_S, FREE, INVALID
 from planner.matteoantoniazzi_mapf.plan import (
     expanded_nodes_from_info,
     is_info_valid,
     sum_of_costs_from_info,
 )
-from sim.decentralized.runner import to_agent_objects
-from sim.decentralized.agent import gridmap_to_graph
-
 from scenarios.solvers import (
     SCHEDULE,
     cached_decentralized,
@@ -20,6 +19,8 @@ from scenarios.solvers import (
     cached_icts,
     indep,
 )
+from sim.decentralized.agent import gridmap_to_graph
+from sim.decentralized.runner import to_agent_objects
 
 logging.getLogger("sim.decentralized.agent").setLevel(logging.ERROR)
 logging.getLogger("sim.decentralized.runner").setLevel(logging.ERROR)

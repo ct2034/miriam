@@ -1,7 +1,6 @@
 import timeit
 
 import numpy as np
-
 from runner import to_agent_objects
 
 setup = "from runner import to_agent_objects;import numpy as np"

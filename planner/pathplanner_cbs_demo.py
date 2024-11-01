@@ -1,10 +1,10 @@
 import datetime
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from planner.tcbs.plan import plan as plan_cbsext
 from planner.eval.display import plot_results
+from planner.tcbs.plan import plan as plan_cbsext
 
 grid = np.zeros([10, 10, 51])
 grid[4, 1:9, :] = -1

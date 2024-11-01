@@ -1,9 +1,9 @@
-import itertools
 import collections
+import itertools
 
-import scipy
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy
 
 plt.style.use("bmh")
 

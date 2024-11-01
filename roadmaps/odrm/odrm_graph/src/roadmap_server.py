@@ -1,27 +1,25 @@
 #!/usr/bin/env python2
 import os
-
-import numpy as np
-import matplotlib.pyplot as plt
-import rospy
-from multiprocessing import Pool
 import pickle
 import time
+from multiprocessing import Pool
 
-from nav_msgs.msg import OccupancyGrid
-from graph_msgs.msg import GeometryGraph, Edges
+import matplotlib.pyplot as plt
+import numpy as np
+import rospy
 from geometry_msgs.msg import Point
-from visualization_msgs.msg import Marker, MarkerArray
-
+from graph_msgs.msg import Edges, GeometryGraph
+from nav_msgs.msg import OccupancyGrid
 from odrm.odrm import (
+    eval,
+    fix,
     get_random_pos,
+    grad_func,
     graphs_from_posar,
     init_graph_posar_edgew,
     make_edges,
-    eval,
-    grad_func,
-    fix,
 )
+from visualization_msgs.msg import Marker, MarkerArray
 
 
 class RoadmapServer:

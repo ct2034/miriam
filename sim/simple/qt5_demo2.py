@@ -1,4 +1,7 @@
-import math, random, sys
+import math
+import random
+import sys
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 

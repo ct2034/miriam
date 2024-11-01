@@ -5,12 +5,12 @@ import os
 import random
 import sys
 
+import solvers
+import visualization
 from IPython import get_ipython
 from matplotlib import pyplot as plt
 
 import scenarios.generators
-import solvers
-import visualization
 
 cwd = os.getcwd()
 assert "miriam" in cwd

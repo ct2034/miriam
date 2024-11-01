@@ -1,12 +1,13 @@
 #!/usr/bin/env python2
 import os
+import pickle
 import random
 import sys
 from enum import Enum, unique
 from itertools import product
-from matplotlib import pyplot as plt
+
 import numpy as np
-import pickle
+from matplotlib import pyplot as plt
 from odrm_eval.filename_verification import is_eval_cen_file
 
 

@@ -1,8 +1,9 @@
-import tensorflow as tf
-from PIL import Image
-import numpy as np
 import math
 from itertools import product
+
+import numpy as np
+import tensorflow as tf
+from PIL import Image
 
 # src: https://dmyhaspl.github.io/2018/10/20/Gaussian-blur-2018/
 

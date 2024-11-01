@@ -3,10 +3,10 @@ from itertools import product
 from typing import Set, Tuple
 
 import matplotlib.pyplot as plt
-import numpy as np
-from scenarios.visualization import plot_with_paths
-
 import networkx as nx
+import numpy as np
+
+from scenarios.visualization import plot_with_paths
 
 
 def env_to_nx(env):

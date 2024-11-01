@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-from bresenham import bresenham
+import math
 from functools import reduce
 from itertools import product
-import math
-from matplotlib import cm
+
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-from scipy.spatial import Delaunay
+from bresenham import bresenham
+from matplotlib import cm
 from pyflann import FLANN
+from scipy.spatial import Delaunay
 
 MAX_COST = 100000
 END_BOOST = 3.

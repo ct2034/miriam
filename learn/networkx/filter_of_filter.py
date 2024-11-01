@@ -1,8 +1,8 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-import pickle
 import math
+import pickle
 
+import matplotlib.pyplot as plt
+import networkx as nx
 
 N = 300
 G = nx.grid_graph((math.sqrt(N), math.sqrt(N)))

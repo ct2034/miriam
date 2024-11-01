@@ -6,6 +6,7 @@ from typing import Dict, Optional, Tuple, Union
 import networkx as nx
 import numpy as np
 import torch
+
 from definitions import (
     BLOCKED_EDGES_TYPE,
     BLOCKED_NODES_TYPE,

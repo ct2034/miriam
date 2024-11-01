@@ -1,16 +1,16 @@
 #!/usr/bin/env python2
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 import pickle
 import sys
-from odrm_eval.filename_verification import (
-    resolve_number_of_iterations,
-    is_result_file,
-    resolve_number_of_nodes,
-    resolve,
-)
 
+import matplotlib.pyplot as plt
+import numpy as np
+from odrm_eval.filename_verification import (
+    is_result_file,
+    resolve,
+    resolve_number_of_iterations,
+    resolve_number_of_nodes,
+)
 
 plt.style.use("bmh")
 # plt.rcParams["font.family"] = "serif"

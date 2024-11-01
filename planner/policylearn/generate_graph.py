@@ -4,9 +4,10 @@ from typing import Tuple
 import networkx as nx
 import numpy as np
 import torch
-from definitions import FREE, C
 from sortedcontainers import SortedSet
 from torch_geometric.data import Data
+
+from definitions import FREE, C
 
 
 def node_to_pos(data_pos, n):

@@ -7,9 +7,9 @@ This example contains two animations. The first is a random walk plot. The
 second is an image animation.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def update_line(num, data, lines):

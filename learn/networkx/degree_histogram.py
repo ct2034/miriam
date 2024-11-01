@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
-import numpy as np
-
 import networkx as nx
+import numpy as np
 
 
 def plot_degree_dist(G):

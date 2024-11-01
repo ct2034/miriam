@@ -10,6 +10,8 @@ from itertools import combinations, product
 import imageio
 import networkx as nx
 import numpy as np
+from bresenham import bresenham
+from odrm.eval_disc import eval_disc, get_unique_batch, write_csv
 from odrm.odrm import (
     dist,
     get_edge_statistics,
@@ -19,16 +21,13 @@ from odrm.odrm import (
     make_edges,
     vertex_path,
 )
-from bresenham import bresenham
-from scipy.spatial import Delaunay
-
 from odrm_eval.filename_verification import (
-    is_result_file,
     is_eval_file,
-    resolve_mapname,
+    is_result_file,
     resolve,
+    resolve_mapname,
 )
-from odrm.eval_disc import get_unique_batch, eval_disc, write_csv
+from scipy.spatial import Delaunay
 
 logging.basicConfig(level=logging.INFO)
 

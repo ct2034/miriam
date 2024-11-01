@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
-import rospy, math, tf
+import math
+
+import rospy
+import tf
 from costmap_converter.msg import ObstacleArrayMsg, ObstacleMsg
-from geometry_msgs.msg import Polygon, Point32, Quaternion
+from geometry_msgs.msg import Point32, Polygon, Quaternion
 from nav_msgs.msg import Odometry
 
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import sys
-import random
 import math
+import random
+import sys
+
 import networkx as nx
 
 

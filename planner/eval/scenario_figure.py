@@ -1,9 +1,10 @@
-from planner.tcbs.plan import plan, generate_config
+from mpl_toolkits.mplot3d import Axes3D
+
+from planner.eval.display import *
 from planner.eval.eval_scenarios import get_costs
 from planner.milp.milp import plan_milp
+from planner.tcbs.plan import generate_config, plan
 from tools import load_map
-from planner.eval.display import *
-from mpl_toolkits.mplot3d import Axes3D
 
 if __name__ == "__main__":
     _ = Axes3D

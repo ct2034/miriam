@@ -1,9 +1,8 @@
 import numpy as np
 
-from tools import load_map
-
-from planner.greedy.greedy import plan_greedy
 from planner.eval.display import plot_inputs, plot_results
+from planner.greedy.greedy import plan_greedy
+from tools import load_map
 
 if __name__ == "__main__":
     _map = load_map("../map2.png")

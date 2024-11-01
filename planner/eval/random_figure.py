@@ -1,12 +1,11 @@
 import hashlib
 
-from planner.tcbs_test import get_data_random
-from planner.eval.display import plot_inputs, plot_results
-from planner.tcbs.plan import plan, generate_config
-from planner.milp.milp import plan_milp
-
 import matplotlib.pyplot as plt
 
+from planner.eval.display import plot_inputs, plot_results
+from planner.milp.milp import plan_milp
+from planner.tcbs.plan import generate_config, plan
+from planner.tcbs_test import get_data_random
 from tools import get_map_str
 
 if __name__ == "__main__":

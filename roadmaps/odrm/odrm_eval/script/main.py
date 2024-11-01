@@ -1,22 +1,22 @@
 #!/usr/bin/env python2
-import imageio
-from itertools import product
-import matplotlib.pyplot as plt
-from multiprocessing import Pool
-import numpy as np
 import os
 import pickle
 import sys
 import time
+from itertools import product
+from multiprocessing import Pool
 
+import imageio
+import matplotlib.pyplot as plt
+import numpy as np
 from odrm.odrm import (
+    eval,
+    fix,
     get_random_pos,
+    grad_func,
     graphs_from_posar,
     init_graph_posar_edgew,
     make_edges,
-    eval,
-    grad_func,
-    fix,
 )
 
 # import odrm

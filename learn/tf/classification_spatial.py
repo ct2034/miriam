@@ -8,14 +8,15 @@ from itertools import product
 import cachier
 import networkx as nx
 import numpy as np
-import sim
 import tensorflow as tf
 from matplotlib import pyplot as plt
+from tensorflow.keras import initializers, layers, regularizers
+from tensorflow.keras.models import Sequential
+
+import sim
 from scenarios.evaluators import is_well_formed
 from scenarios.generators import FREE, random_fill
 from sim.decentralized.agent import gridmap_to_nx
-from tensorflow.keras import initializers, layers, regularizers
-from tensorflow.keras.models import Sequential
 from tools import hasher
 
 

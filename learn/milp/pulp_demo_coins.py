@@ -1,5 +1,6 @@
-from pulp import *
 import random
+
+from pulp import *
 
 # Example for IP to find smallest number of coins necessary to represent an
 # amount of money in e.g. EUR coin sizes

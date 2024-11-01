@@ -1,11 +1,10 @@
 from functools import reduce
 from itertools import product
 
+import matplotlib.animation as animation
 import numpy as np
 from matplotlib import cm
 from matplotlib import pyplot as plt
-import matplotlib.animation as animation
-
 from mpl_toolkits.mplot3d import Axes3D
 
 _ = Axes3D

@@ -9,7 +9,6 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from matplotlib import pyplot as plt
-from tools import ProgressBar
 from torch.nn import Linear, MSELoss
 from torch.special import expit
 from torch_geometric.loader import DataLoader
@@ -20,6 +19,8 @@ from torch_geometric.nn import (
     global_max_pool,
     global_mean_pool,
 )
+
+from tools import ProgressBar
 
 LOSSFN = MSELoss()
 

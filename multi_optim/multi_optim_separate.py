@@ -9,16 +9,16 @@ import numpy as np
 import torch
 import torch.multiprocessing as tmp
 import yaml
-from definitions import POS
 from matplotlib import pyplot as plt
-from planner.policylearn.edge_policy import EdgePolicyModel
 from pyflann import FLANN
-from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 
+from definitions import POS
 from multi_optim.configs import configs_all_maps
 from multi_optim.eval import Eval
 from multi_optim.multi_optim_run import run_optimization
 from multi_optim.state import ITERATOR_TYPE
+from planner.policylearn.edge_policy import EdgePolicyModel
+from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 
 matplotlib.use("cairo")
 plt.style.use("bmh")

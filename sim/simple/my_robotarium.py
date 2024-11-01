@@ -1,6 +1,7 @@
-from numpy import *
-from robotarium import Robotarium, transformations, graph
 import json
+
+from numpy import *
+from robotarium import Robotarium, graph, transformations
 
 
 def pointFromPose(pose):

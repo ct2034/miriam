@@ -1,9 +1,10 @@
 from __future__ import division
 
-import numpy as np
 from itertools import *
-from pyomo.environ import *
+
+import numpy as np
 from pyomo.core import *
+from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
 

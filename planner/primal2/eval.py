@@ -4,6 +4,7 @@ import subprocess
 from random import Random
 
 import numpy as np
+
 from definitions import SCENARIO_TYPE
 from scenarios.evaluators import cost_ecbs
 from scenarios.generators import tracing_pathes_in_the_dark

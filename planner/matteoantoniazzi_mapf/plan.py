@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
+
 from definitions import DEFAULT_TIMEOUT_S, OBSTACLE
 
 from .external.MAPFSolver.SearchBasedAlgorithms import ICTSSolver

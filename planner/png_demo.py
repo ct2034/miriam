@@ -1,6 +1,7 @@
-import png
-import numpy as np
 from itertools import *
+
+import numpy as np
+import png
 
 if __name__ == "__main__":
     r = png.Reader(filename="planner/tcbs/map.png")

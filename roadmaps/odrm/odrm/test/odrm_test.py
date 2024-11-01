@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 from itertools import combinations
 from math import sqrt
+from random import random
+
 import networkx as nx
 import numpy as np
-from random import random
 
 from roadmaps.odrm import grad_func, graphs_from_posar, make_edges
 

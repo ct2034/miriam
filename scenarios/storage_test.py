@@ -3,8 +3,8 @@ import random
 import unittest
 
 import numpy as np
-from definitions import INVALID
 
+from definitions import INVALID
 from scenarios import generators, storage, test_helper
 from scenarios.storage import ResultType, to_key_string
 

@@ -1,5 +1,6 @@
-import numpy as np
 from datetime import datetime
+
+import numpy as np
 
 if __name__ == "__main__":
     NaN = np.nan

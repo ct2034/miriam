@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from planner.eval.display import animate_results
 from tools import load_map

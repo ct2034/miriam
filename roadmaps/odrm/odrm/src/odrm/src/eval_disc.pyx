@@ -10,6 +10,7 @@ from itertools import combinations, product
 import imageio
 import networkx as nx
 import numpy as np
+from bresenham import bresenham
 from odrm import (
     dist,
     get_edge_statistics,
@@ -17,17 +18,15 @@ from odrm import (
     graphs_from_posar,
     is_pixel_free,
     make_edges,
-    vertex_path
+    vertex_path,
 )
-from bresenham import bresenham
-from scipy.spatial import Delaunay
-
 from odrm_eval.filename_verification import (
-    is_result_file,
     is_eval_file,
+    is_result_file,
+    resolve,
     resolve_mapname,
-    resolve
 )
+from scipy.spatial import Delaunay
 
 logging.basicConfig(level=logging.INFO)
 

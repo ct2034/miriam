@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Union
 
 import torch
 from matplotlib import pyplot as plt
+
 from scenarios.visualization import get_colors, plot_env, plot_schedule, plot_with_paths
 
 PLOT_FOVS_STR = "plot_fovs"

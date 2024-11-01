@@ -2,6 +2,7 @@ import unittest
 from random import Random
 
 import numpy as np
+
 from definitions import INVALID
 from planner.dhc.eval import eval
 from scenarios.generators import tracing_pathes_in_the_dark

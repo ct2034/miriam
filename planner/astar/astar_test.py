@@ -1,8 +1,8 @@
 import datetime
 
 import numpy as np
-from planner.astar import astar_grid48con
 
+from planner.astar import astar_grid48con
 from planner.astar.base import NoPathException
 
 grid = np.zeros([10, 10, 10])

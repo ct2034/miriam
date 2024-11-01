@@ -1,15 +1,14 @@
 import os
-import pytest
 from functools import reduce
 
-import numpy as np
-
-from planner.eval.display import plot_inputs, plot_results
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
+from planner.cobra.funwithsnakes import plan_cobra, read_path_file
+from planner.eval.display import plot_inputs, plot_results
 from planner.tcbs.plan import generate_config
 from planner.tcbs_test import get_data_random
-from planner.cobra.funwithsnakes import read_path_file, plan_cobra
 
 
 def test_read_file(fname="planner/cobra/test.path", plot=False):

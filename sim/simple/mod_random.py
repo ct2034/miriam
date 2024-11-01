@@ -2,7 +2,7 @@ import random
 
 from planner.astar.astar_grid48con import astar_grid4con
 from sim.simple.mod import Module
-from sim.simple.route import Route, Car
+from sim.simple.route import Car, Route
 
 
 class Random(Module):

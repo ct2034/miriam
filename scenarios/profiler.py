@@ -1,7 +1,8 @@
 import cProfile
-import numpy as np
-from learn.tf.classification_spatial import run_an_example_and_plot_info
 
+import numpy as np
+
+from learn.tf.classification_spatial import run_an_example_and_plot_info
 
 cProfile.run("run_an_example_and_plot_info()")
 

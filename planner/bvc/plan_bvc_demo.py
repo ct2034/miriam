@@ -4,6 +4,7 @@ from typing import List
 
 import numpy as np
 from matplotlib import pyplot as plt
+
 from multi_optim.multi_optim_run import RADIUS
 from planner.bvc.plan_bvc import get_average_path_length, plan
 from roadmaps.var_odrm_torch.var_odrm_torch import read_map, sample_points

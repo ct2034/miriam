@@ -7,8 +7,9 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
     src: https://stackoverflow.com/questions/22988882/how-to-smooth-a-curve-in-python
     """
-    import numpy as np
     from math import factorial
+
+    import numpy as np
 
     try:
         window_size = np.abs(np.int(window_size))

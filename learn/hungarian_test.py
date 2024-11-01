@@ -1,7 +1,7 @@
 import munkres
 import numpy as np
 
-from tools import benchmark, mongodb_save, is_travis
+from tools import benchmark, is_travis, mongodb_save
 
 m = munkres.Munkres()
 

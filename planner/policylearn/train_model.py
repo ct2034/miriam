@@ -5,7 +5,6 @@ import pickle
 from typing import List, Optional
 
 import numpy as np
-from importtf import keras, tf
 from matplotlib import pyplot as plt
 from tensorflow.compat.v1 import ConfigProto, InteractiveSession
 from tensorflow.keras.layers import (
@@ -24,6 +23,8 @@ from tensorflow.keras.layers import (
 )
 from tensorflow.keras.models import Sequential
 from tensorflow.python.keras.backend import dropout
+
+from importtf import keras, tf
 from tools import ProgressBar
 
 # choices of model type

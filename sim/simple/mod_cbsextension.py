@@ -1,21 +1,20 @@
 import datetime
 import logging
 import time
-from multiprocessing import Pipe
-from multiprocessing import Process
+from multiprocessing import Pipe, Process
 from threading import Lock
 
 import numpy as np
 
 from planner.tcbs.plan import (
-    plan,
-    get_paths,
     comp2condition,
     comp2state,
     generate_config,
+    get_paths,
+    plan,
 )
 from sim.simple.mod import Module
-from sim.simple.route import Route, Car
+from sim.simple.route import Car, Route
 from sim.simple.simulation import list_hash
 
 FORMAT = "%(asctime)s %(levelname)s %(message)s"

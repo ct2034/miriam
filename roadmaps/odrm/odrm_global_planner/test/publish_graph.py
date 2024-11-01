@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import rospy
-from graph_msgs.msg import Edges, GeometryGraph
 from geometry_msgs.msg import Point
+from graph_msgs.msg import Edges, GeometryGraph
 
 if __name__ == "__main__":
     rospy.init_node("pubish_graph", log_level=rospy.INFO)

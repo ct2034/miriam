@@ -3,15 +3,13 @@ import csv
 import datetime
 import itertools
 import logging
-import numpy as np
 import os
 import pickle
-import psutil
-import uuid
 import random
 import signal
 import sys
 import time
+import uuid
 from enum import Enum
 from math import sqrt
 from typing import Dict
@@ -21,17 +19,19 @@ import benchmark_ilp
 import coloredlogs
 import imageio
 import networkx as nx
+import numpy as np
+import psutil
+from bresenham import bresenham
+from odrm.eval_disc import eval_graph, get_unique_batch, graphs_from_posar, make_edges
 from odrm.odrm import is_pixel_free
-from odrm.eval_disc import get_unique_batch, eval_graph, graphs_from_posar, make_edges
 from odrm_eval.filename_verification import (
+    get_basename_wo_extension,
     get_graph_csvs,
     get_graph_undir_csv,
-    is_result_file,
     is_eval_cen_file,
+    is_result_file,
     resolve_mapname,
-    get_basename_wo_extension,
 )
-from bresenham import bresenham
 
 coloredlogs.install(level=logging.INFO)
 

@@ -1,7 +1,8 @@
 # source: https://github.com/sagarvegad/Adam-optimizer
 import math
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 alpha = 0.01
 beta_1 = 0.9

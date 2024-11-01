@@ -1,10 +1,10 @@
+import logging
 import os
+import time
 import uuid
 from itertools import product
 
 import numpy as np
-import time
-import logging
 
 import tools
 

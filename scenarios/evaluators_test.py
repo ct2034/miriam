@@ -3,13 +3,13 @@ import unittest
 
 import numpy as np
 import pytest
+
+import scenarios.evaluators
 from definitions import INVALID
+from scenarios import test_helper
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import LearnedPolicy, PolicyType, RandomPolicy
 from sim.decentralized.runner import to_agent_objects
-
-import scenarios.evaluators
-from scenarios import test_helper
 
 TEST_TIMEOUT = 5  # to be used for ecbs and icts calls
 

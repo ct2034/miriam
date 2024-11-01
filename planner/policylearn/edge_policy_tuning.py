@@ -6,12 +6,13 @@ from typing import Dict, List, Union
 import numpy as np
 import torch
 import torch.multiprocessing as mp
-from cuda_util import pick_gpu_low_memory
 from matplotlib import pyplot as plt
+from torch_geometric.loader import DataLoader
+
+from cuda_util import pick_gpu_low_memory
 from planner.policylearn.edge_policy import EdgePolicyDataset, EdgePolicyModel
 from scenarios.visualization import get_colors
 from tools import ProgressBar
-from torch_geometric.loader import DataLoader
 
 
 def learning(

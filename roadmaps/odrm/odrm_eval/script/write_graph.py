@@ -1,19 +1,19 @@
 #!/usr/bin/env python2
 import csv
-import matplotlib.pyplot as plt
 import os
 import pickle
 import sys
 
 import imageio
+import matplotlib.pyplot as plt
 import networkx as nx
 from odrm.odrm import graphs_from_posar, make_edges, plot_graph
 from odrm_eval.filename_verification import (
+    get_basename_wo_extension,
     get_graph_csvs,
     get_graph_undir_csv,
     is_result_file,
     resolve_mapname,
-    get_basename_wo_extension,
 )
 
 plt.style.use("bmh")

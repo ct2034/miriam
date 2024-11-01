@@ -3,13 +3,14 @@ import hashlib
 import json
 import math
 import random
+
 import matplotlib.pyplot as plt
 
-from planner.tcbs_test import get_data_random
+from planner.eval.display import plot_inputs, plot_results
 from planner.eval.eval_scenarios import get_costs
-from planner.eval.display import plot_results, plot_inputs
 from planner.tcbs.plan import generate_config, plan, pre_calc_paths
-from tools import benchmark, mongodb_save, is_cch, get_map_str
+from planner.tcbs_test import get_data_random
+from tools import benchmark, get_map_str, is_cch, mongodb_save
 
 
 def one_planner(config, size):

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import os
-import sys
-import pickle
 import argparse
+import os
+import pickle
+import sys
 
 verbs = ["list", "transform"]
 parser = argparse.ArgumentParser(description="Fun with some pickle files.")

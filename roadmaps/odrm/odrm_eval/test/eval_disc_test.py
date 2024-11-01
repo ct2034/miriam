@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
 import random
+
 import networkx as nx
 import numpy as np
 
-from roadmaps.odrm_eval import synchronize_paths, eval_disc
+from roadmaps.odrm_eval import eval_disc, synchronize_paths
 
 
 def test_eval_disc_basic():

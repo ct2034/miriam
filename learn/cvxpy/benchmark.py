@@ -3,8 +3,9 @@ import timeit
 
 import matplotlib.pyplot as plt
 import numpy as np
-from learn.cvxpy.two_lines import min_dist
 from tqdm import tqdm
+
+from learn.cvxpy.two_lines import min_dist
 
 if __name__ == "__main__":
     n_tests = 100

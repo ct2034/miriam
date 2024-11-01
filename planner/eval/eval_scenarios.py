@@ -1,10 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import time
 
-from planner.tcbs.plan import plan, generate_config
-from planner.eval.display import plot_results, plot_inputs
-from tools import load_map, get_map_str
+import matplotlib.pyplot as plt
+import numpy as np
+
+from planner.eval.display import plot_inputs, plot_results
+from planner.tcbs.plan import generate_config, plan
+from tools import get_map_str, load_map
 
 
 def eval(_map, agent_pos, jobs, fname, display=False, finished_blocking=True):

@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from planner.tcbs.plan import generate_config, plan
 from planner.eval.display import animate_results, plot_inputs
 from planner.milp.milp import plan_milp
+from planner.tcbs.plan import generate_config, plan
 from tools import load_map
 
 if __name__ == "__main__":

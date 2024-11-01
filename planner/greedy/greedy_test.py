@@ -1,7 +1,7 @@
-from planner.tcbs.plan import generate_config
-from planner.greedy.greedy import plan_greedy
 import numpy as np
 
+from planner.greedy.greedy import plan_greedy
+from planner.tcbs.plan import generate_config
 
 # def test_greedy_simple():
 #     res_agent_job, res_paths = plan_greedy(

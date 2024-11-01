@@ -13,13 +13,13 @@ from typing import *
 import matplotlib.colors as colors
 import numpy as np
 import pandas as pd
-from definitions import INVALID, NO_SUCCESS, SUCCESS
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from tools import BLUE_SEQ, RESET_SEQ, ProgressBar
 
+from definitions import INVALID, NO_SUCCESS, SUCCESS
 from scenarios.evaluators import *
 from scenarios.generators import *
+from tools import BLUE_SEQ, RESET_SEQ, ProgressBar
 
 GENERATOR = "generator"
 FILL = "fill"

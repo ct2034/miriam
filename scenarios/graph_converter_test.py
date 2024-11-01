@@ -1,7 +1,8 @@
-from scenarios.graph_converter import *
-import unittest
 import random
+import unittest
+
 from definitions import OBSTACLE
+from scenarios.graph_converter import *
 
 
 class TestGraphConverter(unittest.TestCase):

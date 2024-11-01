@@ -2,8 +2,7 @@
 from math import sqrt
 
 import rospy
-from geometry_msgs.msg import Polygon, Point32
-
+from geometry_msgs.msg import Point32, Polygon
 
 if __name__ == "__main__":
     rospy.init_node("pub_footprint")

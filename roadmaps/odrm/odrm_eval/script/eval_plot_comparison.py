@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
-import matplotlib.pyplot as plt
-import numpy as np
 import pickle
 import sys
 
+import matplotlib.pyplot as plt
+import numpy as np
 from odrm_eval.filename_verification import is_result_file
 
 

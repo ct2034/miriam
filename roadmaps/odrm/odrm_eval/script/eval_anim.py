@@ -1,11 +1,12 @@
 #!/usr/bin/env python2
-from odrm.odrm import graphs_from_posar, make_edges, plot_graph
-import imageio
-from matplotlib import animation
-import matplotlib.pyplot as plt
-import numpy as np
 import pickle
 import sys
+
+import imageio
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import animation
+from odrm.odrm import graphs_from_posar, make_edges, plot_graph
 
 plt.style.use("bmh")
 plt.rcParams["font.family"] = "sans-serif"

@@ -1,12 +1,12 @@
 from math import sqrt
 
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
-from definitions import POS
 from pyflann import *
 from scipy.spatial import Delaunay
 
-import networkx as nx
+from definitions import POS
 
 
 def dist(a, b):

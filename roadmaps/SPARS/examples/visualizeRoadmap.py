@@ -1,10 +1,10 @@
 # pyline: disable=no-member
-import numpy as np
 import argparse
 
-import matplotlib.pyplot as plt
-from matplotlib import collections as mc
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import collections as mc
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

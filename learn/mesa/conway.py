@@ -1,11 +1,12 @@
 import random
 from itertools import product
+
 from mesa import Agent, Model
 from mesa.datacollection import DataCollector
 from mesa.space import MultiGrid
 from mesa.time import BaseScheduler
-from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
+from mesa.visualization.modules import CanvasGrid
 
 
 class ConwayAgent(Agent):

@@ -15,8 +15,8 @@ import networkx as nx
 
 from definitions import DISTANCE, MAP_IMG, POS
 from roadmaps.benchmark import PRM
-from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 from roadmaps.ompl.build.libomplpy import Ompl
+from roadmaps.var_odrm_torch.var_odrm_torch import read_map
 
 DPI = 500
 

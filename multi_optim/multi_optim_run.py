@@ -17,6 +17,7 @@ import networkx as nx
 import numpy as np
 import torch
 import torch.multiprocessing as tmp
+import wandb
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from pyflann import FLANN
@@ -25,7 +26,6 @@ from torch_geometric.loader import DataLoader
 import scenarios
 import scenarios.solvers
 import tools
-import wandb
 from cuda_util import pick_gpu_lowest_memory
 from definitions import DEFAULT_TIMEOUT_S, INVALID, MAP_IMG, PATH_W_COORDS, POS
 from multi_optim.configs import configs_more_lr_pos_s

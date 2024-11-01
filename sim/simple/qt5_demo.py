@@ -1,7 +1,9 @@
 # simple code by Krystian Samp - krychu (samp[dot]krystian[monkey]gmail.com), November 2006
 
-import sys, time
-from PyQt5 import QtGui, QtCore
+import sys
+import time
+
+from PyQt5 import QtCore, QtGui
 
 
 class MyView(QtGui.QGraphicsView):

@@ -4,11 +4,12 @@ from typing import Dict, Tuple
 
 import networkx as nx
 import numpy as np
-import scenarios
 import torch
-from definitions import DEFAULT_TIMEOUT_S, INVALID, POS
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected
+
+import scenarios
+from definitions import DEFAULT_TIMEOUT_S, INVALID, POS
 
 BFS_TYPE = Dict[int, int]
 logger = logging.getLogger(__name__)

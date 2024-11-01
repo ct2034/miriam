@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+
 from planner.policylearn.generate_graph import gridmap_to_graph
 
 

@@ -2,6 +2,7 @@
 import random
 
 from matplotlib import pyplot as plt
+
 from scenarios import visualization
 from scenarios.generators import tracing_pathes_in_the_dark
 from sim.decentralized.agent import Agent

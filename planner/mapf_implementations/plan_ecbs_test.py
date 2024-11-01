@@ -3,6 +3,7 @@ import unittest
 from random import Random
 
 import numpy as np
+
 from definitions import INVALID
 from planner.mapf_implementations.plan_ecbs import plan_in_gridmap
 from scenarios import test_helper

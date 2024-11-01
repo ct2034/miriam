@@ -1,4 +1,5 @@
 import numpy as np
+
 from planner.matteoantoniazzi_mapf.plan import icts
 from tools import get_map_str
 

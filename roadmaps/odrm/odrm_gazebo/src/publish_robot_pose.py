@@ -1,12 +1,12 @@
 #!/usr/bin/env python2
 import csv
-import numpy as np
 import random
-import rospy
 import sys
 
+import numpy as np
+import rospy
 from gazebo_msgs.msg import ModelState
-from gazebo_msgs.srv import SpawnModel, SpawnModelRequest, DeleteModel
+from gazebo_msgs.srv import DeleteModel, SpawnModel, SpawnModelRequest
 
 SET_MODEL_TOPIC_NAME = "/gazebo/set_model_state"
 SPAWN_SERVICE_NAME = "/gazebo/spawn_urdf_model"

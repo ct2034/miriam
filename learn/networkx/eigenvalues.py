@@ -7,9 +7,9 @@ compare:
 Create an G{n,m} random graph and compute the eigenvalues.
 Requires numpy and matplotlib.
 """
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy.linalg
-import matplotlib.pyplot as plt
 
 n = 50  # nodes
 m = 70  # edges

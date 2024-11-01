@@ -1,6 +1,8 @@
+from typing import List, Tuple
+
 import networkx as nx
 import numpy as np
-from typing import Tuple, List
+
 from definitions import FREE, POS
 
 

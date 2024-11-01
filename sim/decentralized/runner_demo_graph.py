@@ -5,9 +5,10 @@ from typing import Any, List
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-from definitions import POS
 from libpysal import weights
 from libpysal.cg import voronoi_frames
+
+from definitions import POS
 from scenarios.visualization import plot_env_with_arrows, plot_with_paths
 from sim.decentralized.agent import Agent
 from sim.decentralized.iterators import IteratorType

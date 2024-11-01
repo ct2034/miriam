@@ -4,6 +4,7 @@ import uuid
 
 import networkx as nx
 import numpy as np
+
 from sim.decentralized.agent import gridmap_to_graph
 
 ENVVAR_STORAGE_PATH_STR = "SCENARIO_STORAGE_PATH"
