@@ -255,7 +255,7 @@ def optimize_policy(
         for _, batch in enumerate(loader):
             loss = model.learn(batch, optimizer)
             loss_s.append(loss)
-        loader.dataset.shuffle()
+        # loader.dataset.shuffle() <- this is done above in DataLoader
 
     if len(loss_s) == 0:
         loss_s = [0]
