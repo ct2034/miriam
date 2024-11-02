@@ -72,9 +72,7 @@ def read_outfile(fname):
     return data
 
 
-def call_subprocess(
-    fname_infile, fname_outfile, suboptimality, timeout, disappear_at_goal
-):
+def call_subprocess(fname_infile, fname_outfile, timeout):
     start_time = time.time()
     out_data = INVALID
     process = None
@@ -121,7 +119,7 @@ def call_subprocess(
             out_data = read_outfile(fname_outfile)
             t = time.time() - start_time
         except TypeError as e:
-            logger.error("TypeError" + str(e))
+            logger.error(str(e))
         try:
             os.remove(fname_outfile)
         except OSError:
@@ -130,9 +128,7 @@ def call_subprocess(
     return out_data
 
 
-def plan_in_gridmap(
-    gridmap: np.ndarray, starts, goals, suboptimality, timeout, disappear_at_goal=False
-):
+def plan_in_gridmap(gridmap: np.ndarray, starts, goals, timeout):
     # solving memoryview: underlying buffer is not C-contiguous
     gridmap = np.asarray(gridmap, order="C")
     uuid_str = str(uuid.uuid1())
@@ -140,33 +136,13 @@ def plan_in_gridmap(
     fname_outfile = "/tmp/" + uuid_str + "_out.yaml"
     to_inputfile(gridmap, starts, goals, fname_infile)
     print("fname_infile", fname_infile)
-    out_data = call_subprocess(
-        fname_infile, fname_outfile, suboptimality, timeout, disappear_at_goal
-    )
+    out_data = call_subprocess(fname_infile, fname_outfile, timeout)
     return out_data
 
 
 if __name__ == "__main__":
-    # gridmap = np.array([
-    #     [0, 0, 1, 0],
-    #     [0, 0, 1, 0],
-    #     [0, 0, 0, 0],
-    #     [0, 0, 1, 0],
-    #     [0, 0, 1, 0],
-    # ])
-    # starts = [
-    #     [0, 1],
-    #     [4, 1]
-    # ]
-    # goals = [
-    #     [0, 3],
-    #     [4, 3]
-    # ]
-    # res = plan_in_gridmap(gridmap, starts, goals, 1.5, 10, True)
-    # print(res)
-
     gridmap = np.array([[0, 0, 1, 1], [0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 1]])
     starts = [[1, 2], [3, 2], [2, 1]]
     goals = [[3, 0], [2, 2], [0, 0]]
-    res = plan_in_gridmap(gridmap, starts, goals, 1.5, 10, True)
+    res = plan_in_gridmap(gridmap, starts, goals, 10)
     print(res)
