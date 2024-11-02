@@ -47,6 +47,13 @@ jobs:
         cd build
         cmake ..
         make
+    - name: Build ompl
+      run: |
+        cd roadmaps/ompl
+        mkdir -p build
+        cd build
+        cmake ..
+        make
     - name: Test with pytest
       run: |
         pytest -rP
