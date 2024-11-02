@@ -1,5 +1,5 @@
 cvxpy
-psutil
-pyyaml
 matplotlib
 numpy
+psutil
+pyyaml
