@@ -32,6 +32,7 @@ docs/sphinx/build
 
 # caches
 .scenario_cache/*.pkl
+scenarios/.scenario_cache/*.pkl
 multi_optim/results/*_data/*.pkl
 multi_optim/results/tuning/*_data/*.pkl
 
