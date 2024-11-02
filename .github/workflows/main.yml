@@ -60,6 +60,7 @@ jobs:
         pytest -rP
       env:
         PYTHONPATH: ${{github.workspace}}
+        SCENARIO_STORAGE_PATH: ${{github.workspace}}/.scenario_cache
   pre-commit:
     runs-on: ubuntu-latest
     steps:
