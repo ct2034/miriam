@@ -49,7 +49,7 @@ jobs:
         make
     - name: Build ompl
       run: |
-        sudo apt install -y cmake libboost1.74-dev libboost-program-options1.74-dev libboost-filesystem1.74-dev libboost-serialization1.74-dev libboost-python1.74-dev libopencv-dev
+        sudo apt install -y cmake libboost1.74-dev libboost-program-options1.74-dev libboost-filesystem1.74-dev libboost-serialization1.74-dev libboost-python1.74-dev libopencv-dev libompl-dev
         cd roadmaps/ompl
         mkdir -p build
         cd build
