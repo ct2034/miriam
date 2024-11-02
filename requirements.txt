@@ -30,6 +30,7 @@ pytest
 pytest-cov
 pytest-timeout
 rtree
+scikit-learn
 scipy
 seaborn
 sortedcontainers
