@@ -111,8 +111,11 @@ def evaluate(fname):
     logging.info("fname_graph_adjlist: " + fname_graph_adjlist)
 
     # results
-    # type: Dict[str, Dict[str, Dict[str, list]]]
-    eval_results = {SUCCESSFUL: {}, COMPUTATION_TIME: {}, COST: {}}
+    eval_results = {
+        SUCCESSFUL: {},
+        COMPUTATION_TIME: {},
+        COST: {},
+    }  # type: Dict[str, Dict[str, Dict[str, list]]]
     global_seed = random.randint(0, 1000)
 
     # the evaluation per combination

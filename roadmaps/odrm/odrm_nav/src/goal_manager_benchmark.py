@@ -141,7 +141,6 @@ class GoalManager:
         self.last_status[i_a] = msg.status.status
 
     def save_data(self, data, folder):
-        # type: (list, str)
         fname = (
             folder
             + "_".join(self.retrieve_benchmark_metadata())
