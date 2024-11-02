@@ -27,9 +27,13 @@ class ResultType(Enum):
 
 def get_filepath(scenario: SCENARIO_TYPE) -> str:
     # What path will this scenario be saved under?
-    assert SCENARIO_STORAGE_PATH_ENVVAR_STR in os.environ
-    folder = os.environ.get(SCENARIO_STORAGE_PATH_ENVVAR_STR)
+    if SCENARIO_STORAGE_PATH_ENVVAR_STR in os.environ:
+        folder = os.environ.get(SCENARIO_STORAGE_PATH_ENVVAR_STR)
+    else:
+        folder = os.path.join(os.path.dirname(__file__), ".scenario_cache")
     assert folder is not None
+    if not os.path.exists(folder):
+        os.makedirs(folder)
     (env, starts, goals) = scenario
     args = [env, starts, goals]
     fname = str(hasher(args, {})) + ".pkl"
