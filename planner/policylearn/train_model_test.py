@@ -6,6 +6,7 @@ from planner.policylearn.train_model import augment_data
 
 
 class TrainModelClassTest(unittest.TestCase):
+    @unittest.skip("No tensorflow")
     def test_augment_data(self):
         n = 10
         width = height = 4
