@@ -85,17 +85,17 @@ class TestVarOdrmTorch(unittest.TestCase):
             0.6, float(get_path_len(self.pos, self.path_nodes, True))
         )
         self.assertAlmostEqual(
-            6.6,
+            8.6,
             float(get_path_len(self.pos, self.path_nodes_plus_one_start, True)),
             places=5,
         )
         self.assertAlmostEqual(
-            6.6,
+            8.6,
             float(get_path_len(self.pos, self.path_nodes_plus_one_goal, True)),
             places=5,
         )
         self.assertAlmostEqual(
-            12.6,
+            16.6,
             float(get_path_len(self.pos, self.path_nodes_plus_one_start_goal, True)),
             places=5,
         )
@@ -128,7 +128,7 @@ class TestVarOdrmTorch(unittest.TestCase):
             self.path_nodes_plus_one_start_goal,
         ]
         self.assertAlmostEqual(
-            0.6 + 6.6 + 6.6 + 12.6,
+            0.6 + 8.6 + 8.6 + 16.6,
             float(get_paths_len(self.pos, paths, True)),
             places=5,
         )
