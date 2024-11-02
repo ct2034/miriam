@@ -8,6 +8,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{github.workspace}}
+      SCENARIO_STORAGE_PATH: ${{github.workspace}}/.scenario_cache
     steps:
     - name: Checkout repo and submodules
       uses: actions/checkout@v2
@@ -57,10 +60,7 @@ jobs:
         make
     - name: Test with pytest
       run: |
-        pytest -rP
-      env:
-        PYTHONPATH: ${{github.workspace}}
-        SCENARIO_STORAGE_PATH: ${{github.workspace}}/.scenario_cache
+        pytest -vs
   pre-commit:
     runs-on: ubuntu-latest
     steps:
