@@ -50,6 +50,8 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -rP
+      env:
+        PYTHONPATH: ${{github.workspace}}
   mypy:
     runs-on: ubuntu-latest
     steps:
