@@ -28,7 +28,7 @@ jobs:
     #   run: |
     #     cd planner/cobra/external
     #     ./make_cobra.sh
-    - name: Build ecbs and cbs_roadmap
+    - name: Build ecbs, cbs_roadmap and cbs_ta
       run: |
         sudo apt install -y cmake libboost1.74-dev libboost-program-options1.74-dev libboost-regex1.74-dev libyaml-cpp-dev
         rm -rf planner/mapf_implementations/libMultiRobotPlanning/build
