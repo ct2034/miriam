@@ -91,7 +91,7 @@ def make_graph_and_flann(
     #     pos = torch.cat((pos, sample_points(1, map_img, rng)), dim=0)
     pos_np = pos.detach().numpy()
     # make dummy points in obstacles
-    dummy_points = sample_points(len(pos_np) * 0.5, map_img, rng, free_points=False)
+    dummy_points = sample_points(len(pos_np) // 2, map_img, rng, free_points=False)
     pos_np_w_dummy = np.append(pos_np, dummy_points.detach().numpy(), axis=0)
     cells, _ = voronoi_frames(pos_np_w_dummy, clip="bbox")
     delaunay = weights.Rook.from_dataframe(cells, use_index=False)
