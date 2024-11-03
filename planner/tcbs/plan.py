@@ -72,7 +72,7 @@ def plan(
         load_paths(filename)
 
     pool = alloc_threads()
-    alloc_threads()
+    # alloc_threads()
     agent_job = []
     _agent_idle = []
 
@@ -161,7 +161,7 @@ def alloc_threads():
 
 def get_children(_condition: dict, _state: tuple) -> list:
     """
-    Get all following states
+    Get all following states.
 
     Args:
       _condition: The conditions of the problem
@@ -170,7 +170,6 @@ def get_children(_condition: dict, _state: tuple) -> list:
 
     Returns:
       : A list of children
-
     """
     (agent_pos, jobs, alloc_jobs, idle_goals, _) = condition2comp(_condition)
     (agent_job, agent_idle, blocked) = state2comp(_state)
@@ -256,6 +255,9 @@ def assign_jobs(agent_idle, agent_job, agent_pos, blocked, jobs, left_jobs):
     for left_job in left_jobs:  # this makes many children ...
         job_to_assign = jobs.index(left_job)
         for i_a in range(len(agent_pos)):
+            if not _config["time_extended"]:
+                if len(agent_job[i_a]) > 0:  # has assignment
+                    continue
             agent_job_new = agent_job.copy()
             agent_job_new[i_a] += (job_to_assign,)
             children.append(comp2state(tuple(agent_job_new), agent_idle, blocked))
@@ -364,8 +366,8 @@ def cost(_condition: dict, _state: tuple):
             return MAX_COST, _state
         seen.add(b)
 
-    _cost += block_state.__len__() / EXPECTED_MAX_N_BLOCKS
-    assert block_state.__len__() < EXPECTED_MAX_N_BLOCKS, "more blocks than we expected"
+    # _cost += block_state.__len__() / EXPECTED_MAX_N_BLOCKS
+    # assert block_state.__len__() < EXPECTED_MAX_N_BLOCKS, "more blocks than we expected"
 
     _state = comp2state(agent_job, agent_idle, block_state)
     return _cost, _state
@@ -398,7 +400,7 @@ def heuristic(_condition: dict, _state: tuple) -> float:
     assert len(paths) == len(agent_pos), "All agents should have paths"
     for i_agent in range(len(paths)):
         pathset = paths[i_agent]
-        if pathset:
+        if pathset and _config["time_extended"]:
             agentposes.append(pathset[-1][-1][0:2])  # last pose of agent
         else:
             agentposes.append(agent_pos[i_agent])  # no path yet
@@ -698,8 +700,8 @@ def get_paths(_condition: dict, _state: tuple):
             }
         )
     global pool
-    res_out = pool.map(get_paths_for_agent, valss)
-    # res_out = map(get_paths_for_agent, valss)
+    # res_out = pool.map(get_paths_for_agent, valss)
+    res_out = map(get_paths_for_agent, valss)
     res = list(res_out)
     for r in res:
         if not r:
@@ -995,6 +997,8 @@ def generate_config():
         "all_collisions": False,
         # whether to use heuristic collisions resolution (suboptimal)
         "heuristic_colission": False,
+        # whether to use time-extended assignments (agents can have multiple jobs)
+        "time_extended": True,
     }
 
 

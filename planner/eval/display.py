@@ -78,8 +78,13 @@ def plot_results(
 ):
     from mpl_toolkits.mplot3d import Axes3D
 
+    max_t = 0
+    for ps in _paths:
+        for p in ps:
+            max_t = max(max_t, p[-1][2])
+
     _ = Axes3D
-    ax.axis([-1, len(grid[:, 0]), -1, len(grid[:, 0])])
+    ax.axis([-1, grid.shape[0], -1, grid.shape[0], -1, max_t + 1])
     ax.set_facecolor("white")
 
     # Paths

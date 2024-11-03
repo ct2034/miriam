@@ -1,5 +1,6 @@
 import numpy as np
 
+from definitions import OBSTACLE
 from planner.astar import base
 
 
@@ -42,19 +43,16 @@ def get_children(current, grid):
 
 
 def heuristic(a, b, grid: np.array = False):
-    if grid:  # costmap values
-        h = np.mean(grid[grid >= 0]) * distance(a, b)
-    else:
-        h = distance(a, b)
+    h = distance(a, b)
     assert h >= 0, "Negative Heuristic"
     return h
 
 
 def cost(a, b, grid=False):
-    if grid:  # costmap values
-        return grid[a] * distance_manhattan(a, b)
-    else:
-        return distance_manhattan(a, b)
+    if not (isinstance(grid, bool) and not grid):  # costmap values
+        if grid[a] == OBSTACLE or grid[b] == OBSTACLE:
+            return np.inf
+    return distance_manhattan(a, b)
 
 
 def distance(a: tuple, b: tuple) -> float:

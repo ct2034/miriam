@@ -7,6 +7,7 @@ import subprocess
 import time
 import uuid
 from itertools import product
+from pprint import pprint
 from typing import Any, List
 
 import numpy as np
@@ -55,13 +56,14 @@ def to_inputfile(gridmap, starts, goals, fname):
                 lambda i_a: {
                     "name": f"agent{i_a}",
                     "start": [starts[i_a, 0].item(), starts[i_a, 1].item()],
-                    "potentialGoals": goals,
+                    "potentialGoals": [[g[0].item(), g[1].item()] for g in goals],
                 },
                 range(len(starts)),
             )
         ),
     }
-    print("data", data)
+    # print("data:")
+    # pprint(data)
     with open(fname, "w") as f:
         yaml.dump(data, f, default_flow_style=True)
 
@@ -135,7 +137,7 @@ def plan(gridmap: np.ndarray, starts, goals, timeout):
     fname_infile = "/tmp/" + uuid_str + "_in.yaml"
     fname_outfile = "/tmp/" + uuid_str + "_out.yaml"
     to_inputfile(gridmap, starts, goals, fname_infile)
-    print("fname_infile", fname_infile)
+    # print("fname_infile", fname_infile)
     out_data = call_subprocess(fname_infile, fname_outfile, timeout)
     return out_data
 
