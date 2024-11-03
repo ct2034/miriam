@@ -128,7 +128,7 @@ def call_subprocess(fname_infile, fname_outfile, timeout):
     return out_data
 
 
-def plan_in_gridmap(gridmap: np.ndarray, starts, goals, timeout):
+def plan(gridmap: np.ndarray, starts, goals, timeout):
     # solving memoryview: underlying buffer is not C-contiguous
     gridmap = np.asarray(gridmap, order="C")
     uuid_str = str(uuid.uuid1())
@@ -144,5 +144,5 @@ if __name__ == "__main__":
     gridmap = np.array([[0, 0, 1, 1], [0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 1]])
     starts = [[1, 2], [3, 2], [2, 1]]
     goals = [[3, 0], [2, 2], [0, 0]]
-    res = plan_in_gridmap(gridmap, starts, goals, 10)
+    res = plan(gridmap, starts, goals, 10)
     print(res)

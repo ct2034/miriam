@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from planner.mapf_implementations.plan_cbs_ta import plan_in_gridmap
+from planner.mapf_implementations.plan_cbs_ta import plan
 
 
 class TestPlanCBS_TA(unittest.TestCase):
@@ -10,7 +10,7 @@ class TestPlanCBS_TA(unittest.TestCase):
         gridmap = np.array([[0, 0, 1, 1], [0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 1]])
         starts = [[1, 2], [3, 2], [2, 1]]
         goals = [[3, 0], [2, 2], [0, 0]]
-        res = plan_in_gridmap(gridmap, starts, goals, 10)
+        res = plan(gridmap, starts, goals, 10)
 
         self.assertEqual(res["statistics"]["cost"], 6)
         self.assertEqual(res["statistics"]["makespan"], 3)

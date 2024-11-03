@@ -151,6 +151,7 @@ def plan(
 def alloc_threads():
     global pool
     n = multiprocessing.cpu_count()
+    n = min(n, 8)
     pool = multiprocessing.Pool(processes=n)
     return pool
 
@@ -697,7 +698,9 @@ def get_paths(_condition: dict, _state: tuple):
             }
         )
     global pool
-    res = list(pool.map(get_paths_for_agent, valss))
+    res_out = pool.map(get_paths_for_agent, valss)
+    # res_out = map(get_paths_for_agent, valss)
+    res = list(res_out)
     for r in res:
         if not r:
             return False

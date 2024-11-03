@@ -59,3 +59,4 @@ roadmaps/benchmark_plots/benchmark_*.png
 
 # build folder for cvt
 roadmaps/cvt/build/*
+path_save.pkl
