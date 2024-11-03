@@ -176,7 +176,7 @@ def make_full_df():
     #  low_agents, high_agents) = init_values_focus()
 
     # parameters to evaluate against
-    generators = [random_fill, tracing_pathes_in_the_dark, building_walls]
+    generators = [random_fill, tracing_paths_in_the_dark, building_walls]
 
     fills = np.around(np.linspace(0, max_fill, n_fills), 2)  # list of fills we want
 

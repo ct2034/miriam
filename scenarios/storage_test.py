@@ -10,8 +10,8 @@ from scenarios.storage import ResultType, to_key_string
 
 
 class TestStorage(unittest.TestCase):
-    scenario1 = generators.tracing_pathes_in_the_dark(2, 0.5, 1, rng=random.Random(1))
-    scenario2 = generators.tracing_pathes_in_the_dark(2, 0.5, 1, rng=random.Random(2))
+    scenario1 = generators.tracing_paths_in_the_dark(2, 0.5, 1, rng=random.Random(1))
+    scenario2 = generators.tracing_paths_in_the_dark(2, 0.5, 1, rng=random.Random(2))
     to_store = 42
     to_store2 = 42.5
     to_store3 = 42.6
@@ -36,7 +36,7 @@ class TestStorage(unittest.TestCase):
         # same paths for same scenarios
         path1 = storage.get_filepath(self.scenario1)
         self.assertTrue(path1.startswith(TestStorage.data_path))
-        scenario1_2 = generators.tracing_pathes_in_the_dark(
+        scenario1_2 = generators.tracing_paths_in_the_dark(
             2, 0.5, 1, rng=random.Random(1)
         )
         path1_2 = storage.get_filepath(scenario1_2)

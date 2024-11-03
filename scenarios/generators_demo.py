@@ -2,7 +2,7 @@
 from matplotlib import pyplot as plt
 from visualization import plot_env_with_arrows
 
-from scenarios.generators import building_walls, movingai, tracing_pathes_in_the_dark
+from scenarios.generators import building_walls, movingai, tracing_paths_in_the_dark
 
 
 def demo_movingai():
@@ -13,7 +13,7 @@ def demo_movingai():
 
 def demo_tracing_pathes_in_the_dark():
     n_agents = 3
-    env, starts, goals = tracing_pathes_in_the_dark(50, 0.5, n_agents, 0)
+    env, starts, goals = tracing_paths_in_the_dark(50, 0.5, n_agents, 0)
     plot_env_with_arrows(env, starts, goals)
 
 

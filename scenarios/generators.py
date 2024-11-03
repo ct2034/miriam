@@ -92,7 +92,7 @@ def get_random_next_to_free_pose_or_any_if_full(env: np.ndarray, rng: random.Ran
         return step_pos
 
 
-def tracing_pathes_in_the_dark(
+def tracing_paths_in_the_dark(
     size: int, fill: float, n_agents: int, rng: random.Random
 ):
     """Starting with a black map, clearing straight lines through it, making

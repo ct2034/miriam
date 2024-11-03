@@ -121,13 +121,13 @@ class TestGenerators(unittest.TestCase):
         self.assertIn(tuple(pos_next), [(1, 0), (2, 1), (1, 2), (0, 1)])
 
     def test_tracing_pathes_in_the_dark_determinism(self):
-        (base_env, base_starts, base_goals) = tracing_pathes_in_the_dark(
+        (base_env, base_starts, base_goals) = tracing_paths_in_the_dark(
             10, 0.5, 10, random.Random(0)
         )
         # --------
 
         # everything the same
-        (same_env, same_starts, same_goals) = tracing_pathes_in_the_dark(
+        (same_env, same_starts, same_goals) = tracing_paths_in_the_dark(
             10, 0.5, 10, random.Random(0)
         )
         self.assertTrue(np.all(base_env == same_env))
@@ -135,7 +135,7 @@ class TestGenerators(unittest.TestCase):
         self.assertTrue(np.all(base_goals == same_goals))
 
         # everything different
-        (other_env, other_starts, other_goals) = tracing_pathes_in_the_dark(
+        (other_env, other_starts, other_goals) = tracing_paths_in_the_dark(
             10, 0.5, 10, random.Random(1)
         )
         self.assertFalse(np.all(base_env == other_env))
@@ -144,7 +144,7 @@ class TestGenerators(unittest.TestCase):
         # --------
 
         # only env different -> all different
-        (other_env, other_starts, other_goals) = tracing_pathes_in_the_dark(
+        (other_env, other_starts, other_goals) = tracing_paths_in_the_dark(
             10, 0.4, 10, random.Random(0)
         )
         self.assertFalse(np.all(base_env == other_env))
@@ -153,15 +153,15 @@ class TestGenerators(unittest.TestCase):
 
     def test_tracing_pathes_in_the_dark_gen_low_fills(self):
         """tests if generator handles low fill numbers correctly"""
-        (env, starts, goals) = tracing_pathes_in_the_dark(10, 0.1, 10, random.Random(0))
+        (env, starts, goals) = tracing_paths_in_the_dark(10, 0.1, 10, random.Random(0))
         self.assertEqual(np.count_nonzero(env), 10)  # 10% of 10*10
 
-        (env, starts, goals) = tracing_pathes_in_the_dark(10, 0, 10, random.Random(0))
+        (env, starts, goals) = tracing_paths_in_the_dark(10, 0, 10, random.Random(0))
         self.assertEqual(np.count_nonzero(env), 0)  # 0% of 10*10
 
     def test_tracing_pathes_in_the_dark_radomism(self):
         """tests if generator makes actually random changes between agents"""
-        (env, starts, goals) = tracing_pathes_in_the_dark(10, 0, 10, random.Random(0))
+        (env, starts, goals) = tracing_paths_in_the_dark(10, 0, 10, random.Random(0))
         problematic = np.array(starts)[1:, :]
         self.assertFalse(all(problematic[:, 1] == np.arange(9)))
         self.assertFalse(all(problematic[:, 0] == 5))

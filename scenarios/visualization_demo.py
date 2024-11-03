@@ -18,7 +18,7 @@ sys.path.append(cwd + "/..")
 
 
 # %%
-env, starts, goals = scenarios.generators.tracing_pathes_in_the_dark(
+env, starts, goals = scenarios.generators.tracing_paths_in_the_dark(
     50, 0.6, 8, random.Random(0)
 )
 

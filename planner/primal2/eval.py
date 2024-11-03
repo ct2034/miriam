@@ -7,7 +7,7 @@ import numpy as np
 
 from definitions import SCENARIO_TYPE
 from scenarios.evaluators import cost_ecbs
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import tracing_paths_in_the_dark
 from tools import hasher
 
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     rng = Random(0)
     scens = []
     for _ in range(n_eval):
-        scen = tracing_pathes_in_the_dark(size=8, fill=0.5, n_agents=4, rng=rng)
+        scen = tracing_paths_in_the_dark(size=8, fill=0.5, n_agents=4, rng=rng)
         scens.append(scen)
         convert_scenario_to_primal(scen, get_fnames(workdir, scen)[0])
 

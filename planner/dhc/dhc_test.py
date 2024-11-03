@@ -5,7 +5,7 @@ import numpy as np
 
 from definitions import INVALID
 from planner.dhc.eval import eval
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import tracing_paths_in_the_dark
 
 
 class DhcTest(unittest.TestCase):
@@ -14,7 +14,7 @@ class DhcTest(unittest.TestCase):
         size = 10
         fill = 0.5
         n_agents = 5
-        env, starts, goals = tracing_pathes_in_the_dark(size, fill, n_agents, rng)
+        env, starts, goals = tracing_paths_in_the_dark(size, fill, n_agents, rng)
         res = eval(env, starts, goals)
         success, steps, paths = res
         self.assertTrue(success)

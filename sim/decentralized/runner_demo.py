@@ -15,7 +15,7 @@ from scenarios.generators import (
     arena_with_crossing,
     corridor_with_passing,
     random_fill,
-    tracing_pathes_in_the_dark,
+    tracing_paths_in_the_dark,
 )
 from scenarios.solvers import ecbs
 from scenarios.visualization import plot_env_with_arrows, plot_with_paths
@@ -138,7 +138,7 @@ def find_and_run_interesting_scenario():
     seed = 0
 
     while not interesting:
-        env, starts, goals = tracing_pathes_in_the_dark(
+        env, starts, goals = tracing_paths_in_the_dark(
             size, 0.5, n_agents, random.Random(seed)
         )
         agents = to_agent_objects(env, starts, goals, policy)

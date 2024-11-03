@@ -4,7 +4,7 @@ from random import Random
 from tqdm import tqdm
 
 from definitions import SCENARIO_TYPE
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import tracing_paths_in_the_dark
 from tools import hasher
 
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     n_agents = 5
 
     for _ in tqdm(range(n_scenarios)):
-        env, starts, goals = tracing_pathes_in_the_dark(size, fill, n_agents, rng)
+        env, starts, goals = tracing_paths_in_the_dark(size, fill, n_agents, rng)
         tests.append((env, starts, goals))
 
     path = f"./DHC/test_set/tracing_pathes_in_the_dark_{size}_{fill}_{n_agents}.pth"

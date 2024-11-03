@@ -10,10 +10,10 @@ from planner.eval.display import plot_results
 from planner.mapf_implementations.plan_cbs_ta import plan as cbs_ta_plan
 from planner.tcbs.plan import generate_config
 from planner.tcbs.plan import plan as tcbs_plan
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import tracing_paths_in_the_dark
 
 
-def tcbs_with_single_goals(gridmap, starts, goals, timeout):
+def tcbs_with_single_goals(grid, starts, goals, timeout):
     """
     Adapter to call TCBS with single goals.
     (Normally, TCBS defines jobs as transport tasks,
@@ -24,8 +24,8 @@ def tcbs_with_single_goals(gridmap, starts, goals, timeout):
     for g in goals:
         jobs.append((tuple(g), tuple(g), 0))  # start = goal = g, time = 0
     # map must be time-expanded
-    t_max = gridmap.shape[0] * gridmap.shape[1] * 2
-    _map = np.repeat(gridmap[:, :, np.newaxis], t_max, axis=2)
+    t_max = grid.shape[0] * grid.shape[1] * 2
+    _map = np.repeat(grid[:, :, np.newaxis], t_max, axis=2)
     config = generate_config()
     config["time_extended"] = False
     return tcbs_plan(
@@ -38,11 +38,12 @@ def tcbs_with_single_goals(gridmap, starts, goals, timeout):
     )
 
 
-def execute_both_planners(gridmap, starts, goals, timeout):
+def execute_both_planners(grid, starts, goals, timeout):
+    """Execute both planners and return the results."""
     if isinstance(goals, np.ndarray):
         goals = [list(g) for g in goals]
-    cbs_ta_res = cbs_ta_plan(gridmap, starts, goals, timeout)
-    tcbs_res = tcbs_with_single_goals(gridmap, starts, goals, timeout)
+    cbs_ta_res = cbs_ta_plan(grid, starts, goals, timeout)
+    tcbs_res = tcbs_with_single_goals(grid, starts, goals, timeout)
     return cbs_ta_res, tcbs_res
 
 
@@ -89,6 +90,7 @@ def get_paths_from_cbs_ta_res(cbs_ta_res):
 
 
 def demo():
+    """Demonstrate the comparison of CBS-TA and TCBS."""
     gridmap = np.array([[FREE] * 3] * 3)
     gridmap[1, 1] = OBSTACLE
     starts = [[0, 0], [0, 1], [0, 2]]
@@ -160,7 +162,7 @@ def eval_same_cost_for_random_scenarios():
     res_success_tcbs = 0
 
     for _ in tqdm.tqdm(range(n_runs)):
-        gridmap, starts, goals = tracing_pathes_in_the_dark(
+        gridmap, starts, goals = tracing_paths_in_the_dark(
             size=size,
             fill=0.2,
             n_agents=n_agents,
@@ -184,9 +186,8 @@ def eval_same_cost_for_random_scenarios():
         if cost_cbs_ta == cost_tcbs:
             res_same_cost += 1
 
-    print(
-        f"Same cost: {res_same_cost}/{n_runs} = " + f"{res_same_cost/n_runs*100:.2f}%"
-    )
+    percentage_same_cost = res_same_cost / n_runs * 100
+    print(f"Same cost: {res_same_cost}/{n_runs} = {percentage_same_cost:.2f}%")
     print(f"Success CBS-TA: {res_success_cbs_ta/n_runs*100:.2f}%")
     print(f"Success TCBS: {res_success_tcbs/n_runs*100:.2f}%")
 

@@ -17,7 +17,7 @@ from planner.mapf_implementations.plan_ecbs import BLOCKS_STR
 from planner.policylearn.generate_fovs import *
 from planner.policylearn.generate_graph import *
 from scenarios.evaluators import cached_ecbs
-from scenarios.generators import building_walls, random_fill, tracing_pathes_in_the_dark
+from scenarios.generators import building_walls, random_fill, tracing_paths_in_the_dark
 from scenarios.main_eval import GENERATOR
 from sim.decentralized.runner import will_scenario_collide_and_get_paths
 from tools import ProgressBar
@@ -44,7 +44,7 @@ CLASSIFICATION_POS_TIMESTEPS = 3
 CLASSIFICATION_FOV_RADIUS = 3  # self plus x in all 4 directions
 DTYPE_SAMPLES = np.int8
 
-GENERATORS = [building_walls, random_fill, tracing_pathes_in_the_dark]
+GENERATORS = [building_walls, random_fill, tracing_paths_in_the_dark]
 
 
 def show_map(x):
@@ -588,7 +588,7 @@ if __name__ == "__main__":
         while len(all_data) < n_data_to_gen:
             do_collide = False
             while not do_collide:
-                gridmap, starts, goals = tracing_pathes_in_the_dark(
+                gridmap, starts, goals = tracing_paths_in_the_dark(
                     width, fill, n_agents, random.Random(seed)
                 )
                 seed += 1

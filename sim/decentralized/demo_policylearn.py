@@ -4,7 +4,7 @@ import random
 from matplotlib import pyplot as plt
 
 from scenarios import visualization
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import tracing_paths_in_the_dark
 from sim.decentralized.agent import Agent
 from sim.decentralized.policy import PolicyType
 from sim.decentralized.runner import run_a_scenario
@@ -17,7 +17,7 @@ def make_scenario():
     n_agents = 100
     fill = 0.4
     seed = 2034
-    gridmap, starts, goals = tracing_pathes_in_the_dark(width, fill, n_agents, seed)
+    gridmap, starts, goals = tracing_paths_in_the_dark(width, fill, n_agents, seed)
     return (gridmap, starts, goals)
 
 

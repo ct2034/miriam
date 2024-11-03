@@ -4,7 +4,7 @@ from random import Random
 from definitions import INVALID
 from planner.dhc import generate_scenarios
 from planner.dhc.DHC import test
-from scenarios.generators import tracing_pathes_in_the_dark
+from scenarios.generators import tracing_paths_in_the_dark
 
 
 def eval(env, starts, goals):
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     size = 10
     fill = 0.5
     n_agents = 5
-    env, starts, goals = tracing_pathes_in_the_dark(size, fill, n_agents, rng)
+    env, starts, goals = tracing_paths_in_the_dark(size, fill, n_agents, rng)
     print(f"{starts=}")
     print(f"{goals=}")
 
