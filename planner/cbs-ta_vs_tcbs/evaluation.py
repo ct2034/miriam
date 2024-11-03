@@ -13,7 +13,7 @@ from planner.tcbs.plan import plan as tcbs_plan
 from scenarios.generators import tracing_paths_in_the_dark
 
 
-def tcbs_with_single_goals(grid, starts, goals, timeout):
+def tcbs_with_single_goals(grid, starts, goals):
     """
     Adapter to call TCBS with single goals.
     (Normally, TCBS defines jobs as transport tasks,
@@ -31,7 +31,7 @@ def tcbs_with_single_goals(grid, starts, goals, timeout):
     return tcbs_plan(
         agent_pos=[tuple(s) for s in starts],
         jobs=jobs,
-        alloc_jobs=[],
+        allocated_jobs=[],
         idle_goals=[],
         grid=_map,
         config=config,
@@ -43,7 +43,7 @@ def execute_both_planners(grid, starts, goals, timeout):
     if isinstance(goals, np.ndarray):
         goals = [list(g) for g in goals]
     cbs_ta_res = cbs_ta_plan(grid, starts, goals, timeout)
-    tcbs_res = tcbs_with_single_goals(grid, starts, goals, timeout)
+    tcbs_res = tcbs_with_single_goals(grid, starts, goals)
     return cbs_ta_res, tcbs_res
 
 
@@ -91,11 +91,11 @@ def get_paths_from_cbs_ta_res(cbs_ta_res):
 
 def demo():
     """Demonstrate the comparison of CBS-TA and TCBS."""
-    gridmap = np.array([[FREE] * 3] * 3)
-    gridmap[1, 1] = OBSTACLE
+    grid = np.array([[FREE] * 3] * 3)
+    grid[1, 1] = OBSTACLE
     starts = [[0, 0], [0, 1], [0, 2]]
     goals = [[2, 0], [2, 1], [2, 2]]
-    res = execute_both_planners(gridmap, starts, goals, 10)
+    res = execute_both_planners(grid, starts, goals, 10)
     res_cbs_ta, res_tcbs = res
 
     print("=" * 10)
@@ -125,7 +125,7 @@ def demo():
         res_tcbs[2],
         [],
         [],
-        gridmap,
+        grid,
         [],
         [],
         "TCBS",
@@ -139,7 +139,7 @@ def demo():
         path_cbs_ta,
         [],
         [],
-        gridmap,
+        grid,
         [],
         [],
         "CBS-TA",
@@ -162,13 +162,13 @@ def eval_same_cost_for_random_scenarios():
     res_success_tcbs = 0
 
     for _ in tqdm.tqdm(range(n_runs)):
-        gridmap, starts, goals = tracing_paths_in_the_dark(
+        grid, starts, goals = tracing_paths_in_the_dark(
             size=size,
             fill=0.2,
             n_agents=n_agents,
             rng=rng,
         )
-        res = execute_both_planners(gridmap, starts, goals, 10)
+        res = execute_both_planners(grid, starts, goals, 10)
         res_cbs_ta, res_tcbs = res
 
         if res_cbs_ta != INVALID:

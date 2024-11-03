@@ -7,6 +7,7 @@ from itertools import product
 from typing import Any, Iterator, List, Union
 
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.stats import norm
 
 from planner.astar.astar_grid48con import distance_manhattan
@@ -28,12 +29,12 @@ EXPECTED_MAX_N_BLOCKS = 1000
 def plan(
     agent_pos: list,
     jobs: list,
-    alloc_jobs: list,
+    allocated_jobs: list,
     idle_goals: list,
     grid: np.array,
     config: dict = {},
     plot: bool = False,
-    pathplanning_only_assignment=False,
+    fixed_assignment=False,
 ):
     """
     Main entry point for planner
@@ -90,9 +91,9 @@ def plan(
         assert a not in agent_pos_test, "Duplicate agent poses"
         agent_pos_test.add(a)
 
-    if pathplanning_only_assignment:
+    if fixed_assignment:
         logging.info("Pathplanning only!")
-        agent_job = pathplanning_only_assignment
+        agent_job = fixed_assignment
         # for agent in range(len(agent_job)):
         #     if len(agent_job[agent]) == 0:  # no assignment
         #         new_job = ((0, 0), agent_pos[agent], 0)  # fake job
@@ -103,7 +104,7 @@ def plan(
         #             (agent, jobs.index(new_job))
         #         )
 
-    for aj in alloc_jobs:
+    for aj in allocated_jobs:
         agent_job[aj[0]] = (aj[1],)
 
     agent_job = tuple(agent_job)
@@ -113,7 +114,7 @@ def plan(
     jobs = make_unique(jobs)
 
     blocked = ()
-    condition = comp2condition(agent_pos, jobs, alloc_jobs, idle_goals, grid)
+    condition = comp2condition(agent_pos, jobs, allocated_jobs, idle_goals, grid)
 
     # planning!
     (agent_job, _agent_idle, blocked) = astar_base(

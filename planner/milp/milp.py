@@ -59,7 +59,7 @@ def plan_milp(agent_pos, jobs, grid, config, plot=False):
         grid,
         config,
         plot=plot,
-        pathplanning_only_assignment=res_agent_job,
+        fixed_assignment=res_agent_job,
     )
     return res_agent_job, res_paths
 

@@ -35,7 +35,7 @@ def plan_greedy(agent_pos, jobs, grid, config):
         grid,
         plot=False,
         config=config,
-        pathplanning_only_assignment=res_agent_job,
+        fixed_assignment=res_agent_job,
     )
     return res_agent_job, res_paths
 

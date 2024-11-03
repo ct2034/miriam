@@ -21,7 +21,7 @@ def pathplan(agent_pos, jobs):
         grid,
         plot=False,
         filename="pathplanning_only.pkl",
-        pathplanning_only_assignment=[(0,), (1,), (2,)],
+        fixed_assignment=[(0,), (1,), (2,)],
     )
     print(
         "computation time:", (datetime.datetime.now() - start_time).total_seconds(), "s"
