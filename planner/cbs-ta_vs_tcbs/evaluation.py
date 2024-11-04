@@ -26,7 +26,8 @@ def tcbs_with_single_goals(grid, starts, goals):
         jobs.append((tuple(g), tuple(g), 0))  # start = goal = g, time = 0
     # map must be time-expanded
     t_max = grid.shape[0] * grid.shape[1] * 2
-    _map = np.repeat(grid[:, :, np.newaxis], t_max, axis=2)
+    grid_swapped = grid.swapaxes(0, 1)
+    _map = np.repeat(grid_swapped[:, :, np.newaxis], t_max, axis=2)
     # making sure we start with fresh path_save
     fname = "path_save_eval.pkl"
     if os.path.exists(fname):
@@ -147,10 +148,11 @@ def get_paths_from_cbs_ta_res(cbs_ta_res):
 
 def demo():
     """Demonstrate the comparison of CBS-TA and TCBS."""
-    grid = np.array([[FREE] * 3] * 3)
-    grid[1, 1] = OBSTACLE
-    starts = [[0, 0], [0, 1], [0, 2]]
-    goals = [[2, 0], [2, 1], [2, 2]]
+    grid = np.array([[FREE] * 5] * 3)
+    grid[0, 1] = OBSTACLE
+    grid[2, 3] = OBSTACLE
+    starts = [[0, 0], [1, 0], [2, 0]]
+    goals = [[0, 4], [1, 4], [2, 4]]
     res = execute_both_planners(grid, starts, goals, 10)
     res_cbs_ta, res_tcbs = res
 
