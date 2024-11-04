@@ -37,7 +37,7 @@ def tcbs_with_single_goals(grid, starts, goals):
     config["filename_pathsave"] = fname
     config["time_extended"] = False
     config["save_stats"] = True
-    return tcbs_plan(
+    res = tcbs_plan(
         agent_pos=[tuple(s) for s in starts],
         jobs=jobs,
         allocated_jobs=[],
@@ -45,6 +45,9 @@ def tcbs_with_single_goals(grid, starts, goals):
         grid=_map,
         config=config,
     )
+    if os.path.exists(fname):
+        os.remove(fname)
+    return res
 
 
 def execute_both_planners(grid, starts, goals, timeout):
