@@ -45,7 +45,7 @@ def to_inputfile(gridmap, starts, goals, fname):
         - [3, 0]
     """
     starts = np.array(starts)
-    # goals = np.array(goals)
+    goals = np.array(goals)
     obstacles = []
     for x, y in list(zip(*(np.where(gridmap > FREE)))):
         obstacles.append([x.item(), y.item()])
