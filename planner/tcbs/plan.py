@@ -14,6 +14,7 @@ from planner.astar.astar_grid48con import distance_manhattan
 from planner.common import *
 from planner.eval.display import plot_inputs, plot_results
 from planner.tcbs.base import MAX_COST, astar_base
+from planner.tcbs.stats import StatsContainer
 from tools import ColoredLogger
 
 logging.setLoggerClass(ColoredLogger)
@@ -22,6 +23,7 @@ plt.style.use("bmh")
 
 _config = {}
 _distances = None
+_stats = StatsContainer()
 
 EXPECTED_MAX_N_BLOCKS = 1000
 
@@ -67,6 +69,11 @@ def plan(
     filename = config["filename_pathsave"]
     global _config
     _config = config
+
+    # stats
+    if _config["save_stats"]:
+        global _stats
+        _stats = StatsContainer()
 
     # load path_save
     if filename:  # TODO: check if file was created on same map
@@ -146,7 +153,10 @@ def plan(
     pool.terminate()
     pool.join()
 
-    return agent_job, _agent_idle, _paths
+    if _config["save_stats"]:
+        return agent_job, _agent_idle, _paths, _stats.as_dict()
+    else:
+        return agent_job, _agent_idle, _paths
 
 
 def alloc_threads():
@@ -325,6 +335,11 @@ def cost(_condition: dict, _state: tuple):
     (agent_pos, jobs, alloc_jobs, idle_goals, _map) = condition2comp(_condition)
     (agent_job, agent_idle, block_state) = state2comp(_state)
     _cost = 0.0
+
+    global _config
+    global _stats
+    if _config["save_stats"]:
+        _stats.inc_high_level_expanded()
 
     _paths = get_paths(_condition, _state)
     if _paths == False:  # one path was not viable
@@ -625,11 +640,13 @@ def get_paths_for_agent(vals):
     assigned_jobs = agent_job[i_a]
     pose = agent_pos[i_a][0:2]
     t_shift = 0
+    n_expanded = 0
     for ij in assigned_jobs:
         if (i_a, ij) in alloc_jobs:  # can be first only; need to go to goal only
-            p, path_save_process = path(
+            p, path_save_process, exp = path(
                 pose, jobs[ij][1], _map, block, path_save_process, calc=True
             )
+            n_expanded += exp
             if not p:
                 return False
         else:
@@ -637,9 +654,10 @@ def get_paths_for_agent(vals):
             if len(paths_for_agent) > 0:  # no route yet -> keep pose
                 pose, t_shift = get_last_pose_and_t(paths_for_agent)
             block1 = time_shift_blocks(block, t_shift)
-            p1, path_save_process = path(
+            p1, path_save_process, exp = path(
                 pose, jobs[ij][0], _map, block1, path_save_process, calc=True
             )
+            n_expanded += exp
             if not p1:
                 return False
             paths_for_agent += (time_shift_path(p1, t_shift),)
@@ -647,14 +665,15 @@ def get_paths_for_agent(vals):
             pose, t_shift = get_last_pose_and_t(paths_for_agent)
             assert pose == jobs[ij][0], "Last pose should be the start"
             block2 = time_shift_blocks(block, t_shift)
-            p, path_save_process = path(
+            p, path_save_process, exp = path(
                 jobs[ij][0], jobs[ij][1], _map, block2, path_save_process, calc=True
             )
+            n_expanded += exp
             if not p:
                 return False
         paths_for_agent += (time_shift_path(p, t_shift),)
     if len(_agent_idle[i_a]):
-        p, path_save_process = path(
+        p, path_save_process, exp = path(
             agent_pos[i_a],
             idle_goals[_agent_idle[i_a][0]][0],
             _map,
@@ -662,10 +681,11 @@ def get_paths_for_agent(vals):
             path_save_process,
             calc=True,
         )
+        n_expanded += exp
         if not p:
             return False
         paths_for_agent += (p,)
-    return paths_for_agent, path_save_process
+    return paths_for_agent, path_save_process, n_expanded
 
 
 def get_paths(_condition: dict, _state: tuple):
@@ -713,6 +733,7 @@ def get_paths(_condition: dict, _state: tuple):
 
         _paths.append(r[0])
         path_save.update(r[1])
+        _stats.add_low_level_expanded(r[2])
     longest = max(map(lambda p: len(reduce(lambda a, b: a + b, p, [])), _paths))
     if _config["finished_agents_block"]:
         (left_agent_pos, left_idle_goals, left_jobs) = clear_set(
@@ -1000,6 +1021,8 @@ def generate_config():
         "heuristic_colission": False,
         # whether to use time-extended assignments (agents can have multiple jobs)
         "time_extended": True,
+        # whether to save stats
+        "save_stats": False,
     }
 
 

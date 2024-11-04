@@ -23,6 +23,6 @@ if __name__ == "__main__":
         "jobs": [((0, 0), (9, 9), 0.00072), ((0, 0), (9, 9), 0.000309)],
     }
 
-    res = get_paths_for_agent(vals)
+    res, n_expanded = get_paths_for_agent(vals)
 
     print(res)

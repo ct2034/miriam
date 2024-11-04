@@ -34,17 +34,18 @@ def path(
       or False if path shouldn't have been calculated but was not saved either
     """
     _map = _map.copy()
+    n_expanded = 0
     for b in blocked:
         if b[0] == VERTEX:
             v = b[1]
             _map[(v[1], v[0], v[2])] = -1
             if v[:2] == start or v[:2] == goal:
-                return False, {}
+                return False, {}, 0
         elif b[0] == EDGE:
             for v in b[1][0:2]:
                 _map[(v[1], v[0], b[1][2])] = -1
                 if v[:2] == start or v[:2] == goal:
-                    return False, {}
+                    return False, {}, 0
                 # TODO: actually block edge!
 
     blocked.sort()
@@ -58,27 +59,28 @@ def path(
                 _path = astar_grid4con(
                     start + (0,), goal + (_map.shape[2] - 1,), _map.swapaxes(0, 1)
                 )
+                n_expanded += len(_path) - 1
             except NoPathException:
                 _path = []
 
             path_save_process[index] = _path
         else:
-            return False, {}
+            return False, {}, 0
     else:  # exists in the path_save
         _path = path_save[index]
 
     for b in blocked:
         if b[0] == VERTEX and b[1] in _path:
-            return False, {}
+            return False, {}, 0
         # if b[0] == EDGE and (
         #         (b[1][0] + (b[1][2],) in _path) or
         #         (b[1][1] + (b[1][2],) in _path)
         # ):
-        #     return False, {}
+        #     return False, {}, 0
 
     if not _path:
-        return False, {}
+        return False, {}, 0
 
     assert start == _path[0][0:2], "Planed path starts not from start"
     assert goal == _path[-1][0:2], "Planed path ends not in goal"
-    return _path, path_save_process
+    return _path, path_save_process, n_expanded
