@@ -188,6 +188,11 @@ def get_children(_condition: dict, _state: tuple) -> list:
         agent_idle, agent_job, agent_pos, idle_goals, jobs
     )
 
+    global _config
+    global _stats
+    if _config["save_stats"]:
+        _stats.inc_high_level_expanded()
+
     eval_confilct_to_block = False
     if blocked:
         if max(map(is_conflict_not_block, blocked)) & len(left_jobs) == 0:
@@ -337,9 +342,6 @@ def cost(_condition: dict, _state: tuple):
     _cost = 0.0
 
     global _config
-    global _stats
-    if _config["save_stats"]:
-        _stats.inc_high_level_expanded()
 
     _paths = get_paths(_condition, _state)
     if _paths == False:  # one path was not viable

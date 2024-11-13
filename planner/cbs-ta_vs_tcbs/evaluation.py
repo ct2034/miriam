@@ -1,9 +1,12 @@
 import os
+from itertools import product
 from pprint import pprint
 from random import Random
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 import tqdm
 
 from definitions import FREE, INVALID, OBSTACLE
@@ -215,30 +218,49 @@ def plot_comparison_results(grid, res_cbs_ta, res_tcbs):
     plt.show()
 
 
-def eval_same_cost_for_random_scenarios():
+def barplot_comparison(title_str, n_runs, res_tcbs_cost, res_cbs_ta_cost):
+    BAR_WIDTH = 0.4
+    plt.figure()
+    plt.title(title_str)
+    plt.bar(
+        range(n_runs),
+        res_cbs_ta_cost,
+        color="blue",
+        label="CBS-TA",
+        width=BAR_WIDTH,
+    )
+    plt.bar(
+        np.array(range(n_runs)) + BAR_WIDTH,
+        res_tcbs_cost,
+        color="red",
+        label="TCBS",
+        width=BAR_WIDTH,
+    )
+    plt.legend()
+
+
+def eval_random_scenarios():
     """
     Compare the cost from CBS-TA and TCBS for random scenarios.
     """
-    rng = Random(42)
-    n_runs = 10
-    n_agents = 4
+    n_seeds = 10
+    n_agents_s = [2, 3, 4]
+    fills = [0.4, 0.6, 0.8]
     size = 8
 
-    res_same_cost = 0
-    res_success_cbs_ta = 0
-    res_success_tcbs = 0
+    data = pd.DataFrame(
+        columns=["seed", "n_agents", "fill", "cost", "lle", "hle", "success", "planner"]
+    )
 
-    res_tcbs_cost = []
-    res_tcbs_lle = []
-    res_tcbs_hle = []
-    res_cbs_ta_cost = []
-    res_cbs_ta_lle = []
-    res_cbs_ta_hle = []
+    n_runs = n_seeds * len(n_agents_s) * len(fills)
 
-    for _ in tqdm.tqdm(range(n_runs)):
+    for seed, n_agents, fill in tqdm.tqdm(
+        product(range(n_seeds), n_agents_s, fills), total=n_runs
+    ):
+        rng = Random(seed)
         grid, starts, goals = tracing_paths_in_the_dark(
             size=size,
-            fill=0.5,
+            fill=fill,
             n_agents=n_agents,
             rng=rng,
         )
@@ -246,42 +268,110 @@ def eval_same_cost_for_random_scenarios():
         res_cbs_ta, res_tcbs = res
 
         if res_cbs_ta != INVALID:
-            cost_cbs_ta = get_cost_from_cbs_ta_res(res_cbs_ta)
-            res_cbs_ta_cost.append(cost_cbs_ta)
-            res_cbs_ta_lle.append(get_low_level_expanded_from_cbs_ta_res(res_cbs_ta))
-            res_cbs_ta_hle.append(get_high_level_expanded_from_cbs_ta_res(res_cbs_ta))
-            res_success_cbs_ta += 1
+            data = pd.concat(
+                [
+                    data,
+                    pd.DataFrame(
+                        {
+                            "seed": seed,
+                            "n_agents": n_agents,
+                            "fill": fill,
+                            "cost": get_cost_from_cbs_ta_res(res_cbs_ta),
+                            "lle": get_low_level_expanded_from_cbs_ta_res(res_cbs_ta),
+                            "hle": get_high_level_expanded_from_cbs_ta_res(res_cbs_ta),
+                            "success": 1,
+                            "planner": "CBS-TA",
+                        },
+                        index=[0],
+                    ),
+                ],
+                ignore_index=True,
+            )
         else:
-            cost_cbs_ta = INVALID
+            data = pd.concat(
+                [
+                    data,
+                    pd.DataFrame(
+                        {
+                            "seed": seed,
+                            "n_agents": n_agents,
+                            "fill": fill,
+                            "cost": np.nan,
+                            "lle": np.nan,
+                            "hle": np.nan,
+                            "success": 0,
+                            "planner": "CBS-TA",
+                        },
+                        index=[0],
+                    ),
+                ],
+                ignore_index=True,
+            )
 
         if res_tcbs != INVALID:
-            cost_tcbs = get_cost_from_tcbs_res(res_tcbs)
-            res_tcbs_cost.append(cost_tcbs)
-            res_tcbs_lle.append(get_low_level_expanded_from_tcbs_res(res_tcbs))
-            res_tcbs_hle.append(get_high_level_expanded_from_tcbs_res(res_tcbs))
-            res_success_tcbs += 1
+            data = pd.concat(
+                [
+                    data,
+                    pd.DataFrame(
+                        {
+                            "seed": seed,
+                            "n_agents": n_agents,
+                            "fill": fill,
+                            "cost": get_cost_from_tcbs_res(res_tcbs),
+                            "lle": get_low_level_expanded_from_tcbs_res(res_tcbs),
+                            "hle": get_high_level_expanded_from_tcbs_res(res_tcbs),
+                            "success": 1,
+                            "planner": "TCBS",
+                        },
+                        index=[0],
+                    ),
+                ],
+                ignore_index=True,
+            )
         else:
-            cost_tcbs = INVALID
+            data = pd.concat(
+                [
+                    data,
+                    pd.DataFrame(
+                        {
+                            "seed": seed,
+                            "n_agents": n_agents,
+                            "fill": fill,
+                            "cost": np.nan,
+                            "lle": np.nan,
+                            "hle": np.nan,
+                            "success": 0,
+                            "planner": "TCBS",
+                        },
+                        index=[0],
+                    ),
+                ],
+                ignore_index=True,
+            )
 
-        if cost_cbs_ta == cost_tcbs:
-            res_same_cost += 1
-        else:
-            plot_comparison_results(grid, res_cbs_ta, res_tcbs)
+        # if not cost_cbs_ta == cost_tcbs:
+        #     plot_comparison_results(grid, res_cbs_ta, res_tcbs)
 
-    percentage_same_cost = res_same_cost / n_runs * 100
-    print(f"Same cost: {res_same_cost}/{n_runs} = {percentage_same_cost:.2f}%")
-    print("CBS-TA")
-    print(f"  Success rate: {res_success_cbs_ta/n_runs*100:.2f}%")
-    print(f"  Average cost: {np.mean(res_cbs_ta_cost)}")
-    print(f"  Average LL expanded: {np.mean(res_cbs_ta_lle)}")
-    print(f"  Average HL expanded: {np.mean(res_cbs_ta_hle)}")
-    print("TCBS")
-    print(f"  Success rate: {res_success_tcbs/n_runs*100:.2f}%")
-    print(f"  Average cost: {np.mean(res_tcbs_cost)}")
-    print(f"  Average LL expanded: {np.mean(res_tcbs_lle)}")
-    print(f"  Average HL expanded: {np.mean(res_tcbs_hle)}")
+    # write data to file
+    data.to_csv("data.csv")
+
+
+def plot():
+    # read data from file
+    data = pd.read_csv("data.csv")
+
+    # plot
+    sns.set_theme()
+    sns.set_context("paper")
+    sns.pairplot(
+        data,
+        hue="planner",
+        plot_kws={"alpha": 0.8, "marker": "x"},
+    )
+    plt.savefig("pairplot.png")
+    plt.show()
 
 
 if __name__ == "__main__":
-    demo()
-    eval_same_cost_for_random_scenarios()
+    eval_random_scenarios()
+    plot()
