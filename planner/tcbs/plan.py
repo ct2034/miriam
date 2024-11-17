@@ -253,13 +253,13 @@ def assign_idle_goals(
 ):
     children = []
     agent_idle = list(agent_idle)
-    for i_la in range(len(left_agent_pos)):
+    for pos in left_agent_pos:
         # which agent is it actually?
-        i_a = agent_pos.index(left_agent_pos[i_la])
-        if not len(agent_idle[i_a]):  # no idle goal yet
-            for i_ig in range(len(left_idle_goals)):
+        i_a = agent_pos.index(pos)
+        if len(agent_idle[i_a]) == 0:  # no idle goal yet
+            for ig in left_idle_goals:
                 agent_idle_new = agent_idle.copy()
-                agent_idle_new[i_a] = (idle_goals.index(left_idle_goals[i_ig]),)
+                agent_idle_new[i_a] = (idle_goals.index(ig),)
                 children.append(
                     comp2state(tuple(agent_job), tuple(agent_idle_new), blocked)
                 )
